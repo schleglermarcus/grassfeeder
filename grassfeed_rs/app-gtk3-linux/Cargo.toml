@@ -3,7 +3,7 @@
 # (cd app2 ; nice -n9 cargo deb)
 
 [package]
-name = "app2"
+name = "app-gtk3-linux"
 version = "0.0.1"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
@@ -39,7 +39,6 @@ strip = true        # Strip symbols from binary*
 maintainer = "Marcus <schlegler_marcus@posteo.de>"
 copyright = "2022 <schlegler_marcus@posteo.de>"
 name = "grassfeeder"
-
 
 
 [package.metadata.i18n]
