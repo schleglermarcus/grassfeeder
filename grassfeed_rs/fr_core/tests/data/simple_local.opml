@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<opml version="1.0">
+  <head>
+    <title>Liferea Feed List Export</title>
+  </head>
+  <body>
+    <outline title="1-LOCAL" text="1-local" description="1__tag" type="folder">
+      <outline title="Morgen" text="Morgen" description="Morgen" type="folder">
+        <outline title="financearmag" text="financearmag-local" description="financearmag-LOC"
+          type="rss" xmlUrl="tests/data/gui_proc_rss2_v1.rss" htmlUrl="http://financearmageddon.blogspot.com/"/>
+      </outline>
+    </outline>
+    <outline title="Test" text="Test" description="Test" type="folder"/>
+    <outline title="Staseve" text="text-staseve"  type="rss" xmlUrl="tests/data/staseve-11.xml" />
+    <outline title="truthdig" text="text-truthdig"  type="rss" xmlUrl="tests/data/feedburner.rss" />
+  </body>
+</opml>

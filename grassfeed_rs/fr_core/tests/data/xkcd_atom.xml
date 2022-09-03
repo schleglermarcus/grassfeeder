@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+  <title>xkcd.com</title>
+  <link href="https://xkcd.com/" rel="alternate"/>
+  <id>https://xkcd.com/</id>
+  <updated>2022-06-22T00:00:00Z</updated>
+  <entry>
+    <title>What If? 2 Countdown</title>
+    <link href="https://xkcd.com/2636/" rel="alternate"/>
+    <updated>2022-06-22T00:00:00Z</updated>
+    <id>https://xkcd.com/2636/</id>
+    <summary type="html">&lt;img src="https://imgs.xkcd.com/comics/what_if_2_countdown.png" title="If you don't end the 99 Bottles of Beer recursion at N=0 it just becomes The Other Song That Never Ends." alt="If you don't end the 99 Bottles of Beer recursion at N=0 it just becomes The Other Song That Never Ends." /&gt;</summary>
+  </entry>
+  <entry>
+    <title>Superintelligent AIs</title>
+    <link href="https://xkcd.com/2635/" rel="alternate"/>
+    <updated>2022-06-20T00:00:00Z</updated>
+    <id>https://xkcd.com/2635/</id>
+    <summary type="html">&lt;img src="https://imgs.xkcd.com/comics/superintelligent_ais.png" title="Your scientists were so preoccupied with whether or not they should, they didn't stop to think if they could." alt="Your scientists were so preoccupied with whether or not they should, they didn't stop to think if they could." /&gt;</summary>
+  </entry>
+  <entry>
+    <title>Red Line Through HTTPS</title>
+    <link href="https://xkcd.com/2634/" rel="alternate"/>
+    <updated>2022-06-17T00:00:00Z</updated>
+    <id>https://xkcd.com/2634/</id>
+    <summary type="html">&lt;img src="https://imgs.xkcd.com/comics/red_line_through_https.png" title="Some organization has been paying to keep this up and it hasn't been removed from search results. Seems like two votes of confidence to me." alt="Some organization has been paying to keep this up and it hasn't been removed from search results. Seems like two votes of confidence to me." /&gt;</summary>
+  </entry>
+  <entry>
+    <title>Astronomer Hotline</title>
+    <link href="https://xkcd.com/2633/" rel="alternate"/>
+    <updated>2022-06-15T00:00:00Z</updated>
+    <id>https://xkcd.com/2633/</id>
+    <summary type="html">&lt;img src="https://imgs.xkcd.com/comics/astronomer_hotline.png" title="Employment statistics have to correct for the fact that the Weird Bug Hotline hires on a bunch of extra temporary staff every 17 years." alt="Employment statistics have to correct for the fact that the Weird Bug Hotline hires on a bunch of extra temporary staff every 17 years." /&gt;</summary>
+  </entry>
+</feed>
