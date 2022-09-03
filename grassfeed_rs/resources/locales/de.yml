@@ -1,0 +1,80 @@
+de:
+  ABOUT_APP_TXT : Über diese Anwendung
+  ABOUT_APP_DESCRIPTION : Eine rust-iger Nachrichtensammler
+
+  M_FILE: Datei
+  M_IMPORT_OPML: Opml importieren
+  M_EXPORT_OPML: Opml exportieren
+  M_FILE_QUIT: Beenden
+
+  M_OPTIONS: Optionen
+  M_SETTINGS: Einstellungen
+  M_HELP: Hilfe
+  M_ABOUT: Über
+  M_ICONS: Icons
+
+  TB_ADD_FOLDER: Ordner hinzufügen
+  TB_ADD_FEED: Quelle hinzufügen
+  TB_REFRESH_ALL: Alle Quellen aktualisieren
+
+  CM_MSG_MARK_AS_READ: Als gelesen markieren
+  CM_MSG_MARK_AS_UNREAD: Als ungelesen markieren
+  CM_MSG_OPEN_IN_BROWSER: Im Browser öffnen
+  CM_MSG_DELETE: Löschen
+  CM_MSG_COPY_LINK_CLIPBOARD: Verweis in Zwischenablage kopieren
+
+  D_BUTTON_YES: Ja
+  D_BUTTON_NO: No
+  D_BUTTON_OK: Ok
+  D_BUTTON_CANCEL: Abbrechen
+  D_NEW_FOLDER_TITLE: Neuen Ordner anlegen
+
+  D_DELETE_FOLDER_TITLE: Ordner mit Abonnements löschen
+  D_DELETE_FOLDER_QUEST: Diesen Ordner löschen?
+  D_DELETE_SUBSCRIPTION_TITLE: Abonnement löschen
+  D_DELETE_SUBSCRIPTION_QUEST: Diese Quelle löschen ?
+
+  D_EDIT_FOLDER_NAME: Ordner editieren
+
+  CM_SUB_ADD_FEED: Abonnement hinzufügen
+  CM_SUB_ADD_FOLDER: Ordner hinzufügen
+  CM_SUB_UPDATE: Aktualisieren
+  CM_SUB_MARK_AS_READ: Als gelesen markieren
+  CM_SUB_EDIT: Editieren
+  CM_SUB_DELETE: Löschen
+
+  D_NEW_SUBSCRIPTION_TITLE: Neues Abonnement
+  D_NEW_SUBSCRIPTION_URL: Adresse der Quelle
+  D_NEW_SUBSCRIPTION_NAME: Name
+
+  D_EDIT_SUBSCRIPTION_TITLE: Abonnement verändern
+  D_EDIT_SUBSCRIPTION_TAB1: Einfach
+  D_EDIT_SUBSCRIPTION_ICON: Symbol
+  D_EDIT_SUBSCRIPTION_TAB2: Statistik
+  D_EDIT_SUBSCRIPTION_MAIN_WEBSITE: Haupt-Webseite
+  D_EDIT_SUBSCRIPTION_NUM_MESSAGES: Anzahl der Meldungen
+  D_EDIT_SUBSCRIPTION_NUM_UNREAD: Ungelesene Meldungen
+  D_EDIT_SUBSCRIPTION_LAST_DOWNLOAD: Zuletzt abgerufen
+  D_EDIT_SUBSCRIPTION_LAST_CREATION: Abonnement zusammengestellt
+
+  D_SETTINGS_TITLE: Einstellungen
+  D_SETTINGS_TAB1: Quellen
+  D_SETTINGS_UPDATE_ON_START: "Beim Start aktualisieren: "
+  D_SETTINGS_UPDATE_UPDATE_AFTER: "Automatisch aktualisieren nach: "
+  D_SETTINGS_UPDATERS_PARALLEL: "Gleichzeitige Web-Abfragen: "
+  D_SETTINGS_MESSAGE_FOCUS_POLICY: "Nachricht fokussiert wenn Abonnement gewählt: "
+  D_SETTINGS_TAB2: Ansicht
+  D_SETTINGS_SHOW_MESSAGE_COUNT: "Anzahl aller gespeicherten Nachrichten zeigen: "
+  D_SETTINGS_MESSAGES_KEEP_COUNT: "Anzahl der zu aufzubewahrenden Nachrichten: "
+  D_SETTINGS_MANUAL_FONT_SIZE: "Manelle Schriftgröße "
+  D_SETTINGS_BROWSER_BACKGROUND_BRIGHTNESS: "Browser Hintergrundhelligkeit:"
+  D_SETTINGS_INTERVAL_01_MINUTES: "Minuten"
+  D_SETTINGS_INTERVAL_02_HOURS: "Stunden"
+  D_SETTINGS_INTERVAL_03_DAYS: "Tage"
+  D_SETTINGS_FOCUS_POLICY_NONE: "Kein"
+  D_SETTINGS_FOCUS_POLICY_LAST_SELECTED: "Letzte ausgewählte"
+  D_SETTINGS_FOCUS_POLICY_NEWEST: "Neueste"
+  D_SETTINGS_FOCUS_POLICY_BEFORE_UNREAD: "Vor letzter ungelesener"
+
+  D_IMPORT_OPML_SELECT_FILE: Opml Datei auswählen
+  D_STORE_OPML_SELECT_FILE: Opml Datei bestimmen
