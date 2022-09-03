@@ -1,0 +1,47 @@
+# cargo install  cargo-deb
+#
+# (cd app2 ; nice -n9 cargo deb)
+
+[package]
+name = "app2"
+version = "0.0.1"
+edition = "2021"
+description = "Feed Reader Linux-Gtk3 Application"
+
+# [build]
+# target-dir = "../target"
+
+[[bin]]
+name = "grassfeeder"
+path = "src/main.rs"
+
+[dependencies]
+gui_layer = { path = "../gui_layer" }
+context = { path = "../context" }
+fr_core = { path = "../fr_core" , features = ["ui_gtk", "fr_gtk"] }
+resources = { path = "../resources"  }
+log = "0.4.14"
+xdg = "2.4.1"
+once_cell = ">=1.12.0"
+rust-i18n = ">=0.6.1"
+fern = { version = "0.6", features = ["colored", "chrono"] }
+chrono = ">=0.4.19"
+gumdrop = ">=0.8.1"
+
+
+[profile.release]
+opt-level = 's'     # Optimize for size.
+lto = true          # Enable Link Time Optimization
+strip = true        # Strip symbols from binary*
+
+
+[package.metadata.deb]
+maintainer = "Marcus <schlegler_marcus@posteo.de>"
+copyright = "2022 <schlegler_marcus@posteo.de>"
+name = "grassfeeder"
+
+
+
+[package.metadata.i18n]
+available-locales = ["en", "de"]
+default-locale = "en"
