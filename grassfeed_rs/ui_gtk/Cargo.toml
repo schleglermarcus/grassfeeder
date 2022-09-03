@@ -1,0 +1,18 @@
+[package]
+name = "ui_gtk"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+gui_layer = { path = "../gui_layer" }
+resources = { path = "../resources" }
+log = "0.4.14"
+webkit2gtk = {  version = "0.18.0", default-features = false,  features = [ "v2_28"]  }
+flume = "0.10.9"
+gtk = { version = "0.15.5", features = ["v3_24_8"] }
+glib = "^0.15.5"
+lz4-compression ="0.7.0"
+base64 = "^0.13.0"
+gio = "^0.15.5"
+serde = ">=1.0.133"
