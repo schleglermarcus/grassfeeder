@@ -1,0 +1,54 @@
+To Do List
+
+
+- clean out deleted subscriptions ausputzen
+- Check Info Dialog + website
+- remove icon dialog, leave it on  debug flag
+- GTK-Liststore for inserting switch off sorting. Else slow.
+- Drag: Folder down  - not working yet
+- SendToBrowser :   mark-as-read for all entries
+- Build via Docker container,   find external dependencies + packages 
+- Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
+- Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
+- Check: &  in Feed-title, Message-title. Soll escaped werden.
+- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
+- Multiple instances shall be blocking.
+- Cleanup at maximum messages
+- Shutdown Integration Test
+- internnal browser hangs sometimes
+- Subscriptions Sanitize:  Folder sollen richtiges Icon haben
+- Subscriptions Sanitize:  Test mit rekursiver Ordner-Konstellation
+- Updating Sources:  prioritize by tree position, expanded flag
+- process both sets of cmd parameters:   application   AND gtk, see runner_internal
+- Feed edit  Dialog: +Homepage
+- Delete Messages
+- Einzelne FeedQuelle: Reload soll Content-Liste aktualisieren
+- Bei Klick auf Folder:   Aggregat der Feeds anzeigen
+- Error-DB for Subscription Requests, display in edit dialog
+- Modify Browser Font size
+- React on Minimize, do memory usage reduction
+- Zusammenziehen von Code von   folder:mark-as-read  und folder:update
+- Flatpak  https://lib.rs/crates/cargo-pkg
+- Feed-Anwahl, Fokuspolitik - Vor Letzter Ungelesener
+- Browser Display :  wrap over   title 
+- Copy Message address into clipboard 
+- Searching inside feeds
+- Opml export formatiert
+- Theme-Abhängige Farben im Browser
+- Browser: get rid of white display on start 
+- Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
+- Delete Messages
+- Startup, create gui:  delayed creation of dialogs 
+- Windows Build 
+- Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
+
+
+Perhaps:
+- Feed-Import with progress bar ?
+- Keyboard:  Delete on Subscription
+- Read articles when offline ?
+- Do extra format to  dig up invalid feed titles  containg  &     :      dieneuewelle.xml
+- Grouping of feeds by folders ?
+- RSS-Content damaged with    http://n8waechter.info/feed/
+
+
