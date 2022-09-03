@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<rss version="2.0">
+<channel>
+  <title>Ajax and XUL</title>
+  <link>https://www.xul.fr/en/</link>
+  <description>XML graphical interface etc...</description>
+  <image>
+      <url>https://www.xul.fr/xul-icon.gif</url>
+      <link>https://www.xul.fr/en/index.php</link>
+  </image>
+  <item>
+      <title>News  of today</title>
+      <link>https://www.xul.fr/en-xml-rss.html</link>
+      <description>All you need to know about RSS</description>
+      <pubDate>Sun, 19 May 2002 15:21:40 GMT</pubDate>
+      <content>Lorem ipsum dolor sit amet  </err_content>
+  </item>
+</channel>
+</rss>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<opml version="1.0">
+  <head>
+    <title>Liferea Feed List Export</title>
+  </head>
+  <body>
+    <outline title="1-remote" text="1-REMOTE" description="1-TAG" type="folder">
+      <outline title="Morgen" text="Morgen" description="Morgen" type="folder">
+        <outline title="financearmag" text="financearmag" description="financearmag" type="rss" xmlUrl="http://feeds.feedburner.com/blogspot/cwWR" htmlUrl="http://financearmageddon.blogspot.com/"/>
+      </outline>
+    </outline>
+    <outline title="Folder1" text="Folder1" description="Test" type="folder"/>
+    <outline title="Staseve" text="text-staseve"  type="rss" xmlUrl="http://staseve.eu/?feed=rss2" />
+    <outline title="truthdig" text="text-truthdig"  type="rss" xmlUrl="https://www.truthdig.com/rss-2" />
+    <outline title="kino.de" text="neuImKino"  type="rss" xmlUrl="https://www.kino.de/rss/neu-im-kino" />
+  </body>
+</opml>

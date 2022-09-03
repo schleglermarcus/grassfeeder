@@ -1,0 +1,31 @@
+<rss version="2.0">
+	<channel>
+		<description>Alle neuen Filme in den deutschen Kinos</description>
+		<title>Neu im Kino</title>
+		<item>
+			<dc:creator>Kino.de Redaktion</dc:creator>
+			<description>
+				Bereits sein Regie-Erstling war ein Hit:
+				<a href="https://www.kino.de/star/joseph-vilsmaier/">Joseph Vilsmaier</a>
+				erreichte mit &#8222;
+				<a href="https://www.kino.de/film/herbstmilch-1989/">Herbstmilch</a>
+				&#8220; annähernd 2,2 Mio. Zuschauer. Von diesem Erfolg profitierte
+				die im Nachkriegsdeutschland angesiedelte
+			</description>
+			<content:encoded>
+				<p>Felix Zeiler verbringt die Weihnachtstage mit seiner schwangeren
+					Frau Kati und Töchterchen Marie, bevor er zum Einsatz an die
+					Ostfront muß. Die Alliierten bombardieren München und zerstören
+					auch den Frisörladen der Zeilers. Als das Leben in der kaputten </p>
+			</content:encoded>
+			<enclosure
+				url="https://static.kino.de/wp-content/uploads/2021/05/rama-dama-1990-film-rcm1200x0u.jpg"
+				type="image/jpeg" length="153553" />
+			<pubDate>Wed, 13 Oct 2021 12:00:00 +0200</pubDate>
+			<title>Rama Dama</title>
+			<link>https://www.kino.de/film/rama-dama-1990/</link>
+			<guid isPermaLink="true">https://www.kino.de/film/rama-dama-1990/
+			</guid>
+		</item>
+	</channel>
+</rss>

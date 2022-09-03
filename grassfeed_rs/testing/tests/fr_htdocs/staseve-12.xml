@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:wfw="http://wellformedweb.org/CommentAPI/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" xmlns:slash="http://purl.org/rss/1.0/modules/slash/" xmlns:georss="http://www.georss.org/georss" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" version="2.0">
+  <channel>
+    <title>Staseve Aktuell – Arbeitsgemeinschaft Staatlicher Selbstverwaltungen</title>
+    <atom:link href="http://staseve.eu/?feed=rss2" rel="self" type="application/rss+xml"/>
+    <link>http://staseve.eu</link>
+    <description/>
+    <lastBuildDate>Mi, 10 Nov 2021 18:17:07 +0000</lastBuildDate>
+    <language>de-DE</language>
+    <sy:updatePeriod>hourly</sy:updatePeriod>
+    <sy:updateFrequency>1</sy:updateFrequency>
+    <generator>https://wordpress.org/?v=4.7</generator>
+    <site xmlns="com-wordpress:feed-additions:1">96828792</site>
+    <item>
+      <title>Nachrichten AUF1 vom 10. November 2021</title>
+      <link>http://staseve.eu/?p=172292</link>
+      <comments>http://staseve.eu/?p=172292#respond</comments>
+      <pubDate>Wed, 10 Nov 2021 18:16:42 +0000</pubDate>
+      <dc:creator><![CDATA[staseve]]></dc:creator>
+      <category><![CDATA[Aktuell]]></category>
+      <guid isPermaLink="false">http://staseve.eu/?p=172292</guid>
+      <description><![CDATA[NACHRICHTEN AUF1  10.11.2021 / Die wichtigsten Nachrichten des Tages. Die täglichen „Nachrichten AUF1“ werden präsentiert von Vivien Vogt, Tina Wenko und Bernhard Riegler. 2G-Diskriminierung: „Endkampf gegen die Ungeimpften“? + Klima-Hysterie: Neben dem Gesellschaftsumbau wollen einige noch Milliardengewinne einstreifen + Und: &#8230; <a href="http://staseve.eu/?p=172292">Weiterlesen <span class="meta-nav">&#8594;</span></a>]]></description>
+      <content:encoded><![CDATA[
+
+<div data-v-35a5907b="">
+<nav class="navbar nav" data-v-35a5907b="">
+<div class="navbar-brand"><a class="logo nuxt-link-active" href="https://auf1.tv/" data-v-35a5907b=""><img src="https://auf1.tv/_nuxt/img/logo.32b0f4a.png" alt="AUF1.TV" /></a></div>
+<div class="navbar-menu"></div>
+</nav>
+</div>
+<div class="pageContainer">
+<div class="articleContainer" data-v-5d017f7f="">
+<div class="top" data-v-5d017f7f="">
+<div class="content" data-v-5d017f7f="">
+<header class="header background" data-v-5d017f7f="">
+<div class="videoContainer" data-v-60f9794a="" data-v-5d017f7f="">
+<div class="spinner" data-v-60f9794a=""></div>
+<p><iframe class="iframe" src="https://auf1.eu/videos/embed/eRyYzL78iSAt6Ud6wonFaL?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;autoplay=1" width="300" height="150" frameborder="0" allowfullscreen="allowfullscreen" data-v-60f9794a="" data-mce-fragment="1"></iframe></p>
+</div>
+</header>
+<div class="spacer" data-v-5d017f7f=""></div>
+<section class="article" data-v-5d017f7f="">
+<div class="show" data-v-5d017f7f="">NACHRICHTEN AUF1 <i class="mdi mdi-twitter mdi-36px"></i></div>
+<div class="shareTabs" data-v-77bcce23="" data-v-5d017f7f=""></div>
+<div class="description recursive" lang="de-AT" data-v-5d017f7f="">
+<p>10.11.2021 / Die wichtigsten Nachrichten des Tages. Die täglichen „Nachrichten AUF1“ werden präsentiert von Vivien Vogt, Tina Wenko und Bernhard Riegler.</p>
+<p>2G-Diskriminierung: „Endkampf gegen die Ungeimpften“? + Klima-Hysterie: Neben dem Gesellschaftsumbau wollen einige noch Milliardengewinne einstreifen + Und: Vitamin C hilft sehr wohl gegen Covid-19.</p>
+<p><strong>Quelle: Nachrichtenagentur ADN (SMAD-Lizenz-Nr. 101 v. 10.10.46) vom 10.11.2021</strong></p>
+<p>Sie finden staseve auf Telegram unter <a href="https://t.me/fruehwaldinformiert" target="_blank">https://t.me/fruehwaldinformiert</a></p>
+<p>Sie finden staseve auf Gab unter <a href="https://gab.com/staseve" target="_blank">https://gab.com/staseve</a></p>
+<p>Sie finden uns auf Gettr <a href="https://gettr.com/user/peterfruehwald" target="_blank">https://gettr.com/user/peterfruehwald</a></p>
+<p>Folgt unserem neuen Kanal Heimische Direktvermarktung: <a href="https://t.me/heimischeProdukte" target="_blank">https://t.me/heimischeProdukte</a></p>
+
+<p></p>
+<p></p>
+</div>
+</section>
+</div>
+</div>
+</div>
+</div>
+]]></content:encoded>
+      <wfw:commentRss>http://staseve.eu/?feed=rss2&amp;p=172292</wfw:commentRss>
+      <slash:comments>0</slash:comments>
+      <post-id xmlns="com-wordpress:feed-additions:1">172292</post-id>
+    </item>
+
+  </channel>
+</rss>
