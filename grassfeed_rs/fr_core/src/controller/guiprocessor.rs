@@ -483,7 +483,6 @@ impl GuiProcessor {
                         .feedsources_r
                         .borrow_mut()
                         .add_new_feedsource(s0.clone(), s1.clone());
-                    trace!("new-feedsource: ADD  {:?} --> {}", &payload, new_id);
                     self.feedsources_r
                         .borrow_mut()
                         .addjob(SJob::FillSourcesTree);

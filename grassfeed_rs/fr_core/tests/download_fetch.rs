@@ -12,8 +12,8 @@ use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::messages::FetchInner;
 use fr_core::downloader::messages::FetchStart;
-use fr_core::util::StepResult;
 use fr_core::util::timestamp_now;
+use fr_core::util::StepResult;
 use fr_core::web::mockfilefetcher::FileFetcher;
 use fr_core::web::WebFetcherType;
 use std::cell::RefCell;
@@ -140,6 +140,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_logger();
+        let _r = logger_config::setup_fern_logger(logger_config::QuietFlags::Db as u64);
     });
 }

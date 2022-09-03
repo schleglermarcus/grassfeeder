@@ -1,5 +1,6 @@
 To Do List
 
+- deprecate old logger setup
 - debugmode: message popup needs escaping
 - clean out deleted subscriptions
 - Check Info Dialog + website

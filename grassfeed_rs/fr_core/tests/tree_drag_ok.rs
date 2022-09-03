@@ -45,7 +45,9 @@ fn drag_outofrange_fail() {
     let (fsc, _r_fsource) = prepare_source_tree_controller(fs_list);
     match fsc.drag_calc_positions(&vec![0], &vec![0, 6, 0, 0]) {
         Ok(_) => assert!(false),
-        Err(e) => trace!("{:?}", e),
+        Err(_e) => {
+            //  trace!("{:?}", e);
+        }
     }
 }
 
@@ -101,10 +103,7 @@ fn drag_2nd_folder_to_1st_folder() {
     let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
     match fsc.drag_calc_positions(&vec![1], &vec![0, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
-            debug!(
-                "to_parent_id={}, to_folderpos={} ",
-                to_parent_id, to_folderpos
-            );
+            // debug!(                "to_parent_id={}, to_folderpos={} ",                to_parent_id, to_folderpos            );
             assert_eq!(to_parent_id, 1);
             assert_eq!(to_folderpos, 0);
             fsc.drag_move(from_entry, to_parent_id, to_folderpos);
@@ -125,10 +124,7 @@ fn drag_up_to_root() {
     let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
     match fsc.drag_calc_positions(&vec![0, 1], &vec![0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
-            debug!(
-                "to_parent_id={}, to_folderpos={} ",
-                to_parent_id, to_folderpos
-            );
+            // debug!(                "to_parent_id={}, to_folderpos={} ",                to_parent_id, to_folderpos            );
             assert_eq!(to_parent_id, 0);
             assert_eq!(to_folderpos, 0);
             fsc.drag_move(from_entry, to_parent_id, to_folderpos);
@@ -157,7 +153,8 @@ fn drag_under_feed() {
                 from_entry, to_parent_id, to_folderpos
             );
         }
-        Err(e) => trace!("{:?}", e),
+        Err(_e) => { // trace!("{:?}", e) ;
+        }
     }
 }
 
@@ -196,8 +193,8 @@ fn reject_folder_onto_child() {
         Ok((_from_entry, _to_parent_id, _to_folderpos)) => {
             assert!(false);
         }
-        Err(ref e) => {
-            trace!("{:?}", e);
+        Err(ref _e) => {
+            //             trace!("{:?}", e);
         }
     }
 }
@@ -207,11 +204,9 @@ fn drag_entry_below_last() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
     let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
-    // r_fsource.borrow().debug_dump_tree("\nbelow1: ");
     match fsc.drag_calc_positions(&vec![0], &vec![3]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             // debug!("  to_pa:{}   to_fp:{}", to_parent_id, to_folderpos);
-
             fsc.drag_move(from_entry, to_parent_id, to_folderpos);
         }
         Err(e) => {
@@ -225,12 +220,12 @@ fn drag_entry_below_last() {
 }
 
 // shall not drag, since the destination is an entry
+//  drag the first entry onto second
 #[test]
 fn drag_entry_on_other_entry() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
-    //  drag the first entry onto second
+    let (fsc, _r_fsource) = prepare_source_tree_controller(fs_list);
     match fsc.drag_calc_positions(&vec![0], &vec![1, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             panic!(
@@ -238,18 +233,16 @@ fn drag_entry_on_other_entry() {
                 from_entry, to_parent_id, to_folderpos
             );
         }
-        Err(e) => {
-            trace!("{:?}", e);
+        Err(_e) => {
+            //            trace!("{:?}", e);
         }
     }
-    r_fsource.borrow().debug_dump_tree("\nontosecond2: ");
 }
 
 #[test]
 fn check_paths_simple() {
     setup();
     let (_stc, fsource_r) = prepare_source_tree_controller(dataset_some_tree());
-    // (*fsource_r).borrow().debug_dump_tree("CHK");
     assert_eq!(
         (*fsource_r).borrow().get_by_path(&vec![0]).unwrap().subs_id,
         1
@@ -287,6 +280,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_logger();
+        let _r = logger_config::setup_fern_logger(logger_config::QuietFlags::Controller as u64);
     });
 }
