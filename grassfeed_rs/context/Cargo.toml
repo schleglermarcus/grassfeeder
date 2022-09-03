@@ -1,0 +1,10 @@
+[package]
+name = "context"
+version = "0.1.0"
+authors = ["liquidnight2"]
+edition = "2018"
+
+
+[dependencies]
+rust-ini = "0.17.0"
+log = "0.4.11"
