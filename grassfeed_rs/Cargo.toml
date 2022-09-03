@@ -1,4 +1,5 @@
 [workspace]
-members = [ "context",  "gui_layer" , ]
-# members = [ "fr_gtk" , "testing" ,  "fr_core",  "ui_gtk",  "resources" ]
+members = [ "context",  "gui_layer",  "resources",  "ui_gtk",   ]
+# members = [ "fr_gtk" , "testing" ,  "fr_core" ]
+
 # exclude =[ "app-linux-gtk3" ]
