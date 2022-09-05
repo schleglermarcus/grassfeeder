@@ -42,7 +42,7 @@ fn dl_naturalnews() {
     let e0: &MessageRow = new_list.get(0).unwrap();
 
     debug!("date={:?}  ", db_time_to_display_nonnull(e0.entry_src_date));
-	
+
 }
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::dl_entries_breakingnews    --lib -- --exact --nocapture "
@@ -230,6 +230,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_logger();
+        let _r = logger_config::setup_fern_logger(0);
     });
 }

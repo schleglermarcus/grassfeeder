@@ -74,11 +74,13 @@ impl ConfigManager {
     pub fn load_from_file(&mut self, filename: &str) {
         match ini::Ini::load_from_file(filename) {
             Ok(new_ini) => {
+
                 if new_ini.len() > 2 {
+
                     let mode_debug =
                         self.get_section_key_bool(&Self::section_name(), Self::CONF_MODE_DEBUG);
 
-                    (*self.cconf).replace(new_ini);
+                    (*self.cconf).replace(new_ini);	//  unpraktisch !!!
 
                     (*self.cconf).borrow_mut().set_to(
                         Some(Self::section_name()),

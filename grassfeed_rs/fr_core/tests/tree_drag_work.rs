@@ -25,6 +25,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_logger();
+		let _r = logger_config::setup_fern_logger(0);
     });
 }

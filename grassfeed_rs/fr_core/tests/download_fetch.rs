@@ -1,4 +1,3 @@
-// mod feedcontent_dummy;
 mod logger_config;
 
 use chrono::DateTime;
@@ -20,9 +19,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 
-// #[ignore]
 #[test]
-/// GlueSql:  Memory-Store  does not allow Transactions. :-/
 fn single_dl_regular() {
     setup();
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);

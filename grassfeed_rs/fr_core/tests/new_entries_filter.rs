@@ -34,6 +34,7 @@ fn test_new_entries_filter() {
         path_config: "../target/db_entries_filter".to_string(),
         path_cache: "../target/db_entries_filter".to_string(),
         debug_mode: true,
+		version: "test_new_entries_filter".to_string(),
     };
     // "../target/db_entries_filter".to_string(),         "../target/db_entries_filter".to_string(),
     let ini_r = Rc::new(RefCell::new(prepare_config_by_path(&gfc)));

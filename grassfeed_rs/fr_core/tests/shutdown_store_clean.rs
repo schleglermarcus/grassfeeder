@@ -90,6 +90,7 @@ fn add_folder_and_feed() {
         path_config: "../target/db_feedsource_add".to_string(),
         path_cache: "../target/db_feedsource_add".to_string(),
         debug_mode: true,
+		version: "add_folder_and_feed".to_string(),
     };
     // "../target/db_feedsource_add".to_string(),        "../target/db_feedsource_add".to_string(),
     let ini_r = Rc::new(RefCell::new(prepare_config_by_path(&gfc)));

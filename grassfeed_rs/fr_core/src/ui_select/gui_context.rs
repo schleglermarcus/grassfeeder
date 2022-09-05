@@ -28,8 +28,10 @@ pub struct GuiContext {
     updater_adapter: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_runner: Rc<RefCell<dyn GuiRunner>>,
     configmanager_r: Rc<RefCell<ConfigManager>>,
+
     application_name: String,
     window_title: String,
+    //    rcs_version: String,
 }
 
 impl Buildable for GuiContext {
@@ -61,9 +63,20 @@ impl Buildable for GuiContext {
                 .borrow()
                 .get_section_key(&FeedContents::section_name(), &k.to_string())
             {
-                initvalues.insert(k, v);
+                initvalues.insert(k.clone(), v);
             }
         }
+
+        if let Some(v) = (*configman).borrow().get_section_key(
+            &GuiContext::section_name(),
+            &PropDef::AppRcsVersion.to_string(),
+        ) {
+            initvalues.insert(PropDef::AppRcsVersion, v);
+        } else {
+            error!("no {}  conf={:#?}", PropDef::AppRcsVersion,0);
+            conf.dump();
+        }
+
         let (m_v_store_a, ui_updater, g_runner): (
             UIAdapterValueStoreType,
             Rc<RefCell<dyn UIUpdaterAdapter>>,
@@ -80,6 +93,7 @@ impl Buildable for GuiContext {
             configmanager_r: configman,
             application_name: APPLICATION_NAME.to_string(),
             window_title: String::default(),
+            //            rcs_version: String::default(),
         }
     }
 
@@ -89,6 +103,8 @@ impl Buildable for GuiContext {
 }
 
 impl GuiContext {
+    pub const CONF_RCS_VERSION: &'static str = "rcs_version";
+
     pub fn get_receiver_wrapper(&self) -> Rc<dyn ReceiverWrapper> {
         (*self.gui_runner).borrow().get_event_receiver()
     }
@@ -154,6 +170,16 @@ impl GuiContext {
             .set_window_title(wtitle);
         (*self.updater_adapter).borrow().update_window_title();
     }
+
+    /*
+        pub fn set_rcs_version(&mut self, v: String) {
+            self.rcs_version = v;
+        }
+
+        pub fn get_rcs_version(&mut self) -> String {
+            self.rcs_version.clone()
+        }
+    */
 }
 
 impl StartupWithAppContext for GuiContext {

@@ -14,6 +14,7 @@ fn rungui_regular() {
         path_config: "../target/db_rungui_reg".to_string(),
         path_cache: "../target/db_rungui_reg".to_string(),
         debug_mode: true,
+        version: "run_reg_todo".to_string(),
     };
     let appcontext = fr_core::grassfeeder::start(gfconf);
     fr_core::grassfeeder::run(&appcontext);

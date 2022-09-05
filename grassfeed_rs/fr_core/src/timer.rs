@@ -237,6 +237,7 @@ mod appcontext_test {
             path_config: "../target/db_timer_uninit".to_string(),
             path_cache: "../target/db_timer_uninit".to_string(),
             debug_mode: true,
+            version: "timer_example".to_string(),
         };
         let ini_r = Rc::new(RefCell::new(prepare_config_by_path(
             &gfc, // "../target/db_timer_uninit".to_string(),

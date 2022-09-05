@@ -21,10 +21,15 @@ use std::rc::Rc;
 
 pub fn start(conf: GrassFeederConfig) -> AppContext {
     let ini_r: Rc<RefCell<Ini>> = Rc::new(RefCell::new(prepare_config_by_path(&conf)));
-    let mut appcontext = AppContext::new_with_ini(ini_r.clone());
-    let mut cm = ConfigManager::new_with_ini(ini_r);
+
+    let mut cm = ConfigManager::new_with_ini(ini_r.clone());
+
     cm.load_config_file();
-    appcontext.store_ini(Rc::new(RefCell::new(cm.get_conf())));
+
+    let mut appcontext = AppContext::new_with_ini(ini_r.clone());
+
+        appcontext.store_ini(Rc::new(RefCell::new(cm.get_conf())));
+
     appcontext.store_obj(Rc::new(RefCell::new(cm)));
     appcontext.build::<Timer>();
     appcontext.build::<GuiContext>();

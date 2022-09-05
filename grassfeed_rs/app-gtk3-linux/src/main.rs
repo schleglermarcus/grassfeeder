@@ -14,6 +14,8 @@ use log::{debug, error, info, trace, warn};
 
 i18n!("../resources/locales");
 
+include!(concat!(env!("OUT_DIR"), "/gen_git_info.rs"));
+
 fn main() {
     let xdg_dirs = xdg::BaseDirectories::with_prefix(APP_NAME).unwrap();
     let conf: String = xdg_dirs
@@ -37,17 +39,28 @@ fn main() {
         }
     }
     let _r = setup_logger::setup_logger(debug_level, &cache, APP_NAME);
+
+    let version_str = format!(
+        "{} {} {} {}",
+        env!("CARGO_PKG_VERSION"),
+        RCS_CARGO_PKG_VERSION,
+        RCS_BRANCH,
+        RCS_VERSION
+    );
+
     info!(
-        "Starting {} with {} {}  locale={:?}",
+        "Starting {} with {} {}  locale={:?} V={}",
         APP_NAME,
         conf,
         cache,
-        rust_i18n::locale()
+        rust_i18n::locale(),
+        version_str,
     );
     let mut gfconf = GrassFeederConfig {
         path_config: conf,
         path_cache: cache,
         debug_mode: false,
+        version: version_str,
     };
     if let Some(opts) = o_opts {
         gfconf.debug_mode = opts.debug;

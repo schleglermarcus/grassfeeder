@@ -65,6 +65,8 @@ pub fn setup_fern_logger(debug_flags: u64) -> Result<(), fern::InitError> {
     Ok(())
 }
 
+
+#[deprecated]
 #[allow(dead_code)]
 pub fn setup_logger() -> Result<(), fern::InitError> {
     let mut colors = ColoredLevelConfig::new().info(Color::Green);
