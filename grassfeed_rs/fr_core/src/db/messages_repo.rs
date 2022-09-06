@@ -61,9 +61,14 @@ pub struct MessagesRepo {
 }
 
 impl MessagesRepo {
-    pub const CONF_DB_KEY: &'static str = "messages_db";
+    pub const CONF_DB_KEY_FOLDER: &'static str = "messages_db_folder";
+    // messages.db
 
-    pub fn new(filename: String) -> Self {
+//	pub const CONF_DB_KEY_FOLDER: &'static str = "messages_db_folder";
+
+
+    pub fn new(foldername: String) -> Self {
+        let filename = format!("{}messages.db", foldername);
         MessagesRepo {
             ctx: SqliteContext::new(filename),
         }
@@ -100,8 +105,9 @@ impl IMessagesRepo for MessagesRepo {
     }
 
     fn insert_tx(&self, e_list: &[MessageRow]) -> Result<i64, Box<dyn std::error::Error>> {
-
-        self.ctx.insert_tx(& e_list.to_vec() ).map_err(rusqlite_error_to_boxed)
+        self.ctx
+            .insert_tx(&e_list.to_vec())
+            .map_err(rusqlite_error_to_boxed)
     }
 
     // deprecated
@@ -307,12 +313,12 @@ impl IMessagesRepo for MessagesRepo {
 impl Buildable for MessagesRepo {
     type Output = MessagesRepo;
     fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
-        match conf.get(MessagesRepo::CONF_DB_KEY) {
+        match conf.get(MessagesRepo::CONF_DB_KEY_FOLDER) {
             Some(filename) => MessagesRepo::new(filename),
             None => {
                 panic!(
                     "No database location from config!  {}  Stopping",
-                    MessagesRepo::CONF_DB_KEY
+                    MessagesRepo::CONF_DB_KEY_FOLDER
                 );
             }
         }

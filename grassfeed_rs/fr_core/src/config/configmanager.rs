@@ -9,6 +9,7 @@ use context::TimerRegistry;
 use gui_layer::gui_values::PropDef;
 use ini::Ini;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::io::Result;
 use std::rc::Rc;
 
@@ -16,9 +17,13 @@ const ID_CONFIG: &str = "config";
 const SECTION_GUI_RUNNER: &str = "window";
 
 pub struct ConfigManager {
+    #[deprecated]
     cconf: Rc<RefCell<Ini>>,
+
     cconf_modified: bool,
     cconf_filename: String,
+
+    user_config: Rc<RefCell<HashMap<String, String>>>,
 }
 
 impl ConfigManager {
@@ -71,16 +76,15 @@ impl ConfigManager {
         (*self.cconf).borrow().len()
     }
 
+    #[deprecated]
     pub fn load_from_file(&mut self, filename: &str) {
         match ini::Ini::load_from_file(filename) {
             Ok(new_ini) => {
-
                 if new_ini.len() > 2 {
-
                     let mode_debug =
                         self.get_section_key_bool(&Self::section_name(), Self::CONF_MODE_DEBUG);
 
-                    (*self.cconf).replace(new_ini);	//  unpraktisch !!!
+                    (*self.cconf).replace(new_ini); //  unpraktisch !!!
 
                     (*self.cconf).borrow_mut().set_to(
                         Some(Self::section_name()),
@@ -96,7 +100,10 @@ impl ConfigManager {
         }
     }
 
+
+
     /// loads from preset available name
+	#[deprecated]
     pub fn load_config_file(&mut self) {
         let fname = self.cconf_filename.clone();
         self.load_from_file(&fname);
@@ -178,10 +185,11 @@ impl ConfigManager {
         );
     }
 
-    pub fn set_conf_filename(&mut self, new_name: String) {
-        self.cconf_filename = new_name;
-    }
-
+    /*
+        pub fn set_conf_filename(&mut self, new_name: String) {
+            self.cconf_filename = new_name;
+        }
+    */
     pub fn new_with_ini(ini_r: Rc<RefCell<Ini>>) -> ConfigManager {
         let filename = (*ini_r)
             .borrow()
@@ -196,6 +204,49 @@ impl ConfigManager {
             ..ConfigManager::default()
         }
     }
+
+    pub fn get_user_conf(&self) -> Rc<RefCell<HashMap<String, String>>> {
+        self.user_config.clone()
+    }
+
+
+	pub fn load_user_conf(&mut self) -> bool {
+        if !std::path::Path::new(&self.cconf_filename).exists() {
+            trace!(
+                "load_subscriptions_pretty file {} not found. ",
+                &self.cconf_filename
+            );
+            return false;
+        }
+
+        let r_string = std::fs::read_to_string(self.cconf_filename.clone());
+        if r_string.is_err() {
+            error!(
+                "load_user_conf  {:?}  {}",
+                r_string.err(),
+                self.cconf_filename
+            );
+            return false;
+        }
+        let lines = r_string.unwrap();
+        let dec_r: serde_json::Result<HashMap<String, String>> = serde_json::from_str(&lines);
+        if dec_r.is_err() {
+            error!(
+                "serde_json:from_str {:?}   {:?} ",
+                dec_r.err(),
+                &self.cconf_filename
+            );
+            return false;
+        }
+        let userconf = dec_r.unwrap();
+        let mut uc = (*self.user_config).borrow_mut();
+        userconf.into_iter().for_each(|(k, v)| {
+            uc.insert(k, v);
+        });
+        true
+    }
+
+
 }
 
 impl Default for ConfigManager {
@@ -204,6 +255,7 @@ impl Default for ConfigManager {
             cconf: Rc::new(RefCell::new(Ini::new())),
             cconf_modified: false,
             cconf_filename: String::from("default_config.ini"),
+            user_config: Rc::new(RefCell::new(HashMap::new())),
         }
     }
 }
@@ -212,9 +264,13 @@ impl Buildable for ConfigManager {
     type Output = ConfigManager;
 
     #[allow(unreachable_code)]
-    fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
-        panic!("don't use this, initialize manually ");
-        ConfigManager::default()
+    fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
+        // panic!("don't use this, initialize manually ");
+        let mut cm = ConfigManager::default();
+        cm.cconf_filename = conf.get(&ConfigManager::CONF_PATH_KEY.to_string()).unwrap();
+        let _r = cm.load_user_conf();
+        // exit on fail  here ?
+        cm
     }
 
     fn section_name() -> String {

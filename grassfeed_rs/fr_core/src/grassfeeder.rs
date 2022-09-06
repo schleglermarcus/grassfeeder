@@ -19,7 +19,26 @@ use ini::Ini;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+
+/*
+	1:  GrassFeederConfig =>  SystemConfig erzeugen
+	2: AppContext mit SystemConfig
+	3: AC::build<ConfigManager>
+		liest UserConfig - HashMap
+
+	4: UserConfig  für AppContext bereitstellen. Wie?
+
+	5. AC::build<Timer> ...
+
+
+*/
+#[deprecated]
 pub fn start(conf: GrassFeederConfig) -> AppContext {
+
+
+//     let configmanager_r: Rc<RefCell<ConfigManager>> = appcontext.get_rc::<ConfigManager>().unwrap();
+
+
     let ini_r: Rc<RefCell<Ini>> = Rc::new(RefCell::new(prepare_config_by_path(&conf)));
 
     let mut cm = ConfigManager::new_with_ini(ini_r.clone());
@@ -31,6 +50,8 @@ pub fn start(conf: GrassFeederConfig) -> AppContext {
         appcontext.store_ini(Rc::new(RefCell::new(cm.get_conf())));
 
     appcontext.store_obj(Rc::new(RefCell::new(cm)));
+
+
     appcontext.build::<Timer>();
     appcontext.build::<GuiContext>();
     appcontext.build::<SubscriptionRepo>();
@@ -46,6 +67,7 @@ pub fn start(conf: GrassFeederConfig) -> AppContext {
     appcontext
 }
 
+#[deprecated]
 pub fn run(appcontext: &AppContext) {
     let timer_r: Rc<RefCell<dyn ITimer>> = appcontext.get_rc::<Timer>().unwrap();
     (*timer_r).borrow_mut().main_loop();

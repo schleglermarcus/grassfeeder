@@ -39,8 +39,10 @@ impl Buildable for GuiContext {
 
     #[allow(clippy::type_complexity)]
     fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self {
-        let configman = (*appcontext).get_rc::<ConfigManager>().unwrap();
 
+        //  crap
+
+        let configman = (*appcontext).get_rc::<ConfigManager>().unwrap();
         let mut initvalues: HashMap<PropDef, String> = HashMap::default();
         for p in PROPDEF_ARRAY {
             if let Some(s) = conf.get(&p.tostring()) {
@@ -73,9 +75,11 @@ impl Buildable for GuiContext {
         ) {
             initvalues.insert(PropDef::AppRcsVersion, v);
         } else {
-            error!("no {}  conf={:#?}", PropDef::AppRcsVersion,0);
+            error!("no {}  conf={:#?}", PropDef::AppRcsVersion, 0);
             conf.dump();
         }
+
+        // /crap
 
         let (m_v_store_a, ui_updater, g_runner): (
             UIAdapterValueStoreType,

@@ -85,14 +85,25 @@ fn shutdown_store_ini() {
 #[test]
 fn add_folder_and_feed() {
     setup();
-
     let gfc = GrassFeederConfig {
         path_config: "../target/db_feedsource_add".to_string(),
         path_cache: "../target/db_feedsource_add".to_string(),
         debug_mode: true,
-		version: "add_folder_and_feed".to_string(),
+        version: "add_folder_and_feed".to_string(),
     };
-    // "../target/db_feedsource_add".to_string(),        "../target/db_feedsource_add".to_string(),
+
+
+	let gfconf = GrassFeederConfig {
+        path_config: "../target/db_rungui_local".to_string(),
+        path_cache: "../target/db_rungui_local".to_string(),
+        debug_mode: false,
+        version: "rungui:rungui_local_clear".to_string(),
+    };
+    let appcontext = fr_core::grassfeeder::start(gfconf);
+    // test_setup_values(&appcontext, mini_server_c.get_address());
+    fr_core::grassfeeder::run(&appcontext);
+
+/*
     let ini_r = Rc::new(RefCell::new(prepare_config_by_path(&gfc)));
     let mut appcontext = AppContext::new_with_ini(ini_r.clone());
     let mut cm = ConfigManager::new_with_ini(ini_r);
@@ -110,6 +121,7 @@ fn add_folder_and_feed() {
     appcontext.build::<FeedContents>();
     appcontext.build::<GuiProcessor>();
     appcontext.startup();
+*/
     let subs_r: Rc<RefCell<dyn ISubscriptionRepo>> =
         appcontext.get_rc::<SubscriptionRepo>().unwrap();
     let gui_c_r = appcontext.get_rc::<GuiContext>().unwrap();
@@ -132,12 +144,74 @@ fn add_folder_and_feed() {
         gp.process_jobs();
     }
     let entries = (*(subs_r.borrow_mut())).get_all_entries();
-    // for e in &entries {        debug!("SUB={:?}", e);    }
+    for e in &entries {
+        debug!("SUB={:?}", e);
+    }
     assert_eq!(entries.len(), 4); // 2 default entries, one folder, one regular entry
     if false {
         trace!("");
     }
 }
+
+
+
+
+/*
+
+SYSTEM:
+rcs_version=0.0.2
+mode_debug=false
+conf_filename=/home/marcus/.config/grassfeeder//config.ini
+subscriptions_folder=/home/marcus/.config/grassfeeder/
+BrowserDir=/home/marcus/.cache/grassfeeder//browser
+messages_db=/home/marcus/.config/grassfeeder//messages.db
+
+
+USER:
+[window]
+GuiFontSizeManualEnable=false
+GuiFontSizeManual=10
+GuiPane1Pos=237
+GuiPane2Pos=934
+GuiCol1Width=482
+GuiWindowWidth=1618
+GuiWindowHeight=869
+
+[browser]
+BrowserBackgroundLevel=153
+
+[contentlist]
+MessageSelectFocusPolicy=1
+MessagesKeepCount=100
+GuiList0SortColumn=2
+GuiList0SortAscending=false
+
+[sourcetree]
+FetchFeedsOnStart=false
+FetchFeedsInterval=26
+FetchFeedsIntervalUnit=1
+DisplayFeedCountAll=false
+
+[contentdownloader]
+DownloaderThreads=2
+
+[subscriptions_repo]
+[config]
+[messagesrepo]
+
+
+ENTFERNEN:
+GuiWindowTitle=app:default:to do
+
+
+*/
+
+
+
+
+
+
+
 
 // ------------------------------------
 

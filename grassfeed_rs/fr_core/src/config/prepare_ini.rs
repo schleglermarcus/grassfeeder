@@ -10,6 +10,7 @@ use gui_layer::gui_values::PropDef;
 use ini::Ini;
 use std::fs;
 
+#[deprecated]
 pub struct GrassFeederConfig {
     pub path_config: String,
     pub path_cache: String,
@@ -29,6 +30,9 @@ fn check_or_create_folder(path: &String) {
     }
 }
 
+
+
+#[deprecated]
 pub fn prepare_config_by_path(gf_conf: &GrassFeederConfig) -> Ini {
     check_or_create_folder(&gf_conf.path_config);
     check_or_create_folder(&gf_conf.path_cache);
@@ -116,12 +120,12 @@ pub fn prepare_config_by_path(gf_conf: &GrassFeederConfig) -> Ini {
         GuiContext::section_name(),
         mod_ini.section(Some(GuiContext::section_name()))
     );
-
+/*
     mod_ini.set_to(
         Some(MessagesRepo::section_name()),
         MessagesRepo::CONF_DB_KEY.to_string(),
         format!("{}/messages.db", &gf_conf.path_config),
     );
-
+*/
     mod_ini
 }
