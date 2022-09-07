@@ -1,4 +1,5 @@
-use fr_core::config::prepare_ini::GrassFeederConfig;
+use fr_core::config::init_system;
+//::GrassFeederConfig;
 use resources::loc;
 
 #[macro_use]
@@ -10,14 +11,14 @@ i18n!("../resources/locales");
 fn rungui_regular() {
     setup();
     loc::init_locales();
-    let gfconf = GrassFeederConfig {
+    let gfconf = init_system::GrassFeederConfig {
         path_config: "../target/db_rungui_reg".to_string(),
         path_cache: "../target/db_rungui_reg".to_string(),
         debug_mode: true,
         version: "run_reg_todo".to_string(),
     };
-    let appcontext = fr_core::grassfeeder::start(gfconf);
-    fr_core::grassfeeder::run(&appcontext);
+    let appcontext = init_system::start(gfconf);
+    init_system::run(&appcontext);
 }
 
 // ------------------------------------

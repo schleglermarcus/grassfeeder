@@ -9,6 +9,31 @@ mod tree_drag_common;
 // use crate::tree_drag_common::prepare_source_tree_controller;
 // use fr_core::db::subscription_entry::SubscriptionEntry;
 
+
+/*
+use fr_core::config::configmanager::ConfigManager;
+
+#[test]
+fn configmanager_load_store() {
+    setup();
+
+    let cf_filename = "../target/configmanager_load_store.json";
+    {
+        let cm = ConfigManager::default();
+        cm.set_val("Coffee", "3".to_string());
+        cm.store_user_conf(cf_filename.to_string());
+    }
+    {
+        let cm = ConfigManager::default();
+        let _lr = cm.load_user_conf(&cf_filename.to_string());
+        assert_eq!(cm.get_val("Coffee"), Some("3".to_string()));
+    }
+}
+
+*/
+
+
+
 #[allow(dead_code)]
 //#[test]
 fn stub() {
@@ -25,6 +50,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-		let _r = logger_config::setup_fern_logger(0);
+        let _r = logger_config::setup_fern_logger(0);
     });
 }

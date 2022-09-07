@@ -62,10 +62,9 @@ pub struct MessagesRepo {
 
 impl MessagesRepo {
     pub const CONF_DB_KEY_FOLDER: &'static str = "messages_db_folder";
+
     // messages.db
-
-//	pub const CONF_DB_KEY_FOLDER: &'static str = "messages_db_folder";
-
+    //	pub const CONF_DB_KEY_FOLDER: &'static str = "messages_db_folder";
 
     pub fn new(foldername: String) -> Self {
         let filename = format!("{}messages.db", foldername);
@@ -372,9 +371,11 @@ mod t {
     #[test]
     fn t_get_max_src_index_empty() {
         setup();
-        let messagesrepo = MessagesRepo::new(":memory:".to_string());
+        let messagesrepo = MessagesRepo::new_in_mem();   // new(":memory:".to_string());
+        let _r = messagesrepo.get_ctx().delete_table();
         messagesrepo.get_ctx().create_table();
         let maxindex = messagesrepo.get_max_src_index();
+//        let list = messagesrepo.get_all_messages();        println!("{:#?}", list);
         assert_eq!(maxindex, -1);
     }
 
@@ -458,7 +459,8 @@ mod t {
 
     fn prepare_3_rows() -> Rc<RefCell<dyn IMessagesRepo>> {
         setup();
-        let messagesrepo = MessagesRepo::new(":memory:".to_string());
+        let messagesrepo = MessagesRepo::new_in_mem() ; //  (":memory:".to_string());
+		let _r = messagesrepo.get_ctx().delete_table();
         messagesrepo.get_ctx().create_table();
         let msg_r: Rc<RefCell<dyn IMessagesRepo>> = Rc::new(RefCell::new(messagesrepo));
         let mut e1 = MessageRow::default();
@@ -501,6 +503,7 @@ mod t {
         assert_eq!((*msg_r).borrow().get_is_read(3), (3, true));
     }
 
+//cargo watch -s "cargo test  db::messages_repo::t::t_get_read_sum   --lib -- --exact --nocapture "
     #[test]
     fn t_get_read_sum() {
         let msg_r = prepare_3_rows();
@@ -535,7 +538,8 @@ mod t {
     #[test]
     fn t_insert_get_row() {
         setup();
-        let messagesrepo = MessagesRepo::new(":memory:".to_string());
+        let messagesrepo = MessagesRepo:: new_in_mem(); // new(":memory:".to_string());
+        messagesrepo.get_ctx().delete_table();
         messagesrepo.get_ctx().create_table();
         let mut e1 = MessageRow::default();
         let r1 = messagesrepo.get_ctx().insert(&e1);

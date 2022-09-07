@@ -1,7 +1,5 @@
 use crate::config::configmanager::ConfigManager;
 use crate::config::APPLICATION_NAME;
-use crate::controller::browserpane::BrowserPane;
-use crate::controller::contentlist::FeedContents;
 use crate::controller::sourcetree::TREE_STATUS_COLUMN;
 use crate::ui_select::select;
 use crate::util::string_truncate;
@@ -39,47 +37,63 @@ impl Buildable for GuiContext {
 
     #[allow(clippy::type_complexity)]
     fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self {
-
-        //  crap
-
         let configman = (*appcontext).get_rc::<ConfigManager>().unwrap();
         let mut initvalues: HashMap<PropDef, String> = HashMap::default();
-        for p in PROPDEF_ARRAY {
-            if let Some(s) = conf.get(&p.tostring()) {
-                initvalues.insert(p, s.clone());
-            }
-        }
-        for k in [
-            PropDef::BrowserDir,
-            PropDef::BrowserBackgroundLevel,
-            PropDef::GuiList0SortColumn,
-            PropDef::GuiList0SortAscending,
-        ] {
-            if let Some(v) = (*configman)
-                .borrow()
-                .get_section_key(&BrowserPane::section_name(), &k.to_string())
-            {
-                initvalues.insert(k.clone(), v);
-            }
-            if let Some(v) = (*configman)
-                .borrow()
-                .get_section_key(&FeedContents::section_name(), &k.to_string())
-            {
-                initvalues.insert(k.clone(), v);
-            }
-        }
+        /*
+            //  crap
 
-        if let Some(v) = (*configman).borrow().get_section_key(
-            &GuiContext::section_name(),
-            &PropDef::AppRcsVersion.to_string(),
-        ) {
-            initvalues.insert(PropDef::AppRcsVersion, v);
-        } else {
-            error!("no {}  conf={:#?}", PropDef::AppRcsVersion, 0);
-            conf.dump();
-        }
+            for p in PROPDEF_ARRAY {
+                if let Some(s) = conf.get(&p.tostring()) {
+                    initvalues.insert(p, s.clone());
+                }
+            }
+            for k in [
+                PropDef::BrowserDir,
+                PropDef::BrowserBackgroundLevel,
+                PropDef::GuiList0SortColumn,
+                PropDef::GuiList0SortAscending,
+            ] {
+                if let Some(v) = (*configman)
+                    .borrow()
+                    .get_section_key(&BrowserPane::section_name(), &k.to_string())
+                {
+                    initvalues.insert(k.clone(), v);
+                }
+                if let Some(v) = (*configman)
+                    .borrow()
+                    .get_section_key(&FeedContents::section_name(), &k.to_string())
+                {
+                    initvalues.insert(k.clone(), v);
+                }
+            }
 
-        // /crap
+            if let Some(v) = (*configman).borrow().get_section_key(
+                &GuiContext::section_name(),
+                &PropDef::AppRcsVersion.to_string(),
+            ) {
+                initvalues.insert(PropDef::AppRcsVersion, v);
+            } else {
+                error!("no {}  conf={:#?}", PropDef::AppRcsVersion, 0);
+                conf.dump();
+            }
+
+            // /crap
+        */
+
+        for pd in PROPDEF_ARRAY {
+            // TODO check if we need both     conf, configmanager
+            let mut o_val = conf.get(&pd.tostring());
+            if o_val.is_none() {
+                o_val = (*configman).borrow().get_val(&pd.to_string());
+            }
+            if o_val.is_none() {
+                o_val = (*configman).borrow().get_sys_val(&pd.to_string());
+            }
+            if let Some(val) = o_val {
+                initvalues.insert(pd, val);
+            }
+        }
+        // trace!("gui_context:   initvals={:#?}", &initvalues);
 
         let (m_v_store_a, ui_updater, g_runner): (
             UIAdapterValueStoreType,
@@ -140,11 +154,14 @@ impl GuiContext {
             .write()
             .unwrap()
             .set_gui_property(PropDef::GuiFontSizeManualEnable, e.to_string());
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
-            &PropDef::GuiFontSizeManualEnable.to_string(),
-            e.to_string().as_str(),
-        );
+        // (*self.configmanager_r).borrow_mut().set_section_key(
+        //     &Self::section_name(),
+        //     &PropDef::GuiFontSizeManualEnable.to_string(),
+        //     e.to_string().as_str(),
+        // );
+        (*self.configmanager_r)
+            .borrow()
+            .set_val(&PropDef::GuiFontSizeManualEnable.to_string(), e.to_string());
     }
 
     pub fn set_conf_fontsize_manual(&self, s: i32) {
@@ -152,11 +169,15 @@ impl GuiContext {
             .write()
             .unwrap()
             .set_gui_property(PropDef::GuiFontSizeManual, s.to_string());
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
-            &PropDef::GuiFontSizeManual.to_string(),
-            s.to_string().as_str(),
-        );
+        // (*self.configmanager_r).borrow_mut().set_section_key(
+        //     &Self::section_name(),
+        //     &PropDef::GuiFontSizeManual.to_string(),
+        //     s.to_string().as_str(),
+        // );
+		(*self.configmanager_r)
+            .borrow()
+            .set_val(&PropDef::GuiFontSizeManual.to_string(), s.to_string());
+
     }
 
     pub fn set_window_title(&mut self, current_title: String) {

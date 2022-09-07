@@ -1,9 +1,20 @@
-To Do List
+Work in Progress
 
-- add version and branch info to about dialog
+- Add version and branch info to about dialog,
+- refacture initialisation and property loading, config  as json
+- Web threads to 2
+- added more message title conversion html entities
+- removed gluesql remainder
+
+
+
+To Do List
+- delete tablehelper.rs
 - deprecate old logger setup
 - debugmode: message popup needs escaping
+- check  https://www.linuxcompatible.org/  feed: icon + entries
 - clean out deleted subscriptions
+- Create Changelog,   https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
 - Check Info Dialog + website
 - remove icon dialog, leave it on  debug flag
 - GTK-Liststore for inserting switch off sorting. Else slow.
@@ -66,3 +77,9 @@ https://daniellockyer.com/automated-rust-releases/
 
 https://crates.io/crates/rustc_version/
 https://lib.rs/crates/ci_info
+https://www.gtk.org/docs/installations/windows/
+
+Desktop:
+https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
+
+#  less /usr/share/doc/gedit/changelog.Debian.gz

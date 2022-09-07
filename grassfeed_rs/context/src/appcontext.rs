@@ -84,8 +84,8 @@ impl AppContext {
         //        (*self.ini_r).borrow_mut().clear(); // we don't need the ini information no more
     }
 
-    #[deprecated]
-    pub fn store_ini(&mut self, r_ini: Rc<RefCell<Ini>>) {
+    //  #[deprecated]	// later
+    pub fn store_ini(&mut self, _r_ini: Rc<RefCell<Ini>>) {
         // self.ini_r = r_ini;
     }
 
@@ -96,8 +96,8 @@ impl AppContext {
         }
     */
 
-    #[deprecated]
-    pub fn new_with_ini(ini_rc: Rc<RefCell<Ini>>) -> AppContext {
+    //  #[deprecated]	// later
+    pub fn new_with_ini(_ini_rc: Rc<RefCell<Ini>>) -> AppContext {
         AppContext {
             // ini_r: ini_rc,
             ..Default::default()
@@ -124,6 +124,11 @@ impl AppContext {
     pub fn set_user_conf(&mut self, u_c: Rc<RefCell<HashMap<String, String>>>) {
         self.conf_user = u_c;
     }
+
+	pub fn get_system_config(&self) -> Rc<RefCell<HashMap<String, String>>> {
+        self.conf_system.clone()
+    }
+
 }
 
 #[cfg(test)]

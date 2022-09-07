@@ -1,21 +1,12 @@
 mod logger_config;
 
-use context::appcontext::AppContext;
-use fr_core::config::configmanager::ConfigManager;
-use fr_core::config::prepare_ini::prepare_config_by_path;
-use fr_core::config::prepare_ini::GrassFeederConfig;
-use fr_core::controller::browserpane::BrowserPane;
-use fr_core::controller::contentdownloader::Downloader;
-use fr_core::controller::contentlist::FeedContents;
+use fr_core::config::init_system::GrassFeederConfig;
 use fr_core::controller::guiprocessor::GuiProcessor;
-use fr_core::controller::sourcetree::SourceTreeController;
-use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
-use fr_core::timer::Timer;
 use fr_core::ui_select::gui_context::GuiContext;
 use gui_layer::abstract_ui::AValue;
 use gui_layer::abstract_ui::GuiEvents;
@@ -85,51 +76,42 @@ fn shutdown_store_ini() {
 #[test]
 fn add_folder_and_feed() {
     setup();
-    let gfc = GrassFeederConfig {
+    let gf_conf = GrassFeederConfig {
         path_config: "../target/db_feedsource_add".to_string(),
         path_cache: "../target/db_feedsource_add".to_string(),
         debug_mode: true,
         version: "add_folder_and_feed".to_string(),
     };
 
-
-	let gfconf = GrassFeederConfig {
-        path_config: "../target/db_rungui_local".to_string(),
-        path_cache: "../target/db_rungui_local".to_string(),
-        debug_mode: false,
-        version: "rungui:rungui_local_clear".to_string(),
-    };
-    let appcontext = fr_core::grassfeeder::start(gfconf);
+    let appcontext = fr_core::config::init_system::start(gf_conf);
     // test_setup_values(&appcontext, mini_server_c.get_address());
-    fr_core::grassfeeder::run(&appcontext);
+    // fr_core::config::init_system::run(&appcontext);
 
-/*
-    let ini_r = Rc::new(RefCell::new(prepare_config_by_path(&gfc)));
-    let mut appcontext = AppContext::new_with_ini(ini_r.clone());
-    let mut cm = ConfigManager::new_with_ini(ini_r);
-    cm.load_config_file();
-    appcontext.store_ini(Rc::new(RefCell::new(cm.get_conf())));
-    appcontext.store_obj(Rc::new(RefCell::new(cm)));
-    appcontext.build::<Timer>();
-    appcontext.build::<GuiContext>();
-    appcontext.build::<MessagesRepo>();
-    appcontext.build::<SubscriptionRepo>();
-    appcontext.build::<IconRepo>();
-    appcontext.build::<Downloader>();
-    appcontext.build::<SourceTreeController>();
-    appcontext.build::<BrowserPane>();
-    appcontext.build::<FeedContents>();
-    appcontext.build::<GuiProcessor>();
-    appcontext.startup();
-*/
+    /*
+        let ini_r = Rc::new(RefCell::new(prepare_config_by_path(&gfc)));
+        let mut appcontext = AppContext::new_with_ini(ini_r.clone());
+        let mut cm = ConfigManager::new_with_ini(ini_r);
+        cm.load_config_file();
+        appcontext.store_ini(Rc::new(RefCell::new(cm.get_conf())));
+        appcontext.store_obj(Rc::new(RefCell::new(cm)));
+        appcontext.build::<Timer>();
+        appcontext.build::<GuiContext>();
+        appcontext.build::<MessagesRepo>();
+        appcontext.build::<SubscriptionRepo>();
+        appcontext.build::<IconRepo>();
+        appcontext.build::<Downloader>();
+        appcontext.build::<SourceTreeController>();
+        appcontext.build::<BrowserPane>();
+        appcontext.build::<FeedContents>();
+        appcontext.build::<GuiProcessor>();
+        appcontext.startup();
+    */
     let subs_r: Rc<RefCell<dyn ISubscriptionRepo>> =
         appcontext.get_rc::<SubscriptionRepo>().unwrap();
     let gui_c_r = appcontext.get_rc::<GuiContext>().unwrap();
     let event_sender = (*gui_c_r).borrow().get_sender_wrapper();
-
     let msg_r_r = appcontext.get_rc::<MessagesRepo>().unwrap();
     let _r = (*msg_r_r).borrow().insert(&MessageRow::default());
-
     let mut payload: Vec<AValue> = Vec::default();
     payload.push(AValue::ASTR("folder2".to_string()));
     let _r = event_sender.send(GuiEvents::DialogData("new-folder".to_string(), payload));
@@ -144,17 +126,9 @@ fn add_folder_and_feed() {
         gp.process_jobs();
     }
     let entries = (*(subs_r.borrow_mut())).get_all_entries();
-    for e in &entries {
-        debug!("SUB={:?}", e);
-    }
+    // for e in &entries {        trace!("SUB={:?}", e);    }
     assert_eq!(entries.len(), 4); // 2 default entries, one folder, one regular entry
-    if false {
-        trace!("");
-    }
 }
-
-
-
 
 /*
 
@@ -206,13 +180,6 @@ GuiWindowTitle=app:default:to do
 
 */
 
-
-
-
-
-
-
-
 // ------------------------------------
 
 #[macro_use]
@@ -226,4 +193,7 @@ fn setup() {
             logger_config::QuietFlags::Db as u64 | logger_config::QuietFlags::Config as u64,
         );
     });
+    if false {
+        trace!("");
+    }
 }

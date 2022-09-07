@@ -797,19 +797,24 @@ impl SourceTreeController {
     fn startup_read_config(&mut self) {
         self.config.feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
-            .get_section_key_bool(&Self::section_name(), Self::CONF_FETCH_ON_START);
+            //            .get_section_key_bool(&Self::section_name(), Self::CONF_FETCH_ON_START);
+            .get_val_bool(Self::CONF_FETCH_ON_START);
         self.config.display_feedcount_all = (*self.configmanager_r)
             .borrow()
-            .get_section_key_bool(&Self::section_name(), Self::CONF_DISPLAY_FEECOUNT_ALL);
-        self.config.feeds_fetch_interval = (*self.configmanager_r).borrow().get_section_key_int(
-            &Self::section_name(),
-            Self::CONF_FETCH_INTERVAL,
-            0,
-        ) as u32;
+            //            .get_section_key_bool(&Self::section_name(), Self::CONF_DISPLAY_FEECOUNT_ALL);
+            .get_val_bool(Self::CONF_DISPLAY_FEECOUNT_ALL);
+        self.config.feeds_fetch_interval = (*self.configmanager_r)
+            .borrow()
+            //		get_section_key_int(            &Self::section_name(),          Self::CONF_FETCH_INTERVAL,            0,        ) as u32;
+            .get_val_int(Self::CONF_FETCH_INTERVAL)
+            .unwrap_or(0) as u32;
+
         self.config.feeds_fetch_interval_unit = (*self.configmanager_r)
             .borrow()
-            .get_section_key_int(&Self::section_name(), Self::CONF_FETCH_INTERVAL_UNIT, 0)
-            as u32;
+            //            .get_section_key_int(&Self::section_name(), Self::CONF_FETCH_INTERVAL_UNIT, 0)
+            .get_val_int(Self::CONF_FETCH_INTERVAL_UNIT)
+            .unwrap_or(0) as u32;
+
         if self.config.feeds_fetch_interval == 0 {
             self.config.feeds_fetch_interval = 2;
         }
@@ -818,12 +823,14 @@ impl SourceTreeController {
         }
         self.config.feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
-            .get_section_key_bool(&Self::section_name(), Self::CONF_FETCH_ON_START);
+            //.get_section_key_bool(&Self::section_name(), Self::CONF_FETCH_ON_START);
+            .get_val_bool(Self::CONF_FETCH_ON_START);
 
-        self.config.mode_debug = (*self.configmanager_r).borrow().get_section_key_bool(
-            &ConfigManager::section_name(),
-            ConfigManager::CONF_MODE_DEBUG,
-        );
+        self.config.mode_debug = (*self.configmanager_r)
+            .borrow()
+            //		get_section_key_bool(            &ConfigManager::section_name(),           ConfigManager::CONF_MODE_DEBUG,        );
+            .get_val_bool(ConfigManager::CONF_MODE_DEBUG);
+
         // debug!(            "sectionname={}    MODE_DEBUG={:?}",            ConfigManager::section_name(),            self.config.mode_debug        );
     }
 
@@ -951,7 +958,7 @@ impl ISourceTreeController for SourceTreeController {
 
     /// returns  source_repo_id
     fn add_new_folder(&mut self, folder_name: String) -> isize {
-        let mut new_parent_id = 0; 
+        let mut new_parent_id = 0;
         if self.current_new_folder_parent_id.is_some() {
             new_parent_id = self.current_new_folder_parent_id.take().unwrap();
         }
@@ -1287,11 +1294,14 @@ impl ISourceTreeController for SourceTreeController {
 
     fn set_conf_load_on_start(&mut self, n: bool) {
         self.config.feeds_fetch_at_start = n;
+/*
         (*self.configmanager_r).borrow_mut().set_section_key(
             &Self::section_name(),
             SourceTreeController::CONF_FETCH_ON_START,
             n.to_string().as_str(),
         );
+*/
+(*self.configmanager_r).borrow().set_val(SourceTreeController::CONF_FETCH_ON_START,n.to_string() )		;
     }
 
     fn set_conf_fetch_interval(&mut self, n: i32) {
@@ -1304,11 +1314,16 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         self.config.feeds_fetch_interval = n as u32;
+        /*
         (*self.configmanager_r).borrow_mut().set_section_key(
             &Self::section_name(),
             SourceTreeController::CONF_FETCH_INTERVAL,
             n.to_string().as_str(),
         );
+        */
+        (*self.configmanager_r)
+            .borrow()
+            .set_val(SourceTreeController::CONF_FETCH_INTERVAL, n.to_string());
     }
 
     fn set_conf_fetch_interval_unit(&mut self, n: i32) {
@@ -1317,20 +1332,28 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         self.config.feeds_fetch_interval_unit = n as u32;
+/*
         (*self.configmanager_r).borrow_mut().set_section_key(
             &Self::section_name(),
             SourceTreeController::CONF_FETCH_INTERVAL_UNIT,
             n.to_string().as_str(),
         );
+*/
+		(*self.configmanager_r).borrow().set_val(    SourceTreeController::CONF_FETCH_INTERVAL_UNIT, n.to_string() );
+
     }
 
     fn set_conf_display_feedcount_all(&mut self, a: bool) {
         self.config.display_feedcount_all = a;
+/*
         (*self.configmanager_r).borrow_mut().set_section_key(
             &Self::section_name(),
             SourceTreeController::CONF_DISPLAY_FEECOUNT_ALL,
             a.to_string().as_str(),
         );
+*/
+		        (*self.configmanager_r).borrow().set_val(SourceTreeController::CONF_DISPLAY_FEECOUNT_ALL, a.to_string());
+
     }
 
     fn newsource_dialog_edit(&mut self, edit_feed_url: String) {
@@ -1439,7 +1462,7 @@ impl StartupWithAppContext for SourceTreeController {
         self.addjob(SJob::ScanEmptyUnread);
         self.addjob(SJob::GuiUpdateTreeAll);
         self.addjob(SJob::SanitizeSources);
-		self.addjob(SJob::UpdateTreePaths);
+        self.addjob(SJob::UpdateTreePaths);
     }
 }
 

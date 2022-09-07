@@ -239,13 +239,13 @@ mod appcontext_test {
             debug_mode: true,
             version: "timer_example".to_string(),
         };
-        let ini_r = Rc::new(RefCell::new(prepare_config_by_path(
-            &gfc, // "../target/db_timer_uninit".to_string(),
-                 // "../target/db_timer_uninit".to_string(),
-        )));
+        let ini_r = Rc::new(RefCell::new(prepare_config_by_path(&gfc)));
         let mut appcontext = AppContext::new_with_ini(ini_r.clone());
+
+		// TODO 
         let mut cm = ConfigManager::new_with_ini(ini_r);
-        cm.load_config_file();
+
+		        cm.load_config_file();
         appcontext.store_ini(Rc::new(RefCell::new(cm.get_conf())));
         appcontext.store_obj(Rc::new(RefCell::new(cm)));
         appcontext.build::<Timer>();

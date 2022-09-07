@@ -149,7 +149,7 @@ impl UIAdapterValueStore for AdValSto {
     }
 
     fn set_dialog_data(&mut self, _idx: u8, _values: &[AValue]) {
-        unimplemented!()
+        trace!("mock: set_dialog_data  {:?}", _values);
     }
     fn get_dialog_data(&self, _idx: u8) -> Option<&Vec<AValue>> {
         None
@@ -227,7 +227,7 @@ impl UIUpdaterAdapter for UpdAda {
     }
     fn update_label_markup(&self, _nr: u8) {}
     fn update_dialog(&self, _nr: u8) {
-        unimplemented!()
+        trace!("mock: update_dialog {}", _nr);
     }
     fn show_dialog(&self, _nr: u8) {
         unimplemented!()

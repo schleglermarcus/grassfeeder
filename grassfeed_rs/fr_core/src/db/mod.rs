@@ -4,4 +4,4 @@ pub mod messages_repo;
 pub mod sqlite_context;
 pub mod subscription_entry;
 pub mod subscription_repo;
-pub mod tablehelper;
+// pub mod tablehelper;

@@ -25,10 +25,12 @@ pub struct GrassFeederConfig {
 }
 
 pub fn start(conf: GrassFeederConfig) -> AppContext {
-    let mut appcontext = AppContext::new(create_system_config(&conf));
+    let systemconf = create_system_config(&conf);
+    let mut appcontext = AppContext::new(systemconf);
     appcontext.build::<ConfigManager>();
     let configmanager_r: Rc<RefCell<ConfigManager>> = appcontext.get_rc::<ConfigManager>().unwrap();
     appcontext.set_user_conf((*configmanager_r).borrow().get_user_conf());
+
     appcontext.build::<Timer>();
     appcontext.build::<GuiContext>();
     appcontext.build::<subscription_repo::SubscriptionRepo>();

@@ -2,7 +2,6 @@ use crate::config::configmanager::ConfigManager;
 use crate::controller::browserpane::BrowserPane;
 use crate::controller::contentlist::FeedContents;
 use crate::db::icon_repo;
-use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo;
 use crate::ui_select::gui_context::GuiContext;
 use context::Buildable;
@@ -10,7 +9,7 @@ use gui_layer::gui_values::PropDef;
 use ini::Ini;
 use std::fs;
 
-#[deprecated]
+//  #[deprecated]	 // later
 pub struct GrassFeederConfig {
     pub path_config: String,
     pub path_cache: String,
@@ -32,7 +31,7 @@ fn check_or_create_folder(path: &String) {
 
 
 
-#[deprecated]
+// #[deprecated]
 pub fn prepare_config_by_path(gf_conf: &GrassFeederConfig) -> Ini {
     check_or_create_folder(&gf_conf.path_config);
     check_or_create_folder(&gf_conf.path_cache);

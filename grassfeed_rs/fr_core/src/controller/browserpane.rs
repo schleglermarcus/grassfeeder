@@ -66,7 +66,8 @@ impl BrowserPane {
     fn create_browser_dir(&mut self) {
         if let Some(browserdir) = (*self.configmanager_r)
             .borrow()
-            .get_section_key(&Self::section_name(), &PropDef::BrowserDir.to_string())
+            //.get_section_key(&Self::section_name(), &PropDef::BrowserDir.to_string())
+            .get_sys_val(&PropDef::BrowserDir.to_string())
         {
             let existing = std::path::Path::new(&browserdir).is_dir();
             if !existing {
@@ -79,6 +80,8 @@ impl BrowserPane {
             }
         } else {
             error!("config is missing {}", PropDef::BrowserDir.to_string());
+			(*self.configmanager_r)
+	            .borrow().debug_dump("create_browser_dir");
         }
     }
 }
@@ -157,11 +160,17 @@ impl IBrowserPane for BrowserPane {
 
     fn set_conf_browser_bg(&mut self, c: u32) {
         self.config.browser_bg = c as u8;
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
-            &PropDef::BrowserBackgroundLevel.to_string(),
-            c.to_string().as_str(),
-        );
+        /*
+                (*self.configmanager_r).borrow_mut().set_section_key(
+                    &Self::section_name(),
+                    &PropDef::BrowserBackgroundLevel.to_string(),
+                    c.to_string().as_str(),
+                );
+        */
+        (*self.configmanager_r)
+            .borrow()
+            .set_val(&PropDef::BrowserBackgroundLevel.to_string(), c.to_string());
+
         (*self.gui_val_store)
             .write()
             .unwrap()

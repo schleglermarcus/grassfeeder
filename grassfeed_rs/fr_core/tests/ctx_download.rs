@@ -101,7 +101,7 @@ fn comprehensive_feed_download() {
 
 // #[ignore]
 #[test]
-fn downloader_task1_shutdown() {
+fn downloader_load_message_into_db() {
     setup();
     let (content_q_s, _content_q_r) = flume::bounded::<CJob>(9);
     let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(
