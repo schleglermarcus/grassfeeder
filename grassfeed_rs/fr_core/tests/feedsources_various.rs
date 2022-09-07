@@ -91,7 +91,7 @@ fn add_feed_with_existing() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
     let (mut fsc, _r_fsource) = prepare_stc(fs_list);
-    let msgrepo = MessagesRepo::new(":memory:".to_string());
+    let msgrepo = MessagesRepo:: new_in_mem(); // new(":memory:".to_string());
     msgrepo.get_ctx().create_table();
     let mut mr1: MessageRow = MessageRow::default();
     mr1.feed_src_id = 20;

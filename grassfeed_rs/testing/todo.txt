@@ -14,7 +14,9 @@ To Do List
 - debugmode: message popup needs escaping
 - check  https://www.linuxcompatible.org/  feed: icon + entries
 - clean out deleted subscriptions
-- Create Changelog,   https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
+- Create Changelog,
+	https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
+	https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
 - Check Info Dialog + website
 - remove icon dialog, leave it on  debug flag
 - GTK-Liststore for inserting switch off sorting. Else slow.
