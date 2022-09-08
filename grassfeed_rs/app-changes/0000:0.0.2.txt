@@ -2,6 +2,3 @@
   * refacture initialisation and property loading, config  as json
   * Web threads to 2
   * added more message title conversion html entities
-  * removed gluesql remainder
-
-
