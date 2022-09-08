@@ -84,6 +84,7 @@ fn add_folder_and_feed() {
     };
 
     let appcontext = fr_core::config::init_system::start(gf_conf);
+
     // test_setup_values(&appcontext, mini_server_c.get_address());
     // fr_core::config::init_system::run(&appcontext);
 

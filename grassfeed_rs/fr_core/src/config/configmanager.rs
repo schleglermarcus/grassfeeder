@@ -115,13 +115,6 @@ impl ConfigManager {
         }
     }
 
-    /// loads from preset available name
-    #[deprecated] // later
-    pub fn load_config_file(&mut self) {
-        let fname = self.cconf_filename.clone();
-        self.load_from_file(&fname);
-    }
-
     #[deprecated] // later
     pub fn store_to_file(&self, filename: &str) -> Result<()> {
         (*self.cconf).borrow().write_to_file(filename)
@@ -133,19 +126,7 @@ impl ConfigManager {
             return;
         }
         let filename: &str = &self.cconf_filename;
-
-/*
-        match  {
-            Ok(x) => {
-                trace!("stored  \"{}\"  {:?}", &filename, x);
-                self.cconf_modified.replace(false);
-            }
-            Err(e) => {
-                error!("store_if_modified \"{}\" {:?}", &filename, e);
-            }
-        };
-*/
-let _r = self.store_user_conf(filename.to_string());
+        let _r = self.store_user_conf(filename.to_string());
     }
 
     /// do not mark as dirty if the value was set before
@@ -258,7 +239,7 @@ let _r = self.store_user_conf(filename.to_string());
         true
     }
 
-    pub fn store_user_conf(&self, filename: String)  -> bool   {
+    pub fn store_user_conf(&self, filename: String) -> bool {
         let r_file = std::fs::File::create(filename.clone());
         if r_file.is_err() {
             warn!("{:?} writing to {} ", r_file.err(), &filename);
@@ -274,10 +255,10 @@ let _r = self.store_user_conf(filename.to_string());
         let r_ser = writemap.serialize(&mut serializer);
         if r_ser.is_err() {
             warn!("serializing into {} => {:?}", filename, r_ser.err());
-			return false
+            return false;
         }
         debug!("written {} to {}", &writemap.len(), &filename);
-		true
+        true
     }
 
     pub fn get_val(&self, key: &str) -> Option<String> {

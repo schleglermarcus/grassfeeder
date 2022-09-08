@@ -539,7 +539,7 @@ mod t {
     fn t_insert_get_row() {
         setup();
         let messagesrepo = MessagesRepo:: new_in_mem(); // new(":memory:".to_string());
-        messagesrepo.get_ctx().delete_table();
+        let _r = messagesrepo.get_ctx().delete_table();
         messagesrepo.get_ctx().create_table();
         let mut e1 = MessageRow::default();
         let r1 = messagesrepo.get_ctx().insert(&e1);
@@ -561,7 +561,6 @@ mod t {
         let e1 = messagesrepo.get_ctx().get_by_index(1);
         assert!(e1.is_some());
         let e2 = messagesrepo.get_ctx().get_by_index(2).unwrap();
-        //debug!("E2={:?} ", e2);
         assert_eq!(e2.message_id, 2);
         assert_eq!(e2.feed_src_id, 3);
         assert_eq!(e2.title.as_str(), "title3");

@@ -4,25 +4,25 @@ Work in Progress
 - refacture initialisation and property loading, config  as json
 - Web threads to 2
 - added more message title conversion html entities
-- removed gluesql remainder
 
 
 
 To Do List
-- delete tablehelper.rs
-- deprecate old logger setup
+- delete tablehelper.rs , deprecate old logger setup
+- switch subscription_repo to sqlite
 - debugmode: message popup needs escaping
-- check  https://www.linuxcompatible.org/  feed: icon + entries
 - clean out deleted subscriptions
+- SendToBrowser :   mark-as-read for all entries
+- remove icon dialog, leave it on  debug flag
+
 - Create Changelog,
 	https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
 	https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
 - Check Info Dialog + website
-- remove icon dialog, leave it on  debug flag
+- check  https://www.linuxcompatible.org/  feed: icon + entries
 - GTK-Liststore for inserting switch off sorting. Else slow.
 - Drag: Folder down  - not working yet
 - Check:  import, then drag , folder disappears
-- SendToBrowser :   mark-as-read for all entries
 - Build via Docker container,   find external dependencies + packages
 - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
 - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom

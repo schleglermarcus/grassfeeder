@@ -16,12 +16,9 @@ pub struct AppContext {
     conf_system: Rc<RefCell<HashMap<String, String>>>,
     /// resides in configmanager
     conf_user: Rc<RefCell<HashMap<String, String>>>,
-    // #[deprecated]
-    // ini_r: Rc<RefCell<Ini>>,
 }
 
-#[allow(dead_code)]
-/// Drop   and Copy are exclusive
+// #[allow(dead_code)]
 impl AppContext {
     pub fn set<T: Any + 'static>(&mut self, t: T) {
         self.typmap.insert(TypeId::of::<T>(), Box::new(t));
@@ -80,38 +77,19 @@ impl AppContext {
             (*s).borrow_mut().startup(self);
         });
         self.startups.clear(); // reduce cyclic dependencies
-
-        //        (*self.ini_r).borrow_mut().clear(); // we don't need the ini information no more
     }
 
-    //  #[deprecated]	// later
+    #[deprecated] // later
     pub fn store_ini(&mut self, _r_ini: Rc<RefCell<Ini>>) {
         // self.ini_r = r_ini;
     }
 
-    /*
-        #[deprecated]
-        pub fn get_ini(&self) -> Rc<RefCell<Ini>> {
-             self.ini_r.clone()
-        }
-    */
-
-    //  #[deprecated]	// later
+    #[deprecated] // later
     pub fn new_with_ini(_ini_rc: Rc<RefCell<Ini>>) -> AppContext {
         AppContext {
-            // ini_r: ini_rc,
             ..Default::default()
         }
     }
-
-    /*
-        pub fn new_with_properties(props: Rc<RefCell<HashMap<String, String>>>) -> AppContext {
-            AppContext {
-                // ini_r: 0,
-                app_properties: props,
-            }
-        }
-    */
 
     pub fn new(sys_conf: HashMap<String, String>) -> AppContext {
         AppContext {
@@ -125,10 +103,9 @@ impl AppContext {
         self.conf_user = u_c;
     }
 
-	pub fn get_system_config(&self) -> Rc<RefCell<HashMap<String, String>>> {
+    pub fn get_system_config(&self) -> Rc<RefCell<HashMap<String, String>>> {
         self.conf_system.clone()
     }
-
 }
 
 #[cfg(test)]

@@ -139,11 +139,7 @@ impl StartupWithAppContext for Timer {}
 
 #[cfg(test)]
 mod appcontext_test {
-
-    // Cyclic Dependency Issue
-    // Solution:   Putting Weak Ref  into Timer
     use crate::config::configmanager::ConfigManager;
-    // use crate::config::prepare_ini::prepare_config_by_path;
     use crate::config::init_system::create_system_config;
     use crate::config::init_system::GrassFeederConfig;
     use crate::timer::ITimer;
@@ -237,25 +233,11 @@ mod appcontext_test {
             path_config: "../target/db_timer_uninit".to_string(),
             path_cache: "../target/db_timer_uninit".to_string(),
             debug_mode: true,
-            version: "timer_example".to_string(),
+            version: "test_timer_uninit".to_string(),
         };
-
         let systemconf = create_system_config(&gfc);
         let mut appcontext = AppContext::new(systemconf);
         appcontext.build::<ConfigManager>();
-
-        /*
-                let ini_r = Rc::new(RefCell::new(prepare_config_by_path(&gfc)));
-                let mut appcontext = AppContext::new_with_ini(ini_r.clone());
-
-                // TODO
-                let mut cm = ConfigManager::new_with_ini(ini_r);
-
-                        cm.load_config_file();
-                appcontext.store_ini(Rc::new(RefCell::new(cm.get_conf())));
-                appcontext.store_obj(Rc::new(RefCell::new(cm)));
-        */
-
         appcontext.build::<Timer>();
         appcontext.build::<DBU>();
         appcontext.build::<GUIP>();
@@ -265,10 +247,8 @@ mod appcontext_test {
     #[test]
     fn test_timer_uninit() {
         run_example();
-        let inuse = DBU_IN_USE.load(Ordering::Relaxed);
-        assert_eq!(inuse, false);
+        assert_eq!(DBU_IN_USE.load(Ordering::Relaxed), false);
         run_example();
-        let inuse = DBU_IN_USE.load(Ordering::Relaxed);
-        assert_eq!(inuse, false);
+        assert_eq!(DBU_IN_USE.load(Ordering::Relaxed), false);
     }
 }
