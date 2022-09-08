@@ -1,17 +1,9 @@
-Work in Progress
-
-- Add version and branch info to about dialog,
-- refacture initialisation and property loading, config  as json
-- Web threads to 2
-- added more message title conversion html entities
-
-
 
 To Do List
+- clean out deleted subscriptions
 - delete tablehelper.rs , deprecate old logger setup
 - switch subscription_repo to sqlite
 - debugmode: message popup needs escaping
-- clean out deleted subscriptions
 - SendToBrowser :   mark-as-read for all entries
 - remove icon dialog, leave it on  debug flag
 

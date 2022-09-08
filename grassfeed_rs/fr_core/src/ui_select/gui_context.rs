@@ -26,10 +26,8 @@ pub struct GuiContext {
     updater_adapter: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_runner: Rc<RefCell<dyn GuiRunner>>,
     configmanager_r: Rc<RefCell<ConfigManager>>,
-
     application_name: String,
     window_title: String,
-    //    rcs_version: String,
 }
 
 impl Buildable for GuiContext {
@@ -39,47 +37,6 @@ impl Buildable for GuiContext {
     fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self {
         let configman = (*appcontext).get_rc::<ConfigManager>().unwrap();
         let mut initvalues: HashMap<PropDef, String> = HashMap::default();
-        /*
-            //  crap
-
-            for p in PROPDEF_ARRAY {
-                if let Some(s) = conf.get(&p.tostring()) {
-                    initvalues.insert(p, s.clone());
-                }
-            }
-            for k in [
-                PropDef::BrowserDir,
-                PropDef::BrowserBackgroundLevel,
-                PropDef::GuiList0SortColumn,
-                PropDef::GuiList0SortAscending,
-            ] {
-                if let Some(v) = (*configman)
-                    .borrow()
-                    .get_section_key(&BrowserPane::section_name(), &k.to_string())
-                {
-                    initvalues.insert(k.clone(), v);
-                }
-                if let Some(v) = (*configman)
-                    .borrow()
-                    .get_section_key(&FeedContents::section_name(), &k.to_string())
-                {
-                    initvalues.insert(k.clone(), v);
-                }
-            }
-
-            if let Some(v) = (*configman).borrow().get_section_key(
-                &GuiContext::section_name(),
-                &PropDef::AppRcsVersion.to_string(),
-            ) {
-                initvalues.insert(PropDef::AppRcsVersion, v);
-            } else {
-                error!("no {}  conf={:#?}", PropDef::AppRcsVersion, 0);
-                conf.dump();
-            }
-
-            // /crap
-        */
-
         for pd in PROPDEF_ARRAY {
             // TODO check if we need both     conf, configmanager
             let mut o_val = conf.get(&pd.tostring());
@@ -94,7 +51,6 @@ impl Buildable for GuiContext {
             }
         }
         // trace!("gui_context:   initvals={:#?}", &initvalues);
-
         let (m_v_store_a, ui_updater, g_runner): (
             UIAdapterValueStoreType,
             Rc<RefCell<dyn UIUpdaterAdapter>>,
@@ -174,10 +130,9 @@ impl GuiContext {
         //     &PropDef::GuiFontSizeManual.to_string(),
         //     s.to_string().as_str(),
         // );
-		(*self.configmanager_r)
+        (*self.configmanager_r)
             .borrow()
             .set_val(&PropDef::GuiFontSizeManual.to_string(), s.to_string());
-
     }
 
     pub fn set_window_title(&mut self, current_title: String) {
@@ -196,15 +151,6 @@ impl GuiContext {
         (*self.updater_adapter).borrow().update_window_title();
     }
 
-    /*
-        pub fn set_rcs_version(&mut self, v: String) {
-            self.rcs_version = v;
-        }
-
-        pub fn get_rcs_version(&mut self) -> String {
-            self.rcs_version.clone()
-        }
-    */
 }
 
 impl StartupWithAppContext for GuiContext {
