@@ -16,7 +16,6 @@ use std::io::Result;
 use std::rc::Rc;
 
 const ID_CONFIG: &str = "config";
-// const SECTION_GUI_RUNNER: &str = "window";
 
 pub struct ConfigManager {
     // #[deprecated]		// later
@@ -34,41 +33,15 @@ impl ConfigManager {
     pub const CONF_MODE_DEBUG: &'static str = "mode_debug";
 
     pub fn store_window_size(&mut self, width: i32, height: i32) {
-        /*
-                self.set_section_key(
-                    SECTION_GUI_RUNNER,
-                    &PropDef::GuiWindowWidth.tostring(),
-                    &width.to_string(),
-                );
-                self.set_section_key(
-                    SECTION_GUI_RUNNER,
-                    &PropDef::GuiWindowHeight.tostring(),
-                    &height.to_string(),
-                );
-        */
         self.set_val(&PropDef::GuiWindowWidth.tostring(), width.to_string());
         self.set_val(&PropDef::GuiWindowHeight.tostring(), height.to_string());
     }
 
     pub fn store_gui_pane1_pos(&mut self, pos: i32) {
-        /*
-                self.set_section_key(
-                    SECTION_GUI_RUNNER,
-                    &PropDef::GuiPane1Pos.tostring(),
-                    &pos.to_string(),
-                );
-        */
         self.set_val(&PropDef::GuiPane1Pos.tostring(), pos.to_string());
     }
 
     pub fn store_gui_pane2_pos(&mut self, pos: i32) {
-        /*
-                self.set_section_key(
-                    SECTION_GUI_RUNNER,
-                    &PropDef::GuiPane2Pos.tostring(),
-                    &pos.to_string(),
-                );
-        */
         self.set_val(&PropDef::GuiPane2Pos.tostring(), pos.to_string());
     }
 
@@ -77,7 +50,6 @@ impl ConfigManager {
             1 => PropDef::GuiCol1Width.tostring(),
             _ => panic!("unknown col_nr "),
         };
-        //        self.set_section_key(SECTION_GUI_RUNNER, &key, &width.to_string());
         self.set_val(&key, width.to_string());
     }
 
@@ -97,9 +69,7 @@ impl ConfigManager {
         match ini::Ini::load_from_file(filename) {
             Ok(new_ini) => {
                 if new_ini.len() > 2 {
-                    let mode_debug =
-                        // self.get_section_key_bool(&Self::section_name(), Self::CONF_MODE_DEBUG);
-                        self.get_val_bool( Self::CONF_MODE_DEBUG);
+                    let mode_debug = self.get_val_bool(Self::CONF_MODE_DEBUG);
                     (*self.cconf).replace(new_ini); //  unpraktisch !!!
                     (*self.cconf).borrow_mut().set_to(
                         Some(Self::section_name()),
@@ -129,51 +99,53 @@ impl ConfigManager {
         let _r = self.store_user_conf(filename.to_string());
     }
 
-    /// do not mark as dirty if the value was set before
-    #[deprecated]
-    pub fn set_section_key(&mut self, section: &str, key: &str, value: &str) {
-        let mut cc = (*self.cconf).borrow_mut();
-        let prev_value = cc.get_from(Some(section), key);
-        if let Some(s) = prev_value {
-            if s == value {
-                return;
+    /*
+        /// do not mark as dirty if the value was set before
+        #[deprecated]
+        pub fn set_section_key(&mut self, section: &str, key: &str, value: &str) {
+            let mut cc = (*self.cconf).borrow_mut();
+            let prev_value = cc.get_from(Some(section), key);
+            if let Some(s) = prev_value {
+                if s == value {
+                    return;
+                }
             }
+            cc.set_to(Some(section), key.to_string(), value.to_string());
+            self.cconf_modified.replace(true);
         }
-        cc.set_to(Some(section), key.to_string(), value.to_string());
-        self.cconf_modified.replace(true);
-    }
 
-    #[deprecated]
-    pub fn get_section_key(&self, section: &str, key: &str) -> Option<String> {
-        let cc = (*self.cconf).borrow();
-        if let Some(v) = cc.get_from(Some(section), key) {
-            return Some(v.to_string());
-        }
-        None
-    }
-
-    #[deprecated]
-    pub fn get_section_key_bool(&self, section: &str, key: &str) -> bool {
-        let cc = (*self.cconf).borrow();
-
-        if let Some(v) = cc.get_from(Some(section), key) {
-            if let Ok(b) = v.parse::<bool>() {
-                return b;
+        #[deprecated]
+        pub fn get_section_key(&self, section: &str, key: &str) -> Option<String> {
+            let cc = (*self.cconf).borrow();
+            if let Some(v) = cc.get_from(Some(section), key) {
+                return Some(v.to_string());
             }
-        } // else {            trace!(                "get_section_key_bool({} {})   sec_vals={:?}",                section,                key,                cc.section(Some(section))            );        }
-        false
-    }
-
-    #[deprecated]
-    pub fn get_section_key_int(&self, section: &str, key: &str, defaultv: isize) -> isize {
-        let cc = (*self.cconf).borrow();
-        if let Some(v) = cc.get_from(Some(section), key) {
-            if let Ok(i) = v.parse::<isize>() {
-                return i;
-            }
+            None
         }
-        defaultv
-    }
+
+        #[deprecated]
+        pub fn get_section_key_bool(&self, section: &str, key: &str) -> bool {
+            let cc = (*self.cconf).borrow();
+
+            if let Some(v) = cc.get_from(Some(section), key) {
+                if let Ok(b) = v.parse::<bool>() {
+                    return b;
+                }
+            } // else {            trace!(                "get_section_key_bool({} {})   sec_vals={:?}",                section,                key,                cc.section(Some(section))            );        }
+            false
+        }
+
+        #[deprecated]
+        pub fn get_section_key_int(&self, section: &str, key: &str, defaultv: isize) -> isize {
+            let cc = (*self.cconf).borrow();
+            if let Some(v) = cc.get_from(Some(section), key) {
+                if let Ok(i) = v.parse::<isize>() {
+                    return i;
+                }
+            }
+            defaultv
+        }
+    */
 
     pub fn debug_dump(&self, prefix: &str) {
         debug!(
@@ -184,13 +156,7 @@ impl ConfigManager {
         debug!("{} DD-user= {:#?} ", prefix, (*self.user_config).borrow());
     }
 
-    /*
-        pub fn set_conf_filename(&mut self, new_name: String) {
-            self.cconf_filename = new_name;
-        }
-    */
-
-    // #[deprecated] // later
+    #[deprecated] // later
     pub fn new_with_ini(ini_r: Rc<RefCell<Ini>>) -> ConfigManager {
         let filename = (*ini_r)
             .borrow()
@@ -211,7 +177,6 @@ impl ConfigManager {
     }
 
     pub fn load_user_conf(&self, filename: &String) -> bool {
-        // self.cconf_filename
         if !std::path::Path::new(&filename).exists() {
             trace!(
                 "load_subscriptions_pretty file {} not found. ",
@@ -262,10 +227,7 @@ impl ConfigManager {
     }
 
     pub fn get_val(&self, key: &str) -> Option<String> {
-        (*self.user_config)
-            .borrow()
-            .get(key)
-            .map_or(None, |r| Some(r.clone()))
+        (*self.user_config).borrow().get(key).cloned() // map(|r| r.clone())
     }
 
     pub fn get_val_int(&self, key: &str) -> Option<isize> {
@@ -287,14 +249,10 @@ impl ConfigManager {
     }
 
     pub fn get_sys_val(&self, key: &str) -> Option<String> {
-        (*self.system_config)
-            .borrow()
-            .get(key)
-            .map_or(None, |r| Some(r.clone()))
+        (*self.system_config).borrow().get(key).cloned() // map(|r| r.clone())
     }
 
     pub fn set_system_config(&mut self, conf: Rc<RefCell<HashMap<String, String>>>) {
-        // let mut sc = (*self.system_config).borrow_mut();        sc.clear();        sc.extend(conf);
         self.system_config = conf;
     }
 
@@ -327,14 +285,14 @@ impl Default for ConfigManager {
 impl Buildable for ConfigManager {
     type Output = ConfigManager;
 
-    #[allow(unreachable_code)]
+    // #[allow(unreachable_code)]
     fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self::Output {
-        // panic!("don't use this, initialize manually ");
-        let mut cm = ConfigManager::default();
-        cm.cconf_filename = conf.get(&ConfigManager::CONF_PATH_KEY.to_string()).unwrap();
+        let mut cm = ConfigManager {
+            cconf_filename: conf.get(ConfigManager::CONF_PATH_KEY).unwrap(),
+            ..Default::default()
+        };
         cm.set_system_config(appcontext.get_system_config());
         let _r = cm.load_user_conf(&cm.cconf_filename);
-        // exit on fail  here ?
         cm
     }
 

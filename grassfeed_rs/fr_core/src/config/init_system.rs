@@ -54,18 +54,15 @@ pub fn run(appcontext: &AppContext) {
 pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, String> {
     check_or_create_folder(&gf_conf.path_config);
     check_or_create_folder(&gf_conf.path_cache);
-
     let mut ret: HashMap<String, String> = HashMap::default();
     ret.insert(
         icon_repo::KEY_FOLDERNAME.to_string(),
         gf_conf.path_config.clone(),
     );
-
     ret.insert(
         subscription_repo::KEY_FOLDERNAME.to_string(),
         gf_conf.path_config.clone(),
     );
-
     ret.insert(
         ConfigManager::CONF_PATH_KEY.to_string(),
         format!("{}/config.json", &gf_conf.path_config),
@@ -77,59 +74,16 @@ pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, Stri
     ret.insert(
         GuiContext::CONF_RCS_VERSION.to_string(),
         gf_conf.version.clone(),
-    ); // TODO choose one
+    );
     ret.insert(PropDef::AppRcsVersion.tostring(), gf_conf.version.clone());
     ret.insert(
         MessagesRepo::CONF_DB_KEY_FOLDER.to_string(),
-        format!("{}", &gf_conf.path_config),
+        gf_conf.path_config.clone(),
     );
     ret.insert(
         PropDef::BrowserDir.tostring(),
         format!("{}/browser", &gf_conf.path_cache),
     );
-
-    /*
-        mod_ini.set_to(
-            Some(GuiContext::section_name()),
-            PropDef::GuiWindowWidth.tostring(),
-            "400".to_string(),
-        );
-        mod_ini.set_to(
-            Some(GuiContext::section_name()),
-            PropDef::GuiWindowHeight.tostring(),
-            "200".to_string(),
-        );
-        mod_ini.set_to(
-            Some(GuiContext::section_name()),
-            PropDef::GuiPane1Pos.tostring(),
-            "150".to_string(),
-        );
-        mod_ini.set_to(
-            Some(GuiContext::section_name()),
-            PropDef::GuiPane2Pos.tostring(),
-            "300".to_string(),
-        );
-        mod_ini.set_to(
-            Some(GuiContext::section_name()),
-            PropDef::GuiWindowTitle.tostring(),
-            "app:default:to do".to_string(),
-        );
-        mod_ini.set_to(
-            Some(BrowserPane::section_name()),
-            PropDef::BrowserBackgroundLevel.tostring(),
-            "200".to_string(),
-        );
-        mod_ini.set_to(
-            Some(FeedContents::section_name()),
-            PropDef::GuiList0SortColumn.tostring(),
-            "0".to_string(),
-        );
-        mod_ini.set_to(
-            Some(FeedContents::section_name()),
-            PropDef::GuiList0SortAscending.tostring(),
-            "true".to_string(),
-        );
-    */
     ret
 }
 
