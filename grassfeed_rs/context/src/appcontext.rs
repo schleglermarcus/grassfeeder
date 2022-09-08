@@ -11,12 +11,14 @@ use std::rc::Rc;
 #[derive(Default)]
 pub struct AppContext {
     typmap: HashMap<TypeId, Box<dyn Any>>,
-    ini_r: Rc<RefCell<Ini>>,
     startups: Vec<Rc<RefCell<dyn StartupWithAppContext>>>,
+    /// delivered by startup
+    conf_system: Rc<RefCell<HashMap<String, String>>>,
+    /// resides in configmanager
+    conf_user: Rc<RefCell<HashMap<String, String>>>,
 }
 
-#[allow(dead_code)]
-/// Drop   and Copy are exclusive
+// #[allow(dead_code)]
 impl AppContext {
     pub fn set<T: Any + 'static>(&mut self, t: T) {
         self.typmap.insert(TypeId::of::<T>(), Box::new(t));
@@ -49,14 +51,14 @@ impl AppContext {
         T: Buildable + 'static,
         <T as Buildable>::Output: StartupWithAppContext,
     {
-        let mut sectionmap: HashMap<String, String> = HashMap::new();
-        if let Some(s) = (*self.ini_r).borrow().section(Some(T::section_name())) {
-            sectionmap = s
-                .iter()
-                .map(|(k, v)| (k.to_string(), v.to_string()))
-                .collect();
+        let mut prop_copy: HashMap<String, String> = (*self.conf_system).borrow().clone();
+        {
+            let conf_user = (*self.conf_user).borrow();
+            if !conf_user.is_empty() {
+                prop_copy.extend(conf_user.clone());
+            }
         }
-        let b_co = T::build(Box::new(BuildConfigContainer { map: sectionmap }), self);
+        let b_co = T::build(Box::new(BuildConfigContainer { map: prop_copy }), self);
         let rc_app = Rc::new(RefCell::new(b_co));
         self.set(rc_app.clone());
         self.startups.push(rc_app);
@@ -75,22 +77,34 @@ impl AppContext {
             (*s).borrow_mut().startup(self);
         });
         self.startups.clear(); // reduce cyclic dependencies
-        (*self.ini_r).borrow_mut().clear(); // we don't need the ini information no more
     }
 
-    pub fn store_ini(&mut self, r_ini: Rc<RefCell<Ini>>) {
-        self.ini_r = r_ini;
+    #[deprecated] // later
+    pub fn store_ini(&mut self, _r_ini: Rc<RefCell<Ini>>) {
+        // self.ini_r = r_ini;
     }
 
-    pub fn get_ini(&self) -> Rc<RefCell<Ini>> {
-        self.ini_r.clone()
-    }
-
-    pub fn new_with_ini(ini_rc: Rc<RefCell<Ini>>) -> AppContext {
+    #[deprecated] // later
+    pub fn new_with_ini(_ini_rc: Rc<RefCell<Ini>>) -> AppContext {
         AppContext {
-            ini_r: ini_rc,
             ..Default::default()
         }
+    }
+
+    pub fn new(sys_conf: HashMap<String, String>) -> AppContext {
+        AppContext {
+            conf_system: Rc::new(RefCell::new(sys_conf)),
+            conf_user: Rc::new(RefCell::new(HashMap::new())),
+            ..Default::default()
+        }
+    }
+
+    pub fn set_user_conf(&mut self, u_c: Rc<RefCell<HashMap<String, String>>>) {
+        self.conf_user = u_c;
+    }
+
+    pub fn get_system_config(&self) -> Rc<RefCell<HashMap<String, String>>> {
+        self.conf_system.clone()
     }
 }
 

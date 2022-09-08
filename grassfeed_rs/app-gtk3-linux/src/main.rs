@@ -5,14 +5,16 @@ extern crate rust_i18n;
 mod args_lang;
 mod setup_logger;
 
-use fr_core::config::prepare_ini::GrassFeederConfig;
-use fr_core::grassfeeder;
+//  use fr_core::config::init_system::GrassFeederConfig;
+use fr_core::config::init_system;
 use resources::application_id::*;
 
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
 
 i18n!("../resources/locales");
+
+include!(concat!(env!("OUT_DIR"), "/gen_git_info.rs"));
 
 fn main() {
     let xdg_dirs = xdg::BaseDirectories::with_prefix(APP_NAME).unwrap();
@@ -37,24 +39,28 @@ fn main() {
         }
     }
     let _r = setup_logger::setup_logger(debug_level, &cache, APP_NAME);
-    info!(
-        "Starting {} with {} {}  locale={:?}",
-        APP_NAME,
-        conf,
-        cache,
-        rust_i18n::locale()
+    let version_str = format!(
+        "{} : {} : {}",
+        RCS_CARGO_PKG_VERSION, RCS_BRANCH, RCS_VERSION
     );
-    let mut gfconf = GrassFeederConfig {
+	info!(
+        "Starting {} with {} {}  locale={:?} V={}",
+        APP_NAME,
+        &conf,
+        &cache,
+        rust_i18n::locale(),
+        &version_str,
+    );
+    let mut gfconf = init_system::GrassFeederConfig {
         path_config: conf,
         path_cache: cache,
         debug_mode: false,
+        version: version_str,
     };
     if let Some(opts) = o_opts {
         gfconf.debug_mode = opts.debug;
-
-        let appcontext = grassfeeder::start(gfconf);
-        grassfeeder::run(&appcontext);
-
-        info!("Stopped {} ", APP_NAME,);
     }
+    let appcontext = init_system::start(gfconf);
+    init_system::run(&appcontext);
+    info!("Stopped {} ", APP_NAME,);
 }

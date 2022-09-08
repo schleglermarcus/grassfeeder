@@ -57,7 +57,7 @@ pub fn create_dialogs(
     create_settings_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_opml_import_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
     create_opml_export_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
-    create_about_dialog(gui_event_sender, gtk_obj_a.clone());
+    create_about_dialog(gui_event_sender, gtk_obj_a.clone(), ddd);
 }
 
 fn create_icons_dialog(gtk_obj_a: GtkObjectsType) {
@@ -902,10 +902,14 @@ fn create_opml_export_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsTy
     ret.set_dialog(DIALOG_OPML_EXPORT, &dialog.upcast());
 }
 
-fn create_about_dialog(_g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
+fn create_about_dialog(
+    _g_ev_se: Sender<GuiEvents>,
+    gtk_obj_a: GtkObjectsType,
+    ddd: &mut DialogDataDistributor,
+) {
     let dialog = AboutDialog::new();
     dialog.set_program_name(APP_NAME_CAMEL);
-    dialog.set_version(Some(CARGO_PKG_VERSION));
+    dialog.set_version(None); // is injected
     dialog.set_title(format!("{}: {}", t!("ABOUT_APP_TXT"), &APP_NAME_CAMEL).as_str());
     dialog.set_comments(Some(&format!(
         "{} \n {}",
@@ -924,6 +928,14 @@ fn create_about_dialog(_g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
         if response == ResponseType::Ok {}
         dialog.hide();
     });
+    let dia_c = dialog.clone();
+    ddd.set_dialog_distribute(DIALOG_ABOUT, move |dialogdata| {
+        if let Some(s) = dialogdata.get(0).unwrap().str() {
+            debug!("ABOUT-VERSION={}", &s);
+            dia_c.set_version(Some(&s));
+        }
+    });
+
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_ABOUT, &dialog.upcast());
 }

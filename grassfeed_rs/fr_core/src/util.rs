@@ -141,16 +141,19 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     let mut ret = inp;
     // ret = ret.replace(&['(', ')', '\"', '\n', '\'', '\"'][..], "");
     ret = ret.replace(&['\"', '\n', '\'', '\"'][..], "");
+    ret = ret.replace("&#226;", "â");
+    ret = ret.replace("&#128;", "€");
+    ret = ret.replace("&#147;", "›");
+    ret = ret.replace("&#x166;", " ... ");
+    ret = ret.replace("&#153;", " - ");
+    ret = ret.replace("&#156;", " - ");
+    ret = ret.replace("&#157;", " Š ");
     ret = ret.replace("&#8220;", "\"");
     ret = ret.replace("&#8221;", "\"");
     ret = ret.replace("&#8216;", "\'");
     ret = ret.replace("&#8217;", "\'");
     ret = ret.replace("&#8230;", " ... ");
-    ret = ret.replace("&#226;", "â");
-    ret = ret.replace("&#128;", "€");
-    ret = ret.replace("&#147;", "›");
     ret = ret.replace("&#xF6;", "ö");
-    ret = ret.replace("&#x166;", " ... ");
     ret = ret.replace("&#x8211;", " - ");
     ret.trim().to_string()
 }
@@ -227,7 +230,6 @@ mod t {
             remove_invalid_chars_from_input("Jenkins &#226;&#128;&#147; Brighteon".to_string()),
             "Jenkins â€› Brighteon".to_string()
         );
-
     }
 
     #[test]

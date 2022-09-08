@@ -801,56 +801,6 @@ fn txt_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
     }
 }
 
-/*
-// #[allow(dead_code)]
-fn write_to(
-    filename: String,
-    input: &[SubscriptionEntry],
-    converter: &dyn Fn(&SubscriptionEntry) -> Option<String>,
-) -> std::io::Result<usize> {
-    let mut bytes_written: usize = 0;
-    let out = std::fs::File::create(filename)?;
-    let mut buf = BufWriter::new(out);
-    input
-        .iter()
-        .filter_map(|se| converter(se))
-        .for_each(|line| {
-            let bbuf = line.as_bytes();
-            match buf.write(bbuf) {
-                Ok(bytes) => {
-                    let _r = buf.write(&[b'\n']);
-                    bytes_written += bytes + 1;
-                }
-                Err(e) => {
-                    error!("{:?}", e);
-                }
-            }
-        });
-    buf.flush()?;
-    Ok(bytes_written)
-}
-*/
-
-/*
-fn read_from(
-    filename: String,
-    converter: &dyn Fn(String) -> Option<SubscriptionEntry>,
-) -> Vec<SubscriptionEntry> {
-    let mut subscriptions_list: Vec<SubscriptionEntry> = Vec::default();
-    match std::fs::read_to_string(filename.clone()) {
-        Ok(f_str) => {
-            subscriptions_list = f_str
-                .lines()
-                .filter_map(|line| converter(line.to_string()))
-                .collect();
-        }
-        Err(e) => {
-            error!("{:?}  {}", e, filename)
-        }
-    }
-    subscriptions_list
-}
-*/
 
 
 #[cfg(test)]

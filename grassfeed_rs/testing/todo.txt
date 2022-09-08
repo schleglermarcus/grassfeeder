@@ -1,14 +1,20 @@
-To Do List
 
-- deprecate old logger setup
-- debugmode: message popup needs escaping
+To Do List
 - clean out deleted subscriptions
-- Check Info Dialog + website
+- delete tablehelper.rs , deprecate old logger setup
+- switch subscription_repo to sqlite
+- debugmode: message popup needs escaping
+- SendToBrowser :   mark-as-read for all entries
 - remove icon dialog, leave it on  debug flag
+
+- Create Changelog,
+	https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
+	https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
+- Check Info Dialog + website
+- check  https://www.linuxcompatible.org/  feed: icon + entries
 - GTK-Liststore for inserting switch off sorting. Else slow.
 - Drag: Folder down  - not working yet
 - Check:  import, then drag , folder disappears
-- SendToBrowser :   mark-as-read for all entries
 - Build via Docker container,   find external dependencies + packages
 - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
 - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
@@ -17,24 +23,23 @@ To Do List
 - Multiple instances shall be blocking.
 - Cleanup at maximum messages
 - Shutdown Integration Test
-- internnal browser hangs sometimes
+- Bug: internal browser hangs sometimes
 - Subscriptions Sanitize:  Folder sollen richtiges Icon haben
 - Subscriptions Sanitize:  Test mit rekursiver Ordner-Konstellation
 - Updating Sources:  prioritize by tree position, expanded flag
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal
 - Feed edit  Dialog: +Homepage
 - Delete Messages
-- Einzelne FeedQuelle: Reload soll Content-Liste aktualisieren
-- Bei Klick auf Folder:   Aggregat der Feeds anzeigen
+- check: subscription  Reload shall refresh  message list
+- click on folder: show message sums
 - Error-DB for Subscription Requests, display in edit dialog
 - Modify Browser Font size
 - React on Minimize, do memory usage reduction
-- Zusammenziehen von Code von   folder:mark-as-read  und folder:update
+- find common code parts of    folder:mark-as-read  ,  folder:update
 - Flatpak  https://lib.rs/crates/cargo-pkg
-- Feed-Anwahl, Fokuspolitik - Vor Letzter Ungelesener
+- implement focus policy: before last unread
 - Browser Display :  wrap over   title
 - Copy Message address into clipboard
-- Searching inside feeds
 - Opml export formatiert
 - Theme-Abhängige Farben im Browser
 - Browser: get rid of white display on start
@@ -43,6 +48,7 @@ To Do List
 - Startup, create gui:  delayed creation of dialogs
 - Windows Build
 - Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
+- Searching inside feeds
 
 
 Perhaps:
@@ -52,3 +58,22 @@ Perhaps:
 - Do extra format to  dig up invalid feed titles  containg  &     :      dieneuewelle.xml
 - Grouping of feeds by folders ?
 - RSS-Content damaged with    http://n8waechter.info/feed/
+
+
+
+-----
+
+
+https://github.com/marketplace/actions/rust-release-binary
+https://mateuscosta.me/rust-releases-with-github-actions
+https://daniellockyer.com/automated-rust-releases/
+
+
+https://crates.io/crates/rustc_version/
+https://lib.rs/crates/ci_info
+https://www.gtk.org/docs/installations/windows/
+
+Desktop:
+https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
+
+#  less /usr/share/doc/gedit/changelog.Debian.gz

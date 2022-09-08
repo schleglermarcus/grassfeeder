@@ -1,7 +1,5 @@
 use crate::config::configmanager::ConfigManager;
 use crate::config::APPLICATION_NAME;
-use crate::controller::browserpane::BrowserPane;
-use crate::controller::contentlist::FeedContents;
 use crate::controller::sourcetree::TREE_STATUS_COLUMN;
 use crate::ui_select::select;
 use crate::util::string_truncate;
@@ -38,32 +36,21 @@ impl Buildable for GuiContext {
     #[allow(clippy::type_complexity)]
     fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self {
         let configman = (*appcontext).get_rc::<ConfigManager>().unwrap();
-
         let mut initvalues: HashMap<PropDef, String> = HashMap::default();
-        for p in PROPDEF_ARRAY {
-            if let Some(s) = conf.get(&p.tostring()) {
-                initvalues.insert(p, s.clone());
+        for pd in PROPDEF_ARRAY {
+            // TODO check if we need both     conf, configmanager
+            let mut o_val = conf.get(&pd.tostring());
+            if o_val.is_none() {
+                o_val = (*configman).borrow().get_val(&pd.to_string());
+            }
+            if o_val.is_none() {
+                o_val = (*configman).borrow().get_sys_val(&pd.to_string());
+            }
+            if let Some(val) = o_val {
+                initvalues.insert(pd, val);
             }
         }
-        for k in [
-            PropDef::BrowserDir,
-            PropDef::BrowserBackgroundLevel,
-            PropDef::GuiList0SortColumn,
-            PropDef::GuiList0SortAscending,
-        ] {
-            if let Some(v) = (*configman)
-                .borrow()
-                .get_section_key(&BrowserPane::section_name(), &k.to_string())
-            {
-                initvalues.insert(k.clone(), v);
-            }
-            if let Some(v) = (*configman)
-                .borrow()
-                .get_section_key(&FeedContents::section_name(), &k.to_string())
-            {
-                initvalues.insert(k, v);
-            }
-        }
+        // trace!("gui_context:   initvals={:#?}", &initvalues);
         let (m_v_store_a, ui_updater, g_runner): (
             UIAdapterValueStoreType,
             Rc<RefCell<dyn UIUpdaterAdapter>>,
@@ -80,6 +67,7 @@ impl Buildable for GuiContext {
             configmanager_r: configman,
             application_name: APPLICATION_NAME.to_string(),
             window_title: String::default(),
+            //            rcs_version: String::default(),
         }
     }
 
@@ -89,6 +77,8 @@ impl Buildable for GuiContext {
 }
 
 impl GuiContext {
+    pub const CONF_RCS_VERSION: &'static str = "rcs_version";
+
     pub fn get_receiver_wrapper(&self) -> Rc<dyn ReceiverWrapper> {
         (*self.gui_runner).borrow().get_event_receiver()
     }
@@ -120,11 +110,14 @@ impl GuiContext {
             .write()
             .unwrap()
             .set_gui_property(PropDef::GuiFontSizeManualEnable, e.to_string());
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
-            &PropDef::GuiFontSizeManualEnable.to_string(),
-            e.to_string().as_str(),
-        );
+        // (*self.configmanager_r).borrow_mut().set_section_key(
+        //     &Self::section_name(),
+        //     &PropDef::GuiFontSizeManualEnable.to_string(),
+        //     e.to_string().as_str(),
+        // );
+        (*self.configmanager_r)
+            .borrow()
+            .set_val(&PropDef::GuiFontSizeManualEnable.to_string(), e.to_string());
     }
 
     pub fn set_conf_fontsize_manual(&self, s: i32) {
@@ -132,11 +125,14 @@ impl GuiContext {
             .write()
             .unwrap()
             .set_gui_property(PropDef::GuiFontSizeManual, s.to_string());
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
-            &PropDef::GuiFontSizeManual.to_string(),
-            s.to_string().as_str(),
-        );
+        // (*self.configmanager_r).borrow_mut().set_section_key(
+        //     &Self::section_name(),
+        //     &PropDef::GuiFontSizeManual.to_string(),
+        //     s.to_string().as_str(),
+        // );
+        (*self.configmanager_r)
+            .borrow()
+            .set_val(&PropDef::GuiFontSizeManual.to_string(), s.to_string());
     }
 
     pub fn set_window_title(&mut self, current_title: String) {
@@ -154,6 +150,7 @@ impl GuiContext {
             .set_window_title(wtitle);
         (*self.updater_adapter).borrow().update_window_title();
     }
+
 }
 
 impl StartupWithAppContext for GuiContext {

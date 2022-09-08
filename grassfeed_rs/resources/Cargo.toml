@@ -1,12 +1,14 @@
 [package]
 name = "resources"
-version = "0.0.1"
+version = "0.0.888"	# marker number, should not be present in the release version
 edition = "2021"
 
 [dependencies]
 log = "0.4.11"
 once_cell = "1.10.0"
 rust-i18n = ">=0.6.1"
+git-version = ">=0.3.5"
+
 
 
 [package.metadata.i18n]

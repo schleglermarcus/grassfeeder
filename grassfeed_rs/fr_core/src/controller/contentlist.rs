@@ -466,8 +466,7 @@ impl IFeedContents for FeedContents {
         self.set_selected_content_ids(vec![*last_content_id]);
     }
 
-
-// later:  check if update_feed_list_contents()    is a good option, or if cursor shall remain
+    // later:  check if update_feed_list_contents()    is a good option, or if cursor shall remain
     fn set_read_all(&mut self, src_repo_id: isize) {
         (*self.messagesrepo_r)
             .borrow_mut()
@@ -603,11 +602,16 @@ impl IFeedContents for FeedContents {
             return;
         }
         self.config.focus_policy = n;
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
-            FeedContents::CONF_FOCUS_POLICY,
-            n.to_string().as_str(),
-        );
+        /*
+                (*self.configmanager_r).borrow_mut().set_section_key(
+                    &Self::section_name(),
+                    FeedContents::CONF_FOCUS_POLICY,
+                    n.to_string().as_str(),
+                );
+        */
+        (*self.configmanager_r)
+            .borrow()
+            .set_val(FeedContents::CONF_FOCUS_POLICY, n.to_string());
     }
 
     fn set_conf_msg_keep_count(&mut self, n: i32) {
@@ -616,11 +620,14 @@ impl IFeedContents for FeedContents {
             return;
         }
         self.config.message_keep_count = n;
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
-            FeedContents::CONF_MSG_KEEP_COUNT,
-            n.to_string().as_str(),
-        );
+        // (*self.configmanager_r).borrow_mut().set_section_key(
+        //     &Self::section_name(),
+        //     FeedContents::CONF_MSG_KEEP_COUNT,
+        //     n.to_string().as_str(),
+        // );
+        (*self.configmanager_r)
+            .borrow_mut()
+            .set_val(FeedContents::CONF_MSG_KEEP_COUNT, n.to_string());
     }
 
     fn notify_config_update(&mut self) {
@@ -668,15 +675,25 @@ impl IFeedContents for FeedContents {
     fn set_sort_order(&mut self, sort_column: u8, ascending: bool) {
         self.config.list_sort_column = sort_column;
         self.config.list_sort_order_up = ascending;
-        (self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
+        /*
+                (self.configmanager_r).borrow_mut().set_section_key(
+                    &Self::section_name(),
+                    &PropDef::GuiList0SortColumn.to_string(),
+                    &sort_column.to_string(),
+                );
+                (self.configmanager_r).borrow_mut().set_section_key(
+                    &Self::section_name(),
+                    &PropDef::GuiList0SortAscending.to_string(),
+                    &ascending.to_string(),
+                );
+        */
+        (self.configmanager_r).borrow().set_val(
             &PropDef::GuiList0SortColumn.to_string(),
-            &sort_column.to_string(),
+            sort_column.to_string(),
         );
-        (self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
+        (self.configmanager_r).borrow().set_val(
             &PropDef::GuiList0SortAscending.to_string(),
-            &ascending.to_string(),
+            ascending.to_string(),
         );
     }
 
@@ -795,13 +812,10 @@ impl StartupWithAppContext for FeedContents {
         {
             let mut t = (*self.timer_r).borrow_mut();
             t.register(&TimerEvent::Timer100ms, feedcontents_r);
-            // t.register(&TimerEvent::Timer10s, fc_r.clone());
         }
-
-        self.config.mode_debug = (*self.configmanager_r).borrow().get_section_key_bool(
-            &ConfigManager::section_name(),
-            ConfigManager::CONF_MODE_DEBUG,
-        );
+        self.config.mode_debug = (*self.configmanager_r)
+            .borrow()
+            .get_val_bool(ConfigManager::CONF_MODE_DEBUG);
     }
 }
 
@@ -1024,20 +1038,34 @@ impl Default for Config {
 }
 
 pub fn get_font_size_from_config(configmanager_r: Rc<RefCell<ConfigManager>>) -> u32 {
-    if (*configmanager_r).borrow().get_section_key_bool(
-        &GuiContext::section_name(),
-        PropDef::GuiFontSizeManualEnable.to_string().as_str(),
-    ) {
-        if let Some(fs_man) = (*configmanager_r).borrow().get_section_key(
+    /*
+        if (*configmanager_r).borrow().get_section_key_bool(
             &GuiContext::section_name(),
-            PropDef::GuiFontSizeManual.to_string().as_str(),
+            PropDef::GuiFontSizeManualEnable.to_string().as_str(),
         ) {
-            if let Ok(s) = fs_man.parse::<u32>() {
-                return s;
+            if let Some(fs_man) = (*configmanager_r).borrow().
+            get_section_key(
+                &GuiContext::section_name(),
+                PropDef::GuiFontSizeManual.to_string().as_str(),
+            ) {
+                if let Ok(s) = fs_man.parse::<u32>() {
+                    return s;
+                }
             }
         }
+        0
+    */
+	if (*configmanager_r)
+        .borrow()
+        .get_val_bool(&PropDef::GuiFontSizeManualEnable.to_string())
+    {
+        return (*configmanager_r)
+            .borrow()
+            .get_val_int(&PropDef::GuiFontSizeManual.to_string())
+            .unwrap_or(0) as u32;
     }
     0
+	
 }
 
 //------------------------------------------------------
@@ -1219,7 +1247,7 @@ mod feedcontents_test {
 
     //cargo watch -s "cargo test controller::contentlist::feedcontents_test::from_modelentry_naturalnews  --lib -- --exact --nocapture"
     // TODO:  check condition
-	#[ignore]
+    #[ignore]
     #[test]
     fn from_modelentry_naturalnews() {
         let wrongdate = "Wed, 22 Jun 2022  15:59:0 CST";

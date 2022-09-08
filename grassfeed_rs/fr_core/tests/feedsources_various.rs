@@ -42,7 +42,7 @@ fn dl_naturalnews() {
     let e0: &MessageRow = new_list.get(0).unwrap();
 
     debug!("date={:?}  ", db_time_to_display_nonnull(e0.entry_src_date));
-	
+
 }
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::dl_entries_breakingnews    --lib -- --exact --nocapture "
@@ -91,7 +91,7 @@ fn add_feed_with_existing() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
     let (mut fsc, _r_fsource) = prepare_stc(fs_list);
-    let msgrepo = MessagesRepo::new(":memory:".to_string());
+    let msgrepo = MessagesRepo:: new_in_mem(); // new(":memory:".to_string());
     msgrepo.get_ctx().create_table();
     let mut mr1: MessageRow = MessageRow::default();
     mr1.feed_src_id = 20;
@@ -230,6 +230,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_logger();
+        let _r = logger_config::setup_fern_logger(0);
     });
 }

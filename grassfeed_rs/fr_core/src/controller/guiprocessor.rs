@@ -37,6 +37,7 @@ use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
+use resources::id::DIALOG_ABOUT;
 use resources::id::*;
 use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
 use std::cell::RefCell;
@@ -88,7 +89,6 @@ pub struct GuiProcessor {
     iconrepo_r: Rc<RefCell<IconRepo>>,
     statusbar_items: StatusBarItems,
     focus_by_tab: FocusByTab,
-    // eventrecorder: Weak<Box<dyn EventRecorder>>,
 }
 
 impl GuiProcessor {
@@ -881,6 +881,24 @@ impl GuiProcessor {
         }
     }
 
+    pub fn startup_dialogs(&self) {
+        let app_rcs_v = (*self.gui_val_store)
+            .read()
+            .unwrap()
+            .get_gui_property_or(PropDef::AppRcsVersion, "GP: no AppRcsVersion".to_string())
+            .parse::<String>()
+            .unwrap();
+
+        info!("startup_dialogs: V={}", app_rcs_v);
+        let dd: Vec<AValue> = vec![AValue::ASTR(app_rcs_v)];
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_dialog_data(DIALOG_ABOUT, &dd);
+        (*self.gui_updater).borrow().update_dialog(DIALOG_ABOUT);
+        //            warn!("no version info!  {}", ConfigManager::CONF_RCS_VERSION );
+    }
+
     // GuiProcessor
 }
 
@@ -924,6 +942,7 @@ impl TimerReceiver for GuiProcessor {
             }
             TimerEvent::Startup => {
                 self.process_jobs();
+                self.startup_dialogs();
             }
             _ => (),
         }

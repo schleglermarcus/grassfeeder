@@ -1,13 +1,14 @@
 use chrono::Local;
 use chrono::TimeZone;
 use context::appcontext::AppContext;
-use fr_core::config::prepare_ini::GrassFeederConfig;
+use fr_core::config::init_system::GrassFeederConfig;
 use fr_core::controller::sourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
+// use resources::application_id::RCS_CARGO_PKG_VERSION;
 use resources::loc;
 use std::cell::RefCell;
 use std::fs::File;
@@ -75,6 +76,7 @@ fn write_feed() {
 fn rungui_local_clear() {
     setup();
     loc::init_locales();
+
     let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT);
     let _dyn_wr_handle = std::thread::spawn(|| loop {
         write_feed();
@@ -85,10 +87,11 @@ fn rungui_local_clear() {
         path_config: "../target/db_rungui_local".to_string(),
         path_cache: "../target/db_rungui_local".to_string(),
         debug_mode: false,
+        version: "rungui:rungui_local_clear".to_string(),
     };
-    let appcontext = fr_core::grassfeeder::start(gfconf);
+    let appcontext = fr_core::config::init_system::start(gfconf);
     test_setup_values(&appcontext, mini_server_c.get_address());
-    fr_core::grassfeeder::run(&appcontext);
+    fr_core::config::init_system::run(&appcontext);
 
     mini_server_c.stop();
 }
@@ -144,8 +147,11 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
+            (
+                "https://www.linuxcompatible.org/news/atom.xml",
+                "linuxcompatible",
+            ),
             ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
-            ("http://www.peopleofwalmart.com/feed/", "walmart"), // why error ?
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_feedsource_at_parent(
@@ -158,6 +164,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            ("http://www.peopleofwalmart.com/feed/", "walmart"), // why error ?
             ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),
@@ -223,7 +230,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "http://www.tagesschau.de/newsticker.rdf",
                 "tagesschau-no-pubdate",
             ),
-			(
+            (
                 "https://www.thenexthint.com/feed/",
                 "nexthint 無料ダウンロード",
             ),

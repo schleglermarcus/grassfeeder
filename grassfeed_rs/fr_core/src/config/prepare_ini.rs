@@ -2,7 +2,6 @@ use crate::config::configmanager::ConfigManager;
 use crate::controller::browserpane::BrowserPane;
 use crate::controller::contentlist::FeedContents;
 use crate::db::icon_repo;
-use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo;
 use crate::ui_select::gui_context::GuiContext;
 use context::Buildable;
@@ -10,10 +9,12 @@ use gui_layer::gui_values::PropDef;
 use ini::Ini;
 use std::fs;
 
+//  #[deprecated]	 // later
 pub struct GrassFeederConfig {
     pub path_config: String,
     pub path_cache: String,
     pub debug_mode: bool,
+    pub version: String,
 }
 
 fn check_or_create_folder(path: &String) {
@@ -28,6 +29,9 @@ fn check_or_create_folder(path: &String) {
     }
 }
 
+
+
+// #[deprecated]
 pub fn prepare_config_by_path(gf_conf: &GrassFeederConfig) -> Ini {
     check_or_create_folder(&gf_conf.path_config);
     check_or_create_folder(&gf_conf.path_cache);
@@ -53,7 +57,13 @@ pub fn prepare_config_by_path(gf_conf: &GrassFeederConfig) -> Ini {
         ConfigManager::CONF_MODE_DEBUG.to_string(),
         gf_conf.debug_mode.to_string(),
     );
-    // debug!(        "INI: {} {}",        ConfigManager::CONF_MODE_DEBUG.to_string(),        gf_conf.debug_mode.to_string()    );
+    /*
+        mod_ini.set_to(
+            Some(GuiContext::section_name()),
+            GuiContext::CONF_RCS_VERSION.to_string(),
+            gf_conf.version.clone(),
+        );
+    */
     mod_ini.set_to(
         Some(GuiContext::section_name()),
         PropDef::GuiWindowWidth.tostring(),
@@ -100,10 +110,21 @@ pub fn prepare_config_by_path(gf_conf: &GrassFeederConfig) -> Ini {
         "true".to_string(),
     );
     mod_ini.set_to(
+        Some(GuiContext::section_name()),
+        PropDef::AppRcsVersion.tostring(),
+        gf_conf.version.clone(),
+    );
+    debug!(
+        "INI: {}={:?}",
+        GuiContext::section_name(),
+        mod_ini.section(Some(GuiContext::section_name()))
+    );
+/*
+    mod_ini.set_to(
         Some(MessagesRepo::section_name()),
         MessagesRepo::CONF_DB_KEY.to_string(),
         format!("{}/messages.db", &gf_conf.path_config),
     );
-
+*/
     mod_ini
 }

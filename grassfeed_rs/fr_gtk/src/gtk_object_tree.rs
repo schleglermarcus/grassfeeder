@@ -120,6 +120,11 @@ impl GtkGuiBuilder for GtkObjectTree {
                 esw.sendw(GuiEvents::WindowSizeChanged(n_w, n_h));
             }
         });
+
+        /* not here
+          let app_rcs_version = self.initvalues.get(&PropDef::AppRcsVersion) .or("no AppRcsVersion in initvalues");
+        */
+
         create_dialogs(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
         let drag_state = Rc::new(RwLock::new(DragState::default()));
         let paned_top = Paned::new(Orientation::Horizontal);
@@ -385,8 +390,7 @@ fn create_listview(
     gtk_obj_a: GtkObjectsType,
     sort_column: i32,
     sort_ascending: bool,
-) -> TreeView
-{
+) -> TreeView {
     const TYPESTRING_TEXT: &str = "text";
     let content_tree_view = TreeView::new();
     content_tree_view.set_headers_visible(true);

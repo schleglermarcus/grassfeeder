@@ -19,8 +19,8 @@ use crate::downloader::icons::IconInner;
 use crate::downloader::icons::IconLoadStart;
 use crate::downloader::messages::FetchInner;
 use crate::downloader::messages::FetchStart;
-use crate::util::StepResult;
 use crate::timer::Timer;
+use crate::util::StepResult;
 use crate::web::httpfetcher::HttpFetcher;
 use crate::web::WebFetcherType;
 use context::appcontext::AppContext;
@@ -334,11 +334,14 @@ impl IDownloader for Downloader {
             return;
         }
         self.config.num_downloader_threads = n;
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
-            CONF_DOWNLOADER_THREADS,
-            n.to_string().as_str(),
-        );
+        // (*self.configmanager_r).borrow_mut().set_section_key(
+        //     &Self::section_name(),
+        //     CONF_DOWNLOADER_THREADS,
+        //     n.to_string().as_str(),
+        // );
+        (*self.configmanager_r)
+            .borrow()
+            .set_val(CONF_DOWNLOADER_THREADS, n.to_string());
     }
 
     fn get_queue_size(&self) -> usize {
