@@ -112,7 +112,6 @@ impl GuiProcessor {
             gui_updater: u_a,
             gui_val_store: v_s_a,
             gui_runner: guirunner,
-            //eventrecorder: Weak::new(),
             downloader_r: dl_r,
             gui_context_r: guicontex_r,
             browserpane_r: (*ac).get_rc::<BrowserPane>().unwrap(),
@@ -121,31 +120,12 @@ impl GuiProcessor {
         }
     }
 
-    /*
-        pub fn set_event_recorder(&mut self, r_evrec: Rc<Box<dyn EventRecorder>>) {
-            self.eventrecorder = Rc::downgrade(&r_evrec);
-            if let Some(evrec) = self.eventrecorder.upgrade() {
-                evrec.write_event(&GuiEvents::InternalStarted);
-            }
-        }
-    */
 
     pub fn process_event(&mut self) {
         let mut ev_set: HashSet<GuiEvents> = HashSet::new();
         let receiver = (*self.gui_runner).borrow().get_event_receiver();
         loop {
             let ev = receiver.get_event_try();
-            /*
-                        if let Some(evrec) = self.eventrecorder.upgrade() {
-                            match &ev {
-                                GuiEvents::None => (),
-                                GuiEvents::WindowSizeChanged(_, _) => (),
-                                _ => {
-                                    (*evrec).write_event(&ev);
-                                }
-                            }
-                        }
-            */
             match ev {
                 GuiEvents::None => break,
                 _ => {
@@ -153,9 +133,7 @@ impl GuiProcessor {
                 }
             }
         }
-
         let mut list_row_activated_map: HashMap<i32, i32> = HashMap::default();
-        // let ev_set_count = ev_set.len();
         for ev in ev_set {
             let now = Instant::now();
             match ev {
@@ -810,10 +788,6 @@ impl GuiProcessor {
     }
 
     fn start_about_dialog(&mut self) {
-        // let mut dd: Vec<AValue> = Vec::default();
-        // dd.push(AValue::AU32(0));
-        // (*self.gui_val_store)            .write()            .unwrap()            .set_dialog_data(DIALOG_SETTINGS, &dd);
-        // (*self.gui_updater).borrow().update_dialog(DIALOG_SETTINGS);
         (*self.gui_updater).borrow().show_dialog(DIALOG_ABOUT);
     }
 
@@ -882,21 +856,16 @@ impl GuiProcessor {
     }
 
     pub fn startup_dialogs(&self) {
-        let app_rcs_v = (*self.gui_val_store)
-            .read()
-            .unwrap()
-            .get_gui_property_or(PropDef::AppRcsVersion, "GP: no AppRcsVersion".to_string())
-            .parse::<String>()
-            .unwrap();
-
-        info!("startup_dialogs: V={}", app_rcs_v);
+        let app_rcs_v = (*self.configmanager_r)
+            .borrow()
+            .get_sys_val(&PropDef::AppRcsVersion.to_string())
+            .unwrap_or("GP: no AppRcsVersion".to_string());
         let dd: Vec<AValue> = vec![AValue::ASTR(app_rcs_v)];
         (*self.gui_val_store)
             .write()
             .unwrap()
             .set_dialog_data(DIALOG_ABOUT, &dd);
         (*self.gui_updater).borrow().update_dialog(DIALOG_ABOUT);
-        //            warn!("no version info!  {}", ConfigManager::CONF_RCS_VERSION );
     }
 
     // GuiProcessor
@@ -936,10 +905,6 @@ impl TimerReceiver for GuiProcessor {
                 self.process_jobs();
                 self.update_status_bar();
             }
-            TimerEvent::Timer1s => {
-
-                // if self.focus_by_tab != FocusByTab::None {                    self.switch_focus_marker(false);					                }
-            }
             TimerEvent::Startup => {
                 self.process_jobs();
                 self.startup_dialogs();
@@ -955,7 +920,7 @@ impl StartupWithAppContext for GuiProcessor {
         {
             let mut t = (*self.timer_r).borrow_mut();
             t.register(&TimerEvent::Timer100ms, gp_r.clone());
-            t.register(&TimerEvent::Timer1s, gp_r.clone());
+            // t.register(&TimerEvent::Timer1s, gp_r.clone());
             t.register(&TimerEvent::Timer10s, gp_r.clone());
             t.register(&TimerEvent::Startup, gp_r);
             self.timer_sender = Some((*t).get_ctrl_sender());

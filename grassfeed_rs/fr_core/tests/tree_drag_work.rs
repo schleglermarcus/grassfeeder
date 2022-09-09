@@ -3,41 +3,92 @@ mod downloader_dummy;
 mod logger_config;
 mod tree_drag_common;
 
-// use crate::tree_drag_common::dataset_simple_trio;
-// use crate::tree_drag_common::dataset_some_tree;
-// use crate::tree_drag_common::dataset_three_folders;
-// use crate::tree_drag_common::prepare_source_tree_controller;
-// use fr_core::db::subscription_entry::SubscriptionEntry;
+use fr_core::db::message::MessageRow;
+use fr_core::db::subscription_entry::SubscriptionEntry;
+use fr_core::db::subscription_repo::ISubscriptionRepo;
+use fr_core::db::subscription_repo::SubscriptionRepo;
+use fr_core::downloader::messages::feed_text_to_entries;
+use fr_core::util::db_time_to_display_nonnull;
 
-
-/*
-use fr_core::config::configmanager::ConfigManager;
-
+#[ignore]
 #[test]
-fn configmanager_load_store() {
+//cargo test   db::subscription_repo::ut::t_get_by_parent_subs_id  --lib  -- --exact --nocapture
+fn t_get_by_parent_subs_id() {
     setup();
+    let mut sr = SubscriptionRepo::new_inmem();
+    sr.startup();
+    let mut s1 = SubscriptionEntry::default();
+    s1.parent_subs_id = 7;
+    s1.folder_position = 0;
+    let r1 = sr.store_entry(&s1);
+    assert!(r1.is_ok());
+    s1.parent_subs_id = 7;
+    s1.folder_position = 1;
+    assert!(sr.store_entry(&s1).is_ok());
+    s1.parent_subs_id = 7;
+    s1.folder_position = 2;
+    assert!(sr.store_entry(&s1).is_ok());
 
-    let cf_filename = "../target/configmanager_load_store.json";
-    {
-        let cm = ConfigManager::default();
-        cm.set_val("Coffee", "3".to_string());
-        cm.store_user_conf(cf_filename.to_string());
-    }
-    {
-        let cm = ConfigManager::default();
-        let _lr = cm.load_user_conf(&cf_filename.to_string());
-        assert_eq!(cm.get_val("Coffee"), Some("3".to_string()));
-    }
+    sr.get_all_entries().iter().for_each(|e| debug!("{:?}", e));
+
+    let list = sr.get_by_parent_repo_id(7);
+	debug!("LIST={:#?}", list);
+
+    assert_eq!(list.len(), 3);
+    assert_eq!(list.get(0).unwrap().subs_id, 4);
+    assert_eq!(list.get(0).unwrap().folder_position, 0);
+    assert_eq!(list.get(1).unwrap().subs_id, 5);
+    assert_eq!(list.get(1).unwrap().folder_position, 1);
+    assert_eq!(list.get(2).unwrap().subs_id, 6);
+    assert_eq!(list.get(2).unwrap().folder_position, 2);
 }
-
-*/
-
-
 
 #[allow(dead_code)]
 //#[test]
 fn stub() {
     setup();
+}
+
+// #[ignore]
+//  #[test]
+#[allow(dead_code)]
+fn dl_naturalnews() {
+    setup();
+    let (new_list, ts_created, err): (Vec<MessageRow>, i64, String) = feed_text_to_entries(
+        std::fs::read_to_string("tests/data/naturalnews_rss.xml").unwrap(),
+        6,
+        "some-url".to_string(),
+    );
+    debug!("ts_created={:?}  err={:?}", ts_created, err);
+    debug!("list={:?}", new_list.len());
+    // for entry in new_list {        debug!("date={:?}", db_time_to_display_nonnull(entry.entry_src_date));    }
+    let e0: &MessageRow = new_list.get(0).unwrap();
+
+    debug!("date={:?}  ", db_time_to_display_nonnull(e0.entry_src_date));
+}
+
+//RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::dl_entries_breakingnews    --lib -- --exact --nocapture "
+/// Timestamp delivered   from    https://feeds.breakingnews.ie/bnworld
+/// https://www.w3.org/Protocols/rfc822/#z28
+// #[ignore]
+// #[test]
+#[allow(dead_code)]
+fn dl_entries_breakingnews_cmp() {
+    setup();
+    let filenames = [
+        "tests/data/gui_proc_v2.rss",
+        "tests/data/breakingnewsworld-2.xml",
+    ];
+    for filename in filenames {
+        debug!("FILE={}", filename);
+        let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) = feed_text_to_entries(
+            std::fs::read_to_string(filename).unwrap(),
+            5,
+            "some-url".to_string(),
+        );
+        let pubdate = new_list.get(0).unwrap().entry_src_date;
+        assert!(pubdate > 0);
+    }
 }
 
 // ------------------------------------

@@ -7,20 +7,18 @@ use context::TimerEvent;
 use context::TimerReceiver;
 use context::TimerRegistry;
 use gui_layer::gui_values::PropDef;
-use ini::Ini;
+// use ini::Ini;
 use serde::Serialize;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::BufWriter;
-use std::io::Result;
 use std::rc::Rc;
 
 const ID_CONFIG: &str = "config";
-// const SECTION_GUI_RUNNER: &str = "window";
 
 pub struct ConfigManager {
-    // #[deprecated]		// later
-    cconf: Rc<RefCell<Ini>>,
+    // #[deprecated] // later
+    // cconf: Rc<RefCell<Ini>>,
 
     cconf_modified: RefCell<bool>,
     cconf_filename: String,
@@ -34,41 +32,15 @@ impl ConfigManager {
     pub const CONF_MODE_DEBUG: &'static str = "mode_debug";
 
     pub fn store_window_size(&mut self, width: i32, height: i32) {
-        /*
-                self.set_section_key(
-                    SECTION_GUI_RUNNER,
-                    &PropDef::GuiWindowWidth.tostring(),
-                    &width.to_string(),
-                );
-                self.set_section_key(
-                    SECTION_GUI_RUNNER,
-                    &PropDef::GuiWindowHeight.tostring(),
-                    &height.to_string(),
-                );
-        */
         self.set_val(&PropDef::GuiWindowWidth.tostring(), width.to_string());
         self.set_val(&PropDef::GuiWindowHeight.tostring(), height.to_string());
     }
 
     pub fn store_gui_pane1_pos(&mut self, pos: i32) {
-        /*
-                self.set_section_key(
-                    SECTION_GUI_RUNNER,
-                    &PropDef::GuiPane1Pos.tostring(),
-                    &pos.to_string(),
-                );
-        */
         self.set_val(&PropDef::GuiPane1Pos.tostring(), pos.to_string());
     }
 
     pub fn store_gui_pane2_pos(&mut self, pos: i32) {
-        /*
-                self.set_section_key(
-                    SECTION_GUI_RUNNER,
-                    &PropDef::GuiPane2Pos.tostring(),
-                    &pos.to_string(),
-                );
-        */
         self.set_val(&PropDef::GuiPane2Pos.tostring(), pos.to_string());
     }
 
@@ -77,17 +49,17 @@ impl ConfigManager {
             1 => PropDef::GuiCol1Width.tostring(),
             _ => panic!("unknown col_nr "),
         };
-        //        self.set_section_key(SECTION_GUI_RUNNER, &key, &width.to_string());
         self.set_val(&key, width.to_string());
     }
 
-    // #[deprecated]		// later
+/*
+    #[deprecated] // later
     pub fn get_conf(&self) -> Ini {
         let i2 = (*self.cconf).borrow().clone();
         i2
     }
 
-    // #[deprecated]		// later
+    #[deprecated]		// later
     pub fn conf_len(&self) -> usize {
         (*self.cconf).borrow().len()
     }
@@ -97,9 +69,7 @@ impl ConfigManager {
         match ini::Ini::load_from_file(filename) {
             Ok(new_ini) => {
                 if new_ini.len() > 2 {
-                    let mode_debug =
-                        // self.get_section_key_bool(&Self::section_name(), Self::CONF_MODE_DEBUG);
-                        self.get_val_bool( Self::CONF_MODE_DEBUG);
+                    let mode_debug = self.get_val_bool(Self::CONF_MODE_DEBUG);
                     (*self.cconf).replace(new_ini); //  unpraktisch !!!
                     (*self.cconf).borrow_mut().set_to(
                         Some(Self::section_name()),
@@ -114,11 +84,8 @@ impl ConfigManager {
             }
         }
     }
+*/
 
-    #[deprecated] // later
-    pub fn store_to_file(&self, filename: &str) -> Result<()> {
-        (*self.cconf).borrow().write_to_file(filename)
-    }
 
     // runs on timer trigger
     pub fn store_if_modified(&mut self) {
@@ -127,6 +94,12 @@ impl ConfigManager {
         }
         let filename: &str = &self.cconf_filename;
         let _r = self.store_user_conf(filename.to_string());
+    }
+
+	/*
+    #[deprecated] // later
+    pub fn store_to_file(&self, filename: &str) -> Result<()> {
+        (*self.cconf).borrow().write_to_file(filename)
     }
 
     /// do not mark as dirty if the value was set before
@@ -175,22 +148,8 @@ impl ConfigManager {
         defaultv
     }
 
-    pub fn debug_dump(&self, prefix: &str) {
-        debug!(
-            "{} DD-system= {:#?} ",
-            prefix,
-            (*self.system_config).borrow()
-        );
-        debug!("{} DD-user= {:#?} ", prefix, (*self.user_config).borrow());
-    }
 
-    /*
-        pub fn set_conf_filename(&mut self, new_name: String) {
-            self.cconf_filename = new_name;
-        }
-    */
-
-    // #[deprecated] // later
+    #[deprecated] // later
     pub fn new_with_ini(ini_r: Rc<RefCell<Ini>>) -> ConfigManager {
         let filename = (*ini_r)
             .borrow()
@@ -205,13 +164,24 @@ impl ConfigManager {
             ..ConfigManager::default()
         }
     }
+*/
+
+
+	    pub fn debug_dump(&self, prefix: &str) {
+	        debug!(
+	            "{} DD-system= {:#?} ",
+	            prefix,
+	            (*self.system_config).borrow()
+	        );
+	        debug!("{} DD-user= {:#?} ", prefix, (*self.user_config).borrow());
+	    }
+
 
     pub fn get_user_conf(&self) -> Rc<RefCell<HashMap<String, String>>> {
         self.user_config.clone()
     }
 
     pub fn load_user_conf(&self, filename: &String) -> bool {
-        // self.cconf_filename
         if !std::path::Path::new(&filename).exists() {
             trace!(
                 "load_subscriptions_pretty file {} not found. ",
@@ -294,7 +264,6 @@ impl ConfigManager {
     }
 
     pub fn set_system_config(&mut self, conf: Rc<RefCell<HashMap<String, String>>>) {
-        // let mut sc = (*self.system_config).borrow_mut();        sc.clear();        sc.extend(conf);
         self.system_config = conf;
     }
 
@@ -315,7 +284,7 @@ impl ConfigManager {
 impl Default for ConfigManager {
     fn default() -> Self {
         ConfigManager {
-            cconf: Rc::new(RefCell::new(Ini::new())),
+            // cconf: Rc::new(RefCell::new(Ini::new())),
             cconf_modified: RefCell::new(false),
             cconf_filename: String::from("default_config.ini"),
             user_config: Rc::new(RefCell::new(HashMap::new())),
@@ -329,12 +298,10 @@ impl Buildable for ConfigManager {
 
     #[allow(unreachable_code)]
     fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self::Output {
-        // panic!("don't use this, initialize manually ");
         let mut cm = ConfigManager::default();
         cm.cconf_filename = conf.get(&ConfigManager::CONF_PATH_KEY.to_string()).unwrap();
         cm.set_system_config(appcontext.get_system_config());
         let _r = cm.load_user_conf(&cm.cconf_filename);
-        // exit on fail  here ?
         cm
     }
 

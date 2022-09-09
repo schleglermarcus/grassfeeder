@@ -1,32 +1,36 @@
+use crate::db::sqlite_context::TableInfo;
+use crate::db::sqlite_context::Wrap;
 use resources::gen_icons;
 use serde::Deserialize;
 use serde::Serialize;
 use std::fmt;
 
 #[allow(dead_code)]
-pub const SRC_REPO_ID_MOVING: isize = -3;
+pub const SRC_REPO_ID_DELETED: isize = 1;
 #[allow(dead_code)]
-pub const SRC_REPO_ID_DELETED: isize = -2;
+pub const SRC_REPO_ID_MOVING: isize = 2;
+#[allow(dead_code)]
+pub const SRC_REPO_ID_DUMMY: isize = 3;
 
 #[derive(Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct SubscriptionEntry {
-    pub subs_id: isize,
+    pub subs_id: isize, // 1
     pub parent_subs_id: isize,
-    pub is_folder: bool,
     pub last_selected_msg: isize,
-    pub expanded: bool,
-    pub deleted: bool,
     pub folder_position: isize,
-    pub icon_id: usize,
-    ///  timestamp the website compiled the rss file
+    pub icon_id: usize, // 5
+    /// timestamp the website compiled the rss file
     pub updated_ext: i64,
-    ///  timestamp when we updated this feed from external website
+    /// 10 timestamp when we updated this feed from external website
     pub updated_int: i64,
     ///  timestamp when we got the last icon from the website
     pub updated_icon: i64,
+    pub is_folder: bool,
+    pub expanded: bool, // 10
+    pub deleted: bool,
     pub display_name: String,
-    pub url: String, // xml_url
-    pub website_url: String,
+    pub url: String,         // xml_url
+    pub website_url: String, // 14
     #[serde(skip)]
     pub tree_path: Option<Vec<u16>>,
     #[serde(skip)]
@@ -71,7 +75,7 @@ impl SubscriptionEntry {
             parent_subs_id: 0,
             folder_position: 0,
             updated_ext: 0,
-            updated_int: 0, 
+            updated_int: 0,
             updated_icon: 0,
             expanded: false,
             website_url: String::default(),
@@ -208,6 +212,84 @@ impl FeedSourceState for SubscriptionEntry {
         if new_st != self.status {
             self.status = new_st;
             self.is_dirty = true;
+        }
+    }
+}
+
+impl TableInfo for SubscriptionEntry {
+    fn table_name() -> String {
+        "subscriptions".to_string()
+    }
+    fn create_string() -> String {
+        String::from(
+            "subs_id INTEGER PRIMARY KEY,  parent_subs_id INTEGER,  folder_position INTEGER,  \
+			last_selected_msg  INTEGER, icon_id INTEGER,   \
+			updated_ext INTEGER, updated_int INTEGER, updated_icon INTEGER, \
+		 	is_folder BOOL,  expanded BOOL, deleted BOOL, \
+			display_name TEXT, url TEXT, website_url TEXT ",
+        )
+    }
+    fn index_column_name() -> String {
+        "subs_id".to_string()
+    }
+
+    fn create_indices() -> Vec<String> {
+        vec!["CREATE INDEX IF NOT EXISTS idx_id ON subscriptions (subs_id); ".to_string()]
+    }
+
+    fn get_insert_columns(&self) -> Vec<String> {
+        vec![
+            String::from("parent_subs_id"), // 1
+            String::from("last_selected_msg"),
+            String::from("folder_position"),
+            String::from("icon_id"),
+            String::from("updated_ext"), // 5
+            String::from("updated_int"),
+            String::from("updated_icon"),
+            String::from("is_folder"),
+            String::from("expanded"),
+            String::from("deleted"), // 10
+            String::from("display_name"),
+            String::from("url"),
+            String::from("website_url"), // 13
+        ]
+    }
+
+    fn get_insert_values(&self) -> Vec<Wrap> {
+        vec![
+            Wrap::INT(self.parent_subs_id), // 1
+            Wrap::INT(self.last_selected_msg),
+            Wrap::INT(self.folder_position),
+            Wrap::INT(self.icon_id as isize),
+            Wrap::I64(self.updated_ext), // 5
+            Wrap::I64(self.updated_int),
+            Wrap::I64(self.updated_icon),
+            Wrap::BOO(self.is_folder),
+            Wrap::BOO(self.expanded),
+            Wrap::BOO(self.deleted), // 10
+            Wrap::STR(self.display_name.clone()),
+            Wrap::STR(self.url.clone()),
+            Wrap::STR(self.website_url.clone()), // 13
+        ]
+    }
+
+    fn from_row(row: &rusqlite::Row) -> Self {
+        SubscriptionEntry {
+            subs_id: row.get(0).unwrap_or(-4), // 0
+            parent_subs_id: row.get(1).unwrap(),
+            last_selected_msg: row.get(2).unwrap(),
+            folder_position: row.get(3).unwrap(),
+            icon_id: row.get(4).unwrap(),
+            updated_ext: row.get(5).unwrap(), // 5
+            updated_int: row.get(6).unwrap(),
+            updated_icon: row.get(7).unwrap(),
+            is_folder: row.get(8).unwrap(),
+            expanded: row.get(9).unwrap(),
+            deleted: row.get(10).unwrap(), // 10
+            display_name: row.get(11).unwrap(),
+            url: row.get(12).unwrap(),
+            website_url: row.get(13).unwrap(), // 13
+            ..Default::default()
         }
     }
 }

@@ -34,7 +34,7 @@ pub struct IconEntry {
 
 impl std::fmt::Debug for IconEntry {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        fmt.debug_struct("FeedSourceEntry")
+        fmt.debug_struct("IconEntry")
             .field("icon_id", &self.icon_id)
             .field("IC#", &self.icon.len())
             .finish()

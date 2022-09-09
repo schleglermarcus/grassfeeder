@@ -40,6 +40,7 @@ use resources::gen_icons;
 use resources::gen_icons::ICON_LIST;
 use resources::id::*;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::time::Instant;
@@ -141,6 +142,7 @@ pub struct SourceTreeController {
     job_queue_sender: Sender<SJob>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_val_store: UIAdapterValueStoreType,
+
     config: Config,
     feedsource_delete_id: Option<usize>,
     current_edit_fse: Option<SubscriptionEntry>,
@@ -150,6 +152,8 @@ pub struct SourceTreeController {
     tree_fontsize: u32,
     any_spinner_visible: RefCell<bool>,
     need_check_fs_paths: RefCell<bool>,
+
+    statemap: RefCell<HashMap<isize, SubsMapEntry>>,
 }
 
 impl SourceTreeController {
@@ -206,6 +210,7 @@ impl SourceTreeController {
             gui_context_w: Weak::new(),
             messagesrepo_w: Weak::new(),
             need_check_fs_paths: RefCell::new(true),
+            statemap: RefCell::new(HashMap::default()),
         }
     }
 
@@ -779,20 +784,6 @@ impl SourceTreeController {
             });
     }
 
-    fn store_default_db_entries(&self) {
-        let mut fse = SubscriptionEntry {
-            subs_id: SRC_REPO_ID_DELETED,
-            display_name: "_deleted".to_string(),
-            is_folder: true,
-            parent_subs_id: -1,
-            ..Default::default()
-        };
-
-        let _r = (*self.subscriptionrepo_r).borrow().store_entry(&fse);
-        fse.subs_id = SRC_REPO_ID_MOVING;
-        fse.display_name = "_moving".to_string();
-        let _r = (*self.subscriptionrepo_r).borrow().store_entry(&fse);
-    }
 
     fn startup_read_config(&mut self) {
         self.config.feeds_fetch_at_start = (*self.configmanager_r)
@@ -1294,14 +1285,16 @@ impl ISourceTreeController for SourceTreeController {
 
     fn set_conf_load_on_start(&mut self, n: bool) {
         self.config.feeds_fetch_at_start = n;
-/*
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
-            SourceTreeController::CONF_FETCH_ON_START,
-            n.to_string().as_str(),
-        );
-*/
-(*self.configmanager_r).borrow().set_val(SourceTreeController::CONF_FETCH_ON_START,n.to_string() )		;
+        /*
+                (*self.configmanager_r).borrow_mut().set_section_key(
+                    &Self::section_name(),
+                    SourceTreeController::CONF_FETCH_ON_START,
+                    n.to_string().as_str(),
+                );
+        */
+        (*self.configmanager_r)
+            .borrow()
+            .set_val(SourceTreeController::CONF_FETCH_ON_START, n.to_string());
     }
 
     fn set_conf_fetch_interval(&mut self, n: i32) {
@@ -1332,28 +1325,32 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         self.config.feeds_fetch_interval_unit = n as u32;
-/*
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
+        /*
+                (*self.configmanager_r).borrow_mut().set_section_key(
+                    &Self::section_name(),
+                    SourceTreeController::CONF_FETCH_INTERVAL_UNIT,
+                    n.to_string().as_str(),
+                );
+        */
+        (*self.configmanager_r).borrow().set_val(
             SourceTreeController::CONF_FETCH_INTERVAL_UNIT,
-            n.to_string().as_str(),
+            n.to_string(),
         );
-*/
-		(*self.configmanager_r).borrow().set_val(    SourceTreeController::CONF_FETCH_INTERVAL_UNIT, n.to_string() );
-
     }
 
     fn set_conf_display_feedcount_all(&mut self, a: bool) {
         self.config.display_feedcount_all = a;
-/*
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
+        /*
+                (*self.configmanager_r).borrow_mut().set_section_key(
+                    &Self::section_name(),
+                    SourceTreeController::CONF_DISPLAY_FEECOUNT_ALL,
+                    a.to_string().as_str(),
+                );
+        */
+        (*self.configmanager_r).borrow().set_val(
             SourceTreeController::CONF_DISPLAY_FEECOUNT_ALL,
-            a.to_string().as_str(),
+            a.to_string(),
         );
-*/
-		        (*self.configmanager_r).borrow().set_val(SourceTreeController::CONF_DISPLAY_FEECOUNT_ALL, a.to_string());
-
     }
 
     fn newsource_dialog_edit(&mut self, edit_feed_url: String) {
@@ -1452,7 +1449,7 @@ impl StartupWithAppContext for SourceTreeController {
             t.register(&TimerEvent::Timer1s, f_so_r.clone());
             t.register(&TimerEvent::Timer10s, f_so_r);
         }
-        self.store_default_db_entries();
+        (*self.subscriptionrepo_r).borrow() .store_default_db_entries();
         self.startup_read_config();
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::FillSourcesTree);
@@ -1539,6 +1536,43 @@ impl Default for NewSourceState {
     fn default() -> Self {
         NewSourceState::None
     }
+}
+
+struct SubsMapEntry {
+    pub tree_path: Option<Vec<u16>>,
+    pub status: usize,
+    pub num_msg_all_unread: Option<(isize, isize)>,
+    pub is_dirty: bool,
+}
+
+pub trait ISubsStateMap {
+    fn set_schedule_fetch_all(&self);
+    fn get_ids_by_status(
+        &self,
+        statusflag: StatusMask,
+        activated: bool,
+        include_folder: bool,
+    ) -> Vec<isize>;
+    fn get_tree_path(&self, db_id: isize) -> Option<Vec<u16>>;
+    fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry>;
+    fn set_status(&self, idlist: &[isize], statusflag: StatusMask, activated: bool);
+
+    /// writes the path array into the cached subscription list
+    fn update_cached_paths(&self);
+    fn clear_num_all_unread(&self, subs_id: isize);
+
+    /// returns the modified entry
+    fn set_num_all_unread(
+        &self,
+        subs_id: isize,
+        num_all: isize,
+        num_unread: isize,
+    ) -> Option<SubscriptionEntry>;
+
+    fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)>;
+
+    /// searches subscription_entry that has no unread,all  number set
+    fn scan_num_all_unread(&self) -> Option<isize>;
 }
 
 #[cfg(test)]

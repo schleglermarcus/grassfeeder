@@ -889,10 +889,9 @@ fn create_opml_export_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsTy
         if response == ResponseType::Ok {
             let files = dialog.filenames();
             if !files.is_empty() {
-                let payload = vec![
-                    //                    AValue::None,
-                    AValue::ASTR(files[0].as_path().to_str().unwrap().to_string()),
-                ];
+                let payload = vec![AValue::ASTR(
+                    files[0].as_path().to_str().unwrap().to_string(),
+                )];
                 let _r = ev_se.send(GuiEvents::DialogData("export-opml".to_string(), payload));
             }
         }
@@ -931,7 +930,6 @@ fn create_about_dialog(
     let dia_c = dialog.clone();
     ddd.set_dialog_distribute(DIALOG_ABOUT, move |dialogdata| {
         if let Some(s) = dialogdata.get(0).unwrap().str() {
-            debug!("ABOUT-VERSION={}", &s);
             dia_c.set_version(Some(&s));
         }
     });

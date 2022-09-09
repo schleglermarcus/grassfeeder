@@ -67,7 +67,6 @@ impl Buildable for GuiContext {
             configmanager_r: configman,
             application_name: APPLICATION_NAME.to_string(),
             window_title: String::default(),
-            //            rcs_version: String::default(),
         }
     }
 
@@ -110,11 +109,6 @@ impl GuiContext {
             .write()
             .unwrap()
             .set_gui_property(PropDef::GuiFontSizeManualEnable, e.to_string());
-        // (*self.configmanager_r).borrow_mut().set_section_key(
-        //     &Self::section_name(),
-        //     &PropDef::GuiFontSizeManualEnable.to_string(),
-        //     e.to_string().as_str(),
-        // );
         (*self.configmanager_r)
             .borrow()
             .set_val(&PropDef::GuiFontSizeManualEnable.to_string(), e.to_string());
@@ -125,11 +119,6 @@ impl GuiContext {
             .write()
             .unwrap()
             .set_gui_property(PropDef::GuiFontSizeManual, s.to_string());
-        // (*self.configmanager_r).borrow_mut().set_section_key(
-        //     &Self::section_name(),
-        //     &PropDef::GuiFontSizeManual.to_string(),
-        //     s.to_string().as_str(),
-        // );
         (*self.configmanager_r)
             .borrow()
             .set_val(&PropDef::GuiFontSizeManual.to_string(), s.to_string());

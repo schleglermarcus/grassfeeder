@@ -154,25 +154,6 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
             String::from("categories"),
         ]
     }
-    fn from_row(row: &rusqlite::Row) -> Self {
-
-        MessageRow {
-            message_id: row.get(0).unwrap(),
-            feed_src_id: row.get(1).unwrap(),
-            title: row.get(2).unwrap(),
-            post_id: row.get(3).unwrap(),
-            link: row.get(4).unwrap(),
-            is_deleted: row.get(5).unwrap(),
-            is_read: row.get(6).unwrap(),
-            fetch_date: row.get(7).unwrap(),
-            entry_src_date: row.get(8).unwrap(),
-            content_text: row.get(9).unwrap(),
-            enclosure_url: row.get(10).unwrap(),
-            author: row.get(11).unwrap(),
-            categories: row.get(12).unwrap(),
-            ..Default::default()
-        }
-    }
 
     fn get_insert_values(&self) -> Vec<Wrap> {
         vec![
@@ -190,6 +171,27 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
             Wrap::STR(self.categories.clone()),
         ]
     }
+
+
+	fn from_row(row: &rusqlite::Row) -> Self {
+		MessageRow {
+			message_id: row.get(0).unwrap(),
+			feed_src_id: row.get(1).unwrap(),
+			title: row.get(2).unwrap(),
+			post_id: row.get(3).unwrap(),
+			link: row.get(4).unwrap(),
+			is_deleted: row.get(5).unwrap(),
+			is_read: row.get(6).unwrap(),
+			fetch_date: row.get(7).unwrap(),
+			entry_src_date: row.get(8).unwrap(),
+			content_text: row.get(9).unwrap(),
+			enclosure_url: row.get(10).unwrap(),
+			author: row.get(11).unwrap(),
+			categories: row.get(12).unwrap(),
+			..Default::default()
+		}
+	}
+
 }
 
 #[cfg(test)]

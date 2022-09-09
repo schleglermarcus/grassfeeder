@@ -74,12 +74,13 @@ impl<T: TableInfo> SqliteContext<T> {
         match (*self.connection).lock().unwrap().execute(&sql, []) {
             Ok(num) => num,
             Err(e) => {
-                error!("SqliteContext:execute: {} {:?}", sql, e);
+                error!("SqliteContext.execute  {:?}  {:?}", sql, e);
                 0
             }
         }
     }
 
+	/// inserts without primary column.  subs_id is auto-imcremented by sqlite
     /// returns index value
     pub fn insert(&self, entry: &T) -> Result<i64, rusqlite::Error> {
         let col_names = entry.get_insert_columns();
@@ -91,6 +92,7 @@ impl<T: TableInfo> SqliteContext<T> {
             questionmarks
         );
         let wrap_vec: Vec<Wrap> = entry.get_insert_values();
+		// info!("insert: {:?} => {:?}", &prepared, &wrap_vec );
         let vec_dyn_tosql: Vec<&dyn ToSql> = wrap_vec
             .iter()
             .map(|w| w.to_dyn_tosql())
@@ -238,6 +240,14 @@ impl<T: TableInfo> SqliteContext<T> {
             return col0;
         }
         -1
+    }
+
+    #[allow(dead_code)]
+    fn cache_flush(&self) {
+        let r = (*self.connection).lock().unwrap().cache_flush();
+        if r.is_err() {
+            warn!("cache_flush {:?}", r.err());
+        }
     }
 }
 

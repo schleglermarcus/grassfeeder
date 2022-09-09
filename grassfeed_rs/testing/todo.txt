@@ -1,8 +1,8 @@
 
 To Do List
+- switch subscription_repo to sqlite
 - clean out deleted subscriptions
 - delete tablehelper.rs , deprecate old logger setup
-- switch subscription_repo to sqlite
 - debugmode: message popup needs escaping
 - SendToBrowser :   mark-as-read for all entries
 - remove icon dialog, leave it on  debug flag
@@ -13,6 +13,7 @@ To Do List
 - Check Info Dialog + website
 - check  https://www.linuxcompatible.org/  feed: icon + entries
 - GTK-Liststore for inserting switch off sorting. Else slow.
+- remove package ini
 - Drag: Folder down  - not working yet
 - Check:  import, then drag , folder disappears
 - Build via Docker container,   find external dependencies + packages

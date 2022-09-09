@@ -17,72 +17,29 @@ use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::icons::blob_is_icon;
-use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::timer::build_timer;
 use fr_core::timer::ITimer;
 use fr_core::ui_select::uimock::UIMock;
-use fr_core::util::db_time_to_display_nonnull;
 use fr_core::web::httpfetcher::HttpFetcher;
 use fr_core::web::IHttpRequester;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[ignore]
-#[test]
-fn dl_naturalnews() {
-    setup();
-    let (new_list, ts_created, err): (Vec<MessageRow>, i64, String) = feed_text_to_entries(
-        std::fs::read_to_string("tests/data/naturalnews_rss.xml").unwrap(),
-        6,
-        "some-url".to_string(),
-    );
-    debug!("ts_created={:?}  err={:?}", ts_created, err);
-    debug!("list={:?}", new_list.len());
-    // for entry in new_list {        debug!("date={:?}", db_time_to_display_nonnull(entry.entry_src_date));    }
-    let e0: &MessageRow = new_list.get(0).unwrap();
 
-    debug!("date={:?}  ", db_time_to_display_nonnull(e0.entry_src_date));
-
-}
-
-//RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::dl_entries_breakingnews    --lib -- --exact --nocapture "
-/// Timestamp delivered   from    https://feeds.breakingnews.ie/bnworld
-/// https://www.w3.org/Protocols/rfc822/#z28
-#[ignore]
-#[test]
-fn dl_entries_breakingnews_cmp() {
-    setup();
-    let filenames = [
-        "tests/data/gui_proc_v2.rss",
-        "tests/data/breakingnewsworld-2.xml",
-    ];
-    for filename in filenames {
-        debug!("FILE={}", filename);
-        let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) = feed_text_to_entries(
-            std::fs::read_to_string(filename).unwrap(),
-            5,
-            "some-url".to_string(),
-        );
-        let pubdate = new_list.get(0).unwrap().entry_src_date;
-        assert!(pubdate > 0);
-    }
-}
 
 /// Timestamp delivered   from    https://feeds.breakingnews.ie/bnworld
 /// https://www.w3.org/Protocols/rfc822/#z28
-#[ignore]
+// #[ignore]
 #[test]
 fn chrono_broken_timestamp() {
     setup();
     let broken_ts = "Fri, 05 Aug 2022 23:28:01 Europe/Dublin";
     let pars_res = DateTime::parse_from_rfc2822(&broken_ts);
-
     assert!(pars_res.is_err());
     assert_eq!(
         pars_res.err().unwrap().to_string(),
         "trailing input".to_string()
     );
-    debug!("err {:?}", pars_res.err().unwrap().to_string());
 }
 
 // #[ignore]

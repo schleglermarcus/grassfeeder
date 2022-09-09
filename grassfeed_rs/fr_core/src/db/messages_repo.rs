@@ -9,11 +9,13 @@ use rusqlite::Connection;
 use std::sync::Arc;
 use std::sync::Mutex;
 
+
+// TODO register at timer for shutdown,  do flush.
 pub trait IMessagesRepo {
     /// returns index value
     fn insert(&self, entry: &MessageRow) -> Result<i64, Box<dyn std::error::Error>>;
 
-    // returns number of elements ?
+    // returns number of elements
     fn insert_tx(&self, e_list: &[MessageRow]) -> Result<i64, Box<dyn std::error::Error>>;
 
     fn get_by_src_id(&self, src_id: isize) -> Vec<MessageRow>;
@@ -34,8 +36,8 @@ pub trait IMessagesRepo {
 
     fn get_all_messages(&self) -> Vec<MessageRow>;
 
-    #[deprecated(note = "use update_is_read_many()")]
-    fn update_is_read(&self, repo_id: isize, new_is_read: bool);
+    // #[deprecated(note = "use update_is_read_many()")]
+    // fn update_is_read(&self, repo_id: isize, new_is_read: bool);
 
     fn update_is_read_many(&self, repo_ids: &[i32], new_is_read: bool);
     fn update_is_read_all(&self, source_repo_id: isize, new_is_read: bool);
@@ -45,8 +47,6 @@ pub trait IMessagesRepo {
     fn update_entry_src_date(&self, repo_id: isize, n_src_date: i64) -> usize;
     fn update_is_deleted_many(&self, repo_ids: &[i32], new_is_del: bool);
 
-    #[deprecated(note = "use insert()")]
-    fn store_entry(&self, entry: &MessageRow) -> Result<MessageRow, Box<dyn std::error::Error>>;
 
     fn get_ctx(&self) -> &SqliteContext<MessageRow>;
 
@@ -62,9 +62,6 @@ pub struct MessagesRepo {
 
 impl MessagesRepo {
     pub const CONF_DB_KEY_FOLDER: &'static str = "messages_db_folder";
-
-    // messages.db
-    //	pub const CONF_DB_KEY_FOLDER: &'static str = "messages_db_folder";
 
     pub fn new(foldername: String) -> Self {
         let filename = format!("{}messages.db", foldername);
@@ -109,10 +106,13 @@ impl IMessagesRepo for MessagesRepo {
             .map_err(rusqlite_error_to_boxed)
     }
 
-    // deprecated
+/*
+#[deprecated]
+
     fn store_entry(&self, _entry: &MessageRow) -> Result<MessageRow, Box<dyn std::error::Error>> {
         unimplemented!()
     }
+*/
 
     fn get_by_src_id(&self, src_id: isize) -> Vec<MessageRow> {
         let prepared = format!(
@@ -190,10 +190,13 @@ impl IMessagesRepo for MessagesRepo {
         self.ctx.get_all()
     }
 
+/*
     // deprecated
     fn update_is_read(&self, _repo_id: isize, _new_is_read: bool) {
         unimplemented!()
     }
+*/
+
 
     fn update_is_read_many(&self, repo_ids: &[i32], new_is_read: bool) {
         let joined = repo_ids
@@ -352,10 +355,8 @@ mod t {
         let mut e1 = MessageRow::default();
         e1.feed_src_id = 1;
         let _r = (*msgrepo_r).borrow().insert(&e1);
-        // let all = (*msgrepo_r).borrow().get_all_messages();	    for msg in all {	        trace!("{:?}", msg);	    }
         let src_not: Vec<i32> = vec![0, 3];
         let msg_not = (*msgrepo_r).borrow().get_src_not_contained(&src_not);
-        // for msg in & msg_not {	        debug!(" NOT {:?}", msg);	    }
         assert_eq!(msg_not.len(), 1);
         assert_eq!(msg_not.get(0).unwrap().feed_src_id, 1);
     }
@@ -371,11 +372,11 @@ mod t {
     #[test]
     fn t_get_max_src_index_empty() {
         setup();
-        let messagesrepo = MessagesRepo::new_in_mem();   // new(":memory:".to_string());
+        let messagesrepo = MessagesRepo::new_in_mem(); // new(":memory:".to_string());
         let _r = messagesrepo.get_ctx().delete_table();
         messagesrepo.get_ctx().create_table();
         let maxindex = messagesrepo.get_max_src_index();
-//        let list = messagesrepo.get_all_messages();        println!("{:#?}", list);
+        //        let list = messagesrepo.get_all_messages();        println!("{:#?}", list);
         assert_eq!(maxindex, -1);
     }
 
@@ -420,7 +421,6 @@ mod t {
             (*msg_r).borrow().update_post_id(1, "some_id".to_string()),
             1
         );
-        //let list = (*msg_r).borrow().get_all_messages();    debug!("{:#?}", list);
         assert_eq!(
             (*msg_r).borrow().get_by_index(1).unwrap().post_id.as_str(),
             "some_id"
@@ -459,8 +459,8 @@ mod t {
 
     fn prepare_3_rows() -> Rc<RefCell<dyn IMessagesRepo>> {
         setup();
-        let messagesrepo = MessagesRepo::new_in_mem() ; //  (":memory:".to_string());
-		let _r = messagesrepo.get_ctx().delete_table();
+        let messagesrepo = MessagesRepo::new_in_mem(); //  (":memory:".to_string());
+        let _r = messagesrepo.get_ctx().delete_table();
         messagesrepo.get_ctx().create_table();
         let msg_r: Rc<RefCell<dyn IMessagesRepo>> = Rc::new(RefCell::new(messagesrepo));
         let mut e1 = MessageRow::default();
@@ -503,7 +503,7 @@ mod t {
         assert_eq!((*msg_r).borrow().get_is_read(3), (3, true));
     }
 
-//cargo watch -s "cargo test  db::messages_repo::t::t_get_read_sum   --lib -- --exact --nocapture "
+    //cargo watch -s "cargo test  db::messages_repo::t::t_get_read_sum   --lib -- --exact --nocapture "
     #[test]
     fn t_get_read_sum() {
         let msg_r = prepare_3_rows();
@@ -538,7 +538,7 @@ mod t {
     #[test]
     fn t_insert_get_row() {
         setup();
-        let messagesrepo = MessagesRepo:: new_in_mem(); // new(":memory:".to_string());
+        let messagesrepo = MessagesRepo::new_in_mem(); // new(":memory:".to_string());
         let _r = messagesrepo.get_ctx().delete_table();
         messagesrepo.get_ctx().create_table();
         let mut e1 = MessageRow::default();

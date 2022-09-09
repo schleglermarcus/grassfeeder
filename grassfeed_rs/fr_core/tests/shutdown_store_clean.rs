@@ -72,7 +72,10 @@ fn shutdown_store_ini() {
 
 */
 
-// #[ignore]
+
+
+
+#[ignore] // TODO 
 #[test]
 fn add_folder_and_feed() {
     setup();
