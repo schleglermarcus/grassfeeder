@@ -19,7 +19,6 @@ const ID_CONFIG: &str = "config";
 pub struct ConfigManager {
     // #[deprecated] // later
     // cconf: Rc<RefCell<Ini>>,
-
     cconf_modified: RefCell<bool>,
     cconf_filename: String,
 
@@ -52,40 +51,39 @@ impl ConfigManager {
         self.set_val(&key, width.to_string());
     }
 
-/*
-    #[deprecated] // later
-    pub fn get_conf(&self) -> Ini {
-        let i2 = (*self.cconf).borrow().clone();
-        i2
-    }
+    /*
+        #[deprecated] // later
+        pub fn get_conf(&self) -> Ini {
+            let i2 = (*self.cconf).borrow().clone();
+            i2
+        }
 
-    #[deprecated]		// later
-    pub fn conf_len(&self) -> usize {
-        (*self.cconf).borrow().len()
-    }
+        #[deprecated]		// later
+        pub fn conf_len(&self) -> usize {
+            (*self.cconf).borrow().len()
+        }
 
-    #[deprecated]
-    pub fn load_from_file(&mut self, filename: &str) {
-        match ini::Ini::load_from_file(filename) {
-            Ok(new_ini) => {
-                if new_ini.len() > 2 {
-                    let mode_debug = self.get_val_bool(Self::CONF_MODE_DEBUG);
-                    (*self.cconf).replace(new_ini); //  unpraktisch !!!
-                    (*self.cconf).borrow_mut().set_to(
-                        Some(Self::section_name()),
-                        Self::CONF_MODE_DEBUG.to_string(),
-                        mode_debug.to_string(),
-                    );
+        #[deprecated]
+        pub fn load_from_file(&mut self, filename: &str) {
+            match ini::Ini::load_from_file(filename) {
+                Ok(new_ini) => {
+                    if new_ini.len() > 2 {
+                        let mode_debug = self.get_val_bool(Self::CONF_MODE_DEBUG);
+                        (*self.cconf).replace(new_ini); //  unpraktisch !!!
+                        (*self.cconf).borrow_mut().set_to(
+                            Some(Self::section_name()),
+                            Self::CONF_MODE_DEBUG.to_string(),
+                            mode_debug.to_string(),
+                        );
+                    }
+                    self.cconf_filename = filename.to_string();
                 }
-                self.cconf_filename = filename.to_string();
-            }
-            Err(e) => {
-                trace!("load_from_file {} {:?}", &filename, &e);
+                Err(e) => {
+                    trace!("load_from_file {} {:?}", &filename, &e);
+                }
             }
         }
-    }
-*/
-
+    */
 
     // runs on timer trigger
     pub fn store_if_modified(&mut self) {
@@ -144,7 +142,7 @@ impl ConfigManager {
         }
     */
 
-
+/*
     #[deprecated] // later
     pub fn new_with_ini(ini_r: Rc<RefCell<Ini>>) -> ConfigManager {
         let filename = (*ini_r)
@@ -156,22 +154,21 @@ impl ConfigManager {
             .to_string();
         ConfigManager {
             cconf_filename: filename,
-            cconf: ini_r,
+            // cconf: ini_r,
             ..ConfigManager::default()
         }
     }
 */
 
 
-	    pub fn debug_dump(&self, prefix: &str) {
-	        debug!(
-	            "{} DD-system= {:#?} ",
-	            prefix,
-	            (*self.system_config).borrow()
-	        );
-	        debug!("{} DD-user= {:#?} ", prefix, (*self.user_config).borrow());
-	    }
-
+    pub fn debug_dump(&self, prefix: &str) {
+        debug!(
+            "{} DD-system= {:#?} ",
+            prefix,
+            (*self.system_config).borrow()
+        );
+        debug!("{} DD-user= {:#?} ", prefix, (*self.user_config).borrow());
+    }
 
     pub fn get_user_conf(&self) -> Rc<RefCell<HashMap<String, String>>> {
         self.user_config.clone()
