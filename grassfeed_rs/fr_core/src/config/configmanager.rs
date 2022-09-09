@@ -96,57 +96,53 @@ impl ConfigManager {
         let _r = self.store_user_conf(filename.to_string());
     }
 
-	/*
-    #[deprecated] // later
-    pub fn store_to_file(&self, filename: &str) -> Result<()> {
-        (*self.cconf).borrow().write_to_file(filename)
-    }
-
-    /// do not mark as dirty if the value was set before
-    #[deprecated]
-    pub fn set_section_key(&mut self, section: &str, key: &str, value: &str) {
-        let mut cc = (*self.cconf).borrow_mut();
-        let prev_value = cc.get_from(Some(section), key);
-        if let Some(s) = prev_value {
-            if s == value {
-                return;
+    /*
+        /// do not mark as dirty if the value was set before
+        #[deprecated]
+        pub fn set_section_key(&mut self, section: &str, key: &str, value: &str) {
+            let mut cc = (*self.cconf).borrow_mut();
+            let prev_value = cc.get_from(Some(section), key);
+            if let Some(s) = prev_value {
+                if s == value {
+                    return;
+                }
             }
+            cc.set_to(Some(section), key.to_string(), value.to_string());
+            self.cconf_modified.replace(true);
         }
-        cc.set_to(Some(section), key.to_string(), value.to_string());
-        self.cconf_modified.replace(true);
-    }
 
-    #[deprecated]
-    pub fn get_section_key(&self, section: &str, key: &str) -> Option<String> {
-        let cc = (*self.cconf).borrow();
-        if let Some(v) = cc.get_from(Some(section), key) {
-            return Some(v.to_string());
-        }
-        None
-    }
-
-    #[deprecated]
-    pub fn get_section_key_bool(&self, section: &str, key: &str) -> bool {
-        let cc = (*self.cconf).borrow();
-
-        if let Some(v) = cc.get_from(Some(section), key) {
-            if let Ok(b) = v.parse::<bool>() {
-                return b;
+        #[deprecated]
+        pub fn get_section_key(&self, section: &str, key: &str) -> Option<String> {
+            let cc = (*self.cconf).borrow();
+            if let Some(v) = cc.get_from(Some(section), key) {
+                return Some(v.to_string());
             }
-        } // else {            trace!(                "get_section_key_bool({} {})   sec_vals={:?}",                section,                key,                cc.section(Some(section))            );        }
-        false
-    }
-
-    #[deprecated]
-    pub fn get_section_key_int(&self, section: &str, key: &str, defaultv: isize) -> isize {
-        let cc = (*self.cconf).borrow();
-        if let Some(v) = cc.get_from(Some(section), key) {
-            if let Ok(i) = v.parse::<isize>() {
-                return i;
-            }
+            None
         }
-        defaultv
-    }
+
+        #[deprecated]
+        pub fn get_section_key_bool(&self, section: &str, key: &str) -> bool {
+            let cc = (*self.cconf).borrow();
+
+            if let Some(v) = cc.get_from(Some(section), key) {
+                if let Ok(b) = v.parse::<bool>() {
+                    return b;
+                }
+            } // else {            trace!(                "get_section_key_bool({} {})   sec_vals={:?}",                section,                key,                cc.section(Some(section))            );        }
+            false
+        }
+
+        #[deprecated]
+        pub fn get_section_key_int(&self, section: &str, key: &str, defaultv: isize) -> isize {
+            let cc = (*self.cconf).borrow();
+            if let Some(v) = cc.get_from(Some(section), key) {
+                if let Ok(i) = v.parse::<isize>() {
+                    return i;
+                }
+            }
+            defaultv
+        }
+    */
 
 
     #[deprecated] // later
@@ -232,10 +228,7 @@ impl ConfigManager {
     }
 
     pub fn get_val(&self, key: &str) -> Option<String> {
-        (*self.user_config)
-            .borrow()
-            .get(key)
-            .map_or(None, |r| Some(r.clone()))
+        (*self.user_config).borrow().get(key).cloned() // map(|r| r.clone())
     }
 
     pub fn get_val_int(&self, key: &str) -> Option<isize> {
@@ -257,10 +250,7 @@ impl ConfigManager {
     }
 
     pub fn get_sys_val(&self, key: &str) -> Option<String> {
-        (*self.system_config)
-            .borrow()
-            .get(key)
-            .map_or(None, |r| Some(r.clone()))
+        (*self.system_config).borrow().get(key).cloned() // map(|r| r.clone())
     }
 
     pub fn set_system_config(&mut self, conf: Rc<RefCell<HashMap<String, String>>>) {
@@ -296,10 +286,12 @@ impl Default for ConfigManager {
 impl Buildable for ConfigManager {
     type Output = ConfigManager;
 
-    #[allow(unreachable_code)]
+    // #[allow(unreachable_code)]
     fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self::Output {
-        let mut cm = ConfigManager::default();
-        cm.cconf_filename = conf.get(&ConfigManager::CONF_PATH_KEY.to_string()).unwrap();
+        let mut cm = ConfigManager {
+            cconf_filename: conf.get(ConfigManager::CONF_PATH_KEY).unwrap(),
+            ..Default::default()
+        };
         cm.set_system_config(appcontext.get_system_config());
         let _r = cm.load_user_conf(&cm.cconf_filename);
         cm
