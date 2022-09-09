@@ -85,6 +85,7 @@ impl MiniHttpServerController {
 // #[derive(PartialEq)]  // geht net wegen Option<ContentType>
 #[derive(Debug)]
 pub enum AttachFileInfo {
+    /// path, statuscode, length, contenttype
     FileInfoPath(String, StatusCode, u64, Option<ContentType>),
     LargeFile(String, StatusCode, u64, Option<ContentType>),
     ReplacementText(String, StatusCode),
@@ -333,13 +334,13 @@ pub fn analyse_request(
     index_file_name: &str,
     req_path: &str,
 ) -> AttachFileInfo {
-    let mut path_expanded = req_path.to_string();
-    // format!("{}", req_path);
-    match check_request_dir(htdocs_dir, req_path)  // is_file, is_dir
+     let mut path_expanded = req_path.to_string();
+    // let mut path_expanded =     format!("{}", req_path);
+    match check_request_dir(htdocs_dir, req_path)
     {
         (false, false, _) => {
             return AttachFileInfo::FileNotFound(
-                Some(format!("Path does not exist: {}", &req_path)),
+                Some(format!("Path does not exist: {}{}", &htdocs_dir, &req_path)),
                 StatusCode::NOT_FOUND,
             );
         }
@@ -352,9 +353,7 @@ pub fn analyse_request(
                 index_file_name,
             ) {
                 let det :String = create_direntry_text(htdocs_dir, &path_expanded);
-
                 let folderlist_html = wrap_text_in_html(&det);
-
                 return  AttachFileInfo::ReplacementText(folderlist_html, StatusCode::OK) ;
             } else {
                 path_expanded = format!("{}{}", &path_expanded, index_file_name);
@@ -415,6 +414,8 @@ fn check_create_dir_index(htdocs_dir: &str, request_path: &str, index_file_name:
 //   requestpath completed with slash added
 pub fn check_request_dir(htdocs_dir: &str, path: &str) -> (bool, bool, String) {
     let path_str = format!("{}{}", htdocs_dir, path);
+    info!("checking {}", path_str);
+
     let p = Path::new(&path_str);
     if !p.exists() {
         return (false, false, path.to_string());

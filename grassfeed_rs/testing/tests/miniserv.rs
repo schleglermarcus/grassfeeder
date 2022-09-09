@@ -63,16 +63,33 @@ fn transfer_file_simple() {
 
 // #[ignore]
 #[test]
-fn analyse_request_test() {
+fn analyse_request_withfile() {
     setup();
-    let job = minisrv::analyse_request("tests/ms_htdocs/", 1000, "index.html", "1");
+    let job = minisrv::analyse_request("tests/ms_htdocs/", 1000, "index.html", "index.html");
     match job {
-        minisrv::AttachFileInfo::ReplacementText(msg, _sta) => {
-            assert!(msg.contains("Index"));
-            assert!(!msg.contains("file"));
+        minisrv::AttachFileInfo::FileInfoPath(msg, sc, length, _o_contenttype) => {
+            assert_eq!(msg, "tests/ms_htdocs/index.html".to_string());
+            assert_eq!(length, 169);
+            assert_eq!(sc, 200);
+            assert!(_o_contenttype.is_some());
         }
         _ => {
-            assert!(false, "wrong job");
+            assert!(false, "wrong job {:?}", &job);
+        }
+    }
+}
+
+// #[ignore]
+#[test]
+fn analyse_request_nofile() {
+    setup();
+    let job = minisrv::analyse_request("tests/ms_htdocs/", 1000, "index.html", "none_");
+    match job {
+        minisrv::AttachFileInfo::FileNotFound(msg, _sta) => {
+            assert!(msg.is_some());
+        }
+        _ => {
+            assert!(false, "wrong job {:?}", &job);
         }
     }
 }
@@ -143,32 +160,11 @@ fn read_file_simple() {
 
 #[macro_use]
 extern crate log;
-// use log::LevelFilter;
-// use simplelog;
-// use simplelog::ColorChoice;
-// use simplelog::ConfigBuilder;
-// use simplelog::TermLogger;
-// use simplelog::TerminalMode;
-// use simplelog::ThreadLogMode;
 use std::sync::Once;
 
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-				let _r = testing::logger_config::setup_logger();
-/*
-        let conf = ConfigBuilder::new()
-            .set_thread_mode(ThreadLogMode::Names)
-            // .set_time_format(String::from("%M:%S:%.3f"))
-            .build();
-        TermLogger::init(
-            LevelFilter::Debug,
-            conf,
-            TerminalMode::Mixed,
-            ColorChoice::Always,
-        )
-        .unwrap();
-        log_enabled!(simplelog::Level::Debug);
-*/
+        let _r = testing::logger_config::setup_logger();
     });
 }
