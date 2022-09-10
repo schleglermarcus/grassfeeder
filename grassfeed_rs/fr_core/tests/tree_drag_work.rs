@@ -4,50 +4,12 @@ mod logger_config;
 mod tree_drag_common;
 
 use fr_core::db::message::MessageRow;
-use fr_core::db::subscription_entry::SubscriptionEntry;
-use fr_core::db::subscription_repo::ISubscriptionRepo;
-use fr_core::db::subscription_repo::SubscriptionRepo;
+// use fr_core::db::subscription_entry::FeedSourceState;
+// use fr_core::db::subscription_entry::SubscriptionEntry;
+// use fr_core::db::subscription_repo::ISubscriptionRepo;
+// use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::util::db_time_to_display_nonnull;
-
-#[ignore]
-#[test]
-//cargo test   db::subscription_repo::ut::t_get_by_parent_subs_id  --lib  -- --exact --nocapture
-fn t_get_by_parent_subs_id() {
-    setup();
-    let mut sr = SubscriptionRepo::new_inmem();
-    sr.startup();
-    let mut s1 = SubscriptionEntry::default();
-    s1.parent_subs_id = 7;
-    s1.folder_position = 0;
-    let r1 = sr.store_entry(&s1);
-    assert!(r1.is_ok());
-    s1.parent_subs_id = 7;
-    s1.folder_position = 1;
-    assert!(sr.store_entry(&s1).is_ok());
-    s1.parent_subs_id = 7;
-    s1.folder_position = 2;
-    assert!(sr.store_entry(&s1).is_ok());
-
-    sr.get_all_entries().iter().for_each(|e| debug!("{:?}", e));
-
-    let list = sr.get_by_parent_repo_id(7);
-	debug!("LIST={:#?}", list);
-
-    assert_eq!(list.len(), 3);
-    assert_eq!(list.get(0).unwrap().subs_id, 4);
-    assert_eq!(list.get(0).unwrap().folder_position, 0);
-    assert_eq!(list.get(1).unwrap().subs_id, 5);
-    assert_eq!(list.get(1).unwrap().folder_position, 1);
-    assert_eq!(list.get(2).unwrap().subs_id, 6);
-    assert_eq!(list.get(2).unwrap().folder_position, 2);
-}
-
-#[allow(dead_code)]
-//#[test]
-fn stub() {
-    setup();
-}
 
 // #[ignore]
 //  #[test]

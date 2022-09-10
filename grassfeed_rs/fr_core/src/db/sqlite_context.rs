@@ -13,9 +13,12 @@ pub trait TableInfo {
     fn index_column_name() -> String;
     fn create_indices() -> Vec<String>;
 
+    /// without index column
     fn get_insert_columns(&self) -> Vec<String>;
+    /// without index column
     fn get_insert_values(&self) -> Vec<Wrap>;
     fn from_row(row: &rusqlite::Row) -> Self;
+    fn get_index_value(&self) -> isize;
 }
 
 pub struct SqliteContext<T>
@@ -80,10 +83,19 @@ impl<T: TableInfo> SqliteContext<T> {
         }
     }
 
-	/// inserts without primary column.  subs_id is auto-imcremented by sqlite
+    /// inserts without primary column.  subs_id is auto-imcremented by sqlite
     /// returns index value
-    pub fn insert(&self, entry: &T) -> Result<i64, rusqlite::Error> {
-        let col_names = entry.get_insert_columns();
+    pub fn insert(&self, entry: &T, with_index: bool) -> Result<i64, rusqlite::Error> {
+        let mut col_names: Vec<String> = Vec::default();
+        let mut wrap_vec: Vec<Wrap> = Vec::default();
+        if with_index {
+            col_names.push(T::index_column_name());
+            wrap_vec.push(Wrap::INT(entry.get_index_value()));
+        }
+        // 		col_names = entry.get_insert_columns();
+        col_names.extend(entry.get_insert_columns());
+        wrap_vec.extend(entry.get_insert_values());
+
         let questionmarks = vec!["?"; col_names.len()].to_vec().join(", ");
         let prepared = format!(
             "INSERT INTO {} ( {} ) VALUES ( {} )",
@@ -91,8 +103,7 @@ impl<T: TableInfo> SqliteContext<T> {
             col_names.join(", "),
             questionmarks
         );
-        let wrap_vec: Vec<Wrap> = entry.get_insert_values();
-		// info!("insert: {:?} => {:?}", &prepared, &wrap_vec );
+        // trace!("insert: {} {:?} => {:?}", with_index, &prepared, &wrap_vec);
         let vec_dyn_tosql: Vec<&dyn ToSql> = wrap_vec
             .iter()
             .map(|w| w.to_dyn_tosql())
@@ -103,10 +114,11 @@ impl<T: TableInfo> SqliteContext<T> {
                 return stmt.insert(params_fi);
             }
             Err(e) => {
-                error!(" {:?}", e)
+                warn!("insert: {:?}  idx={} ", &e, &entry.get_index_value());
+                return Err(e);
             }
         }
-        Ok(0)
+        //Ok(0)
     }
 
     pub fn insert_tx(&self, list: &Vec<T>) -> Result<i64, rusqlite::Error> {

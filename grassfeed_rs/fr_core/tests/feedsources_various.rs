@@ -4,7 +4,6 @@ mod logger_config;
 mod downloader_dummy;
 
 use crate::downloader_dummy::DownloaderDummy;
-use chrono::DateTime;
 use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::IDownloader;
 use fr_core::controller::sourcetree::ISourceTreeController;
@@ -25,30 +24,14 @@ use fr_core::web::IHttpRequester;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
-
-/// Timestamp delivered   from    https://feeds.breakingnews.ie/bnworld
-/// https://www.w3.org/Protocols/rfc822/#z28
-// #[ignore]
-#[test]
-fn chrono_broken_timestamp() {
-    setup();
-    let broken_ts = "Fri, 05 Aug 2022 23:28:01 Europe/Dublin";
-    let pars_res = DateTime::parse_from_rfc2822(&broken_ts);
-    assert!(pars_res.is_err());
-    assert_eq!(
-        pars_res.err().unwrap().to_string(),
-        "trailing input".to_string()
-    );
-}
-
 // #[ignore]
 #[test]
 fn add_feed_with_existing() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
     let (mut fsc, _r_fsource) = prepare_stc(fs_list);
-    let msgrepo = MessagesRepo:: new_in_mem(); // new(":memory:".to_string());
+    let msgrepo = MessagesRepo::new_in_mem();
+
     msgrepo.get_ctx().create_table();
     let mut mr1: MessageRow = MessageRow::default();
     mr1.feed_src_id = 20;
@@ -70,7 +53,7 @@ fn add_feed_empty() {
         "name-proc2".to_string(),
     );
     let entries = (*(r_fsource.borrow())).get_all_entries();
-    assert_eq!(entries.len(), 1);
+    assert_eq!(entries.len(), 4); // plus 3 pre-existing entries
 }
 
 // #[ignore]
@@ -82,6 +65,7 @@ fn delete_feed_v1() {
     fsc.set_fs_delete_id(Some(2));
     fsc.feedsource_move_to_trash();
     let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
+    // debug!("{:?}", &result);
     assert_eq!(result.get(0).unwrap().folder_position, 0);
     assert_eq!(result.get(1).unwrap().folder_position, 1);
 }
@@ -96,16 +80,20 @@ fn update_folder_pos() {
         .borrow()
         .update_parent_and_folder_position(1, 22, 33);
     let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_all_entries();
-    // result.iter().for_each(|fs| info!("  {}", fs));
-    assert_eq!(result.get(0).unwrap().subs_id, 1);
-    assert_eq!(result.get(0).unwrap().parent_subs_id, 22);
-    assert_eq!(result.get(0).unwrap().folder_position, 33);
+    // result.iter().for_each(|fs| debug!("##  {}", fs));
+    assert_eq!(result.get(2).unwrap().subs_id, 1);
+    assert_eq!(result.get(2).unwrap().parent_subs_id, 22);
+    assert_eq!(result.get(2).unwrap().folder_position, 33);
 }
+
+// ----------------------------
+
 
 fn prepare_stc(
     fs_list: Vec<SubscriptionEntry>,
 ) -> (SourceTreeController, Rc<RefCell<dyn ISubscriptionRepo>>) {
-    let subscrip_repo = SubscriptionRepo::new("");
+    let mut subscrip_repo = SubscriptionRepo::new_inmem();
+    subscrip_repo.startup_int();
     fs_list.iter().for_each(|e| {
         let _r = subscrip_repo.store_entry(e);
     });

@@ -84,8 +84,8 @@ fn rungui_local_clear() {
     });
 
     let gfconf = GrassFeederConfig {
-        path_config: "../target/db_rungui_local".to_string(),
-        path_cache: "../target/db_rungui_local".to_string(),
+        path_config: "../target/db_rungui_local/".to_string(),
+        path_cache: "../target/db_rungui_local/".to_string(),
         debug_mode: false,
         version: "rungui:rungui_local_clear".to_string(),
     };

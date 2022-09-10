@@ -18,7 +18,9 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 pub struct GrassFeederConfig {
+	/// with trailing slash
     pub path_config: String,
+	/// with trailing slash
     pub path_cache: String,
     pub debug_mode: bool,
     pub version: String,
@@ -65,7 +67,7 @@ pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, Stri
     );
     ret.insert(
         ConfigManager::CONF_PATH_KEY.to_string(),
-        format!("{}/config.json", &gf_conf.path_config),
+        format!("{}config.json", &gf_conf.path_config),
     );
     ret.insert(
         ConfigManager::CONF_MODE_DEBUG.to_string(),

@@ -302,7 +302,7 @@ pub fn transfer_file<W: Write + Read>(
                 numwritten = nw as u64;
             }
             Err(e) => {
-                info!("downloading {:?} : {:?}", src_path, e);
+                debug!("downloading {:?} : {:?}", src_path, e);
                 buffer_full = false;
                 numwritten = 0;
             }
@@ -414,8 +414,6 @@ fn check_create_dir_index(htdocs_dir: &str, request_path: &str, index_file_name:
 //   requestpath completed with slash added
 pub fn check_request_dir(htdocs_dir: &str, path: &str) -> (bool, bool, String) {
     let path_str = format!("{}{}", htdocs_dir, path);
-    info!("checking {}", path_str);
-
     let p = Path::new(&path_str);
     if !p.exists() {
         return (false, false, path.to_string());

@@ -153,6 +153,7 @@ pub struct SourceTreeController {
     any_spinner_visible: RefCell<bool>,
     need_check_fs_paths: RefCell<bool>,
 
+	#[allow(dead_code)]
     statemap: RefCell<HashMap<isize, SubsMapEntry>>,
 }
 
@@ -1538,6 +1539,7 @@ impl Default for NewSourceState {
     }
 }
 
+#[allow(dead_code)]
 struct SubsMapEntry {
     pub tree_path: Option<Vec<u16>>,
     pub status: usize,

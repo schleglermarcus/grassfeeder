@@ -7,7 +7,6 @@ use context::TimerEvent;
 use context::TimerReceiver;
 use context::TimerRegistry;
 use gui_layer::gui_values::PropDef;
-// use ini::Ini;
 use serde::Serialize;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -17,8 +16,6 @@ use std::rc::Rc;
 const ID_CONFIG: &str = "config";
 
 pub struct ConfigManager {
-    // #[deprecated] // later
-    // cconf: Rc<RefCell<Ini>>,
     cconf_modified: RefCell<bool>,
     cconf_filename: String,
 
@@ -51,115 +48,14 @@ impl ConfigManager {
         self.set_val(&key, width.to_string());
     }
 
-    /*
-        #[deprecated] // later
-        pub fn get_conf(&self) -> Ini {
-            let i2 = (*self.cconf).borrow().clone();
-            i2
-        }
-
-        #[deprecated]		// later
-        pub fn conf_len(&self) -> usize {
-            (*self.cconf).borrow().len()
-        }
-
-        #[deprecated]
-        pub fn load_from_file(&mut self, filename: &str) {
-            match ini::Ini::load_from_file(filename) {
-                Ok(new_ini) => {
-                    if new_ini.len() > 2 {
-                        let mode_debug = self.get_val_bool(Self::CONF_MODE_DEBUG);
-                        (*self.cconf).replace(new_ini); //  unpraktisch !!!
-                        (*self.cconf).borrow_mut().set_to(
-                            Some(Self::section_name()),
-                            Self::CONF_MODE_DEBUG.to_string(),
-                            mode_debug.to_string(),
-                        );
-                    }
-                    self.cconf_filename = filename.to_string();
-                }
-                Err(e) => {
-                    trace!("load_from_file {} {:?}", &filename, &e);
-                }
-            }
-        }
-    */
-
     // runs on timer trigger
     pub fn store_if_modified(&mut self) {
         if !*self.cconf_modified.borrow() {
             return;
         }
-        let filename: &str = &self.cconf_filename;
-        let _r = self.store_user_conf(filename.to_string());
+        let _r = self.store_user_conf(self.cconf_filename.clone());
+		self.cconf_modified.replace(false);
     }
-
-    /*
-        /// do not mark as dirty if the value was set before
-        #[deprecated]
-        pub fn set_section_key(&mut self, section: &str, key: &str, value: &str) {
-            let mut cc = (*self.cconf).borrow_mut();
-            let prev_value = cc.get_from(Some(section), key);
-            if let Some(s) = prev_value {
-                if s == value {
-                    return;
-                }
-            }
-            cc.set_to(Some(section), key.to_string(), value.to_string());
-            self.cconf_modified.replace(true);
-        }
-
-        #[deprecated]
-        pub fn get_section_key(&self, section: &str, key: &str) -> Option<String> {
-            let cc = (*self.cconf).borrow();
-            if let Some(v) = cc.get_from(Some(section), key) {
-                return Some(v.to_string());
-            }
-            None
-        }
-
-        #[deprecated]
-        pub fn get_section_key_bool(&self, section: &str, key: &str) -> bool {
-            let cc = (*self.cconf).borrow();
-
-            if let Some(v) = cc.get_from(Some(section), key) {
-                if let Ok(b) = v.parse::<bool>() {
-                    return b;
-                }
-            } // else {            trace!(                "get_section_key_bool({} {})   sec_vals={:?}",                section,                key,                cc.section(Some(section))            );        }
-            false
-        }
-
-        #[deprecated]
-        pub fn get_section_key_int(&self, section: &str, key: &str, defaultv: isize) -> isize {
-            let cc = (*self.cconf).borrow();
-            if let Some(v) = cc.get_from(Some(section), key) {
-                if let Ok(i) = v.parse::<isize>() {
-                    return i;
-                }
-            }
-            defaultv
-        }
-    */
-
-/*
-    #[deprecated] // later
-    pub fn new_with_ini(ini_r: Rc<RefCell<Ini>>) -> ConfigManager {
-        let filename = (*ini_r)
-            .borrow()
-            .section(Some(ConfigManager::section_name()))
-            .unwrap()
-            .get(ConfigManager::CONF_PATH_KEY)
-            .unwrap()
-            .to_string();
-        ConfigManager {
-            cconf_filename: filename,
-            // cconf: ini_r,
-            ..ConfigManager::default()
-        }
-    }
-*/
-
 
     pub fn debug_dump(&self, prefix: &str) {
         debug!(

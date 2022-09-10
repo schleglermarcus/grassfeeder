@@ -1,5 +1,4 @@
 use fr_core::config::init_system;
-//::GrassFeederConfig;
 use resources::loc;
 
 #[macro_use]
@@ -12,8 +11,8 @@ fn rungui_regular() {
     setup();
     loc::init_locales();
     let gfconf = init_system::GrassFeederConfig {
-        path_config: "../target/db_rungui_reg".to_string(),
-        path_cache: "../target/db_rungui_reg".to_string(),
+        path_config: "../target/db_rungui_reg/".to_string(),
+        path_cache: "../target/db_rungui_reg/".to_string(),
         debug_mode: true,
         version: "run_reg_todo".to_string(),
     };

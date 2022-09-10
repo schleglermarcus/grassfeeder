@@ -9,7 +9,6 @@ use rusqlite::Connection;
 use std::sync::Arc;
 use std::sync::Mutex;
 
-
 // TODO register at timer for shutdown,  do flush.
 pub trait IMessagesRepo {
     /// returns index value
@@ -36,9 +35,6 @@ pub trait IMessagesRepo {
 
     fn get_all_messages(&self) -> Vec<MessageRow>;
 
-    // #[deprecated(note = "use update_is_read_many()")]
-    // fn update_is_read(&self, repo_id: isize, new_is_read: bool);
-
     fn update_is_read_many(&self, repo_ids: &[i32], new_is_read: bool);
     fn update_is_read_all(&self, source_repo_id: isize, new_is_read: bool);
     /// title string shall be compressed. returns number of lines
@@ -46,7 +42,6 @@ pub trait IMessagesRepo {
     fn update_post_id(&self, repo_id: isize, new_post_id: String) -> usize;
     fn update_entry_src_date(&self, repo_id: isize, n_src_date: i64) -> usize;
     fn update_is_deleted_many(&self, repo_ids: &[i32], new_is_del: bool);
-
 
     fn get_ctx(&self) -> &SqliteContext<MessageRow>;
 
@@ -97,7 +92,9 @@ impl IMessagesRepo for MessagesRepo {
     }
 
     fn insert(&self, entry: &MessageRow) -> Result<i64, Box<dyn std::error::Error>> {
-        self.ctx.insert(entry).map_err(rusqlite_error_to_boxed)
+        self.ctx
+            .insert(entry, false)
+            .map_err(rusqlite_error_to_boxed)
     }
 
     fn insert_tx(&self, e_list: &[MessageRow]) -> Result<i64, Box<dyn std::error::Error>> {
@@ -105,14 +102,6 @@ impl IMessagesRepo for MessagesRepo {
             .insert_tx(&e_list.to_vec())
             .map_err(rusqlite_error_to_boxed)
     }
-
-/*
-#[deprecated]
-
-    fn store_entry(&self, _entry: &MessageRow) -> Result<MessageRow, Box<dyn std::error::Error>> {
-        unimplemented!()
-    }
-*/
 
     fn get_by_src_id(&self, src_id: isize) -> Vec<MessageRow> {
         let prepared = format!(
@@ -189,14 +178,6 @@ impl IMessagesRepo for MessagesRepo {
     fn get_all_messages(&self) -> Vec<MessageRow> {
         self.ctx.get_all()
     }
-
-/*
-    // deprecated
-    fn update_is_read(&self, _repo_id: isize, _new_is_read: bool) {
-        unimplemented!()
-    }
-*/
-
 
     fn update_is_read_many(&self, repo_ids: &[i32], new_is_read: bool) {
         let joined = repo_ids
@@ -376,7 +357,6 @@ mod t {
         let _r = messagesrepo.get_ctx().delete_table();
         messagesrepo.get_ctx().create_table();
         let maxindex = messagesrepo.get_max_src_index();
-        //        let list = messagesrepo.get_all_messages();        println!("{:#?}", list);
         assert_eq!(maxindex, -1);
     }
 
@@ -405,9 +385,7 @@ mod t {
     #[test]
     fn t_update_entry_src_date() {
         let msg_r = prepare_3_rows();
-
         (*msg_r).borrow().update_entry_src_date(1, 11);
-
         assert_eq!(
             (*msg_r).borrow().get_by_index(1).unwrap().entry_src_date,
             11
@@ -534,7 +512,6 @@ mod t {
     }
 
     //RUST_BACKTRACE=1 cargo watch -s "cargo test  db::messages_repo::t::t_insert_get_row   --lib -- --exact --nocapture "
-    // #[ignore]
     #[test]
     fn t_insert_get_row() {
         setup();
@@ -542,7 +519,7 @@ mod t {
         let _r = messagesrepo.get_ctx().delete_table();
         messagesrepo.get_ctx().create_table();
         let mut e1 = MessageRow::default();
-        let r1 = messagesrepo.get_ctx().insert(&e1);
+        let r1 = messagesrepo.get_ctx().insert(&e1, false);
         assert!(r1.is_ok());
         e1.feed_src_id = 3;
         e1.title = "title3".to_string();
@@ -556,7 +533,7 @@ mod t {
         e1.enclosure_url = "delete enclosure".to_string();
         e1.author = "from authorized".to_string();
         e1.categories = "cat1 cat2".to_string();
-        let r2 = messagesrepo.get_ctx().insert(&e1);
+        let r2 = messagesrepo.get_ctx().insert(&e1, false);
         assert!(r2.is_ok());
         let e1 = messagesrepo.get_ctx().get_by_index(1);
         assert!(e1.is_some());

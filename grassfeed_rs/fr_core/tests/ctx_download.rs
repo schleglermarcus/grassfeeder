@@ -41,7 +41,7 @@ fn prepare_db_with_errors(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo) {
     let _r = msgrepo.insert(&m1);
 }
 
-#[ignore]
+#[ignore]	// TODO
 #[test]
 fn t_db_cleanup() {
     setup();
@@ -71,7 +71,7 @@ fn t_db_cleanup() {
     assert_eq!(msgrepo2.get_by_index(2).unwrap().is_deleted, true);
 }
 
-#[ignore]
+#[ignore]		 // TODO
 #[test]
 fn comprehensive_feed_download() {
     setup();
@@ -147,6 +147,22 @@ fn downloader_load_message_into_db() {
     assert_eq!(msg.message_id, 1);
     assert_eq!(msg.post_id, "2345");
 }
+
+/// Timestamp delivered   from    https://feeds.breakingnews.ie/bnworld
+/// https://www.w3.org/Protocols/rfc822/#z28
+#[ignore]
+#[test]
+fn chrono_broken_timestamp() {
+    setup();
+    let broken_ts = "Fri, 05 Aug 2022 23:28:01 Europe/Dublin";
+    let pars_res = chrono::DateTime::parse_from_rfc2822(&broken_ts);
+    assert!(pars_res.is_err());
+    assert_eq!(
+        pars_res.err().unwrap().to_string(),
+        "trailing input".to_string()
+    );
+}
+
 
 fn get_file_fetcher() -> WebFetcherType {
     Arc::new(Box::new(FileFetcher::new(

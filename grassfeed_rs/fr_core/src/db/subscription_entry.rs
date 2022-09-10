@@ -6,11 +6,11 @@ use serde::Serialize;
 use std::fmt;
 
 #[allow(dead_code)]
-pub const SRC_REPO_ID_DELETED: isize = 1;
+pub const SRC_REPO_ID_DELETED: isize = -2;
 #[allow(dead_code)]
-pub const SRC_REPO_ID_MOVING: isize = 2;
+pub const SRC_REPO_ID_MOVING: isize = -3;
 #[allow(dead_code)]
-pub const SRC_REPO_ID_DUMMY: isize = 3;
+pub const SRC_REPO_ID_DUMMY: isize = 9;
 
 #[derive(Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct SubscriptionEntry {
@@ -277,8 +277,8 @@ impl TableInfo for SubscriptionEntry {
         SubscriptionEntry {
             subs_id: row.get(0).unwrap_or(-4), // 0
             parent_subs_id: row.get(1).unwrap(),
-            last_selected_msg: row.get(2).unwrap(),
-            folder_position: row.get(3).unwrap(),
+            folder_position: row.get(2).unwrap(),
+            last_selected_msg: row.get(3).unwrap(),
             icon_id: row.get(4).unwrap(),
             updated_ext: row.get(5).unwrap(), // 5
             updated_int: row.get(6).unwrap(),
@@ -291,6 +291,10 @@ impl TableInfo for SubscriptionEntry {
             website_url: row.get(13).unwrap(), // 13
             ..Default::default()
         }
+    }
+
+    fn get_index_value(&self) -> isize {
+        self.subs_id
     }
 }
 

@@ -54,8 +54,8 @@ pub struct MessageRow {
     pub fetch_date: i64,
     /// When it was created/modified
     pub entry_src_date: i64,
-	/// when pubdate was not delivered or, was invalid formatted
-	pub entry_invalid_pubdate: bool,
+    /// when pubdate was not delivered or, was invalid formatted
+    pub entry_invalid_pubdate: bool,
     /// Delivered display in html
     pub content_text: String,
     pub enclosure_url: String,
@@ -172,26 +172,28 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
         ]
     }
 
+    fn from_row(row: &rusqlite::Row) -> Self {
+        MessageRow {
+            message_id: row.get(0).unwrap(),
+            feed_src_id: row.get(1).unwrap(),
+            title: row.get(2).unwrap(),
+            post_id: row.get(3).unwrap(),
+            link: row.get(4).unwrap(),
+            is_deleted: row.get(5).unwrap(),
+            is_read: row.get(6).unwrap(),
+            fetch_date: row.get(7).unwrap(),
+            entry_src_date: row.get(8).unwrap(),
+            content_text: row.get(9).unwrap(),
+            enclosure_url: row.get(10).unwrap(),
+            author: row.get(11).unwrap(),
+            categories: row.get(12).unwrap(),
+            ..Default::default()
+        }
+    }
 
-	fn from_row(row: &rusqlite::Row) -> Self {
-		MessageRow {
-			message_id: row.get(0).unwrap(),
-			feed_src_id: row.get(1).unwrap(),
-			title: row.get(2).unwrap(),
-			post_id: row.get(3).unwrap(),
-			link: row.get(4).unwrap(),
-			is_deleted: row.get(5).unwrap(),
-			is_read: row.get(6).unwrap(),
-			fetch_date: row.get(7).unwrap(),
-			entry_src_date: row.get(8).unwrap(),
-			content_text: row.get(9).unwrap(),
-			enclosure_url: row.get(10).unwrap(),
-			author: row.get(11).unwrap(),
-			categories: row.get(12).unwrap(),
-			..Default::default()
-		}
-	}
-
+    fn get_index_value(&self) -> isize {
+        self.message_id
+    }
 }
 
 #[cfg(test)]
