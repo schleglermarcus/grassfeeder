@@ -17,7 +17,7 @@ pub fn prepare_source_tree_controller(
     fs_list: Vec<SubscriptionEntry>,
 ) -> (SourceTreeController, Rc<RefCell<dyn ISubscriptionRepo>>) {
     let subscrip_repo = SubscriptionRepo::new("");
-    subscrip_repo.clear();
+    subscrip_repo.scrub_all_subscriptions();
     fs_list.iter().for_each(|e| {
         let _r = subscrip_repo.store_entry(e);
     });

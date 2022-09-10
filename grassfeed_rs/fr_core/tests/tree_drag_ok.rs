@@ -242,32 +242,12 @@ fn drag_entry_on_other_entry() {
 #[test]
 fn check_paths_simple() {
     setup();
-    let (_stc, fsource_r) = prepare_source_tree_controller(dataset_some_tree());
-    assert_eq!(
-        (*fsource_r).borrow().get_by_path(&vec![0]).unwrap().subs_id,
-        1
-    );
-    assert_eq!(
-        (*fsource_r)
-            .borrow()
-            .get_by_path(&vec![0, 0])
-            .unwrap()
-            .subs_id,
-        2
-    );
-    assert_eq!((*fsource_r).borrow().get_by_path(&vec![2]), None);
-    assert_eq!(
-        (*fsource_r)
-            .borrow()
-            .get_by_path(&vec![0, 1])
-            .unwrap()
-            .subs_id,
-        3
-    );
-    assert_eq!(
-        (*fsource_r).borrow().get_by_path(&vec![1]).unwrap().subs_id,
-        4
-    );
+    let (stc, _fsource_r) = prepare_source_tree_controller(dataset_some_tree());
+    assert_eq!(stc.get_by_path(&vec![0]).unwrap().subs_id, 1);
+    assert_eq!(stc.get_by_path(&vec![0, 0]).unwrap().subs_id, 2);
+    assert_eq!(stc.get_by_path(&vec![2]), None);
+    assert_eq!(stc.get_by_path(&vec![0, 1]).unwrap().subs_id, 3);
+    assert_eq!(stc.get_by_path(&vec![1]).unwrap().subs_id, 4);
 }
 
 // ------------------------------------

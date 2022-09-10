@@ -12,6 +12,7 @@ use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
+use crate::db::subscription_state::SubsMapEntry;
 use crate::opml::opmlreader::OpmlReader;
 use crate::timer::ITimer;
 use crate::timer::Timer;
@@ -119,7 +120,6 @@ impl GuiProcessor {
             focus_by_tab: FocusByTab::None,
         }
     }
-
 
     pub fn process_event(&mut self) {
         let mut ev_set: HashSet<GuiEvents> = HashSet::new();
@@ -658,14 +658,17 @@ impl GuiProcessor {
         }
         let mut num_msg_all = self.statusbar_items.num_msg_all;
         let mut num_msg_unread = self.statusbar_items.num_msg_unread;
+
+        let subs_state: SubsMapEntry = (*self.feedsources_r)
+            .borrow()
+            .get_state(repo_id_new)
+            .unwrap_or_default();
         if selected_msg_id != self.statusbar_items.selected_msg_id
             || repo_id_new != self.statusbar_items.selected_repo_id
         {
             self.statusbar_items.selected_msg_id = selected_msg_id;
-            if let Some((n_a, n_u)) = (*self.subscriptionrepo_r)
-                .borrow()
-                .get_num_all_unread(repo_id_new)
-            {
+            //if let Some((n_a, n_u)) = (*self.subscriptionrepo_r).borrow().get_num_all_unread(repo_id_new)
+            if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
                 num_msg_all = n_a;
                 num_msg_unread = n_u;
                 need_update2 = true;

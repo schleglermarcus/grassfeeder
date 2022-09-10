@@ -92,7 +92,7 @@ impl SubscriptionEntry {
     pub fn isdeleted(&self) -> bool {
         self.parent_subs_id == SRC_REPO_ID_DELETED
             || self.parent_subs_id == SRC_REPO_ID_MOVING
-            || self.is_deleted()
+            || self.deleted
     }
 }
 
@@ -131,6 +131,8 @@ impl fmt::Display for SubscriptionEntry {
     }
 }
 
+
+/*
 pub trait FeedSourceState {
     fn is_expanded(&self) -> bool;
     fn set_expanded(&mut self, new_exp: bool);
@@ -216,6 +218,8 @@ impl FeedSourceState for SubscriptionEntry {
     }
 }
 
+*/
+
 impl TableInfo for SubscriptionEntry {
     fn table_name() -> String {
         "subscriptions".to_string()
@@ -298,6 +302,7 @@ impl TableInfo for SubscriptionEntry {
     }
 }
 
+/*
 #[allow(dead_code)]
 pub enum StatusMask {
     Dirty = 1,
@@ -309,3 +314,4 @@ pub enum StatusMask {
     //    FolderExpanded = 64,
     //    Deleted = 128,
 }
+*/

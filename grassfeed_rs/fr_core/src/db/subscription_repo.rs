@@ -2,8 +2,6 @@ use crate::db::message::compress;
 use crate::db::message::decompress;
 use crate::db::sqlite_context::SqliteContext;
 use crate::db::sqlite_context::TableInfo;
-use crate::db::subscription_entry::FeedSourceState;
-use crate::db::subscription_entry::StatusMask;
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_entry::SRC_REPO_ID_DELETED;
 use crate::db::subscription_entry::SRC_REPO_ID_DUMMY;
@@ -91,48 +89,51 @@ pub trait ISubscriptionRepo {
 
     fn delete_by_index(&self, del_index: isize);
 
-    fn clear(&self);
+    /// clear:   deletes the table, and recreates it. Use only inside tests.
+    fn scrub_all_subscriptions(&self);
 
     fn debug_dump_tree(&self, ident: &str);
 
-    #[deprecated(note = "into statemap ")]
-    fn set_schedule_fetch_all(&self);
-    #[deprecated(note = "into statemap ")]
-    fn get_ids_by_status(
-        &self,
-        statusflag: StatusMask,
-        activated: bool,
-        include_folder: bool,
-    ) -> Vec<isize>;
-    #[deprecated(note = "into statemap ")]
-    fn get_tree_path(&self, db_id: isize) -> Option<Vec<u16>>;
-    #[deprecated(note = "into statemap ")]
-    fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry>;
-    #[deprecated(note = "into statemap ")]
-    fn set_status(&self, idlist: &[isize], statusflag: StatusMask, activated: bool);
+    // #[deprecated(note = "into statemap ")]
+    // fn set_schedule_fetch_all(&self);
+    // #[deprecated(note = "into statemap ")]
+    // fn get_ids_by_status(
+    //     &self,
+    //     statusflag: StatusMask,
+    //     activated: bool,
+    //     include_folder: bool,
+    // ) -> Vec<isize>;
+    //
+    // #[deprecated(note = "into statemap ")]
+    // fn get_tree_path(&self, db_id: isize) -> Option<Vec<u16>>;
+    // #[deprecated(note = "into statemap ")]
+    // fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry>;
+    // #[deprecated(note = "into statemap ")]
+    // fn set_status(&self, idlist: &[isize], statusflag: StatusMask, activated: bool);
 
-    /// writes the path array into the cached subscription list
-    #[deprecated(note = "into statemap ")]
-    fn update_cached_paths(&self);
-
-    #[deprecated(note = "into statemap ")]
-    fn clear_num_all_unread(&self, subs_id: isize);
+    // #[deprecated(note = "into statemap ")]
+    // fn clear_num_all_unread(&self, subs_id: isize);
 
     /// returns the modified entry
-    #[deprecated(note = "into statemap ")]
-    fn set_num_all_unread(
-        &self,
-        subs_id: isize,
-        num_all: isize,
-        num_unread: isize,
-    ) -> Option<SubscriptionEntry>;
+    // #[deprecated(note = "into statemap ")]
+    // fn set_num_all_unread(
+    //     &self,
+    //     subs_id: isize,
+    //     num_all: isize,
+    //     num_unread: isize,
+    // ) -> Option<SubscriptionEntry>;
+    //
+    // #[deprecated(note = "into statemap ")]
+    // fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)>;
 
-    #[deprecated(note = "into statemap ")]
-    fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)>;
+    // /// searches subscription_entry that has no unread,all  number set
+    // #[deprecated(note = "into statemap ")]
+    // fn scan_num_all_unread(&self) -> Option<isize>;
 
-    /// searches subscription_entry that has no unread,all  number set
-    #[deprecated(note = "into statemap ")]
-    fn scan_num_all_unread(&self) -> Option<isize>;
+    //----
+
+    /// writes the path array into the cached subscription list
+    fn update_cached_paths(&self);
 
     fn get_highest_src_id(&self) -> isize;
 
@@ -228,54 +229,56 @@ impl SubscriptionRepo {
         } else {
             //
         }
-        self.import_json();
+
+        // self.import_json();
         true // later: remove this
     }
 
-    pub fn import_json(&self) {
-        let file_name = format!("{}/{}", self.folder_name, FILENAME_JSON);
-        if !std::path::Path::new(&file_name).exists() {
-            trace!(
-                "subscription repo json  {} not found, good, exiting. ",
-                &file_name
+    /*
+        pub fn import_json(&self) {
+            let file_name = format!("{}/{}", self.folder_name, FILENAME_JSON);
+            if !std::path::Path::new(&file_name).exists() {
+                trace!(
+                    "subscription repo json  {} not found, good, exiting. ",
+                    &file_name
+                );
+                return;
+            }
+            let r_string = std::fs::read_to_string(file_name.clone());
+            let lines = r_string.unwrap();
+            let dec_r: serde_json::Result<Vec<SubscriptionEntry>> = serde_json::from_str(&lines);
+            if dec_r.is_err() {
+                error!("serde_json:from_str {:?}   {:?} ", dec_r.err(), &file_name);
+                return;
+            }
+
+            let json_vec = dec_r.unwrap();
+
+            let mut num_json: usize = 0;
+            let mut num_db: usize = 0;
+            for se in json_vec {
+                if se.subs_id < 10 {
+                    continue;
+                }
+                num_json += 1;
+                let r = self.store_entry(&se);
+                if r.is_err() {
+                    error!("\t\t TO_DB {}:  {:?} => {:?}", num_json, &se, r);
+                } else {
+                    trace!("IMPORTED: {:?}", r.unwrap() );
+                    num_db += 1;
+                }
+            }
+            if num_json != num_db {
+                error!("IMPORT FAILED");
+            }
+            info!(
+                "IMPORT: {}   #json:{} #db:{}  ",
+                self.folder_name, num_json, num_db
             );
-            return;
+            // todo: rename the json file
         }
-        let r_string = std::fs::read_to_string(file_name.clone());
-        let lines = r_string.unwrap();
-        let dec_r: serde_json::Result<Vec<SubscriptionEntry>> = serde_json::from_str(&lines);
-        if dec_r.is_err() {
-            error!("serde_json:from_str {:?}   {:?} ", dec_r.err(), &file_name);
-            return;
-        }
-
-        let json_vec = dec_r.unwrap();
-
-        let mut num_json: usize = 0;
-        let mut num_db: usize = 0;
-        for se in json_vec {
-            if se.subs_id < 10 {
-                continue;
-            }
-            num_json += 1;
-            let r = self.store_entry(&se);
-            if r.is_err() {
-                error!("\t\t TO_DB {}:  {:?} => {:?}", num_json, &se, r);
-            } else {
-				trace!("IMPORTED: {:?}", r.unwrap() );
-                num_db += 1;
-            }
-        }
-        if num_json != num_db {
-            error!("IMPORT FAILED");
-        }
-        info!(
-            "IMPORT: {}   #json:{} #db:{}  ",
-            self.folder_name, num_json, num_db
-        );
-
-        // todo: rename the json file
-    }
+    */
 
     pub fn load_subscriptions_pretty(&mut self) -> bool {
         let file_name = format!("{}/{}", self.folder_name, FILENAME_JSON);
@@ -372,6 +375,7 @@ impl SubscriptionRepo {
         });
     }
 
+    // TODO  DELETE TREE ITEMS
     // TODO : catch exceeding depth
     pub fn update_paths_rec(
         &self,
@@ -379,6 +383,7 @@ impl SubscriptionRepo {
         parent_subs_id: i32,
         mut is_deleted: bool,
     ) -> bool {
+        info!("TODO:  DELETE TREE ITEMS ");
         if parent_subs_id < 0 {
             is_deleted = true;
         }
@@ -392,10 +397,13 @@ impl SubscriptionRepo {
             path.extend_from_slice(localpath);
             path.push(num as u16);
             self.update_paths_rec(&path, *child_id as i32, is_deleted);
-            if let Some(mut subs_e) = self.list.write().unwrap().get_mut(child_id) {
-                subs_e.tree_path = Some(path);
-                subs_e.set_deleted(is_deleted)
-            }
+
+            warn!("TODO:   correct the path in state_map,   set deleted !!  ");
+
+            // if let Some(mut subs_e) = self.list.write().unwrap().get_mut(child_id) {
+            //     subs_e.tree_path = Some(path);
+            //     subs_e.set_deleted(is_deleted)
+            // }
         });
         false
     }
@@ -744,16 +752,19 @@ impl ISubscriptionRepo for SubscriptionRepo {
         self.ctx.execute(sql);
     }
 
-    fn set_schedule_fetch_all(&self) {
-        self.list
-            .write()
-            .unwrap()
-            .iter_mut()
-            .filter(|(_id, entry)| !entry.is_folder && !entry.is_deleted())
-            .for_each(|(_id, entry)| {
-                entry.set_fetch_scheduled(true);
-            });
-    }
+    /*
+        // done
+        fn set_schedule_fetch_all(&self) {
+            self.list
+                .write()
+                .unwrap()
+                .iter_mut()
+                .filter(|(_id, entry)| !entry.is_folder && !entry.is_deleted())
+                .for_each(|(_id, entry)| {
+                    entry.set_fetch_scheduled(true);
+                });
+        }
+    */
 
     fn store_entry(
         &self,
@@ -853,113 +864,113 @@ impl ISubscriptionRepo for SubscriptionRepo {
         self.dump_tree_rec(&[], 0, ident);
     }
 
-    fn clear(&self) {
+    fn scrub_all_subscriptions(&self) {
         (*self.list).write().unwrap().clear();
 
         let _r = self.ctx.delete_table();
         self.ctx.create_table();
     }
 
-    fn get_ids_by_status(
-        &self,
-        statusflag: StatusMask,
-        activated: bool,
-        include_folder: bool,
-    ) -> Vec<isize> {
-        let mask = statusflag as usize;
-        self.list
-            .read()
-            .unwrap()
-            .iter()
-            .filter(|(_id, entry)| include_folder || !entry.is_folder)
-            .filter_map(|(id, entry)| {
-                if entry.check_bitmask(mask) == activated {
-                    Some(*id)
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<isize>>()
-    }
-
-    fn get_tree_path(&self, db_id: isize) -> Option<Vec<u16>> {
-        if let Some(entry) = self.list.read().unwrap().get(&db_id) {
-            if let Some(p) = &entry.tree_path {
-                return Some(p.clone());
-            }
+    /*
+        fn get_ids_by_status(
+            &self,
+            statusflag: StatusMask,
+            activated: bool,
+            include_folder: bool,
+        ) -> Vec<isize> {
+            let mask = statusflag as usize;
+            self.list
+                .read()
+                .unwrap()
+                .iter()
+                .filter(|(_id, entry)| include_folder || !entry.is_folder)
+                .filter_map(|(id, entry)| {
+                    if entry.check_bitmask(mask) == activated {
+                        Some(*id)
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<isize>>()
         }
-        None
-    }
 
-    fn set_status(&self, idlist: &[isize], statusflag: StatusMask, activated: bool) {
-        let mask = statusflag as usize;
-        self.list
-            .write()
-            .unwrap()
-            .iter_mut()
-            .filter(|(id, _entry)| idlist.contains(*id))
-            .for_each(|(_id, entry)| entry.change_bitmask(mask, activated));
-    }
 
-    fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {
-        self.list.read().unwrap().iter().find_map(|(_id, entry)| {
-            if let Some(e_path) = &entry.tree_path {
-                if e_path == path {
-                    return Some(entry.clone());
+        fn get_tree_path(&self, db_id: isize) -> Option<Vec<u16>> {
+            if let Some(entry) = self.list.read().unwrap().get(&db_id) {
+                if let Some(p) = &entry.tree_path {
+                    return Some(p.clone());
                 }
             }
             None
-        })
-    }
+        }
+
+
+        fn set_status(&self, idlist: &[isize], statusflag: StatusMask, activated: bool) {
+            let mask = statusflag as usize;
+            self.list
+                .write()
+                .unwrap()
+                .iter_mut()
+                .filter(|(id, _entry)| idlist.contains(*id))
+                .for_each(|(_id, entry)| entry.change_bitmask(mask, activated));
+        }
+
+
+
+    */
 
     fn update_cached_paths(&self) {
         self.update_paths_rec(&Vec::<u16>::default(), 0, false);
     }
 
-    fn set_num_all_unread(
-        &self,
-        subs_id: isize,
-        num_all: isize,
-        num_unread: isize,
-    ) -> Option<SubscriptionEntry> {
-        if let Some(entry) = self.list.write().unwrap().get_mut(&subs_id) {
-            entry.num_msg_all_unread = Some((num_all, num_unread));
-            return Some(entry.clone());
-        } else {
-            debug!("set_num_all_unread({})  ID not found", subs_id);
-        }
-        None
-    }
+    /*
 
-    fn clear_num_all_unread(&self, subs_id: isize) {
-        if let Some(entry) = self.list.write().unwrap().get_mut(&subs_id) {
-            entry.num_msg_all_unread = None;
-        }
-    }
-
-    fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)> {
-        if let Some(entry) = self.list.write().unwrap().get_mut(&subs_id) {
-            return entry.num_msg_all_unread;
-        }
-        None
-    }
-
-    /// don't include deleted ones, no folders,
-    fn scan_num_all_unread(&self) -> Option<isize> {
-        let unproc_id: Option<isize> = self.list.read().unwrap().iter().find_map(|(id, se)| {
-            if !se.is_folder
-                && se.num_msg_all_unread.is_none()
-                && se.subs_id > 0
-                && se.parent_subs_id > 0
-                && !se.is_deleted()
-            {
-                Some(*id)
+        fn set_num_all_unread(
+            &self,
+            subs_id: isize,
+            num_all: isize,
+            num_unread: isize,
+        ) -> Option<SubscriptionEntry> {
+            if let Some(entry) = self.list.write().unwrap().get_mut(&subs_id) {
+                entry.num_msg_all_unread = Some((num_all, num_unread));
+                return Some(entry.clone());
             } else {
-                None
+                debug!("set_num_all_unread({})  ID not found", subs_id);
             }
-        });
-        unproc_id
-    }
+            None
+        }
+
+        fn clear_num_all_unread(&self, subs_id: isize) {
+            if let Some(entry) = self.list.write().unwrap().get_mut(&subs_id) {
+                entry.num_msg_all_unread = None;
+            }
+        }
+
+
+        fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)> {
+            if let Some(entry) = self.list.write().unwrap().get_mut(&subs_id) {
+                return entry.num_msg_all_unread;
+            }
+            None
+        }
+
+        /// don't include deleted ones, no folders,
+        fn scan_num_all_unread(&self) -> Option<isize> {
+            let unproc_id: Option<isize> = self.list.read().unwrap().iter().find_map(|(id, se)| {
+                if !se.is_folder
+                    && se.num_msg_all_unread.is_none()
+                    && se.subs_id > 0
+                    && se.parent_subs_id > 0
+                    && !se.is_deleted()
+                {
+                    Some(*id)
+                } else {
+                    None
+                }
+            });
+            unproc_id
+        }
+    */
 
     fn get_highest_src_id(&self) -> isize {
         let o_highest = self.list.read().unwrap().iter().map(|(id, _fse)| *id).max();
@@ -998,6 +1009,19 @@ impl ISubscriptionRepo for SubscriptionRepo {
         self.delete_by_index(fse.subs_id);
         let _r = self.store_entry(&fse);
     }
+
+    /*
+        fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {
+            self.list.read().unwrap().iter().find_map(|(_id, entry)| {
+                if let Some(e_path) = &entry.tree_path {
+                    if e_path == path {
+                        return Some(entry.clone());
+                    }
+                }
+                None
+            })
+        }
+    */
 } // ISubscriptionRepo
 
 //-------------------
@@ -1112,7 +1136,7 @@ mod ut {
         {
             let mut sr = SubscriptionRepo::new(TEST_FOLDER1);
             sr.startup_int();
-            sr.clear();
+            sr.scrub_all_subscriptions();
             let s1 = SubscriptionEntry::default();
             assert!(sr.store_entry(&s1).is_ok());
             assert!(sr.store_entry(&s1).is_ok());
@@ -1312,9 +1336,9 @@ mod ut {
         sr.set_deleted_rec(10);
         let all = sr.get_all_entries();
         // all.iter().for_each(|e| debug!("## {:?}", &e));
-        assert!(all.get(3).unwrap().is_deleted());
-        assert!(all.get(4).unwrap().is_deleted());
-        assert!(all.get(5).unwrap().is_deleted());
+        assert!(all.get(3).unwrap().deleted);
+        assert!(all.get(4).unwrap().deleted);
+        assert!(all.get(5).unwrap().deleted);
     }
 
     #[test]
@@ -1355,7 +1379,7 @@ mod ut {
         {
             let mut sr = SubscriptionRepo::new(repopath);
             sr.startup_int();
-            sr.clear();
+            sr.scrub_all_subscriptions();
             let s1 = SubscriptionEntry::default();
             assert!(sr.store_entry(&s1).is_ok());
             assert!(sr.store_entry(&s1).is_ok());
@@ -1381,7 +1405,7 @@ mod ut {
         {
             let mut sr = SubscriptionRepo::new2(repopath.to_string());
             sr.startup_int();
-            sr.clear();
+            sr.scrub_all_subscriptions();
             let s1 = SubscriptionEntry::default();
             let r1 = sr.store_entry(&s1);
             assert!(r1.is_ok());

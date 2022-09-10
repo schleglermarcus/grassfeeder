@@ -71,7 +71,7 @@ fn write_feed() {
     // debug!("written to {} {}", RSS_DYNAMIC_FILENAME, ts_now);
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn rungui_local_clear() {
     setup();
@@ -98,7 +98,7 @@ fn rungui_local_clear() {
 
 fn test_setup_values(acr: &AppContext, addr: String) {
     let fsrwr: Rc<RefCell<dyn ISubscriptionRepo>> = acr.get_rc::<SubscriptionRepo>().unwrap();
-    (*fsrwr.borrow()).clear();
+    (*fsrwr.borrow()).scrub_all_subscriptions();
     if false {
         let msg_r: Rc<RefCell<dyn IMessagesRepo>> = acr.get_rc::<MessagesRepo>().unwrap();
         let _r = (*msg_r).borrow().get_ctx().delete_table();
