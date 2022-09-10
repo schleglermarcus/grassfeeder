@@ -1,1 +1,1 @@
-pub const DOWNLOADER_MAX_NUM_THREADS: usize = 2;
+pub const DOWNLOADER_MAX_NUM_THREADS: usize = 3;
