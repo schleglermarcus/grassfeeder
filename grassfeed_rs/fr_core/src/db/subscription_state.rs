@@ -157,17 +157,16 @@ impl ISubscriptionState for SubscriptionState {
     }
 
     fn get_id_by_path(&self, path: &[u16]) -> Option<isize> {
-        self.statemap.iter().find_map(|(id, st)| {
-            if let Some(e_path) = &st.tree_path {
-                debug!("comparing paths {:?} with {:?}", &e_path, &path);
-                if e_path == path {
-					debug!("EQUAL  paths {:?}", id);
-                    return Some(id);
+        self.statemap
+            .iter()
+            .filter_map(|(id, st)| {
+                if let Some(tp) = &st.tree_path {
+                    Some((id, tp))
+                } else {
+                    None
                 }
-            }
-            None
-        });
-        None
+            })
+            .find_map(|(id, tp)| if tp == path { Some(*id) } else { None })
     }
 
     fn set_schedule_fetch_all(&mut self) {
