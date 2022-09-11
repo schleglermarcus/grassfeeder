@@ -460,7 +460,7 @@ impl GuiProcessor {
                     let new_id = self
                         .feedsources_r
                         .borrow_mut()
-                        .add_new_feedsource(s0.clone(), s1.clone());
+                        .add_new_subscription(s0.clone(), s1.clone());
                     self.feedsources_r
                         .borrow_mut()
                         .addjob(SJob::FillSourcesTree);

@@ -124,7 +124,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         (url_nn_aug.as_str(), "NN-aug, special chars"),
     ];
     src.iter().for_each(|(url, desc)| {
-        feedsources.add_new_feedsource_at_parent(url.to_string(), desc.to_string(), f_hill, false);
+        feedsources.add_new_subscription_at_parent(url.to_string(), desc.to_string(), f_hill, false);
     });
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
     if true {
@@ -134,7 +134,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_staseve.as_str(), "staseve11"),
         ];
         src.iter().for_each(|(url, desc)| {
-            feedsources.add_new_feedsource_at_parent(
+            feedsources.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
                 folder2,
@@ -154,7 +154,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
         ];
         src.iter().for_each(|(url, desc)| {
-            feedsources.add_new_feedsource_at_parent(
+            feedsources.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
                 folder3,
@@ -216,7 +216,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
         let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
-            feedsources.add_new_feedsource_at_parent(
+            feedsources.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
                 folder3,
@@ -322,7 +322,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
         let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
-            feedsources.add_new_feedsource_at_parent(
+            feedsources.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
                 folder4,

@@ -30,7 +30,7 @@ pub trait IMessagesRepo {
 
     fn get_by_index(&self, indexvalue: isize) -> Option<MessageRow>;
 
-    /// returns   feed_src_id  , is_read
+    /// returns   subscription id  , is_read
     fn get_is_read(&self, repo_id: isize) -> (isize, bool);
 
     fn get_all_messages(&self) -> Vec<MessageRow>;
@@ -105,7 +105,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn get_by_src_id(&self, src_id: isize) -> Vec<MessageRow> {
         let prepared = format!(
-            "SELECT * FROM {} WHERE feed_src_id={}",
+            "SELECT * FROM {} WHERE subscription_id={}",
             MessageRow::table_name(),
             src_id
         );
@@ -128,7 +128,7 @@ impl IMessagesRepo for MessagesRepo {
     /// returns  the number of read lines for that source id:   -1 for undefined
     fn get_read_sum(&self, src_id: isize) -> isize {
         let sql = format!(
-            "SELECT COUNT({}) FROM {} WHERE feed_src_id = {} and is_read = true ",
+            "SELECT COUNT({}) FROM {} WHERE subscription_id = {} and is_read = true ",
             MessageRow::index_column_name(),
             MessageRow::table_name(),
             src_id
@@ -138,7 +138,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn get_src_sum(&self, src_id: isize) -> isize {
         let sql = format!(
-            "SELECT COUNT({}) FROM {} WHERE feed_src_id = {} ",
+            "SELECT COUNT({}) FROM {} WHERE subscription_id = {} ",
             MessageRow::index_column_name(),
             MessageRow::table_name(),
             src_id
@@ -160,7 +160,7 @@ impl IMessagesRepo for MessagesRepo {
         self.ctx.get_by_index(indexvalue)
     }
 
-    /// returns   feed_src_id  , is_read
+    /// returns   subscription_id  , is_read
     fn get_is_read(&self, repo_id: isize) -> (isize, bool) {
         let sql = format!(
             "SELECT * FROM {} WHERE {} = {} ",
@@ -197,7 +197,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn update_is_read_all(&self, source_repo_id: isize, new_is_read: bool) {
         let sql = format!(
-            "UPDATE {}  SET  is_read = {} WHERE feed_src_id = {}",
+            "UPDATE {}  SET  is_read = {} WHERE subscription_id = {}",
             MessageRow::table_name(),
             new_is_read,
             source_repo_id,
@@ -255,7 +255,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn get_max_src_index(&self) -> isize {
         let sql = format!(
-            "SELECT MAX( feed_src_id ) FROM {} ",
+            "SELECT MAX( subscription_id ) FROM {} ",
             MessageRow::table_name()
         );
         self.ctx.count(sql)
@@ -269,7 +269,7 @@ impl IMessagesRepo for MessagesRepo {
             .join(",");
 
         let sql = format!(
-            "SELECT * FROM {} where feed_src_id NOT IN ( {} ) and is_deleted = false ",
+            "SELECT * FROM {} where subscription_id NOT IN ( {} ) and is_deleted = false ",
             MessageRow::table_name(),
             src_ids_jo
         );
@@ -334,12 +334,12 @@ mod t {
         setup();
         let msgrepo_r = prepare_3_rows();
         let mut e1 = MessageRow::default();
-        e1.feed_src_id = 1;
+        e1.subscription_id = 1;
         let _r = (*msgrepo_r).borrow().insert(&e1);
         let src_not: Vec<i32> = vec![0, 3];
         let msg_not = (*msgrepo_r).borrow().get_src_not_contained(&src_not);
         assert_eq!(msg_not.len(), 1);
-        assert_eq!(msg_not.get(0).unwrap().feed_src_id, 1);
+        assert_eq!(msg_not.get(0).unwrap().subscription_id, 1);
     }
 
     #[test]
@@ -443,9 +443,9 @@ mod t {
         let msg_r: Rc<RefCell<dyn IMessagesRepo>> = Rc::new(RefCell::new(messagesrepo));
         let mut e1 = MessageRow::default();
         let _r = (*msg_r).borrow().insert(&e1);
-        e1.feed_src_id = 3;
+        e1.subscription_id = 3;
         let _r = (*msg_r).borrow().insert(&e1);
-        e1.feed_src_id = 3;
+        e1.subscription_id = 3;
         e1.is_read = true;
         let _r = (*msg_r).borrow().insert(&e1);
         msg_r
@@ -521,7 +521,7 @@ mod t {
         let mut e1 = MessageRow::default();
         let r1 = messagesrepo.get_ctx().insert(&e1, false);
         assert!(r1.is_ok());
-        e1.feed_src_id = 3;
+        e1.subscription_id = 3;
         e1.title = "title3".to_string();
         e1.post_id = "47".to_string();
         e1.link = "link47".to_string();
@@ -539,7 +539,7 @@ mod t {
         assert!(e1.is_some());
         let e2 = messagesrepo.get_ctx().get_by_index(2).unwrap();
         assert_eq!(e2.message_id, 2);
-        assert_eq!(e2.feed_src_id, 3);
+        assert_eq!(e2.subscription_id, 3);
         assert_eq!(e2.title.as_str(), "title3");
         assert_eq!(e2.post_id.as_str(), "47");
         assert_eq!(e2.link.as_str(), "link47");

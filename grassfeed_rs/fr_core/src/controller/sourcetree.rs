@@ -6,6 +6,7 @@ use crate::controller::contentlist::CJob;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
 use crate::db::icon_repo::IconRepo;
+use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_entry::SRC_REPO_ID_DELETED;
@@ -90,8 +91,8 @@ pub trait ISourceTreeController {
     fn set_tree_expanded(&self, source_repo_id: isize, new_expanded: bool);
     fn addjob(&self, nj: SJob);
 
-    fn add_new_feedsource(&mut self, newsource: String, display: String) -> isize;
-    fn add_new_feedsource_at_parent(
+    fn add_new_subscription(&mut self, newsource: String, display: String) -> isize;
+    fn add_new_subscription_at_parent(
         &mut self,
         newsource: String,
         display: String,
@@ -837,21 +838,16 @@ impl SourceTreeController {
     fn startup_read_config(&mut self) {
         self.config.feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
-            //            .get_section_key_bool(&Self::section_name(), Self::CONF_FETCH_ON_START);
             .get_val_bool(Self::CONF_FETCH_ON_START);
         self.config.display_feedcount_all = (*self.configmanager_r)
             .borrow()
-            //            .get_section_key_bool(&Self::section_name(), Self::CONF_DISPLAY_FEECOUNT_ALL);
             .get_val_bool(Self::CONF_DISPLAY_FEECOUNT_ALL);
         self.config.feeds_fetch_interval = (*self.configmanager_r)
             .borrow()
-            //		get_section_key_int(            &Self::section_name(),          Self::CONF_FETCH_INTERVAL,            0,        ) as u32;
             .get_val_int(Self::CONF_FETCH_INTERVAL)
             .unwrap_or(0) as u32;
-
         self.config.feeds_fetch_interval_unit = (*self.configmanager_r)
             .borrow()
-            //            .get_section_key_int(&Self::section_name(), Self::CONF_FETCH_INTERVAL_UNIT, 0)
             .get_val_int(Self::CONF_FETCH_INTERVAL_UNIT)
             .unwrap_or(0) as u32;
 
@@ -863,23 +859,17 @@ impl SourceTreeController {
         }
         self.config.feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
-            //.get_section_key_bool(&Self::section_name(), Self::CONF_FETCH_ON_START);
             .get_val_bool(Self::CONF_FETCH_ON_START);
 
         self.config.mode_debug = (*self.configmanager_r)
             .borrow()
-            //		get_section_key_bool(            &ConfigManager::section_name(),           ConfigManager::CONF_MODE_DEBUG,        );
             .get_val_bool(ConfigManager::CONF_MODE_DEBUG);
-
-        // debug!(            "sectionname={}    MODE_DEBUG={:?}",            ConfigManager::section_name(),            self.config.mode_debug        );
     }
 
     fn check_paths(&self) {
         if *self.need_check_fs_paths.borrow() {
             let now = Instant::now();
-            // (*self.subscriptionrepo_r).borrow().update_cached_paths();
             self.update_cached_paths();
-
             self.need_check_fs_paths.replace(false);
             let elapsed_ms = now.elapsed().as_millis();
             if elapsed_ms > 20 {
@@ -889,8 +879,18 @@ impl SourceTreeController {
     }
 
     pub fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {
-        if let Some(subs_id) = self.statemap.borrow().get_id_by_path(path) {
+        let o_subs_id = self.statemap.borrow().get_id_by_path(path);
+        info!("{path:?}  => o_subs_id={o_subs_id:?}");
+
+        if let Some(subs_id) = o_subs_id {
             return (*self.subscriptionrepo_r).borrow().get_by_index(subs_id);
+        } else {
+            warn!(
+                "no subscr_id for {:?}   #statemap={}",
+                &path,
+                self.statemap.borrow().len()
+            );
+            self.statemap.borrow().dump();
         }
         None
     }
@@ -917,15 +917,27 @@ impl SourceTreeController {
             path.extend_from_slice(localpath);
             path.push(num as u16);
             self.update_paths_rec(&path, *child_id as i32, is_deleted);
-            // if let Some(mut subs_e) = self.list.write().unwrap().get_mut(child_id) {
-            //     subs_e.tree_path = Some(path);
-            //     subs_e.set_deleted(is_deleted)
-            // }
             let mut smm = self.statemap.borrow_mut();
             smm.set_tree_path(*child_id, path);
             smm.set_deleted(*child_id, is_deleted);
         });
         false
+    }
+
+    /// scans the messages for highest subscription id, if there is a higher one, use next higher subscription id
+    /// returns 0     to use   autoincrement
+    fn get_next_available_subscription_id(&self) -> isize {
+        let subs_repo_highest = (*self.subscriptionrepo_r).borrow().get_highest_src_id();
+        let mut next_subs_id = std::cmp::max(subs_repo_highest + 1, 10);
+        if let Some(messagesrepo) = self.messagesrepo_w.upgrade() {
+            let h = (*messagesrepo).borrow().get_max_src_index();
+            if h >= next_subs_id {
+                next_subs_id = h + 1;
+            } else {
+                next_subs_id = 0; // default auto increment
+            }
+        }
+        next_subs_id
     }
 
     //	impl SourceTree
@@ -947,7 +959,6 @@ impl ISourceTreeController for SourceTreeController {
                     error!("Drag lost entries: {}->{}", length_before, all2.len());
                     success = false;
                 } else {
-                    // (*self.subscriptionrepo_r).borrow().update_cached_paths();
                     self.update_cached_paths();
                     success = true;
                 }
@@ -987,15 +998,12 @@ impl ISourceTreeController for SourceTreeController {
                 .map(|fse| fse.subs_id)
                 .collect::<Vec<isize>>();
             trace!("mark_schedule_fetch child_feeds: {:?}   ", child_repo_ids);
-
-            // (*self.subscriptionrepo_r).borrow().set_status(
             self.statemap.borrow_mut().set_status(
                 &child_repo_ids,
                 StatusMask::FetchScheduled,
                 true,
             );
         } else {
-            // (*self.subscriptionrepo_r).borrow().set_status(
             self.statemap
                 .borrow_mut()
                 .set_status(&[subs_id], StatusMask::FetchScheduled, true);
@@ -1016,7 +1024,6 @@ impl ISourceTreeController for SourceTreeController {
             let child_fse: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
                 .borrow()
                 .get_by_parent_repo_id(src_repo_id);
-            // debug!("mark_as_read: folder  ");
             child_fse
                 .iter()
                 .filter(|fse| !fse.is_folder)
@@ -1088,12 +1095,11 @@ impl ISourceTreeController for SourceTreeController {
         }
     }
 
-    fn add_new_feedsource(&mut self, newsource: String, display: String) -> isize {
+    fn add_new_subscription(&mut self, newsource: String, display: String) -> isize {
         let p_id = self.current_new_folder_parent_id.unwrap_or(0);
-        self.add_new_feedsource_at_parent(newsource, display, p_id, false)
+        self.add_new_subscription_at_parent(newsource, display, p_id, false)
     }
-
-    fn add_new_feedsource_at_parent(
+    fn add_new_subscription_at_parent(
         &mut self,
         newsource: String,
         display: String,
@@ -1105,19 +1111,8 @@ impl ISourceTreeController for SourceTreeController {
             .to_string();
         let mut san_display = remove_invalid_chars_from_input(display).trim().to_string();
         san_display = filter_by_iso8859_1(&san_display).0;
-        /*
-                let mut highest_src_id = 10;
-                if let Some(messagesrepo) = self.messagesrepo_w.upgrade() {
-                    let h = (*messagesrepo).borrow().get_max_src_index();
-                    highest_src_id = std::cmp::max(h, highest_src_id);
-                }
-                let sub_repo_max = (*self.subscriptionrepo_r).borrow().get_highest_src_id();
-                highest_src_id = std::cmp::max(sub_repo_max, highest_src_id);
-                highest_src_id += 1;
-        */
-
         let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
-        // fse.subs_id = highest_src_id;
+        fse.subs_id = self.get_next_available_subscription_id();
         fse.parent_subs_id = parent_id;
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
@@ -1128,7 +1123,6 @@ impl ISourceTreeController for SourceTreeController {
         if let Some(mfp) = max_folderpos {
             fse.folder_position = (mfp + 1) as isize;
         }
-        // trace!("add_new_feedsource_at_parent  INSERT_FSE={:?}", &fse);
         let mut new_id = -1;
         match (*self.subscriptionrepo_r).borrow().store_entry(&fse) {
             Ok(fse2) => {
@@ -1140,22 +1134,19 @@ impl ISourceTreeController for SourceTreeController {
                 }
                 new_id = fse2.subs_id;
             }
-            Err(e) => error!(" add_new_feedsource_at_parent >{}<  {:?}", &san_source, e),
+            Err(e) => error!(" add_new_subscription_at_parent >{}<  {:?}", &san_source, e),
         }
 
         new_id
     }
 
     fn set_fetch_in_progress(&self, source_repo_id: isize) {
-        // (*self.subscriptionrepo_r).borrow().set_status(
         self.statemap
             .borrow_mut()
             .set_status(&[source_repo_id], StatusMask::FetchInProgress, true);
-        // (*self.subscriptionrepo_r).borrow().set_status(
         self.statemap
             .borrow_mut()
             .set_status(&[source_repo_id], StatusMask::FetchScheduled, false);
-        // (*self.subscriptionrepo_r).borrow().set_status(
         self.statemap.borrow_mut().set_status(
             &[source_repo_id],
             StatusMask::FetchScheduledJobCreated,
@@ -1166,30 +1157,25 @@ impl ISourceTreeController for SourceTreeController {
     }
 
     fn set_fetch_finished(&self, source_repo_id: isize, error_happened: bool) {
-        // (*self.subscriptionrepo_r).borrow().set_status(
         self.statemap.borrow_mut().set_status(
             &[source_repo_id],
             StatusMask::FetchInProgress,
             false,
         );
-        //        (*self.subscriptionrepo_r).borrow().set_status(
         self.statemap
             .borrow_mut()
             .set_status(&[source_repo_id], StatusMask::FetchScheduled, false);
-        // (*self.subscriptionrepo_r).borrow().set_status(
         self.statemap.borrow_mut().set_status(
             &[source_repo_id],
             StatusMask::FetchScheduledJobCreated,
             false,
         );
-        // (*self.subscriptionrepo_r).borrow().set_status(
         self.statemap.borrow_mut().set_status(
             &[source_repo_id],
             StatusMask::ErrFetchReq,
             error_happened,
         );
         self.addjob(SJob::CheckSpinnerActive);
-        //        (*self.subscriptionrepo_r)            .borrow()
         self.statemap
             .borrow_mut()
             .clear_num_all_unread(source_repo_id);

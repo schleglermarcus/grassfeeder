@@ -92,7 +92,6 @@ impl<T: TableInfo> SqliteContext<T> {
             col_names.push(T::index_column_name());
             wrap_vec.push(Wrap::INT(entry.get_index_value()));
         }
-        // 		col_names = entry.get_insert_columns();
         col_names.extend(entry.get_insert_columns());
         wrap_vec.extend(entry.get_insert_values());
 
@@ -103,7 +102,7 @@ impl<T: TableInfo> SqliteContext<T> {
             col_names.join(", "),
             questionmarks
         );
-        // trace!("insert: {} {:?} => {:?}", with_index, &prepared, &wrap_vec);
+        // trace!("insert:{:?}=>{:?} Idx:{}", &prepared, &wrap_vec, with_index);
         let vec_dyn_tosql: Vec<&dyn ToSql> = wrap_vec
             .iter()
             .map(|w| w.to_dyn_tosql())

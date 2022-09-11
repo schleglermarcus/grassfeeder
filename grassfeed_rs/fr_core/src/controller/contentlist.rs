@@ -209,7 +209,7 @@ impl FeedContents {
         if debug_mode {
             newrow.push(AValue::ASTR(format!(
                 "id{} src{}  postid:{}",
-                fc.message_id, fc.feed_src_id, fc.post_id
+                fc.message_id, fc.subscription_id, fc.post_id
             )));
         } else {
             newrow.push(AValue::None);
@@ -1065,7 +1065,7 @@ pub fn get_font_size_from_config(configmanager_r: Rc<RefCell<ConfigManager>>) ->
             .unwrap_or(0) as u32;
     }
     0
-	
+
 }
 
 //------------------------------------------------------

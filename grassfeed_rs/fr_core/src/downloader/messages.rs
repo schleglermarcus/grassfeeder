@@ -182,7 +182,7 @@ pub fn feed_text_to_entries(
         Ok(feed) => {
             for e in feed.entries {
                 let mut fce = message_from_modelentry(&e);
-                fce.feed_src_id = source_repo_id;
+                fce.subscription_id = source_repo_id;
                 fce.title = compress(&fce.title);
                 fce.content_text = compress(&fce.content_text);
                 fce.categories = compress(&fce.categories);

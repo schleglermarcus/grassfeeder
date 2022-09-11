@@ -11,6 +11,25 @@ use fr_core::db::message::MessageRow;
 use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::util::db_time_to_display_nonnull;
 
+use tree_drag_common::dataset_some_tree;
+use tree_drag_common::prepare_source_tree_controller;
+
+#[test]
+fn check_paths_simple() {
+    setup();
+    let (stc, _fsource_r) = prepare_source_tree_controller(dataset_some_tree());
+    (*_fsource_r)
+        .borrow()
+        .get_all_entries()
+        .iter()
+        .for_each(|e| debug!("## {:?}", e));
+    assert_eq!(stc.get_by_path(&vec![0]).unwrap().subs_id, 1);
+    assert_eq!(stc.get_by_path(&vec![0, 0]).unwrap().subs_id, 2);
+    assert_eq!(stc.get_by_path(&vec![2]), None);
+    assert_eq!(stc.get_by_path(&vec![0, 1]).unwrap().subs_id, 3);
+    assert_eq!(stc.get_by_path(&vec![1]).unwrap().subs_id, 4);
+}
+
 // #[ignore]
 //  #[test]
 #[allow(dead_code)]

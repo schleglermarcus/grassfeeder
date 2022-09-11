@@ -26,54 +26,66 @@ use std::sync::Arc;
 
 fn prepare_db_with_errors(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo) {
     let mut se = SubscriptionEntry::default();
-    let _r = subsrepo.store_entry(&se);
-    se.parent_subs_id = 10;
-    let _r = subsrepo.store_entry(&se);
-    se.parent_subs_id = 10; // unchanged folder pos
+    assert!(subsrepo.store_entry(&se).is_ok());
+    se.parent_subs_id = 1;
+    assert!(subsrepo.store_entry(&se).is_ok());
+    se.parent_subs_id = 1; // unchanged folder pos, that's an error
     se.display_name = "Japan 無料ダウンロード".to_string();
     se.expanded = true;
     let _r = subsrepo.store_entry(&se);
-
+    // 	debug!("### {:#?}", subsrepo.get_all_entries());
     let mut m1 = MessageRow::default();
-    m1.feed_src_id = 1;
+    m1.subscription_id = 1;
     let _r = msgrepo.insert(&m1);
-    m1.feed_src_id = 2;
+    m1.subscription_id = 2;
     let _r = msgrepo.insert(&m1);
 }
 
-// #[ignore]	// TODO
+/*
+// #[test]
+fn t_db_prepare() {
+    setup();
+    let sr = SubscriptionRepo::new_inmem(); // new("");
+    sr.scrub_all_subscriptions();
+    let mut se = SubscriptionEntry::default();
+
+    assert!(sr.store_entry(&se).is_ok());
+    se.parent_subs_id=20;
+    assert!(sr.store_entry(&se).is_ok());
+    assert!(sr.store_entry(&se).is_ok());
+    debug!("### {:#?}", sr.get_all_entries());
+}
+*/
+
 #[test]
 fn t_db_cleanup() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
-    let subsrepo = SubscriptionRepo::new_inmem();  // new("");
-    let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()) ;  // by_existing_list(subsrepo.get_list());
-
-
-    //    let subsrepo_r: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(subsrepo));
+    let subsrepo = SubscriptionRepo::new_inmem(); // new("");
+    subsrepo.scrub_all_subscriptions();
     let msgrepo1 = MessagesRepo::new_in_mem();
     let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors(&msgrepo1, &subsrepo);
-
+    let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
     let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1);
-
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
-    assert_eq!(inner.fp_correct_subs_parent.lock().unwrap().len(), 1);
+    let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
+    assert_eq!(parent_ids_to_correct.len(), 1);
+
     assert!(subsrepo1
-        .get_by_index(11)
+        .get_by_index(1)
         .unwrap()
         .display_name
         .starts_with("unnamed"));
-    assert!(subsrepo1.get_by_index(12).unwrap().display_name.len() < 10);
-    assert!(!subsrepo1.get_by_index(12).unwrap().expanded);
-
-    assert_eq!(msgrepo2.get_by_index(1).unwrap().is_deleted, true);
-    assert_eq!(msgrepo2.get_by_index(2).unwrap().is_deleted, true);
+    assert!(subsrepo1.get_by_index(2).unwrap().display_name.len() < 10);
+    assert!(!subsrepo1.get_by_index(2).unwrap().expanded);
+    // debug!("ALLMSG={:#?}", msgrepo2.get_all_messages());
+    assert_eq!(msgrepo2.get_by_index(1).unwrap().is_deleted, false); // belongs to subscription
+    assert_eq!(msgrepo2.get_by_index(2).unwrap().is_deleted, true); // does not belong to subscription
 }
 
-#[ignore]		 // TODO
 #[test]
 fn comprehensive_feed_download() {
     setup();
@@ -101,7 +113,6 @@ fn comprehensive_feed_download() {
     assert_eq!(all_e.len(), 1);
 }
 
-// #[ignore]
 #[test]
 fn downloader_load_message_into_db() {
     setup();
@@ -112,7 +123,8 @@ fn downloader_load_message_into_db() {
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let (gp_s, _gp_r) = flume::bounded::<Job>(9);
     let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
-    let f_src_repo = SubscriptionRepo::new("");
+    let f_src_repo = SubscriptionRepo::new_inmem(); // new("");
+    f_src_repo.scrub_all_subscriptions();
     let mut fse = SubscriptionEntry::from_new_url(
         "feed1-display".to_string(),
         "gui_proc_rss2_v1.rss".to_string(),
@@ -152,7 +164,7 @@ fn downloader_load_message_into_db() {
 
 /// Timestamp delivered   from    https://feeds.breakingnews.ie/bnworld
 /// https://www.w3.org/Protocols/rfc822/#z28
-#[ignore]
+// #[ignore]
 #[test]
 fn chrono_broken_timestamp() {
     setup();
@@ -164,7 +176,6 @@ fn chrono_broken_timestamp() {
         "trailing input".to_string()
     );
 }
-
 
 fn get_file_fetcher() -> WebFetcherType {
     Arc::new(Box::new(FileFetcher::new(
@@ -196,6 +207,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-		let _r = logger_config::setup_fern_logger(0);
+        let _r = logger_config::setup_fern_logger(0);
     });
 }

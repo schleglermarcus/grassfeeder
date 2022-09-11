@@ -54,7 +54,7 @@ pub trait ISubscriptionRepo {
 
     fn get_all_entries(&self) -> Vec<SubscriptionEntry>;
 
-    #[deprecated(note = "use ctx.get_all()")]
+    #[deprecated(note = "use get_all_entries()")]
     fn get_list(&self) -> Arc<RwLock<HashMap<isize, SubscriptionEntry>>>;
 
     /// if subs_id == 0  stores at next possible higher  subs_id.
@@ -133,7 +133,7 @@ pub trait ISubscriptionRepo {
     //----
 
     /// writes the path array into the cached subscription list
-//     fn update_cached_paths(&self);
+    //     fn update_cached_paths(&self);
 
     fn get_highest_src_id(&self) -> isize;
 
@@ -142,7 +142,7 @@ pub trait ISubscriptionRepo {
 
     fn store_default_db_entries(&self);
 
-	 fn get_connection(&self) -> Arc<Mutex<Connection>>;
+    fn get_connection(&self) -> Arc<Mutex<Connection>>;
 }
 
 pub struct SubscriptionRepo {
@@ -307,8 +307,7 @@ impl SubscriptionRepo {
         true
     }
 
-
-	// #[deprecated] // later 
+    // #[deprecated] // later
     pub fn check_or_store(&mut self) {
         let mut count_changed: bool = false;
         let current_length = (*self.list).read().unwrap().len();
@@ -379,40 +378,39 @@ impl SubscriptionRepo {
         });
     }
 
-/*
-    // TODO : catch exceeding depth
-    pub fn update_paths_rec(
-        &self,
-        localpath: &[u16],
-        parent_subs_id: i32,
-        mut is_deleted: bool,
-    ) -> bool {
-        info!("TODO:  DELETE TREE ITEMS ");
-        if parent_subs_id < 0 {
-            is_deleted = true;
+    /*
+        // TODO : catch exceeding depth
+        pub fn update_paths_rec(
+            &self,
+            localpath: &[u16],
+            parent_subs_id: i32,
+            mut is_deleted: bool,
+        ) -> bool {
+            info!("TODO:  DELETE TREE ITEMS ");
+            if parent_subs_id < 0 {
+                is_deleted = true;
+            }
+            let entries: Vec<SubscriptionEntry> = self.get_by_parent_repo_id(parent_subs_id as isize);
+            let child_ids: Vec<isize> = entries
+                .iter()
+                .map(|entry| entry.subs_id)
+                .collect::<Vec<isize>>();
+            child_ids.iter().enumerate().for_each(|(num, child_id)| {
+                let mut path: Vec<u16> = Vec::new();
+                path.extend_from_slice(localpath);
+                path.push(num as u16);
+                self.update_paths_rec(&path, *child_id as i32, is_deleted);
+
+                warn!("TODO:   correct the path in state_map,   set deleted !!  ");
+
+                // if let Some(mut subs_e) = self.list.write().unwrap().get_mut(child_id) {
+                //     subs_e.tree_path = Some(path);
+                //     subs_e.set_deleted(is_deleted)
+                // }
+            });
+            false
         }
-        let entries: Vec<SubscriptionEntry> = self.get_by_parent_repo_id(parent_subs_id as isize);
-        let child_ids: Vec<isize> = entries
-            .iter()
-            .map(|entry| entry.subs_id)
-            .collect::<Vec<isize>>();
-        child_ids.iter().enumerate().for_each(|(num, child_id)| {
-            let mut path: Vec<u16> = Vec::new();
-            path.extend_from_slice(localpath);
-            path.push(num as u16);
-            self.update_paths_rec(&path, *child_id as i32, is_deleted);
-
-            warn!("TODO:   correct the path in state_map,   set deleted !!  ");
-
-            // if let Some(mut subs_e) = self.list.write().unwrap().get_mut(child_id) {
-            //     subs_e.tree_path = Some(path);
-            //     subs_e.set_deleted(is_deleted)
-            // }
-        });
-        false
-    }
-*/
-
+    */
 
     fn update_deleted_list(&self, src_ids: Vec<isize>, is_del: bool) {
         let joined = src_ids
@@ -659,16 +657,17 @@ impl ISubscriptionRepo for SubscriptionRepo {
 
     /// display name shall be encoded
     fn update_displayname(&self, src_id: isize, new_name: String) {
-        match (*self.list).write().unwrap().get_mut(&src_id) {
-            Some(mut entry) => {
-                entry.display_name = new_name.clone();
-                entry.is_dirty = true;
-            }
-            None => {
-                debug!("update_displayname: not found {}", src_id);
-            }
-        };
-
+        if self.migr_read_from_json {
+            match (*self.list).write().unwrap().get_mut(&src_id) {
+                Some(mut entry) => {
+                    entry.display_name = new_name.clone();
+                    entry.is_dirty = true;
+                }
+                None => {
+                    debug!("update_displayname: not found {}", src_id);
+                }
+            };
+        }
         let sql = format!(
             "UPDATE {}  SET   display_name=\"{}\"  WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -773,6 +772,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
         entry: &SubscriptionEntry,
     ) -> Result<SubscriptionEntry, Box<dyn std::error::Error>> {
         if self.migr_read_from_json {
+            warn!("subs_repo: storing to json!");
             let mut new_id = entry.subs_id;
             if new_id == 0 {
                 let max_id = match (*self.list).read().unwrap().keys().max() {
@@ -791,8 +791,6 @@ impl ISubscriptionRepo for SubscriptionRepo {
                 .insert(new_id, store_entry.clone());
             return Ok(store_entry);
         }
-
-        // TODO handle    subs_id == 0
         match self.ctx.insert(&entry, entry.subs_id != 0) {
             Ok(indexval) => {
                 let mut ret_e: SubscriptionEntry = entry.clone();
@@ -921,12 +919,9 @@ impl ISubscriptionRepo for SubscriptionRepo {
 
     */
 
-
-	// fn update_cached_paths(&self) {
+    // fn update_cached_paths(&self) {
     //     self.update_paths_rec(&Vec::<u16>::default(), 0, false);
     // }
-
-
 
     /*
 
@@ -1017,11 +1012,9 @@ impl ISubscriptionRepo for SubscriptionRepo {
         let _r = self.store_entry(&fse);
     }
 
-
-	 fn get_connection(&self) -> Arc<Mutex<Connection>> {
+    fn get_connection(&self) -> Arc<Mutex<Connection>> {
         self.ctx.get_connection()
     }
-
 } // ISubscriptionRepo
 
 //-------------------

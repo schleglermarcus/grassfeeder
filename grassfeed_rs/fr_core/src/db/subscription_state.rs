@@ -37,6 +37,9 @@ pub trait ISubscriptionState {
     fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)>;
 
     fn set_deleted(&mut self, subs_id: isize, new_del: bool);
+
+    fn len(&self) -> usize;
+    fn dump(&self);
 }
 
 #[derive(Default)]
@@ -156,7 +159,9 @@ impl ISubscriptionState for SubscriptionState {
     fn get_id_by_path(&self, path: &[u16]) -> Option<isize> {
         self.statemap.iter().find_map(|(id, st)| {
             if let Some(e_path) = &st.tree_path {
+                debug!("comparing paths {:?} with {:?}", &e_path, &path);
                 if e_path == path {
+					debug!("EQUAL  paths {:?}", id);
                     return Some(id);
                 }
             }
@@ -173,6 +178,17 @@ impl ISubscriptionState for SubscriptionState {
                 entry.set_fetch_scheduled(true);
             });
     }
+
+    fn len(&self) -> usize {
+        self.statemap.len()
+    }
+
+    fn dump(&self) {
+        self.statemap
+            .iter()
+            .for_each(|(k, v)| debug!("SSD {} {:?}", k, v));
+        // debug!("subscription_state::dump() {:#?}", self.statemap);
+    }
 }
 
 #[allow(dead_code)]
@@ -188,7 +204,7 @@ pub enum StatusMask {
 }
 
 #[allow(dead_code)]
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct SubsMapEntry {
     pub tree_path: Option<Vec<u16>>,
     pub status: usize,

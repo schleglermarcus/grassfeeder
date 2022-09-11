@@ -42,7 +42,7 @@ impl CompWrap {
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct MessageRow {
     pub message_id: isize,
-    pub feed_src_id: isize,
+    pub subscription_id: isize,
     /// keep compressed data in here
     pub title: String,
     /// individual ID for each item
@@ -83,7 +83,7 @@ impl std::fmt::Display for MessageRow {
         write!(
             f,
             "({} {} '{}' '{}' {}   )", //  {}  '{}'  '{}'
-            self.message_id, self.feed_src_id, self.post_id, self.title, srcdate,
+            self.message_id, self.subscription_id, self.post_id, self.title, srcdate,
         )
     }
 }
@@ -122,7 +122,7 @@ impl TableInfo for MessageRow {
     // INTEGER REAL  TEXT  BLOB		BOOLEAN
     fn create_string() -> String {
         String::from(
-        "message_id  INTEGER  PRIMARY KEY, feed_src_id  INTEGER, title  BLOB, post_id  text,  link  text, \
+        "message_id  INTEGER  PRIMARY KEY, subscription_id  INTEGER, title  BLOB, post_id  text,  link  text, \
 is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEGER   \
 ,  content_text  BLOB, enclosure_url  text, author BLOB, categories BLOB    " )
     }
@@ -130,7 +130,7 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
     fn create_indices() -> Vec<String> {
         vec![
             "CREATE INDEX IF NOT EXISTS idx_id ON messages (message_id) ; ".to_string(),
-            "CREATE INDEX IF NOT EXISTS idx_feed_src ON messages (feed_src_id) ; ".to_string(),
+            "CREATE INDEX IF NOT EXISTS idx_feed_src ON messages (subscription_id) ; ".to_string(),
         ]
     }
 
@@ -140,7 +140,7 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
 
     fn get_insert_columns(&self) -> Vec<String> {
         vec![
-            String::from("feed_src_id"), // 1
+            String::from("subscription_id"), // 1
             String::from("title"),
             String::from("post_id"),
             String::from("link"),
@@ -157,7 +157,7 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
 
     fn get_insert_values(&self) -> Vec<Wrap> {
         vec![
-            Wrap::INT(self.feed_src_id),
+            Wrap::INT(self.subscription_id),
             Wrap::STR(self.title.clone()),
             Wrap::STR(self.post_id.clone()),
             Wrap::STR(self.link.clone()),
@@ -175,7 +175,7 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
     fn from_row(row: &rusqlite::Row) -> Self {
         MessageRow {
             message_id: row.get(0).unwrap(),
-            feed_src_id: row.get(1).unwrap(),
+            subscription_id: row.get(1).unwrap(),
             title: row.get(2).unwrap(),
             post_id: row.get(3).unwrap(),
             link: row.get(4).unwrap(),

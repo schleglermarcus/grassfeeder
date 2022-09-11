@@ -24,23 +24,25 @@ use fr_core::web::IHttpRequester;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+/// when there are messages with subscription_id=100, don't insert subscription with ID 99
 // #[ignore]
 #[test]
-fn add_feed_with_existing() {
+fn add_subscription_with_existing_messages() {
     setup();
-    let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    let (mut fsc, _r_fsource) = prepare_stc(fs_list);
+    let subscriptions_list: Vec<SubscriptionEntry> = dataset_simple_trio();
+    let (mut subscription_controller, _r_fsource) = prepare_stc(subscriptions_list);
     let msgrepo = MessagesRepo::new_in_mem();
-
     msgrepo.get_ctx().create_table();
     let mut mr1: MessageRow = MessageRow::default();
-    mr1.feed_src_id = 20;
+    mr1.subscription_id = 20;
     let _mr1id = msgrepo.insert(&mr1).unwrap() as isize;
     let msg_r_r = Rc::new(RefCell::new(msgrepo));
-    fsc.messagesrepo_w = Rc::downgrade(&msg_r_r);
-    let new_id = fsc.add_new_feedsource("some-url-3".to_string(), "name-proc3".to_string());
-    assert_eq!(new_id, mr1.feed_src_id + 1);
-    // let fse = (*(r_fsource.borrow())).get_by_index(new_id).unwrap();    debug!("FSE={:?}", fse);
+    subscription_controller.messagesrepo_w = Rc::downgrade(&msg_r_r);
+    let subs_id = subscription_controller
+        .add_new_subscription("some-url-3".to_string(), "name-proc3".to_string());
+    assert_eq!(subs_id, mr1.subscription_id + 1);
+    let message = (*(msg_r_r.borrow())).get_by_src_id(subs_id);
+    assert_eq!(message.len(), 0); // the new created subscription may not have messages attached
 }
 
 // #[ignore]
@@ -48,7 +50,7 @@ fn add_feed_with_existing() {
 fn add_feed_empty() {
     setup();
     let (mut fsc, r_fsource) = prepare_stc(Vec::default());
-    fsc.add_new_feedsource(
+    fsc.add_new_subscription(
         "tests/data/gui_proc_rss2_v1.rss".to_string(),
         "name-proc2".to_string(),
     );
@@ -86,8 +88,33 @@ fn update_folder_pos() {
     assert_eq!(result.get(2).unwrap().folder_position, 33);
 }
 
-// ----------------------------
+//RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_heise_svg  --lib -- --exact --nocapture"
+// #[ignore]
+#[test]
+fn test_heise_svg() {
+    setup();
+    let web_fetcher = HttpFetcher {};
+    let r = web_fetcher.request_url_bin(
+        "https://www.heise.de/icons/ho/touch-icons/safari-pinned-tab.svg".to_string(),
+    );
+    let (ii, _msg) = blob_is_icon(&r.content_bin);
+    // trace!(        "#content_bin={} #content={}   msg={}",        r.content_bin.len(),        r.content.len(),        msg    );
+    assert_eq!(ii, 0);
+}
 
+//RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_remote_redirect --lib -- --exact --nocapture"
+// #[ignore]
+#[test]
+fn test_remote_redirect() {
+    setup();
+    let web_fetcher = HttpFetcher {};
+    let r = web_fetcher.request_url_bin("https://kodansha.us/favicon.ico".to_string());
+    // debug!(        "#content_bin={} #content={}",        r.content_bin.len(),       r.content.len()    );
+    let (is_icon, _msg) = blob_is_icon(&r.content_bin);
+    assert_eq!(is_icon, 0);
+}
+
+// ----------------------------
 
 fn prepare_stc(
     fs_list: Vec<SubscriptionEntry>,
@@ -137,32 +164,6 @@ fn dataset_simple_trio() -> Vec<SubscriptionEntry> {
     fse.folder_position = 2;
     fs_list.push(fse.clone());
     fs_list
-}
-
-//RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_heise_svg  --lib -- --exact --nocapture"
-// #[ignore]
-#[test]
-fn test_heise_svg() {
-    setup();
-    let web_fetcher = HttpFetcher {};
-    let r = web_fetcher.request_url_bin(
-        "https://www.heise.de/icons/ho/touch-icons/safari-pinned-tab.svg".to_string(),
-    );
-    let (ii, _msg) = blob_is_icon(&r.content_bin);
-    // trace!(        "#content_bin={} #content={}   msg={}",        r.content_bin.len(),        r.content.len(),        msg    );
-    assert_eq!(ii, 0);
-}
-
-//RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_remote_redirect --lib -- --exact --nocapture"
-// #[ignore]
-#[test]
-fn test_remote_redirect() {
-    setup();
-    let web_fetcher = HttpFetcher {};
-    let r = web_fetcher.request_url_bin("https://kodansha.us/favicon.ico".to_string());
-    // debug!(        "#content_bin={} #content={}",        r.content_bin.len(),       r.content.len()    );
-    let (is_icon, _msg) = blob_is_icon(&r.content_bin);
-    assert_eq!(is_icon, 0);
 }
 
 // ------------------------------------

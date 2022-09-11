@@ -17,7 +17,7 @@ use std::rc::Rc;
 pub fn prepare_source_tree_controller(
     fs_list: Vec<SubscriptionEntry>,
 ) -> (SourceTreeController, Rc<RefCell<dyn ISubscriptionRepo>>) {
-    let subscrip_repo = SubscriptionRepo::new("");
+    let subscrip_repo = SubscriptionRepo::new_inmem(); // new("");
     subscrip_repo.scrub_all_subscriptions();
     fs_list.iter().for_each(|e| {
         let _r = subscrip_repo.store_entry(e);
@@ -39,7 +39,6 @@ pub fn prepare_source_tree_controller(
         uimock.val_sto(),
         r_dl,
     );
-    //    (*r_subscriptions_repo).borrow().update_cached_paths();
     fs.update_cached_paths();
     (fs, r_subscriptions_repo)
 }

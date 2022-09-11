@@ -4,13 +4,12 @@ use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
+use crate::util::filter_by_iso8859_1;
 use crate::util::Step;
 use crate::util::StepResult;
-use crate::util::filter_by_iso8859_1;
 use flume::Sender;
 use std::borrow::Borrow;
 use std::sync::Mutex;
-
 
 pub struct CleanerInner {
     pub cjob_sender: Sender<CJob>,
@@ -75,8 +74,10 @@ impl Step<CleanerInner> for CleanerStart {
             &inner.fp_correct_subs_parent,
             &inner.subs_parents_active,
         );
-        // trace!("correct_p: {:?}", &inner.fp_correct_subs_parent.borrow());
-        if inner.fp_correct_subs_parent.lock().unwrap().is_empty() {
+
+        let to_correct_a = &inner.fp_correct_subs_parent.lock().unwrap().clone();
+        // trace!("CleanerStart correct_p: {:?}", &to_correct_a);
+        if to_correct_a.is_empty() {
             StepResult::Continue(Box::new(CorrectNames(inner)))
         } else {
             inner.need_update_subscriptions = true;
@@ -102,6 +103,7 @@ impl Step<CleanerInner> for ReSortParentId {
 
 pub struct CorrectNames(pub CleanerInner);
 impl Step<CleanerInner> for CorrectNames {
+    //  Correct all Folder names that are empty
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner
@@ -185,7 +187,6 @@ impl Step<CleanerInner> for Notify {
 }
 
 // Walk the Path downwards and find all  parents with   folder-pos not in a row.
-//  Correct all Folder names that are empty
 // Recursive
 pub fn check_layer(
     localpath: &[u16],
@@ -200,10 +201,12 @@ pub fn check_layer(
     if !entries.is_empty() {
         subs_active_parents.lock().unwrap().push(parent_subs_id);
     }
-    entries.iter().enumerate().for_each(|(n, fse)| {
+    // debug!("check_layer: {:?} {:?}", &localpath, &entries);
+    entries.iter().enumerate().for_each(|(folderpos, fse)| {
         let mut path: Vec<u16> = Vec::new();
         path.extend_from_slice(localpath);
-        if fse.folder_position != (n as isize) {
+        if fse.folder_position != (folderpos as isize) {
+            // debug!(                "check_layer: unequal folderpos {:?} {:?}",                fse.folder_position, folderpos            );
             fp_correct_subs_parent
                 .lock()
                 .unwrap()
