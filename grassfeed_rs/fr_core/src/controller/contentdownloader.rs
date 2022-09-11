@@ -236,8 +236,11 @@ impl IDownloader for Downloader {
             warn!(" fetch_single    {}  but is folder ", f_source_repo_id);
             return;
         }
-        let subscription_repo =
-            SubscriptionRepo::by_existing_list((*self.subscriptionrepo_r).borrow().get_list());
+        //        let subscription_repo =            SubscriptionRepo::by_existing_list((*self.subscriptionrepo_r).borrow().get_list());
+        let subscription_repo = SubscriptionRepo::by_existing_connection(
+            (*self.subscriptionrepo_r).borrow().get_connection(),
+        );
+
         let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
 
         let msgrepo = MessagesRepo::new_by_connection(
@@ -297,8 +300,11 @@ impl IDownloader for Downloader {
     }
 
     fn cleanup_db(&self) {
-        let subs_repo =
-            SubscriptionRepo::by_existing_list((*self.subscriptionrepo_r).borrow().get_list());
+        // let subs_repo =            SubscriptionRepo::by_existing_list((*self.subscriptionrepo_r).borrow().get_list());
+        let subs_repo = SubscriptionRepo::by_existing_connection(
+            (*self.subscriptionrepo_r).borrow().get_connection(),
+        );
+
         let msgrepo1 = MessagesRepo::new_by_connection(
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );

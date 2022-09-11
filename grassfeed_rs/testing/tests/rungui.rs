@@ -71,7 +71,7 @@ fn write_feed() {
     // debug!("written to {} {}", RSS_DYNAMIC_FILENAME, ts_now);
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn rungui_local_clear() {
     setup();

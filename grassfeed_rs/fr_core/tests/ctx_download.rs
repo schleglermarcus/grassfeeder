@@ -41,14 +41,16 @@ fn prepare_db_with_errors(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo) {
     let _r = msgrepo.insert(&m1);
 }
 
-#[ignore]	// TODO
+// #[ignore]	// TODO
 #[test]
 fn t_db_cleanup() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
-    let subsrepo = SubscriptionRepo::new("");
-    let subsrepo1 = SubscriptionRepo::by_existing_list(subsrepo.get_list());
+    let subsrepo = SubscriptionRepo::new_inmem();  // new("");
+    let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()) ;  // by_existing_list(subsrepo.get_list());
+
+
     //    let subsrepo_r: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(subsrepo));
     let msgrepo1 = MessagesRepo::new_in_mem();
     let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());

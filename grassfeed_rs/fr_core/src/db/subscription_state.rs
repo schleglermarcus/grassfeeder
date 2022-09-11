@@ -17,6 +17,7 @@ pub trait ISubscriptionState {
     ) -> Vec<isize>;
 
     fn get_tree_path(&self, db_id: isize) -> Option<Vec<u16>>;
+    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>);
 
     fn set_status(&mut self, idlist: &[isize], statusflag: StatusMask, activated: bool);
 
@@ -34,6 +35,8 @@ pub trait ISubscriptionState {
     ) -> Option<SubsMapEntry>;
 
     fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)>;
+
+    fn set_deleted(&mut self, subs_id: isize, new_del: bool);
 }
 
 #[derive(Default)]
@@ -42,6 +45,21 @@ pub struct SubscriptionState {
 }
 
 impl ISubscriptionState for SubscriptionState {
+    fn set_deleted(&mut self, subs_id: isize, new_del: bool) {
+        if let Some(mut st) = self.statemap.get_mut(&subs_id) {
+            st.is_deleted = new_del;
+        }
+    }
+
+    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>) {
+        if !self.statemap.contains_key(&db_id) {
+            let mut sme = SubsMapEntry::default();
+            sme.tree_path = Some(newpath);
+            self.statemap.insert(db_id, sme);
+        } else if let Some(st) = self.statemap.get_mut(&db_id) {
+            st.set_path(newpath);
+        }
+    }
 
     fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)> {
         if let Some(st) = self.statemap.get(&subs_id) {
@@ -208,6 +226,9 @@ pub trait FeedSourceState {
 
     fn check_bitmask(&self, bitmask: usize) -> bool;
     fn change_bitmask(&mut self, bitmask: usize, new_state: bool);
+
+    fn set_path(&mut self, newpath: Vec<u16>);
+    fn get_path(&self) -> Option<Vec<u16>>;
 }
 
 #[allow(dead_code)]
@@ -269,5 +290,12 @@ impl FeedSourceState for SubsMapEntry {
             self.status = new_st;
             self.is_dirty = true;
         }
+    }
+
+    fn set_path(&mut self, newpath: Vec<u16>) {
+        self.tree_path = Some(newpath);
+    }
+    fn get_path(&self) -> Option<Vec<u16>> {
+        self.tree_path.clone()
     }
 }

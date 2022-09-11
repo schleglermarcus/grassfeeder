@@ -1,5 +1,6 @@
 use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::IDownloader;
+use fr_core::controller::sourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::subscription_entry::SubscriptionEntry;
@@ -38,7 +39,8 @@ pub fn prepare_source_tree_controller(
         uimock.val_sto(),
         r_dl,
     );
-    (*r_subscriptions_repo).borrow().update_cached_paths();
+    //    (*r_subscriptions_repo).borrow().update_cached_paths();
+    fs.update_cached_paths();
     (fs, r_subscriptions_repo)
 }
 
@@ -74,12 +76,12 @@ pub fn dataset_three_folders() -> Vec<SubscriptionEntry> {
     fse.folder_position = 0;
     fs_list.push(fse.clone());
 
-	fse.display_name = "folder2".to_string();
+    fse.display_name = "folder2".to_string();
     fse.subs_id = 2;
     fse.folder_position = 1;
     fs_list.push(fse.clone());
 
-	fse.display_name = "folder3".to_string();
+    fse.display_name = "folder3".to_string();
     fse.subs_id = 3;
     fse.folder_position = 2;
     fs_list.push(fse.clone());
@@ -168,7 +170,7 @@ impl IDownloader for DownloaderDummy {
     fn cleanup_db(&self) {
         unimplemented!()
     }
-	fn get_queue_size(&self) -> usize {
-	    unimplemented!()
-	}
+    fn get_queue_size(&self) -> usize {
+        unimplemented!()
+    }
 }

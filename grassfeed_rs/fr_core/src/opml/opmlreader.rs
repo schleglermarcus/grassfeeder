@@ -204,10 +204,10 @@ pub fn from_outline(o: &Outline, repo_parent_id: isize, folder_pos: isize) -> Su
         expanded: false,
         website_url: websit_url,
         last_selected_msg: -1,
-        num_msg_all_unread: None,
+        // num_msg_all_unread: None,
         is_dirty: true,
-        status: 0,
-        tree_path: None,
+        // status: 0,
+        // tree_path: None,
         deleted: false,
     }
 }

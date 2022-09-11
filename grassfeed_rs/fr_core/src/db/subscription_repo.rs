@@ -133,7 +133,7 @@ pub trait ISubscriptionRepo {
     //----
 
     /// writes the path array into the cached subscription list
-    fn update_cached_paths(&self);
+//     fn update_cached_paths(&self);
 
     fn get_highest_src_id(&self) -> isize;
 
@@ -141,6 +141,8 @@ pub trait ISubscriptionRepo {
     fn set_deleted_rec(&self, del_index: isize);
 
     fn store_default_db_entries(&self);
+
+	 fn get_connection(&self) -> Arc<Mutex<Connection>>;
 }
 
 pub struct SubscriptionRepo {
@@ -305,6 +307,8 @@ impl SubscriptionRepo {
         true
     }
 
+
+	// #[deprecated] // later 
     pub fn check_or_store(&mut self) {
         let mut count_changed: bool = false;
         let current_length = (*self.list).read().unwrap().len();
@@ -375,7 +379,7 @@ impl SubscriptionRepo {
         });
     }
 
-    // TODO  DELETE TREE ITEMS
+/*
     // TODO : catch exceeding depth
     pub fn update_paths_rec(
         &self,
@@ -407,10 +411,8 @@ impl SubscriptionRepo {
         });
         false
     }
+*/
 
-    pub fn get_connection(&self) -> Arc<Mutex<Connection>> {
-        self.ctx.get_connection()
-    }
 
     fn update_deleted_list(&self, src_ids: Vec<isize>, is_del: bool) {
         let joined = src_ids
@@ -552,7 +554,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
         self.ctx.get_all()
     }
 
-    ///   store IconID into feed source
+    ///   store IconID into subscription entry
     fn update_icon_id(&self, src_id: isize, icon_id: usize, timestamp_s: i64) {
         match (*self.list).write().unwrap().get_mut(&src_id) {
             Some(mut entry) => {
@@ -919,11 +921,16 @@ impl ISubscriptionRepo for SubscriptionRepo {
 
     */
 
-    fn update_cached_paths(&self) {
-        self.update_paths_rec(&Vec::<u16>::default(), 0, false);
-    }
+
+	// fn update_cached_paths(&self) {
+    //     self.update_paths_rec(&Vec::<u16>::default(), 0, false);
+    // }
+
+
 
     /*
+
+
 
         fn set_num_all_unread(
             &self,
@@ -1010,18 +1017,11 @@ impl ISubscriptionRepo for SubscriptionRepo {
         let _r = self.store_entry(&fse);
     }
 
-    /*
-        fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {
-            self.list.read().unwrap().iter().find_map(|(_id, entry)| {
-                if let Some(e_path) = &entry.tree_path {
-                    if e_path == path {
-                        return Some(entry.clone());
-                    }
-                }
-                None
-            })
-        }
-    */
+
+	 fn get_connection(&self) -> Arc<Mutex<Connection>> {
+        self.ctx.get_connection()
+    }
+
 } // ISubscriptionRepo
 
 //-------------------

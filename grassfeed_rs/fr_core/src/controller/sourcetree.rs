@@ -128,6 +128,9 @@ pub trait ISourceTreeController {
     fn mark_as_read(&self, src_repo_id: isize);
     fn get_current_selected_fse(&self) -> Option<SubscriptionEntry>;
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry>;
+
+    /// writes the path array into the cached subscription list
+    fn update_cached_paths(&self);
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -244,7 +247,7 @@ impl SourceTreeController {
                     }
                 }
                 SJob::UpdateTreePaths => {
-                    (*self.subscriptionrepo_r).borrow().update_cached_paths();
+                    self.update_cached_paths();
                 }
                 SJob::FillSourcesTree => {
                     self.feedsources_into_store_adapter();
@@ -361,7 +364,7 @@ impl SourceTreeController {
             let subs_map = match self.statemap.borrow().get_state(fse.subs_id) {
                 Some(m) => m,
                 None => {
-                    warn!("no subs_map for id {}", fse.subs_id);
+                    warn!("no subs_map for id {} {:?}", fse.subs_id, &path);
                     SubsMapEntry::default()
                 }
             };
@@ -382,7 +385,7 @@ impl SourceTreeController {
         let mut rightcol_text = String::default(); // later:  folder sum stats
         let mut num_msg_unread = 0;
         if !fse.is_folder {
-            if let Some((num_all, num_unread)) = fse.num_msg_all_unread {
+            if let Some((num_all, num_unread)) = su_st.num_msg_all_unread {
                 if self.config.display_feedcount_all {
                     rightcol_text = format!("{}/{}", num_unread, num_all);
                 } else {
@@ -398,8 +401,6 @@ impl SourceTreeController {
         let mut show_status_icon = false;
         let mut status_icon = gen_icons::ICON_03_ICON_TRANSPARENT_48;
 
-        // self.statemap.borrow().get_state(fse.subs_id).unwrap()
-
         if su_st.is_fetch_scheduled() || su_st.is_fetch_scheduled_jobcreated() {
             status_icon = gen_icons::ICON_14_ICON_DOWNLOAD_64;
             show_status_icon = true;
@@ -407,14 +408,14 @@ impl SourceTreeController {
             status_icon = gen_icons::ICON_32_FLAG_RED_32;
             show_status_icon = true;
         }
-        let tp = match &fse.tree_path {
+        let tp = match &su_st.tree_path {
             Some(tp) => format!("{:?}", &tp),
             None => "".to_string(),
         };
         let tooltip = format!(
             "{} ST{} X{}  P{:?} I{} L{}",
             fse.subs_id,
-            fse.status,
+            su_st.status,
             match fse.expanded {
                 true => 1,
                 _ => 0,
@@ -423,7 +424,7 @@ impl SourceTreeController {
             fse.icon_id,
             fse.last_selected_msg
         );
-        let mut m_status = fse.status as u32;
+        let mut m_status = su_st.status as u32;
         if fse.expanded {
             m_status |= TREE0_COL_STATUS_EXPANDED; //StatusMask::FolderExpanded as u32;
         }
@@ -479,10 +480,8 @@ impl SourceTreeController {
             warn!("tree_update_one:  is_deleted ! {:?}", subscr);
             return;
         }
-
         //        let su_st = self            .statemap            .borrow()            .get_state(subscr.subs_id)            .unwrap_or_default();
-
-        match &subscr.tree_path {
+        match &su_st.tree_path {
             Some(t_path) => {
                 let treevalues = self.tree_row_to_values(subscr, &su_st);
                 (*self.gui_val_store)
@@ -496,7 +495,7 @@ impl SourceTreeController {
             None => {
                 warn!(
                     "tree_update_one: no path for id {} <= {:?}",
-                    subscr.subs_id, subscr.tree_path
+                    subscr.subs_id, su_st.tree_path
                 );
                 self.need_check_fs_paths.replace(true);
             }
@@ -878,7 +877,9 @@ impl SourceTreeController {
     fn check_paths(&self) {
         if *self.need_check_fs_paths.borrow() {
             let now = Instant::now();
-            (*self.subscriptionrepo_r).borrow().update_cached_paths();
+            // (*self.subscriptionrepo_r).borrow().update_cached_paths();
+            self.update_cached_paths();
+
             self.need_check_fs_paths.replace(false);
             let elapsed_ms = now.elapsed().as_millis();
             if elapsed_ms > 20 {
@@ -892,6 +893,39 @@ impl SourceTreeController {
             return (*self.subscriptionrepo_r).borrow().get_by_index(subs_id);
         }
         None
+    }
+
+    // TODO : catch exceeding depth
+    pub fn update_paths_rec(
+        &self,
+        localpath: &[u16],
+        parent_subs_id: i32,
+        mut is_deleted: bool,
+    ) -> bool {
+        if parent_subs_id < 0 {
+            is_deleted = true;
+        }
+        let entries: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
+            .borrow()
+            .get_by_parent_repo_id(parent_subs_id as isize);
+        let child_ids: Vec<isize> = entries
+            .iter()
+            .map(|entry| entry.subs_id)
+            .collect::<Vec<isize>>();
+        child_ids.iter().enumerate().for_each(|(num, child_id)| {
+            let mut path: Vec<u16> = Vec::new();
+            path.extend_from_slice(localpath);
+            path.push(num as u16);
+            self.update_paths_rec(&path, *child_id as i32, is_deleted);
+            // if let Some(mut subs_e) = self.list.write().unwrap().get_mut(child_id) {
+            //     subs_e.tree_path = Some(path);
+            //     subs_e.set_deleted(is_deleted)
+            // }
+            let mut smm = self.statemap.borrow_mut();
+            smm.set_tree_path(*child_id, path);
+            smm.set_deleted(*child_id, is_deleted);
+        });
+        false
     }
 
     //	impl SourceTree
@@ -913,7 +947,8 @@ impl ISourceTreeController for SourceTreeController {
                     error!("Drag lost entries: {}->{}", length_before, all2.len());
                     success = false;
                 } else {
-                    (*self.subscriptionrepo_r).borrow().update_cached_paths();
+                    // (*self.subscriptionrepo_r).borrow().update_cached_paths();
+                    self.update_cached_paths();
                     success = true;
                 }
             }
@@ -1472,6 +1507,10 @@ impl ISourceTreeController for SourceTreeController {
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry> {
         self.statemap.borrow().get_state(search_id)
     }
+
+    fn update_cached_paths(&self) {
+        self.update_paths_rec(&Vec::<u16>::default(), 0, false);
+    }
 } // impl ISourceTreeController
 
 impl TimerReceiver for SourceTreeController {
@@ -1607,38 +1646,6 @@ impl Default for NewSourceState {
         NewSourceState::None
     }
 }
-
-/*
-pub trait ISubsStateMap {
-    fn set_schedule_fetch_all(&self);
-    fn get_ids_by_status(
-        &self,
-        statusflag: StatusMask,
-        activated: bool,
-        include_folder: bool,
-    ) -> Vec<isize>;
-    fn get_tree_path(&self, db_id: isize) -> Option<Vec<u16>>;
-    fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry>;
-    fn set_status(&self, idlist: &[isize], statusflag: StatusMask, activated: bool);
-
-    /// writes the path array into the cached subscription list
-    fn update_cached_paths(&self);
-    fn clear_num_all_unread(&self, subs_id: isize);
-
-    /// returns the modified entry
-    fn set_num_all_unread(
-        &self,
-        subs_id: isize,
-        num_all: isize,
-        num_unread: isize,
-    ) -> Option<SubscriptionEntry>;
-
-    fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)>;
-
-    /// searches subscription_entry that has no unread,all  number set
-    fn scan_num_all_unread(&self) -> Option<isize>;
-}
-*/
 
 #[cfg(test)]
 pub mod feedsources_t {

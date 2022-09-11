@@ -31,13 +31,21 @@ pub struct SubscriptionEntry {
     pub display_name: String,
     pub url: String,         // xml_url
     pub website_url: String, // 14
+
+    // #[deprecated]
+    // #[serde(skip)]
+    // pub tree_path: Option<Vec<u16>>,
+
+    // #[serde(skip)]
+    // #[deprecated]
+    // pub status: usize,
+
+    // #[serde(skip)]
+    // #[deprecated]
+    // pub num_msg_all_unread: Option<(isize, isize)>,
+
     #[serde(skip)]
-    pub tree_path: Option<Vec<u16>>,
-    #[serde(skip)]
-    pub status: usize,
-    #[serde(skip)]
-    pub num_msg_all_unread: Option<(isize, isize)>,
-    #[serde(skip)]
+// 	#[deprecated]
     pub is_dirty: bool,
 }
 
@@ -57,9 +65,9 @@ impl SubscriptionEntry {
             expanded: false,
             website_url: String::default(),
             last_selected_msg: -1,
-            num_msg_all_unread: None,
-            status: 0,
-            tree_path: None,
+            // num_msg_all_unread: None,
+            // status: 0,
+            // tree_path: None,
             is_dirty: true,
             deleted: false,
         }
@@ -80,10 +88,10 @@ impl SubscriptionEntry {
             expanded: false,
             website_url: String::default(),
             last_selected_msg: -1,
-            num_msg_all_unread: None,
+            // num_msg_all_unread: None,
             is_dirty: true,
-            status: 0,
-            tree_path: None,
+            // status: 0,
+            // tree_path: None,
             deleted: false,
         }
     }
@@ -104,7 +112,7 @@ impl fmt::Debug for SubscriptionEntry {
             .field("FP", &self.folder_position)
             .field("DEL", &self.deleted)
             .field("FO", &self.is_folder)
-            .field("ST", &self.status)
+            // .field("ST", &self.status)
             .field("D", &self.display_name)
             .field("url", &self.url)
             .field("icon", &self.icon_id)
@@ -126,11 +134,10 @@ impl fmt::Display for SubscriptionEntry {
             .field("PA", &self.parent_subs_id)
             .field("FP", &self.folder_position)
             .field("XP", &expi)
-            .field("ST", &self.status)
+            // .field("ST", &self.status)
             .finish()
     }
 }
-
 
 /*
 pub trait FeedSourceState {
