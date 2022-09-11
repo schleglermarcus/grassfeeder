@@ -553,25 +553,27 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     ///   store IconID into subscription entry
-    fn update_icon_id(&self, src_id: isize, icon_id: usize, timestamp_s: i64) {
-        match (*self.list).write().unwrap().get_mut(&src_id) {
-            Some(mut entry) => {
-                entry.icon_id = icon_id;
-                entry.updated_icon = timestamp_s;
-                entry.is_dirty = true;
-            }
-            None => {
-                debug!("update_icon_id: not found {}", src_id);
-            }
-        };
-
+    fn update_icon_id(&self, subs_id: isize, icon_id: usize, timestamp_s: i64) {
+        if self.migr_read_from_json {
+            match (*self.list).write().unwrap().get_mut(&subs_id) {
+                Some(mut entry) => {
+                    entry.icon_id = icon_id;
+                    entry.updated_icon = timestamp_s;
+                    entry.is_dirty = true;
+                }
+                None => {
+                    debug!("update_icon_id: not found {}", subs_id);
+                }
+            };
+            return;
+        }
         let sql = format!(
             "UPDATE {}  SET  icon_id={}, updated_icon={} WHERE {}={} ",
             SubscriptionEntry::table_name(),
             icon_id,
             timestamp_s,
             SubscriptionEntry::index_column_name(),
-            src_id
+            subs_id
         );
         self.ctx.execute(sql);
     }

@@ -86,7 +86,7 @@ fn rungui_local_clear() {
     let gfconf = GrassFeederConfig {
         path_config: "../target/db_rungui_local/".to_string(),
         path_cache: "../target/db_rungui_local/".to_string(),
-        debug_mode: false,
+        debug_mode: true,
         version: "rungui:rungui_local_clear".to_string(),
     };
     let appcontext = fr_core::config::init_system::start(gfconf);
@@ -124,22 +124,16 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
 
     let f_hill = feedsources.add_new_folder_at_parent("hill".to_string(), 0);
-    let src = [
-        //	(url_dieneuewelle.as_str(), "dieneuewelle, ampersand")
-        (url_nn_aug.as_str(), "NN-aug, special chars"),
-    ];
-    src.iter().for_each(|(url, desc)| {
-        feedsources.add_new_subscription_at_parent(
-            url.to_string(),
-            desc.to_string(),
-            f_hill,
-            false,
-        );
-    });
-    let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
+    let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), f_hill);
+    let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder2);
+    // let src = [		(url_dynamic.as_str(), "dynamic"),   ];    src.iter().for_each(|(url, desc)| {    });
+    feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
+    feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
+
+    // feedsources.add_new_subscription_at_parent(        url_gui_proc.clone(),        "gui_proc_2".to_string(),        folder3,        false,    );
+
     if true {
         let src = [
-            (url_dynamic.as_str(), "dynamic"),
             (url_gui_proc.as_str(), "gui_proc_2"),
             (url_staseve.as_str(), "staseve11"),
         ];
@@ -148,13 +142,13 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 feedsources.add_new_subscription_at_parent(
                     url.to_string(),
                     desc.to_string(),
-                    folder2,
+                    folder3,
                     false,
                 ) > 0
             );
         });
-
-        let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
+    }
+    if false {
         let src = [
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),

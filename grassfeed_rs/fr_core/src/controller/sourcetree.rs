@@ -231,7 +231,6 @@ impl SourceTreeController {
             let now = Instant::now();
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
-                    // (*self.subscriptionrepo_r)    .borrow()     .set_num_all_unread(subs_id, msg_all, msg_unread)
                     if let Some(su_st) = self
                         .statemap
                         .borrow_mut()
@@ -256,7 +255,6 @@ impl SourceTreeController {
                 }
                 SJob::GuiUpdateTree(feed_source_id) => {
                     if let Some(path) = self.get_path_for_src(feed_source_id) {
-                        // trace!("GuiUpdateTree {} {:?}", feed_source_id, &path);
                         (*self.gui_updater)
                             .borrow()
                             .update_tree_single(0, path.as_slice());
@@ -347,6 +345,7 @@ impl SourceTreeController {
     ///  Read all sources   from db and put into ModelValueAdapter
     pub fn feedsources_into_store_adapter(&mut self) {
         (*self.gui_val_store).write().unwrap().clear_tree(0);
+        debug!("VAL_STORE_CLEAR ");
         let _num_items = self.insert_tree_row(&Vec::<u16>::default(), 0);
         self.addjob(SJob::CheckSpinnerActive);
     }
@@ -369,8 +368,8 @@ impl SourceTreeController {
                     SubsMapEntry::default()
                 }
             };
-
             let treevalues = self.tree_row_to_values(fse, &subs_map);
+            // trace!("insert_tree_row:{} {:?}\t{:?}", n, &path, &fse);
             (*self.gui_val_store)
                 .write()
                 .unwrap()
@@ -460,20 +459,23 @@ impl SourceTreeController {
 
     /// update one tree item  from db into treestore. Depends on the last tree path
     pub fn tree_store_update_one(&self, f_source_id: isize) {
-        if let Some(fse) = (*self.subscriptionrepo_r)
+        let o_fse = (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_index(f_source_id)
-        {
-            let su_st = self
-                .statemap
-                .borrow()
-                .get_state(fse.subs_id)
-                .unwrap_or_default();
-
-            if !fse.isdeleted() {
-                self.tree_update_one(&fse, &su_st);
-            }
+            .get_by_index(f_source_id);
+        if o_fse.is_none() {
+            return;
         }
+        let fse = o_fse.unwrap();
+        if fse.isdeleted() {
+            return;
+        }
+        let o_state = self.statemap.borrow().get_state(fse.subs_id);
+        if o_state.is_none() {
+            return;
+        }
+        let su_st = o_state.unwrap();
+        // self.statemap.borrow().dump();
+        self.tree_update_one(&fse, &su_st);
     }
 
     pub fn tree_update_one(&self, subscr: &SubscriptionEntry, su_st: &SubsMapEntry) {
@@ -481,7 +483,6 @@ impl SourceTreeController {
             warn!("tree_update_one:  is_deleted ! {:?}", subscr);
             return;
         }
-        //        let su_st = self            .statemap            .borrow()            .get_state(subscr.subs_id)            .unwrap_or_default();
         match &su_st.tree_path {
             Some(t_path) => {
                 let treevalues = self.tree_row_to_values(subscr, &su_st);
@@ -614,11 +615,7 @@ impl SourceTreeController {
                     to_path_prev = elements.to_vec();
                     to_path_prev.push(*last - 1);
                 }
-                // o_to_entry_parent = (*self.subscriptionrepo_r)                    .borrow()                    .get_by_path(to_path_parent);
-
                 o_to_entry_parent = self.get_by_path(to_path_parent);
-
-                // trace!(                    "split1: to_path_parent={:?}   to_parent_folderpos={}  to_path_prev={:?}  ",                    to_path_parent,                    to_parent_folderpos,                    to_path_prev                );
             }
         } else {
             warn!("drag_calc_positions: to_path too short: {:?}", &to_path);
@@ -627,16 +624,12 @@ impl SourceTreeController {
             if let Some((_last, elements)) = to_path_parent.split_last() {
                 to_path_parent = elements;
             }
-            // trace!(                "split2: to_path_parent={:?}   to_parent_folderpos={}    ",                to_path_parent,                to_parent_folderpos            );
-            // o_to_entry_parent = (*self.subscriptionrepo_r)                .borrow()                .get_by_path(to_path_parent);
             o_to_entry_parent = self.get_by_path(to_path_parent);
         }
 
-        // let o_to_entry_direct = (*self.subscriptionrepo_r).borrow().get_by_path(to_path);
         let o_to_entry_direct = self.get_by_path(to_path);
         let mut o_to_entry_prev: Option<SubscriptionEntry> = None;
         if o_to_entry_direct.is_none() && o_to_entry_parent.is_none() {
-            // o_to_entry_prev = (*self.subscriptionrepo_r)                .borrow()                .get_by_path(to_path_prev.as_slice());
             o_to_entry_prev = self.get_by_path(to_path_prev.as_slice());
         }
         if o_to_entry_direct.is_none() && o_to_entry_parent.is_none() && o_to_entry_prev.is_none() {
@@ -655,7 +648,6 @@ impl SourceTreeController {
                 to_parent_id = to_entry_direct.parent_subs_id;
                 to_parent_folderpos = to_entry_direct.folder_position;
             }
-            // trace!(                "Direct:  isFolder={}  to_parent_id={}  to_parent_folderpos={:?}",                to_entry_direct.is_folder,                to_parent_id,                to_parent_folderpos            );
             if from_entry.subs_id == to_parent_id {
                 return Err(format!(
                     "drag on same element: {}:{:?} => {}:{:?}",
@@ -675,13 +667,11 @@ impl SourceTreeController {
                     from_entry.subs_id, &from_path, to_path_parent, to_entry_parent
                 ));
             }
-            // trace!(                "Parent:  to_parent_id={}  to_parent_folderpos={:?}",                to_parent_id,                to_parent_folderpos            );
             return Ok((from_entry, to_parent_id, to_parent_folderpos));
         }
         if let Some(to_entry_prev) = o_to_entry_prev {
             to_parent_id = to_entry_prev.parent_subs_id;
             to_parent_folderpos = to_entry_prev.folder_position + 1;
-            // trace!(                "Previous:  to_parent_id={}  to_parent_folderpos={:?}",                to_parent_id,                to_parent_folderpos            );
             return Ok((from_entry, to_parent_id, to_parent_folderpos));
         }
         panic!();
@@ -821,7 +811,6 @@ impl SourceTreeController {
         entries
             .iter()
             .filter(|fse| !fse.is_folder)
-            // .filter(|fse| !fse.is_fetch_scheduled() && !fse.is_fetch_in_progress())
             .filter(|fse| {
                 let su_st = self
                     .statemap
@@ -890,7 +879,6 @@ impl SourceTreeController {
                 &path,
                 self.statemap.borrow().len()
             );
-            self.statemap.borrow().dump();
         }
         None
     }
@@ -998,7 +986,7 @@ impl ISourceTreeController for SourceTreeController {
                 .filter(|fse| !fse.is_folder)
                 .map(|fse| fse.subs_id)
                 .collect::<Vec<isize>>();
-            trace!("mark_schedule_fetch child_feeds: {:?}   ", child_repo_ids);
+            // trace!("mark_schedule_fetch child_feeds: {:?}   ", child_repo_ids);
             self.statemap.borrow_mut().set_status(
                 &child_repo_ids,
                 StatusMask::FetchScheduled,
@@ -1071,6 +1059,8 @@ impl ISourceTreeController for SourceTreeController {
         if let Some(mfp) = max_folderpos {
             fse.folder_position = (mfp + 1) as isize;
         }
+        // let subs_repo_highest = (*self.subscriptionrepo_r).borrow().get_highest_src_id();
+        // debug!("add_new_folder_at_parent FSE={:?}", &fse);
         let r = (*self.subscriptionrepo_r).borrow().store_entry(&fse);
         match r {
             Ok(fse) => {
@@ -1184,7 +1174,6 @@ impl ISourceTreeController for SourceTreeController {
 
         if let Some(fse) = &self.current_selected_fse {
             if fse.subs_id == source_repo_id {
-                // trace!("set_fetch_finished {} {}", source_repo_id, fse.display_name);
                 if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                     (*feedcontents)
                         .borrow()
@@ -1372,13 +1361,6 @@ impl ISourceTreeController for SourceTreeController {
 
     fn set_conf_load_on_start(&mut self, n: bool) {
         self.config.feeds_fetch_at_start = n;
-        /*
-                (*self.configmanager_r).borrow_mut().set_section_key(
-                    &Self::section_name(),
-                    SourceTreeController::CONF_FETCH_ON_START,
-                    n.to_string().as_str(),
-                );
-        */
         (*self.configmanager_r)
             .borrow()
             .set_val(SourceTreeController::CONF_FETCH_ON_START, n.to_string());
@@ -1394,13 +1376,6 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         self.config.feeds_fetch_interval = n as u32;
-        /*
-        (*self.configmanager_r).borrow_mut().set_section_key(
-            &Self::section_name(),
-            SourceTreeController::CONF_FETCH_INTERVAL,
-            n.to_string().as_str(),
-        );
-        */
         (*self.configmanager_r)
             .borrow()
             .set_val(SourceTreeController::CONF_FETCH_INTERVAL, n.to_string());
@@ -1412,13 +1387,6 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         self.config.feeds_fetch_interval_unit = n as u32;
-        /*
-                (*self.configmanager_r).borrow_mut().set_section_key(
-                    &Self::section_name(),
-                    SourceTreeController::CONF_FETCH_INTERVAL_UNIT,
-                    n.to_string().as_str(),
-                );
-        */
         (*self.configmanager_r).borrow().set_val(
             SourceTreeController::CONF_FETCH_INTERVAL_UNIT,
             n.to_string(),
@@ -1427,13 +1395,6 @@ impl ISourceTreeController for SourceTreeController {
 
     fn set_conf_display_feedcount_all(&mut self, a: bool) {
         self.config.display_feedcount_all = a;
-        /*
-                (*self.configmanager_r).borrow_mut().set_section_key(
-                    &Self::section_name(),
-                    SourceTreeController::CONF_DISPLAY_FEECOUNT_ALL,
-                    a.to_string().as_str(),
-                );
-        */
         (*self.configmanager_r).borrow().set_val(
             SourceTreeController::CONF_DISPLAY_FEECOUNT_ALL,
             a.to_string(),
@@ -1442,7 +1403,6 @@ impl ISourceTreeController for SourceTreeController {
 
     fn newsource_dialog_edit(&mut self, edit_feed_url: String) {
         if edit_feed_url != self.new_source.edit_url {
-            // trace!("newsource_dialog_edit : {}", edit_feed_url);
             self.new_source.edit_url = edit_feed_url.trim().to_string();
             self.new_source.state = NewSourceState::UrlChanged;
             if string_is_http_url(&self.new_source.edit_url) {

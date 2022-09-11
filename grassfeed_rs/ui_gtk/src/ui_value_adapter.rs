@@ -50,9 +50,10 @@ impl ModelValueStoreImpl {
         }
         if *last_path_pos > (*add_node).children.len() as u16 {
             error!(
-                "get_tree_add_node_for_path_2 {path:?}  lastpos={} >= children.len:{:?} ",
+                "get_tree_add_node_for_path_2 {path:?}  lastpos={} >= children.len:{:?} add_node_values={:?} ",
                 *last_path_pos,
                 (*add_node).children.len(),
+				& (*add_node).a_values
             );
             return None;
         }
@@ -81,15 +82,17 @@ impl ModelValueStoreImpl {
         Some(add_node)
     }
 
-    fn debug_dump_tree(&self) {
-        debug!("DUMP: ----------------------------");
-        ModelValueStoreImpl::dump_elements_r(&self.gui_tree_root, &[]);
-
+    #[allow(dead_code)]
+    fn debug_dump_tree(&self, ident: &str) {
+        ModelValueStoreImpl::dump_elements_r(&self.gui_tree_root, &[], ident);
+        debug!("\\----------------------------/ {}", ident);
     }
 
-    fn dump_elements_r(node: &GuiTreeItem, path: &[u16]) {
+    #[allow(dead_code)]
+    fn dump_elements_r(node: &GuiTreeItem, path: &[u16], ident: &str) {
         debug!(
-            "DUMP_E: {:?} {:?} {:?}",
+            "DUMP {}:\t{:?}\t{:?}\t{:?}",
+            ident,
             &path,
             node.a_values.get(5),
             node.a_values.get(1)
@@ -97,7 +100,7 @@ impl ModelValueStoreImpl {
         node.children.iter().enumerate().for_each(|(i, n)| {
             let mut n_path = path.to_vec();
             n_path.push(i as u16);
-            ModelValueStoreImpl::dump_elements_r(n, n_path.as_slice());
+            ModelValueStoreImpl::dump_elements_r(n, n_path.as_slice(), ident);
         });
     }
 }
@@ -159,20 +162,22 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
             error!(" replace_tree_item : path is empty ");
             return;
         }
+
         if let Some((ref mut add_node, last_path_pos)) = self.get_tree_add_node_for_path(path) {
-            let new_child = GuiTreeItem::new_values(treevalues);
+            let mut new_child = GuiTreeItem::new_values(treevalues);
             if add_node.children.len() < (last_path_pos + 1) as usize {
                 add_node
                     .children
                     .resize((last_path_pos + 1) as usize, new_child.clone());
             }
+            new_child.children = (add_node).children[last_path_pos as usize].children.clone();
             (add_node).children[last_path_pos as usize] = new_child;
         } else {
             error!(
                 "replace_tree_item: BadPath {:?}  Skipping {:?} ",
                 &path, &treevalues
             );
-            self.debug_dump_tree();
+            self.debug_dump_tree("REPL");
         }
     }
 
@@ -357,5 +362,4 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
     fn get_label_tooltip(&self, index: u8) -> Option<&String> {
         self.gui_label_tooltips.get(index as usize)
     }
-
 }
