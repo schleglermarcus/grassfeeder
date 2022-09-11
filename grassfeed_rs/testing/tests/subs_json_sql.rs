@@ -1,8 +1,11 @@
 use fr_core::db::sqlite_context::SqliteContext;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 
-const IN_JSON: &str = "../fr_core/tests/data/san_subs_list_dmg1.json";
-const OUT_DB: &str = "../target/subs_json_sql_imported.db";
+// const IN_JSON: &str = "../fr_core/tests/data/san_subs_list_dmg1.json";
+// const OUT_DB: &str = "../target/subs_json_sql_imported.db";
+
+const IN_JSON: &str = "/home/work/.config/grassfeeder/subscription_list.json";
+const OUT_DB: &str = "/home/work/.config/grassfeeder/messages.db";
 
 #[test]
 pub fn import_json() {
