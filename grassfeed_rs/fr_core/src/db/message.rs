@@ -122,7 +122,7 @@ impl TableInfo for MessageRow {
     // INTEGER REAL  TEXT  BLOB		BOOLEAN
     fn create_string() -> String {
         String::from(
-        "message_id  INTEGER  PRIMARY KEY, subscription_id  INTEGER, title  BLOB, post_id  text,  link  text, \
+        "message_id  INTEGER  PRIMARY KEY, feed_src_id  INTEGER, title  BLOB, post_id  text,  link  text, \
 is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEGER   \
 ,  content_text  BLOB, enclosure_url  text, author BLOB, categories BLOB    " )
     }
@@ -130,7 +130,7 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
     fn create_indices() -> Vec<String> {
         vec![
             "CREATE INDEX IF NOT EXISTS idx_id ON messages (message_id) ; ".to_string(),
-            "CREATE INDEX IF NOT EXISTS idx_feed_src ON messages (subscription_id) ; ".to_string(),
+            "CREATE INDEX IF NOT EXISTS idx_feed_src ON messages (feed_src_id) ; ".to_string(),
         ]
     }
 
@@ -140,7 +140,7 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
 
     fn get_insert_columns(&self) -> Vec<String> {
         vec![
-            String::from("subscription_id"), // 1
+            String::from("feed_src_id"), // 1
             String::from("title"),
             String::from("post_id"),
             String::from("link"),

@@ -97,6 +97,11 @@ fn rungui_local_clear() {
 }
 
 fn test_setup_values(acr: &AppContext, addr: String) {
+    if false {
+        let messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>> = acr.get_rc::<MessagesRepo>().unwrap();
+        let _r = (*messagesrepo_r.borrow()).get_ctx().delete_table();
+        (*messagesrepo_r.borrow()).get_ctx().create_table();
+    }
     let fsrwr: Rc<RefCell<dyn ISubscriptionRepo>> = acr.get_rc::<SubscriptionRepo>().unwrap();
     (*fsrwr.borrow()).scrub_all_subscriptions();
     if false {
@@ -124,7 +129,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         (url_nn_aug.as_str(), "NN-aug, special chars"),
     ];
     src.iter().for_each(|(url, desc)| {
-        feedsources.add_new_subscription_at_parent(url.to_string(), desc.to_string(), f_hill, false);
+        feedsources.add_new_subscription_at_parent(
+            url.to_string(),
+            desc.to_string(),
+            f_hill,
+            false,
+        );
     });
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
     if true {

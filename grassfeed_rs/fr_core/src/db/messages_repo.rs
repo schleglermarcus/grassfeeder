@@ -105,7 +105,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn get_by_src_id(&self, src_id: isize) -> Vec<MessageRow> {
         let prepared = format!(
-            "SELECT * FROM {} WHERE subscription_id={}",
+            "SELECT * FROM {} WHERE feed_src_id={}",
             MessageRow::table_name(),
             src_id
         );
@@ -128,7 +128,7 @@ impl IMessagesRepo for MessagesRepo {
     /// returns  the number of read lines for that source id:   -1 for undefined
     fn get_read_sum(&self, src_id: isize) -> isize {
         let sql = format!(
-            "SELECT COUNT({}) FROM {} WHERE subscription_id = {} and is_read = true ",
+            "SELECT COUNT({}) FROM {} WHERE feed_src_id = {} and is_read = true ",
             MessageRow::index_column_name(),
             MessageRow::table_name(),
             src_id
@@ -138,7 +138,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn get_src_sum(&self, src_id: isize) -> isize {
         let sql = format!(
-            "SELECT COUNT({}) FROM {} WHERE subscription_id = {} ",
+            "SELECT COUNT({}) FROM {} WHERE feed_src_id = {} ",
             MessageRow::index_column_name(),
             MessageRow::table_name(),
             src_id
@@ -197,7 +197,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn update_is_read_all(&self, source_repo_id: isize, new_is_read: bool) {
         let sql = format!(
-            "UPDATE {}  SET  is_read = {} WHERE subscription_id = {}",
+            "UPDATE {}  SET  is_read = {} WHERE feed_src_id = {}",
             MessageRow::table_name(),
             new_is_read,
             source_repo_id,
@@ -255,7 +255,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn get_max_src_index(&self) -> isize {
         let sql = format!(
-            "SELECT MAX( subscription_id ) FROM {} ",
+            "SELECT MAX( feed_src_id ) FROM {} ",
             MessageRow::table_name()
         );
         self.ctx.count(sql)
@@ -269,7 +269,7 @@ impl IMessagesRepo for MessagesRepo {
             .join(",");
 
         let sql = format!(
-            "SELECT * FROM {} where subscription_id NOT IN ( {} ) and is_deleted = false ",
+            "SELECT * FROM {} where feed_src_id NOT IN ( {} ) and is_deleted = false ",
             MessageRow::table_name(),
             src_ids_jo
         );
