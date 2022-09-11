@@ -931,6 +931,7 @@ impl SourceTreeController {
         let mut next_subs_id = std::cmp::max(subs_repo_highest + 1, 10);
         if let Some(messagesrepo) = self.messagesrepo_w.upgrade() {
             let h = (*messagesrepo).borrow().get_max_src_index();
+            // debug!("highest from messages: {}   from subscriptions: {}", h, next_subs_id );
             if h >= next_subs_id {
                 next_subs_id = h + 1;
             } else {
@@ -1134,9 +1135,10 @@ impl ISourceTreeController for SourceTreeController {
                 }
                 new_id = fse2.subs_id;
             }
-            Err(e) => error!(" add_new_subscription_at_parent >{}<  {:?}", &san_source, e),
+            Err(e) => {
+                error!(" add_new_subscription_at_parent >{}<  {:?}", &san_source, e);
+            }
         }
-
         new_id
     }
 

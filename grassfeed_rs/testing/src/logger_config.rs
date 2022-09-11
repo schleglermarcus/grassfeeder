@@ -17,7 +17,7 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
     let logfile = fern::log_file(logfilename).unwrap();
     fern::Dispatch::new()
         .format(move |out, message, record| {
-            const TARGET_WIDTH: usize = 20;
+            const TARGET_WIDTH: usize = 25;
             let target: &str = record.target();
             let t_short = if target.len() > TARGET_WIDTH {
                 target.split_at(target.len() - TARGET_WIDTH).1

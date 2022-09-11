@@ -144,11 +144,13 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_staseve.as_str(), "staseve11"),
         ];
         src.iter().for_each(|(url, desc)| {
-            feedsources.add_new_subscription_at_parent(
-                url.to_string(),
-                desc.to_string(),
-                folder2,
-                false,
+            assert!(
+                feedsources.add_new_subscription_at_parent(
+                    url.to_string(),
+                    desc.to_string(),
+                    folder2,
+                    false,
+                ) > 0
             );
         });
 

@@ -975,8 +975,16 @@ impl ISubscriptionRepo for SubscriptionRepo {
     */
 
     fn get_highest_src_id(&self) -> isize {
-        let o_highest = self.list.read().unwrap().iter().map(|(id, _fse)| *id).max();
-        o_highest.unwrap_or(0)
+        if self.migr_read_from_json {
+            let o_highest = self.list.read().unwrap().iter().map(|(id, _fse)| *id).max();
+            return o_highest.unwrap_or(0);
+        }
+        let sql = format!(
+            "SELECT MAX( subs_id ) FROM {} ",
+            SubscriptionEntry::table_name()
+        );
+        let count = self.ctx.one_number(sql);
+        count
     }
 
     fn update_deleted(&self, src_id: isize, is_del: bool) {

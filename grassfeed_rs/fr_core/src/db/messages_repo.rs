@@ -133,7 +133,7 @@ impl IMessagesRepo for MessagesRepo {
             MessageRow::table_name(),
             src_id
         );
-        self.ctx.count(sql)
+        self.ctx.one_number(sql)
     }
 
     fn get_src_sum(&self, src_id: isize) -> isize {
@@ -143,7 +143,7 @@ impl IMessagesRepo for MessagesRepo {
             MessageRow::table_name(),
             src_id
         );
-        self.ctx.count(sql)
+        self.ctx.one_number(sql)
     }
 
     /// return count of all lines for that source-id
@@ -153,7 +153,7 @@ impl IMessagesRepo for MessagesRepo {
             MessageRow::index_column_name(),
             MessageRow::table_name()
         );
-        self.ctx.count(sql)
+        self.ctx.one_number(sql)
     }
 
     fn get_by_index(&self, indexvalue: isize) -> Option<MessageRow> {
@@ -258,7 +258,7 @@ impl IMessagesRepo for MessagesRepo {
             "SELECT MAX( feed_src_id ) FROM {} ",
             MessageRow::table_name()
         );
-        self.ctx.count(sql)
+        self.ctx.one_number(sql)
     }
 
     fn get_src_not_contained(&self, src_repo_id_list: &[i32]) -> Vec<MessageRow> {

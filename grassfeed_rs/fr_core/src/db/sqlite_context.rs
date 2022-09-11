@@ -212,11 +212,11 @@ impl<T: TableInfo> SqliteContext<T> {
             T::index_column_name(),
             T::table_name()
         );
-        self.count(prepared)
+        self.one_number(prepared)
     }
 
     /// return -1 on errors
-    pub fn count(&self, sql: String) -> isize {
+    pub fn one_number(&self, sql: String) -> isize {
         let o_conn = (*self.connection).lock();
         if o_conn.is_err() {
             error!("count_all() NO connection! {:?}", o_conn.err());
