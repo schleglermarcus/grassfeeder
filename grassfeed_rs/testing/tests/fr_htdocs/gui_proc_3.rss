@@ -8,22 +8,27 @@
  <item>
    <title>RSS Tutorial two &amp; three</title>
    <link>https://www.w3schools.com/xml/xml_rss.asp</link>
-   <description>New RSS tutorial on W3Schools</description>
+   <description>New RSS tutorial on W3Schools <br/>
+	 for testing: the guid shall contain error:  raw ampersand </description>
 	 <pubDate>Sun, 12 May 2002 15:21:40 GMT</pubDate>
    <author>Mohtashim</author>
+	 <guid>guid-777&999</guid>
  </item>
  <item>
-   <title>XML Tutorial</title>
+   <title>XML Tutorial four</title>
    <link>https://www.w3schools.com/xml</link>
-   <description>New XML tutorial on W3Schools</description>
+   <description>New XML tutorial on W3Schools:
+		  for testing: the guid shall contain error:  raw ampersand 
+	 </description>
 	 <pubDate>Sun, 13 May 2003 15:21:40 GMT</pubDate>
 	 <author>Dagobert</author>
+	 <post-id>post-id-777&888</post-id>
  </item>
  <item>
-	 <title>Beer Tutorial</title>
-	 <link></link>
+	 <title>Beer &amp; Tutorial</title>
+	 <link>https://check/amper&sand</link>
 	 <description>Beer!</description>
-	 <pubDate>Sun, 14 May 2004 15:21:40 GMT</pubDate>
+	 <pubDate>Sun, 14 May 2004 15:40:40 GMT</pubDate>
 	 <author>Pumuckl</author>
  </item>
 

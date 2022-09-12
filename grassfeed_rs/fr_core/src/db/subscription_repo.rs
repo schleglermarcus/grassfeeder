@@ -648,16 +648,18 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn update_last_selected(&self, src_id: isize, content_id: isize) {
-        match (*self.list).write().unwrap().get_mut(&src_id) {
-            Some(mut entry) => {
-                entry.last_selected_msg = content_id;
-                entry.is_dirty = true;
-            }
-            None => {
-                debug!("update_last_selected: not found {}", src_id);
-            }
-        };
-
+        if self.migr_read_from_json {
+            match (*self.list).write().unwrap().get_mut(&src_id) {
+                Some(mut entry) => {
+                    entry.last_selected_msg = content_id;
+                    entry.is_dirty = true;
+                }
+                None => {
+                    debug!("update_last_selected: not found {}", src_id);
+                }
+            };
+            return;
+        }
         let sql = format!(
             "UPDATE {}  SET   last_selected_msg={}  WHERE {}={} ",
             SubscriptionEntry::table_name(),

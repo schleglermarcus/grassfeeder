@@ -17,10 +17,11 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+#[derive(Debug)]
 pub struct GrassFeederConfig {
-	/// with trailing slash
+    /// with trailing slash
     pub path_config: String,
-	/// with trailing slash
+    /// with trailing slash
     pub path_cache: String,
     pub debug_mode: bool,
     pub version: String,

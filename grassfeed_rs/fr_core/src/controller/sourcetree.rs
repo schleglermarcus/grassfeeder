@@ -255,6 +255,8 @@ impl SourceTreeController {
                 }
                 SJob::GuiUpdateTree(feed_source_id) => {
                     if let Some(path) = self.get_path_for_src(feed_source_id) {
+                        // debug!("GuiUpdateTree-update_tree_single {:?}", &path);
+
                         (*self.gui_updater)
                             .borrow()
                             .update_tree_single(0, path.as_slice());
@@ -321,15 +323,16 @@ impl SourceTreeController {
                         .update_last_selected(fs_id, fc_id);
                 }
                 SJob::ScanEmptyUnread => {
-                    // let o_work_id = (*self.subscriptionrepo_r).borrow().scan_num_all_unread();
-                    let o_work_id = self.statemap.borrow().scan_num_all_unread();
-                    if let Some(work_src_id) = o_work_id {
-                        if let Some(feedcontents) = self.feedcontents_w.upgrade() {
-                            (*feedcontents)
-                                .borrow()
-                                .addjob(CJob::RequestUnreadAllCount(work_src_id));
-                        }
+                    let unread_ids = self.statemap.borrow().scan_num_all_unread();
+                    if !unread_ids.is_empty() {
                         self.addjob(SJob::ScanEmptyUnread);
+                        for unread_id in unread_ids {
+                            if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+                                (*feedcontents)
+                                    .borrow()
+                                    .addjob(CJob::RequestUnreadAllCount(unread_id));
+                            }
+                        }
                     }
                 }
             }
@@ -489,6 +492,7 @@ impl SourceTreeController {
                     .write()
                     .unwrap()
                     .replace_tree_item(t_path, &treevalues);
+                // trace!(                    "ONE: update_tree_single {:?}  {}",                    &t_path,                    &subscr.display_name                );
                 (*self.gui_updater)
                     .borrow()
                     .update_tree_single(0, t_path.as_slice());
@@ -838,7 +842,6 @@ impl SourceTreeController {
             .borrow()
             .get_val_int(Self::CONF_FETCH_INTERVAL_UNIT)
             .unwrap_or(0) as u32;
-
         if self.config.feeds_fetch_interval == 0 {
             self.config.feeds_fetch_interval = 2;
         }
@@ -848,10 +851,14 @@ impl SourceTreeController {
         self.config.feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
             .get_val_bool(Self::CONF_FETCH_ON_START);
-
-        self.config.mode_debug = (*self.configmanager_r)
+        if let Some(s) = (*self.configmanager_r)
             .borrow()
-            .get_val_bool(ConfigManager::CONF_MODE_DEBUG);
+            .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
+        {
+            if let Ok(b) = s.parse::<bool>() {
+                self.config.mode_debug = b;
+            }
+        }
     }
 
     fn check_paths(&self) {
@@ -868,8 +875,6 @@ impl SourceTreeController {
 
     pub fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {
         let o_subs_id = self.statemap.borrow().get_id_by_path(path);
-        info!("{path:?}  => o_subs_id={o_subs_id:?}");
-
         if let Some(subs_id) = o_subs_id {
             return (*self.subscriptionrepo_r).borrow().get_by_index(subs_id);
         } else {

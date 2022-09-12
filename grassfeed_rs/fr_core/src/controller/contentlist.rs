@@ -12,6 +12,7 @@ use crate::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util::db_time_to_display;
 use crate::util::remove_invalid_chars_from_input;
+use crate::util::string_escape_url;
 use chrono::DateTime;
 use chrono::Local;
 use context::appcontext::AppContext;
@@ -207,9 +208,10 @@ impl FeedContents {
         ))); // 4
         newrow.push(AValue::AU32(fc.message_id as u32)); // 5
         if debug_mode {
+            let escaped_post_id = string_escape_url(fc.post_id.clone());
             newrow.push(AValue::ASTR(format!(
                 "id{} src{}  postid:{}",
-                fc.message_id, fc.subscription_id, fc.post_id
+                fc.message_id, fc.subscription_id, escaped_post_id
             )));
         } else {
             newrow.push(AValue::None);
@@ -813,9 +815,15 @@ impl StartupWithAppContext for FeedContents {
             let mut t = (*self.timer_r).borrow_mut();
             t.register(&TimerEvent::Timer100ms, feedcontents_r);
         }
-        self.config.mode_debug = (*self.configmanager_r)
+
+        if let Some(s) = (*self.configmanager_r)
             .borrow()
-            .get_val_bool(ConfigManager::CONF_MODE_DEBUG);
+            .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
+        {
+            if let Ok(b) = s.parse::<bool>() {
+                self.config.mode_debug = b;
+            }
+        }
     }
 }
 
@@ -1055,7 +1063,7 @@ pub fn get_font_size_from_config(configmanager_r: Rc<RefCell<ConfigManager>>) ->
         }
         0
     */
-	if (*configmanager_r)
+    if (*configmanager_r)
         .borrow()
         .get_val_bool(&PropDef::GuiFontSizeManualEnable.to_string())
     {
@@ -1065,7 +1073,6 @@ pub fn get_font_size_from_config(configmanager_r: Rc<RefCell<ConfigManager>>) ->
             .unwrap_or(0) as u32;
     }
     0
-
 }
 
 //------------------------------------------------------

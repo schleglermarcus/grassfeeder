@@ -22,7 +22,7 @@ pub trait ISubscriptionState {
     fn set_status(&mut self, idlist: &[isize], statusflag: StatusMask, activated: bool);
 
     /// searches subscription_entry that has no unread,all  number set
-    fn scan_num_all_unread(&self) -> Option<isize>;
+    fn scan_num_all_unread(&self) -> Vec<isize>;
 
     fn clear_num_all_unread(&mut self, subs_id: isize);
 
@@ -93,20 +93,21 @@ impl ISubscriptionState for SubscriptionState {
     }
 
     /// don't include deleted ones, no folders,
-    fn scan_num_all_unread(&self) -> Option<isize> {
-        let unproc_id: Option<isize> = self.statemap.iter().find_map(|(id, se)| {
-            if !se.is_folder
-                && se.num_msg_all_unread.is_none()
-                && *id > 0
-                //&& se.parent_subs_id > 0
-                && !se.is_deleted()
-            {
-                Some(*id)
-            } else {
-                None
-            }
-        });
-        unproc_id
+    /// Usability+Speed:  dispatch 2 subscriptions at one time for re-calculating
+    fn scan_num_all_unread(&self) -> Vec<isize> {
+        let unproc_ids: Vec<isize> = self
+            .statemap
+            .iter()
+            .filter_map(|(id, se)| {
+                if !se.is_folder && se.num_msg_all_unread.is_none() && *id > 0 && !se.is_deleted() {
+                    Some(*id)
+                } else {
+                    None
+                }
+            })
+            .take(2)
+            .collect::<Vec<isize>>();
+        unproc_ids
     }
 
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry> {
