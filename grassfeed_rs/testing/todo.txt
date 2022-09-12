@@ -1,32 +1,33 @@
 To Do List
 
-
-
 - Create Changelog,
 	https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
 	https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
+- Drag: Folder down  - not working yet
+- Check:  import, then drag , folder disappears
 - Check Info Dialog + website
 - Check Icon update frequency
 - GTK-Liststore for inserting switch off sorting. Else slow.
 - remove package ini, check if section_name is needed
+- Subscription_state: merge extra booleans
 - Shutdown Integration Test
-- Drag: Folder down  - not working yet
-- Check:  import, then drag , folder disappears
+- Subscription Tree: hide zeroes when nothing to read
 - Build via Docker container,   find external dependencies + packages
 - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
 - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
 - check  https://www.linuxcompatible.org/  feed: icon + entries
 - Check: &  in Feed-title, Message-title. should be escaped
-- Sanitize: cross-check icon ids of tree if they are present in icon db
+- Feed edit  Dialog: +Homepage
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
+- Browser Display :  wrap over   title
 - Multiple instances shall be blocking.
 - Cleanup at maximum messages
+- Sanitize: cross-check icon ids of tree if they are present in icon db
 - Bug: internal browser hangs sometimes
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
 - Updating Sources:  prioritize by tree position, expanded flag
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal
-- Feed edit  Dialog: +Homepage
 - Delete Messages
 - check: subscription  Reload shall refresh  message list
 - click on folder: show message sums
@@ -36,7 +37,6 @@ To Do List
 - find common code parts of    folder:mark-as-read  ,  folder:update
 - Flatpak  https://lib.rs/crates/cargo-pkg
 - implement focus policy: before last unread
-- Browser Display :  wrap over   title
 - Copy Message address into clipboard
 - Opml export formatiert
 - Browser: enable theme related colors
