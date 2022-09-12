@@ -1,7 +1,7 @@
 * refactored subscriptions to sqlite
 * cleaning out deleted subscriptions
 * Tree Unread-Calculation Speed increased, parallel web requests to 3
-* fixed: message popup needs escaping
+* fixed: message tooltip needs escaping
 
 * remove icon dialog, leave it on  debug flag
 * SendToBrowser :   mark-as-read for all entries
