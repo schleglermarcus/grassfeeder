@@ -170,6 +170,10 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
                     .children
                     .resize((last_path_pos + 1) as usize, new_child.clone());
             }
+
+			// add_node.children[last_path_pos as usize]                .children                .into_iter()                .for_each(|c| new_child.children.push(c));
+
+
             new_child.children = (add_node).children[last_path_pos as usize].children.clone();
             (add_node).children[last_path_pos as usize] = new_child;
         } else {

@@ -1,11 +1,4 @@
-
 To Do List
-- switch subscription_repo to sqlite
-- clean out deleted subscriptions
-
-- debugmode: message popup needs escaping
-- SendToBrowser :   mark-as-read for all entries
-- remove icon dialog, leave it on  debug flag
 
 
 
@@ -13,8 +6,9 @@ To Do List
 	https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
 	https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
 - Check Info Dialog + website
+- Check Icon update frequency
 - GTK-Liststore for inserting switch off sorting. Else slow.
-- remove package ini
+- remove package ini, check if section_name is needed
 - Shutdown Integration Test
 - Drag: Folder down  - not working yet
 - Check:  import, then drag , folder disappears

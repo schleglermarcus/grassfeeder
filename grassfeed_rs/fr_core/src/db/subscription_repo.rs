@@ -114,8 +114,6 @@ pub struct SubscriptionRepo {
     ///  ID -> Entry
     // #[deprecated] // later
     list: Arc<RwLock<HashMap<isize, SubscriptionEntry>>>,
-    // #[deprecated]	// later
-    // list_cardinality_last: usize,
 }
 
 impl SubscriptionRepo {
@@ -125,19 +123,17 @@ impl SubscriptionRepo {
         SubscriptionRepo {
             list: Arc::new(RwLock::new(HashMap::new())),
             folder_name: folder_name.to_string(),
-            // list_cardinality_last: 0,
             ctx: SqliteContext::new(filename),
             migr_read_from_json: true,
         }
     }
 
-    pub fn new2(folder_name: String) -> Self {
-        let filename = format!("{}subscriptions.db", folder_name);
+    pub fn new2(foldername: String) -> Self {
+        let filename = format!("{}subscriptions.db", foldername);
         SubscriptionRepo {
-            folder_name: folder_name.to_string(),
+            folder_name: foldername,
             ctx: SqliteContext::new(filename),
             list: Arc::new(RwLock::new(HashMap::new())),
-            // list_cardinality_last: 0,
             migr_read_from_json: false,
         }
     }
@@ -146,7 +142,6 @@ impl SubscriptionRepo {
         SubscriptionRepo {
             list: existing,
             folder_name: String::default(),
-            // list_cardinality_last: 0,
             ctx: SqliteContext::new_in_memory(),
             migr_read_from_json: true,
         }
@@ -156,7 +151,6 @@ impl SubscriptionRepo {
         SubscriptionRepo {
             list: Arc::new(RwLock::new(HashMap::new())),
             folder_name: String::default(),
-            // list_cardinality_last: 0,
             ctx: SqliteContext::new_by_connection(con),
             migr_read_from_json: false,
         }
@@ -167,7 +161,6 @@ impl SubscriptionRepo {
             folder_name: String::default(),
             ctx: SqliteContext::new_in_memory(),
             list: Arc::new(RwLock::new(HashMap::new())),
-            // list_cardinality_last: 0,
             migr_read_from_json: false,
         }
     }
@@ -187,11 +180,7 @@ impl SubscriptionRepo {
         self.store_default_db_entries();
         if self.migr_read_from_json {
             self.load_subscriptions_pretty();
-        } else {
-            //
         }
-
-        // self.import_json();
         true // later: remove this
     }
 
@@ -694,15 +683,15 @@ impl ISubscriptionRepo for SubscriptionRepo {
                 .insert(new_id, store_entry.clone());
             return Ok(store_entry);
         }
-        match self.ctx.insert(&entry, entry.subs_id != 0) {
+        match self.ctx.insert(entry, entry.subs_id != 0) {
             Ok(indexval) => {
                 let mut ret_e: SubscriptionEntry = entry.clone();
                 ret_e.subs_id = indexval as isize;
-                return Ok(ret_e);
+                Ok(ret_e)
             }
             Err(e) => {
                 error!("store_entry: {:?} {:?} ", &entry, e);
-                return Err(Box::new(e));
+                Err(Box::new(e))
             }
         }
     }
@@ -769,7 +758,6 @@ impl ISubscriptionRepo for SubscriptionRepo {
 
     fn scrub_all_subscriptions(&self) {
         (*self.list).write().unwrap().clear();
-
         let _r = self.ctx.delete_table();
         self.ctx.create_table();
     }
@@ -783,8 +771,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
             "SELECT MAX( subs_id ) FROM {} ",
             SubscriptionEntry::table_name()
         );
-        let count = self.ctx.one_number(sql);
-        count
+        self.ctx.one_number(sql)
     }
 
     fn update_deleted(&self, src_id: isize, is_del: bool) {
@@ -869,7 +856,6 @@ impl TimerReceiver for SubscriptionRepo {
                 self.check_or_store();
             }
             TimerEvent::Shutdown => {
-                debug!("SubscriptionRepo-shutdown");
                 self.check_or_store();
             }
             _ => (),

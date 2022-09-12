@@ -862,7 +862,7 @@ impl GuiProcessor {
         let app_rcs_v = (*self.configmanager_r)
             .borrow()
             .get_sys_val(&PropDef::AppRcsVersion.to_string())
-            .unwrap_or("GP: no AppRcsVersion".to_string());
+            .unwrap_or_else(|| "GP: no AppRcsVersion".to_string());
         let dd: Vec<AValue> = vec![AValue::ASTR(app_rcs_v)];
         (*self.gui_val_store)
             .write()
@@ -886,7 +886,6 @@ pub fn dl_char_for_kind(kind: u8) -> char {
         4 => char::from_u32(0x26c1).unwrap(), // DatabaseCleanup : database icon
         _ => '_',
     };
-
     nc
 }
 

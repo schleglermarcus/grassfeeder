@@ -1,9 +1,6 @@
-// use crate::db::subscription_entry::SubscriptionEntry;
 use std::collections::HashMap;
 
 pub trait ISubscriptionState {
-    // fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry>;
-
     fn get_state(&self, id: isize) -> Option<SubsMapEntry>;
     fn get_id_by_path(&self, path: &[u16]) -> Option<isize>;
 
@@ -38,7 +35,8 @@ pub trait ISubscriptionState {
 
     fn set_deleted(&mut self, subs_id: isize, new_del: bool);
 
-    fn len(&self) -> usize;
+    fn get_length(&self) -> usize;
+
     fn dump(&self);
 }
 
@@ -55,10 +53,21 @@ impl ISubscriptionState for SubscriptionState {
     }
 
     fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>) {
-        if !self.statemap.contains_key(&db_id) {
-            let mut sme = SubsMapEntry::default();
-            sme.tree_path = Some(newpath);
-            self.statemap.insert(db_id, sme);
+        /*
+                if !self.statemap.contains_key(&db_id) {
+                    let mut sme = SubsMapEntry::default();
+                    sme.tree_path = Some(newpath);
+                    self.statemap.insert(db_id, sme);
+                } else if let Some(st) = self.statemap.get_mut(&db_id) {
+                    st.set_path(newpath);
+                }
+        */
+        if let std::collections::hash_map::Entry::Vacant(e) = self.statemap.entry(db_id) {
+            let sme = SubsMapEntry {
+                tree_path: Some(newpath),
+                ..Default::default()
+            };
+            e.insert(sme);
         } else if let Some(st) = self.statemap.get_mut(&db_id) {
             st.set_path(newpath);
         }
@@ -161,11 +170,12 @@ impl ISubscriptionState for SubscriptionState {
         self.statemap
             .iter()
             .filter_map(|(id, st)| {
-                if let Some(tp) = &st.tree_path {
-                    Some((id, tp))
-                } else {
-                    None
-                }
+                // if let Some(tp) = &st.tree_path {
+                //     Some((id, tp))
+                // } else {
+                //     None
+                // }
+                st.tree_path.as_ref().map(|tp| (id, tp))
             })
             .find_map(|(id, tp)| if tp == path { Some(*id) } else { None })
     }
@@ -179,7 +189,7 @@ impl ISubscriptionState for SubscriptionState {
             });
     }
 
-    fn len(&self) -> usize {
+    fn get_length(&self) -> usize {
         self.statemap.len()
     }
 

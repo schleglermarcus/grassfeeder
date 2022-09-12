@@ -38,7 +38,7 @@ impl Buildable for GuiContext {
         let configman = (*appcontext).get_rc::<ConfigManager>().unwrap();
         let mut initvalues: HashMap<PropDef, String> = HashMap::default();
         for pd in PROPDEF_ARRAY {
-            // TODO check if we need both     conf, configmanager
+            // LATER check if we need both     conf, configmanager
             let mut o_val = conf.get(&pd.tostring());
             if o_val.is_none() {
                 o_val = (*configman).borrow().get_val(&pd.to_string());
@@ -48,6 +48,14 @@ impl Buildable for GuiContext {
             }
             if let Some(val) = o_val {
                 initvalues.insert(pd, val);
+            }
+        }
+        if let Some(s) = (*configman)
+            .borrow()
+            .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
+        {
+            if let Ok(b) = s.parse::<bool>() {
+                initvalues.insert(PropDef::AppModeDebug, b.to_string());
             }
         }
         // trace!("gui_context:   initvals={:#?}", &initvalues);
@@ -96,7 +104,6 @@ impl GuiContext {
     }
 
     pub fn start(&self) {
-        info!("GuiContext::start()  --> ");
         (*self.gui_runner).borrow().start();
     }
 
@@ -139,9 +146,13 @@ impl GuiContext {
             .set_window_title(wtitle);
         (*self.updater_adapter).borrow().update_window_title();
     }
-
 }
 
 impl StartupWithAppContext for GuiContext {
     fn startup(&mut self, _ac: &AppContext) {}
+}
+
+#[derive(Clone, Debug)]
+pub struct Config {
+    pub mode_debug: bool,
 }

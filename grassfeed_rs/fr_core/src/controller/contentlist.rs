@@ -227,11 +227,7 @@ impl FeedContents {
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_many(&repo_ids, is_read);
-        debug!(
-            "set_read_many: {}   repoids={:?}",
-            *self.last_activated_subscription_id.borrow(),
-            repo_ids
-        );
+        // trace!(            "set_read_many: {}   repoids={:?}  ",            *self.last_activated_subscription_id.borrow(),            repo_ids        );
         self.fc_state_map
             .write()
             .unwrap()
@@ -551,10 +547,7 @@ impl IFeedContents for FeedContents {
         (*self.gui_updater)
             .borrow()
             .update_list_some(TREEVIEW1, &[list_position as u32]);
-        debug!(
-            "toggle_feed_item_read {}",
-            *self.last_activated_subscription_id.borrow()
-        );
+        // trace!(            "toggle_feed_item_read {}",            *self.last_activated_subscription_id.borrow()        );
         self.addjob(CJob::RequestUnreadAllCount(
             *self.last_activated_subscription_id.borrow(),
         ));
@@ -604,13 +597,6 @@ impl IFeedContents for FeedContents {
             return;
         }
         self.config.focus_policy = n;
-        /*
-                (*self.configmanager_r).borrow_mut().set_section_key(
-                    &Self::section_name(),
-                    FeedContents::CONF_FOCUS_POLICY,
-                    n.to_string().as_str(),
-                );
-        */
         (*self.configmanager_r)
             .borrow()
             .set_val(FeedContents::CONF_FOCUS_POLICY, n.to_string());
@@ -622,11 +608,6 @@ impl IFeedContents for FeedContents {
             return;
         }
         self.config.message_keep_count = n;
-        // (*self.configmanager_r).borrow_mut().set_section_key(
-        //     &Self::section_name(),
-        //     FeedContents::CONF_MSG_KEEP_COUNT,
-        //     n.to_string().as_str(),
-        // );
         (*self.configmanager_r)
             .borrow_mut()
             .set_val(FeedContents::CONF_MSG_KEEP_COUNT, n.to_string());
@@ -634,7 +615,6 @@ impl IFeedContents for FeedContents {
 
     fn notify_config_update(&mut self) {
         self.list_fontsize = get_font_size_from_config(self.configmanager_r.clone());
-        // debug!("config_update: {}", self.list_fontsize);
     }
 
     fn set_selected_content_ids(&self, list: Vec<i32>) {
@@ -649,7 +629,6 @@ impl IFeedContents for FeedContents {
     }
 
     fn process_list_action(&self, action: String, repoid_listpos: Vec<(i32, i32)>) {
-        // trace!("process_list_action   {} ,  {:?}", action, repoid_listpos);
         match action.as_str() {
             "mark-as-read" => {
                 self.set_read_many(&repoid_listpos, true);
@@ -659,8 +638,9 @@ impl IFeedContents for FeedContents {
             }
             "open-in-browser" => {
                 let repoids: Vec<i32> = repoid_listpos.iter().map(|(db, _lp)| *db).collect();
-                trace!("list ->  start external browser {:?}", repoids);
+                // trace!("list ->  start external browser {:?}", repoid_listpos);
                 self.start_web_browser(repoids);
+                self.set_read_many(&repoid_listpos, true);
             }
             "messages-delete" => {
                 debug!("TODO  delete messages  ");
@@ -677,18 +657,6 @@ impl IFeedContents for FeedContents {
     fn set_sort_order(&mut self, sort_column: u8, ascending: bool) {
         self.config.list_sort_column = sort_column;
         self.config.list_sort_order_up = ascending;
-        /*
-                (self.configmanager_r).borrow_mut().set_section_key(
-                    &Self::section_name(),
-                    &PropDef::GuiList0SortColumn.to_string(),
-                    &sort_column.to_string(),
-                );
-                (self.configmanager_r).borrow_mut().set_section_key(
-                    &Self::section_name(),
-                    &PropDef::GuiList0SortAscending.to_string(),
-                    &ascending.to_string(),
-                );
-        */
         (self.configmanager_r).borrow().set_val(
             &PropDef::GuiList0SortColumn.to_string(),
             sort_column.to_string(),

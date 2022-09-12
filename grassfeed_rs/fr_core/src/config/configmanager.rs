@@ -54,7 +54,7 @@ impl ConfigManager {
             return;
         }
         let _r = self.store_user_conf(self.cconf_filename.clone());
-		self.cconf_modified.replace(false);
+        self.cconf_modified.replace(false);
     }
 
     pub fn debug_dump(&self, prefix: &str) {
@@ -116,7 +116,7 @@ impl ConfigManager {
             warn!("serializing into {} => {:?}", filename, r_ser.err());
             return false;
         }
-        debug!("written {} to {}", &writemap.len(), &filename);
+        trace!("written {} to {}", &writemap.len(), &filename);
         true
     }
 
@@ -143,7 +143,7 @@ impl ConfigManager {
     }
 
     pub fn get_sys_val(&self, key: &str) -> Option<String> {
-        (*self.system_config).borrow().get(key).cloned() // map(|r| r.clone())
+        (*self.system_config).borrow().get(key).cloned()
     }
 
     pub fn set_system_config(&mut self, conf: Rc<RefCell<HashMap<String, String>>>) {
@@ -167,7 +167,6 @@ impl ConfigManager {
 impl Default for ConfigManager {
     fn default() -> Self {
         ConfigManager {
-            // cconf: Rc::new(RefCell::new(Ini::new())),
             cconf_modified: RefCell::new(false),
             cconf_filename: String::from("default_config.ini"),
             user_config: Rc::new(RefCell::new(HashMap::new())),
@@ -179,7 +178,6 @@ impl Default for ConfigManager {
 impl Buildable for ConfigManager {
     type Output = ConfigManager;
 
-    // #[allow(unreachable_code)]
     fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self::Output {
         let mut cm = ConfigManager {
             cconf_filename: conf.get(ConfigManager::CONF_PATH_KEY).unwrap(),

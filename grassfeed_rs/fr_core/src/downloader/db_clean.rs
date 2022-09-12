@@ -77,7 +77,7 @@ impl Step<CleanerInner> for RemoveNonConnected {
         let mut connected_child_list: HashSet<isize> = HashSet::default();
         let mut folder_todo: Vec<isize> = Vec::default();
         folder_todo.push(0);
-        while folder_todo.len() > 0 {
+        while !folder_todo.is_empty() {
             let parent_subs_id = folder_todo.pop().unwrap();
             let childs = inner.subscriptionrepo.get_by_parent_repo_id(parent_subs_id);
             childs.iter().for_each(|se| {
@@ -92,13 +92,11 @@ impl Step<CleanerInner> for RemoveNonConnected {
         all_entries.iter().for_each(|se| {
             if se.deleted || se.parent_subs_id < 0 {
                 delete_list.insert(se.subs_id);
-            } else {
-                if !connected_child_list.contains(&se.subs_id) {
-                    if delete_list.contains(&se.parent_subs_id) {
-                        delete_list.insert(se.subs_id);
-                    } else {
-                        debug!("Cleanup:  NotConnectedSubscription: {}", &se);
-                    }
+            } else if !connected_child_list.contains(&se.subs_id) {
+                if delete_list.contains(&se.parent_subs_id) {
+                    delete_list.insert(se.subs_id);
+                } else {
+                    debug!("Cleanup:  NotConnectedSubscription: {}", &se);
                 }
             }
         });
@@ -174,7 +172,6 @@ impl Step<CleanerInner> for CorrectNames {
                 } else {
                     let (filtered, truncated) = filter_by_iso8859_1(&fse.display_name);
                     if truncated {
-                        // trace!("SO: name change to iso8859 : {:?} ", fse);
                         inner
                             .subscriptionrepo
                             .update_displayname(fse.subs_id, filtered);

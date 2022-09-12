@@ -109,15 +109,12 @@ impl<T: TableInfo> SqliteContext<T> {
             .collect::<Vec<&dyn ToSql>>();
         let params_fi: ParamsFromIter<&Vec<&dyn ToSql>> = params_from_iter(&vec_dyn_tosql);
         match (*self.connection).lock().unwrap().prepare(&prepared) {
-            Ok(mut stmt) => {
-                return stmt.insert(params_fi);
-            }
+            Ok(mut stmt) => stmt.insert(params_fi),
             Err(e) => {
                 warn!("insert: {:?}  idx={} ", &e, &entry.get_index_value());
-                return Err(e);
+                Err(e)
             }
         }
-        //Ok(0)
     }
 
     pub fn insert_tx(&self, list: &Vec<T>) -> Result<i64, rusqlite::Error> {

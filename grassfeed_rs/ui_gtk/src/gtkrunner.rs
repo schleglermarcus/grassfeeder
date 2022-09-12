@@ -37,7 +37,7 @@ use webkit2gtk::WebContext;
 use webkit2gtk::WebView;
 
 const EVENT_QUEUE_SIZE: usize = 1000;
-const INTERNAL_QUEUE_SIZE: usize = 600;
+const INTERNAL_QUEUE_SIZE: usize = 2000;
 const INTERNAL_QUEUE_SEND_DURATION: Duration = Duration::from_millis(200);
 
 pub struct GtkRunner {

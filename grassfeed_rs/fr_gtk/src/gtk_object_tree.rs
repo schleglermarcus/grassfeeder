@@ -120,11 +120,6 @@ impl GtkGuiBuilder for GtkObjectTree {
                 esw.sendw(GuiEvents::WindowSizeChanged(n_w, n_h));
             }
         });
-
-        /* not here
-          let app_rcs_version = self.initvalues.get(&PropDef::AppRcsVersion) .or("no AppRcsVersion in initvalues");
-        */
-
         create_dialogs(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
         let drag_state = Rc::new(RwLock::new(DragState::default()));
         let paned_top = Paned::new(Orientation::Horizontal);
@@ -133,7 +128,6 @@ impl GtkGuiBuilder for GtkObjectTree {
         let box_1_v = gtk::Box::new(Orientation::Vertical, 0);
         paned_top.pack1(&box_1_v, false, false);
         paned_top.set_size_request(20, -1);
-
         let esw = EvSenderWrapper(gui_event_sender.clone());
         paned_top.connect_leave_notify_event(move |paned_top: &Paned, _a2| {
             let newpos: i32 = paned_top.position();
@@ -145,11 +139,15 @@ impl GtkGuiBuilder for GtkObjectTree {
             }
             gtk::Inhibit(false)
         });
+
+        let mode_debug = self.get_bool(PropDef::AppModeDebug);
+
         let p2p = self.get_int(PropDef::GuiPane2Pos, 120) as i32;
         paned_top.set_position(p2p);
         let box_2_h = gtk::Box::new(Orientation::Horizontal, 0);
         box_1_v.add(&box_2_h);
-        let menubar = create_menubar(gui_event_sender.clone(), gtk_obj_a.clone());
+
+        let menubar = create_menubar(gui_event_sender.clone(), gtk_obj_a.clone(), mode_debug);
         box_2_h.pack_start(&menubar, false, false, 0);
         let toolbar = create_toolbar(gui_event_sender.clone(), gtk_obj_a.clone());
         box_2_h.add(&toolbar);
@@ -190,7 +188,6 @@ impl GtkGuiBuilder for GtkObjectTree {
         let col1width = self.get_int(PropDef::GuiCol1Width, 77) as i32;
         let sort_col = self.get_int(PropDef::GuiList0SortColumn, 0);
         let sort_asc = self.get_bool(PropDef::GuiList0SortAscending);
-        //        let (content_treeview2, content_liststore, list_store_columns) =
         let content_treeview2 = create_listview(
             gui_event_sender.clone(),
             col1width,
@@ -661,7 +658,11 @@ fn connect_keyboard(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
 //   MenuItem
 //     Menu
 //       MenuItem
-pub fn create_menubar(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) -> MenuBar {
+pub fn create_menubar(
+    g_ev_se: Sender<GuiEvents>,
+    gtk_obj_a: GtkObjectsType,
+    mode_debug: bool,
+) -> MenuBar {
     let icons_dialog: Dialog = (*gtk_obj_a)
         .read()
         .unwrap()
@@ -742,7 +743,7 @@ pub fn create_menubar(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) -> 
                 esw.sendw(GuiEvents::MenuActivate(_m.widget_name().to_string()));
             });
         }
-        {
+        if mode_debug {
             let m_icons = MenuItem::with_label(&t!("M_ICONS"));
             m_icons.set_widget_name("M_ICONS");
             menu.add(&m_icons);

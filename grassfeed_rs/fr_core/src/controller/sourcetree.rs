@@ -487,7 +487,7 @@ impl SourceTreeController {
         }
         match &su_st.tree_path {
             Some(t_path) => {
-                let treevalues = self.tree_row_to_values(subscr, &su_st);
+                let treevalues = self.tree_row_to_values(subscr, su_st);
                 (*self.gui_val_store)
                     .write()
                     .unwrap()
@@ -881,7 +881,7 @@ impl SourceTreeController {
             warn!(
                 "no subscr_id for {:?}   #statemap={}",
                 &path,
-                self.statemap.borrow().len()
+                self.statemap.borrow().get_length()
             );
         }
         None
