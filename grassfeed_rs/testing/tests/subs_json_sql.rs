@@ -2,14 +2,16 @@ use fr_core::db::sqlite_context::SqliteContext;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 
 const IN_JSON: &str = "../fr_core/tests/data/san_subs_list_dmg1.json";
-const OUT_DB: &str = "../target/subs_json_sql_imported.db";
+// const OUT_DB: &str = "../target/subs_json_sql_imported.db";
+const OUT_DB: &str = "../target/db_rungui_reg/subscriptions.db";
 
-// const IN_JSON: &str = "/home/work/.config/grassfeeder/subscription_list.json";
-// const OUT_DB: &str = "/home/work/.config/grassfeeder/messages.db";
+// const IN_JSON: &str = "/home/www/.config/grassfeeder/subscription_list.json";
+// const OUT_DB: &str = "/home/www/.config/grassfeeder/messages.db";
 
 #[test]
 pub fn import_json() {
     setup();
+    debug!("converting: {} => {} ... ", IN_JSON, OUT_DB);
     let lines = std::fs::read_to_string(IN_JSON.to_string()).unwrap();
     let dec_r: serde_json::Result<Vec<SubscriptionEntry>> = serde_json::from_str(&lines);
     if dec_r.is_err() {

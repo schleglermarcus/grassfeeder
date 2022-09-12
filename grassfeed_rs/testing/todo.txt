@@ -2,7 +2,11 @@
 To Do List
 - switch subscription_repo to sqlite
 - clean out deleted subscriptions
-- delete tablehelper.rs , deprecate old logger setup
+
+
+- Icon Display broken
+
+
 - debugmode: message popup needs escaping
 - SendToBrowser :   mark-as-read for all entries
 - remove icon dialog, leave it on  debug flag

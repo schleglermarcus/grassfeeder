@@ -345,7 +345,6 @@ impl SourceTreeController {
     ///  Read all sources   from db and put into ModelValueAdapter
     pub fn feedsources_into_store_adapter(&mut self) {
         (*self.gui_val_store).write().unwrap().clear_tree(0);
-        debug!("VAL_STORE_CLEAR ");
         let _num_items = self.insert_tree_row(&Vec::<u16>::default(), 0);
         self.addjob(SJob::CheckSpinnerActive);
     }

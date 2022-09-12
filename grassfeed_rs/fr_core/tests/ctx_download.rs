@@ -7,7 +7,6 @@ use fr_core::controller::contentlist::CJob;
 use fr_core::controller::guiprocessor::Job;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::icon_repo::IconRepo;
-use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_entry::SubscriptionEntry;
@@ -15,76 +14,12 @@ use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::comprehensive::ComprStart;
 use fr_core::downloader::comprehensive::ComprehensiveInner;
-use fr_core::downloader::db_clean::CleanerInner;
-use fr_core::downloader::db_clean::CleanerStart;
 use fr_core::util::StepResult;
 use fr_core::web::mockfilefetcher::FileFetcher;
 use fr_core::web::WebFetcherType;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
-
-fn prepare_db_with_errors(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo) {
-    let mut se = SubscriptionEntry::default();
-    assert!(subsrepo.store_entry(&se).is_ok());
-    se.parent_subs_id = 1;
-    assert!(subsrepo.store_entry(&se).is_ok());
-    se.parent_subs_id = 1; // unchanged folder pos, that's an error
-    se.display_name = "Japan 無料ダウンロード".to_string();
-    se.expanded = true;
-    let _r = subsrepo.store_entry(&se);
-    // 	debug!("### {:#?}", subsrepo.get_all_entries());
-    let mut m1 = MessageRow::default();
-    m1.subscription_id = 1;
-    let _r = msgrepo.insert(&m1);
-    m1.subscription_id = 2;
-    let _r = msgrepo.insert(&m1);
-}
-
-/*
-// #[test]
-fn t_db_prepare() {
-    setup();
-    let sr = SubscriptionRepo::new_inmem(); // new("");
-    sr.scrub_all_subscriptions();
-    let mut se = SubscriptionEntry::default();
-
-    assert!(sr.store_entry(&se).is_ok());
-    se.parent_subs_id=20;
-    assert!(sr.store_entry(&se).is_ok());
-    assert!(sr.store_entry(&se).is_ok());
-    debug!("### {:#?}", sr.get_all_entries());
-}
-*/
-
-#[test]
-fn t_db_cleanup() {
-    setup();
-    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
-    let subsrepo = SubscriptionRepo::new_inmem(); // new("");
-    subsrepo.scrub_all_subscriptions();
-    let msgrepo1 = MessagesRepo::new_in_mem();
-    let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
-    msgrepo1.get_ctx().create_table();
-    prepare_db_with_errors(&msgrepo1, &subsrepo);
-    let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
-    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1);
-    let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
-    let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
-    assert_eq!(parent_ids_to_correct.len(), 1);
-
-    assert!(subsrepo1
-        .get_by_index(1)
-        .unwrap()
-        .display_name
-        .starts_with("unnamed"));
-    assert!(subsrepo1.get_by_index(2).unwrap().display_name.len() < 10);
-    assert!(!subsrepo1.get_by_index(2).unwrap().expanded);
-    // debug!("ALLMSG={:#?}", msgrepo2.get_all_messages());
-    assert_eq!(msgrepo2.get_by_index(1).unwrap().is_deleted, false); // belongs to subscription
-    assert_eq!(msgrepo2.get_by_index(2).unwrap().is_deleted, true); // does not belong to subscription
-}
 
 #[test]
 fn comprehensive_feed_download() {
@@ -104,7 +39,6 @@ fn comprehensive_feed_download() {
         icon_id: -1,
     };
     let last = StepResult::start(Box::new(ComprStart::new(comp_inner)));
-    // debug!("last={:?}", last);
     assert_eq!(last.download_error_happened, false);
     assert_eq!(last.feed_title, "Ajax and XUL".to_string());
     assert_eq!(last.feed_homepage, "http://localhost/".to_string());

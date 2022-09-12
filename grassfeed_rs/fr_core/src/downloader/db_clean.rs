@@ -9,6 +9,7 @@ use crate::util::Step;
 use crate::util::StepResult;
 use flume::Sender;
 use std::borrow::Borrow;
+use std::collections::HashSet;
 use std::sync::Mutex;
 
 pub struct CleanerInner {
@@ -16,8 +17,6 @@ pub struct CleanerInner {
     pub sourcetree_job_sender: Sender<SJob>,
     pub subscriptionrepo: SubscriptionRepo,
     pub messgesrepo: MessagesRepo,
-    // pub fp_correct_subs_parent: RefCell<Vec<i32>>,
-    // pub subs_parents_active: RefCell<Vec<i32>>,
     pub fp_correct_subs_parent: Mutex<Vec<i32>>,
     pub subs_parents_active: Mutex<Vec<i32>>,
     pub need_update_subscriptions: bool,
@@ -66,6 +65,62 @@ impl CleanerStart {
 pub struct CleanerStart(pub CleanerInner);
 impl Step<CleanerInner> for CleanerStart {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        StepResult::Continue(Box::new(RemoveNonConnected(self.0)))
+    }
+}
+
+pub struct RemoveNonConnected(pub CleanerInner);
+impl Step<CleanerInner> for RemoveNonConnected {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let mut inner = self.0;
+        let all_entries = inner.subscriptionrepo.get_all_entries();
+        let mut connected_child_list: HashSet<isize> = HashSet::default();
+        let mut folder_todo: Vec<isize> = Vec::default();
+        folder_todo.push(0);
+        while folder_todo.len() > 0 {
+            let parent_subs_id = folder_todo.pop().unwrap();
+            let childs = inner.subscriptionrepo.get_by_parent_repo_id(parent_subs_id);
+            childs.iter().for_each(|se| {
+                connected_child_list.insert(se.subs_id);
+                if se.is_folder {
+                    folder_todo.push(se.subs_id);
+                }
+            });
+        }
+        // trace!("connected_child_list={:?}", &connected_child_list);
+        let mut delete_list: HashSet<isize> = HashSet::default();
+        all_entries.iter().for_each(|se| {
+            if se.deleted || se.parent_subs_id < 0 {
+                delete_list.insert(se.subs_id);
+            } else {
+                if !connected_child_list.contains(&se.subs_id) {
+                    if delete_list.contains(&se.parent_subs_id) {
+                        delete_list.insert(se.subs_id);
+                    } else {
+                        debug!("Cleanup:  NotConnectedSubscription: {}", &se);
+                    }
+                }
+            }
+        });
+        if !delete_list.is_empty() {
+            debug!(
+                "Cleanup:  #connected: {}   #to_delete: {}",
+                connected_child_list.len(),
+                delete_list.len()
+            );
+            delete_list
+                .iter()
+                .for_each(|id| inner.subscriptionrepo.delete_by_index(*id));
+            inner.need_update_subscriptions = true;
+        }
+        // inner.subscriptionrepo.debug_dump_tree("##");
+        StepResult::Continue(Box::new(AnalyzeFolderPositions(inner)))
+    }
+}
+
+pub struct AnalyzeFolderPositions(pub CleanerInner);
+impl Step<CleanerInner> for AnalyzeFolderPositions {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         check_layer(
             &Vec::<u16>::default(),
@@ -74,9 +129,7 @@ impl Step<CleanerInner> for CleanerStart {
             &inner.fp_correct_subs_parent,
             &inner.subs_parents_active,
         );
-
         let to_correct_a = &inner.fp_correct_subs_parent.lock().unwrap().clone();
-        // trace!("CleanerStart correct_p: {:?}", &to_correct_a);
         if to_correct_a.is_empty() {
             StepResult::Continue(Box::new(CorrectNames(inner)))
         } else {
@@ -93,10 +146,12 @@ impl Step<CleanerInner> for ReSortParentId {
         let mut parent_ids: Vec<i32> = inner.fp_correct_subs_parent.lock().unwrap().clone();
         parent_ids.sort();
         parent_ids.dedup();
-        parent_ids.iter().for_each(|p| {
-            debug!("restoring parent_ids {}", p);
-            resort_parent_list(*p as isize, &inner.subscriptionrepo);
-        });
+        if !parent_ids.is_empty() {
+            debug!("Cleanup: resorting {:?}", parent_ids);
+            parent_ids.iter().for_each(|p| {
+                resort_parent_list(*p as isize, &inner.subscriptionrepo);
+            });
+        }
         StepResult::Continue(Box::new(CorrectNames(inner)))
     }
 }
@@ -112,7 +167,6 @@ impl Step<CleanerInner> for CorrectNames {
             .iter()
             .for_each(|fse| {
                 if fse.display_name.is_empty() {
-                    // trace!("SO:  no display name for : {:?} ", fse);
                     inner
                         .subscriptionrepo
                         .update_displayname(fse.subs_id, format!("unnamed-{}", fse.subs_id));
@@ -144,7 +198,7 @@ impl Step<CleanerInner> for CollapseSubscriptions {
             .map(|fse| fse.subs_id)
             .collect::<Vec<isize>>();
         if !collapse_ids.is_empty() {
-            // debug!("sanitizing collapse: {:?}", collapse_ids);
+            debug!("Cleanup:  collapsing folders: {:?}", collapse_ids);
             inner.subscriptionrepo.update_expanded(collapse_ids, false);
             inner.need_update_subscriptions = true;
         }
