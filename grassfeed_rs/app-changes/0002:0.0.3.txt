@@ -1,0 +1,7 @@
+* refactored subscriptions to sqlite
+* cleaning out deleted subscriptions
+
+* delete tablehelper.rs , deprecate old logger setup
+* debugmode: message popup needs escaping
+* SendToBrowser :   mark-as-read for all entries
+* remove icon dialog, leave it on  debug flag
