@@ -1,9 +1,8 @@
-- Fixed startup:    -h shall remain on commandline
+- Startup Commandline processing fixed:    -h shall remain on commandline
+- Drag: Folder down  - fixed
+- GTK-Liststore for inserting switch off sorting, else slow. Solved by using pixbuf cache
 
 
-- Drag: Folder down  - not working yet
-- Check:  import, then drag , folder disappears
-- GTK-Liststore for inserting switch off sorting. Else slow.
 - Subscription_state: merge extra booleans
 - Create Changelog,
 	https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
