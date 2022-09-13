@@ -30,20 +30,22 @@ fn main() {
         .to_str()
         .unwrap()
         .to_string();
-    let o_opts = args_lang::parse_args();
+    let version_str = format!(
+        "{} : {} : {}",
+        RCS_CARGO_PKG_VERSION, RCS_BRANCH, RCS_VERSION
+    );
+    let o_opts = args_lang::parse_args(&version_str);
 
     let mut debug_level = 0;
     if let Some(ref opts) = o_opts {
         if opts.debug {
             debug_level = 5;
         }
+    } else {
+        return; // commandline option were handled, do not start the gui
     }
     let _r = setup_logger::setup_logger(debug_level, &cache, APP_NAME);
-    let version_str = format!(
-        "{} : {} : {}",
-        RCS_CARGO_PKG_VERSION, RCS_BRANCH, RCS_VERSION
-    );
-	info!(
+    info!(
         "Starting {} with {} {}  locale={:?} V={}",
         APP_NAME,
         &conf,

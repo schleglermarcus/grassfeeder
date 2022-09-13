@@ -24,6 +24,7 @@ fn drag_different_parent_down() {
     fse.is_folder = true;
     fs_list.push(fse.clone());
     let (fsc, r_fsource) = prepare_source_tree_controller(fs_list.clone());
+
     match fsc.drag_calc_positions(&vec![0], &vec![1, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             fsc.drag_move(from_entry, to_parent_id, to_folderpos);

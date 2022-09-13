@@ -120,17 +120,23 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_staseve = format!("{}/staseve-11.xml", addr);
     let url_r_foto = format!("{}/reddit-Fotografie.rss", addr);
     let url_insi = format!("{}/newsinsideout_com.rss", addr);
-    // let _url_dieneuewelle = format!("{}/dieneuewelle.xml", addr);
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
 
-    let f_hill = feedsources.add_new_folder_at_parent("hill".to_string(), 0);
-    let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), f_hill);
-    let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder2);
-    // let src = [		(url_dynamic.as_str(), "dynamic"),   ];    src.iter().for_each(|(url, desc)| {    });
+    let _f_hill = feedsources.add_new_folder_at_parent("hill".to_string(), 0);
+    let _folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), 0);
+    let _folder5 = feedsources.add_new_folder_at_parent("folder5".to_string(), 0);
+    let _folder6 = feedsources.add_new_folder_at_parent("folder6".to_string(), 0);
+    let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
+    let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
+
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
-
-    // feedsources.add_new_subscription_at_parent(        url_gui_proc.clone(),        "gui_proc_2".to_string(),        folder3,        false,    );
+    feedsources.add_new_subscription_at_parent(
+        url_gui_proc.clone(),
+        "gui_proc_2".to_string(),
+        folder3,
+        false,
+    );
 
     if true {
         let src = [

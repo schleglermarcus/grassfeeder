@@ -1,15 +1,8 @@
-# cargo install  cargo-deb
-#
-# (cd app2 ; nice -n9 cargo deb)
-
 [package]
 name = "app-gtk3-linux"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
-
-# [build]
-# target-dir = "../target"
 
 [[bin]]
 name = "grassfeeder"

@@ -2,8 +2,9 @@ use gumdrop::Options;
 use resources::application_id::*;
 
 const CARGO_PKG_DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
-const CARGO_PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
-const LOCALES_LIST: [&str; 2] = ["en", "de"];
+// const CARGO_PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+const LOCALES_LIST: [&str; 2] = ["en", "de"]; // later into environment variable ?
 
 i18n!("locales");
 
@@ -59,7 +60,7 @@ pub fn init_locales(desired: Option<String>) -> Option<String> {
     selected
 }
 
-pub fn parse_args() -> Option<MyOptions> {
+pub fn parse_args(version_str: &str) -> Option<MyOptions> {
     let args: Vec<String> = std::env::args().collect();
     let (call_path, argsonly) = args.split_at(1);
     let o_opts = MyOptions::parse_args_default(argsonly);
@@ -76,20 +77,11 @@ pub fn parse_args() -> Option<MyOptions> {
     }
     if opts.version {
         println!(
-            "{} {} {} {}",
-            call_path[0], APP_NAME_CAMEL, CARGO_PKG_DESCRIPTION, CARGO_PKG_VERSION,
+            "{} {} {} {} ",
+            APP_NAME_CAMEL, CARGO_PKG_DESCRIPTION, version_str, call_path[0],
         );
         return None;
     }
-    let initresult = init_locales(opts.lang.clone());
-    if opts.debug {
-        println!(
-            "only:    i18n-locale={}  options={:?}  init_loc:{:?}",
-            rust_i18n::locale(),
-            opts,
-            initresult
-        );
-    }
-
+    let _selected_lang = init_locales(opts.lang.clone());
     Some(opts)
 }

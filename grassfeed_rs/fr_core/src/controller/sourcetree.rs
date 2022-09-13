@@ -476,7 +476,6 @@ impl SourceTreeController {
             return;
         }
         let su_st = o_state.unwrap();
-        // self.statemap.borrow().dump();
         self.tree_update_one(&fse, &su_st);
     }
 
@@ -492,7 +491,6 @@ impl SourceTreeController {
                     .write()
                     .unwrap()
                     .replace_tree_item(t_path, &treevalues);
-                // trace!(                    "ONE: update_tree_single {:?}  {}",                    &t_path,                    &subscr.display_name                );
                 (*self.gui_updater)
                     .borrow()
                     .update_tree_single(0, t_path.as_slice());
@@ -508,7 +506,6 @@ impl SourceTreeController {
     }
 
     pub fn get_path_for_src(&self, feed_source_id: isize) -> Option<Vec<u16>> {
-        // let o_path = (*self.subscriptionrepo_r)            .borrow()            .get_tree_path(feed_source_id);
         let o_path = self.statemap.borrow().get_tree_path(feed_source_id);
         if o_path.is_none() {
             debug!("get_path_for_src {} => {:?}", feed_source_id, o_path);
@@ -521,7 +518,6 @@ impl SourceTreeController {
 
     // if folder was scheduled, now create a downloader job
     fn process_fetch_scheduled(&self) {
-        // let fetch_scheduled_list = (*self.subscriptionrepo_r).borrow().get_ids_by_status(StatusMask::FetchScheduled,            true,            false,        );
         let fetch_scheduled_list =
             self.statemap
                 .borrow()
@@ -599,7 +595,6 @@ impl SourceTreeController {
         from_path: &[u16],
         to_path: &[u16],
     ) -> Result<(SubscriptionEntry, isize, isize), String> {
-        // let o_from_entry = (*self.subscriptionrepo_r).borrow().get_by_path(from_path);
         let o_from_entry = self.get_by_path(from_path);
         if o_from_entry.is_none() {
             self.need_check_fs_paths.replace(true);
@@ -618,7 +613,7 @@ impl SourceTreeController {
                     to_path_prev = elements.to_vec();
                     to_path_prev.push(*last - 1);
                 }
-                o_to_entry_parent = self.get_by_path(to_path_parent);
+                    o_to_entry_parent = self.get_by_path(to_path_parent);
             }
         } else {
             warn!("drag_calc_positions: to_path too short: {:?}", &to_path);
@@ -627,12 +622,15 @@ impl SourceTreeController {
             if let Some((_last, elements)) = to_path_parent.split_last() {
                 to_path_parent = elements;
             }
+            debug!("calc: 4  to_path_parent:{:?}", &to_path_parent);
             o_to_entry_parent = self.get_by_path(to_path_parent);
         }
 
+        debug!("calc: 5  to_path:{:?}", &to_path);
         let o_to_entry_direct = self.get_by_path(to_path);
         let mut o_to_entry_prev: Option<SubscriptionEntry> = None;
         if o_to_entry_direct.is_none() && o_to_entry_parent.is_none() {
+            debug!("calc: 6  to_path_prev:{:?}", &to_path_prev);
             o_to_entry_prev = self.get_by_path(to_path_prev.as_slice());
         }
         if o_to_entry_direct.is_none() && o_to_entry_parent.is_none() && o_to_entry_prev.is_none() {
@@ -641,9 +639,12 @@ impl SourceTreeController {
                 &to_path, to_path_parent
             ));
         }
+
         let to_parent_folderpos: isize;
         let to_parent_id;
         if let Some(to_entry_direct) = o_to_entry_direct {
+            warn!("calc:  PROBLEM    direct:{:?}", to_entry_direct);
+
             if to_entry_direct.is_folder {
                 to_parent_id = to_entry_direct.parent_subs_id;
                 to_parent_folderpos = 0;
@@ -878,11 +879,13 @@ impl SourceTreeController {
         if let Some(subs_id) = o_subs_id {
             return (*self.subscriptionrepo_r).borrow().get_by_index(subs_id);
         } else {
-            warn!(
-                "no subscr_id for {:?}   #statemap={}",
-                &path,
-                self.statemap.borrow().get_length()
-            );
+            if !path.is_empty() {
+                warn!(
+                    "no subscr_id for {:?}   #statemap={}",
+                    &path,
+                    self.statemap.borrow().get_length()
+                );
+            }
         }
         None
     }
@@ -938,7 +941,7 @@ impl SourceTreeController {
 
 impl ISourceTreeController for SourceTreeController {
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool {
-        trace!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
+        info!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
 
         let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
         let length_before = all1.len();
@@ -958,7 +961,9 @@ impl ISourceTreeController for SourceTreeController {
             }
             Err(msg) => {
                 warn!("DragFail: {:?}=>{:?} --> {} ", from_path, to_path, msg);
-                // (*self.subscriptionrepo_r)                    .borrow()                    .debug_dump_tree("dragfail");
+                (*self.subscriptionrepo_r)
+                    .borrow()
+                    .debug_dump_tree("dragfail");
             }
         }
         self.addjob(SJob::FillSourcesTree);
@@ -1053,7 +1058,7 @@ impl ISourceTreeController for SourceTreeController {
 
     fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize {
         let mut fse = SubscriptionEntry::from_new_foldername(folder_name, parent_id);
-        fse.expanded = true;
+        fse.expanded = false;
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_id)
@@ -1063,7 +1068,8 @@ impl ISourceTreeController for SourceTreeController {
         if let Some(mfp) = max_folderpos {
             fse.folder_position = (mfp + 1) as isize;
         }
-        // let subs_repo_highest = (*self.subscriptionrepo_r).borrow().get_highest_src_id();
+        fse.subs_id = self.get_next_available_subscription_id();
+
         // debug!("add_new_folder_at_parent FSE={:?}", &fse);
         let r = (*self.subscriptionrepo_r).borrow().store_entry(&fse);
         match r {
