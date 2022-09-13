@@ -54,16 +54,16 @@ fn create_debian_changelog(
         entries.for_each(|e| {
             if let Ok(direntry) = e {
                 let fname = direntry.file_name().to_str().unwrap().to_string();
-                let (tmod, tacc, tcrea) = unix_time_from_direntry(&direntry);
+                let (tmod, _tacc, _tcrea) = unix_time_from_direntry(&direntry);
                 // debug!(                    "fname={}  \t{}\t{}\t{}",                    fname,                    unix_time_display(tmod),                    unix_time_display(tacc),                    unix_time_display(tcrea),                );
                 if fname.contains(':') && fname.ends_with(".txt") {
-                    file_t_mod_list.push((fname, t_mod));
+                    file_t_mod_list.push((fname, tmod));
                 }
             }
         });
     }
-    file_list.sort();
-    debug!("FILEs={:?}  =>   OUT={}", file_list, out_file);
+    file_t_mod_list.sort_by(|a, b| a.0.cmp(&b.0));
+    debug!("FILEs={:?}  =>   OUT={}", file_t_mod_list, out_file);
 
     let o_outfile = std::fs::File::create(out_file);
     if o_outfile.is_err() {
@@ -72,14 +72,19 @@ fn create_debian_changelog(
     }
     let mut outfile = o_outfile.unwrap();
 
-    for name in file_list {
+    for (name, ts) in file_t_mod_list {
         //         let parts = name.replace(".txt", "").split(':').collect::<&str>().as_slice();
         let replaced = name.replace(".txt", "");
         let parts: Vec<&str> = replaced.split(':').collect();
         // debug!("S1={:?}", s1);
 
         //		outfile.wr
-        let line1 = format!("LINE {}    {:?} \n", name, parts);
+        let line1 = format!(
+            "LINE {}    {:?} \t  {} \n",
+            name,
+            parts,
+            unix_time_display(ts)
+        );
         let o_wr = outfile.write_all(line1.as_bytes());
         if o_wr.is_err() {
             error!("writing to {} => {:?}", out_file, o_wr.err());
