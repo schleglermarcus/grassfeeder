@@ -142,6 +142,7 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     // ret = ret.replace(&['(', ')', '\"', '\n', '\'', '\"'][..], "");
     ret = ret.replace(&['\"', '\n', '\'', '\"'][..], "");
     ret = ret.replace("&#38;", " & ");
+    ret = ret.replace("&#038;", " & ");
     ret = ret.replace("&#128;", "€");
     ret = ret.replace("&#147;", "›");
     ret = ret.replace("&#148;", "-");

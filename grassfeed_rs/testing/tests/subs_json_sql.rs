@@ -6,7 +6,7 @@ const OUT_DB: &str = "../target/db_rungui_reg/subscriptions.db";
 
  // const IN_JSON: &str = "/home/www/.config/grassfeeder/subscription_list.json";
  // const OUT_DB: &str = "/home/www/.config/grassfeeder/subscriptions.db";
-
+#[ignore]
 #[test]
 pub fn import_json() {
     setup();

@@ -13,6 +13,7 @@ use fr_core::util::db_time_to_display_nonnull;
 // use fr_core::controller::sourcetree::ISourceTreeController;
 
 /// Dragging the first folder   between the second and third.   0 -> 2
+#[ignore]
 #[test]
 fn drag_folder_one_down() {
     setup(); //

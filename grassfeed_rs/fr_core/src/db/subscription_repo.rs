@@ -1,26 +1,20 @@
-use crate::db::message::compress;
-use crate::db::message::decompress;
 use crate::db::sqlite_context::SqliteContext;
 use crate::db::sqlite_context::TableInfo;
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_entry::SRC_REPO_ID_DELETED;
 use crate::db::subscription_entry::SRC_REPO_ID_DUMMY;
 use crate::db::subscription_entry::SRC_REPO_ID_MOVING;
-use crate::timer::Timer;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
 use context::StartupWithAppContext;
 use context::TimerEvent;
 use context::TimerReceiver;
-use context::TimerRegistry;
 use rusqlite::Connection;
 use serde::Serialize;
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::io::BufWriter;
-use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::RwLock;
@@ -54,8 +48,8 @@ pub trait ISubscriptionRepo {
 
     fn get_all_entries(&self) -> Vec<SubscriptionEntry>;
 
-    #[deprecated(note = "use get_all_entries()")]
-    fn get_list(&self) -> Arc<RwLock<HashMap<isize, SubscriptionEntry>>>;
+    // #[deprecated(note = "use get_all_entries()")]
+    // fn get_list(&self) -> Arc<RwLock<HashMap<isize, SubscriptionEntry>>>;
 
     /// if subs_id == 0  stores at next possible higher  subs_id.
     /// if subs_id is given, we store that.
@@ -85,6 +79,8 @@ pub trait ISubscriptionRepo {
     fn update_timestamps(&self, src_id: isize, updated_int: i64, updated_ext: Option<i64>);
 
     fn update_last_selected(&self, src_id: isize, content_id: isize);
+
+    /// TODO What's this for ?
     fn update_deleted(&self, src_id: isize, is_del: bool);
 
     fn delete_by_index(&self, del_index: isize);
@@ -109,7 +105,7 @@ pub struct SubscriptionRepo {
 
     ctx: SqliteContext<SubscriptionEntry>,
 
-    pub migr_read_from_json: bool,
+    migr_read_from_json: bool,
 
     ///  ID -> Entry
     // #[deprecated] // later
@@ -117,16 +113,18 @@ pub struct SubscriptionRepo {
 }
 
 impl SubscriptionRepo {
-    // #[deprecated]	// later
-    pub fn new(folder_name: &str) -> Self {
-        let filename = format!("{}subscriptions.db", folder_name);
-        SubscriptionRepo {
-            list: Arc::new(RwLock::new(HashMap::new())),
-            folder_name: folder_name.to_string(),
-            ctx: SqliteContext::new(filename),
-            migr_read_from_json: true,
+    /*
+        #[deprecated]
+        pub fn new(folder_name: &str) -> Self {
+            let filename = format!("{}subscriptions.db", folder_name);
+            SubscriptionRepo {
+                list: Arc::new(RwLock::new(HashMap::new())),
+                folder_name: folder_name.to_string(),
+                ctx: SqliteContext::new(filename),
+                migr_read_from_json: true,
+            }
         }
-    }
+    */
 
     pub fn new2(foldername: String) -> Self {
         let filename = format!("{}subscriptions.db", foldername);
@@ -137,15 +135,17 @@ impl SubscriptionRepo {
             migr_read_from_json: false,
         }
     }
-
-    pub fn by_existing_list(existing: Arc<RwLock<HashMap<isize, SubscriptionEntry>>>) -> Self {
-        SubscriptionRepo {
-            list: existing,
-            folder_name: String::default(),
-            ctx: SqliteContext::new_in_memory(),
-            migr_read_from_json: true,
+    /*
+        #[deprecated]
+        pub fn by_existing_list(existing: Arc<RwLock<HashMap<isize, SubscriptionEntry>>>) -> Self {
+            SubscriptionRepo {
+                list: existing,
+                folder_name: String::default(),
+                ctx: SqliteContext::new_in_memory(),
+                migr_read_from_json: true,
+            }
         }
-    }
+    */
 
     pub fn by_existing_connection(con: Arc<Mutex<Connection>>) -> Self {
         SubscriptionRepo {
@@ -209,7 +209,8 @@ impl SubscriptionRepo {
         true
     }
 
-    // #[deprecated] // later
+/*
+    #[deprecated]
     pub fn check_or_store(&mut self) {
         let count_changed: bool = false;
         // let current_length = (*self.list).read().unwrap().len();
@@ -223,7 +224,7 @@ impl SubscriptionRepo {
         //     count_changed = true;
         // }
         if count_changed || !dirty_ids.is_empty() {
-            self.store_to_file_pretty();
+//            self.store_to_file_pretty();
             (*self.list)
                 .write()
                 .unwrap()
@@ -232,8 +233,10 @@ impl SubscriptionRepo {
                 .for_each(|(_id, se)| se.is_dirty = false);
         }
     }
+*/
 
     /// renames the old file, then stores the subscription entries in formatted json
+    #[deprecated]
     pub fn store_to_file_pretty(&mut self) {
         let mut values = (*self.list)
             .read()
@@ -280,40 +283,6 @@ impl SubscriptionRepo {
         });
     }
 
-    /*
-        // TODO : catch exceeding depth
-        pub fn update_paths_rec(
-            &self,
-            localpath: &[u16],
-            parent_subs_id: i32,
-            mut is_deleted: bool,
-        ) -> bool {
-            info!("TODO:  DELETE TREE ITEMS ");
-            if parent_subs_id < 0 {
-                is_deleted = true;
-            }
-            let entries: Vec<SubscriptionEntry> = self.get_by_parent_repo_id(parent_subs_id as isize);
-            let child_ids: Vec<isize> = entries
-                .iter()
-                .map(|entry| entry.subs_id)
-                .collect::<Vec<isize>>();
-            child_ids.iter().enumerate().for_each(|(num, child_id)| {
-                let mut path: Vec<u16> = Vec::new();
-                path.extend_from_slice(localpath);
-                path.push(num as u16);
-                self.update_paths_rec(&path, *child_id as i32, is_deleted);
-
-                warn!("TODO:   correct the path in state_map,   set deleted !!  ");
-
-                // if let Some(mut subs_e) = self.list.write().unwrap().get_mut(child_id) {
-                //     subs_e.tree_path = Some(path);
-                //     subs_e.set_deleted(is_deleted)
-                // }
-            });
-            false
-        }
-    */
-
     fn update_deleted_list(&self, src_ids: Vec<isize>, is_del: bool) {
         let joined = src_ids
             .iter()
@@ -335,19 +304,20 @@ impl SubscriptionRepo {
 impl ISubscriptionRepo for SubscriptionRepo {
     /// sorts by folder_position
     fn get_by_parent_repo_id(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry> {
-        if self.migr_read_from_json {
-            let mut list = (*self.list)
-                .read()
-                .unwrap()
-                .iter()
-                .map(|(_id, sub)| sub)
-                .filter(|sub| sub.parent_subs_id == parent_subs_id)
-                .cloned()
-                .collect::<Vec<SubscriptionEntry>>();
-            list.sort_by(|a, b| a.folder_position.cmp(&b.folder_position));
-            return list;
-        }
-
+        /*
+                if self.migr_read_from_json {
+                    let mut list = (*self.list)
+                        .read()
+                        .unwrap()
+                        .iter()
+                        .map(|(_id, sub)| sub)
+                        .filter(|sub| sub.parent_subs_id == parent_subs_id)
+                        .cloned()
+                        .collect::<Vec<SubscriptionEntry>>();
+                    list.sort_by(|a, b| a.folder_position.cmp(&b.folder_position));
+                    return list;
+                }
+        */
         let prepared = format!(
             "SELECT * FROM {} WHERE parent_subs_id={} order by folder_position ",
             SubscriptionEntry::table_name(),
@@ -359,20 +329,21 @@ impl ISubscriptionRepo for SubscriptionRepo {
 
     /// get by parent_subs_id  and folder_position
     fn get_by_pri_fp(&self, parent_subs_id: isize, folder_pos: isize) -> Vec<SubscriptionEntry> {
-        if self.migr_read_from_json {
-            let mut list = (*self.list)
-                .read()
-                .unwrap()
-                .iter()
-                .map(|(_id, sub)| sub)
-                .filter(|sub| sub.parent_subs_id == parent_subs_id)
-                .filter(|sub| sub.folder_position == folder_pos)
-                .cloned()
-                .collect::<Vec<SubscriptionEntry>>();
-            list.sort_by(|a, b| a.folder_position.cmp(&b.folder_position));
-            return list;
-        }
-
+        /*
+                if self.migr_read_from_json {
+                    let mut list = (*self.list)
+                        .read()
+                        .unwrap()
+                        .iter()
+                        .map(|(_id, sub)| sub)
+                        .filter(|sub| sub.parent_subs_id == parent_subs_id)
+                        .filter(|sub| sub.folder_position == folder_pos)
+                        .cloned()
+                        .collect::<Vec<SubscriptionEntry>>();
+                    list.sort_by(|a, b| a.folder_position.cmp(&b.folder_position));
+                    return list;
+                }
+        */
         let prepared = format!(
 		"SELECT * FROM {} WHERE parent_subs_id={} AND folder_position={}  order by folder_position ",
 		SubscriptionEntry::table_name(),		parent_subs_id,		folder_pos			);
@@ -381,19 +352,20 @@ impl ISubscriptionRepo for SubscriptionRepo {
 
     /// sorts by folder_position
     fn get_all_nonfolder(&self) -> Vec<SubscriptionEntry> {
-        if self.migr_read_from_json {
-            let mut list = (*self.list)
-                .read()
-                .unwrap()
-                .iter()
-                .map(|(_id, sub)| sub)
-                .filter(|sub| !sub.is_folder)
-                .cloned()
-                .collect::<Vec<SubscriptionEntry>>();
-            list.sort_by(|a, b| a.folder_position.cmp(&b.folder_position));
-            return list;
-        }
-
+        /*
+                if self.migr_read_from_json {
+                    let mut list = (*self.list)
+                        .read()
+                        .unwrap()
+                        .iter()
+                        .map(|(_id, sub)| sub)
+                        .filter(|sub| !sub.is_folder)
+                        .cloned()
+                        .collect::<Vec<SubscriptionEntry>>();
+                    list.sort_by(|a, b| a.folder_position.cmp(&b.folder_position));
+                    return list;
+                }
+        */
         let prepared = format!(
             "SELECT * FROM {} WHERE is_folder=false order by folder_position ",
             SubscriptionEntry::table_name(),
@@ -404,17 +376,18 @@ impl ISubscriptionRepo for SubscriptionRepo {
     /// checks for  updated_int,  retrieves those earlier than the given date
     /// new:  order by updated-time. TODO check the order
     fn get_by_fetch_time(&self, updated_time_s: i64) -> Vec<SubscriptionEntry> {
-        if self.migr_read_from_json {
-            return (*self.list)
-                .read()
-                .unwrap()
-                .iter()
-                .map(|(_id, sub)| sub)
-                .filter(|sub| !sub.is_folder && sub.updated_int <= updated_time_s)
-                .cloned()
-                .collect::<Vec<SubscriptionEntry>>();
-        }
-
+        /*
+                if self.migr_read_from_json {
+                    return (*self.list)
+                        .read()
+                        .unwrap()
+                        .iter()
+                        .map(|(_id, sub)| sub)
+                        .filter(|sub| !sub.is_folder && sub.updated_int <= updated_time_s)
+                        .cloned()
+                        .collect::<Vec<SubscriptionEntry>>();
+                }
+        */
         let prepared = format!(
             "SELECT * FROM {} WHERE updated_int<{}  order by updated_int ",
             SubscriptionEntry::table_name(),
@@ -424,51 +397,55 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn get_by_index(&self, indexvalue: isize) -> Option<SubscriptionEntry> {
-        if self.migr_read_from_json {
-            return (*self.list)
-                .read()
-                .unwrap()
-                .iter()
-                .map(|(_id, sub)| sub)
-                .find(|sub| sub.subs_id == indexvalue)
-                .cloned();
-        }
-
+        /*
+                if self.migr_read_from_json {
+                    return (*self.list)
+                        .read()
+                        .unwrap()
+                        .iter()
+                        .map(|(_id, sub)| sub)
+                        .find(|sub| sub.subs_id == indexvalue)
+                        .cloned();
+                }
+        */
         self.ctx.get_by_index(indexvalue)
     }
 
     /// sorted by subs_id
     fn get_all_entries(&self) -> Vec<SubscriptionEntry> {
-        if self.migr_read_from_json {
-            let mut se_list = (*self.list)
-                .read()
-                .unwrap()
-                .iter()
-                .map(|(_id, sub)| sub)
-                .cloned()
-                .collect::<Vec<SubscriptionEntry>>();
-            se_list.sort_by(|a, b| a.subs_id.cmp(&b.subs_id));
-            return se_list;
-        }
-
+        /*
+                if self.migr_read_from_json {
+                    let mut se_list = (*self.list)
+                        .read()
+                        .unwrap()
+                        .iter()
+                        .map(|(_id, sub)| sub)
+                        .cloned()
+                        .collect::<Vec<SubscriptionEntry>>();
+                    se_list.sort_by(|a, b| a.subs_id.cmp(&b.subs_id));
+                    return se_list;
+                }
+        */
         self.ctx.get_all()
     }
 
     ///   store IconID into subscription entry
     fn update_icon_id(&self, subs_id: isize, icon_id: usize, timestamp_s: i64) {
-        if self.migr_read_from_json {
-            match (*self.list).write().unwrap().get_mut(&subs_id) {
-                Some(mut entry) => {
-                    entry.icon_id = icon_id;
-                    entry.updated_icon = timestamp_s;
-                    entry.is_dirty = true;
+        /*
+                if self.migr_read_from_json {
+                    match (*self.list).write().unwrap().get_mut(&subs_id) {
+                        Some(mut entry) => {
+                            entry.icon_id = icon_id;
+                            entry.updated_icon = timestamp_s;
+                            entry.is_dirty = true;
+                        }
+                        None => {
+                            debug!("update_icon_id: not found {}", subs_id);
+                        }
+                    };
+                    return;
                 }
-                None => {
-                    debug!("update_icon_id: not found {}", subs_id);
-                }
-            };
-            return;
-        }
+        */
         let sql = format!(
             "UPDATE {}  SET  icon_id={}, updated_icon={} WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -481,18 +458,20 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn update_folder_position(&self, src_id: isize, new_folder_pos: isize) {
-        if self.migr_read_from_json {
-            match (*self.list).write().unwrap().get_mut(&src_id) {
-                Some(mut entry) => {
-                    entry.folder_position = new_folder_pos;
-                    entry.is_dirty = true;
+        /*
+                if self.migr_read_from_json {
+                    match (*self.list).write().unwrap().get_mut(&src_id) {
+                        Some(mut entry) => {
+                            entry.folder_position = new_folder_pos;
+                            entry.is_dirty = true;
+                        }
+                        None => {
+                            debug!("update_folder_position: not found {}", src_id);
+                        }
+                    };
+                    return;
                 }
-                None => {
-                    debug!("update_folder_position: not found {}", src_id);
-                }
-            };
-            return;
-        }
+        */
         let sql = format!(
             "UPDATE {}  SET  folder_position={}  WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -504,16 +483,17 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn update_expanded(&self, src_ids: Vec<isize>, new_expanded: bool) {
-        (*self.list)
-            .write()
-            .unwrap()
-            .iter_mut()
-            .filter(|(id, _se)| src_ids.contains(id))
-            .for_each(|(_id, se)| {
-                se.expanded = new_expanded;
-                se.is_dirty = true;
-            });
-
+        /*
+                (*self.list)
+                    .write()
+                    .unwrap()
+                    .iter_mut()
+                    .filter(|(id, _se)| src_ids.contains(id))
+                    .for_each(|(_id, se)| {
+                        se.expanded = new_expanded;
+                        se.is_dirty = true;
+                    });
+        */
         let joined = src_ids
             .iter()
             .map(|r| r.to_string())
@@ -535,19 +515,21 @@ impl ISubscriptionRepo for SubscriptionRepo {
         new_parent_id: isize,
         new_folder_pos: isize,
     ) {
-        if self.migr_read_from_json {
-            match (*self.list).write().unwrap().get_mut(&src_id) {
-                Some(mut entry) => {
-                    entry.parent_subs_id = new_parent_id;
-                    entry.folder_position = new_folder_pos;
-                    entry.is_dirty = true;
+        /*
+                if self.migr_read_from_json {
+                    match (*self.list).write().unwrap().get_mut(&src_id) {
+                        Some(mut entry) => {
+                            entry.parent_subs_id = new_parent_id;
+                            entry.folder_position = new_folder_pos;
+                            entry.is_dirty = true;
+                        }
+                        None => {
+                            debug!("update_parent_and_folder_position: not found {}", src_id);
+                        }
+                    }
+                    return;
                 }
-                None => {
-                    debug!("update_parent_and_folder_position: not found {}", src_id);
-                }
-            }
-            return;
-        }
+        */
         let sql = format!(
             "UPDATE {}  SET   parent_subs_id={},  folder_position={}  WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -561,17 +543,19 @@ impl ISubscriptionRepo for SubscriptionRepo {
 
     /// display name shall be encoded
     fn update_displayname(&self, src_id: isize, new_name: String) {
-        if self.migr_read_from_json {
-            match (*self.list).write().unwrap().get_mut(&src_id) {
-                Some(mut entry) => {
-                    entry.display_name = new_name.clone();
-                    entry.is_dirty = true;
+        /*
+                if self.migr_read_from_json {
+                    match (*self.list).write().unwrap().get_mut(&src_id) {
+                        Some(mut entry) => {
+                            entry.display_name = new_name.clone();
+                            entry.is_dirty = true;
+                        }
+                        None => {
+                            debug!("update_displayname: not found {}", src_id);
+                        }
+                    };
                 }
-                None => {
-                    debug!("update_displayname: not found {}", src_id);
-                }
-            };
-        }
+        */
         let sql = format!(
             "UPDATE {}  SET   display_name=\"{}\"  WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -584,16 +568,17 @@ impl ISubscriptionRepo for SubscriptionRepo {
 
     /// url shall be encoded
     fn update_url(&self, src_id: isize, new_url: String) {
-        match (*self.list).write().unwrap().get_mut(&src_id) {
-            Some(mut entry) => {
-                entry.url = new_url.clone();
-                entry.is_dirty = true;
-            }
-            None => {
-                debug!("update_url: not found {}", src_id);
-            }
-        };
-
+        /*
+                match (*self.list).write().unwrap().get_mut(&src_id) {
+                    Some(mut entry) => {
+                        entry.url = new_url.clone();
+                        entry.is_dirty = true;
+                    }
+                    None => {
+                        debug!("update_url: not found {}", src_id);
+                    }
+                };
+        */
         let sql = format!(
             "UPDATE {}  SET   url=\"{}\"  WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -605,21 +590,23 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn update_timestamps(&self, src_id: isize, updated_int: i64, updated_ext: Option<i64>) {
-        if self.migr_read_from_json {
-            match (*self.list).write().unwrap().get_mut(&src_id) {
-                Some(mut entry) => {
-                    entry.updated_int = updated_int;
-                    if let Some(e) = updated_ext {
-                        entry.updated_ext = e;
-                    }
-                    entry.is_dirty = true;
+        /*
+                if self.migr_read_from_json {
+                    match (*self.list).write().unwrap().get_mut(&src_id) {
+                        Some(mut entry) => {
+                            entry.updated_int = updated_int;
+                            if let Some(e) = updated_ext {
+                                entry.updated_ext = e;
+                            }
+                            entry.is_dirty = true;
+                        }
+                        None => {
+                            debug!("update_timestamps: not found {}", src_id);
+                        }
+                    };
+                    return;
                 }
-                None => {
-                    debug!("update_timestamps: not found {}", src_id);
-                }
-            };
-            return;
-        }
+        */
         let upd_ext_s = if let Some(ue) = updated_ext {
             format!(", updated_ext={}", ue)
         } else {
@@ -637,18 +624,20 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn update_last_selected(&self, src_id: isize, content_id: isize) {
-        if self.migr_read_from_json {
-            match (*self.list).write().unwrap().get_mut(&src_id) {
-                Some(mut entry) => {
-                    entry.last_selected_msg = content_id;
-                    entry.is_dirty = true;
+        /*
+                if self.migr_read_from_json {
+                    match (*self.list).write().unwrap().get_mut(&src_id) {
+                        Some(mut entry) => {
+                            entry.last_selected_msg = content_id;
+                            entry.is_dirty = true;
+                        }
+                        None => {
+                            debug!("update_last_selected: not found {}", src_id);
+                        }
+                    };
+                    return;
                 }
-                None => {
-                    debug!("update_last_selected: not found {}", src_id);
-                }
-            };
-            return;
-        }
+        */
         let sql = format!(
             "UPDATE {}  SET   last_selected_msg={}  WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -663,26 +652,28 @@ impl ISubscriptionRepo for SubscriptionRepo {
         &self,
         entry: &SubscriptionEntry,
     ) -> Result<SubscriptionEntry, Box<dyn std::error::Error>> {
-        if self.migr_read_from_json {
-            warn!("subs_repo: storing to json!");
-            let mut new_id = entry.subs_id;
-            if new_id == 0 {
-                let max_id = match (*self.list).read().unwrap().keys().max() {
-                    Some(id) => *id,
-                    None => 0,
-                };
-                let max_id = std::cmp::max(max_id, 9); // start value
-                new_id = max_id + 1;
-            }
-            let mut store_entry = entry.clone();
-            store_entry.subs_id = new_id;
-            store_entry.is_dirty = false;
-            (*self.list)
-                .write()
-                .unwrap()
-                .insert(new_id, store_entry.clone());
-            return Ok(store_entry);
-        }
+        /*
+                if self.migr_read_from_json {
+                    warn!("subs_repo: storing to json!");
+                    let mut new_id = entry.subs_id;
+                    if new_id == 0 {
+                        let max_id = match (*self.list).read().unwrap().keys().max() {
+                            Some(id) => *id,
+                            None => 0,
+                        };
+                        let max_id = std::cmp::max(max_id, 9); // start value
+                        new_id = max_id + 1;
+                    }
+                    let mut store_entry = entry.clone();
+                    store_entry.subs_id = new_id;
+                    store_entry.is_dirty = false;
+                    (*self.list)
+                        .write()
+                        .unwrap()
+                        .insert(new_id, store_entry.clone());
+                    return Ok(store_entry);
+                }
+        */
         match self.ctx.insert(entry, entry.subs_id != 0) {
             Ok(indexval) => {
                 let mut ret_e: SubscriptionEntry = entry.clone();
@@ -697,13 +688,15 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn delete_by_index(&self, del_index: isize) {
-        if self.migr_read_from_json {
-            match (*self.list).write().unwrap().remove(&del_index) {
-                Some(e) => debug!("deleted : {:?}", e),
-                None => debug!("delete_by_index: not found {}", del_index),
-            }
-            return;
-        }
+        /*
+                if self.migr_read_from_json {
+                    match (*self.list).write().unwrap().remove(&del_index) {
+                        Some(e) => debug!("deleted : {:?}", e),
+                        None => debug!("delete_by_index: not found {}", del_index),
+                    }
+                    return;
+                }
+        */
         let sql = format!(
             "DELETE FROM {}   WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -714,23 +707,24 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn set_deleted_rec(&self, del_index: isize) {
-        if self.migr_read_from_json {
-            let mut scan_list: Vec<isize> = Vec::default();
-            scan_list.push(del_index);
-            while let Some(idx) = scan_list.pop() {
-                let child_list = self.get_by_parent_repo_id(idx);
-                for se in &child_list {
-                    scan_list.push(se.subs_id);
+        /*
+                if self.migr_read_from_json {
+                    let mut scan_list: Vec<isize> = Vec::default();
+                    scan_list.push(del_index);
+                    while let Some(idx) = scan_list.pop() {
+                        let child_list = self.get_by_parent_repo_id(idx);
+                        for se in &child_list {
+                            scan_list.push(se.subs_id);
+                        }
+                        child_list
+                            .iter()
+                            .for_each(|se| self.update_deleted(se.subs_id, true));
+                    }
+
+                    self.update_deleted(del_index, true);
+                    return;
                 }
-                child_list
-                    .iter()
-                    .for_each(|se| self.update_deleted(se.subs_id, true));
-            }
-
-            self.update_deleted(del_index, true);
-            return;
-        }
-
+        */
         // db
         let mut to_delete_list: HashSet<isize> = HashSet::default();
         to_delete_list.insert(del_index);
@@ -746,10 +740,12 @@ impl ISubscriptionRepo for SubscriptionRepo {
         self.update_deleted_list(to_delete_list.into_iter().collect(), true);
     }
 
-    // deprecated
-    fn get_list(&self) -> Arc<RwLock<HashMap<isize, SubscriptionEntry>>> {
-        self.list.clone()
-    }
+    /*
+        deprecated
+        fn get_list(&self) -> Arc<RwLock<HashMap<isize, SubscriptionEntry>>> {
+            self.list.clone()
+        }
+    */
 
     fn debug_dump_tree(&self, ident: &str) {
         self.dump_tree_rec(&[], SRC_REPO_ID_MOVING, ident); // parent_id for moving elements
@@ -757,16 +753,19 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn scrub_all_subscriptions(&self) {
-        (*self.list).write().unwrap().clear();
+        // (*self.list).write().unwrap().clear();
+
         let _r = self.ctx.delete_table();
         self.ctx.create_table();
     }
 
     fn get_highest_src_id(&self) -> isize {
-        if self.migr_read_from_json {
-            let o_highest = self.list.read().unwrap().iter().map(|(id, _fse)| *id).max();
-            return o_highest.unwrap_or(0);
-        }
+        /*
+                if self.migr_read_from_json {
+                    let o_highest = self.list.read().unwrap().iter().map(|(id, _fse)| *id).max();
+                    return o_highest.unwrap_or(0);
+                }
+        */
         let sql = format!(
             "SELECT MAX( subs_id ) FROM {} ",
             SubscriptionEntry::table_name()
@@ -775,6 +774,8 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn update_deleted(&self, src_id: isize, is_del: bool) {
+        info!("TODO update_deleted ");
+
         match (*self.list).write().unwrap().get_mut(&src_id) {
             Some(mut entry) => {
                 entry.deleted = is_del;
@@ -783,6 +784,8 @@ impl ISubscriptionRepo for SubscriptionRepo {
                 debug!("update_deleted: not found {}", src_id);
             }
         };
+
+        //    self.update_deleted_list(to_delete_list.into_iter().collect(), true);
     }
 
     fn store_default_db_entries(&self) {
@@ -819,7 +822,7 @@ impl Buildable for SubscriptionRepo {
     fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         let o_folder = conf.get(KEY_FOLDERNAME);
         match o_folder {
-            Some(folder) => SubscriptionRepo::new2(folder), // new(&folder),
+            Some(folder) => SubscriptionRepo::new2(folder),
             None => {
                 conf.dump();
                 panic!("subscription config has no {} ", KEY_FOLDERNAME);
@@ -833,16 +836,13 @@ impl Buildable for SubscriptionRepo {
 }
 
 impl StartupWithAppContext for SubscriptionRepo {
-    fn startup(&mut self, ac: &AppContext) {
-        let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
-        let su_r = ac.get_rc::<SubscriptionRepo>().unwrap();
+    // later: register shutdown to  flush databases
+    fn startup(&mut self, _ac: &AppContext) {
+        // let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
+        // let su_r = ac.get_rc::<SubscriptionRepo>().unwrap();
         {
-            (*timer_r)
-                .borrow_mut()
-                .register(&TimerEvent::Timer10s, su_r.clone());
-            (*timer_r)
-                .borrow_mut()
-                .register(&TimerEvent::Shutdown, su_r);
+            // (*timer_r)                .borrow_mut()                .register(&TimerEvent::Timer10s, su_r.clone());
+            // (*timer_r)                .borrow_mut()                .register(&TimerEvent::Shutdown, su_r);
         }
 
         self.startup_int();
@@ -852,18 +852,14 @@ impl StartupWithAppContext for SubscriptionRepo {
 impl TimerReceiver for SubscriptionRepo {
     fn trigger(&mut self, event: &TimerEvent) {
         match event {
-            TimerEvent::Timer10s => {
-                self.check_or_store();
-            }
-            TimerEvent::Shutdown => {
-                self.check_or_store();
-            }
+            // TimerEvent::Timer10s => {                self.check_or_store();            }
+            // TimerEvent::Shutdown => {                self.check_or_store();            }
             _ => (),
         }
     }
 }
 
-#[allow(dead_code)]
+//  #[allow(dead_code)]
 fn subscription_entry_to_json(input: &SubscriptionEntry) -> Option<String> {
     match serde_json::to_string(input) {
         Ok(encoded) => Some(encoded),
@@ -874,7 +870,8 @@ fn subscription_entry_to_json(input: &SubscriptionEntry) -> Option<String> {
     }
 }
 
-#[allow(dead_code)]
+/*
+//  #[allow(dead_code)]
 fn subscription_entry_to_txt(input: &SubscriptionEntry) -> Option<String> {
     match bincode::serialize(input) {
         //         Ok(encoded) => Some(compress(&encoded)),
@@ -885,8 +882,9 @@ fn subscription_entry_to_txt(input: &SubscriptionEntry) -> Option<String> {
         }
     }
 }
+*/
 
-#[allow(dead_code)]
+// #[allow(dead_code)]
 fn json_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
     let dec_r: serde_json::Result<SubscriptionEntry> = serde_json::from_str(&line);
     match dec_r {
@@ -898,7 +896,8 @@ fn json_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
     }
 }
 
-#[allow(dead_code)]
+/*
+// #[allow(dead_code)]
 fn txt_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
     let dc_bytes = decompress(&line);
     let dec_r: bincode::Result<SubscriptionEntry> = bincode::deserialize(dc_bytes.as_bytes());
@@ -910,18 +909,20 @@ fn txt_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
         }
     }
 }
+*/
 
 #[cfg(test)]
 mod ut {
     use super::*;
 
-    pub const TEST_FOLDER1: &'static str = "../target/db_t_sub_rep";
 
+/*
+pub const TEST_FOLDER1: &'static str = "../target/db_t_sub_rep";
     #[test]
     fn t_store_file() {
         setup();
         {
-            let mut sr = SubscriptionRepo::new(TEST_FOLDER1);
+            let mut sr = SubscriptionRepo::new2(TEST_FOLDER1.to_string());
             sr.startup_int();
             sr.scrub_all_subscriptions();
             let s1 = SubscriptionEntry::default();
@@ -939,6 +940,8 @@ mod ut {
             assert_eq!(list.len(), 3);
         }
     }
+*/
+
 
     #[test]
     fn t_update_last_selected() {
@@ -1156,32 +1159,6 @@ mod ut {
         assert_eq!(list.get(2).unwrap().folder_position, 2);
     }
 
-    // TODO remove
-    //cargo test   db::subscription_repo::ut::t_store_and_read_pretty_json  --lib  -- --exact --nocapture
-    #[ignore]
-    #[test]
-    fn t_store_and_read_pretty_json() {
-        setup();
-        let repopath = "../target/db_sr_pretty";
-        {
-            let mut sr = SubscriptionRepo::new(repopath);
-            sr.startup_int();
-            sr.scrub_all_subscriptions();
-            let s1 = SubscriptionEntry::default();
-            assert!(sr.store_entry(&s1).is_ok());
-            assert!(sr.store_entry(&s1).is_ok());
-            let list = sr.get_all_entries();
-            assert_eq!(list.len(), 2);
-            sr.store_to_file_pretty();
-        }
-        {
-            let mut sr = SubscriptionRepo::new(repopath);
-            sr.startup_int();
-            let entries = sr.get_all_entries();
-            assert_eq!(entries.len(), 2);
-        }
-    }
-
     #[ignore]
     // TODO
     //cargo test   db::subscription_repo::ut::t_store_and_read_pretty_json  --lib  -- --exact --nocapture
@@ -1199,7 +1176,7 @@ mod ut {
             assert!(sr.store_entry(&s1).is_ok());
             let list = sr.get_all_entries();
             assert_eq!(list.len(), 2);
-            sr.store_to_file_pretty();
+            // sr.store_to_file_pretty();
         }
         {
             let mut sr = SubscriptionRepo::new2(repopath.to_string());

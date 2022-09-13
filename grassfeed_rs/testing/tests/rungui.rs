@@ -76,13 +76,11 @@ fn write_feed() {
 fn rungui_local_clear() {
     setup();
     loc::init_locales();
-
     let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT);
     let _dyn_wr_handle = std::thread::spawn(|| loop {
         write_feed();
         std::thread::sleep(std::time::Duration::from_secs(59));
     });
-
     let gfconf = GrassFeederConfig {
         path_config: "../target/db_rungui_local/".to_string(),
         path_cache: "../target/db_rungui_local/".to_string(),

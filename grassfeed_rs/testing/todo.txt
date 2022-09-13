@@ -9,7 +9,7 @@ To Do List
 - Create Changelog,
 	https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
 	https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
-- Check Info Dialog + website
+- Check Subscription Edit Dialog + website
 - Check Icon update frequency
 - remove package ini, check if section_name is needed
 - Shutdown Integration Test
@@ -23,11 +23,11 @@ To Do List
 - check  https://www.linuxcompatible.org/  feed: icon + entries
 - Check: &  in Feed-title, Message-title. should be escaped
 - StatusBar: copy Feed address into clipboard
-
-
+- Create Backups for Subscriptions-DB
+- Message List: set scroll position to upper edge from Cursor
 - Copy Message address into clipboard
-
 - Feed edit  Dialog: +Homepage
+- On Shutdown:  Flush Databases
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
 - Browser Display :  wrap over   title
 - Multiple instances shall be blocking.

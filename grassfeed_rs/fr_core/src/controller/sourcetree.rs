@@ -643,7 +643,10 @@ impl SourceTreeController {
         let to_parent_folderpos: isize;
         let to_parent_id;
         if let Some(to_entry_direct) = o_to_entry_direct {
+
+
             warn!("calc:  PROBLEM    direct:{:?}", to_entry_direct);
+
 
             if to_entry_direct.is_folder {
                 to_parent_id = to_entry_direct.parent_subs_id;

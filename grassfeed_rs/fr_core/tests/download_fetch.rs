@@ -23,7 +23,8 @@ use std::sync::Arc;
 fn single_dl_regular() {
     setup();
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
-    let f_src_repo = SubscriptionRepo::new("");
+    let f_src_repo = SubscriptionRepo::new_inmem();
+	f_src_repo.scrub_all_subscriptions();
     let icon_repo = IconRepo::new("");
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let msgrepo = MessagesRepo::new_in_mem();
@@ -70,7 +71,8 @@ fn single_dl_regular() {
 fn download_with_create_date() {
     setup();
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
-    let subsc_r = SubscriptionRepo::new("");
+    let subsc_r = SubscriptionRepo::new_inmem();
+	subsc_r.scrub_all_subscriptions();
     let icon_repo = IconRepo::new("");
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let msgrepo = MessagesRepo::new_in_mem();
@@ -121,7 +123,7 @@ fn prepare_feedsource_dummy() -> Rc<RefCell<dyn ISubscriptionRepo>> {
     );
     fse.subs_id = 1;
     fse.folder_position = 0;
-    let subscription_repo = SubscriptionRepo::new("");
+    let subscription_repo = SubscriptionRepo::new_inmem();
     let _r = subscription_repo.store_entry(&fse);
     let r_fsource: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(subscription_repo));
     r_fsource

@@ -82,10 +82,13 @@ impl OpmlReader {
         outl: &Outline,
     ) {
         let db_entry = from_outline(outl, parent_subs_id, position);
+
         let repo_id: isize = match (*subscription_repo).borrow().store_entry(&db_entry) {
-            Ok(r_entry) => r_entry.subs_id,
+            Ok(r_entry) => {
+                r_entry.subs_id
+            }
             Err(e) => {
-                error!("store_outline {:?}", e);
+                error!("store_outline {:?}", &e);
                 return;
             }
         };
@@ -232,28 +235,32 @@ impl StartupWithAppContext for OpmlReader {}
 // ------------------------------------
 
 #[cfg(test)]
-mod opml_reader_test {
+mod t_ {
     use super::*;
 
+    //RUST_BACKTRACE=1 cargo watch -s "cargo test  opml::opmlreader::t_::opml_import_w_folders  --lib -- --exact --nocapture"
     #[test]
     fn opml_import_w_folders() {
         setup();
-        let fsrr = Rc::new(RefCell::new(SubscriptionRepo::new("")));
+        let fsrr = Rc::new(RefCell::new(SubscriptionRepo::new_inmem()));
+		(*fsrr).borrow().scrub_all_subscriptions();
         let mut opmlreader = OpmlReader::new(fsrr.clone());
         let r = opmlreader.read_from_file(String::from("../testing/tests/opml/reader_wp.opml"));
         assert!(r.is_ok());
         opmlreader.transfer_to_db(0);
         let all = (*fsrr).borrow().get_all_entries();
+        println!("all={:?}", all);
         let e0 = all.get(0).unwrap();
         assert!(e0.is_folder);
         assert_eq!(all.len(), 24);
     }
 
-    //RUST_BACKTRACE=1 cargo watch -s "cargo test  opml::opmlreader::opml_reader_test::opmlread_simple1  --lib -- --exact --nocapture"
+    //RUST_BACKTRACE=1 cargo watch -s "cargo test  opml::opmlreader::t_::opmlread_simple1  --lib -- --exact --nocapture"
     // #[ignore]
     #[test]
     fn opmlread_simple1() {
-        let fsr = SubscriptionRepo::new("");
+        let fsr = SubscriptionRepo::new_inmem();
+		fsr.scrub_all_subscriptions();
         let fsrr = Rc::new(RefCell::new(fsr));
         let mut opmlreader = OpmlReader::new(fsrr.clone());
         let r = opmlreader.read_from_file(String::from("tests/data/simple_local.opml"));
@@ -279,7 +286,8 @@ mod opml_reader_test {
     // #[ignore]
     #[test]
     fn opml_write() {
-        let fsr = SubscriptionRepo::new("");
+        let fsr = SubscriptionRepo::new_inmem();
+		fsr.scrub_all_subscriptions();
         let fsrr: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(fsr));
         {
             let mut opmlreader = OpmlReader::new(fsrr.clone());

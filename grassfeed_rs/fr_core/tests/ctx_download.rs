@@ -125,7 +125,7 @@ fn prepare_feedsource_dummy() -> Rc<RefCell<dyn ISubscriptionRepo>> {
     );
     fse.subs_id = 1;
     fse.folder_position = 0;
-    let subscription_repo = SubscriptionRepo::new("");
+    let subscription_repo = SubscriptionRepo::new_inmem();
     let _r = subscription_repo.store_entry(&fse);
     let r_fsource: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(subscription_repo));
     r_fsource
