@@ -206,7 +206,7 @@ impl Downloader {
         }
         let elapsedms = now.elapsed().as_millis();
         let t_name: String = std::thread::current().name().unwrap().to_string();
-        if elapsedms > 3000 {
+        if elapsedms > 5000 {
             trace!(
                 "{} {:?} took {}ms   #Q={}",
                 t_name,

@@ -605,7 +605,6 @@ impl SourceTreeController {
         let mut to_path_parent: &[u16] = &[];
         let mut to_path_prev: Vec<u16> = Vec::default();
         let mut o_to_entry_parent: Option<SubscriptionEntry> = None;
-
         if !to_path.is_empty() {
             if let Some((last, elements)) = to_path.split_last() {
                 to_path_parent = elements;
@@ -613,7 +612,7 @@ impl SourceTreeController {
                     to_path_prev = elements.to_vec();
                     to_path_prev.push(*last - 1);
                 }
-                    o_to_entry_parent = self.get_by_path(to_path_parent);
+                o_to_entry_parent = self.get_by_path(to_path_parent);
             }
         } else {
             warn!("drag_calc_positions: to_path too short: {:?}", &to_path);
@@ -622,15 +621,11 @@ impl SourceTreeController {
             if let Some((_last, elements)) = to_path_parent.split_last() {
                 to_path_parent = elements;
             }
-            debug!("calc: 4  to_path_parent:{:?}", &to_path_parent);
             o_to_entry_parent = self.get_by_path(to_path_parent);
         }
-
-        debug!("calc: 5  to_path:{:?}", &to_path);
         let o_to_entry_direct = self.get_by_path(to_path);
         let mut o_to_entry_prev: Option<SubscriptionEntry> = None;
         if o_to_entry_direct.is_none() && o_to_entry_parent.is_none() {
-            debug!("calc: 6  to_path_prev:{:?}", &to_path_prev);
             o_to_entry_prev = self.get_by_path(to_path_prev.as_slice());
         }
         if o_to_entry_direct.is_none() && o_to_entry_parent.is_none() && o_to_entry_prev.is_none() {
@@ -639,31 +634,20 @@ impl SourceTreeController {
                 &to_path, to_path_parent
             ));
         }
-
         let to_parent_folderpos: isize;
         let to_parent_id;
         if let Some(to_entry_direct) = o_to_entry_direct {
-
-
-            warn!("calc:  PROBLEM    direct:{:?}", to_entry_direct);
-
-
-            if to_entry_direct.is_folder {
-                to_parent_id = to_entry_direct.parent_subs_id;
-                to_parent_folderpos = 0;
-            } else {
-                to_parent_id = to_entry_direct.parent_subs_id;
-                to_parent_folderpos = to_entry_direct.folder_position;
-            }
+            to_parent_id = to_entry_direct.parent_subs_id;
             if from_entry.subs_id == to_parent_id {
                 return Err(format!(
                     "drag on same element: {}:{:?} => {}:{:?}",
                     from_entry.subs_id, &from_path, to_parent_id, to_path_parent
                 ));
             }
+            // if to_entry_direct.is_folder {                to_parent_folderpos = 0;            } else {                to_parent_folderpos = to_entry_direct.folder_position;            }
+            to_parent_folderpos = to_entry_direct.folder_position; // dragging insidethe tree down
             return Ok((from_entry, to_parent_id, to_parent_folderpos));
         }
-
         if let Some(to_entry_parent) = o_to_entry_parent {
             if to_entry_parent.is_folder {
                 to_parent_id = to_entry_parent.subs_id;
@@ -883,7 +867,7 @@ impl SourceTreeController {
             return (*self.subscriptionrepo_r).borrow().get_by_index(subs_id);
         } else {
             if !path.is_empty() {
-                warn!(
+                debug!(
                     "no subscr_id for {:?}   #statemap={}",
                     &path,
                     self.statemap.borrow().get_length()
@@ -958,7 +942,7 @@ impl ISourceTreeController for SourceTreeController {
                     error!("Drag lost entries: {}->{}", length_before, all2.len());
                     success = false;
                 } else {
-                    self.update_cached_paths();
+                    //            self.update_cached_paths();
                     success = true;
                 }
             }
@@ -969,6 +953,7 @@ impl ISourceTreeController for SourceTreeController {
                     .debug_dump_tree("dragfail");
             }
         }
+        self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::FillSourcesTree);
         success
     }

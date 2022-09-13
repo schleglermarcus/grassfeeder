@@ -32,7 +32,9 @@ strip = true        # Strip symbols from binary*
 maintainer = "Marcus <schlegler_marcus@posteo.de>"
 copyright = "2022 <schlegler_marcus@posteo.de>"
 name = "grassfeeder"
-
+# extended-description = "Feed Reader Linux-Gtk3 Application"
+extended-description = "$description"
+# changelog =
 
 [package.metadata.i18n]
 available-locales = ["en", "de"]

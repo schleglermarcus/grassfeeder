@@ -13,7 +13,7 @@ use fr_core::util::db_time_to_display_nonnull;
 // use fr_core::controller::sourcetree::ISourceTreeController;
 
 /// Dragging the first folder   between the second and third.   0 -> 2
-#[ignore]
+//  #[ignore]
 #[test]
 fn drag_folder_one_down() {
     setup(); //
@@ -37,10 +37,17 @@ fn drag_folder_one_down() {
         }
     }
 
-    r_fsource.borrow().debug_dump_tree("OD2 ");
+    //     r_fsource.borrow().debug_dump_tree("OD2 ");
 
-    // let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(1);
-    // assert_eq!(result.len(), 1);
+    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_all_entries();
+	assert_eq!(result.len(), 3);
+    for e in &result {
+        debug!("{:?}", &e);
+    }
+	assert_eq!(result[1].folder_position, 0);
+	assert_eq!(result[0].folder_position, 1);
+	assert_eq!(result[2].folder_position, 2);
+
     // assert!(success);
 }
 

@@ -71,7 +71,7 @@ fn write_feed() {
     // debug!("written to {} {}", RSS_DYNAMIC_FILENAME, ts_now);
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn rungui_local_clear() {
     setup();
@@ -152,7 +152,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    if false {
+    if true {
         let src = [
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
@@ -162,6 +162,23 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "linuxcompatible",
             ),
             ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
+			("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
+			("http://thehighersidechats.com/feed/", "higherside-300"),
+
+			(
+                "https://packages.gentoo.org/packages/added.atom",
+                "gentoo-added_no-pubdate-500",
+            ), //  pubDate not there, but <updaed>
+			(
+				"http://feeds.feedburner.com/RichardHerringLSTPodcast",
+				"RichardHerring-560",
+			),
+
+			(
+				"http://chaosradio.ccc.de/chaosradio-complete.rss",
+				"chaosradio-267",
+			),
+
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -174,7 +191,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
-            ("http://www.peopleofwalmart.com/feed/", "walmart"), // why error ?
             ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),
@@ -196,7 +212,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://tickernews.co/comments/feed/", "tickernews-comm"),
             ("https://www.gawker.com/rss", "gawker"),
             ("https://arcadi-online.de/feed/", "arcadi"),
-            ("http://thehighersidechats.com/feed/", "higherside"),
             ("https://www.kino.de/rss/neu-im-kino", "kino_neu"),
             ("https://kolkatatv.org/feed/", "kolkatatv"),
             ("https://lupocattivoblog.com/feed/", "lupocat"),
@@ -245,10 +260,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "nexthint 無料ダウンロード",
             ),
             (
-                "https://packages.gentoo.org/packages/added.atom",
-                "gentoo-added_no-pubdate",
-            ), //  pubDate not there, but <updaed>
-            (
                 "https://observer.ug/headlinenews?format=feed&type=rss",
                 "obs_uganda",
             ),
@@ -285,10 +296,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "marketwatch",
             ),
             (
-                "http://feeds.feedburner.com/RichardHerringLSTPodcast",
-                "RichardHerring",
-            ),
-            (
                 "https://www.gorillavsbear.net/category/mp3/feed/",
                 "gorilla",
             ),
@@ -319,10 +326,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (
                 "http://thesuperest.com/feed/rss.xml",
                 "superest liste damaged",
-            ),
-            (
-                "http://chaosradio.ccc.de/chaosradio-complete.rss",
-                "chaosradio",
             ),
             (
                 "http://feeds.seoulnews.net/rss/3f5c98640a497b43",

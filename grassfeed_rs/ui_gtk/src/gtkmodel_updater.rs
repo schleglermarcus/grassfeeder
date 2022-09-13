@@ -4,6 +4,8 @@ use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::*;
 use gtk::Label;
 use gtk::ListStore;
+use gtk::SortColumn;
+use gtk::SortType;
 use gtk::TreeIter;
 use gtk::TreePath;
 use gtk::TreeStore;
@@ -226,16 +228,16 @@ impl GtkModelUpdaterInt {
     }
 
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
-    ///  Needs the same index for   ListStore  wie für TreeView
+    ///  Needs the same index for   ListStore  as for TreeView
     pub fn update_list_model(&self, list_index: u8) {
         let g_o = (*self.g_o_a).read().unwrap();
-
         let o_list_store = g_o.get_list_store(list_index as usize);
         if o_list_store.is_none() {
             error!("update_list_model: liststore {} not found", list_index);
             return;
         }
         let list_store: &ListStore = o_list_store.unwrap();
+
         let o_list_view = g_o.get_tree_view(list_index as usize);
         if o_list_view.is_none() {
             error!("update_list_model: tree_view {} not found", list_index);
@@ -243,19 +245,31 @@ impl GtkModelUpdaterInt {
         }
         let list_view: &TreeView = o_list_view.unwrap();
         let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
-        let view_option: Option<&ListStore> = None;
-        list_view.set_model(view_option);
+        let empty_view_option: Option<&ListStore> = None;
+        list_view.set_model(empty_view_option);
+        let o_last_sort_column_id: Option<(SortColumn, SortType)> = list_store.sort_column_id();
+        if o_last_sort_column_id.is_some() {
+            list_store.set_unsorted();
+        }
         list_store.clear();
         for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
             let append_iter = list_store.insert(-1);
-            Self::put_into_store(list_store, &append_iter, maxcols, row);
+            Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbufcache);
         }
         list_view.set_model(Some(list_store));
+        if let Some((sort_col, sort_type)) = o_last_sort_column_id {
+            list_store.set_sort_column_id(sort_col, sort_type);
+        }
     }
 
-    fn put_into_store(list_store: &ListStore, iter: &TreeIter, maxcols: u32, row: &[AValue]) {
+    fn put_into_store(
+        list_store: &ListStore,
+        iter: &TreeIter,
+        maxcols: u32,
+        row: &[AValue],
+        pixbufcache: &RefCell<HashMap<String, Pixbuf>>,
+    ) {
         for column in 0..maxcols {
-            //            let av: &AValue = row.get(column as usize).unwrap();
             match row.get(column as usize).unwrap() {
                 AValue::ASTR(s) => {
                     list_store.set_value(iter, column, &glib::Value::from(&s));
@@ -270,14 +284,19 @@ impl GtkModelUpdaterInt {
                     list_store.set_value(iter, column, &glib::Value::from(&b));
                 }
                 AValue::AIMG(s) => {
-                    let pb: Pixbuf = if !s.is_empty() {
-                        let buf = IconLoader::decompress_string_to_vec(s);
-                        IconLoader::vec_to_pixbuf(&buf).unwrap()
-                    } else {
-                        debug!("list  inserting empty icon Col{}  ", column);
-                        crate::iconloader::get_missing_icon()
-                    };
-                    list_store.set(iter, &[(column, &pb)]);
+                    let contained = pixbufcache.borrow().contains_key(s);
+                    if !contained {
+                        let pb: Pixbuf = Self::icon_for_string(s, String::default());
+                        pixbufcache.borrow_mut().insert(s.clone(), pb);
+                    }
+                    match pixbufcache.borrow().get(s) {
+                        Some(e_pb) => {
+                            list_store.set(iter, &[(column, &e_pb)]);
+                        }
+                        None => {
+                            error!("list,put_into_store:   pixbuf was inserted, but is not there ");
+                        }
+                    }
                 }
                 AValue::None => (),
             }
@@ -296,7 +315,7 @@ impl GtkModelUpdaterInt {
 
             let gpath = gtk::TreePath::from_indicesv(&[list_position as i32]);
             let iter = list_store.iter(&gpath).unwrap();
-            Self::put_into_store(list_store, &iter, maxcols, &row);
+            Self::put_into_store(list_store, &iter, maxcols, &row, &self.pixbufcache);
         }
     }
 
@@ -313,7 +332,7 @@ impl GtkModelUpdaterInt {
             if let Some(row) = o_row {
                 let gpath = gtk::TreePath::from_indicesv(&[list_pos as i32]);
                 if let Some(iter) = list_store.iter(&gpath) {
-                    Self::put_into_store(list_store, &iter, maxcols, &row);
+                    Self::put_into_store(list_store, &iter, maxcols, &row, &self.pixbufcache);
                 }
             }
         }
@@ -336,7 +355,6 @@ impl GtkModelUpdaterInt {
             error!("update_text_view({}) not found", text_view_index);
         }
     }
-
 
     // later: check if load_html() needs a base_url
     pub fn update_web_view(&self, idx: u8) {

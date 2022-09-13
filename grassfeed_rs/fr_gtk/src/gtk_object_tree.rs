@@ -353,6 +353,8 @@ fn set_sort_indicator(tvc: &TreeViewColumn, _sort_column: i32, sort_ascending: b
         true => SortType::Ascending,
         _ => SortType::Descending,
     };
+
+
     tvc.set_sort_order(sorttype);
     tvc.clicked();
     if !sort_ascending {
