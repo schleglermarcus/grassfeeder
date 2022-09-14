@@ -3,9 +3,9 @@
 * GTK-Liststore for inserting switch off sorting, else slow. Solved by using pixbuf cache
 * Created debian changelog
 * Subscription_state: merge extra booleans
-* gtk-updater: catching row-too-short nullpointer, Shutdown Integration Test,
-- Remove section_name, Remove Package Ini
+* Remove section_name, Remove Package Ini
+* Shutdown Integration Test, gtk-updater: catching row-too-short nullpointer
 
 - Subscription Edit Dialog  +Homepage
 
-- TLD-Specific Url Map, prevent multiple accesses 
+- TLD-Specific Url Map, prevent multiple accesses
