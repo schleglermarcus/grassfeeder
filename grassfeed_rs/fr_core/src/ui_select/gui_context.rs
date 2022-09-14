@@ -17,9 +17,12 @@ use gui_layer::gui_values::PROPDEF_ARRAY;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering;
 use std::sync::Arc;
 
 const TITLE_LENGTH_MAX: usize = 20;
+pub static IN_USE: AtomicBool = AtomicBool::new(false);
 
 pub struct GuiContext {
     values_store_adapter: UIAdapterValueStoreType,
@@ -28,57 +31,6 @@ pub struct GuiContext {
     configmanager_r: Rc<RefCell<ConfigManager>>,
     application_name: String,
     window_title: String,
-}
-
-impl Buildable for GuiContext {
-    type Output = GuiContext;
-
-    #[allow(clippy::type_complexity)]
-    fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self {
-        let configman = (*appcontext).get_rc::<ConfigManager>().unwrap();
-        let mut initvalues: HashMap<PropDef, String> = HashMap::default();
-        for pd in PROPDEF_ARRAY {
-            // LATER check if we need both     conf, configmanager
-            let mut o_val = conf.get(&pd.tostring());
-            if o_val.is_none() {
-                o_val = (*configman).borrow().get_val(&pd.to_string());
-            }
-            if o_val.is_none() {
-                o_val = (*configman).borrow().get_sys_val(&pd.to_string());
-            }
-            if let Some(val) = o_val {
-                initvalues.insert(pd, val);
-            }
-        }
-        if let Some(s) = (*configman)
-            .borrow()
-            .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
-        {
-            if let Ok(b) = s.parse::<bool>() {
-                initvalues.insert(PropDef::AppModeDebug, b.to_string());
-            }
-        }
-        // trace!("gui_context:   initvals={:#?}", &initvalues);
-        let (m_v_store_a, ui_updater, g_runner): (
-            UIAdapterValueStoreType,
-            Rc<RefCell<dyn UIUpdaterAdapter>>,
-            Rc<RefCell<dyn GuiRunner>>,
-        ) = select::ui_select::init_gui(initvalues);
-        (*m_v_store_a)
-            .write()
-            .unwrap()
-            .set_tree_row_expand(0, TREE_STATUS_COLUMN, 1);
-        GuiContext {
-            values_store_adapter: m_v_store_a,
-            updater_adapter: ui_updater,
-            gui_runner: g_runner,
-            configmanager_r: configman,
-            application_name: APPLICATION_NAME.to_string(),
-            window_title: String::default(),
-        }
-    }
-
-    // fn section_name() -> String {        String::from("window")    }
 }
 
 impl GuiContext {
@@ -143,6 +95,64 @@ impl GuiContext {
             .unwrap()
             .set_window_title(wtitle);
         (*self.updater_adapter).borrow().update_window_title();
+    }
+}
+
+impl Buildable for GuiContext {
+    type Output = GuiContext;
+
+    #[allow(clippy::type_complexity)]
+    fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self {
+        IN_USE.store(true, Ordering::Relaxed);
+        let configman = (*appcontext).get_rc::<ConfigManager>().unwrap();
+        let mut initvalues: HashMap<PropDef, String> = HashMap::default();
+        for pd in PROPDEF_ARRAY {
+            // LATER check if we need both     conf, configmanager
+            let mut o_val = conf.get(&pd.tostring());
+            if o_val.is_none() {
+                o_val = (*configman).borrow().get_val(&pd.to_string());
+            }
+            if o_val.is_none() {
+                o_val = (*configman).borrow().get_sys_val(&pd.to_string());
+            }
+            if let Some(val) = o_val {
+                initvalues.insert(pd, val);
+            }
+        }
+        if let Some(s) = (*configman)
+            .borrow()
+            .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
+        {
+            if let Ok(b) = s.parse::<bool>() {
+                initvalues.insert(PropDef::AppModeDebug, b.to_string());
+            }
+        }
+        // trace!("gui_context:   initvals={:#?}", &initvalues);
+        let (m_v_store_a, ui_updater, g_runner): (
+            UIAdapterValueStoreType,
+            Rc<RefCell<dyn UIUpdaterAdapter>>,
+            Rc<RefCell<dyn GuiRunner>>,
+        ) = select::ui_select::init_gui(initvalues);
+        (*m_v_store_a)
+            .write()
+            .unwrap()
+            .set_tree_row_expand(0, TREE_STATUS_COLUMN, 1);
+        GuiContext {
+            values_store_adapter: m_v_store_a,
+            updater_adapter: ui_updater,
+            gui_runner: g_runner,
+            configmanager_r: configman,
+            application_name: APPLICATION_NAME.to_string(),
+            window_title: String::default(),
+        }
+    }
+
+    // fn section_name() -> String {        String::from("window")    }
+}
+
+impl Drop for GuiContext {
+    fn drop(&mut self) {
+        IN_USE.store(false, Ordering::Relaxed);
     }
 }
 

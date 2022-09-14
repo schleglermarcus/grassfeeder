@@ -1,37 +1,34 @@
 To Do List
 
-- Subscription_state: merge extra booleans
-- Check Subscription Edit Dialog + website
-- Check Icon update frequency
-- remove package ini, check if section_name is needed
-- Shutdown Integration Test
+-  Subscription Edit Dialog  +Homepage
 
 
-- Add default set of feeds on new configuration
-- Subscription Tree: hide zeroes when nothing to read
+
 - Build via Docker container,   find external dependencies + packages
 - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
+- StatusBar: copy Feed address into clipboard
+- Add default set of feeds on new configuration
+- On Shutdown:  Flush Databases
+- Cleanup at maximum messages
+- Multiple instances shall be blocking.
+
+- Copy Message address into clipboard
+- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
+- Sanitize: cross-check icon ids of tree if they are present in icon db
+- Subscriptions Sanitize:  Folder shall have only folder icon
+- Subscriptions Sanitize:  test and clean with recursive folders
+- Subscription Tree: hide zeroes when nothing to read
 - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
 - check  https://www.linuxcompatible.org/  feed: icon + entries
 - Check: &  in Feed-title, Message-title. should be escaped
-- StatusBar: copy Feed address into clipboard
-- Create Backups for Subscriptions-DB
-- Message List: set scroll position to upper edge from Cursor
-- Copy Message address into clipboard
-- Feed edit  Dialog: +Homepage
-- On Shutdown:  Flush Databases
-- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
-- Browser Display :  wrap over   title
-- Multiple instances shall be blocking.
-- Cleanup at maximum messages
-- Sanitize: cross-check icon ids of tree if they are present in icon db
-- Bug: internal browser hangs sometimes
-- Subscriptions Sanitize:  Folder shall have only folder icon
-- Subscriptions Sanitize:  test and clean with recursive folders
+- Rotate log file 
+- Windows Build
 - Updating Sources:  prioritize by tree position, expanded flag
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal
 - Delete Messages
 - check: subscription  Reload shall refresh  message list
+- Browser Display :  wrap over   title
+- Create Backups for Subscriptions-DB
 - click on folder: show message sums
 - Error-DB for Subscription Requests, display in edit dialog
 - Modify Browser Font size
@@ -39,15 +36,15 @@ To Do List
 - find common code parts of    folder:mark-as-read  ,  folder:update
 - Flatpak  https://lib.rs/crates/cargo-pkg
 - implement focus policy: before last unread
-- Opml export formatiert
+- Opml export formatted / pretty
 - Browser: enable theme related colors
 - Browser: get rid of white display on start
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 - Delete Messages
 - Startup, create gui:  delayed creation of dialogs
-- Windows Build
 - Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
 - Searching inside feeds
+- Message List: set scroll position to upper edge from Cursor
 
 
 Perhaps:

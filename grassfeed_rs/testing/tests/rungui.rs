@@ -177,6 +177,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "chaosradio-267",
             ),
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
+            (
+                "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
+                "youtube",
+            ),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(

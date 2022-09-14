@@ -85,6 +85,7 @@ pub enum SJob {
     ScanEmptyUnread,
 }
 
+
 // #[automock]
 pub trait ISourceTreeController {
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool;
@@ -1110,6 +1111,7 @@ impl ISourceTreeController for SourceTreeController {
         let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
         fse.subs_id = self.get_next_available_subscription_id();
         fse.parent_subs_id = parent_id;
+		fse.expanded=true;
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_id)
@@ -1257,7 +1259,6 @@ impl ISourceTreeController for SourceTreeController {
         self.current_edit_fse.replace(fse.clone());
         let mut num_all: i32 = -1;
         let mut num_unread: i32 = -1;
-
         if let Some(feedcontents) = self.feedcontents_w.upgrade() {
             (num_all, num_unread) = (*feedcontents).borrow().get_counts(src_repo_id).unwrap();
         }

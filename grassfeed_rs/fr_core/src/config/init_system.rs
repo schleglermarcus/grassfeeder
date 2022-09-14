@@ -54,6 +54,10 @@ pub fn run(appcontext: &AppContext) {
     (*timer_r).borrow_mut().main_loop();
 }
 
+pub fn combine_config_path(path_config: &String) -> String {
+    format!("{}config.json", path_config)
+}
+
 pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, String> {
     check_or_create_folder(&gf_conf.path_config);
     check_or_create_folder(&gf_conf.path_cache);
@@ -68,7 +72,7 @@ pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, Stri
     );
     ret.insert(
         ConfigManager::CONF_PATH_KEY.to_string(),
-        format!("{}config.json", &gf_conf.path_config),
+        combine_config_path(&gf_conf.path_config), // format!("{}config.json", &gf_conf.path_config),
     );
     ret.insert(
         ConfigManager::CONF_MODE_DEBUG.to_string(),

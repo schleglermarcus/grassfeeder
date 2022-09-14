@@ -19,7 +19,8 @@ pub fn retrieve_homepage_from_feed_text(
     }
     let feed = r.unwrap();
     if feed.title.is_none() {
-        debug!("c:title empty for {}", &dbg_feed_url);
+        //  trace!("c:title empty for {}", &dbg_feed_url);
+		// Later: into error log
         return (None, None);
     }
     #[allow(unused_assignments)]
@@ -88,13 +89,7 @@ pub fn extract_icon_from_homepage(hp_content: String, homepage_url: &String) -> 
         })
         .filter(|attrmap| attrmap.get("rel").unwrap().contains("icon"))
         .filter_map(|attrmap| {
-            // if let Some(href) = attrmap.get("href") {
-            //     Some(href.clone())
-            // } else {
-            //     None
-            // }
             attrmap.get("href").cloned()
-			// .map(|href| href.clone())
         })
         .collect();
     if !icon_list.is_empty() {
@@ -115,11 +110,10 @@ pub fn extract_icon_from_homepage(hp_content: String, homepage_url: &String) -> 
             }
             icon_href = format!("{}{}", homepage_host, icon_href);
         }
-        // trace!("from_homepage- icon_href: {}", icon_href);
         return Some(icon_href);
-    } else {
-        trace!("no rel_icon  on page {} found", homepage_url);
     }
+	//  else {        trace!("no rel_icon  on page {} found", homepage_url);    }
+	// later: into error log
     None
 }
 

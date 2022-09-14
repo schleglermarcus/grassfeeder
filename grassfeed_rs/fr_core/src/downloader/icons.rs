@@ -2,13 +2,12 @@ use crate::controller::sourcetree::SJob;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::downloader::util;
+use crate::util::convert_webp_to_png;
 use crate::util::Step;
 use crate::util::StepResult;
-use crate::util::convert_webp_to_png;
 use crate::web::WebFetcherType;
 use flume::Sender;
 use jpeg_decoder;
-
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 32;
 
@@ -77,12 +76,28 @@ impl Step<IconInner> for IconFeedTextDownload {
             &inner.feed_url,
         ) {
             inner.feed_homepage = homepage;
-            // trace!(                "IconFeedTextDownload:2   HP={:?}  title={:?}",                inner.feed_homepage,                _feed_title            );
+            trace!(
+                "IconFeedTextDownload:2   HP={:?}  title={:?}",
+                inner.feed_homepage,
+                _feed_title
+            );
             return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
         }
         StepResult::Continue(Box::new(IconFallbackSimple(inner)))
     }
 }
+
+/* TODO
+struct CompareHomepageToDB(CompareHomepageToDB);
+impl Step<IconInner> for CompareHomepageToDB {
+    fn step(self: Box<Self>) -> StepResult<IconInner> {
+
+		StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)))
+
+	}
+}
+
+*/
 
 pub struct IconAnalyzeHomepage(IconInner);
 impl Step<IconInner> for IconAnalyzeHomepage {

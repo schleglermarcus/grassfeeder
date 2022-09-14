@@ -100,7 +100,7 @@ impl Step<CleanerInner> for RemoveNonConnected {
                 }
             }
         });
-        if !delete_list.is_empty() {
+        if !delete_list.is_empty() && !connected_child_list.is_empty() {
             debug!(
                 "Cleanup:  #connected: {}   #to_delete: {}",
                 connected_child_list.len(),

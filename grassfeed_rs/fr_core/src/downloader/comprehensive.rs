@@ -195,7 +195,10 @@ pub struct ComprFinal(ComprehensiveInner);
 impl Step<ComprehensiveInner> for ComprFinal {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let inner: ComprehensiveInner = self.0;
-        // trace!(            "DL: sending job  NewFeedSourceEdit  icon_id={}",            inner.icon_id        );
+        trace!(
+            "DL: sending job  NewFeedSourceEdit  icon_id={}",
+            inner.icon_id
+        );
         let _r = inner.sourcetree_job_sender.send(SJob::NewFeedSourceEdit(
             inner.feed_url_edit.clone(),
             inner.feed_title.clone(),

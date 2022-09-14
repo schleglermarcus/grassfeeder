@@ -254,6 +254,14 @@ impl GtkModelUpdaterInt {
         list_store.clear();
         for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
             let append_iter = list_store.insert(-1);
+            if row.len() < maxcols as usize {
+                error!(
+                    " update_list_model row shorter that columns #row:{}  columns:{}  SKIPPING",
+                    row.len(),
+                    maxcols
+                );
+                continue;
+            }
             Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbufcache);
         }
         list_view.set_model(Some(list_store));
@@ -270,7 +278,16 @@ impl GtkModelUpdaterInt {
         pixbufcache: &RefCell<HashMap<String, Pixbuf>>,
     ) {
         for column in 0..maxcols {
-            match row.get(column as usize).unwrap() {
+            let o_column = row.get(column as usize);
+            if o_column.is_none() {
+                error!(
+                    "put_into_store  row has no column {}  #row={}",
+                    column,
+                    row.len()
+                );
+                continue;
+            }
+            match o_column.unwrap() {
                 AValue::ASTR(s) => {
                     list_store.set_value(iter, column, &glib::Value::from(&s));
                 }
@@ -315,6 +332,15 @@ impl GtkModelUpdaterInt {
 
             let gpath = gtk::TreePath::from_indicesv(&[list_position as i32]);
             let iter = list_store.iter(&gpath).unwrap();
+
+            if row.len() < maxcols as usize {
+                error!(
+                    "update_list_model_single row shorter that columns #row:{}  columns:{}  SKIPPING",
+                    row.len(),
+                    maxcols
+                );
+                return;
+            }
             Self::put_into_store(list_store, &iter, maxcols, &row, &self.pixbufcache);
         }
     }
@@ -332,6 +358,14 @@ impl GtkModelUpdaterInt {
             if let Some(row) = o_row {
                 let gpath = gtk::TreePath::from_indicesv(&[list_pos as i32]);
                 if let Some(iter) = list_store.iter(&gpath) {
+                    if row.len() < maxcols as usize {
+                        error!(
+		                    "update_list_model_some row shorter that columns #row:{}  columns:{}  SKIPPING",
+		                    row.len(),
+		                    maxcols
+		                );
+                        continue;
+                    }
                     Self::put_into_store(list_store, &iter, maxcols, &row, &self.pixbufcache);
                 }
             }
