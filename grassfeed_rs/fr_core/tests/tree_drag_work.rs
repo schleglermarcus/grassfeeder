@@ -2,54 +2,14 @@ mod downloader_dummy;
 mod logger_config;
 mod tree_drag_common;
 
-use crate::tree_drag_common::dataset_three_folders;
-use crate::tree_drag_common::prepare_source_tree_controller;
+// use crate::tree_drag_common::dataset_three_folders;
+// use crate::tree_drag_common::prepare_source_tree_controller;
+// use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::message::MessageRow;
-use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::util::db_time_to_display_nonnull;
-// use fr_core::db::subscription_repo::SubscriptionRepo;
-// use fr_core::db::subscription_entry::FeedSourceState;
-// use fr_core::controller::sourcetree::ISourceTreeController;
 
-/// Dragging the first folder   between the second and third.   0 -> 2
-//  #[ignore]
-#[test]
-fn drag_folder_one_down() {
-    setup(); //
-    let fs_list: Vec<SubscriptionEntry> = dataset_three_folders();
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
-    // r_fsource.borrow().debug_dump_tree("OD1 ");
 
-    match fsc.drag_calc_positions(&vec![0], &vec![2]) {
-        Ok((from_entry, to_parent_id, to_folderpos)) => {
-            debug!(
-                "OK:  to_parent_id={}  to_folderpos={} ",
-                to_parent_id, to_folderpos
-            );
-            assert_eq!(to_folderpos, 2);
-
-            fsc.drag_move(from_entry, to_parent_id, to_folderpos);
-        }
-        Err(ref e) => {
-            error!("{:?}", e);
-            assert!(false);
-        }
-    }
-
-    //     r_fsource.borrow().debug_dump_tree("OD2 ");
-
-    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_all_entries();
-	assert_eq!(result.len(), 3);
-    for e in &result {
-        debug!("{:?}", &e);
-    }
-	assert_eq!(result[1].folder_position, 0);
-	assert_eq!(result[0].folder_position, 1);
-	assert_eq!(result[2].folder_position, 2);
-
-    // assert!(success);
-}
 
 // #[ignore]
 //  #[test]

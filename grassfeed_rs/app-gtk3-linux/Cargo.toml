@@ -34,7 +34,8 @@ copyright = "2022 <schlegler_marcus@posteo.de>"
 name = "grassfeeder"
 # extended-description = "Feed Reader Linux-Gtk3 Application"
 extended-description = "$description"
-# changelog =
+changelog = "src/changelog.txt"
+
 
 [package.metadata.i18n]
 available-locales = ["en", "de"]

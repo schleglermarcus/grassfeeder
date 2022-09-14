@@ -6,3 +6,4 @@ pub mod application_id;
 pub mod loc;
 pub mod parameter;
 pub mod gitversion;
+pub mod changelog_debian;

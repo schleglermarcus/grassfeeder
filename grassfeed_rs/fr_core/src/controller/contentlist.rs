@@ -151,6 +151,7 @@ pub struct FeedContents {
 impl FeedContents {
     pub const CONF_FOCUS_POLICY: &'static str = "MessageSelectFocusPolicy";
     pub const CONF_MSG_KEEP_COUNT: &'static str = "MessagesKeepCount";
+    pub const CONF_MSG_KEEP_COUNT_DEFAULT: i32 = 1000;
 
     pub fn new(ac: &AppContext) -> Self {
         let (q_s, q_r) = flume::bounded::<CJob>(JOBQUEUE_SIZE);
@@ -760,7 +761,7 @@ impl Buildable for FeedContents {
         if let Some(i) = conf.get_int(FeedContents::CONF_MSG_KEEP_COUNT) {
             fc.config.message_keep_count = i as i32;
         } else {
-            fc.config.message_keep_count = 100;
+            fc.config.message_keep_count = Self::CONF_MSG_KEEP_COUNT_DEFAULT;
         }
         if let Some(i) = conf.get_int(&PropDef::GuiList0SortColumn.to_string()) {
             fc.config.list_sort_column = i as u8;

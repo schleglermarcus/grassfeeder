@@ -1,0 +1,40 @@
+app-gtk3-linux (0.0.4) unstable; urgency=low
+
+  * Drag: Folder down  - fixed
+  * GTK-Liststore for inserting switch off sorting, else slow. Solved by using pixbuf cache
+  * Created debian changelog
+  
+  - Subscription_state: merge extra booleans
+  - Check Info Dialog + website
+  - Check Icon update frequency
+  - remove package ini, check if section_name is needed
+  - Shutdown Integration Test
+
+ --   * Startup Commandline processing fixed:    -h shall remain on commandline
+
+app-gtk3-linux (0.0.3) unstable; urgency=low
+
+  * refactored subscriptions to sqlite
+  * cleaning out deleted subscriptions
+  * Tree Unread-Calculation Speed increased, parallel web requests to 3
+  * fixed: message tooltip needs escaping
+  * remove icon dialog, leave it on  debug flag
+  * SendToBrowser :   mark-as-read for all entries
+
+ --   Tue, 13 Sep 2022 00:00:00 +0000
+
+app-gtk3-linux (0.0.2) unstable; urgency=low
+
+  * Add version and branch info to about dialog,
+  * refacture initialisation and property loading, config  as json
+  * Web threads to 2
+  * added more message title conversion html entities
+
+ --   Thu, 08 Sep 2022 00:00:00 +0000
+
+app-gtk3-linux (0.0.1) unstable; urgency=low
+
+  * Initial release
+
+ --   Sun, 04 Sep 2022 00:00:00 +0000
+

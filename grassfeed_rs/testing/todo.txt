@@ -1,14 +1,6 @@
 To Do List
 
-- Drag: Folder down  - not working yet
-
-
-- Check:  import, then drag , folder disappears
-- GTK-Liststore for inserting switch off sorting. Else slow.
 - Subscription_state: merge extra booleans
-- Create Changelog,
-	https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
-	https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
 - Check Subscription Edit Dialog + website
 - Check Icon update frequency
 - remove package ini, check if section_name is needed

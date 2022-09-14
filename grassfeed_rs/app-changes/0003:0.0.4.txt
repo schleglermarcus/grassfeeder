@@ -1,12 +1,9 @@
-- Startup Commandline processing fixed:    -h shall remain on commandline
-- Drag: Folder down  - fixed
-- GTK-Liststore for inserting switch off sorting, else slow. Solved by using pixbuf cache
-
+* Startup Commandline processing fixed:    -h shall remain on commandline
+* Drag: Folder down  - fixed
+* GTK-Liststore for inserting switch off sorting, else slow. Solved by using pixbuf cache
+* Created debian changelog
 
 - Subscription_state: merge extra booleans
-- Create Changelog,
-	https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
-	https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
 - Check Info Dialog + website
 - Check Icon update frequency
 - remove package ini, check if section_name is needed
