@@ -1,4 +1,4 @@
-app-gtk3-linux (0.0.4) unstable; urgency=low
+grassfeeder (0.0.4) unstable; urgency=low
 
   * Drag: Folder down  - fixed
   * GTK-Liststore for inserting switch off sorting, else slow. Solved by using pixbuf cache
@@ -10,9 +10,9 @@ app-gtk3-linux (0.0.4) unstable; urgency=low
   - remove package ini, check if section_name is needed
   - Shutdown Integration Test
 
- --   * Startup Commandline processing fixed:    -h shall remain on commandline
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  * Startup Commandline processing fixed:    -h shall remain on commandline
 
-app-gtk3-linux (0.0.3) unstable; urgency=low
+grassfeeder (0.0.3) unstable; urgency=low
 
   * refactored subscriptions to sqlite
   * cleaning out deleted subscriptions
@@ -21,20 +21,20 @@ app-gtk3-linux (0.0.3) unstable; urgency=low
   * remove icon dialog, leave it on  debug flag
   * SendToBrowser :   mark-as-read for all entries
 
- --   Tue, 13 Sep 2022 00:00:00 +0000
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 13 Sep 2022 00:00:00 +0000
 
-app-gtk3-linux (0.0.2) unstable; urgency=low
+grassfeeder (0.0.2) unstable; urgency=low
 
   * Add version and branch info to about dialog,
   * refacture initialisation and property loading, config  as json
   * Web threads to 2
   * added more message title conversion html entities
 
- --   Thu, 08 Sep 2022 00:00:00 +0000
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Thu, 08 Sep 2022 00:00:00 +0000
 
-app-gtk3-linux (0.0.1) unstable; urgency=low
+grassfeeder (0.0.1) unstable; urgency=low
 
   * Initial release
 
- --   Sun, 04 Sep 2022 00:00:00 +0000
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sun, 04 Sep 2022 00:00:00 +0000
 

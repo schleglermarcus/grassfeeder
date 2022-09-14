@@ -71,7 +71,7 @@ fn write_feed() {
     // debug!("written to {} {}", RSS_DYNAMIC_FILENAME, ts_now);
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn rungui_local_clear() {
     setup();
@@ -162,23 +162,21 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "linuxcompatible",
             ),
             ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
-			("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
-			("http://thehighersidechats.com/feed/", "higherside-300"),
-
-			(
+            ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
+            ("http://thehighersidechats.com/feed/", "higherside-300"),
+            (
                 "https://packages.gentoo.org/packages/added.atom",
                 "gentoo-added_no-pubdate-500",
             ), //  pubDate not there, but <updaed>
-			(
-				"http://feeds.feedburner.com/RichardHerringLSTPodcast",
-				"RichardHerring-560",
-			),
-
-			(
-				"http://chaosradio.ccc.de/chaosradio-complete.rss",
-				"chaosradio-267",
-			),
-
+            (
+                "http://feeds.feedburner.com/RichardHerringLSTPodcast",
+                "RichardHerring-560",
+            ),
+            (
+                "http://chaosradio.ccc.de/chaosradio-complete.rss",
+                "chaosradio-267",
+            ),
+            ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(

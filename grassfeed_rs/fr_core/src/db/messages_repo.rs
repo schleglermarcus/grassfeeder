@@ -307,9 +307,7 @@ impl Buildable for MessagesRepo {
         }
     }
 
-    fn section_name() -> String {
-        String::from("messagesrepo")
-    }
+    // fn section_name() -> String {        String::from("messagesrepo")    }
 }
 
 use context::StartupWithAppContext;

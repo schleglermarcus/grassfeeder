@@ -4,7 +4,6 @@ use std::io::Write;
 // https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
 // https://docs.rs/chrono/latest/chrono/format/strftime/index.html#specifiers
 
-
 pub fn get_env(key: &str) -> Option<String> {
     if let Some(s1) = std::env::var_os(key) {
         if let Some(s2) = s1.to_str() {
@@ -13,7 +12,6 @@ pub fn get_env(key: &str) -> Option<String> {
     }
     None
 }
-
 
 ///  with trailing slash
 pub fn create_debian_changelog(
@@ -34,18 +32,10 @@ pub fn create_debian_changelog(
             }
         });
     }
-    //    file_t_mod_list.sort_by(|a, b| a.0.cmp(&b.0));
     file_list.sort();
-	file_list.reverse();
-    println!("FILEs={:?}  =>   OUT={}", file_list, out_file);
-
-    let o_outfile = std::fs::File::create(out_file);
-    if o_outfile.is_err() {
-        println!("opening {} : {:?}", out_file, o_outfile.err());
-        return;
-    }
-    let mut outfile = o_outfile.unwrap();
-
+    file_list.reverse();
+    let mut outfile =
+        std::fs::File::create(out_file).expect("build.rs, changelog_debian: cannot open out_file!");
     for name in file_list {
         let replaced = name.replace(".txt", "");
         let parts: Vec<&str> = replaced.split(':').collect();
@@ -71,17 +61,3 @@ pub fn create_debian_changelog(
             .expect("error writing out file");
     }
 }
-
-/*
-pub fn do_changelog() {
-    setup();
-
-    create_debian_changelog(
-        "../app-changes/",
-        "../target/test_debian_changelog.txt",
-        "grassfeeder",
-        "unstable; urgency=low",
-        "Marcus der Schlegler <schleglermarcus@posteo.de>",
-    );
-}
-*/

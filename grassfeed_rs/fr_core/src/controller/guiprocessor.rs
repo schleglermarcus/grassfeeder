@@ -894,9 +894,7 @@ impl Buildable for GuiProcessor {
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         GuiProcessor::new(_appcontext)
     }
-    fn section_name() -> String {
-        String::from("guiprocessor")
-    }
+    // fn section_name() -> String {        String::from("guiprocessor")    }
 }
 
 impl TimerReceiver for GuiProcessor {

@@ -156,9 +156,7 @@ impl Buildable for OpmlReader {
         }
     }
 
-    fn section_name() -> String {
-        String::from("opmlreader")
-    }
+    // fn section_name() -> String {        String::from("opmlreader")    }
 }
 
 pub fn from_outline(o: &Outline, repo_parent_id: isize, folder_pos: isize) -> SubscriptionEntry {

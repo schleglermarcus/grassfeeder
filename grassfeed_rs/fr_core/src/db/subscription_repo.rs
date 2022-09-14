@@ -209,31 +209,31 @@ impl SubscriptionRepo {
         true
     }
 
-/*
-    #[deprecated]
-    pub fn check_or_store(&mut self) {
-        let count_changed: bool = false;
-        // let current_length = (*self.list).read().unwrap().len();
-        let dirty_ids: Vec<isize> = (self.list)
-            .read()
-            .unwrap()
-            .iter()
-            .filter_map(|(id, se)| if se.is_dirty { Some(*id) } else { None })
-            .collect();
-        // if current_length != self.list_cardinality_last {
-        //     count_changed = true;
-        // }
-        if count_changed || !dirty_ids.is_empty() {
-//            self.store_to_file_pretty();
-            (*self.list)
-                .write()
+    /*
+        #[deprecated]
+        pub fn check_or_store(&mut self) {
+            let count_changed: bool = false;
+            // let current_length = (*self.list).read().unwrap().len();
+            let dirty_ids: Vec<isize> = (self.list)
+                .read()
                 .unwrap()
-                .iter_mut()
-                .filter(|(id, _se)| dirty_ids.contains(*id))
-                .for_each(|(_id, se)| se.is_dirty = false);
+                .iter()
+                .filter_map(|(id, se)| if se.is_dirty { Some(*id) } else { None })
+                .collect();
+            // if current_length != self.list_cardinality_last {
+            //     count_changed = true;
+            // }
+            if count_changed || !dirty_ids.is_empty() {
+    //            self.store_to_file_pretty();
+                (*self.list)
+                    .write()
+                    .unwrap()
+                    .iter_mut()
+                    .filter(|(id, _se)| dirty_ids.contains(*id))
+                    .for_each(|(_id, se)| se.is_dirty = false);
+            }
         }
-    }
-*/
+    */
 
     /// renames the old file, then stores the subscription entries in formatted json
     #[deprecated]
@@ -376,18 +376,6 @@ impl ISubscriptionRepo for SubscriptionRepo {
     /// checks for  updated_int,  retrieves those earlier than the given date
     /// new:  order by updated-time. TODO check the order
     fn get_by_fetch_time(&self, updated_time_s: i64) -> Vec<SubscriptionEntry> {
-        /*
-                if self.migr_read_from_json {
-                    return (*self.list)
-                        .read()
-                        .unwrap()
-                        .iter()
-                        .map(|(_id, sub)| sub)
-                        .filter(|sub| !sub.is_folder && sub.updated_int <= updated_time_s)
-                        .cloned()
-                        .collect::<Vec<SubscriptionEntry>>();
-                }
-        */
         let prepared = format!(
             "SELECT * FROM {} WHERE updated_int<{}  order by updated_int ",
             SubscriptionEntry::table_name(),
@@ -413,39 +401,11 @@ impl ISubscriptionRepo for SubscriptionRepo {
 
     /// sorted by subs_id
     fn get_all_entries(&self) -> Vec<SubscriptionEntry> {
-        /*
-                if self.migr_read_from_json {
-                    let mut se_list = (*self.list)
-                        .read()
-                        .unwrap()
-                        .iter()
-                        .map(|(_id, sub)| sub)
-                        .cloned()
-                        .collect::<Vec<SubscriptionEntry>>();
-                    se_list.sort_by(|a, b| a.subs_id.cmp(&b.subs_id));
-                    return se_list;
-                }
-        */
         self.ctx.get_all()
     }
 
     ///   store IconID into subscription entry
     fn update_icon_id(&self, subs_id: isize, icon_id: usize, timestamp_s: i64) {
-        /*
-                if self.migr_read_from_json {
-                    match (*self.list).write().unwrap().get_mut(&subs_id) {
-                        Some(mut entry) => {
-                            entry.icon_id = icon_id;
-                            entry.updated_icon = timestamp_s;
-                            entry.is_dirty = true;
-                        }
-                        None => {
-                            debug!("update_icon_id: not found {}", subs_id);
-                        }
-                    };
-                    return;
-                }
-        */
         let sql = format!(
             "UPDATE {}  SET  icon_id={}, updated_icon={} WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -458,20 +418,6 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn update_folder_position(&self, src_id: isize, new_folder_pos: isize) {
-        /*
-                if self.migr_read_from_json {
-                    match (*self.list).write().unwrap().get_mut(&src_id) {
-                        Some(mut entry) => {
-                            entry.folder_position = new_folder_pos;
-                            entry.is_dirty = true;
-                        }
-                        None => {
-                            debug!("update_folder_position: not found {}", src_id);
-                        }
-                    };
-                    return;
-                }
-        */
         let sql = format!(
             "UPDATE {}  SET  folder_position={}  WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -483,17 +429,6 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     fn update_expanded(&self, src_ids: Vec<isize>, new_expanded: bool) {
-        /*
-                (*self.list)
-                    .write()
-                    .unwrap()
-                    .iter_mut()
-                    .filter(|(id, _se)| src_ids.contains(id))
-                    .for_each(|(_id, se)| {
-                        se.expanded = new_expanded;
-                        se.is_dirty = true;
-                    });
-        */
         let joined = src_ids
             .iter()
             .map(|r| r.to_string())
@@ -830,9 +765,7 @@ impl Buildable for SubscriptionRepo {
         }
     }
 
-    fn section_name() -> String {
-        String::from("subscriptions_repo")
-    }
+    // fn section_name() -> String {        String::from("subscriptions_repo")    }
 }
 
 impl StartupWithAppContext for SubscriptionRepo {
@@ -840,22 +773,17 @@ impl StartupWithAppContext for SubscriptionRepo {
     fn startup(&mut self, _ac: &AppContext) {
         // let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
         // let su_r = ac.get_rc::<SubscriptionRepo>().unwrap();
-        {
-            // (*timer_r)                .borrow_mut()                .register(&TimerEvent::Timer10s, su_r.clone());
-            // (*timer_r)                .borrow_mut()                .register(&TimerEvent::Shutdown, su_r);
-        }
 
         self.startup_int();
     }
 }
 
 impl TimerReceiver for SubscriptionRepo {
-    fn trigger(&mut self, event: &TimerEvent) {
-        match event {
-            // TimerEvent::Timer10s => {                self.check_or_store();            }
-            // TimerEvent::Shutdown => {                self.check_or_store();            }
-            _ => (),
-        }
+    fn trigger(&mut self, _event: &TimerEvent) {
+        // match event {
+        //      TimerEvent::Timer10s => {                self.check_or_store();            }
+        //     _ => (),
+        // }
     }
 }
 
@@ -870,20 +798,6 @@ fn subscription_entry_to_json(input: &SubscriptionEntry) -> Option<String> {
     }
 }
 
-/*
-//  #[allow(dead_code)]
-fn subscription_entry_to_txt(input: &SubscriptionEntry) -> Option<String> {
-    match bincode::serialize(input) {
-        //         Ok(encoded) => Some(compress(&encoded)),
-        Ok(encoded) => Some(compress(String::from_utf8(encoded).unwrap().as_str())),
-        Err(er) => {
-            error!("bincode_serizalize {:?} \n {:?}", er, &input.subs_id);
-            None
-        }
-    }
-}
-*/
-
 // #[allow(dead_code)]
 fn json_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
     let dec_r: serde_json::Result<SubscriptionEntry> = serde_json::from_str(&line);
@@ -896,52 +810,35 @@ fn json_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
     }
 }
 
-/*
-// #[allow(dead_code)]
-fn txt_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
-    let dc_bytes = decompress(&line);
-    let dec_r: bincode::Result<SubscriptionEntry> = bincode::deserialize(dc_bytes.as_bytes());
-    match dec_r {
-        Ok(dec_se) => Some(dec_se),
-        Err(e) => {
-            error!("bincode:deserialize {:?}   {:?} ", e, &line);
-            None
-        }
-    }
-}
-*/
-
 #[cfg(test)]
 mod ut {
     use super::*;
 
-
-/*
-pub const TEST_FOLDER1: &'static str = "../target/db_t_sub_rep";
-    #[test]
-    fn t_store_file() {
-        setup();
-        {
-            let mut sr = SubscriptionRepo::new2(TEST_FOLDER1.to_string());
-            sr.startup_int();
-            sr.scrub_all_subscriptions();
-            let s1 = SubscriptionEntry::default();
-            assert!(sr.store_entry(&s1).is_ok());
-            assert!(sr.store_entry(&s1).is_ok());
-            let list = sr.get_all_entries();
-            assert_eq!(list.len(), 2);
-            sr.check_or_store();
+    /*
+    pub const TEST_FOLDER1: &'static str = "../target/db_t_sub_rep";
+        #[test]
+        fn t_store_file() {
+            setup();
+            {
+                let mut sr = SubscriptionRepo::new2(TEST_FOLDER1.to_string());
+                sr.startup_int();
+                sr.scrub_all_subscriptions();
+                let s1 = SubscriptionEntry::default();
+                assert!(sr.store_entry(&s1).is_ok());
+                assert!(sr.store_entry(&s1).is_ok());
+                let list = sr.get_all_entries();
+                assert_eq!(list.len(), 2);
+                sr.check_or_store();
+            }
+            {
+                let mut sr = SubscriptionRepo::new_inmem();
+                sr.startup_int();
+                let list = sr.get_all_entries();
+                // list.iter().for_each(|l| debug!("ST {:?}", l));
+                assert_eq!(list.len(), 3);
+            }
         }
-        {
-            let mut sr = SubscriptionRepo::new_inmem();
-            sr.startup_int();
-            let list = sr.get_all_entries();
-            // list.iter().for_each(|l| debug!("ST {:?}", l));
-            assert_eq!(list.len(), 3);
-        }
-    }
-*/
-
+    */
 
     #[test]
     fn t_update_last_selected() {

@@ -148,7 +148,6 @@ impl Downloader {
         for n in 0..self.config.num_downloader_threads {
             let gp_sender: Sender<Job> = self.gp_job_sender.as_ref().unwrap().clone();
             let queue_a = self.job_queue.clone();
-            // let f_q_r = self.fetch_queue_receiver.clone();
             let busy_a = self.busy_indicators.clone();
             let builder = thread::Builder::new().name(format!("dl_{}", n));
             let h = builder
@@ -157,6 +156,7 @@ impl Downloader {
                     let o_job = (*queue_a).write().unwrap().pop_front();
                     if let Some(dljob) = o_job {
                         let job_kind = dljob.kind();
+                        // if job_kind == 2 {                            debug!("DL:ICON {:?}", &dljob);                        }
                         (*busy_a).write().unwrap()[n as usize] = job_kind;
                         let _r = gp_sender.send(Job::DownloaderJobStarted(n as u8, job_kind));
                         Self::process_job(dljob, queue_size);
@@ -340,18 +340,12 @@ impl IDownloader for Downloader {
             return;
         }
         self.config.num_downloader_threads = n;
-        // (*self.configmanager_r).borrow_mut().set_section_key(
-        //     &Self::section_name(),
-        //     CONF_DOWNLOADER_THREADS,
-        //     n.to_string().as_str(),
-        // );
         (*self.configmanager_r)
             .borrow()
             .set_val(CONF_DOWNLOADER_THREADS, n.to_string());
     }
 
     fn get_queue_size(&self) -> usize {
-        // self.fetch_queue_sender.len()
         (*self.job_queue).read().unwrap().len()
     }
 }
@@ -366,10 +360,6 @@ impl Buildable for Downloader {
             dl.config.num_downloader_threads = 1;
         }
         dl
-    }
-
-    fn section_name() -> String {
-        String::from("contentdownloader")
     }
 }
 

@@ -196,9 +196,7 @@ impl Buildable for IconRepo {
         }
     }
 
-    fn section_name() -> String {
-        String::from("subscriptions_repo")
-    }
+    // fn section_name() -> String {        String::from("subscriptions_repo")    }
 }
 
 impl StartupWithAppContext for IconRepo {

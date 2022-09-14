@@ -20,11 +20,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 
-// #[allow(dead_code)]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum BJob {
-    Something,
-}
+// #[derive(Debug, Clone, PartialEq, Eq)]
+// pub enum BJob {    Something,}
 
 pub trait IBrowserPane {
     fn switch_browsertab_content(&self, repo_id: i32, fc_state: FeedContentState);
@@ -40,7 +37,6 @@ pub struct BrowserPane {
     gui_val_store: UIAdapterValueStoreType,
     config: Config,
     last_selected_link_text: RefCell<String>,
-    // last_fc_state: RefCell<FeedContentState>,
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     feedcontents_w: Weak<RefCell<FeedContents>>, // YY
 }
@@ -66,7 +62,6 @@ impl BrowserPane {
     fn create_browser_dir(&mut self) {
         if let Some(browserdir) = (*self.configmanager_r)
             .borrow()
-            //.get_section_key(&Self::section_name(), &PropDef::BrowserDir.to_string())
             .get_sys_val(&PropDef::BrowserDir.to_string())
         {
             let existing = std::path::Path::new(&browserdir).is_dir();
@@ -80,8 +75,9 @@ impl BrowserPane {
             }
         } else {
             error!("config is missing {}", PropDef::BrowserDir.to_string());
-			(*self.configmanager_r)
-	            .borrow().debug_dump("create_browser_dir");
+            (*self.configmanager_r)
+                .borrow()
+                .debug_dump("create_browser_dir");
         }
     }
 }
@@ -160,13 +156,6 @@ impl IBrowserPane for BrowserPane {
 
     fn set_conf_browser_bg(&mut self, c: u32) {
         self.config.browser_bg = c as u8;
-        /*
-                (*self.configmanager_r).borrow_mut().set_section_key(
-                    &Self::section_name(),
-                    &PropDef::BrowserBackgroundLevel.to_string(),
-                    c.to_string().as_str(),
-                );
-        */
         (*self.configmanager_r)
             .borrow()
             .set_val(&PropDef::BrowserBackgroundLevel.to_string(), c.to_string());
@@ -196,9 +185,7 @@ impl Buildable for BrowserPane {
         }
         bp
     }
-    fn section_name() -> String {
-        String::from("browser")
-    }
+    //  fn section_name() -> String {        String::from("browser")    }
 }
 
 impl StartupWithAppContext for BrowserPane {

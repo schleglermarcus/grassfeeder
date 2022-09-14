@@ -162,7 +162,7 @@ impl GtkRunnerInternal {
                     }
                 }
                 let elapsed_ms = now.elapsed().as_millis();
-                if elapsed_ms > 100 {
+                if elapsed_ms > 200 {
                     warn!("R_INT: {:?} took {:?}", &command, elapsed_ms);
                 }
             }

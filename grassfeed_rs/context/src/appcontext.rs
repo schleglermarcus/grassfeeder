@@ -1,7 +1,6 @@
 use crate::buildconfig::BuildConfigContainer;
 use crate::Buildable;
 use crate::StartupWithAppContext;
-use ini::Ini;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -79,17 +78,19 @@ impl AppContext {
         self.startups.clear(); // reduce cyclic dependencies
     }
 
-    #[deprecated] // later
-    pub fn store_ini(&mut self, _r_ini: Rc<RefCell<Ini>>) {
-        // self.ini_r = r_ini;
-    }
-
-    #[deprecated] // later
-    pub fn new_with_ini(_ini_rc: Rc<RefCell<Ini>>) -> AppContext {
-        AppContext {
-            ..Default::default()
+    /*
+        #[deprecated] // later
+        pub fn store_ini(&mut self, _r_ini: Rc<RefCell<Ini>>) {
+            // self.ini_r = r_ini;
         }
-    }
+
+        #[deprecated] // later
+        pub fn new_with_ini(_ini_rc: Rc<RefCell<Ini>>) -> AppContext {
+            AppContext {
+                ..Default::default()
+            }
+        }
+    */
 
     pub fn new(sys_conf: HashMap<String, String>) -> AppContext {
         AppContext {
@@ -122,9 +123,7 @@ pub mod appcontext_test {
         fn build(_conf: Box<dyn BuildConfig>, _ac: &AppContext) -> Self::Output {
             CoA {}
         }
-        fn section_name() -> String {
-            "A".to_string()
-        }
+        // fn section_name() -> String {            "A".to_string()        }
     }
     impl StartupWithAppContext for CoA {}
 
@@ -134,9 +133,7 @@ pub mod appcontext_test {
         fn build(_conf: Box<dyn BuildConfig>, _ac: &AppContext) -> Self::Output {
             CoB {}
         }
-        fn section_name() -> String {
-            "B".to_string()
-        }
+        // fn section_name() -> String {            "B".to_string()        }
     }
     impl StartupWithAppContext for CoB {}
 

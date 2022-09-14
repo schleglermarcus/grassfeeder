@@ -59,7 +59,7 @@ fn shutdown_store_ini() {
         (*gp_r).borrow_mut().process_event();
         (*gp_r).borrow_mut().process_jobs();
         (*timer_r).borrow_mut().main_loop();
-        let ini2 = ini::Ini::load_from_file(conf_name.clone()).unwrap();
+        let ini2 = in_i __ load_from_file(conf_name.clone()).unwrap();
         let ppos_str = ini2.get_from(Some("window"), "GuiPane1Pos").unwrap();
         assert_eq!(ppos_str.to_string(), pane_pos.to_string());
     }
@@ -75,7 +75,7 @@ fn shutdown_store_ini() {
 
 
 
-#[ignore] // TODO 
+#[ignore] // TODO
 #[test]
 fn add_folder_and_feed() {
     setup();
@@ -134,55 +134,6 @@ fn add_folder_and_feed() {
     assert_eq!(entries.len(), 4); // 2 default entries, one folder, one regular entry
 }
 
-/*
-
-SYSTEM:
-rcs_version=0.0.2
-mode_debug=false
-conf_filename=/home/marcus/.config/grassfeeder//config.ini
-subscriptions_folder=/home/marcus/.config/grassfeeder/
-BrowserDir=/home/marcus/.cache/grassfeeder//browser
-messages_db=/home/marcus/.config/grassfeeder//messages.db
-
-
-USER:
-[window]
-GuiFontSizeManualEnable=false
-GuiFontSizeManual=10
-GuiPane1Pos=237
-GuiPane2Pos=934
-GuiCol1Width=482
-GuiWindowWidth=1618
-GuiWindowHeight=869
-
-[browser]
-BrowserBackgroundLevel=153
-
-[contentlist]
-MessageSelectFocusPolicy=1
-MessagesKeepCount=100
-GuiList0SortColumn=2
-GuiList0SortAscending=false
-
-[sourcetree]
-FetchFeedsOnStart=false
-FetchFeedsInterval=26
-FetchFeedsIntervalUnit=1
-DisplayFeedCountAll=false
-
-[contentdownloader]
-DownloaderThreads=2
-
-[subscriptions_repo]
-[config]
-[messagesrepo]
-
-
-ENTFERNEN:
-GuiWindowTitle=app:default:to do
-
-
-*/
 
 // ------------------------------------
 

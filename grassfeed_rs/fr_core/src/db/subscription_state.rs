@@ -47,21 +47,12 @@ pub struct SubscriptionState {
 
 impl ISubscriptionState for SubscriptionState {
     fn set_deleted(&mut self, subs_id: isize, new_del: bool) {
-        if let Some(mut st) = self.statemap.get_mut(&subs_id) {
-            st.is_deleted = new_del;
+        if let Some(st) = self.statemap.get_mut(&subs_id) {
+            st.set_deleted(new_del);
         }
     }
 
     fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>) {
-        /*
-                if !self.statemap.contains_key(&db_id) {
-                    let mut sme = SubsMapEntry::default();
-                    sme.tree_path = Some(newpath);
-                    self.statemap.insert(db_id, sme);
-                } else if let Some(st) = self.statemap.get_mut(&db_id) {
-                    st.set_path(newpath);
-                }
-        */
         if let std::collections::hash_map::Entry::Vacant(e) = self.statemap.entry(db_id) {
             let sme = SubsMapEntry {
                 tree_path: Some(newpath),
@@ -108,7 +99,8 @@ impl ISubscriptionState for SubscriptionState {
             .statemap
             .iter()
             .filter_map(|(id, se)| {
-                if !se.is_folder && se.num_msg_all_unread.is_none() && *id > 0 && !se.is_deleted() {
+                if !se.is_folder() && se.num_msg_all_unread.is_none() && *id > 0 && !se.is_deleted()
+                {
                     Some(*id)
                 } else {
                     None
@@ -155,7 +147,7 @@ impl ISubscriptionState for SubscriptionState {
         let mask = statusflag as usize;
         self.statemap
             .iter()
-            .filter(|(_id, entry)| include_folder || !entry.is_folder)
+            .filter(|(_id, entry)| include_folder || !entry.is_folder())
             .filter_map(|(id, entry)| {
                 if entry.check_bitmask(mask) == activated {
                     Some(*id)
@@ -170,11 +162,6 @@ impl ISubscriptionState for SubscriptionState {
         self.statemap
             .iter()
             .filter_map(|(id, st)| {
-                // if let Some(tp) = &st.tree_path {
-                //     Some((id, tp))
-                // } else {
-                //     None
-                // }
                 st.tree_path.as_ref().map(|tp| (id, tp))
             })
             .find_map(|(id, tp)| if tp == path { Some(*id) } else { None })
@@ -183,7 +170,7 @@ impl ISubscriptionState for SubscriptionState {
     fn set_schedule_fetch_all(&mut self) {
         self.statemap
             .iter_mut()
-            .filter(|(_id, entry)| !entry.is_folder && !entry.is_deleted)
+            .filter(|(_id, entry)| !entry.is_folder() && !entry.is_deleted())
             .for_each(|(_id, entry)| {
                 entry.set_fetch_scheduled(true);
             });
@@ -209,8 +196,9 @@ pub enum StatusMask {
     FetchInProgress = 32,
     ErrFetchReq = 64,
     ErrIconReq = 128,
-    //    FolderExpanded = 64,
-    //    Deleted = 128,
+    IsFolderCopy = 256,
+    IsDeletedCopy = 512,
+    IsExpandedCopy = 1024,
 }
 
 #[allow(dead_code)]
@@ -221,13 +209,17 @@ pub struct SubsMapEntry {
     pub num_msg_all_unread: Option<(isize, isize)>,
 
     /// later: remove this
+    #[deprecated]
     pub is_dirty: bool,
 
     /// copied
+    #[deprecated]
     pub is_folder: bool,
     /// copied
+    #[deprecated]
     pub is_deleted: bool,
     /// copied
+    #[deprecated]
     pub is_expanded: bool,
 }
 
@@ -255,6 +247,9 @@ pub trait FeedSourceState {
 
     fn set_path(&mut self, newpath: Vec<u16>);
     fn get_path(&self) -> Option<Vec<u16>>;
+
+    fn is_folder(&self) -> bool;
+    fn set_folder(&mut self, n: bool);
 }
 
 #[allow(dead_code)]
@@ -290,17 +285,21 @@ impl FeedSourceState for SubsMapEntry {
     }
 
     fn is_deleted(&self) -> bool {
-        self.is_deleted
+        // self.is_deleted
+        self.check_bitmask(StatusMask::IsDeletedCopy as usize)
     }
     fn set_deleted(&mut self, n: bool) {
-        self.is_deleted = n
+        // self.is_deleted = n
+        self.change_bitmask(StatusMask::IsDeletedCopy as usize, n)
     }
 
     fn is_expanded(&self) -> bool {
-        self.is_expanded
+        // self.is_expanded
+        self.check_bitmask(StatusMask::IsExpandedCopy as usize)
     }
-    fn set_expanded(&mut self, new_exp: bool) {
-        self.is_expanded = new_exp;
+    fn set_expanded(&mut self, n: bool) {
+        // self.is_expanded = new_exp;
+        self.change_bitmask(StatusMask::IsExpandedCopy as usize, n);
     }
 
     fn check_bitmask(&self, bitmask: usize) -> bool {
@@ -314,7 +313,7 @@ impl FeedSourceState for SubsMapEntry {
         };
         if new_st != self.status {
             self.status = new_st;
-            self.is_dirty = true;
+            // self.is_dirty = true;
         }
     }
 
@@ -323,5 +322,13 @@ impl FeedSourceState for SubsMapEntry {
     }
     fn get_path(&self) -> Option<Vec<u16>> {
         self.tree_path.clone()
+    }
+
+    fn is_folder(&self) -> bool {
+        self.check_bitmask(StatusMask::IsFolderCopy as usize)
+    }
+
+    fn set_folder(&mut self, n: bool) {
+        self.change_bitmask(StatusMask::IsFolderCopy as usize, n);
     }
 }

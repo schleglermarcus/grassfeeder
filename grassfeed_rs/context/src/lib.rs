@@ -10,16 +10,17 @@ use std::rc::Rc;
 pub trait Buildable: Sized {
     type Output;
 
-	/// Phase 1
+    /// Phase 1
     fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self::Output;
 
-    fn section_name() -> String;
+    // #[deprecated]
+    // fn section_name() -> String {      String::default()    }
 }
 
 pub trait BuildConfig {
     fn get(&self, key: &str) -> Option<String>;
-	fn get_int(&self, key: &str) -> Option<isize>;
-	fn get_bool(&self, key: &str) -> bool;
+    fn get_int(&self, key: &str) -> Option<isize>;
+    fn get_bool(&self, key: &str) -> bool;
     fn dump(&self);
 }
 
@@ -35,7 +36,7 @@ pub trait StartupWithAppContext {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum TimerEvent {
     Timer100s = 0,
-	Timer10s,
+    Timer10s,
     Timer1s,
     Timer200ms,
     Timer100ms,

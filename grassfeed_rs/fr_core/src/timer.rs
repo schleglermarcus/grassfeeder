@@ -128,9 +128,7 @@ impl Buildable for Timer {
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         build_timer()
     }
-    fn section_name() -> String {
-        String::from("timer")
-    }
+    // fn section_name() -> String {        String::from("timer")    }
 }
 
 impl StartupWithAppContext for Timer {}
@@ -185,9 +183,7 @@ mod appcontext_test {
         fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
             GUIP::new(_appcontext)
         }
-        fn section_name() -> String {
-            String::from("GPU")
-        }
+        // fn section_name() -> String {            String::from("GPU")        }
     }
 
     #[derive(Debug, Clone)]
@@ -214,9 +210,7 @@ mod appcontext_test {
             DBU_IN_USE.store(true, Ordering::Relaxed);
             DBU {}
         }
-        fn section_name() -> String {
-            String::from("dbu")
-        }
+        // fn section_name() -> String {            String::from("dbu")        }
     }
     impl StartupWithAppContext for DBU {
         fn startup(&mut self, _ac: &AppContext) {}

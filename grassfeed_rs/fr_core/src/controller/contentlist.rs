@@ -771,9 +771,7 @@ impl Buildable for FeedContents {
         fc.config.list_sort_order_up = conf.get_bool(&PropDef::GuiList0SortAscending.to_string());
         fc
     }
-    fn section_name() -> String {
-        String::from("contentlist")
-    }
+    // fn section_name() -> String {        String::from("contentlist")    }
 }
 
 impl StartupWithAppContext for FeedContents {
@@ -1015,23 +1013,6 @@ impl Default for Config {
 }
 
 pub fn get_font_size_from_config(configmanager_r: Rc<RefCell<ConfigManager>>) -> u32 {
-    /*
-        if (*configmanager_r).borrow().get_section_key_bool(
-            &GuiContext::section_name(),
-            PropDef::GuiFontSizeManualEnable.to_string().as_str(),
-        ) {
-            if let Some(fs_man) = (*configmanager_r).borrow().
-            get_section_key(
-                &GuiContext::section_name(),
-                PropDef::GuiFontSizeManual.to_string().as_str(),
-            ) {
-                if let Ok(s) = fs_man.parse::<u32>() {
-                    return s;
-                }
-            }
-        }
-        0
-    */
     if (*configmanager_r)
         .borrow()
         .get_val_bool(&PropDef::GuiFontSizeManualEnable.to_string())

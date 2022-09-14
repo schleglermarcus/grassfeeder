@@ -40,8 +40,6 @@ pub fn build_rs_main(build_out_folder: &str) {
         env!("CARGO_PKG_VERSION")
     ));
     let filecontent = lines.join("\n");
-    // let out_dir = env::var_os("OUT_DIR").unwrap();
-    // let dest_path = Path::new(&out_dir).join("rcs_version.rs");
     let dest_path = Path::new(&gen_filename);
     fs::write(&dest_path, &filecontent).unwrap();
 }

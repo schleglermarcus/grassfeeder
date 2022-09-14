@@ -13,7 +13,7 @@ use std::collections::HashMap;
 use std::io::BufWriter;
 use std::rc::Rc;
 
-const ID_CONFIG: &str = "config";
+// const ID_CONFIG: &str = "config";
 
 pub struct ConfigManager {
     cconf_modified: RefCell<bool>,
@@ -188,9 +188,7 @@ impl Buildable for ConfigManager {
         cm
     }
 
-    fn section_name() -> String {
-        String::from(ID_CONFIG)
-    }
+    // fn section_name() -> String {        String::from(ID_CONFIG)    }
 }
 
 impl TimerReceiver for ConfigManager {

@@ -22,6 +22,7 @@ use crate::opml::opmlreader::OpmlReader;
 use crate::timer::ITimer;
 use crate::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
+use crate::util::db_time_to_display;
 use crate::util::db_time_to_display_nonnull;
 use crate::util::filter_by_iso8859_1;
 use crate::util::remove_invalid_chars_from_input;
@@ -290,10 +291,12 @@ impl SourceTreeController {
                     self.set_fetch_finished(fs_id, error_happened)
                 }
                 SJob::SetIconId(fs_id, icon_id) => {
+                    let ts_now = timestamp_now();
+                    // trace!(                        "SetIconId {} {} {}",                        fs_id,                        icon_id,                        db_time_to_display(ts_now)                    );
                     (*self.subscriptionrepo_r).borrow().update_icon_id(
                         fs_id,
                         icon_id as usize,
-                        timestamp_now(),
+                        ts_now,
                     );
                     self.tree_store_update_one(fs_id);
                 }
@@ -522,20 +525,17 @@ impl SourceTreeController {
             self.statemap
                 .borrow()
                 .get_ids_by_status(StatusMask::FetchScheduled, true, false);
-
         if fetch_scheduled_list.is_empty() {
             return;
         }
         let source_id = *fetch_scheduled_list.first().unwrap();
         let mut is_deleted: bool = false;
         let mut jobcreated: bool = false;
-
         let su_st = self
             .statemap
             .borrow()
             .get_state(source_id)
             .unwrap_or_default();
-
         if let Some(subs_e) = (*self.subscriptionrepo_r).borrow().get_by_index(source_id) {
             if subs_e.isdeleted() {
                 debug!("process_fetch_scheduled:  deleted  {:?}", subs_e);
@@ -547,13 +547,11 @@ impl SourceTreeController {
         }
         if !is_deleted && !jobcreated {
             (*self.downloader_r).borrow().add_update_source(source_id);
-            // (*self.subscriptionrepo_r).borrow().set_status(                &[source_id],                StatusMask::FetchScheduledJobCreated,                true,            );
             self.statemap.borrow_mut().set_status(
                 &[source_id],
                 StatusMask::FetchScheduledJobCreated,
                 true,
             );
-
             self.set_any_spinner_visible(true);
             self.tree_store_update_one(source_id);
             self.check_icon(source_id);
@@ -568,7 +566,17 @@ impl SourceTreeController {
         if let Some(fse) = self.subscriptionrepo_r.borrow().get_by_index(fs_id) {
             let now_seconds = timestamp_now();
             let time_outdated = now_seconds - (fse.updated_icon + ICON_RELOAD_TIME_S);
+
             if time_outdated > 0 || fse.icon_id < ICON_LIST.len() {
+                let now_minus_outdated = now_seconds - time_outdated;
+                trace!(
+                    "check_icon: id:{}  icon_id:{}     now-OutDated: {}s   {}h   icon_updated:{}",
+                    fs_id,
+                    fse.icon_id,
+                    now_minus_outdated,
+                    (now_minus_outdated as f32 / 3600.0),
+                    db_time_to_display(fse.updated_icon)
+                );
                 (*self.downloader_r)
                     .borrow()
                     .load_icon(fse.subs_id, fse.url, fse.icon_id);
@@ -865,15 +873,14 @@ impl SourceTreeController {
         let o_subs_id = self.statemap.borrow().get_id_by_path(path);
         if let Some(subs_id) = o_subs_id {
             return (*self.subscriptionrepo_r).borrow().get_by_index(subs_id);
-        } else {
-            if !path.is_empty() {
-                debug!(
-                    "no subscr_id for {:?}   #statemap={}",
-                    &path,
-                    self.statemap.borrow().get_length()
-                );
-            }
+        } else if !path.is_empty() {
+            debug!(
+                "no subscr_id for {:?}   #statemap={}",
+                &path,
+                self.statemap.borrow().get_length()
+            );
         }
+
         None
     }
 
@@ -1484,9 +1491,7 @@ impl Buildable for SourceTreeController {
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         SourceTreeController::new_ac(_appcontext)
     }
-    fn section_name() -> String {
-        String::from("sourcetree")
-    }
+    // fn section_name() -> String {         String::from("sourcetree")    }
 }
 
 impl StartupWithAppContext for SourceTreeController {

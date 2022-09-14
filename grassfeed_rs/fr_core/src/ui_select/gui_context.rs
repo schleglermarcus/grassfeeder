@@ -78,9 +78,7 @@ impl Buildable for GuiContext {
         }
     }
 
-    fn section_name() -> String {
-        String::from("window")
-    }
+    // fn section_name() -> String {        String::from("window")    }
 }
 
 impl GuiContext {

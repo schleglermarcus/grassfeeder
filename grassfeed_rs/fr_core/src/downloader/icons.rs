@@ -199,8 +199,6 @@ impl Step<IconInner> for IconStore {
         let comp_st = util::compress_vec_to_string(&inner.icon_bytes);
         let existing_icons: Vec<IconEntry> = inner.iconrepo.get_by_icon(comp_st.clone());
         if existing_icons.is_empty() {
-            // let mut ie = IconEntry::default();
-            // ie.icon = comp_st;
             let ie = IconEntry {
                 icon: comp_st,
                 ..Default::default()
