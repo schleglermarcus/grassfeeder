@@ -1,4 +1,5 @@
-  * Add version and branch info to about dialog,
-  * refacture initialisation and property loading, config  as json
-  * Web threads to 2
-  * added more message title conversion html entities
+Thu, 08 Sep 2022 00:00:00 +0000
+* Add version and branch info to about dialog,
+* refacture initialisation and property loading, config  as json
+* Web threads to 2
+* added more message title conversion html entities
