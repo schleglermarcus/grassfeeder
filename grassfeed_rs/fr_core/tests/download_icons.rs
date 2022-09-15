@@ -209,7 +209,7 @@ fn icon_simple_seoulnews() {
 #[test]
 fn test_retrieve_homepages() {
     setup();
-    let files_urls: [(&str, &str); 4] = [
+    let files_urls: [(&str, &str); 2] = [
         (
             "tests/data/gorillavsbear.rss",
             "https://www.gorillavsbear.net/",
@@ -218,11 +218,8 @@ fn test_retrieve_homepages() {
             "tests/data/arstechnica_feed.rss",
             "https://arstechnica.com/",
         ),
-        (
-            "tests/data/chaosradio-complete.rss",
-            "https://chaosradio.de/",
-        ),
-        ("tests/data/relay_rd.rss", "https://www.relay.fm/rd"),
+        // (            "tests/data/chaosradio-complete.rss",           "https://chaosradio.de/",        ),
+        // ("tests/data/relay_rd.rss", "https://www.relay.fm/rd"),
     ];
     files_urls.iter().for_each(|(f, u)| {
         let buffer: Vec<u8> = file_to_bin(f).unwrap();
@@ -248,8 +245,7 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            	logger_config::QuietFlags::Downloader as u64
-            // 0,
+            logger_config::QuietFlags::Downloader as u64, // 0,
         );
     });
 }

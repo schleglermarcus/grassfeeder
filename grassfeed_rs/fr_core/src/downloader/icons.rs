@@ -32,9 +32,7 @@ impl std::fmt::Debug for IconInner {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("")
             .field("repo_id", &self.fs_repo_id)
-            //  .field("url", &self.icon_url)
             .field("feed", &self.feed_url)
-            // .field("E", &self.download_error_happened)
             .finish()
     }
 }
@@ -57,7 +55,7 @@ impl Step<IconInner> for IconLoadStart {
         let mut inner: IconInner = self.0;
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.fs_repo_id) {
             if !subs_e.website_url.is_empty() {
-				// debug!("IconLoadStart  homepage from db  {} ", &subs_e.website_url);
+                // debug!("IconLoadStart  homepage from db  {} ", &subs_e.website_url);
                 inner.feed_homepage = subs_e.website_url;
 
                 return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
@@ -72,7 +70,6 @@ impl Step<IconInner> for FeedTextDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let result = (*inner.web_fetcher).request_url(inner.feed_url.clone());
-        // trace!("FeedTextDownload:1 {} {:?} icon_urL={}",            inner.feed_url,            result.status,            inner.icon_url        );
         match result.status {
             200 => {
                 inner.feed_download_text = result.content;
@@ -94,8 +91,7 @@ impl Step<IconInner> for HomepageDownload {
             inner.feed_download_text.as_bytes(),
             &inner.feed_url,
         ) {
-
-			inner.feed_homepage = homepage;
+            inner.feed_homepage = homepage;
             // trace!("FeedTextDownload:2   HP={:?}  title={:?}",                inner.feed_homepage,                _feed_title            );
             return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
         }
@@ -110,10 +106,7 @@ impl Step<IconInner> for CompareHomepageToDB {
 
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.fs_repo_id) {
             if !inner.feed_homepage.is_empty() && inner.feed_homepage != subs_e.website_url {
-                debug!(
-                    "CompareHomepageToDB     Update TO db: {}",
-                    &inner.feed_homepage
-                );
+                // debug!(                    "CompareHomepageToDB     Update TO db: {}",                    &inner.feed_homepage                );
                 inner
                     .subscriptionrepo
                     .update_homepage(inner.fs_repo_id, &inner.feed_homepage);

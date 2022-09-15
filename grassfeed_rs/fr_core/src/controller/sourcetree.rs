@@ -22,7 +22,6 @@ use crate::opml::opmlreader::OpmlReader;
 use crate::timer::ITimer;
 use crate::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
-use crate::util::db_time_to_display;
 use crate::util::db_time_to_display_nonnull;
 use crate::util::filter_by_iso8859_1;
 use crate::util::remove_invalid_chars_from_input;
@@ -567,17 +566,11 @@ impl SourceTreeController {
         if let Some(fse) = self.subscriptionrepo_r.borrow().get_by_index(fs_id) {
             let now_seconds = timestamp_now();
             let time_outdated = now_seconds - (fse.updated_icon + ICON_RELOAD_TIME_S);
-
             if time_outdated > 0 || fse.icon_id < ICON_LIST.len() {
-                let now_minus_outdated = now_seconds - time_outdated;
-                trace!(
-                    "check_icon: id:{}  icon_id:{}     now-OutDated: {}s   {}h   icon_updated:{}",
-                    fs_id,
-                    fse.icon_id,
-                    now_minus_outdated,
-                    (now_minus_outdated as f32 / 3600.0),
-                    db_time_to_display(fse.updated_icon)
-                );
+
+
+                // let now_minus_outdated = now_seconds - time_outdated;
+                // trace!(                    "check_icon: id:{}  icon_id:{}     now-OutDated: {}s   {}h   icon_updated:{}",                    fs_id,                    fse.icon_id,                    now_minus_outdated,                    (now_minus_outdated as f32 / 3600.0),            crate::util::        db_time_to_display(fse.updated_icon)                );
                 (*self.downloader_r)
                     .borrow()
                     .load_icon(fse.subs_id, fse.url, fse.icon_id);
@@ -1054,7 +1047,7 @@ impl ISourceTreeController for SourceTreeController {
 
     fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize {
         let mut fse = SubscriptionEntry::from_new_foldername(folder_name, parent_id);
-        fse.expanded = false;
+        fse.expanded = true;
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_id)
@@ -1065,8 +1058,6 @@ impl ISourceTreeController for SourceTreeController {
             fse.folder_position = (mfp + 1) as isize;
         }
         fse.subs_id = self.get_next_available_subscription_id();
-
-        // debug!("add_new_folder_at_parent FSE={:?}", &fse);
         let r = (*self.subscriptionrepo_r).borrow().store_entry(&fse);
         match r {
             Ok(fse) => {
@@ -1111,7 +1102,6 @@ impl ISourceTreeController for SourceTreeController {
         let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
         fse.subs_id = self.get_next_available_subscription_id();
         fse.parent_subs_id = parent_id;
-		fse.expanded=true;
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_id)

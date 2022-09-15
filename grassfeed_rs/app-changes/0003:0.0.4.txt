@@ -5,7 +5,5 @@
 * Subscription_state: merge extra booleans
 * Remove section_name, Remove Package Ini
 * Shutdown Integration Test, gtk-updater: catching row-too-short nullpointer
-
-- Subscription Edit Dialog  +Homepage
-
-- TLD-Specific Url Map, prevent multiple accesses
+* Subscription Edit Dialog: show Homepage
+* Prevent simultaneous accesses for the same domain

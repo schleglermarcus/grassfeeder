@@ -1,5 +1,4 @@
 use fr_core::controller::contentdownloader::IDownloader;
-use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
 
 #[derive(Default)]
 pub struct DownloaderDummy {}
@@ -28,9 +27,12 @@ impl IDownloader for DownloaderDummy {
     fn set_conf_num_threads(&mut self, _: u8) {
         unimplemented!()
     }
-    fn is_dl_busy(&self) -> [u8; DOWNLOADER_MAX_NUM_THREADS] {
-        [0; DOWNLOADER_MAX_NUM_THREADS]
+
+    // fn is_dl_busy(&self) -> [u8; DOWNLOADER_MAX_NUM_THREADS] {        [0; DOWNLOADER_MAX_NUM_THREADS]    }
+	fn get_kind_list(&self) -> Vec<u8> {
+        unimplemented!()
     }
+
     fn cleanup_db(&self) {
         unimplemented!()
     }

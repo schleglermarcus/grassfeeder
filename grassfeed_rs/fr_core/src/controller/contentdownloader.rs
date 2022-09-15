@@ -45,6 +45,7 @@ use std::time::Duration;
 pub static KEEPRUNNING: AtomicBool = AtomicBool::new(true);
 pub const CONF_DOWNLOADER_THREADS: &str = "DownloaderThreads";
 pub const DOWNLOADER_LOOP_DELAY_S: u8 = 1;
+pub const DOWNLOADER_LOOP_WAIT_MS: u64 = 200; // between downloader queue requests
 pub const DOWNLOADER_JOB_QUEUE: usize = 10000;
 
 pub trait IDownloader {
@@ -52,7 +53,7 @@ pub trait IDownloader {
     fn is_running(&self) -> bool;
     fn get_config(&self) -> Config;
     fn set_conf_num_threads(&mut self, n: u8);
-    fn is_dl_busy(&self) -> [u8; DOWNLOADER_MAX_NUM_THREADS];
+    fn get_kind_list(&self) -> Vec<u8>;
     fn add_update_source(&self, f_source_repo_id: isize);
     fn new_feedsource_request(&self, fs_edit_url: &str);
     fn load_icon(&self, fs_id: isize, fs_url: String, old_icon_id: usize);
@@ -90,8 +91,8 @@ impl DLKind for DLJob {
 
     fn hostname(&self) -> Option<String> {
         match self {
-            DLJob::Feed(fetch_inner) => Some(fetch_inner.url.clone()),
-            DLJob::Icon(icon_inner) => Some(icon_inner.feed_url.clone()),
+            DLJob::Feed(fetch_inner) => Downloader::host_from_url(&fetch_inner.url),
+            DLJob::Icon(icon_inner) => Downloader::host_from_url(&icon_inner.feed_url),
             _ => None,
         }
     }
@@ -107,7 +108,7 @@ pub struct Downloader {
     pub gp_job_sender: Option<Sender<Job>>,
     configmanager_r: Rc<RefCell<ConfigManager>>,
     config: Config,
-    pub busy_indicators: Arc<RwLock<[u8; DOWNLOADER_MAX_NUM_THREADS as usize]>>,
+    pub busy_indicators: Arc<RwLock<[(u8, String); DOWNLOADER_MAX_NUM_THREADS as usize]>>,
     messagesrepo: Rc<RefCell<MessagesRepo>>,
     job_queue: Arc<RwLock<VecDeque<DLJob>>>,
 }
@@ -130,7 +131,7 @@ impl Downloader {
             gp_job_sender: None,          // guiprocessor jobs
             configmanager_r: cm_r,
             config: Config::default(),
-            busy_indicators: Arc::new(RwLock::new([0; DOWNLOADER_MAX_NUM_THREADS as usize])),
+            busy_indicators: Arc::new(RwLock::new(Default::default())),
             messagesrepo: msgrepo,
             job_queue: Arc::new(RwLock::new(VecDeque::default())),
         }
@@ -163,27 +164,35 @@ impl Downloader {
             let builder = thread::Builder::new().name(format!("dl_{}", n));
             let h = builder
                 .spawn(move || loop {
-                    let queue_size = (*queue_a).read().unwrap().len();
-                    let o_job = (*queue_a).write().unwrap().pop_front();
-
-                    if let Some(dljob) = o_job {
-                        let job_kind = dljob.kind();
-
-                        if let Some(hostname) = dljob.hostname() {
-                            debug!("HOST: {}", hostname);
+                    let mut skip_it: bool = false;
+                    let mut hostname = String::default();
+                    if let Some(ref_job) = (*queue_a).read().unwrap().front() {
+                        if let Some(ref hostnam) = ref_job.hostname() {
+                            hostname = hostnam.clone();
+                            for (kind, hn) in (*busy_a).read().unwrap().iter() {
+                                if !hn.is_empty() && hn.eq(hostnam) {
+                                    trace!("HOST {} in use with {} {} , pushback  ", hn, kind, n);
+                                    skip_it = true;
+                                }
+                            }
                         }
-
-                        (*busy_a).write().unwrap()[n as usize] = job_kind;
-
-                        let _r = gp_sender.send(Job::DownloaderJobStarted(n as u8, job_kind));
-                        Self::process_job(dljob, queue_size);
-                        let _r = gp_sender.send(Job::DownloaderJobFinished(n as u8, job_kind));
-
-                        (*busy_a).write().unwrap()[n as usize] = 0;
+                    }
+                    if skip_it {
+                        let mut q_w = (*queue_a).write().unwrap();
+                        if let Some(dl_job) = q_w.pop_front() {
+                            q_w.push_back(dl_job);
+                        }
+                    } else {
+                        let o_job = (*queue_a).write().unwrap().pop_front();
+                        if let Some(dljob) = o_job {
+                            (*busy_a).write().unwrap()[n as usize] = (dljob.kind(), hostname);
+                            Self::process_job(dljob, gp_sender.clone(), n as u8);
+                            (*busy_a).write().unwrap()[n as usize] = (0, String::default());
+                        }
                     }
                     let k = KEEPRUNNING.load(Ordering::Relaxed);
                     if k {
-                        thread::sleep(Duration::from_millis(100));
+                        thread::sleep(Duration::from_millis(DOWNLOADER_LOOP_WAIT_MS));
                     } else {
                         break;
                     }
@@ -203,10 +212,11 @@ impl Downloader {
         }
     }
 
-    fn process_job(dljob: DLJob, queue_size: usize) {
+    fn process_job(dljob: DLJob, gp_sender: Sender<Job>, proc_num: u8) {
         let now = std::time::Instant::now();
+        let job_kind = dljob.kind();
+        let _r = gp_sender.send(Job::DownloaderJobStarted(proc_num, job_kind));
         let job_description = format!("{:?}", &dljob);
-
         match dljob {
             DLJob::None => {}
             DLJob::Feed(i) => {
@@ -225,14 +235,9 @@ impl Downloader {
         let elapsedms = now.elapsed().as_millis();
         let t_name: String = std::thread::current().name().unwrap().to_string();
         if elapsedms > 5000 {
-            trace!(
-                "{} {:?} took {}ms   #Q={}",
-                t_name,
-                job_description,
-                elapsedms,
-                queue_size
-            );
+            trace!("{} {:?} took {}ms  ", t_name, job_description, elapsedms);
         }
+        let _r = gp_sender.send(Job::DownloaderJobFinished(proc_num, job_kind));
     }
 
     pub fn host_from_url(url: &String) -> Option<String> {
@@ -251,8 +256,17 @@ impl Downloader {
 }
 
 impl IDownloader for Downloader {
-    fn is_dl_busy(&self) -> [u8; DOWNLOADER_MAX_NUM_THREADS] {
-        *(*self.busy_indicators).read().unwrap()
+    // fn is_dl_busy(&self) -> [(u8, String); DOWNLOADER_MAX_NUM_THREADS] {
+    //     *(*self.busy_indicators).read().unwrap()
+    // }
+
+    fn get_kind_list(&self) -> Vec<u8> {
+        (*self.busy_indicators)
+            .read()
+            .unwrap()
+            .iter()
+            .map(|k_u| k_u.0)
+            .collect::<Vec<u8>>()
     }
 
     fn add_update_source(&self, f_source_repo_id: isize) {

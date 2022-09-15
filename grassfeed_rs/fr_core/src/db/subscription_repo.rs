@@ -76,7 +76,7 @@ pub trait ISubscriptionRepo {
     // #[deprecated]
     // fn update_deleted(&self, src_id: isize, is_del: bool);
 
-    fn update_homepage(&self, src_id: isize, new_url: & String);
+    fn update_homepage(&self, src_id: isize, new_url: &String);
 
     fn delete_by_index(&self, del_index: isize);
 
@@ -100,10 +100,6 @@ pub struct SubscriptionRepo {
 
     ctx: SqliteContext<SubscriptionEntry>,
 
-    migr_read_from_json: bool,
-    //  ID -> Entry
-    // #[deprecated] // later
-    // list: Arc<RwLock<HashMap<isize, SubscriptionEntry>>>,
 }
 
 impl SubscriptionRepo {
@@ -112,17 +108,13 @@ impl SubscriptionRepo {
         SubscriptionRepo {
             folder_name: foldername,
             ctx: SqliteContext::new(filename),
-            // list: Arc::new(RwLock::new(HashMap::new())),
-            migr_read_from_json: false,
         }
     }
 
     pub fn by_existing_connection(con: Arc<Mutex<Connection>>) -> Self {
         SubscriptionRepo {
-            // list: Arc::new(RwLock::new(HashMap::new())),
             folder_name: String::default(),
             ctx: SqliteContext::new_by_connection(con),
-            migr_read_from_json: false,
         }
     }
 
@@ -130,8 +122,6 @@ impl SubscriptionRepo {
         SubscriptionRepo {
             folder_name: String::default(),
             ctx: SqliteContext::new_in_memory(),
-            // list: Arc::new(RwLock::new(HashMap::new())),
-            migr_read_from_json: false,
         }
     }
 
@@ -148,13 +138,12 @@ impl SubscriptionRepo {
         }
         self.ctx.create_table();
         self.store_default_db_entries();
-        if self.migr_read_from_json {
-            self.load_subscriptions_pretty();
-        }
-        true // later: remove this
+        true
     }
 
+/*
     // remove this
+    #[deprecated]
     pub fn load_subscriptions_pretty(&mut self) -> bool {
         let file_name = format!("{}/{}", self.folder_name, FILENAME_JSON);
         if !std::path::Path::new(&file_name).exists() {
@@ -173,52 +162,10 @@ impl SubscriptionRepo {
             warn!("serde_json:from_str {:?}   {:?} ", dec_r.err(), &file_name);
             return false;
         }
-        /*
-                let mut hm = (*self.list).write().unwrap();
-                for se in dec_r.unwrap() {
-                    hm.insert(se.subs_id, se);
-                }
-        */
         true
     }
+	*/
 
-    /*
-        /// renames the old file, then stores the subscription entries in formatted json
-        #[deprecated]
-        pub fn store_to_file_pretty(&mut self) {
-            let mut values = (*self.list)
-                .read()
-                .unwrap()
-                .values()
-                .cloned()
-                .collect::<Vec<SubscriptionEntry>>();
-            values.sort_by(|a, b| a.subs_id.cmp(&b.subs_id));
-            let formatter = serde_json::ser::PrettyFormatter::with_indent(b"  ");
-            let file_name = format!("{}/{}", self.folder_name, FILENAME_JSON);
-            let file_name_old = format!("{}/{}.old", self.folder_name, FILENAME_JSON);
-            let r_rename = std::fs::rename(&file_name, &file_name_old);
-            if r_rename.is_err() {
-                warn!(
-                    "renamed {} => {} : Error {:?}",
-                    &file_name,
-                    &file_name_old,
-                    r_rename.err()
-                );
-            }
-            let r_file = std::fs::File::create(file_name.clone());
-            if r_file.is_err() {
-                warn!("{:?} writing to {} ", r_file.err(), &file_name);
-                return;
-            }
-            let outfile = r_file.unwrap();
-            let bufwriter = BufWriter::new(outfile);
-            let mut serializer = serde_json::Serializer::with_formatter(bufwriter, formatter);
-            let r_ser = values.serialize(&mut serializer);
-            if r_ser.is_err() {
-                warn!("serializing into {} => {:?}", file_name, r_ser.err());
-            }
-        }
-    */
 
     /// recursive, depth-first
     pub fn dump_tree_rec(&self, lpath: &[u16], parent_subs_id: isize, ident: &str) {
@@ -280,7 +227,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     /// checks for  updated_int,  retrieves those earlier than the given date
-    /// new:  order by updated-time. TODO check the order
+    /// new:  order by updated-time
     fn get_by_fetch_time(&self, updated_time_s: i64) -> Vec<SubscriptionEntry> {
         let prepared = format!(
             "SELECT * FROM {} WHERE updated_int<{}  order by updated_int ",
@@ -380,7 +327,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
         self.ctx.execute(sql);
     }
 
-    fn update_homepage(&self, src_id: isize, new_url: & String) {
+    fn update_homepage(&self, src_id: isize, new_url: &String) {
         let sql = format!(
             "UPDATE {}  SET   website_url=\"{}\"  WHERE {}={} ",
             SubscriptionEntry::table_name(),
@@ -829,34 +776,33 @@ mod ut {
         assert_eq!(list.get(2).unwrap().folder_position, 2);
     }
 
-/*
+    /*
 
-    //cargo test   db::subscription_repo::ut::t_store_and_read_pretty_json  --lib  -- --exact --nocapture
-    #[test]
-    fn t_store_and_read_on_fs() {
-        setup();
-        let repopath = "../target/db_sr_pretty";
-        {
-            let mut sr = SubscriptionRepo::new2(repopath.to_string());
-            sr.startup_int();
-            sr.scrub_all_subscriptions();
-            let s1 = SubscriptionEntry::default();
-            let r1 = sr.store_entry(&s1);
-            assert!(r1.is_ok());
-            assert!(sr.store_entry(&s1).is_ok());
-            let list = sr.get_all_entries();
-            assert_eq!(list.len(), 2);
-            // sr.store_to_file_pretty();
+        //cargo test   db::subscription_repo::ut::t_store_and_read_pretty_json  --lib  -- --exact --nocapture
+        #[test]
+        fn t_store_and_read_on_fs() {
+            setup();
+            let repopath = "../target/db_sr_pretty";
+            {
+                let mut sr = SubscriptionRepo::new2(repopath.to_string());
+                sr.startup_int();
+                sr.scrub_all_subscriptions();
+                let s1 = SubscriptionEntry::default();
+                let r1 = sr.store_entry(&s1);
+                assert!(r1.is_ok());
+                assert!(sr.store_entry(&s1).is_ok());
+                let list = sr.get_all_entries();
+                assert_eq!(list.len(), 2);
+                // sr.store_to_file_pretty();
+            }
+            {
+                let mut sr = SubscriptionRepo::new2(repopath.to_string());
+                sr.startup_int();
+                let entries = sr.get_all_entries();
+                assert_eq!(entries.len(), 2);
+            }
         }
-        {
-            let mut sr = SubscriptionRepo::new2(repopath.to_string());
-            sr.startup_int();
-            let entries = sr.get_all_entries();
-            assert_eq!(entries.len(), 2);
-        }
-    }
-*/
-
+    */
 
     // dummy instead of log configuration
     fn setup() {}

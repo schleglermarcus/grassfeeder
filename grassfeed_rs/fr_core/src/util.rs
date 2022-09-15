@@ -147,11 +147,11 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#147;", "›");
     ret = ret.replace("&#148;", "-");
     ret = ret.replace("&#x166;", " ... ");
-	ret = ret.replace("&#xF6;", "ö");
+    ret = ret.replace("&#xF6;", "ö");
     ret = ret.replace("&#153;", " - ");
     ret = ret.replace("&#156;", " - ");
     ret = ret.replace("&#157;", " Š ");
-	ret = ret.replace("&#226;", "â");
+    ret = ret.replace("&#226;", "â");
     ret = ret.replace("&#8211;", "\"");
     ret = ret.replace("&#8220;", "\"");
     ret = ret.replace("&#8221;", "\"");
@@ -307,14 +307,16 @@ mod t {
         assert_eq!(buf.len(), size);
     }
 
-    #[test]
-    fn fetch_gtkrs() {
-        let (_buf, size) = fetch_http_to_bin(
-            String::from("https://gtk-rs.org/gtk3-rs/stable/latest/docs/favicon-32x32.png"),
-            10000,
-        );
-        assert_eq!(size, 1837);
-    }
+    /*
+        #[test]
+        fn t_fetch_http_to_bin() {
+            let (_buf, size) = fetch_http_to_bin(
+                String::from("https://w3-mediapool.hm.edu/mediapool/media/_technik/img/_technik_1/favicon.jpg"),
+                10000,
+            );
+            assert_eq!(size, 1837);
+        }
+    */
 
     // ---
 

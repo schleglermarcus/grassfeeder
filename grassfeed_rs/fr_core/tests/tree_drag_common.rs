@@ -9,7 +9,6 @@ use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::timer::build_timer;
 use fr_core::timer::ITimer;
 use fr_core::ui_select::uimock::UIMock;
-use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -163,13 +162,17 @@ impl IDownloader for DownloaderDummy {
     fn set_conf_num_threads(&mut self, _: u8) {
         unimplemented!()
     }
-    fn is_dl_busy(&self) -> [u8; DOWNLOADER_MAX_NUM_THREADS] {
-        [0; DOWNLOADER_MAX_NUM_THREADS]
-    }
+
+    // fn is_dl_busy(&self) -> [u8; DOWNLOADER_MAX_NUM_THREADS] {        [0; DOWNLOADER_MAX_NUM_THREADS]    }
+
     fn cleanup_db(&self) {
         unimplemented!()
     }
     fn get_queue_size(&self) -> usize {
+        unimplemented!()
+    }
+
+    fn get_kind_list(&self) -> Vec<u8> {
         unimplemented!()
     }
 }

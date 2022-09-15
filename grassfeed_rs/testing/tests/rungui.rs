@@ -32,7 +32,7 @@ fn startup_minihttpserver(port: usize) -> MiniHttpServerController {
         index_file: String::from("index.html"),
         tcp_address: format!("127.0.0.1:{}", port).to_string(),
         binary_max_size: 1000000,
-        download_throttling_kbps: 10,
+        download_throttling_kbps: 20,
     };
     let mut msc = MiniHttpServerController::new(Arc::new(conf));
     msc.start();
@@ -119,11 +119,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_r_foto = format!("{}/reddit-Fotografie.rss", addr);
     let url_insi = format!("{}/newsinsideout_com.rss", addr);
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
+    let _url_relay = format!("{}/relay_rd.rss", addr); // very big
 
-    let _f_hill = feedsources.add_new_folder_at_parent("hill".to_string(), 0);
-    let _folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), 0);
-    let _folder5 = feedsources.add_new_folder_at_parent("folder5".to_string(), 0);
-    let _folder6 = feedsources.add_new_folder_at_parent("folder6".to_string(), 0);
+    // let _f_hill = feedsources.add_new_folder_at_parent("hill".to_string(), 0);
     let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
 
@@ -136,24 +134,25 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         false,
     );
 
-    if true {
-        let src = [
-            (url_gui_proc.as_str(), "gui_proc_2"),
-            (url_staseve.as_str(), "staseve11"),
-        ];
-        src.iter().for_each(|(url, desc)| {
-            assert!(
-                feedsources.add_new_subscription_at_parent(
-                    url.to_string(),
-                    desc.to_string(),
-                    folder3,
-                    false,
-                ) > 0
-            );
-        });
-    }
+    /*
+        if true {
+            let src = [
+            ];
+            src.iter().for_each(|(url, desc)| {
+                assert!(
+                    feedsources.add_new_subscription_at_parent(
+                        url.to_string(),
+                        desc.to_string(),
+                        folder3,
+                        false,
+                    ) > 0
+                );
+            });
+        }
+    */
     if false {
         let src = [
+            (url_staseve.as_str(), "staseve11"),
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
@@ -191,7 +190,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    if false {
+    if true {
         let src = [
             ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
