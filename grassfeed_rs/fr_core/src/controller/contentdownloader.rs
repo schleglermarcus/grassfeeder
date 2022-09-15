@@ -169,9 +169,9 @@ impl Downloader {
                     if let Some(ref_job) = (*queue_a).read().unwrap().front() {
                         if let Some(ref hostnam) = ref_job.hostname() {
                             hostname = hostnam.clone();
-                            for (kind, hn) in (*busy_a).read().unwrap().iter() {
+                            for (_kind, hn) in (*busy_a).read().unwrap().iter() {
                                 if !hn.is_empty() && hn.eq(hostnam) {
-                                    trace!("HOST {} in use with {} {} , pushback  ", hn, kind, n);
+                                    // trace!("HOST {} in use with {} {} , pushback  ", hn, kind, n);
                                     skip_it = true;
                                 }
                             }

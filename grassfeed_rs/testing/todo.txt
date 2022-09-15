@@ -1,56 +1,81 @@
 To Do List
 
-
 - Build via Docker container,   find external dependencies + packages
-- Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
 - StatusBar: copy Feed address into clipboard
 - Add default set of feeds on new configuration
 - On Shutdown:  Flush Databases
 - Cleanup at maximum messages
 - Multiple instances shall be blocking.
+- Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
+- Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
+- check  https://www.linuxcompatible.org/  feed: icon + entries
+- Check: &  in Feed-title, Message-title. should be escaped
 
 - Copy Message address into clipboard
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
 - Sanitize: cross-check icon ids of tree if they are present in icon db
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
-- Subscription Tree: hide zeroes when nothing to read
-- Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
-- check  https://www.linuxcompatible.org/  feed: icon + entries
-- Check: &  in Feed-title, Message-title. should be escaped
 - Rotate log file
+
+- Subscription Tree: hide zeroes when nothing to read
 - Windows Build
-- Updating Sources:  prioritize by tree position, expanded flag
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal
 - Delete Messages
 - check: subscription  Reload shall refresh  message list
 - Browser Display :  wrap over   title
 - Create Backups for Subscriptions-DB
-- click on folder: show message sums
+- Show message sums on folders
+
 - Error-DB for Subscription Requests, display in edit dialog
-- Modify Browser Font size
 - React on Minimize, do memory usage reduction
 - find common code parts of    folder:mark-as-read  ,  folder:update
 - Flatpak  https://lib.rs/crates/cargo-pkg
 - implement focus policy: before last unread
 - Opml export formatted / pretty
 - Browser: enable theme related colors
+- Modify Browser Font size
 - Browser: get rid of white display on start
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 - Delete Messages
 - Startup, create gui:  delayed creation of dialogs
-- Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
 - Searching inside feeds
 - Message List: set scroll position to upper edge from Cursor
 
 
 Perhaps:
+- Updating Sources:  prioritize by tree position, expanded flag
+- Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
 - Feed-Import with progress bar ?
 - Keyboard:  Delete on Subscription
 - Read articles when offline ?
 - Do extra format to  dig up invalid feed titles  containg  &     :      dieneuewelle.xml
 - Grouping of feeds by folders ?
 - RSS-Content damaged with    http://n8waechter.info/feed/
+
+
+-----
+
+* Merge Branch and build release
+
+    git checkout main
+    git merge v0_0_3
+    git push origin main
+
+		# (cd grassfeed_rs/app-gtk3-linux/ ; cargo clean;  rm Cargo.lock ; cargo test && nice -n9 cargo deb )
+
+
+* Put the work folder back to main
+  git checkout main
+  git pull
+	git status
+
+* Create new Branch
+
+	git branch v0_0_4
+	git checkout v0_0_4
+  git push -u origin v0_0_4
+  git branch --set-upstream-to=origin/v0_0_4 v0_0_4
 
 
 

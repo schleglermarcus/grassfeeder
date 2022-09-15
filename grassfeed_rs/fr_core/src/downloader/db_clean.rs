@@ -87,7 +87,6 @@ impl Step<CleanerInner> for RemoveNonConnected {
                 }
             });
         }
-        // trace!("connected_child_list={:?}", &connected_child_list);
         let mut delete_list: HashSet<isize> = HashSet::default();
         all_entries.iter().for_each(|se| {
             if se.deleted || se.parent_subs_id < 0 {
@@ -100,7 +99,7 @@ impl Step<CleanerInner> for RemoveNonConnected {
                 }
             }
         });
-        if !delete_list.is_empty() && !connected_child_list.is_empty() {
+        if delete_list.len() > 3 {
             debug!(
                 "Cleanup:  #connected: {}   #to_delete: {}",
                 connected_child_list.len(),
@@ -111,7 +110,6 @@ impl Step<CleanerInner> for RemoveNonConnected {
                 .for_each(|id| inner.subscriptionrepo.delete_by_index(*id));
             inner.need_update_subscriptions = true;
         }
-        // inner.subscriptionrepo.debug_dump_tree("##");
         StepResult::Continue(Box::new(AnalyzeFolderPositions(inner)))
     }
 }
