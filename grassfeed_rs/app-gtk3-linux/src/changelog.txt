@@ -1,16 +1,16 @@
 grassfeeder (0.0.4) unstable; urgency=low
 
-  * Drag: Folder down  - fixed
+  * Startup Commandline processing fixed:    -h shall remain on commandline
+  * Drag: Folder down - fixed
   * GTK-Liststore for inserting switch off sorting, else slow. Solved by using pixbuf cache
   * Created debian changelog
-  
-  - Subscription_state: merge extra booleans
-  - Check Info Dialog + website
-  - Check Icon update frequency
-  - remove package ini, check if section_name is needed
-  - Shutdown Integration Test
+  * Subscription_state: merge extra booleans
+  * Remove section_name, Remove Package Ini
+  * Shutdown Integration Test, gtk-updater: catching row-too-short nullpointer
+  * Subscription Edit Dialog: show Homepage
+  * Prevent simultaneous accesses for the same domain
 
- -- Marcus der Schlegler <schleglermarcus@posteo.de>  * Startup Commandline processing fixed:    -h shall remain on commandline
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Fri, 16 Sep 2022 00:12:00 +0000
 
 grassfeeder (0.0.3) unstable; urgency=low
 
