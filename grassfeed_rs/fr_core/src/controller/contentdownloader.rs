@@ -248,7 +248,7 @@ impl Downloader {
                 }
             }
             Err(e) => {
-                warn!("invalid url: {}  {:?}", &url, e);
+                debug!("host_from_url({}) ERR:{:?}", &url, e);
             }
         }
         None
@@ -256,10 +256,6 @@ impl Downloader {
 }
 
 impl IDownloader for Downloader {
-    // fn is_dl_busy(&self) -> [(u8, String); DOWNLOADER_MAX_NUM_THREADS] {
-    //     *(*self.busy_indicators).read().unwrap()
-    // }
-
     fn get_kind_list(&self) -> Vec<u8> {
         (*self.busy_indicators)
             .read()

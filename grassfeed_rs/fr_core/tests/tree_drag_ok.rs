@@ -19,12 +19,8 @@ fn drag_folder_one_down() {
     let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
     match fsc.drag_calc_positions(&vec![0], &vec![2]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
-            debug!(
-                "OK:  to_parent_id={}  to_folderpos={} ",
-                to_parent_id, to_folderpos
-            );
+            // debug!(                "OK:  to_parent_id={}  to_folderpos={} ",                to_parent_id, to_folderpos            );
             assert_eq!(to_folderpos, 2);
-
             fsc.drag_move(from_entry, to_parent_id, to_folderpos);
         }
         Err(ref e) => {
@@ -34,9 +30,7 @@ fn drag_folder_one_down() {
     }
     let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_all_entries();
     assert_eq!(result.len(), 3);
-    for e in &result {
-        debug!("{:?}", &e);
-    }
+    //  for e in &result {        debug!("{:?}", &e);    }
     assert_eq!(result[1].folder_position, 0);
     assert_eq!(result[0].folder_position, 1);
     assert_eq!(result[2].folder_position, 2);
@@ -56,7 +50,6 @@ fn drag_different_parent_down() {
     fse.is_folder = true;
     fs_list.push(fse.clone());
     let (fsc, r_fsource) = prepare_source_tree_controller(fs_list.clone());
-
     match fsc.drag_calc_positions(&vec![0], &vec![1, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             fsc.drag_move(from_entry, to_parent_id, to_folderpos);

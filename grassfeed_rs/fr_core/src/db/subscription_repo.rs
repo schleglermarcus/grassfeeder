@@ -73,10 +73,7 @@ pub trait ISubscriptionRepo {
 
     fn update_last_selected(&self, src_id: isize, content_id: isize);
 
-    // #[deprecated]
-    // fn update_deleted(&self, src_id: isize, is_del: bool);
-
-    fn update_homepage(&self, src_id: isize, new_url: &String);
+    fn update_homepage(&self, src_id: isize, new_url: &str);
 
     fn delete_by_index(&self, del_index: isize);
 
@@ -97,9 +94,7 @@ pub trait ISubscriptionRepo {
 
 pub struct SubscriptionRepo {
     folder_name: String,
-
     ctx: SqliteContext<SubscriptionEntry>,
-
 }
 
 impl SubscriptionRepo {
@@ -140,32 +135,6 @@ impl SubscriptionRepo {
         self.store_default_db_entries();
         true
     }
-
-/*
-    // remove this
-    #[deprecated]
-    pub fn load_subscriptions_pretty(&mut self) -> bool {
-        let file_name = format!("{}/{}", self.folder_name, FILENAME_JSON);
-        if !std::path::Path::new(&file_name).exists() {
-            trace!("load_subscriptions_pretty file {} not found. ", &file_name);
-            return false;
-        }
-
-        let r_string = std::fs::read_to_string(file_name.clone());
-        if r_string.is_err() {
-            warn!("load_pretty:{:?}  {}", r_string.err(), file_name);
-            return false;
-        }
-        let lines = r_string.unwrap();
-        let dec_r: serde_json::Result<Vec<SubscriptionEntry>> = serde_json::from_str(&lines);
-        if dec_r.is_err() {
-            warn!("serde_json:from_str {:?}   {:?} ", dec_r.err(), &file_name);
-            return false;
-        }
-        true
-    }
-	*/
-
 
     /// recursive, depth-first
     pub fn dump_tree_rec(&self, lpath: &[u16], parent_subs_id: isize, ident: &str) {
@@ -327,7 +296,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
         self.ctx.execute(sql);
     }
 
-    fn update_homepage(&self, src_id: isize, new_url: &String) {
+    fn update_homepage(&self, src_id: isize, new_url: &str) {
         let sql = format!(
             "UPDATE {}  SET   website_url=\"{}\"  WHERE {}={} ",
             SubscriptionEntry::table_name(),

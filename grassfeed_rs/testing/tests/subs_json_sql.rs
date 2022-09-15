@@ -10,13 +10,12 @@ fn get_env(key: &str) -> Option<String> {
     None
 }
 
+#[ignore]
 #[test]
 pub fn do_changelog() {
     setup();
-        debug!("DISPLAY={:?}", get_env("DISPLAY"));
-        debug!("HOME={:?}", get_env("HOME"));
-
-
+    debug!("DISPLAY={:?}", get_env("DISPLAY"));
+    debug!("HOME={:?}", get_env("HOME"));
     resources::changelog_debian::create_debian_changelog(
         "../app-changes/",
         "../target/test_debian_changelog.txt",

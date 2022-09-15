@@ -186,7 +186,7 @@ impl TableInfo for SubscriptionEntry {
             display_name: row.get(11).unwrap(),
             url: row.get(12).unwrap(),
             website_url: row.get(13).unwrap(), // 13
-            ..Default::default()
+            // ..Default::default()
         }
     }
 

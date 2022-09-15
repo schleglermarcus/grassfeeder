@@ -696,7 +696,6 @@ impl GuiProcessor {
         } else {
             (self.browserpane_r).borrow().get_last_selected_link()
         };
-        //if last_msg_url.len() > 0 {            debug!("statusbar: last_msg_url={}", last_msg_url);        }
         if self.statusbar_items.selected_msg_url != last_msg_url {
             self.statusbar_items.selected_msg_url = last_msg_url;
             need_update2 = true;
@@ -723,9 +722,7 @@ impl GuiProcessor {
             need_update2 = true;
             need_update1 = true;
         }
-        // let downloader_busy: [u8; DOWNLOADER_MAX_NUM_THREADS] =            (self.downloader_r).borrow().is_dl_busy();
         let downloader_busy = (self.downloader_r).borrow().get_kind_list();
-
         for a in 0..(DOWNLOADER_MAX_NUM_THREADS as usize) {
             if self.statusbar_items.downloader_kind[a] > 0 && downloader_busy[a] == 0 {
                 self.statusbar_items.downloader_kind_new[a] = 0;
