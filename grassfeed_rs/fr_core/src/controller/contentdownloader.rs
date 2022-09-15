@@ -71,6 +71,9 @@ pub enum DLJob {
 
 trait DLKind {
     fn kind(&self) -> u8;
+    fn hostname(&self) -> Option<String> {
+        None
+    }
 }
 
 impl DLKind for DLJob {
@@ -82,6 +85,14 @@ impl DLKind for DLJob {
             DLJob::Icon(_) => 2,
             DLJob::ComprehensiveFeed(_) => 3,
             DLJob::CleanDatabase(_) => 4,
+        }
+    }
+
+    fn hostname(&self) -> Option<String> {
+        match self {
+            DLJob::Feed(fetch_inner) => Some(fetch_inner.url.clone()),
+            DLJob::Icon(icon_inner) => Some(icon_inner.feed_url.clone()),
+            _ => None,
         }
     }
 }
@@ -154,13 +165,20 @@ impl Downloader {
                 .spawn(move || loop {
                     let queue_size = (*queue_a).read().unwrap().len();
                     let o_job = (*queue_a).write().unwrap().pop_front();
+
                     if let Some(dljob) = o_job {
                         let job_kind = dljob.kind();
-                        // if job_kind == 2 {                            debug!("DL:ICON {:?}", &dljob);                        }
+
+                        if let Some(hostname) = dljob.hostname() {
+                            debug!("HOST: {}", hostname);
+                        }
+
                         (*busy_a).write().unwrap()[n as usize] = job_kind;
+
                         let _r = gp_sender.send(Job::DownloaderJobStarted(n as u8, job_kind));
                         Self::process_job(dljob, queue_size);
                         let _r = gp_sender.send(Job::DownloaderJobFinished(n as u8, job_kind));
+
                         (*busy_a).write().unwrap()[n as usize] = 0;
                     }
                     let k = KEEPRUNNING.load(Ordering::Relaxed);
@@ -216,6 +234,20 @@ impl Downloader {
             );
         }
     }
+
+    pub fn host_from_url(url: &String) -> Option<String> {
+        match url::Url::parse(url) {
+            Ok(parsed) => {
+                if let Some(hoststr) = parsed.host_str() {
+                    return Some(hoststr.to_string());
+                }
+            }
+            Err(e) => {
+                warn!("invalid url: {}  {:?}", &url, e);
+            }
+        }
+        None
+    }
 }
 
 impl IDownloader for Downloader {
@@ -236,7 +268,6 @@ impl IDownloader for Downloader {
             warn!(" fetch_single    {}  but is folder ", f_source_repo_id);
             return;
         }
-        //        let subscription_repo =            SubscriptionRepo::by_existing_list((*self.subscriptionrepo_r).borrow().get_list());
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
@@ -265,6 +296,11 @@ impl IDownloader for Downloader {
 
     fn load_icon(&self, fs_id: isize, fs_url: String, old_icon_id: usize) {
         let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+
+        let subscription_repo = SubscriptionRepo::by_existing_connection(
+            (*self.subscriptionrepo_r).borrow().get_connection(),
+        );
+
         let dl_inner = IconInner {
             fs_repo_id: fs_id,
             feed_url: fs_url,
@@ -277,6 +313,7 @@ impl IDownloader for Downloader {
             sourcetree_job_sender: self.source_c_sender.as_ref().unwrap().clone(),
             feed_homepage: String::default(),
             feed_download_text: String::default(),
+            subscriptionrepo: subscription_repo,
         };
         self.add_to_queue(DLJob::Icon(dl_inner));
     }

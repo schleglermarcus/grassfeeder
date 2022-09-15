@@ -1,8 +1,5 @@
 To Do List
 
--  Subscription Edit Dialog  +Homepage
-
-
 
 - Build via Docker container,   find external dependencies + packages
 - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
@@ -21,7 +18,7 @@ To Do List
 - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
 - check  https://www.linuxcompatible.org/  feed: icon + entries
 - Check: &  in Feed-title, Message-title. should be escaped
-- Rotate log file 
+- Rotate log file
 - Windows Build
 - Updating Sources:  prioritize by tree position, expanded flag
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal

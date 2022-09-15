@@ -10,7 +10,7 @@ pub enum QuietFlags {
     MiniHttp = 1,
     Config = 2,
     Db = 4,
-    Donwloader = 8,
+    Downloader = 8,
     Controller = 16,
 }
 
@@ -39,7 +39,7 @@ pub fn setup_fern_logger(debug_flags: u64) -> Result<(), fern::InitError> {
     if debug_flags & QuietFlags::Db as u64 > 0 {
         level_config = level_config.level_for("fr_core::db", log::LevelFilter::Info);
     }
-    if debug_flags & QuietFlags::Donwloader as u64 > 0 {
+    if debug_flags & QuietFlags::Downloader as u64 > 0 {
         level_config = level_config.level_for("fr_core::downloader", log::LevelFilter::Info);
     }
     if debug_flags & QuietFlags::Controller as u64 > 0 {
@@ -64,7 +64,6 @@ pub fn setup_fern_logger(debug_flags: u64) -> Result<(), fern::InitError> {
     format_config.chain(std::io::stdout()).apply()?;
     Ok(())
 }
-
 
 #[deprecated]
 #[allow(dead_code)]

@@ -1,6 +1,8 @@
 use crate::controller::sourcetree::SJob;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
+use crate::db::subscription_repo::ISubscriptionRepo;
+use crate::db::subscription_repo::SubscriptionRepo;
 use crate::downloader::util;
 use crate::util::convert_webp_to_png;
 use crate::util::Step;
@@ -23,6 +25,7 @@ pub struct IconInner {
     pub sourcetree_job_sender: Sender<SJob>,
     pub feed_homepage: String,
     pub feed_download_text: String,
+    pub subscriptionrepo: SubscriptionRepo,
 }
 
 impl std::fmt::Debug for IconInner {
@@ -51,66 +54,88 @@ impl IconLoadStart {
 
 impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
-        StepResult::Continue(Box::new(IconFeedTextDownload(self.0)))
+        let mut inner: IconInner = self.0;
+        if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.fs_repo_id) {
+            if !subs_e.website_url.is_empty() {
+				// debug!("IconLoadStart  homepage from db  {} ", &subs_e.website_url);
+                inner.feed_homepage = subs_e.website_url;
+
+                return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
+            }
+        }
+        StepResult::Continue(Box::new(FeedTextDownload(inner)))
     }
 }
 
-struct IconFeedTextDownload(IconInner);
-impl Step<IconInner> for IconFeedTextDownload {
+struct FeedTextDownload(IconInner);
+impl Step<IconInner> for FeedTextDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let result = (*inner.web_fetcher).request_url(inner.feed_url.clone());
-        // trace!(            "IconFeedTextDownload:1 {} {:?} icon_urL={}",            inner.feed_url,            result.status,            inner.icon_url        );
+        // trace!("FeedTextDownload:1 {} {:?} icon_urL={}",            inner.feed_url,            result.status,            inner.icon_url        );
         match result.status {
             200 => {
                 inner.feed_download_text = result.content;
             }
             _ => {
-                //inner.download_error_happened = true;
                 // trace!(                    "Feed download:  '{}' => {} {} {:?}  -> FallbackSimple ",                    &inner.feed_url,                    result.get_status(),                    result.get_kind(),                    result.error_description                );
                 return StepResult::Continue(Box::new(IconFallbackSimple(inner)));
             }
         }
+        StepResult::Continue(Box::new(HomepageDownload(inner)))
+    }
+}
+
+struct HomepageDownload(IconInner);
+impl Step<IconInner> for HomepageDownload {
+    fn step(self: Box<Self>) -> StepResult<IconInner> {
+        let mut inner: IconInner = self.0;
         if let (Some(homepage), Some(_feed_title)) = util::retrieve_homepage_from_feed_text(
             inner.feed_download_text.as_bytes(),
             &inner.feed_url,
         ) {
-            inner.feed_homepage = homepage;
-            trace!(
-                "IconFeedTextDownload:2   HP={:?}  title={:?}",
-                inner.feed_homepage,
-                _feed_title
-            );
-            return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
+
+			inner.feed_homepage = homepage;
+            // trace!("FeedTextDownload:2   HP={:?}  title={:?}",                inner.feed_homepage,                _feed_title            );
+            return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
         }
         StepResult::Continue(Box::new(IconFallbackSimple(inner)))
     }
 }
 
-/* TODO
-struct CompareHomepageToDB(CompareHomepageToDB);
+struct CompareHomepageToDB(IconInner);
 impl Step<IconInner> for CompareHomepageToDB {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
+        let inner: IconInner = self.0;
 
-		StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)))
+        if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.fs_repo_id) {
+            if !inner.feed_homepage.is_empty() && inner.feed_homepage != subs_e.website_url {
+                debug!(
+                    "CompareHomepageToDB     Update TO db: {}",
+                    &inner.feed_homepage
+                );
+                inner
+                    .subscriptionrepo
+                    .update_homepage(inner.fs_repo_id, &inner.feed_homepage);
+            }
+        } else {
+            debug!("no subscription in db for {}", inner.fs_repo_id);
+        }
 
-	}
+        StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)))
+    }
 }
-
-*/
 
 pub struct IconAnalyzeHomepage(IconInner);
 impl Step<IconInner> for IconAnalyzeHomepage {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        // trace!(            "IconAnalyzeHomepage: {}   icon_url={}",           &inner.feed_homepage, inner.icon_url        );
         let r = (*inner.web_fetcher).request_url(inner.feed_homepage.clone());
         match r.status {
             200 => {
                 if let Some(icon_url) =
                     util::extract_icon_from_homepage(r.content, &inner.feed_homepage)
                 {
-                    // trace!("extracted from page: {}", &icon_url);
                     inner.icon_url = icon_url;
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 };

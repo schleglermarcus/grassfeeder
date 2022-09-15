@@ -31,22 +31,6 @@ pub struct SubscriptionEntry {
     pub display_name: String,
     pub url: String,         // xml_url
     pub website_url: String, // 14
-
-    // #[deprecated]
-    // #[serde(skip)]
-    // pub tree_path: Option<Vec<u16>>,
-
-    // #[serde(skip)]
-    // #[deprecated]
-    // pub status: usize,
-
-    // #[serde(skip)]
-    // #[deprecated]
-    // pub num_msg_all_unread: Option<(isize, isize)>,
-
-    #[serde(skip)]
-// 	#[deprecated]
-    pub is_dirty: bool,
 }
 
 impl SubscriptionEntry {
@@ -65,10 +49,6 @@ impl SubscriptionEntry {
             expanded: false,
             website_url: String::default(),
             last_selected_msg: -1,
-            // num_msg_all_unread: None,
-            // status: 0,
-            // tree_path: None,
-            is_dirty: true,
             deleted: false,
         }
     }
@@ -88,10 +68,6 @@ impl SubscriptionEntry {
             expanded: false,
             website_url: String::default(),
             last_selected_msg: -1,
-            // num_msg_all_unread: None,
-            is_dirty: true,
-            // status: 0,
-            // tree_path: None,
             deleted: false,
         }
     }
@@ -112,7 +88,6 @@ impl fmt::Debug for SubscriptionEntry {
             .field("FP", &self.folder_position)
             .field("DEL", &self.deleted)
             .field("FO", &self.is_folder)
-            // .field("ST", &self.status)
             .field("D", &self.display_name)
             .field("url", &self.url)
             .field("icon", &self.icon_id)
@@ -134,98 +109,9 @@ impl fmt::Display for SubscriptionEntry {
             .field("PA", &self.parent_subs_id)
             .field("FP", &self.folder_position)
             .field("XP", &expi)
-            // .field("ST", &self.status)
             .finish()
     }
 }
-
-/*
-pub trait FeedSourceState {
-    fn is_expanded(&self) -> bool;
-    fn set_expanded(&mut self, new_exp: bool);
-
-    fn is_err_on_fetch(&self) -> bool;
-
-    fn set_err_on_fetch(&mut self, n: bool);
-    fn is_fetch_scheduled(&self) -> bool;
-    fn set_fetch_scheduled(&mut self, n: bool);
-
-    fn is_fetch_scheduled_jobcreated(&self) -> bool;
-    fn set_fetch_scheduled_jobcreated(&mut self, n: bool);
-
-    fn is_fetch_in_progress(&self) -> bool;
-    fn set_fetch_in_progress(&mut self, n: bool);
-
-    fn is_deleted(&self) -> bool;
-    fn set_deleted(&mut self, n: bool);
-
-    fn check_bitmask(&self, bitmask: usize) -> bool;
-    fn change_bitmask(&mut self, bitmask: usize, new_state: bool);
-}
-
-#[allow(dead_code)]
-impl FeedSourceState for SubscriptionEntry {
-    fn is_err_on_fetch(&self) -> bool {
-        self.check_bitmask(StatusMask::ErrFetchReq as usize)
-    }
-
-    fn set_err_on_fetch(&mut self, n: bool) {
-        self.change_bitmask(StatusMask::ErrFetchReq as usize, n)
-    }
-
-    fn is_fetch_scheduled(&self) -> bool {
-        self.check_bitmask(StatusMask::FetchScheduled as usize)
-    }
-    fn set_fetch_scheduled(&mut self, n: bool) {
-        self.change_bitmask(StatusMask::FetchScheduled as usize, n)
-    }
-
-    fn is_fetch_scheduled_jobcreated(&self) -> bool {
-        self.check_bitmask(StatusMask::FetchScheduledJobCreated as usize)
-    }
-    fn set_fetch_scheduled_jobcreated(&mut self, n: bool) {
-        self.change_bitmask(StatusMask::FetchScheduledJobCreated as usize, n)
-    }
-
-    fn is_fetch_in_progress(&self) -> bool {
-        self.check_bitmask(StatusMask::FetchInProgress as usize)
-    }
-
-    fn set_fetch_in_progress(&mut self, n: bool) {
-        self.change_bitmask(StatusMask::FetchInProgress as usize, n)
-    }
-
-    fn is_deleted(&self) -> bool {
-        self.deleted
-    }
-    fn set_deleted(&mut self, n: bool) {
-        self.deleted = n
-    }
-
-    fn is_expanded(&self) -> bool {
-        self.expanded
-    }
-    fn set_expanded(&mut self, new_exp: bool) {
-        self.expanded = new_exp;
-    }
-
-    fn check_bitmask(&self, bitmask: usize) -> bool {
-        self.status & bitmask == bitmask
-    }
-
-    fn change_bitmask(&mut self, bitmask: usize, new_state: bool) {
-        let new_st = match new_state {
-            true => self.status | bitmask,
-            false => self.status & !bitmask,
-        };
-        if new_st != self.status {
-            self.status = new_st;
-            self.is_dirty = true;
-        }
-    }
-}
-
-*/
 
 impl TableInfo for SubscriptionEntry {
     fn table_name() -> String {
@@ -308,17 +194,3 @@ impl TableInfo for SubscriptionEntry {
         self.subs_id
     }
 }
-
-/*
-#[allow(dead_code)]
-pub enum StatusMask {
-    Dirty = 1,
-    FetchScheduled = 8,
-    FetchScheduledJobCreated = 16,
-    FetchInProgress = 32,
-    ErrFetchReq = 64,
-    ErrIconReq = 128,
-    //    FolderExpanded = 64,
-    //    Deleted = 128,
-}
-*/
