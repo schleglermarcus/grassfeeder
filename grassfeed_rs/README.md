@@ -9,11 +9,10 @@
 ##### Linux Mint 20
 Version 0.0.4 and down do not work here, since they have no libgdk-pixbuf-2.0-0:amd64  
 They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upgrade path. 
-Mint20  uses 
+###### Mint20  uses 
 - "focal" for Ubuntu packages
 - "uma" for Mint packages
-
-Mint21 uses 
+###### Mint21 uses 
 - "jammy" for Ubuntu packages
 - "vanessa" for Mint  packages
 
