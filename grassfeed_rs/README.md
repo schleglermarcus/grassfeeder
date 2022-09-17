@@ -7,26 +7,40 @@
 * Or `sudo dpkg -i  grassfeeder_0.0.4_amd64.deb`
 
 ### Linux Mint 20
-Version 0.0.4 and down do not work here, since they have no libgdk-pixbuf-2.0-0:amd64  
-They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upgrade path. 
-###### Mint20  uses 
+Version 0.0.4 and down do not work here, since they have no libgdk-pixbuf-2.0-0:amd64
+They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upgrade path.
+###### Mint20  uses
 - "focal" for Ubuntu packages
 - "uma" for Mint packages
-###### Mint21 uses 
+###### Mint21 uses
 - "jammy" for Ubuntu packages
 - "vanessa" for Mint  packages
 
-    
+
 
 
 
 
 ## Dependencies
-#### Build 
+#### Build
+##### Linux Mint 20 preparation, as user
+  - Install rust:  `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+	- `cargo install cargo-deb`
 
-* ~~apt-get install libjavascriptcoregtk-4.0-dev~~
-* ~~apt-get install libsoup2.4-dev~~
-* ~~apt-get install libssl-dev~~ 
+##### Linux Mint 20 preparation, as admin
+  - apt-get install git
+  - apt-get install libsoup2.4-dev
+	- apt-get install librust-gdk-sys-dev
+	- apt-get install libjavascriptcoregtk-4.0-dev
+	- apt-get install libwebkit2gtk-4.0-d-dev
+
+
+
+
+##### not yet
+* ~~apt-get install libssl-dev~~
+
+
 
 #### Binary
 - libglib2.0-0 (>= 2.33.14)
@@ -35,5 +49,3 @@ They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upg
 - libc6 (>= 2.35)
 - libgdk-pixbuf-2.0-0 (>= 2.22.0)
 - libpango-1.0-0 (>= 1.14.0)
-
-
