@@ -233,9 +233,14 @@ impl GtkGuiBuilder for GtkObjectTree {
             gtk::Inhibit(false)
         });
 
-        label_st2.connect_focus(|label2: &Label, _dirtype| {
+        label_st2.connect_focus(|_l2: &Label, _dirtype| {
             debug!("LABEL2 focus ");
             gtk::Inhibit(false)
+        });
+
+        label_st2.connect_focus_on_click_notify(|_l2: &Label| {
+            debug!("LABEL2   focus_on_click_notify ");
+            // gtk::Inhibit(false)
         });
 
         let layout_st = gtk::Layout::new(NONE_ADJ, NONE_ADJ);

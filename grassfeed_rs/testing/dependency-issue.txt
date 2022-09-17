@@ -44,3 +44,19 @@ ii  librust-gdk-pixbuf-sys-dev:amd64                      0.14.0-1              
 ii  libwmf-0.2-7-gtk                                      0.2.12-5ubuntu1                            amd64        Windows metafile conversion GTK pixbuf plugin
 ii  libwmf0.2-7-gtk:amd64                                 0.2.12-5ubuntu1                            amd64        Windows metafile conversion GTK pixbuf plugin - transitional package
 ii  webp-pixbuf-loader                                    0.0.5-5                                    amd64        WebP Image format GdkPixbuf loader
+
+
+
+# Auf Debian Buster:
+
+  cargo:warning=`"pkg-config" "--libs" "--cflags" "gtk+-3.0" "gtk+-3.0 >= 3.24.8"` did not exit successfully: exit status: 1
+  error: could not find system library 'gtk+-3.0' required by the 'gtk-sys' crate
+
+  Package dependency requirement 'gtk+-3.0 >= 3.24.8' could not be satisfied.
+  Package 'gtk+-3.0' has version '3.24.5', required version is '>= 3.24.8'
+	
+	Alt:  Zu alt für mein Programm. D.h. mit "buster"   kann ich es unter docker nicht bauen.
+	https://packages.debian.org/buster/libgtk-3-dev
+
+	Neu: Zu neu für Mint20
+	https://packages.debian.org/bullseye/libgtk-3-dev
