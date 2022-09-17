@@ -32,7 +32,7 @@ They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upg
   - apt-get install libsoup2.4-dev
 	- apt-get install librust-gdk-sys-dev
 	- apt-get install libjavascriptcoregtk-4.0-dev
-	- apt-get install libwebkit2gtk-4.0-d-dev
+	- apt-get install libwebkit2gtk-4.0-dev
 
 
 
