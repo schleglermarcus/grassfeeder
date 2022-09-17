@@ -10,7 +10,8 @@ WORKDIR /usr/src/gf/grassfeed_rs/app-gtk3-linux
 RUN pwd
 RUN ls -l
 RUN cargo clean
-RUN cargo test && cargo deb
+RUN cargo test --release 
+RUN cargo deb
 
 WORKDIR /usr/src/gf/grassfeed_rs/target/debian
 RUN ls -l

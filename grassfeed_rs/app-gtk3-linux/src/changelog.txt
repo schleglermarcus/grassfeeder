@@ -1,3 +1,20 @@
+grassfeeder (0.0.5) unstable; urgency=low
+
+  * On Shutdown:  Flush Databases
+  * StatusBar: copy Feed address into clipboard
+  * Build via Docker containera
+  
+  
+  - Multiple instances shall be blocking.
+  - Add default set of feeds on new configuration
+  - Cleanup at maximum messages
+  - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
+  - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
+  - check  https://www.linuxcompatible.org/  feed: icon + entries
+  - Check: &  in Feed-title, Message-title. should be escaped
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Fri, 18 Sep 2022 00:12:00 +0000
+
 grassfeeder (0.0.4) unstable; urgency=low
 
   * Startup Commandline processing fixed:    -h shall remain on commandline

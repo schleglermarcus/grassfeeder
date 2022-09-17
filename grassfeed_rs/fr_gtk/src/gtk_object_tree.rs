@@ -216,32 +216,18 @@ impl GtkGuiBuilder for GtkObjectTree {
 
         let label_st2 = Label::new(Some(">some_url<"));
         label_st2.set_width_request(100);
-
-        label_st2.connect_label_notify(move |label| {
-            let l2txt = label.text().to_string();
-            debug!("LABEL2   NOTIFY changing of contained text ",);
-
-            label.set_tooltip_text(Some(l2txt.as_str()));
-            //             label_st2.set_tooltip_text(Some("LABEL2!!!"));
-        });
+        label_st2.set_selectable(true);
         label_st2.connect_button_press_event(|label2: &Label, evb: &EventButton| {
-            debug!(
-                "LABEL2   connect_button_press_event  {:?}   button={:?}",
-                label2.text(),
-                evb.button()
-            );
+            if evb.button() == MOUSE_BUTTON_RIGHT {
+                // trace!(                    "L2   button_press_event  {:?}   button={:?}",                    label2.text(),                    evb.button()                );
+                label2.select_region(0, -1); // select all
+            }
             gtk::Inhibit(false)
         });
-
-        label_st2.connect_focus(|_l2: &Label, _dirtype| {
-            debug!("LABEL2 focus ");
-            gtk::Inhibit(false)
-        });
-
-        label_st2.connect_focus_on_click_notify(|_l2: &Label| {
-            debug!("LABEL2   focus_on_click_notify ");
-            // gtk::Inhibit(false)
-        });
+        // label_st2.connect_label_notify(move |label| {            let l2txt = label.text().to_string();            label.set_tooltip_text(Some(l2txt.as_str()));        });
+        // label_st2.connect_focus(|_l2: &Label, _dirtype| {            debug!("LABEL2 focus ");            gtk::Inhibit(false)        });
+        // label_st2.connect_focus_on_click_notify(|_l2: &Label| {            debug!("LABEL2   focus_on_click_notify ");        });
+        // label_st2.connect_activate_link(|_l2: &Label, _arg2| {            debug!("LABEL2   activate_link ");            gtk::Inhibit(false)        });
 
         let layout_st = gtk::Layout::new(NONE_ADJ, NONE_ADJ);
         layout_st.add(&label_st2);
