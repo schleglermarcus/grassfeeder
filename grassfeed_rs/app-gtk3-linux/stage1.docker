@@ -1,28 +1,18 @@
-#docker build -t grassfeeder:stage1 -f app-gtk3-linux/stage1.docker .
-
-          # FROM rust
-# FROM debian:bullseye-slim
 FROM rust:1.63-slim-bullseye
 
+#  TODO: ausprobieren aelteres Debian
+# FROM rust:1.63-slim-buster
+
+
+run echo "deb     http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free"  >/etc/apt/sources.list
+run echo "deb-src http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free" >>/etc/apt/sources.list
+
 RUN apt update
-RUN apt install -y git
-RUN apt install -y wget
-
-RUN mkdir -p /usr/src/grassfeed_rs
-WORKDIR /usr/src/grassfeed_rs
-
-COPY .  /usr/src/grassfeed_rs
+RUN apt install -y wget git pkgconf
+RUN apt install -y librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev
+RUN apt install -y libsoup2.4-dev libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev
 
 
-WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
-RUN pwd
-RUN ls -l
-# (cd grassfeed_rs/app-gtk3-linux/ ; cargo clean;  rm Cargo.lock ; cargo test && nice -n9 cargo deb )
+
 
 RUN cargo install cargo-deb
-RUN cargo clean
-# RUN rm Cargo.lock
-
-#RUN cargo test
-#RUN cargo build
-#RUN cargo deb

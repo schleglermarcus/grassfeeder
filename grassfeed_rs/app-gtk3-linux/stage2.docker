@@ -2,14 +2,21 @@
 
 FROM grassfeeder:stage1
 
-WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
+# RUN apt install -y librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev libsoup2.4-dev
+# RUN apt install -y libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev
+
+WORKDIR /usr/src/
+
+RUN wget -q -O- https://github.com/schleglermarcus/grassfeeder/archive/refs/tags/v0.0.4.tar.gz |gzip -d |tar x
+RUN mv grassfeeder-0.0.4  gf
+
+WORKDIR /usr/src/gf/grassfeed_rs/app-gtk3-linux
 RUN pwd
 RUN ls -l
+# RUN cargo clean
+# RUN cargo test
+RUN cargo deb
 
-# RUN git status
-RUN git rev-parse --short HEAD
-
-#RUN cargo clean
-#RUN cargo test
-#RUN cargo build
-#RUN cargo deb
+WORKDIR /usr/src/gf/grassfeed_rs/target/debian
+RUN pwd
+RUN ls -l
