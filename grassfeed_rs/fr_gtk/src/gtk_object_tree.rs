@@ -568,7 +568,7 @@ fn create_listview(
     let ev_se_3 = g_ev_se.clone();
     let esw = EvSenderWrapper(g_ev_se.clone());
     let gtk_obj_ac = gtk_obj_a.clone();
-    content_tree_view.connect_button_press_event(move |p_tv, eventbutton: &EventButton| {
+    content_tree_view.connect_button_press_event(move |p_tv : &TreeView, eventbutton: &EventButton| {
         let treeview: gtk::TreeView = p_tv.clone().dynamic_cast::<gtk::TreeView>().unwrap();
         let mut repo_id: i32 = -1;
         let button_num = eventbutton.button();

@@ -1,0 +1,46 @@
+
+gdk-pixbuf:  Teil von gtk
+
+
+Grassfeeder Braucht:
+  libc6   >= 2.35		Installiert:    2.31
+libgtk-pixbuf   >=2.22		Installiert:  keine
+
+# ldd /usr/bin/grassfeeder |grep gdk
+	libgdk-3.so.0 => /lib/x86_64-linux-gnu/libgdk-3.so.0 (0x00007fa6f1f32000)
+	libgdk_pixbuf-2.0.so.0 => /lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0 (0x00007fa6f1e9a000)
+
+# apt-file search /lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0
+libgdk-pixbuf-2.0-0: /usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0
+libgdk-pixbuf-2.0-0: /usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0.4200.8
+
+
+Linux Mint 20.2  VM
+# dpkg -l |grep pixbuf
+ii  gir1.2-gdkpixbuf-2.0:amd64                 2.40.0+dfsg-3ubuntu0.4              amd64        GDK Pixbuf library - GObject-Introspection
+ii  gtk2-engines-pixbuf:amd64                  2.24.32-4ubuntu4                    amd64        pixbuf-based theme for GTK 2
+ii  libgdk-pixbuf2.0-0:amd64                   2.40.0+dfsg-3ubuntu0.4              amd64        GDK Pixbuf library
+ii  libgdk-pixbuf2.0-bin                       2.40.0+dfsg-3ubuntu0.4              amd64        GDK Pixbuf library (thumbnailer)
+ii  libgdk-pixbuf2.0-common                    2.40.0+dfsg-3ubuntu0.4              all          GDK Pixbuf library - data files
+
+
+Linux Mint 21  Desktop
+#  dpkg -l |grep pixbuf
+ii  gir1.2-gdkpixbuf-2.0:amd64                            2.42.8+dfsg-1                              amd64        GDK Pixbuf library - GObject-Introspection
+ii  gtk2-engines-pixbuf:amd64                             2.24.33-2ubuntu2                           amd64        pixbuf-based theme for GTK 2
+ii  libgdk-pixbuf-2.0-0:amd64                             2.42.8+dfsg-1                              amd64        GDK Pixbuf library
+ii  libgdk-pixbuf-2.0-0:i386                              2.42.8+dfsg-1                              i386         GDK Pixbuf library
+ii  libgdk-pixbuf-2.0-dev:amd64                           2.42.8+dfsg-1                              amd64        GDK Pixbuf library (development files)
+ii  libgdk-pixbuf-xlib-2.0-0:amd64                        2.40.2-2build4                             amd64        GDK Pixbuf library (deprecated Xlib integration)
+ii  libgdk-pixbuf-xlib-2.0-0:i386                         2.40.2-2build4                             i386         GDK Pixbuf library (deprecated Xlib integration)
+ii  libgdk-pixbuf-xlib-2.0-dev:amd64                      2.40.2-2build4                             amd64        GDK Pixbuf library (development files)
+ii  libgdk-pixbuf2.0-0:amd64                              2.40.2-2build4                             amd64        GDK Pixbuf library (transitional package)
+ii  libgdk-pixbuf2.0-0:i386                               2.40.2-2build4                             i386         GDK Pixbuf library (transitional package)
+ii  libgdk-pixbuf2.0-bin                                  2.42.8+dfsg-1                              amd64        GDK Pixbuf library (thumbnailer)
+ii  libgdk-pixbuf2.0-common                               2.42.8+dfsg-1                              all          GDK Pixbuf library - data files
+ii  libgdk-pixbuf2.0-dev:amd64                            2.40.2-2build4                             amd64        GDK Pixbuf library (transitional development files)
+ii  librust-gdk-pixbuf-dev:amd64                          0.14.0-1                                   amd64        Rust bindings for the GdkPixbuf library - Rust source code
+ii  librust-gdk-pixbuf-sys-dev:amd64                      0.14.0-1                                   amd64        FFI bindings to libgdk_pixbuf-2.0 - Rust source code
+ii  libwmf-0.2-7-gtk                                      0.2.12-5ubuntu1                            amd64        Windows metafile conversion GTK pixbuf plugin
+ii  libwmf0.2-7-gtk:amd64                                 0.2.12-5ubuntu1                            amd64        Windows metafile conversion GTK pixbuf plugin - transitional package
+ii  webp-pixbuf-loader                                    0.0.5-5                                    amd64        WebP Image format GdkPixbuf loader

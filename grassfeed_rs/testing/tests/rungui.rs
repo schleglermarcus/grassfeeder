@@ -8,7 +8,6 @@ use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
-// use resources::application_id::RCS_CARGO_PKG_VERSION;
 use resources::loc;
 use std::cell::RefCell;
 use std::fs::File;
@@ -133,7 +132,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder3,
         false,
     );
-    if false {
+    if true {
         let src = [
             (url_staseve.as_str(), "staseve11"),
             (url_r_foto.as_str(), "fotograf"),
@@ -173,7 +172,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    if true {
+    if false {
         let src = [
             ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0

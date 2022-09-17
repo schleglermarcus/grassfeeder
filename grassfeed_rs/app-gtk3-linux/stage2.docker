@@ -1,0 +1,15 @@
+#docker build -t grassfeeder:stage2 -f app-gtk3-linux/stage2.docker .
+
+FROM grassfeeder:stage1
+
+WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
+RUN pwd
+RUN ls -l
+
+# RUN git status
+RUN git rev-parse --short HEAD
+
+#RUN cargo clean
+#RUN cargo test
+#RUN cargo build
+#RUN cargo deb

@@ -1,14 +1,6 @@
 use std::io::Write;
 
-// https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
-// https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
-// https://docs.rs/chrono/latest/chrono/format/strftime/index.html#specifiers
-
-
-//  dpkg-deb -i 	grassfeeder.deb
-
-
-
+#[allow(dead_code)]
 pub fn get_env(key: &str) -> Option<String> {
     if let Some(s1) = std::env::var_os(key) {
         if let Some(s2) = s1.to_str() {

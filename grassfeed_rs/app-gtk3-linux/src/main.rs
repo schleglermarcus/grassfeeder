@@ -14,7 +14,7 @@ use log::{debug, error, info, trace, warn};
 
 i18n!("../resources/locales");
 
-include!(concat!(env!("OUT_DIR"), "/gen_git_info.rs"));
+/// include!(concat!(env!("OUT_DIR"), "/gen_git_info.rs"));
 
 fn main() {
     let xdg_dirs = xdg::BaseDirectories::with_prefix(APP_NAME).unwrap();
@@ -30,10 +30,10 @@ fn main() {
         .to_str()
         .unwrap()
         .to_string();
-    let version_str = format!(
-        "{} : {} : {}",
-        RCS_CARGO_PKG_VERSION, RCS_BRANCH, RCS_VERSION
-    );
+
+    // let version_str = format!(        "{} : {} : {}",        RCS_CARGO_PKG_VERSION, RCS_BRANCH, RCS_VERSION    );
+    let version_str = env!("CARGO_PKG_VERSION").to_string();
+
     let o_opts = args_lang::parse_args(&version_str);
 
     let mut debug_level = 0;
