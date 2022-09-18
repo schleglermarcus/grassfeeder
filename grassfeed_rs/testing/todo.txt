@@ -1,12 +1,6 @@
 To Do List
 
 
-- Multiple instances shall be blocking.
-       GTK_DEBUG=interactive
-https://docs.gtk.org/gio/class.Application.html
-https://wiki.gnome.org/HowDoI/GtkApplication
-https://developer.gnome.org/documentation/tutorials/application.html
-https://docs.gtk.org/gio/method.Application.run.html
 
 - Add default set of feeds on new configuration
 - Cleanup at maximum messages
@@ -27,6 +21,7 @@ https://docs.gtk.org/gio/method.Application.run.html
 - Sanitize: cross-check icon ids of tree if they are present in icon db
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
+- Sanitize: Message clean out those with deleted flag
 
 
 - Subscription Tree: hide zeroes when nothing to read
@@ -125,3 +120,11 @@ https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 Docker:  3 Phasen:  aus,   build, run
 	https://kerkour.com/rust-small-docker-image#/from-buster-slim
 	https://windsoilder.github.io/writing_dockerfile_in_rust_project.html
+
+
+	- Multiple instances shall be blocking.
+	       GTK_DEBUG=interactive
+	https://docs.gtk.org/gio/class.Application.html
+	https://wiki.gnome.org/HowDoI/GtkApplication
+	https://developer.gnome.org/documentation/tutorials/application.html
+	https://docs.gtk.org/gio/method.Application.run.html

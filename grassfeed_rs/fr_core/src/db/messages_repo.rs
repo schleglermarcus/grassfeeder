@@ -17,6 +17,7 @@ pub trait IMessagesRepo {
     // returns number of elements
     fn insert_tx(&self, e_list: &[MessageRow]) -> Result<i64, Box<dyn std::error::Error>>;
 
+    /// sorted by  entry_src_date
     fn get_by_src_id(&self, src_id: isize) -> Vec<MessageRow>;
 
     /// returns  the number of read lines for that source id:   -1 for undefined
@@ -37,10 +38,17 @@ pub trait IMessagesRepo {
 
     fn update_is_read_many(&self, repo_ids: &[i32], new_is_read: bool);
     fn update_is_read_all(&self, source_repo_id: isize, new_is_read: bool);
-    /// title string shall be compressed. returns number of lines
+
+
+    ///  title string shall be compressed. This undeletes the message,  Returns number of lines
     fn update_title(&self, repo_id: isize, new_title_compr: String) -> usize;
+
+	/// undeletes the message
     fn update_post_id(&self, repo_id: isize, new_post_id: String) -> usize;
+
+	/// undeletes the message
     fn update_entry_src_date(&self, repo_id: isize, n_src_date: i64) -> usize;
+
     fn update_is_deleted_many(&self, repo_ids: &[i32], new_is_del: bool);
 
     fn get_ctx(&self) -> &SqliteContext<MessageRow>;
@@ -105,7 +113,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn get_by_src_id(&self, src_id: isize) -> Vec<MessageRow> {
         let prepared = format!(
-            "SELECT * FROM {} WHERE feed_src_id={}",
+            "SELECT * FROM {} WHERE feed_src_id={} ORDER BY entry_src_date DESC ",
             MessageRow::table_name(),
             src_id
         );
@@ -205,7 +213,6 @@ impl IMessagesRepo for MessagesRepo {
         self.ctx.execute(sql);
     }
 
-    /// title string shall be compressed
     fn update_title(&self, repo_id: isize, new_title: String) -> usize {
         if new_title.contains('"') {
             warn!(
@@ -215,7 +222,7 @@ impl IMessagesRepo for MessagesRepo {
             return 0;
         }
         let sql = format!(
-            "UPDATE {}  SET  title = \"{}\" WHERE {} = {}",
+            "UPDATE {}  SET  title = \"{}\" , is_deleted=false   WHERE {} = {}",
             MessageRow::table_name(),
             new_title,
             MessageRow::index_column_name(),
@@ -233,7 +240,7 @@ impl IMessagesRepo for MessagesRepo {
             return 0;
         }
         let sql = format!(
-            "UPDATE {}  SET  post_id = \"{}\" WHERE {} = {}",
+            "UPDATE {}  SET  post_id = \"{}\"  , is_deleted=false   WHERE {} = {}",
             MessageRow::table_name(),
             new_post_id,
             MessageRow::index_column_name(),
@@ -244,7 +251,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn update_entry_src_date(&self, repo_id: isize, n_src_date: i64) -> usize {
         let sql = format!(
-            "UPDATE {}  SET  entry_src_date = \"{}\" WHERE {} = {}",
+            "UPDATE {}  SET  entry_src_date = \"{}\" , is_deleted=false   WHERE {} = {}",
             MessageRow::table_name(),
             n_src_date,
             MessageRow::index_column_name(),

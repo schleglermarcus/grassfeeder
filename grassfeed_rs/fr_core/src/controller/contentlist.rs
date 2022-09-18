@@ -84,6 +84,7 @@ pub trait IFeedContents {
     fn toggle_feed_item_read(&self, content_repo_id: isize, list_position: i32);
 
     /// updates existing entries,  returns the new entries only,
+	#[deprecated]
     fn match_new_entries_to_db(
         &self,
         new_list: &[MessageRow],

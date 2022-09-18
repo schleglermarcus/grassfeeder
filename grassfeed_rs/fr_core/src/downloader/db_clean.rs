@@ -4,6 +4,7 @@ use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
+use crate::util::db_time_to_display;
 use crate::util::filter_by_iso8859_1;
 use crate::util::Step;
 use crate::util::StepResult;
@@ -21,6 +22,8 @@ pub struct CleanerInner {
     pub subs_parents_active: Mutex<Vec<i32>>,
     pub need_update_subscriptions: bool,
     pub need_update_messages: bool,
+    /// -1 : do not check
+    pub max_messages_per_subscription: i32,
 }
 
 impl CleanerInner {
@@ -39,6 +42,7 @@ impl CleanerInner {
             subs_parents_active: Mutex::new(Vec::default()),
             need_update_messages: false,
             need_update_subscriptions: false,
+            max_messages_per_subscription: -1,
         }
     }
 }
@@ -218,9 +222,60 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
             inner.messgesrepo.update_is_deleted_many(&noncon_ids, true);
         }
 
+        StepResult::Continue(Box::new(ReduceTooManyMessages(inner)))
+    }
+}
+
+pub struct ReduceTooManyMessages(pub CleanerInner);
+impl Step<CleanerInner> for ReduceTooManyMessages {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let inner = self.0;
+
+        if inner.max_messages_per_subscription > 1 {
+            let subs_ids = inner
+                .subscriptionrepo
+                .get_all_entries()
+                .iter()
+                .filter(|fse| !fse.is_folder)
+                .map(|fse| fse.subs_id)
+                .collect::<Vec<isize>>();
+
+            debug!(
+                "ReduceTooManyMessages={:?}  SUBS={:?}",
+                inner.max_messages_per_subscription, &subs_ids
+            );
+
+            for su_id in &subs_ids {
+                let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id);
+                if msg_per_subscription.len() > inner.max_messages_per_subscription as usize {
+                    msg_per_subscription.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
+                    let (_stay, remove) =
+                        msg_per_subscription.split_at(inner.max_messages_per_subscription as usize);
+                    // _stay.iter().for_each(|e| {                        debug!(                            "STAY  {}\t{}",                            e.message_id,                            db_time_to_display(e.entry_src_date)                        )                    });
+                    //  remove.iter().for_each(|e| {                        debug!(                            "REMOVE  {}\t{}",                            e.message_id,                            db_time_to_display(e.entry_src_date)                        )                    });
+
+                    if !remove.is_empty() {
+                        let id_list: Vec<i32> =
+                            remove.iter().map(|e| e.message_id as i32).collect();
+                        let first_msg = remove.iter().next().unwrap();
+                        debug!(
+                            "Cleanup messages:  subsciption(id {}) ,  {} messages. Latest date: {}	\t message-ids={:?}",
+                            su_id,
+                            id_list.len(),
+                            db_time_to_display(first_msg.entry_src_date),
+                            id_list
+                        );
+                        inner.messgesrepo.update_is_deleted_many(&id_list, true);
+                    }
+                }
+            }
+        }
+
         StepResult::Continue(Box::new(Notify(inner)))
     }
 }
+
+// later : clean out all deleted messagesrepo
 
 pub struct Notify(pub CleanerInner);
 impl Step<CleanerInner> for Notify {

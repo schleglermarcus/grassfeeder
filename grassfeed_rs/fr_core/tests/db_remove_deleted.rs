@@ -13,6 +13,27 @@ use fr_core::downloader::db_clean::CleanerStart;
 use fr_core::util::StepResult;
 use std::collections::HashSet;
 
+// #[ignore]
+#[test]
+fn db_cleanup_many_messages() {
+    setup();
+    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
+    let subsrepo = SubscriptionRepo::new_inmem(); // new("");
+    subsrepo.scrub_all_subscriptions();
+    let msgrepo1 = MessagesRepo::new_in_mem();
+    let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
+    msgrepo1.get_ctx().create_table();
+    prepare_db_with_errors_1(&msgrepo1, &subsrepo);
+    // let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
+    let mut cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1);
+    cleaner_i.max_messages_per_subscription = 5;
+    let _inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
+
+    let msg1 = msgrepo2.get_by_src_id(1);
+    debug!("#msg={}", msg1.len());
+}
+
 fn clean_phase1(subs_repo: &SubscriptionRepo) {
     let all_entries = subs_repo.get_all_entries();
     // let count_all = all_entries.len();
@@ -85,26 +106,7 @@ fn db_cleanup_remove_deleted() {
     assert_eq!(all_entries.len(), 309);
 }
 
-fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo) {
-    let mut se = SubscriptionEntry::default();
-	se.is_folder = true;
-    assert!(subsrepo.store_entry(&se).is_ok());
-	se.is_folder = false;
-    se.parent_subs_id = 1;
-    assert!(subsrepo.store_entry(&se).is_ok());
-    se.parent_subs_id = 1; // unchanged folder pos, that's an error
-    se.display_name = "Japan 無料ダウンロード".to_string();
-    se.expanded = true;
-    let _r = subsrepo.store_entry(&se);
-    // 	debug!("### {:#?}", subsrepo.get_all_entries());
-    let mut m1 = MessageRow::default();
-    m1.subscription_id = 1;
-    let _r = msgrepo.insert(&m1);
-    m1.subscription_id = 2;
-    let _r = msgrepo.insert(&m1);
-}
-
-// #[ignore]
+#[ignore]
 #[test]
 fn t_db_cleanup_1() {
     setup();
@@ -132,6 +134,31 @@ fn t_db_cleanup_1() {
     // debug!("ALLMSG={:#?}", msgrepo2.get_all_messages());
     assert_eq!(msgrepo2.get_by_index(1).unwrap().is_deleted, false); // belongs to subscription
     assert_eq!(msgrepo2.get_by_index(2).unwrap().is_deleted, true); // does not belong to subscription
+}
+
+fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo) {
+    let mut se = SubscriptionEntry::default();
+    se.is_folder = true;
+    assert!(subsrepo.store_entry(&se).is_ok());
+    se.is_folder = false;
+    se.parent_subs_id = 1;
+    assert!(subsrepo.store_entry(&se).is_ok());
+    se.parent_subs_id = 1; // unchanged folder pos, that's an error
+    se.display_name = "Japan 無料ダウンロード".to_string();
+    se.expanded = true;
+    let _r = subsrepo.store_entry(&se);
+    // 	debug!("### {:#?}", subsrepo.get_all_entries());
+    let mut m1 = MessageRow::default();
+    m1.subscription_id = 1;
+    let _r = msgrepo.insert(&m1);
+    m1.subscription_id = 2;
+    let _r = msgrepo.insert(&m1);
+    for i in 0..10 {
+        m1.subscription_id = 2;
+        m1.post_id = format!("post-{}", i);
+        m1.entry_src_date = 1000000000_i64 + 100000 * i;
+        let _r = msgrepo.insert(&m1);
+    }
 }
 
 // ------------------------------------

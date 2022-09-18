@@ -2,22 +2,15 @@ mod logger_config;
 
 use chrono::DateTime;
 use feed_rs::parser;
-use fr_core::config::configmanager::ConfigManager;
 use fr_core::config::init_system::GrassFeederConfig;
-use fr_core::controller::browserpane::BrowserPane;
-use fr_core::controller::contentdownloader::Downloader;
 use fr_core::controller::contentlist::message_from_modelentry;
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::contentlist::FeedContents;
 use fr_core::controller::contentlist::IFeedContents;
-use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
-use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::messages::feed_text_to_entries;
-use fr_core::timer::Timer;
-use fr_core::ui_select::gui_context::GuiContext;
 use fr_core::util;
 use regex::Regex;
 use std::cell::RefCell;
@@ -25,8 +18,7 @@ use std::rc::Rc;
 
 // test if feed update content matching works
 
-// TODO  later
-#[ignore]
+
 #[test]
 fn test_new_entries_filter() {
     setup();
@@ -38,32 +30,8 @@ fn test_new_entries_filter() {
         version: "db_entries_filter".to_string(),
     };
 
-    let mut appcontext = fr_core::config::init_system::start(gf_conf);
+    let  appcontext = fr_core::config::init_system::start(gf_conf);
 
-    /*
-        let gfc = GrassFeederConfig {
-            path_config: "../target/db_entries_filter".to_string(),
-            path_cache: "../target/db_entries_filter".to_string(),
-            debug_mode: true,
-            version: "test_new_entries_filter".to_string(),
-        };
-
-        let ini_r = Rc::new(RefCell::new(prepare_config_by_path(&gfc)));
-        let mut appcontext = AppContext::new_with_ini(ini_r.clone());
-        let mut cm = ConfigManager::new_with_ini(ini_r);
-        cm.load_config_file();
-        appcontext.store_ini(Rc::new(RefCell::new(cm.get_conf())));
-        appcontext.store_obj(Rc::new(RefCell::new(cm)));
-    */
-    appcontext.build::<ConfigManager>();
-    appcontext.build::<Timer>();
-    appcontext.build::<GuiContext>();
-    appcontext.build::<SubscriptionRepo>();
-    appcontext.build::<MessagesRepo>();
-    appcontext.build::<IconRepo>();
-    appcontext.build::<Downloader>();
-    appcontext.build::<BrowserPane>();
-    appcontext.build::<FeedContents>();
     let feedcontents_r = appcontext.get_rc::<FeedContents>().unwrap();
 
     let msg_repo_r: Rc<RefCell<dyn IMessagesRepo>> = appcontext.get_rc::<MessagesRepo>().unwrap();
@@ -98,9 +66,24 @@ fn test_new_entries_filter() {
     // one entry new, that existed
     let mut new_list: Vec<MessageRow> = Vec::default();
     new_list.push(fce1.clone());
-    let insert_list = (*feedcontents_r)
-        .borrow()
-        .match_new_entries_to_db(&new_list, source_repo_id);
+
+
+     let insert_list = (*feedcontents_r)        .borrow()
+         .match_new_entries_to_db(&new_list, source_repo_id);
+
+/* TODO
+		let existing_entries = (*self.messagesrepo_r)
+            .borrow()
+            .get_by_src_id(source_repo_id);
+
+    let insert_list = 		match_new_entries_to_existing(
+            &new_list.to_vec(),
+            &existing_entries,
+            self.job_queue_sender.clone(),
+        )
+
+*/
+
     assert_eq!(insert_list.len(), 0);
 
     // one entry changed

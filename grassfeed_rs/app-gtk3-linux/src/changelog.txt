@@ -1,15 +1,13 @@
 grassfeeder (0.0.5) unstable; urgency=low
 
   * StatusBar: copy Feed address into clipboard
+  * Multiple instances shall not be allowed
+  * Cleanup messges at configured upper limit
   * On Shutdown:  Flush Databases
   * Build via Docker container
   
   
-  - Multiple instances shall be blocking.
-  
-  
   - Add default set of feeds on new configuration
-  - Cleanup at maximum messages
   - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
   - Check: &  in Feed-title, Message-title. should be escaped
 
