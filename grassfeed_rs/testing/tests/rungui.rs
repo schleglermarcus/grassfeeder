@@ -162,6 +162,15 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
                 "youtube",
             ),
+			(
+                "http://feeds.feedburner.com/TechmemeRideHome",
+                "techmeme",
+            ),
+			(
+                "https://feeds.megaphone.fm/stuffyoushouldknow",
+                "megaphone",
+            ),
+
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(

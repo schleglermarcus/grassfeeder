@@ -142,7 +142,9 @@ impl GuiProcessor {
                     self.addjob(Job::StopApplication);
                 }
                 GuiEvents::AppWasAlreadyRunning => {
+                    let _r = self.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
                     self.addjob(Job::StopApplication);
+                    // trace!("GP: AppWasAlreadyRunning  jobs sent   {:?}", _r);
                 }
 
                 GuiEvents::MenuActivate(ref s) => match s.as_str() {
