@@ -44,7 +44,11 @@ fn main() {
     } else {
         return; // commandline option were handled, do not start the gui
     }
-    let _r = setup_logger::setup_logger(debug_level, &cache, APP_NAME);
+    let r = setup_logger::setup_logger(debug_level, &cache, APP_NAME);
+    if r.is_err() {
+        eprintln!("Stopping: {:?}", &r);
+        return;
+    }
     info!(
         "Starting {} with {} {}  locale={:?} V={}",
         APP_NAME,

@@ -141,6 +141,10 @@ impl GuiProcessor {
                 GuiEvents::WinDelete => {
                     self.addjob(Job::StopApplication);
                 }
+                GuiEvents::AppWasAlreadyRunning => {
+                    self.addjob(Job::StopApplication);
+                }
+
                 GuiEvents::MenuActivate(ref s) => match s.as_str() {
                     "M_FILE_QUIT" => {
                         debug!("sending: Job::StopApplication");

@@ -14,7 +14,14 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
 
     let logfilename = "../target/testing.log";
     let _r = std::fs::remove_file(logfilename);
-    let logfile = fern::log_file(logfilename).unwrap();
+
+    let o_logfile = fern::log_file(logfilename);
+    if o_logfile.is_err() {
+        error!("setup_logger: cannot create {}", logfilename);
+        return Err(fern::InitError::Io(o_logfile.err().unwrap()));
+    }
+    let logfile = o_logfile.unwrap();
+    //    let logfile = fern::log_file(logfilename).unwrap();
     fern::Dispatch::new()
         .format(move |out, message, record| {
             const TARGET_WIDTH: usize = 25;

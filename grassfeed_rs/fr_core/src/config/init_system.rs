@@ -91,8 +91,36 @@ pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, Stri
         PropDef::BrowserDir.tostring(),
         format!("{}/browser", &gf_conf.path_cache),
     );
+    ret.insert(PropDef::GuiWindowWidth.tostring(), "600".to_string());
+    ret.insert(PropDef::GuiWindowHeight.tostring(), "300".to_string());
+    ret.insert(PropDef::GuiPane1Pos.tostring(), "200".to_string());
+    ret.insert(PropDef::GuiPane2Pos.tostring(), "400".to_string());
+    ret.insert(
+        PropDef::BrowserBackgroundLevel.tostring(),
+        "200".to_string(),
+    );
+    ret.insert(PropDef::AppUrl.tostring(), "grassfeede.rs".to_string());
+
     ret
 }
+
+/*
+mod_ini.set_to(
+    Some(GuiContext::section_name()),
+    PropDef::GuiWindowTitle.tostring(),
+    "app:default:to do".to_string(),
+);
+mod_ini.set_to(
+    Some(BrowserPane::section_name()),
+    PropDef::BrowserDir.tostring(),
+    format!("{}/browser", &gf_conf.path_cache),
+);
+mod_ini.set_to(
+    Some(FeedContents::section_name()),
+    PropDef::GuiList0SortAscending.tostring(),
+    "true".to_string(),
+);
+*/
 
 fn check_or_create_folder(path: &String) {
     let mut dir_exists = false;
@@ -105,66 +133,3 @@ fn check_or_create_folder(path: &String) {
         }
     }
 }
-
-/*
-    mod_ini.set_to(
-        Some(GuiContext::section_name()),
-        GuiContext::CONF_RCS_VERSION.to_string(),
-        gf_conf.version.clone(),
-    );
-mod_ini.set_to(
-    Some(GuiContext::section_name()),
-    PropDef::GuiWindowWidth.tostring(),
-    "400".to_string(),
-);
-mod_ini.set_to(
-    Some(GuiContext::section_name()),
-    PropDef::GuiWindowHeight.tostring(),
-    "200".to_string(),
-);
-mod_ini.set_to(
-    Some(GuiContext::section_name()),
-    PropDef::GuiPane1Pos.tostring(),
-    "150".to_string(),
-);
-mod_ini.set_to(
-    Some(GuiContext::section_name()),
-    PropDef::GuiPane2Pos.tostring(),
-    "300".to_string(),
-);
-mod_ini.set_to(
-    Some(GuiContext::section_name()),
-    PropDef::GuiWindowTitle.tostring(),
-    "app:default:to do".to_string(),
-);
-mod_ini.set_to(
-    Some(BrowserPane::section_name()),
-    PropDef::BrowserDir.tostring(),
-    format!("{}/browser", &gf_conf.path_cache),
-);
-mod_ini.set_to(
-    Some(BrowserPane::section_name()),
-    PropDef::BrowserBackgroundLevel.tostring(),
-    "200".to_string(),
-);
-mod_ini.set_to(
-    Some(FeedContents::section_name()),
-    PropDef::GuiList0SortColumn.tostring(),
-    "0".to_string(),
-);
-mod_ini.set_to(
-    Some(FeedContents::section_name()),
-    PropDef::GuiList0SortAscending.tostring(),
-    "true".to_string(),
-);
-mod_ini.set_to(
-    Some(GuiContext::section_name()),
-    PropDef::AppRcsVersion.tostring(),
-    gf_conf.version.clone(),
-);
-debug!(
-    "INI: {}={:?}",
-    GuiContext::section_name(),
-    mod_ini.section(Some(GuiContext::section_name()))
-);
-*/

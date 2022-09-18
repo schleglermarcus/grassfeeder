@@ -6,6 +6,8 @@ grassfeeder (0.0.5) unstable; urgency=low
   
   
   - Multiple instances shall be blocking.
+  
+  
   - Add default set of feeds on new configuration
   - Cleanup at maximum messages
   - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
