@@ -1,10 +1,8 @@
 Fri, 18 Sep 2022 00:12:00 +0000
 * StatusBar: copy Feed address into clipboard
-
 * On Shutdown:  Flush Databases
-* Build via Docker containers
-
-- Multiple instances shall be blocking.
+* Build via Docker container
+* Multiple instances shall be blocking.
 
 
 - Add default set of feeds on new configuration
