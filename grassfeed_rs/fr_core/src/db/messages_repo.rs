@@ -18,7 +18,7 @@ pub trait IMessagesRepo {
     fn insert_tx(&self, e_list: &[MessageRow]) -> Result<i64, Box<dyn std::error::Error>>;
 
     /// sorted by  entry_src_date
-    fn get_by_src_id(&self, src_id: isize) -> Vec<MessageRow>;
+    fn get_by_src_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow>;
 
     /// returns  the number of read lines for that source id:   -1 for undefined
     fn get_read_sum(&self, src_id: isize) -> isize;
@@ -39,14 +39,13 @@ pub trait IMessagesRepo {
     fn update_is_read_many(&self, repo_ids: &[i32], new_is_read: bool);
     fn update_is_read_all(&self, source_repo_id: isize, new_is_read: bool);
 
-
     ///  title string shall be compressed. This undeletes the message,  Returns number of lines
     fn update_title(&self, repo_id: isize, new_title_compr: String) -> usize;
 
-	/// undeletes the message
+    /// undeletes the message
     fn update_post_id(&self, repo_id: isize, new_post_id: String) -> usize;
 
-	/// undeletes the message
+    /// undeletes the message
     fn update_entry_src_date(&self, repo_id: isize, n_src_date: i64) -> usize;
 
     fn update_is_deleted_many(&self, repo_ids: &[i32], new_is_del: bool);
@@ -111,12 +110,19 @@ impl IMessagesRepo for MessagesRepo {
             .map_err(rusqlite_error_to_boxed)
     }
 
-    fn get_by_src_id(&self, src_id: isize) -> Vec<MessageRow> {
+    fn get_by_src_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow> {
+        let no_deleted_and = if include_deleted {
+            String::default()
+        } else {
+            " AND is_deleted=false ".to_string()
+        };
         let prepared = format!(
-            "SELECT * FROM {} WHERE feed_src_id={} ORDER BY entry_src_date DESC ",
+            "SELECT * FROM {} WHERE feed_src_id={} {}  ORDER BY entry_src_date DESC ",
             MessageRow::table_name(),
-            src_id
+            src_id,
+            no_deleted_and,
         );
+        // debug!("PREP={}", prepared);
         let mut list: Vec<MessageRow> = Vec::default();
         if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(&prepared) {
             match stmt.query_map([], |row| {
@@ -511,7 +517,7 @@ mod t {
     #[test]
     fn t_get_by_src_id() {
         let msg_r = prepare_3_rows();
-        let list = (*msg_r).borrow().get_by_src_id(3);
+        let list = (*msg_r).borrow().get_by_src_id(3, true);
         assert_eq!(list.len(), 2);
         assert_eq!(list.get(0).unwrap().message_id, 2);
     }

@@ -77,7 +77,7 @@ impl Step<FetchInner> for EvalStringAndFilter {
             warn!("{} {}", err_msg, &inner.url); // later put this into  error database
         }
         inner.timestamp_created = ts_created;
-        let existing_entries = inner.messgesrepo.get_by_src_id(inner.fs_repo_id);
+        let existing_entries = inner.messgesrepo.get_by_src_id(inner.fs_repo_id, false );
         let filtered_list =
             match_new_entries_to_existing(&new_list, &existing_entries, inner.cjob_sender.clone());
         //	filtered_list.iter().for_each(|f|  debug!("F:{} P:{} title={:#?}", f.message_id, f.post_id, f.title) );

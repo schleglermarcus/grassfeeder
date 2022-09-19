@@ -84,7 +84,7 @@ pub trait IFeedContents {
     fn toggle_feed_item_read(&self, content_repo_id: isize, list_position: i32);
 
     /// updates existing entries,  returns the new entries only,
-	#[deprecated]
+    #[deprecated]
     fn match_new_entries_to_db(
         &self,
         new_list: &[MessageRow],
@@ -480,7 +480,7 @@ impl IFeedContents for FeedContents {
     fn update_feed_list_contents(&self, feed_source_id: isize) {
         self.last_activated_subscription_id.replace(feed_source_id);
         let mut messagelist: Vec<MessageRow> =
-            (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(feed_source_id);
+            (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(feed_source_id, false);
 
         self.fc_state_map.write().unwrap().clear();
         messagelist.iter_mut().enumerate().for_each(|(i, fc)| {
@@ -564,7 +564,7 @@ impl IFeedContents for FeedContents {
     ) -> Vec<MessageRow> {
         let existing_entries = (*self.messagesrepo_r)
             .borrow()
-            .get_by_src_id(source_repo_id);
+            .get_by_src_id(source_repo_id, true);
         match_new_entries_to_existing(
             &new_list.to_vec(),
             &existing_entries,
@@ -584,7 +584,7 @@ impl IFeedContents for FeedContents {
     fn get_counts(&self, source_repo_id: isize) -> Option<(i32, i32)> {
         let all = (*self.messagesrepo_r)
             .borrow()
-            .get_by_src_id(source_repo_id);
+            .get_by_src_id(source_repo_id, false);
         let num_is_read = all.iter().filter(|fce| fce.is_read).count() as i32;
         Some((all.len() as i32, (all.len() as i32 - num_is_read) as i32))
     }

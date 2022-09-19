@@ -209,14 +209,23 @@ pub struct MarkUnconnectedMessages(pub CleanerInner);
 impl Step<CleanerInner> for MarkUnconnectedMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-        let parent_ids_active: Vec<i32> = inner.subs_parents_active.lock().unwrap().clone();
+        let parent_ids_active: Vec<i32> = inner
+            .subscriptionrepo
+            .get_all_nonfolder()
+            .iter()
+            .filter(|se| !se.isdeleted())
+            .map(|se| se.subs_id as i32)
+            .collect();
         let noncon_ids = inner
             .messgesrepo
             .get_src_not_contained(&parent_ids_active)
             .iter()
             .map(|fse| fse.message_id as i32)
             .collect::<Vec<i32>>();
-        // trace!("nonconnected: {:?}", &noncon_ids);
+        debug!(
+            "Cleanup: not connected messages: {:?}   parent-ids={:?}",
+            &noncon_ids, &parent_ids_active
+        );
         if !noncon_ids.is_empty() {
             inner.need_update_messages = true;
             inner.messgesrepo.update_is_deleted_many(&noncon_ids, true);
@@ -229,7 +238,7 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
 pub struct ReduceTooManyMessages(pub CleanerInner);
 impl Step<CleanerInner> for ReduceTooManyMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
-        let inner = self.0;
+        let mut inner = self.0;
 
         if inner.max_messages_per_subscription > 1 {
             let subs_ids = inner
@@ -246,8 +255,9 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
             );
 
             for su_id in &subs_ids {
-                let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id);
+                let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id, true);
                 if msg_per_subscription.len() > inner.max_messages_per_subscription as usize {
+                    inner.need_update_messages = true;
                     msg_per_subscription.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
                     let (_stay, remove) =
                         msg_per_subscription.split_at(inner.max_messages_per_subscription as usize);
@@ -311,10 +321,11 @@ pub fn check_layer(
         path.extend_from_slice(localpath);
         if fse.folder_position != (folderpos as isize) {
             // debug!(                "check_layer: unequal folderpos {:?} {:?}",                fse.folder_position, folderpos            );
-            fp_correct_subs_parent
-                .lock()
-                .unwrap()
-                .push(fse.parent_subs_id as i32);
+
+            let mut fpc = fp_correct_subs_parent.lock().unwrap();
+            if !fpc.contains(&(fse.parent_subs_id as i32)) {
+                fpc.push(fse.parent_subs_id as i32);
+            }
         }
         path.push(fse.folder_position as u16);
         check_layer(

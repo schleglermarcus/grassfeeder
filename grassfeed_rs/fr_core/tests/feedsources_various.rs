@@ -41,7 +41,7 @@ fn add_subscription_with_existing_messages() {
     let subs_id = subscription_controller
         .add_new_subscription("some-url-3".to_string(), "name-proc3".to_string());
     assert_eq!(subs_id, mr1.subscription_id + 1);
-    let message = (*(msg_r_r.borrow())).get_by_src_id(subs_id);
+    let message = (*(msg_r_r.borrow())).get_by_src_id(subs_id, false);
     assert_eq!(message.len(), 0); // the new created subscription may not have messages attached
 }
 
