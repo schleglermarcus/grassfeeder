@@ -222,11 +222,11 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
             .iter()
             .map(|fse| fse.message_id as i32)
             .collect::<Vec<i32>>();
-        debug!(
-            "Cleanup: not connected messages: {:?}   parent-ids={:?}",
-            &noncon_ids, &parent_ids_active
-        );
         if !noncon_ids.is_empty() {
+            debug!(
+                "Cleanup: not connected messages: {:?}   parent-ids={:?}",
+                &noncon_ids, &parent_ids_active
+            );
             inner.need_update_messages = true;
             inner.messgesrepo.update_is_deleted_many(&noncon_ids, true);
         }
@@ -248,10 +248,10 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 .filter(|fse| !fse.is_folder)
                 .map(|fse| fse.subs_id)
                 .collect::<Vec<isize>>();
-
-            debug!(
+            trace!(
                 "ReduceTooManyMessages={:?}  SUBS={:?}",
-                inner.max_messages_per_subscription, &subs_ids
+                inner.max_messages_per_subscription,
+                &subs_ids
             );
 
             for su_id in &subs_ids {

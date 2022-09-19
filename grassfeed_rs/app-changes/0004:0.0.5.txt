@@ -6,6 +6,19 @@ Fri, 18 Sep 2022 00:12:00 +0000
 * Build via Docker container
 
 
+- Bug:    Beenden der Applikation geht nicht mehr. 
+
+
+
 - Add default set of feeds on new configuration
+
+https://rss.golem.de/rss.php?feed=ATOM1.0
+https://xkcd.com/atom.xml
+https://blog.linuxmint.com/?feed=rss2
+https://rss.slashdot.org/Slashdot/slashdot
+https://github.com/schleglermarcus/grassfeeder/releases.atom
+http://blog.rust-lang.org/feed.xml
+
+
 - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
 - Check: &  in Feed-title, Message-title. should be escaped
