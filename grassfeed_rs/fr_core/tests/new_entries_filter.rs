@@ -70,13 +70,11 @@ fn test_new_entries_filter() {
     // debug!("    insert_list={:#?}", &insert_list);
     assert_eq!(insert_list.len(), 0);
 
-    // one entry changed
+    // one entry changed, only title change results in title update
     new_list.clear();
     let changed_title = "moon";
     fce0.title = changed_title.to_string();
     new_list.push(fce0);
-    // let insert_list = (*feedcontents_r).borrow()
-    //     .match_new_entries_to_db(&new_list, source_repo_id);
     let insert_list =
         match_new_entries_to_existing(&new_list.to_vec(), &existing_entries, job_sender.clone());
     assert_eq!(insert_list.len(), 0);
@@ -96,8 +94,6 @@ fn test_new_entries_filter() {
     new_list.push(fce1);
     fce2.entry_src_date = changed_timestamp;
     new_list.push(fce2);
-    // let insert_list = (*feedcontents_r)     .borrow()
-    //     .match_new_entries_to_db(&mut new_list, source_repo_id);
     let insert_list =
         match_new_entries_to_existing(&new_list.to_vec(), &existing_entries, job_sender.clone());
 

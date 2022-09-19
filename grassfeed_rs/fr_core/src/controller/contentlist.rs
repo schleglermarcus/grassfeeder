@@ -564,7 +564,7 @@ impl IFeedContents for FeedContents {
     ) -> Vec<MessageRow> {
         let existing_entries = (*self.messagesrepo_r)
             .borrow()
-            .get_by_src_id(source_repo_id, true);
+            .get_by_src_id(source_repo_id, false);
         match_new_entries_to_existing(
             &new_list.to_vec(),
             &existing_entries,
@@ -937,7 +937,6 @@ pub fn match_new_entries_to_existing(
         let pos_with_max_ones = exi_pos_match
             .iter()
             .find(|(_pos, ones_count)| **ones_count >= max_ones_count)
-            // .next()
             .map(|(pos, _ones_count_)| pos);
         if let Some(pos) = pos_with_max_ones {
             let exi_fce = existing_entries.get(*pos).unwrap();
@@ -965,6 +964,7 @@ pub fn match_new_entries_to_existing(
                         n_fce.title.to_string(),
                     ));
                 }
+				debug!("seems corrected:  {}  {:?}", idx_new , new_list );
                 new_list_delete_indices.push(idx_new); // entry corrected
             }
         }

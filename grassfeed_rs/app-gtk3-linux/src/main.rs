@@ -5,7 +5,6 @@ extern crate rust_i18n;
 mod args_lang;
 mod setup_logger;
 
-//  use fr_core::config::init_system::GrassFeederConfig;
 use fr_core::config::init_system;
 use resources::application_id::*;
 
@@ -44,6 +43,8 @@ fn main() {
     } else {
         return; // commandline option were handled, do not start the gui
     }
+
+    init_system::check_or_create_folder(&cache);
     let r = setup_logger::setup_logger(debug_level, &cache, APP_NAME);
     if r.is_err() {
         eprintln!("Stopping: {:?}", &r);

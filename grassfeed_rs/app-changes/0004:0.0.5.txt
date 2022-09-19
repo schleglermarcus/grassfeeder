@@ -5,10 +5,14 @@ Fri, 18 Sep 2022 00:12:00 +0000
 * On Shutdown:  Flush Databases
 * Build via Docker container
 
+- Bug: on start: create logging folder
 
-- Bug:    Beenden der Applikation geht nicht mehr. 
 
+- Bug: Doppelanzeige von Meldungen
 
+- Bug:    Beenden der Applikation geht nicht mehr.
+
+- Bug: Fetch-All shall not include folder scheduling
 
 - Add default set of feeds on new configuration
 

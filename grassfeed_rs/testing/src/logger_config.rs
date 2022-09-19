@@ -44,7 +44,7 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
         .level_for("sqlparser::parser", log::LevelFilter::Info)
         .level_for("ureq", log::LevelFilter::Info)
         .level_for("testing::minihttpserver", log::LevelFilter::Info)
-        .level_for("fr_core::downloader", log::LevelFilter::Debug)
+        .level_for("fr_core::downloader", log::LevelFilter::Trace)
         .chain(logfile)
         .chain(std::io::stdout())
         .apply()?;

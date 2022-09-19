@@ -122,7 +122,7 @@ mod_ini.set_to(
 );
 */
 
-fn check_or_create_folder(path: &String) {
+pub fn check_or_create_folder(path: &String) {
     let mut dir_exists = false;
     if let Ok(metadata) = std::fs::metadata(&path) {
         dir_exists = metadata.is_dir();

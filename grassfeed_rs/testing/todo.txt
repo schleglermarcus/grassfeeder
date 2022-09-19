@@ -3,7 +3,7 @@ To Do List
 
 
 - Add default set of feeds on new configuration
-- Cleanup at maximum messages
+
 - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
 - Check: &  in Feed-title, Message-title. should be escaped
 - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
@@ -22,8 +22,8 @@ To Do List
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
 - Sanitize: Message clean out those with deleted flag
-
-
+- Sanitize: clean doubled message entries
+- Browser CleanUp Cache, on startup / finish
 - Subscription Tree: hide zeroes when nothing to read
 - Windows Build
   https://www.ebbflow.io/blog/vending-win
