@@ -66,6 +66,10 @@ Perhaps:
 
 -----
 
+* Get the branch and test it:
+  git pull  https://github.com/schleglermarcus/grassfeeder  v0_0_5
+
+
 * Merge Branch and build release
 
     git checkout main

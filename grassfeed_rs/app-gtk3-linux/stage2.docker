@@ -3,15 +3,15 @@
 FROM grassfeeder:stage1
 
 WORKDIR /usr/src/
-RUN wget -q -O- https://github.com/schleglermarcus/grassfeeder/archive/refs/tags/v0.0.4.tar.gz |gzip -d |tar x
-RUN mv grassfeeder-0.0.4  gf
+COPY target/gf.tar.gz /usr/src/ 
+RUN cat gf.tar.gz |gzip -d |tar x
 
-WORKDIR /usr/src/gf/grassfeed_rs/app-gtk3-linux
+WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
 RUN pwd
 RUN ls -l
 RUN cargo clean
 RUN cargo test --release 
 RUN cargo deb
 
-WORKDIR /usr/src/gf/grassfeed_rs/target/debian
+WORKDIR /usr/src/grassfeed_rs/target/debian
 RUN ls -l
