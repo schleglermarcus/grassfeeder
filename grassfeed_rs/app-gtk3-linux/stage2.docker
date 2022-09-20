@@ -9,11 +9,13 @@ RUN cat gf.tar.gz |gzip -d |tar x
 WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
 RUN pwd
 RUN ls -l
-RUN cargo clean
-RUN cargo test --release 
-RUN cargo deb --deb-version D 
-
-
+# RUN cargo clean
+# RUN cargo test --release 
+RUN cargo deb 
 
 WORKDIR /usr/src/grassfeed_rs/target/debian
 RUN ls -l
+WORKDIR /usr/src/grassfeed_rs/target
+RUN mv debian/grass*.deb  gf.deb
+RUN ls -l
+
