@@ -11,7 +11,9 @@ RUN pwd
 RUN ls -l
 RUN cargo clean
 RUN cargo test --release 
-RUN cargo deb
+RUN cargo deb --deb-version D 
+
+
 
 WORKDIR /usr/src/grassfeed_rs/target/debian
 RUN ls -l

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DIR=`pwd` 
+VERSION=`cat Cargo.toml  |grep "^version"  |sed -e "s/.*= \"//" -e "s/\"//"`
 test -d target || mkdir target
 
 # the output file is used by the docker file
@@ -8,5 +9,7 @@ test -d target || mkdir target
 
 docker build -t grassfeeder:stage2 -f  stage2.docker .
 
-docker cp $(docker create --name tc grassfeeder:stage2):/usr/src/gf/grassfeed_rs/target/debian/grassfeeder*.deb target/ ; docker rm tc
+docker cp $(docker create --name tc grassfeeder:stage2):/usr/src/gf/grassfeed_rs/target/debian/grassfeeder_D_amd64.deb target/ ; docker rm tc
+mv target/grassfeeder_D_amd64.deb  target/grassfeeder_${VERSION}_amd64.deb
 
+ 
