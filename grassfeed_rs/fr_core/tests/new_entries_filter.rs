@@ -1,71 +1,36 @@
 mod logger_config;
 
-use chrono::DateTime;
 use feed_rs::parser;
-use fr_core::config::configmanager::ConfigManager;
+use flume::Receiver;
+use flume::Sender;
 use fr_core::config::init_system::GrassFeederConfig;
-use fr_core::controller::browserpane::BrowserPane;
-use fr_core::controller::contentdownloader::Downloader;
+use fr_core::controller::contentlist::match_new_entries_to_existing;
 use fr_core::controller::contentlist::message_from_modelentry;
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::contentlist::FeedContents;
 use fr_core::controller::contentlist::IFeedContents;
-use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
-use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::messages::feed_text_to_entries;
-use fr_core::timer::Timer;
-use fr_core::ui_select::gui_context::GuiContext;
 use fr_core::util;
-use regex::Regex;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 // test if feed update content matching works
 
-// TODO  later
-#[ignore]
+// #[ignore]
 #[test]
 fn test_new_entries_filter() {
     setup();
-
     let gf_conf = GrassFeederConfig {
         path_config: "../target/db_entries_filter".to_string(),
         path_cache: "../target/db_entries_filter".to_string(),
         debug_mode: true,
         version: "db_entries_filter".to_string(),
     };
-
-    let mut appcontext = fr_core::config::init_system::start(gf_conf);
-
-    /*
-        let gfc = GrassFeederConfig {
-            path_config: "../target/db_entries_filter".to_string(),
-            path_cache: "../target/db_entries_filter".to_string(),
-            debug_mode: true,
-            version: "test_new_entries_filter".to_string(),
-        };
-
-        let ini_r = Rc::new(RefCell::new(prepare_config_by_path(&gfc)));
-        let mut appcontext = AppContext::new_with_ini(ini_r.clone());
-        let mut cm = ConfigManager::new_with_ini(ini_r);
-        cm.load_config_file();
-        appcontext.store_ini(Rc::new(RefCell::new(cm.get_conf())));
-        appcontext.store_obj(Rc::new(RefCell::new(cm)));
-    */
-    appcontext.build::<ConfigManager>();
-    appcontext.build::<Timer>();
-    appcontext.build::<GuiContext>();
-    appcontext.build::<SubscriptionRepo>();
-    appcontext.build::<MessagesRepo>();
-    appcontext.build::<IconRepo>();
-    appcontext.build::<Downloader>();
-    appcontext.build::<BrowserPane>();
-    appcontext.build::<FeedContents>();
+    let appcontext = fr_core::config::init_system::start(gf_conf);
     let feedcontents_r = appcontext.get_rc::<FeedContents>().unwrap();
-
     let msg_repo_r: Rc<RefCell<dyn IMessagesRepo>> = appcontext.get_rc::<MessagesRepo>().unwrap();
     let _r = (*msg_repo_r).borrow().get_ctx().delete_table();
     (*msg_repo_r).borrow().get_ctx().create_table();
@@ -90,27 +55,28 @@ fn test_new_entries_filter() {
     fce2.post_id = "0x30".to_string();
     fce2.entry_src_date = timestamp_now + 3;
     existing.push(fce2.clone());
-
     let _r = (*msg_repo_r).borrow().insert_tx(&existing);
-    //debug!("    ALL={:#?}", &(*msg_repo_r).borrow().get_all_messages());
-    let job_receiver = (*feedcontents_r).borrow().get_job_receiver();
+    let job_receiver: Receiver<CJob> = (*feedcontents_r).borrow().get_job_receiver();
+    let job_sender: Sender<CJob> = (*feedcontents_r).borrow().get_job_sender();
+    // (*msg_repo_r)        .borrow()        .get_all_messages()        .iter()        .for_each(|m| debug!("    ALL: {:?}", m));
 
-    // one entry new, that existed
+    // one entry new, that existed.   gives an empty insert list
     let mut new_list: Vec<MessageRow> = Vec::default();
     new_list.push(fce1.clone());
-    let insert_list = (*feedcontents_r)
-        .borrow()
-        .match_new_entries_to_db(&new_list, source_repo_id);
+    let existing_entries = (*msg_repo_r).borrow().get_by_src_id(source_repo_id, false);
+    assert_eq!(existing_entries.len(), 3);
+    let insert_list =
+        match_new_entries_to_existing(&new_list.to_vec(), &existing_entries, job_sender.clone());
+    // debug!("    insert_list={:#?}", &insert_list);
     assert_eq!(insert_list.len(), 0);
 
-    // one entry changed
+    // one entry changed, only title change results in title update
     new_list.clear();
     let changed_title = "moon";
     fce0.title = changed_title.to_string();
     new_list.push(fce0);
-    let insert_list = (*feedcontents_r)
-        .borrow()
-        .match_new_entries_to_db(&new_list, source_repo_id);
+    let insert_list =
+        match_new_entries_to_existing(&new_list.to_vec(), &existing_entries, job_sender.clone());
     assert_eq!(insert_list.len(), 0);
     match job_receiver.recv().unwrap() {
         CJob::DbUpdateTitle(id, title) => {
@@ -128,9 +94,9 @@ fn test_new_entries_filter() {
     new_list.push(fce1);
     fce2.entry_src_date = changed_timestamp;
     new_list.push(fce2);
-    let insert_list = (*feedcontents_r)
-        .borrow()
-        .match_new_entries_to_db(&mut new_list, source_repo_id);
+    let insert_list =
+        match_new_entries_to_existing(&new_list.to_vec(), &existing_entries, job_sender.clone());
+
     assert_eq!(insert_list.len(), 0);
     match job_receiver.recv().unwrap() {
         CJob::DbUpdatePostId(id, ti) => {
@@ -157,7 +123,7 @@ fn test_feed_text_to_entries() {
     let (new_list, _num, _err_txt) =
         feed_text_to_entries(contents.clone(), source_repo_id, "some-url".to_string());
     let _r = (*msgrepo_r).borrow().insert_tx(&new_list);
-    let r_list = (*msgrepo_r).borrow().get_by_src_id(source_repo_id);
+    let r_list = (*msgrepo_r).borrow().get_by_src_id(source_repo_id, true);
     assert_eq!(r_list.len(), 2);
 }
 
@@ -195,22 +161,6 @@ fn parse_youtube() {
     let msg0 = fce_list.get_mut(0).unwrap();
     // debug!("msg0={:?}", msg0.content_text);
     assert!(msg0.content_text.len() > 2);
-}
-
-// #[test]
-#[allow(dead_code)]
-fn strange_date_formats() {
-    setup();
-    let strangers: [&str; 2] = [
-        "Fri, 19 Aug 2022 21:56:36 Europe/Dublin", // https://feeds.breakingnews.ie/bnworld
-        "Fri, 19 Aug 2022  15:29:5 CST",           // https://www.naturalnews.com/rss.xml
-    ];
-    for s in strangers {
-        let r = DateTime::parse_from_rfc2822(&s);
-        let regex = Regex::new(r":(\d) ").unwrap();
-        let date_replaced = regex.replace(&s, ":0$1 ");
-        debug!(" {}	\t\t{:?}	\t\t{:?}", s, r, date_replaced);
-    }
 }
 
 // ------------------------------------

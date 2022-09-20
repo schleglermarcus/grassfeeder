@@ -185,7 +185,7 @@ impl GtkGuiBuilder for GtkObjectTree {
         //         paned_1.connect_position_set_notify(|p| {            debug!("paned1: pos_set {}", p.position());        });
         let p1p = self.get_int(PropDef::GuiPane1Pos, 90) as i32;
         paned_1.set_position(p1p);
-        let col1width = self.get_int(PropDef::GuiCol1Width, 77) as i32;
+        let col1width = self.get_int(PropDef::GuiCol1Width, 200) as i32;
         let sort_col = self.get_int(PropDef::GuiList0SortColumn, 0);
         let sort_asc = self.get_bool(PropDef::GuiList0SortAscending);
         let content_treeview2 = create_listview(
@@ -216,11 +216,19 @@ impl GtkGuiBuilder for GtkObjectTree {
 
         let label_st2 = Label::new(Some(">some_url<"));
         label_st2.set_width_request(100);
-        // let l_st2_c = label_st2.clone();
-        label_st2.connect_label_notify(move |label| {
-            let l2txt = label.text().to_string();
-            label.set_tooltip_text(Some(&l2txt));
+        label_st2.set_selectable(true);
+        label_st2.connect_button_press_event(|label2: &Label, evb: &EventButton| {
+            if evb.button() == MOUSE_BUTTON_RIGHT {
+                // trace!(                    "L2   button_press_event  {:?}   button={:?}",                    label2.text(),                    evb.button()                );
+                label2.select_region(0, -1); // select all
+            }
+            gtk::Inhibit(false)
         });
+        // label_st2.connect_label_notify(move |label| {            let l2txt = label.text().to_string();            label.set_tooltip_text(Some(l2txt.as_str()));        });
+        // label_st2.connect_focus(|_l2: &Label, _dirtype| {            debug!("LABEL2 focus ");            gtk::Inhibit(false)        });
+        // label_st2.connect_focus_on_click_notify(|_l2: &Label| {            debug!("LABEL2   focus_on_click_notify ");        });
+        // label_st2.connect_activate_link(|_l2: &Label, _arg2| {            debug!("LABEL2   activate_link ");            gtk::Inhibit(false)        });
+
         let layout_st = gtk::Layout::new(NONE_ADJ, NONE_ADJ);
         layout_st.add(&label_st2);
         layout_st.set_width(100);
@@ -353,7 +361,6 @@ fn set_sort_indicator(tvc: &TreeViewColumn, _sort_column: i32, sort_ascending: b
         true => SortType::Ascending,
         _ => SortType::Descending,
     };
-
 
     tvc.set_sort_order(sorttype);
     tvc.clicked();
@@ -568,67 +575,69 @@ fn create_listview(
     let ev_se_3 = g_ev_se.clone();
     let esw = EvSenderWrapper(g_ev_se.clone());
     let gtk_obj_ac = gtk_obj_a.clone();
-    content_tree_view.connect_button_press_event(move |p_tv, eventbutton: &EventButton| {
-        let treeview: gtk::TreeView = p_tv.clone().dynamic_cast::<gtk::TreeView>().unwrap();
-        let mut repo_id: i32 = -1;
-        let button_num = eventbutton.button();
-        let (posx, posy) = eventbutton.position();
-        if button_num == MOUSE_BUTTON_LEFT {
-            if let Some((o_tree_path, o_column, _x, _y)) =
-                treeview.path_at_pos(posx as i32, posy as i32)
-            {
-                if let Some(ref t_path) = o_tree_path {
-                    let t_model = treeview.model().unwrap();
-                    let t_iter = t_model.iter(t_path).unwrap();
-                    repo_id = t_model
-                        .value(&t_iter, LIST0_COL_MSG_ID as i32)
-                        .get::<u32>()
-                        .unwrap() as i32;
-                }
-                if let Some(tvc) = o_column {
-                    let mut list_pos = -1;
-                    if let Some(tp) = o_tree_path {
-                        let indices = tp.indices();
-                        list_pos = indices[0];
-                    }
-                    if tvc.sort_column_id() == LIST0_COL_ISREAD {
-                        esw.sendw(GuiEvents::ListCellClicked(
-                            0,
-                            list_pos,
-                            tvc.sort_column_id(),
-                            repo_id,
-                        ));
-                    }
-                }
-            }
-        }
-        if button_num == MOUSE_BUTTON_RIGHT {
-            let (tp_list, t_model) = treeview.selection().selected_rows();
-            let mut repoid_listpos: Vec<(i32, i32)> = Vec::default();
-            //            let mut list_positions: Vec<i32> = Vec::default();
-            if !tp_list.is_empty() {
-                for t_path in tp_list {
-                    if let Some(t_iter) = t_model.iter(&t_path) {
-                        let repo_id = t_model
+    content_tree_view.connect_button_press_event(
+        move |p_tv: &TreeView, eventbutton: &EventButton| {
+            let treeview: gtk::TreeView = p_tv.clone().dynamic_cast::<gtk::TreeView>().unwrap();
+            let mut repo_id: i32 = -1;
+            let button_num = eventbutton.button();
+            let (posx, posy) = eventbutton.position();
+            if button_num == MOUSE_BUTTON_LEFT {
+                if let Some((o_tree_path, o_column, _x, _y)) =
+                    treeview.path_at_pos(posx as i32, posy as i32)
+                {
+                    if let Some(ref t_path) = o_tree_path {
+                        let t_model = treeview.model().unwrap();
+                        let t_iter = t_model.iter(t_path).unwrap();
+                        repo_id = t_model
                             .value(&t_iter, LIST0_COL_MSG_ID as i32)
                             .get::<u32>()
                             .unwrap() as i32;
-                        repoid_listpos.push((repo_id, t_path.indices()[0]));
+                    }
+                    if let Some(tvc) = o_column {
+                        let mut list_pos = -1;
+                        if let Some(tp) = o_tree_path {
+                            let indices = tp.indices();
+                            list_pos = indices[0];
+                        }
+                        if tvc.sort_column_id() == LIST0_COL_ISREAD {
+                            esw.sendw(GuiEvents::ListCellClicked(
+                                0,
+                                list_pos,
+                                tvc.sort_column_id(),
+                                repo_id,
+                            ));
+                        }
                     }
                 }
             }
-            // trace!("LIST RightMouse repo_listpos={:?}  ", &repoid_listpos);
-            show_context_menu_message(
-                button_num,
-                ev_se_3.clone(),
-                gtk_obj_ac.clone(),
-                &repoid_listpos,
-            );
-            return gtk::Inhibit(true); // do  not propagate
-        }
+            if button_num == MOUSE_BUTTON_RIGHT {
+                let (tp_list, t_model) = treeview.selection().selected_rows();
+                let mut repoid_listpos: Vec<(i32, i32)> = Vec::default();
+                //            let mut list_positions: Vec<i32> = Vec::default();
+                if !tp_list.is_empty() {
+                    for t_path in tp_list {
+                        if let Some(t_iter) = t_model.iter(&t_path) {
+                            let repo_id = t_model
+                                .value(&t_iter, LIST0_COL_MSG_ID as i32)
+                                .get::<u32>()
+                                .unwrap() as i32;
+                            repoid_listpos.push((repo_id, t_path.indices()[0]));
+                        }
+                    }
+                }
+                // trace!("LIST RightMouse repo_listpos={:?}  ", &repoid_listpos);
+                show_context_menu_message(
+                    button_num,
+                    ev_se_3.clone(),
+                    gtk_obj_ac.clone(),
+                    &repoid_listpos,
+                );
+                return gtk::Inhibit(true); // do  not propagate
+            }
 
-        gtk::Inhibit(false) // do propagate
-    });
+            gtk::Inhibit(false) // do propagate
+        },
+    );
     match sort_column {
         1 => set_sort_indicator(&title_column, sort_column, sort_ascending),
         2 => set_sort_indicator(&date_column, sort_column, sort_ascending),

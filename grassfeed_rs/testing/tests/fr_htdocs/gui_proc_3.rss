@@ -17,8 +17,8 @@
  <item>
    <title>XML Tutorial four</title>
    <link>https://www.w3schools.com/xml</link>
-   <description>New XML tutorial on W3Schools:
-		  for testing: the guid shall contain error:  raw ampersand 
+   <description>New XML tutorial &amp; on W3Schools:
+		  for testing: the guid shall contain error:  raw ampersand
 	 </description>
 	 <pubDate>Sun, 13 May 2003 15:21:40 GMT</pubDate>
 	 <author>Dagobert</author>

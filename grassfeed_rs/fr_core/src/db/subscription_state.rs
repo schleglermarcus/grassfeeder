@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 
+/// on each scan attempt, how many unread-jobs do we create.
+pub const SCAN_EMPTY_UNREAD_GROUP: u8 = 3;
+
 pub trait ISubscriptionState {
     fn get_state(&self, id: isize) -> Option<SubsMapEntry>;
     fn get_id_by_path(&self, path: &[u16]) -> Option<isize>;
@@ -14,7 +17,7 @@ pub trait ISubscriptionState {
     ) -> Vec<isize>;
 
     fn get_tree_path(&self, db_id: isize) -> Option<Vec<u16>>;
-    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>);
+    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>, is_folder: bool);
 
     fn set_status(&mut self, idlist: &[isize], statusflag: StatusMask, activated: bool);
 
@@ -52,12 +55,14 @@ impl ISubscriptionState for SubscriptionState {
         }
     }
 
-    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>) {
+    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>, is_folder: bool) {
         if let std::collections::hash_map::Entry::Vacant(e) = self.statemap.entry(db_id) {
-            let sme = SubsMapEntry {
+            let mut sme = SubsMapEntry {
                 tree_path: Some(newpath),
+
                 ..Default::default()
             };
+            sme.set_folder(is_folder);
             e.insert(sme);
         } else if let Some(st) = self.statemap.get_mut(&db_id) {
             st.set_path(newpath);
@@ -106,7 +111,7 @@ impl ISubscriptionState for SubscriptionState {
                     None
                 }
             })
-            .take(2)
+            .take(SCAN_EMPTY_UNREAD_GROUP as usize)
             .collect::<Vec<isize>>();
         unproc_ids
     }
@@ -161,9 +166,7 @@ impl ISubscriptionState for SubscriptionState {
     fn get_id_by_path(&self, path: &[u16]) -> Option<isize> {
         self.statemap
             .iter()
-            .filter_map(|(id, st)| {
-                st.tree_path.as_ref().map(|tp| (id, tp))
-            })
+            .filter_map(|(id, st)| st.tree_path.as_ref().map(|tp| (id, tp)))
             .find_map(|(id, tp)| if tp == path { Some(*id) } else { None })
     }
 

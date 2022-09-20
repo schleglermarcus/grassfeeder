@@ -43,6 +43,7 @@ impl GtkRunnerInternal {
 
     /// Creates the window, connects the   activate signal with the build command
     /// https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/gio/struct.ApplicationFlags.html#associatedconstant.HANDLES_COMMAND_LINE
+    /// return  true on success.  False on   App-Was-Running
     pub fn init(
         &mut self,
         builder: &GtkBuilderType,
@@ -50,18 +51,29 @@ impl GtkRunnerInternal {
         win_width: i32,
         win_height: i32,
         app_url: String,
-    ) {
+    ) -> bool {
         let ev_se = self.gui_event_sender.clone();
         let obj_c = self.gtk_objects.clone();
         let obj_c2 = self.gtk_objects.clone();
         let builder_c = builder.clone();
         let mut appflags: ApplicationFlags = ApplicationFlags::default();
         appflags.set(ApplicationFlags::HANDLES_COMMAND_LINE, false);
-
-        let app = gtk::Application::new(
-            Some(&app_url),
-            appflags, // Default::default()
-        );
+        let app = gtk::Application::new(Some(&app_url), appflags);
+        let _r = app.register(gio::Cancellable::NONE);
+        if app.is_remote() {
+            warn!(
+                "{} is already running (registered at d-bus, remote=1). Stopping. ",
+                &app_url
+            );
+            let _r = ev_se.send(GuiEvents::AppWasAlreadyRunning);
+            app.release();
+            if let Some(dbuscon) = app.dbus_connection() {
+                dbuscon.close(gio::Cancellable::NONE, |_a1| {
+                    debug!("GtkRunnerInternal: dbus-closed callback");
+                });
+            }
+            return false;
+        }
         (*obj_c).write().unwrap().set_application(&app);
         app.connect_activate(move |app| {
             let appwindow = build_window(app, &ev_se, win_title.clone(), win_width, win_height);
@@ -72,16 +84,16 @@ impl GtkRunnerInternal {
             (*obj_c).write().unwrap().set_dddist(dd);
             window.show_all();
         });
+        true
     }
 
     /// this  blocks the caller completely, while running the app
     /// https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/gio/prelude/trait.ApplicationExtManual.html#tymethod.run
-	///  LATER: find a way how to process both sets of parameters:   application   AND gtk
+    ///  LATER: find a way how to process both sets of parameters:   application   AND gtk
     pub fn run(&self) {
         let app_o = (*self.gtk_objects).read().unwrap().get_application();
         match app_o {
             Some(appli) => {
-                // let run_result = appli.run();
                 let run_result = appli.run_with_args::<String>(&[]);
                 if run_result != 0 {
                     error!("PROBLEM on gtk:application.run() {}", run_result);

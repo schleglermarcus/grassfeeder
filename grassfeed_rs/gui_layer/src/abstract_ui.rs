@@ -44,6 +44,7 @@ pub trait SenderWrapper {
 pub enum GuiEvents {
     None,
     InternalStarted,
+	AppWasAlreadyRunning,
     WinDelete,
     WindowSizeChanged(i32, i32),
     MenuFileQuit,

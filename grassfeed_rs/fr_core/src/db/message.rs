@@ -79,11 +79,11 @@ impl MessageRow {
 impl std::fmt::Display for MessageRow {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let srcdate = util::db_time_to_display(self.entry_src_date);
-        // let title_decomp = self.title_c_decompressed();
+        let isdel = if self.is_deleted { 1 } else { 0 };
         write!(
             f,
-            "({} {} '{}' '{}' {}   )", //  {}  '{}'  '{}'
-            self.message_id, self.subscription_id, self.post_id, self.title, srcdate,
+            "({} {} '{}' '{}' {} D{}  )",
+            self.message_id, self.subscription_id, self.post_id, self.title, srcdate, isdel
         )
     }
 }

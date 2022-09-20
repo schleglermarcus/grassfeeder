@@ -1,3 +1,20 @@
+grassfeeder (0.0.5) unstable; urgency=low
+
+  * StatusBar: copy Feed address into clipboard
+  * Multiple instances shall not be allowed
+  * Cleanup messages at configured upper limit, also double same messages
+  * Build via Docker container
+  * On Shutdown:  Flush Databases
+  * Databases check via command line, no more automatic
+  * Databases check shall remove doubled messages
+  * Add default set of subscriptions on new configuration
+  * Bugfix: Fetch-All shall not include folder scheduling
+  * Bugfix: on start create logging folder
+  * Refactored test for new_entries_filter
+  * New-Feed allowed umlaut in name, deacticated iso8859 filter
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Wed, 21 Sep 2022 00:12:00 +0000
+
 grassfeeder (0.0.4) unstable; urgency=low
 
   * Startup Commandline processing fixed:    -h shall remain on commandline

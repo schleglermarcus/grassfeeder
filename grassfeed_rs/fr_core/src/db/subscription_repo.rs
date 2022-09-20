@@ -26,7 +26,6 @@ pub const FILENAME_JSON: &str = "subscription_list.json";
 pub const CONV_TO: &dyn Fn(String) -> Option<SubscriptionEntry> = &json_to_subscription_entry;
 pub const CONV_FROM: &dyn Fn(&SubscriptionEntry) -> Option<String> = &subscription_entry_to_json;
 
-// TODO  register at timer for shutdown,  do flush!
 pub trait ISubscriptionRepo {
     /// sorts by folder_position
     fn get_by_parent_repo_id(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry>;
@@ -90,6 +89,12 @@ pub trait ISubscriptionRepo {
     fn store_default_db_entries(&self);
 
     fn get_connection(&self) -> Arc<Mutex<Connection>>;
+
+	fn db_vacuum(&self) -> usize ;
+
+	//  is false if no DB was present - on fresh start
+	fn db_existed_before(&self) -> bool;
+
 }
 
 pub struct SubscriptionRepo {
@@ -98,11 +103,21 @@ pub struct SubscriptionRepo {
 }
 
 impl SubscriptionRepo {
-    pub fn new2(foldername: String) -> Self {
-        let filename = format!("{}subscriptions.db", foldername);
+    pub fn by_folder(foldername: &str) -> Self {
         SubscriptionRepo {
-            folder_name: foldername,
-            ctx: SqliteContext::new(filename),
+            folder_name: foldername.to_string(),
+            ctx: SqliteContext::new(Self::filename(foldername)),
+        }
+    }
+
+    pub fn filename(foldername: &str) -> String {
+        format!("{}subscriptions.db", foldername)
+    }
+
+    pub fn by_file(filename: &str) -> Self {
+        SubscriptionRepo {
+            folder_name: String::default(),
+            ctx: SqliteContext::new(filename.to_string()),
         }
     }
 
@@ -395,22 +410,6 @@ impl ISubscriptionRepo for SubscriptionRepo {
         self.ctx.one_number(sql)
     }
 
-    /*
-        fn update_deleted(&self, src_id: isize, is_del: bool) {
-            info!("TODO update_deleted ");
-
-            match (*self.list).write().unwrap().get_mut(&src_id) {
-                Some(mut entry) => {
-                    entry.deleted = is_del;
-                }
-                None => {
-                    debug!("update_deleted: not found {}", src_id);
-                }
-            };
-
-            //    self.update_deleted_list(to_delete_list.into_iter().collect(), true);
-        }
-    */
 
     fn store_default_db_entries(&self) {
         let mut fse = SubscriptionEntry {
@@ -437,6 +436,18 @@ impl ISubscriptionRepo for SubscriptionRepo {
     fn get_connection(&self) -> Arc<Mutex<Connection>> {
         self.ctx.get_connection()
     }
+
+	fn db_vacuum(&self) -> usize {
+        self.ctx.execute("VACUUM".to_string())
+    }
+
+
+	fn db_existed_before(&self) -> bool
+	{
+		self.ctx.db_existed_before()
+	}
+
+
 } // ISubscriptionRepo
 
 //-------------------
@@ -446,7 +457,7 @@ impl Buildable for SubscriptionRepo {
     fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         let o_folder = conf.get(KEY_FOLDERNAME);
         match o_folder {
-            Some(folder) => SubscriptionRepo::new2(folder),
+            Some(folder) => SubscriptionRepo::by_folder(&folder),
             None => {
                 conf.dump();
                 panic!("subscription config has no {} ", KEY_FOLDERNAME);
@@ -502,32 +513,6 @@ fn json_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
 #[cfg(test)]
 mod ut {
     use super::*;
-
-    /*
-    pub const TEST_FOLDER1: &'static str = "../target/db_t_sub_rep";
-        #[test]
-        fn t_store_file() {
-            setup();
-            {
-                let mut sr = SubscriptionRepo::new2(TEST_FOLDER1.to_string());
-                sr.startup_int();
-                sr.scrub_all_subscriptions();
-                let s1 = SubscriptionEntry::default();
-                assert!(sr.store_entry(&s1).is_ok());
-                assert!(sr.store_entry(&s1).is_ok());
-                let list = sr.get_all_entries();
-                assert_eq!(list.len(), 2);
-                sr.check_or_store();
-            }
-            {
-                let mut sr = SubscriptionRepo::new_inmem();
-                sr.startup_int();
-                let list = sr.get_all_entries();
-                // list.iter().for_each(|l| debug!("ST {:?}", l));
-                assert_eq!(list.len(), 3);
-            }
-        }
-    */
 
     #[test]
     fn t_update_last_selected() {

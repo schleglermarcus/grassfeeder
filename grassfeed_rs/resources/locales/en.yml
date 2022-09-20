@@ -1,7 +1,7 @@
 en:
   ABOUT_APP_TXT : About this application
   ABOUT_APP_DESCRIPTION : A rusty feed reader
-  
+
   M_FILE: File              #  test listens
   M_IMPORT_OPML: Import Opml
   M_EXPORT_OPML: Export Opml
@@ -16,6 +16,9 @@ en:
   TB_ADD_FOLDER: Add Folder
   TB_ADD_FEED: Add Subscription
   TB_REFRESH_ALL: Refresh all Feeds
+
+  SUBSC_DEFAULT_FOLDER1: Examples
+  SUBSC_DEFAULT_FOLDER2: Tech
 
   CM_MSG_MARK_AS_READ: Mark as read
   CM_MSG_MARK_AS_UNREAD: Mark as unread
@@ -42,6 +45,8 @@ en:
   CM_SUB_MARK_AS_READ: Mark as read
   CM_SUB_EDIT: Edit
   CM_SUB_DELETE: Delete
+
+
 
   D_NEW_SUBSCRIPTION_TITLE: New Subscription
   D_NEW_SUBSCRIPTION_URL: Feed Address

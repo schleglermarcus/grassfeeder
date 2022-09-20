@@ -1,9 +1,12 @@
 use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
+use crate::db::message::decompress;
+use crate::db::message::MessageRow;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
+use crate::util::db_time_to_display;
 use crate::util::filter_by_iso8859_1;
 use crate::util::Step;
 use crate::util::StepResult;
@@ -21,6 +24,8 @@ pub struct CleanerInner {
     pub subs_parents_active: Mutex<Vec<i32>>,
     pub need_update_subscriptions: bool,
     pub need_update_messages: bool,
+    /// -1 : do not check
+    pub max_messages_per_subscription: i32,
 }
 
 impl CleanerInner {
@@ -39,6 +44,7 @@ impl CleanerInner {
             subs_parents_active: Mutex::new(Vec::default()),
             need_update_messages: false,
             need_update_subscriptions: false,
+            max_messages_per_subscription: -1,
         }
     }
 }
@@ -73,7 +79,7 @@ pub struct RemoveNonConnected(pub CleanerInner);
 impl Step<CleanerInner> for RemoveNonConnected {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-        let all_entries = inner.subscriptionrepo.get_all_entries();
+        let all_subs = inner.subscriptionrepo.get_all_entries();
         let mut connected_child_list: HashSet<isize> = HashSet::default();
         let mut folder_todo: Vec<isize> = Vec::default();
         folder_todo.push(0);
@@ -88,7 +94,7 @@ impl Step<CleanerInner> for RemoveNonConnected {
             });
         }
         let mut delete_list: HashSet<isize> = HashSet::default();
-        all_entries.iter().for_each(|se| {
+        all_subs.iter().for_each(|se| {
             if se.deleted || se.parent_subs_id < 0 {
                 delete_list.insert(se.subs_id);
             } else if !connected_child_list.contains(&se.subs_id) {
@@ -205,22 +211,137 @@ pub struct MarkUnconnectedMessages(pub CleanerInner);
 impl Step<CleanerInner> for MarkUnconnectedMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-        let parent_ids_active: Vec<i32> = inner.subs_parents_active.lock().unwrap().clone();
+        let parent_ids_active: Vec<i32> = inner
+            .subscriptionrepo
+            .get_all_nonfolder()
+            .iter()
+            .filter(|se| !se.isdeleted())
+            .map(|se| se.subs_id as i32)
+            .collect();
         let noncon_ids = inner
             .messgesrepo
             .get_src_not_contained(&parent_ids_active)
             .iter()
             .map(|fse| fse.message_id as i32)
             .collect::<Vec<i32>>();
-        // trace!("nonconnected: {:?}", &noncon_ids);
         if !noncon_ids.is_empty() {
+            if noncon_ids.len() < 100 && parent_ids_active.len() < 100 {
+                debug!(
+                    "Cleanup: not connected messages={:?}   parent-ids={:?}",
+                    &noncon_ids, &parent_ids_active
+                );
+            } else {
+                debug!(
+                    "Cleanup: not connected messages: {}   parent-ids: {}",
+                    &noncon_ids.len(),
+                    &parent_ids_active.len()
+                );
+            }
             inner.need_update_messages = true;
             inner.messgesrepo.update_is_deleted_many(&noncon_ids, true);
+        }
+
+        StepResult::Continue(Box::new(ReduceTooManyMessages(inner)))
+    }
+}
+
+pub struct ReduceTooManyMessages(pub CleanerInner);
+impl Step<CleanerInner> for ReduceTooManyMessages {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let mut inner = self.0;
+        if inner.max_messages_per_subscription > 1 {
+            let subs_ids = inner
+                .subscriptionrepo
+                .get_all_entries()
+                .iter()
+                .filter(|fse| !fse.is_folder)
+                .map(|fse| fse.subs_id)
+                .collect::<Vec<isize>>();
+            trace!(
+                "ReduceTooManyMessages={:?}  SUBS={:?}",
+                inner.max_messages_per_subscription,
+                &subs_ids
+            );
+
+            for su_id in &subs_ids {
+                let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id, true);
+                if msg_per_subscription.len() > inner.max_messages_per_subscription as usize {
+                    inner.need_update_messages = true;
+                    msg_per_subscription.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
+                    let (_stay, remove) =
+                        msg_per_subscription.split_at(inner.max_messages_per_subscription as usize);
+                    // _stay.iter().for_each(|e| {                        debug!(                            "STAY  {}\t{}",                            e.message_id,                            db_time_to_display(e.entry_src_date)                        )                    });
+                    //  remove.iter().for_each(|e| {                        debug!(                            "REMOVE  {}\t{}",                            e.message_id,                            db_time_to_display(e.entry_src_date)                        )                    });
+
+                    if !remove.is_empty() {
+                        let id_list: Vec<i32> =
+                            remove.iter().map(|e| e.message_id as i32).collect();
+                        let first_msg = remove.iter().next().unwrap();
+                        debug!(
+                            "Cleanup messages:  subsciption(id {}) ,  {} messages. Latest date: {}	\t message-ids={:?}",
+                            su_id,
+                            id_list.len(),
+                            db_time_to_display(first_msg.entry_src_date),
+                            id_list
+                        );
+                        inner.messgesrepo.update_is_deleted_many(&id_list, true);
+                    }
+                }
+            }
+        }
+        StepResult::Continue(Box::new(DeleteDoubleSameMessages(inner)))
+    }
+}
+
+pub struct DeleteDoubleSameMessages(pub CleanerInner);
+impl Step<CleanerInner> for DeleteDoubleSameMessages {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let inner = self.0;
+        let subs_ids_active: Vec<i32> = inner
+            .subscriptionrepo
+            .get_all_nonfolder()
+            .iter()
+            .map(|se| se.subs_id as i32)
+            .collect();
+        for subs_id in subs_ids_active {
+            let mut msglist: Vec<MessageRow> =
+                inner.messgesrepo.get_by_src_id(subs_id as isize, true);
+            if msglist.is_empty() {
+                continue;
+            }
+            msglist.sort_by(|a, b| a.fetch_date.cmp(&b.fetch_date));
+
+            let mut known: HashSet<(i64, String)> = HashSet::new();
+            let mut delete_list: Vec<MessageRow> = Vec::default();
+            msglist.iter().for_each(|msg| {
+                if known.contains(&(msg.entry_src_date, msg.title.clone())) {
+                    delete_list.push(msg.clone());
+                } else {
+                    known.insert((msg.entry_src_date, msg.title.clone()));
+                };
+            });
+            for d in &delete_list {
+                trace!(
+                    "{} double: ID:{}\tdate:{} fetch:{}\t{}",
+                    subs_id,
+                    d.message_id,
+                    db_time_to_display(d.entry_src_date),
+                    db_time_to_display(d.fetch_date),
+                    decompress(&d.title),
+                );
+            }
+            let del_indices: Vec<i32> = delete_list.iter().map(|m| m.message_id as i32).collect();
+            debug!("setting deleted: {} messages", del_indices.len());
+            inner
+                .messgesrepo
+                .update_is_deleted_many(del_indices.as_slice(), true);
         }
 
         StepResult::Continue(Box::new(Notify(inner)))
     }
 }
+
+// later : clean out all deleted messages
 
 pub struct Notify(pub CleanerInner);
 impl Step<CleanerInner> for Notify {
@@ -256,10 +377,11 @@ pub fn check_layer(
         path.extend_from_slice(localpath);
         if fse.folder_position != (folderpos as isize) {
             // debug!(                "check_layer: unequal folderpos {:?} {:?}",                fse.folder_position, folderpos            );
-            fp_correct_subs_parent
-                .lock()
-                .unwrap()
-                .push(fse.parent_subs_id as i32);
+
+            let mut fpc = fp_correct_subs_parent.lock().unwrap();
+            if !fpc.contains(&(fse.parent_subs_id as i32)) {
+                fpc.push(fse.parent_subs_id as i32);
+            }
         }
         path.push(fse.folder_position as u16);
         check_layer(

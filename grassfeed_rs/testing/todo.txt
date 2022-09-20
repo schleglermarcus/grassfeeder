@@ -1,46 +1,58 @@
 To Do List
 
-- Build via Docker container,   find external dependencies + packages
-- StatusBar: copy Feed address into clipboard
-- Add default set of feeds on new configuration
-- On Shutdown:  Flush Databases
-- Cleanup at maximum messages
-- Multiple instances shall be blocking.
-- Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
-- Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
-- check  https://www.linuxcompatible.org/  feed: icon + entries
-- Check: &  in Feed-title, Message-title. should be escaped
+23h59
 
+- check: subscription  Reload shall refresh  message list
 - Copy Message address into clipboard
+- Desktop Icon:
+    https://unalfaruk.com/2018/09/10/creating-a-shortcut-icon-on-debian/
+- Memory usage display in status bar
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
+- Show message sums on folders
+- Keyboard commands for:  mark-as-unread, next unread message
+- Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
+- Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
+- check  https://www.linuxcompatible.org/  feed: icon + entries
+- rename previous log file  .old
+- see if  diylib  can be used for ui_gtk
 - Sanitize: cross-check icon ids of tree if they are present in icon db
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
-- Rotate log file
-
-- Subscription Tree: hide zeroes when nothing to read
 - Windows Build
-- process both sets of cmd parameters:   application   AND gtk, see runner_internal
+  https://www.ebbflow.io/blog/vending-win
+- Sanitize: Message clean out those with deleted flag
+- Browser CleanUp Cache, on startup / finish
+- Subscription Tree: hide zeroes when nothing to read
+- refactor messages / separate state_map
+- Create https://github.com/StratusFearMe21/cargo-appimage
+- Flatpak  https://lib.rs/crates/cargo-pkg
 - Delete Messages
-- check: subscription  Reload shall refresh  message list
 - Browser Display :  wrap over   title
 - Create Backups for Subscriptions-DB
-- Show message sums on folders
-
 - Error-DB for Subscription Requests, display in edit dialog
 - React on Minimize, do memory usage reduction
 - find common code parts of    folder:mark-as-read  ,  folder:update
-- Flatpak  https://lib.rs/crates/cargo-pkg
+- move logger config this into fr_core
 - implement focus policy: before last unread
 - Opml export formatted / pretty
 - Browser: enable theme related colors
 - Modify Browser Font size
 - Browser: get rid of white display on start
+- Databases consistency check with open Dialog.
+- Databases consistency check  on startup configurable.
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 - Delete Messages
 - Startup, create gui:  delayed creation of dialogs
 - Searching inside feeds
 - Message List: set scroll position to upper edge from Cursor
+- Keybard configuration in settings
+
+
+Later:
+- GTK4: block multiple instances
+- process both sets of cmd parameters:   application   AND gtk, see runner_internal
+	https://docs.gtk.org/gio/method.Application.run.html
+
 
 
 Perhaps:
@@ -56,10 +68,14 @@ Perhaps:
 
 -----
 
+* Get the branch and test it:
+  git clone -b  v0_0_5  https://github.com/schleglermarcus/grassfeeder gf-v005  
+
+
 * Merge Branch and build release
 
     git checkout main
-    git merge v0_0_3
+    git merge origin/v0_0_3
     git push origin main
 
 		# (cd grassfeed_rs/app-gtk3-linux/ ; cargo clean;  rm Cargo.lock ; cargo test && nice -n9 cargo deb )
@@ -80,6 +96,13 @@ Perhaps:
 
 
 -----
+https://doc.rust-lang.org/cargo/reference/environment-variables.html
+
+// https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
+// https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
+// https://docs.rs/chrono/latest/chrono/format/strftime/index.html#specifiers
+//  dpkg-deb -i 	grassfeeder.deb
+
 
 
 https://github.com/marketplace/actions/rust-release-binary
@@ -94,4 +117,16 @@ https://www.gtk.org/docs/installations/windows/
 Desktop:
 https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 
-#  less /usr/share/doc/gedit/changelog.Debian.gz
+
+------
+Docker:  3 Phasen:  aus,   build, run
+	https://kerkour.com/rust-small-docker-image#/from-buster-slim
+	https://windsoilder.github.io/writing_dockerfile_in_rust_project.html
+
+
+	- Multiple instances shall be blocking.
+	       GTK_DEBUG=interactive
+	https://docs.gtk.org/gio/class.Application.html
+	https://wiki.gnome.org/HowDoI/GtkApplication
+	https://developer.gnome.org/documentation/tutorials/application.html
+	https://docs.gtk.org/gio/method.Application.run.html

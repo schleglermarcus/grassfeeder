@@ -9,6 +9,13 @@ use textcode::iso8859_1;
 
 static DATETIME_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
 
+pub fn file_exists(filename: &String) -> bool {
+    if let Ok(metadata) = std::fs::metadata(&filename) {
+        return metadata.is_file();
+    }
+    false
+}
+
 //  escape ampersand as &amp;
 pub fn string_escape_url(unescaped: String) -> String {
     unescaped.replace('&', "&amp;")
@@ -151,6 +158,8 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#153;", " - ");
     ret = ret.replace("&#156;", " - ");
     ret = ret.replace("&#157;", " Š ");
+    ret = ret.replace("&#164;", " ");
+    ret = ret.replace("&#190;", "¾");
     ret = ret.replace("&#226;", "â");
     ret = ret.replace("&#8211;", "\"");
     ret = ret.replace("&#8220;", "\"");

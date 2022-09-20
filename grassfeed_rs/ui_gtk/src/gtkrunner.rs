@@ -74,6 +74,7 @@ impl GuiRunner for GtkRunner {
         let ev_se = self.gui_event_sender.clone();
         let ev_se2 = self.gui_event_sender.clone();
         let co_re2 = self.gui_command_receiver.clone();
+        let co_se2 = self.gui_command_sender.clone();
         let builder_c = self.gtk_builder.clone();
         let win_title;
         let win_width;
@@ -92,7 +93,14 @@ impl GuiRunner for GtkRunner {
             .name("TGUI".to_string())
             .spawn(move || {
                 let mut runner_i = GtkRunnerInternal::new(ev_se);
-                runner_i.init(&builder_c, win_title, win_width, win_height, app_url);
+                let initsuccess =
+                    runner_i.init(&builder_c, win_title, win_width, win_height, app_url);
+                if !initsuccess {
+                    let _r = co_se2.send(IntCommands::STOP);
+                    let _r = ev_se2.send(GuiEvents::AppWasAlreadyRunning);
+                    return;
+                }
+
                 ev_se2.send(GuiEvents::InternalStarted).unwrap();
                 GtkRunnerInternal::add_timeout_loop(
                     co_re2.clone(),
@@ -115,7 +123,10 @@ impl GuiRunner for GtkRunner {
         if let Ok(ev) = self.gui_event_receiver.recv() {
             match ev {
                 GuiEvents::InternalStarted => (),
-                _ => error!("gtkrunner:init, got other event"),
+                GuiEvents::AppWasAlreadyRunning => {
+                    let _r = self.gui_command_sender.send(IntCommands::STOP);
+                }
+                _ => error!("gtkrunner:init, got other event {:?}", &ev),
             }
         }
     }

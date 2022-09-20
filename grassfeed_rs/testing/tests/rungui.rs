@@ -8,7 +8,6 @@ use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
-// use resources::application_id::RCS_CARGO_PKG_VERSION;
 use resources::loc;
 use std::cell::RefCell;
 use std::fs::File;
@@ -54,11 +53,16 @@ fn write_feed() {
     let header = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
 <rss version=\"2.0\">
  <channel>
-  <title>Dynamically created</title>
-  <description>lorem ipsum</description> \n";
+  <title>Dynamically created!</title>
+  <description>some dynamic description:   lorem ipsum</description> \n";
     let footer = "\n </channel>\n</rss> \n";
     let ts_now = Local::now().timestamp();
-    let mut file = File::create(RSS_DYNAMIC_FILENAME).unwrap();
+    let o_file = File::create(RSS_DYNAMIC_FILENAME);
+    if o_file.is_err() {
+        error!("cannot open {}", RSS_DYNAMIC_FILENAME);
+        return;
+    }
+    let mut file = o_file.unwrap();
     file.write(header.as_bytes()).unwrap();
     let entryline = entry(
         format!("TITLE-{}", ts_now).as_str(),
@@ -67,6 +71,8 @@ fn write_feed() {
         ts_now,
     );
     file.write(entryline.as_bytes()).unwrap();
+    let el2 = entry("statictitle", "link", "description", ts_now);
+    file.write(el2.as_bytes()).unwrap();
     file.write(footer.as_bytes()).unwrap();
     // debug!("written to {} {}", RSS_DYNAMIC_FILENAME, ts_now);
 }
@@ -79,7 +85,7 @@ fn rungui_local_clear() {
     let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT);
     let _dyn_wr_handle = std::thread::spawn(|| loop {
         write_feed();
-        std::thread::sleep(std::time::Duration::from_secs(59));
+        std::thread::sleep(std::time::Duration::from_secs(19));
     });
     let gfconf = GrassFeederConfig {
         path_config: "../target/db_rungui_local/".to_string(),
@@ -90,7 +96,6 @@ fn rungui_local_clear() {
     let appcontext = fr_core::config::init_system::start(gfconf);
     test_setup_values(&appcontext, mini_server_c.get_address());
     fr_core::config::init_system::run(&appcontext);
-
     mini_server_c.stop();
 }
 
@@ -121,15 +126,13 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
     let _url_relay = format!("{}/relay_rd.rss", addr); // very big
 
-    // let _f_hill = feedsources.add_new_folder_at_parent("hill".to_string(), 0);
     let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
-
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(
         url_gui_proc.clone(),
-        "gui_proc_2".to_string(),
+        "gui_proc_2 & aaa".to_string(),
         folder3,
         false,
     );
@@ -139,6 +142,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
+            ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             (
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",
@@ -163,6 +167,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
                 "youtube",
             ),
+            ("http://feeds.feedburner.com/TechmemeRideHome", "techmeme"),
+            ("https://www.gistpaper.com/feed", "gistpaper"),
+            ("https://www.opendesktop.org/content.rdf", "opendesktop"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -173,7 +180,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    if true {
+    if false {
         let src = [
             ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
@@ -211,7 +218,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://www.relay.fm/rd/feed", "rel_rd"),
             ("https://www.relay.fm/query/feed", "rel_query"),
             ("http://feeds.feedburner.com/euronews/en/news/", "euronews"),
-            ("https://www.ksta.de/feed/index.rss", "koelner"),
             ("https://kodansha.us/feed/", "Kodansha"),
             ("https://planet.debian.org/rss20.xml", "debian"),
             ("https://report24.news/feed/", "report24"),

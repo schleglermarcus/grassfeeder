@@ -104,11 +104,13 @@ impl fmt::Display for SubscriptionEntry {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let title = if self.is_folder { "FO" } else { "SE" };
         let expi: usize = if self.expanded { 1 } else { 0 };
+        let is_del: usize = if self.isdeleted() { 1 } else { 0 };
         fmt.debug_struct(title)
             .field("ID", &self.subs_id)
             .field("PA", &self.parent_subs_id)
             .field("FP", &self.folder_position)
             .field("XP", &expi)
+            .field("D", &is_del)
             .finish()
     }
 }
@@ -186,7 +188,7 @@ impl TableInfo for SubscriptionEntry {
             display_name: row.get(11).unwrap(),
             url: row.get(12).unwrap(),
             website_url: row.get(13).unwrap(), // 13
-            // ..Default::default()
+                                               // ..Default::default()
         }
     }
 

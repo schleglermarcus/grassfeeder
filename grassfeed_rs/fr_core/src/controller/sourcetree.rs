@@ -50,6 +50,9 @@ use std::time::Instant;
 const JOBQUEUE_SIZE: usize = 1000;
 pub const TREE_STATUS_COLUMN: usize = 7;
 
+pub const DEFAULT_CONFIG_FETCH_FEED_INTERVAL: u8 = 2;
+pub const DEFAULT_CONFIG_FETCH_FEED_UNIT: u8 = 2; // hours
+
 /// seven days
 const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
 
@@ -82,8 +85,8 @@ pub enum SJob {
     /// subscription_id,  num_msg_all, num_msg_unread
     NotifyTreeReadCount(isize, isize, isize),
     ScanEmptyUnread,
+    EmptyTreeCreateDefaultSubscriptions,
 }
-
 
 // #[automock]
 pub trait ISourceTreeController {
@@ -269,7 +272,6 @@ impl SourceTreeController {
                     (*self.gui_updater).borrow().update_tree(TREEVIEW0);
                 }
                 SJob::ScheduleFetchAllFeeds => {
-                    //                     (*self.subscriptionrepo_r).borrow().set_schedule_fetch_all();
                     self.statemap.borrow_mut().set_schedule_fetch_all();
                 }
                 SJob::ScheduleUpdateFeed(fs_id) => {
@@ -338,6 +340,10 @@ impl SourceTreeController {
                         }
                     }
                 }
+
+                SJob::EmptyTreeCreateDefaultSubscriptions => {
+                    self.empty_create_default_subscriptions()
+                }
             }
             if self.config.mode_debug {
                 let elapsed_m = now.elapsed().as_millis();
@@ -365,7 +371,6 @@ impl SourceTreeController {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(localpath);
             path.push(n as u16);
-
             let subs_map = match self.statemap.borrow().get_state(fse.subs_id) {
                 Some(m) => m,
                 None => {
@@ -567,8 +572,6 @@ impl SourceTreeController {
             let now_seconds = timestamp_now();
             let time_outdated = now_seconds - (fse.updated_icon + ICON_RELOAD_TIME_S);
             if time_outdated > 0 || fse.icon_id < ICON_LIST.len() {
-
-
                 // let now_minus_outdated = now_seconds - time_outdated;
                 // trace!(                    "check_icon: id:{}  icon_id:{}     now-OutDated: {}s   {}h   icon_updated:{}",                    fs_id,                    fse.icon_id,                    now_minus_outdated,                    (now_minus_outdated as f32 / 3600.0),            crate::util::        db_time_to_display(fse.updated_icon)                );
                 (*self.downloader_r)
@@ -776,7 +779,6 @@ impl SourceTreeController {
             AValue::ASTR(icon_str), // 2: icon_str
             AValue::ABOOL(false),   // 3: spinner
         ];
-
         (*self.gui_val_store)
             .write()
             .unwrap()
@@ -833,10 +835,11 @@ impl SourceTreeController {
             .get_val_int(Self::CONF_FETCH_INTERVAL_UNIT)
             .unwrap_or(0) as u32;
         if self.config.feeds_fetch_interval == 0 {
-            self.config.feeds_fetch_interval = 2;
+            self.config.feeds_fetch_interval = DEFAULT_CONFIG_FETCH_FEED_INTERVAL as u32;
         }
         if self.config.feeds_fetch_interval_unit == 0 {
-            self.config.feeds_fetch_interval_unit = 2; // Hours
+            self.config.feeds_fetch_interval_unit = DEFAULT_CONFIG_FETCH_FEED_UNIT as u32;
+            // Hours
         }
         self.config.feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
@@ -891,18 +894,15 @@ impl SourceTreeController {
         let entries: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_subs_id as isize);
-        let child_ids: Vec<isize> = entries
-            .iter()
-            .map(|entry| entry.subs_id)
-            .collect::<Vec<isize>>();
-        child_ids.iter().enumerate().for_each(|(num, child_id)| {
+        // let child_ids: Vec<isize> = entries            .iter()            .map(|entry| entry.subs_id)            .collect::<Vec<isize>>();
+        entries.iter().enumerate().for_each(|(num, entry)| {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(localpath);
             path.push(num as u16);
-            self.update_paths_rec(&path, *child_id as i32, is_deleted);
+            self.update_paths_rec(&path, entry.subs_id as i32, is_deleted);
             let mut smm = self.statemap.borrow_mut();
-            smm.set_tree_path(*child_id, path);
-            smm.set_deleted(*child_id, is_deleted);
+            smm.set_tree_path(entry.subs_id, path, entry.is_folder);
+            smm.set_deleted(entry.subs_id, is_deleted);
         });
         false
     }
@@ -924,13 +924,74 @@ impl SourceTreeController {
         next_subs_id
     }
 
+    fn empty_create_default_subscriptions(&mut self) {
+        let before = (*self.subscriptionrepo_r).borrow().db_existed_before();
+        if before {
+            return;
+        }
+        info!("SUBS:   existed DB :  {} ", before);
+        {
+            let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
+            self.add_new_subscription_at_parent(
+                "https://rss.slashdot.org/Slashdot/slashdot".to_string(),
+                "Slashdot".to_string(),
+                folder1,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://www.reddit.com/r/aww.rss".to_string(),
+                "Reddit - Aww".to_string(),
+                folder1,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://xkcd.com/atom.xml".to_string(),
+                "XKCD".to_string(),
+                folder1,
+                true,
+            );
+        }
+        {
+            let folder2 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER2"), 0);
+            self.add_new_subscription_at_parent(
+                "https://github.com/schleglermarcus/grassfeeder/releases.atom".to_string(),
+                "Grassfeeder Releases".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://blog.linuxmint.com/?feed=rss2".to_string(),
+                "Linux Mint".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "http://blog.rust-lang.org/feed.xml".to_string(),
+                "Rust Language".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://www.heise.de/rss/heise-atom.xml".to_string(),
+                "Heise.de".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://rss.golem.de/rss.php?feed=ATOM1.0".to_string(),
+                "Golem.de".to_string(),
+                folder2,
+                true,
+            );
+        }
+    }
+
     //	impl SourceTree
 }
 
 impl ISourceTreeController for SourceTreeController {
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool {
-        info!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
-
+        debug!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
         let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
         let length_before = all1.len();
         let mut success: bool = false;
@@ -1097,8 +1158,15 @@ impl ISourceTreeController for SourceTreeController {
         let san_source = remove_invalid_chars_from_input(newsource)
             .trim()
             .to_string();
-        let mut san_display = remove_invalid_chars_from_input(display).trim().to_string();
-        san_display = filter_by_iso8859_1(&san_display).0;
+        let mut san_display = remove_invalid_chars_from_input(display.clone())
+            .trim()
+            .to_string();
+        let (filtered, was_truncated) = filter_by_iso8859_1(&san_display);
+        if !was_truncated {
+            san_display = filtered;
+        } else {
+            debug!("Found non-ISO chars in Subscription Title: {}", &display); // later see how to filter  https://www.ksta.de/feed/index.rss
+        }
         let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
         fse.subs_id = self.get_next_available_subscription_id();
         fse.parent_subs_id = parent_id;
@@ -1502,6 +1570,9 @@ impl StartupWithAppContext for SourceTreeController {
             .borrow()
             .store_default_db_entries();
         self.startup_read_config();
+
+        self.addjob(SJob::EmptyTreeCreateDefaultSubscriptions);
+
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::FillSourcesTree);
         if self.config.feeds_fetch_at_start {
@@ -1509,7 +1580,7 @@ impl StartupWithAppContext for SourceTreeController {
         }
         self.addjob(SJob::ScanEmptyUnread);
         self.addjob(SJob::GuiUpdateTreeAll);
-        self.addjob(SJob::SanitizeSources);
+        // self.addjob(SJob::SanitizeSources);	// later: do that with dialog,  with config setting
         self.addjob(SJob::UpdateTreePaths);
     }
 }
