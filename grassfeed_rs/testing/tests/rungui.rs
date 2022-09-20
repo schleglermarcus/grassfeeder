@@ -132,7 +132,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(
         url_gui_proc.clone(),
-        "gui_proc_2".to_string(),
+        "gui_proc_2 & aaa".to_string(),
         folder3,
         false,
     );
@@ -142,7 +142,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
-            ("https://www.ksta.de/feed/index.rss", "koelner"),
+            ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             (
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",

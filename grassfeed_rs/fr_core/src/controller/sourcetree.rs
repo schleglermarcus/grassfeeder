@@ -1161,8 +1161,15 @@ impl ISourceTreeController for SourceTreeController {
         let san_source = remove_invalid_chars_from_input(newsource)
             .trim()
             .to_string();
-        let mut san_display = remove_invalid_chars_from_input(display).trim().to_string();
-        san_display = filter_by_iso8859_1(&san_display).0;
+        let mut san_display = remove_invalid_chars_from_input(display.clone())
+            .trim()
+            .to_string();
+        let (filtered, was_truncated) = filter_by_iso8859_1(&san_display);
+        if !was_truncated {
+            san_display = filtered;
+        } else {
+            debug!("Found non-ISO chars in Subscription Title: {}", &display); // later see how to filter  https://www.ksta.de/feed/index.rss
+        }
         let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
         fse.subs_id = self.get_next_available_subscription_id();
         fse.parent_subs_id = parent_id;
