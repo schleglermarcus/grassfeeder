@@ -10,3 +10,5 @@ RSS Feed Reader anno 2022
 * Written in Rust (18k lines) with  LGPL-3.
 * Translations: english, german.
 * It is yet very fresh, not production ready
+
+![Version 0.0.5 dark](web/screenshot-v005-dark.jpg)
