@@ -17,7 +17,7 @@ pub trait ISubscriptionState {
     ) -> Vec<isize>;
 
     fn get_tree_path(&self, db_id: isize) -> Option<Vec<u16>>;
-    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>);
+    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>, is_folder: bool);
 
     fn set_status(&mut self, idlist: &[isize], statusflag: StatusMask, activated: bool);
 
@@ -55,12 +55,14 @@ impl ISubscriptionState for SubscriptionState {
         }
     }
 
-    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>) {
+    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>, is_folder: bool) {
         if let std::collections::hash_map::Entry::Vacant(e) = self.statemap.entry(db_id) {
-            let sme = SubsMapEntry {
+            let mut sme = SubsMapEntry {
                 tree_path: Some(newpath),
+
                 ..Default::default()
             };
+            sme.set_folder(is_folder);
             e.insert(sme);
         } else if let Some(st) = self.statemap.get_mut(&db_id) {
             st.set_path(newpath);

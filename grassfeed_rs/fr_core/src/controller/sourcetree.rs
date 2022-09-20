@@ -50,6 +50,9 @@ use std::time::Instant;
 const JOBQUEUE_SIZE: usize = 1000;
 pub const TREE_STATUS_COLUMN: usize = 7;
 
+pub const DEFAULT_CONFIG_FETCH_FEED_INTERVAL: u8 = 2;
+pub const DEFAULT_CONFIG_FETCH_FEED_UNIT: u8 = 2; // hours
+
 /// seven days
 const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
 
@@ -269,7 +272,6 @@ impl SourceTreeController {
                     (*self.gui_updater).borrow().update_tree(TREEVIEW0);
                 }
                 SJob::ScheduleFetchAllFeeds => {
-                    //                     (*self.subscriptionrepo_r).borrow().set_schedule_fetch_all();
                     self.statemap.borrow_mut().set_schedule_fetch_all();
                 }
                 SJob::ScheduleUpdateFeed(fs_id) => {
@@ -369,7 +371,6 @@ impl SourceTreeController {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(localpath);
             path.push(n as u16);
-
             let subs_map = match self.statemap.borrow().get_state(fse.subs_id) {
                 Some(m) => m,
                 None => {
@@ -778,7 +779,6 @@ impl SourceTreeController {
             AValue::ASTR(icon_str), // 2: icon_str
             AValue::ABOOL(false),   // 3: spinner
         ];
-
         (*self.gui_val_store)
             .write()
             .unwrap()
@@ -835,10 +835,11 @@ impl SourceTreeController {
             .get_val_int(Self::CONF_FETCH_INTERVAL_UNIT)
             .unwrap_or(0) as u32;
         if self.config.feeds_fetch_interval == 0 {
-            self.config.feeds_fetch_interval = 2;
+            self.config.feeds_fetch_interval = DEFAULT_CONFIG_FETCH_FEED_INTERVAL as u32;
         }
         if self.config.feeds_fetch_interval_unit == 0 {
-            self.config.feeds_fetch_interval_unit = 2; // Hours
+            self.config.feeds_fetch_interval_unit = DEFAULT_CONFIG_FETCH_FEED_UNIT as u32;
+            // Hours
         }
         self.config.feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
@@ -893,18 +894,15 @@ impl SourceTreeController {
         let entries: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_subs_id as isize);
-        let child_ids: Vec<isize> = entries
-            .iter()
-            .map(|entry| entry.subs_id)
-            .collect::<Vec<isize>>();
-        child_ids.iter().enumerate().for_each(|(num, child_id)| {
+        // let child_ids: Vec<isize> = entries            .iter()            .map(|entry| entry.subs_id)            .collect::<Vec<isize>>();
+        entries.iter().enumerate().for_each(|(num, entry)| {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(localpath);
             path.push(num as u16);
-            self.update_paths_rec(&path, *child_id as i32, is_deleted);
+            self.update_paths_rec(&path, entry.subs_id as i32, is_deleted);
             let mut smm = self.statemap.borrow_mut();
-            smm.set_tree_path(*child_id, path);
-            smm.set_deleted(*child_id, is_deleted);
+            smm.set_tree_path(entry.subs_id, path, entry.is_folder);
+            smm.set_deleted(entry.subs_id, is_deleted);
         });
         false
     }
@@ -993,8 +991,7 @@ impl SourceTreeController {
 
 impl ISourceTreeController for SourceTreeController {
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool {
-        info!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
-
+        debug!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
         let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
         let length_before = all1.len();
         let mut success: bool = false;
