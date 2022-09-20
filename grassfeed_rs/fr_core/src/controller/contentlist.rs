@@ -964,7 +964,6 @@ pub fn match_new_entries_to_existing(
                         n_fce.title.to_string(),
                     ));
                 }
-				debug!("seems corrected:  {}  {:?}", idx_new , new_list );
                 new_list_delete_indices.push(idx_new); // entry corrected
             }
         }

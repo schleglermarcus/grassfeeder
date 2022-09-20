@@ -8,6 +8,8 @@ To Do List
 - Check: &  in Feed-title, Message-title. should be escaped
 - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
 
+- Databases consistency check with open Dialog.
+- Databases consistency check  on startup configurable.
 
 - Copy Message address into clipboard
 - Desktop Icon:

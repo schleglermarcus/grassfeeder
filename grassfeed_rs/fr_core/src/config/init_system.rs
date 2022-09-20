@@ -100,27 +100,8 @@ pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, Stri
         "200".to_string(),
     );
     ret.insert(PropDef::AppUrl.tostring(), "grassfeede.rs".to_string());
-
     ret
 }
-
-/*
-mod_ini.set_to(
-    Some(GuiContext::section_name()),
-    PropDef::GuiWindowTitle.tostring(),
-    "app:default:to do".to_string(),
-);
-mod_ini.set_to(
-    Some(BrowserPane::section_name()),
-    PropDef::BrowserDir.tostring(),
-    format!("{}/browser", &gf_conf.path_cache),
-);
-mod_ini.set_to(
-    Some(FeedContents::section_name()),
-    PropDef::GuiList0SortAscending.tostring(),
-    "true".to_string(),
-);
-*/
 
 pub fn check_or_create_folder(path: &String) {
     let mut dir_exists = false;

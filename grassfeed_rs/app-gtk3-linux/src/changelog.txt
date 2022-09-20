@@ -2,14 +2,15 @@ grassfeeder (0.0.5) unstable; urgency=low
 
   * StatusBar: copy Feed address into clipboard
   * Multiple instances shall not be allowed
-  * Cleanup messges at configured upper limit
+  * Cleanup messages at configured upper limit, also double same messages
   * On Shutdown:  Flush Databases
   * Build via Docker container
+  * Bugfix:  on start create logging folder
+  * Refactored test for new_entries_filter
+  * Sanitize databases via command line, no more automatic
   
   
-  - Bug:    Beenden der Applikation geht nicht mehr. 
-  
-  
+  - Bug: Fetch-All shall not include folder scheduling
   
   - Add default set of feeds on new configuration
   

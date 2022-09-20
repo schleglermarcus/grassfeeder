@@ -2,6 +2,7 @@ mod logger_config;
 
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::sourcetree::SJob;
+use fr_core::db::check_consistency;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
@@ -13,9 +14,62 @@ use fr_core::downloader::db_clean::CleanerStart;
 use fr_core::util::StepResult;
 use std::collections::HashSet;
 
+#[ignore]
+#[test]
+fn db_check_manual() {
+    setup();
+
+    check_consistency::databases_consistency_check_u(
+        &"/home/marcus/dbcheck/".to_string(),
+        true,
+        true,
+    );
+}
+
+
+
+
+
 // #[ignore]
 #[test]
-fn db_cleanup_many_messages() {
+fn cleanup_message_doublettes() {
+    setup();
+    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
+    let subsrepo = SubscriptionRepo::new_inmem(); // new("");
+    subsrepo.scrub_all_subscriptions();
+    let msgrepo1 = MessagesRepo::new_in_mem();
+    let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
+    msgrepo1.get_ctx().create_table();
+    prepare_db_with_errors_1(&msgrepo1, &subsrepo);
+    let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
+/*
+    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1);
+    let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
+    let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
+    // debug!(" to_correct: {:?}", parent_ids_to_correct);
+    assert_eq!(parent_ids_to_correct.len(), 1);
+
+    assert!(subsrepo1
+        .get_by_index(1)
+        .unwrap()
+        .display_name
+        .starts_with("unnamed"));
+    assert!(subsrepo1.get_by_index(2).unwrap().display_name.len() < 10);
+    assert!(!subsrepo1.get_by_index(2).unwrap().expanded);
+    // msgrepo2        .get_all_messages()        .iter()        .for_each(|m| debug!("MSG {}", m));
+    assert_eq!(msgrepo2.get_by_index(1).unwrap().is_deleted, true); //  belongs to folder,   delete it
+    assert_eq!(msgrepo2.get_by_index(2).unwrap().is_deleted, false); // belongs to subscription, keep it
+*/
+}
+
+
+
+
+
+#[ignore]
+#[test]
+fn db_cleanup_too_many_messages() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
@@ -74,7 +128,7 @@ fn clean_phase1(subs_repo: &SubscriptionRepo) {
         .for_each(|id| subs_repo.delete_by_index(*id));
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn db_cleanup_remove_deleted() {
     setup();
@@ -105,7 +159,7 @@ fn db_cleanup_remove_deleted() {
     assert_eq!(all_entries.len(), 309);
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn t_db_cleanup_1() {
     setup();
@@ -178,8 +232,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            // 0,
-            logger_config::QuietFlags::Downloader as u64,
+            0,
+            // logger_config::QuietFlags::Downloader as u64,
         );
     });
 }

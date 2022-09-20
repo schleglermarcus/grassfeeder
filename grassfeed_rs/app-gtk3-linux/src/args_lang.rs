@@ -17,8 +17,6 @@ i18n!("locales");
 // (`Debug` is derived here only for demonstration purposes.)
 #[derive(Debug, Options)]
 pub struct MyOptions {
-    // #[options(free)]
-    // free: Vec<String>,
     #[options(help = "print this message.")]
     help: bool,
 
@@ -30,6 +28,10 @@ pub struct MyOptions {
 
     #[options(help = "Language selection.")]
     lang: Option<String>,
+
+	#[options(help = "Databases consistency check")]
+    pub check: bool,
+
 }
 
 /// 1. Set the desired language, if available

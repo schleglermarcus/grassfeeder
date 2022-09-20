@@ -126,12 +126,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
     let _url_relay = format!("{}/relay_rd.rss", addr); // very big
 
-    // let _f_hill = feedsources.add_new_folder_at_parent("hill".to_string(), 0);
     let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
-
-    // feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
-
+    feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(
         url_gui_proc.clone(),

@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 
+/// on each scan attempt, how many unread-jobs do we create.
+pub const SCAN_EMPTY_UNREAD_GROUP: u8 = 3;
+
 pub trait ISubscriptionState {
     fn get_state(&self, id: isize) -> Option<SubsMapEntry>;
     fn get_id_by_path(&self, path: &[u16]) -> Option<isize>;
@@ -106,7 +109,7 @@ impl ISubscriptionState for SubscriptionState {
                     None
                 }
             })
-            .take(2)
+            .take(SCAN_EMPTY_UNREAD_GROUP as usize)
             .collect::<Vec<isize>>();
         unproc_ids
     }
@@ -161,9 +164,7 @@ impl ISubscriptionState for SubscriptionState {
     fn get_id_by_path(&self, path: &[u16]) -> Option<isize> {
         self.statemap
             .iter()
-            .filter_map(|(id, st)| {
-                st.tree_path.as_ref().map(|tp| (id, tp))
-            })
+            .filter_map(|(id, st)| st.tree_path.as_ref().map(|tp| (id, tp)))
             .find_map(|(id, tp)| if tp == path { Some(*id) } else { None })
     }
 

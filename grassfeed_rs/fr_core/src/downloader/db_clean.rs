@@ -223,10 +223,18 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
             .map(|fse| fse.message_id as i32)
             .collect::<Vec<i32>>();
         if !noncon_ids.is_empty() {
-            debug!(
-                "Cleanup: not connected messages: {:?}   parent-ids={:?}",
-                &noncon_ids, &parent_ids_active
-            );
+            if noncon_ids.len() < 100 && parent_ids_active.len() < 100 {
+                debug!(
+                    "Cleanup: not connected messages={:?}   parent-ids={:?}",
+                    &noncon_ids, &parent_ids_active
+                );
+            } else {
+                debug!(
+                    "Cleanup: not connected messages: {}   parent-ids: {}",
+                    &noncon_ids.len(),
+                    &parent_ids_active.len()
+                );
+            }
             inner.need_update_messages = true;
             inner.messgesrepo.update_is_deleted_many(&noncon_ids, true);
         }
@@ -281,7 +289,17 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
             }
         }
 
-        StepResult::Continue(Box::new(Notify(inner)))
+        StepResult::Continue(Box::new(DeleteDoubleSameMessages(inner)))
+    }
+}
+
+pub struct DeleteDoubleSameMessages(pub CleanerInner);
+impl Step<CleanerInner> for DeleteDoubleSameMessages {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+		///  TODO : delete double messages
+		
+
+        StepResult::Continue(Box::new(Notify(self.0)))
     }
 }
 

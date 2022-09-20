@@ -84,7 +84,6 @@ pub enum SJob {
     ScanEmptyUnread,
 }
 
-
 // #[automock]
 pub trait ISourceTreeController {
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool;
@@ -567,8 +566,6 @@ impl SourceTreeController {
             let now_seconds = timestamp_now();
             let time_outdated = now_seconds - (fse.updated_icon + ICON_RELOAD_TIME_S);
             if time_outdated > 0 || fse.icon_id < ICON_LIST.len() {
-
-
                 // let now_minus_outdated = now_seconds - time_outdated;
                 // trace!(                    "check_icon: id:{}  icon_id:{}     now-OutDated: {}s   {}h   icon_updated:{}",                    fs_id,                    fse.icon_id,                    now_minus_outdated,                    (now_minus_outdated as f32 / 3600.0),            crate::util::        db_time_to_display(fse.updated_icon)                );
                 (*self.downloader_r)
@@ -1509,7 +1506,7 @@ impl StartupWithAppContext for SourceTreeController {
         }
         self.addjob(SJob::ScanEmptyUnread);
         self.addjob(SJob::GuiUpdateTreeAll);
-        self.addjob(SJob::SanitizeSources);
+        // self.addjob(SJob::SanitizeSources);	// later: do that with dialog,  with config setting
         self.addjob(SJob::UpdateTreePaths);
     }
 }
