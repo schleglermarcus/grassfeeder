@@ -222,9 +222,14 @@ pub fn create_new_feedsource_dialog(
     dialog.connect_response(move |dialog, rt| {
         match rt {
             ResponseType::Ok => {
+
+                let f2txt = ent2_c.text().as_str().to_string();
+                debug!("new-subscr: hp={}", &f2txt);
+
+				
                 let payload = vec![
                     AValue::ASTR(ent1_c.text().as_str().to_string()),
-                    AValue::ASTR(ent2_c.text().as_str().to_string()),
+                    AValue::ASTR(f2txt),
                 ];
                 let _r = ev_se.send(GuiEvents::DialogData("new-feedsource".to_string(), payload));
             }

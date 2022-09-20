@@ -185,7 +185,7 @@ impl GtkGuiBuilder for GtkObjectTree {
         //         paned_1.connect_position_set_notify(|p| {            debug!("paned1: pos_set {}", p.position());        });
         let p1p = self.get_int(PropDef::GuiPane1Pos, 90) as i32;
         paned_1.set_position(p1p);
-        let col1width = self.get_int(PropDef::GuiCol1Width, 77) as i32;
+        let col1width = self.get_int(PropDef::GuiCol1Width, 200) as i32;
         let sort_col = self.get_int(PropDef::GuiList0SortColumn, 0);
         let sort_asc = self.get_bool(PropDef::GuiList0SortAscending);
         let content_treeview2 = create_listview(

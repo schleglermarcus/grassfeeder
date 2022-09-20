@@ -9,7 +9,6 @@ use rusqlite::Connection;
 use std::sync::Arc;
 use std::sync::Mutex;
 
-// TODO register at timer for shutdown,  do flush.
 pub trait IMessagesRepo {
     /// returns index value
     fn insert(&self, entry: &MessageRow) -> Result<i64, Box<dyn std::error::Error>>;
@@ -58,7 +57,7 @@ pub trait IMessagesRepo {
     fn get_src_not_contained(&self, src_repo_id_list: &[i32]) -> Vec<MessageRow>;
 
     ///  deletes really those IDs, if they were set to is_deleted  before. Returns the count really deleted.
-    fn delete_by_index(&self, indices: &Vec<i32>) -> usize;
+    fn delete_by_index(&self, indices: &[i32]) -> usize;
 
     fn db_vacuum(&self) -> usize;
 }
@@ -70,19 +69,19 @@ pub struct MessagesRepo {
 impl MessagesRepo {
     pub const CONF_DB_KEY_FOLDER: &'static str = "messages_db_folder";
 
-    pub fn by_folder(foldername: &String) -> Self {
+    pub fn by_folder(foldername: &str) -> Self {
         MessagesRepo {
             ctx: SqliteContext::new(MessagesRepo::filename(foldername)),
         }
     }
 
-    pub fn filename(foldername: &String) -> String {
+    pub fn filename(foldername: &str) -> String {
         format!("{}messages.db", foldername)
     }
 
-    pub fn by_filename(filename: &String) -> Self {
+    pub fn by_filename(filename: &str) -> Self {
         MessagesRepo {
-            ctx: SqliteContext::new(filename.clone()),
+            ctx: SqliteContext::new(filename.to_string()),
         }
     }
 
@@ -320,7 +319,7 @@ impl IMessagesRepo for MessagesRepo {
     }
 
     ///  deletes really those IDs, if they were set to is_deleted  before.
-    fn delete_by_index(&self, indices: &Vec<i32>) -> usize {
+    fn delete_by_index(&self, indices: &[i32]) -> usize {
         let joined = indices
             .iter()
             .map(|r| r.to_string())

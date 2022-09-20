@@ -44,6 +44,7 @@ use std::time::Duration;
 
 pub static KEEPRUNNING: AtomicBool = AtomicBool::new(true);
 pub const CONF_DOWNLOADER_THREADS: &str = "DownloaderThreads";
+pub const DOWNLOADER_THREADS_DEFAULT  : u8 =2;
 pub const DOWNLOADER_LOOP_DELAY_S: u8 = 1;
 pub const DOWNLOADER_LOOP_WAIT_MS: u64 = 200; // between downloader queue requests
 pub const DOWNLOADER_JOB_QUEUE: usize = 10000;
@@ -155,7 +156,7 @@ impl Downloader {
                 "Invalid Number of downloader threads: {}",
                 self.config.num_downloader_threads
             );
-            self.config.num_downloader_threads = 1;
+            self.config.num_downloader_threads = DOWNLOADER_THREADS_DEFAULT;
         }
         for n in 0..self.config.num_downloader_threads {
             let gp_sender: Sender<Job> = self.gp_job_sender.as_ref().unwrap().clone();

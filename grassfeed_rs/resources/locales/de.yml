@@ -17,6 +17,9 @@ de:
   TB_ADD_FEED: Quelle hinzufügen
   TB_REFRESH_ALL: Alle Quellen aktualisieren
 
+  SUBSC_DEFAULT_FOLDER1: Beispiele
+  SUBSC_DEFAULT_FOLDER2: Technik
+
   CM_MSG_MARK_AS_READ: Als gelesen markieren
   CM_MSG_MARK_AS_UNREAD: Als ungelesen markieren
   CM_MSG_OPEN_IN_BROWSER: Im Browser öffnen

@@ -142,6 +142,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
+            ("https://www.ksta.de/feed/index.rss", "koelner"),
             (
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",
@@ -167,8 +168,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "youtube",
             ),
             ("http://feeds.feedburner.com/TechmemeRideHome", "techmeme"),
-            ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
+            ("https://www.opendesktop.org/content.rdf", "opendesktop"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -217,7 +218,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://www.relay.fm/rd/feed", "rel_rd"),
             ("https://www.relay.fm/query/feed", "rel_query"),
             ("http://feeds.feedburner.com/euronews/en/news/", "euronews"),
-            ("https://www.ksta.de/feed/index.rss", "koelner"),
             ("https://kodansha.us/feed/", "Kodansha"),
             ("https://planet.debian.org/rss20.xml", "debian"),
             ("https://report24.news/feed/", "report24"),

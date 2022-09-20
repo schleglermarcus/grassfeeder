@@ -1,6 +1,8 @@
 use crate::config::configmanager::ConfigManager;
 use crate::controller::browserpane::BrowserPane;
 use crate::controller::contentdownloader::Downloader;
+use crate::controller::contentdownloader::CONF_DOWNLOADER_THREADS;
+use crate::controller::contentdownloader::DOWNLOADER_THREADS_DEFAULT;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::guiprocessor::GuiProcessor;
 use crate::controller::sourcetree::SourceTreeController;
@@ -91,15 +93,19 @@ pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, Stri
         PropDef::BrowserDir.tostring(),
         format!("{}/browser", &gf_conf.path_cache),
     );
-    ret.insert(PropDef::GuiWindowWidth.tostring(), "600".to_string());
+    ret.insert(PropDef::GuiWindowWidth.tostring(), "700".to_string());
     ret.insert(PropDef::GuiWindowHeight.tostring(), "300".to_string());
-    ret.insert(PropDef::GuiPane1Pos.tostring(), "200".to_string());
-    ret.insert(PropDef::GuiPane2Pos.tostring(), "400".to_string());
+    ret.insert(PropDef::GuiPane1Pos.tostring(), "150".to_string());
+    ret.insert(PropDef::GuiPane2Pos.tostring(), "450".to_string());
     ret.insert(
         PropDef::BrowserBackgroundLevel.tostring(),
         "200".to_string(),
     );
     ret.insert(PropDef::AppUrl.tostring(), "grassfeede.rs".to_string());
+    ret.insert(
+        CONF_DOWNLOADER_THREADS.to_string(),
+        DOWNLOADER_THREADS_DEFAULT.to_string(),
+    );
     ret
 }
 

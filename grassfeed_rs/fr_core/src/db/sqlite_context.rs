@@ -1,3 +1,4 @@
+use crate::util::file_exists;
 use rusqlite::params_from_iter;
 use rusqlite::Connection;
 use rusqlite::ParamsFromIter;
@@ -27,14 +28,17 @@ where
 {
     connection: Arc<Mutex<Connection>>,
     _p: PhantomData<T>,
+    db_file_existed_before: bool,
 }
 
 impl<T: TableInfo> SqliteContext<T> {
     pub fn new(filenam: String) -> Self {
+        let existed = file_exists(&filenam);
         let c = Connection::open(filenam).unwrap();
         SqliteContext {
             connection: Arc::new(Mutex::new(c)),
             _p: PhantomData,
+            db_file_existed_before: existed,
         }
     }
 
@@ -42,6 +46,7 @@ impl<T: TableInfo> SqliteContext<T> {
         SqliteContext {
             connection: con,
             _p: PhantomData,
+            db_file_existed_before: false,
         }
     }
 
@@ -49,6 +54,7 @@ impl<T: TableInfo> SqliteContext<T> {
         SqliteContext {
             connection: Arc::new(Mutex::new(Connection::open_in_memory().unwrap())),
             _p: PhantomData,
+            db_file_existed_before: false,
         }
     }
 
@@ -256,6 +262,10 @@ impl<T: TableInfo> SqliteContext<T> {
         if r.is_err() {
             warn!("cache_flush {:?}", r.err());
         }
+    }
+
+    pub fn db_existed_before(&self) -> bool {
+        self.db_file_existed_before
     }
 }
 

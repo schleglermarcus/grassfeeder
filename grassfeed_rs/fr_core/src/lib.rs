@@ -6,6 +6,8 @@ extern crate log;
 extern crate mockall;
 #[cfg(test)]
 extern crate rand;
+#[macro_use]
+extern crate rust_i18n;
 
 extern crate jpeg_decoder;
 extern crate libwebp_image;
@@ -19,3 +21,5 @@ pub mod timer;
 pub mod ui_select;
 pub mod util;
 pub mod web;
+
+i18n!("../resources/locales");

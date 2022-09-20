@@ -180,12 +180,10 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
     se.folder_position = 3;
     assert!(subsrepo.store_entry(&se).is_ok());
 
-
-	se.display_name = "fifth".to_string();
+    se.display_name = "fifth".to_string();
     se.expanded = false;
     se.folder_position = 4;
-    assert!(subsrepo.store_entry(&se).is_ok());	// 5
-
+    assert!(subsrepo.store_entry(&se).is_ok()); // 5
 
     // subsrepo.debug_dump_tree("###");
     let mut m1 = MessageRow::default();
@@ -204,8 +202,7 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
         let _r = msgrepo.insert(&m1);
     }
 
-
-	m1.is_deleted = false;
+    m1.is_deleted = false;
     m1.subscription_id = 5;
     m1.title = compress("fifth"); // .to_string();
     for i in 0..10 {
@@ -213,14 +210,7 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
         m1.entry_src_date = 1000000000_i64 + 100000 * i;
         let _r = msgrepo.insert(&m1);
     }
-
-
-
 }
-
-
-
-
 
 // ------------------------------------
 

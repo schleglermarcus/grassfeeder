@@ -26,7 +26,6 @@ pub const FILENAME_JSON: &str = "subscription_list.json";
 pub const CONV_TO: &dyn Fn(String) -> Option<SubscriptionEntry> = &json_to_subscription_entry;
 pub const CONV_FROM: &dyn Fn(&SubscriptionEntry) -> Option<String> = &subscription_entry_to_json;
 
-// TODO  register at timer for shutdown,  do flush!
 pub trait ISubscriptionRepo {
     /// sorts by folder_position
     fn get_by_parent_repo_id(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry>;
@@ -93,6 +92,9 @@ pub trait ISubscriptionRepo {
 
 	fn db_vacuum(&self) -> usize ;
 
+	//  is false if no DB was present - on fresh start
+	fn db_existed_before(&self) -> bool;
+
 }
 
 pub struct SubscriptionRepo {
@@ -101,21 +103,21 @@ pub struct SubscriptionRepo {
 }
 
 impl SubscriptionRepo {
-    pub fn by_folder(foldername: &String) -> Self {
+    pub fn by_folder(foldername: &str) -> Self {
         SubscriptionRepo {
-            folder_name: foldername.clone(),
+            folder_name: foldername.to_string(),
             ctx: SqliteContext::new(Self::filename(foldername)),
         }
     }
 
-    pub fn filename(foldername: &String) -> String {
+    pub fn filename(foldername: &str) -> String {
         format!("{}subscriptions.db", foldername)
     }
 
-    pub fn by_file(filename: &String) -> Self {
+    pub fn by_file(filename: &str) -> Self {
         SubscriptionRepo {
             folder_name: String::default(),
-            ctx: SqliteContext::new(filename.clone()),
+            ctx: SqliteContext::new(filename.to_string()),
         }
     }
 
@@ -438,6 +440,13 @@ impl ISubscriptionRepo for SubscriptionRepo {
 	fn db_vacuum(&self) -> usize {
         self.ctx.execute("VACUUM".to_string())
     }
+
+
+	fn db_existed_before(&self) -> bool
+	{
+		self.ctx.db_existed_before()
+	}
+
 
 } // ISubscriptionRepo
 

@@ -303,10 +303,6 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
             .iter()
             .map(|se| se.subs_id as i32)
             .collect();
-
-        debug!("DeleteDoubleSameMessages : active={:?}", subs_ids_active);
-
-        //  TODO : delete double messages
         for subs_id in subs_ids_active {
             let mut msglist: Vec<MessageRow> =
                 inner.messgesrepo.get_by_src_id(subs_id as isize, true);
@@ -324,7 +320,6 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
                     known.insert((msg.entry_src_date, msg.title.clone()));
                 };
             });
-
             for d in &delete_list {
                 trace!(
                     "{} double: ID:{}\tdate:{} fetch:{}\t{}",
@@ -336,7 +331,6 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
                 );
             }
             let del_indices: Vec<i32> = delete_list.iter().map(|m| m.message_id as i32).collect();
-            // inner.messgesrepo.delete_by_index(&del_indices);
             debug!("setting deleted: {} messages", del_indices.len());
             inner
                 .messgesrepo
@@ -348,7 +342,6 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
 }
 
 // later : clean out all deleted messages
-
 
 pub struct Notify(pub CleanerInner);
 impl Step<CleanerInner> for Notify {

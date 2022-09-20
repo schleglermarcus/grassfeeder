@@ -82,6 +82,7 @@ pub enum SJob {
     /// subscription_id,  num_msg_all, num_msg_unread
     NotifyTreeReadCount(isize, isize, isize),
     ScanEmptyUnread,
+    EmptyTreeCreateDefaultSubscriptions,
 }
 
 // #[automock]
@@ -336,6 +337,10 @@ impl SourceTreeController {
                             }
                         }
                     }
+                }
+
+                SJob::EmptyTreeCreateDefaultSubscriptions => {
+                    self.empty_create_default_subscriptions()
                 }
             }
             if self.config.mode_debug {
@@ -921,6 +926,68 @@ impl SourceTreeController {
         next_subs_id
     }
 
+    fn empty_create_default_subscriptions(&mut self) {
+        let before = (*self.subscriptionrepo_r).borrow().db_existed_before();
+        if before {
+            return;
+        }
+        info!("SUBS:   existed DB :  {} ", before);
+        {
+            let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
+            self.add_new_subscription_at_parent(
+                "https://rss.slashdot.org/Slashdot/slashdot".to_string(),
+                "Slashdot".to_string(),
+                folder1,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://www.reddit.com/r/aww.rss".to_string(),
+                "Reddit - Aww".to_string(),
+                folder1,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://xkcd.com/atom.xml".to_string(),
+                "XKCD".to_string(),
+                folder1,
+                true,
+            );
+        }
+        {
+            let folder2 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER2"), 0);
+            self.add_new_subscription_at_parent(
+                "https://github.com/schleglermarcus/grassfeeder/releases.atom".to_string(),
+                "Grassfeeder Releases".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://blog.linuxmint.com/?feed=rss2".to_string(),
+                "Linux Mint".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "http://blog.rust-lang.org/feed.xml".to_string(),
+                "Rust Language".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://www.heise.de/rss/heise-atom.xml".to_string(),
+                "Heise.de".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://rss.golem.de/rss.php?feed=ATOM1.0".to_string(),
+                "Golem.de".to_string(),
+                folder2,
+                true,
+            );
+        }
+    }
+
     //	impl SourceTree
 }
 
@@ -1499,6 +1566,9 @@ impl StartupWithAppContext for SourceTreeController {
             .borrow()
             .store_default_db_entries();
         self.startup_read_config();
+
+        self.addjob(SJob::EmptyTreeCreateDefaultSubscriptions);
+
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::FillSourcesTree);
         if self.config.feeds_fetch_at_start {

@@ -7,25 +7,21 @@ use crate::db::subscription_repo::SubscriptionRepo;
 use crate::downloader::db_clean::CleanerInner;
 use crate::downloader::db_clean::CleanerStart;
 use crate::util::StepResult;
+use crate::util::file_exists;
 
-pub fn databases_consistency_check(foldername: &String) {
+pub fn databases_consistency_check(foldername: &str) {
     databases_consistency_check_u(foldername, false, true);
 }
 
-fn file_exists(filename: &String) -> bool {
-    if let Ok(metadata) = std::fs::metadata(&filename) {
-        return metadata.is_file();
-    }
-    false
-}
-pub fn databases_consistency_check_u(foldername: &String, set_undelete: bool, really_remove: bool) {
+
+pub fn databases_consistency_check_u(foldername: &str, set_undelete: bool, really_remove: bool) {
     let subs_fn = SubscriptionRepo::filename(foldername);
     if !file_exists(&subs_fn) {
         error!("No file {} ", subs_fn);
         return;
     }
     let subs_copy = format!("{}.copy", subs_fn);
-    std::fs::copy(subs_fn.clone(), subs_copy.clone()).unwrap();
+    std::fs::copy(&subs_fn, &subs_copy).unwrap();
     let subsrepo1 = SubscriptionRepo::by_file(&subs_fn);
     let all_subscriptions = subsrepo1.get_all_entries();
     debug!(
@@ -35,7 +31,7 @@ pub fn databases_consistency_check_u(foldername: &String, set_undelete: bool, re
     );
     let msg_fn = MessagesRepo::filename(foldername);
     let msg_copy = format!("{}.copy", msg_fn);
-    std::fs::copy(msg_fn.clone(), msg_copy.clone()).unwrap();
+    std::fs::copy(&msg_fn, msg_copy).unwrap();
     let msgrepo1 = MessagesRepo::by_filename(&msg_fn);
     let all_messages = msgrepo1.get_all_messages();
     debug!("Messages  {}  #{}", &msg_fn, &all_messages.len());

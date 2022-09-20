@@ -2,10 +2,11 @@ To Do List
 
 
 
-- Add default set of feeds on new configuration
 
 - Umlaut in name at New-Feed  https://www.ksta.de/feed/index.rss
 - Check: &  in Feed-title, Message-title. should be escaped
+
+
 - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
 
 - Databases consistency check with open Dialog.
