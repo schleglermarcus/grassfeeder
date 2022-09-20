@@ -67,7 +67,7 @@ Perhaps:
 -----
 
 * Get the branch and test it:
-  git pull  https://github.com/schleglermarcus/grassfeeder  v0_0_5
+  git clone -b  v0_0_5  https://github.com/schleglermarcus/grassfeeder gf-v005  
 
 
 * Merge Branch and build release
