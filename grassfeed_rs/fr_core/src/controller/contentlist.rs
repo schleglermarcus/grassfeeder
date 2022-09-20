@@ -12,7 +12,6 @@ use crate::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util::db_time_to_display;
 use crate::util::remove_invalid_chars_from_input;
-use crate::util::string_escape_url;
 use chrono::DateTime;
 use chrono::Local;
 use context::appcontext::AppContext;
@@ -210,10 +209,14 @@ impl FeedContents {
         ))); // 4
         newrow.push(AValue::AU32(fc.message_id as u32)); // 5
         if debug_mode {
-            let escaped_post_id = string_escape_url(fc.post_id.clone());
+            // let escaped_post_id = crate::util::string_escape_url(fc.post_id.clone());
+            let isdel = if fc.is_deleted { 1 } else { 0 };
             newrow.push(AValue::ASTR(format!(
-                "id{} src{}  postid:{}",
-                fc.message_id, fc.subscription_id, escaped_post_id
+                "id{} src{}  D:{} F:{}",
+                fc.message_id,
+                fc.subscription_id,
+                isdel,
+                crate::util::db_time_to_display(fc.fetch_date)
             )));
         } else {
             newrow.push(AValue::None);
@@ -481,7 +484,6 @@ impl IFeedContents for FeedContents {
         self.last_activated_subscription_id.replace(feed_source_id);
         let mut messagelist: Vec<MessageRow> =
             (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(feed_source_id, false);
-
         self.fc_state_map.write().unwrap().clear();
         messagelist.iter_mut().enumerate().for_each(|(i, fc)| {
             self.insert_state_from_row(fc, Some(i as isize));

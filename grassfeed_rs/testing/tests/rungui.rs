@@ -168,6 +168,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ),
             ("http://feeds.feedburner.com/TechmemeRideHome", "techmeme"),
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
+            ("https://www.gistpaper.com/feed", "gistpaper"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(

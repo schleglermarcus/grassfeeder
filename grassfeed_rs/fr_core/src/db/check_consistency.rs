@@ -12,28 +12,33 @@ pub fn databases_consistency_check(foldername: &String) {
     databases_consistency_check_u(foldername, false, true);
 }
 
+fn file_exists(filename: &String) -> bool {
+    if let Ok(metadata) = std::fs::metadata(&filename) {
+        return metadata.is_file();
+    }
+    false
+}
 pub fn databases_consistency_check_u(foldername: &String, set_undelete: bool, really_remove: bool) {
     let subs_fn = SubscriptionRepo::filename(foldername);
+    if !file_exists(&subs_fn) {
+        error!("No file {} ", subs_fn);
+        return;
+    }
     let subs_copy = format!("{}.copy", subs_fn);
-    std::fs::copy(subs_fn, subs_copy.clone()).unwrap();
-    let subsrepo1 = SubscriptionRepo::by_file(&subs_copy);
+    std::fs::copy(subs_fn.clone(), subs_copy.clone()).unwrap();
+    let subsrepo1 = SubscriptionRepo::by_file(&subs_fn);
     let all_subscriptions = subsrepo1.get_all_entries();
     debug!(
         "Start Check  Subscriptions: {}  #{}",
-        &subs_copy,
+        &subs_fn,
         all_subscriptions.len()
     );
     let msg_fn = MessagesRepo::filename(foldername);
     let msg_copy = format!("{}.copy", msg_fn);
     std::fs::copy(msg_fn.clone(), msg_copy.clone()).unwrap();
-    let msgrepo1 = MessagesRepo::by_filename(&msg_copy);
+    let msgrepo1 = MessagesRepo::by_filename(&msg_fn);
     let all_messages = msgrepo1.get_all_messages();
-    debug!(
-        "Messages  {}=>{}  #{}",
-        &msg_fn,
-        &msg_copy,
-        &all_messages.len()
-    );
+    debug!("Messages  {}  #{}", &msg_fn, &all_messages.len());
 
     if set_undelete {
         debug!("setting all messages to undeleted!  ");
@@ -80,7 +85,7 @@ pub fn databases_consistency_check_u(foldername: &String, set_undelete: bool, re
     let v_msg = inner.messgesrepo.db_vacuum();
     debug!("vacuuum done #vmsg={}  #vsubs={}", v_msg, v_sub);
 
-	let all_messages = inner.messgesrepo.get_all_messages();
+    let all_messages = inner.messgesrepo.get_all_messages();
     let count_not_deleted = all_messages.iter().filter(|m| !m.is_deleted).count();
     debug!("After cleanup  #MESSAGES= #{}", count_not_deleted);
 

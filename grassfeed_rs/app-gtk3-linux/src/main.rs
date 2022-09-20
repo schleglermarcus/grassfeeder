@@ -47,14 +47,14 @@ fn main() {
     }
     if opts.check {
         trace!(
-            "Starting {} {} with {} {}    Database consistency check",
-            APP_NAME, &version_str, &conf, &cache,
+            "{} {} Database consistency check: {}    ",
+            APP_NAME,
+            &version_str,
+            &conf,
         );
-        check_consistency::db_1(&cache);
-
+        check_consistency::databases_consistency_check_u(&conf, true, true);
         return; // no gui
     }
-
     info!(
         "Starting {} with {} {}  locale={:?} V={}",
         APP_NAME,

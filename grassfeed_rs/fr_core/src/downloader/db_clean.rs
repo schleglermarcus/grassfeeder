@@ -1,5 +1,7 @@
 use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
+use crate::db::message::decompress;
+use crate::db::message::MessageRow;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
@@ -77,7 +79,7 @@ pub struct RemoveNonConnected(pub CleanerInner);
 impl Step<CleanerInner> for RemoveNonConnected {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-        let all_entries = inner.subscriptionrepo.get_all_entries();
+        let all_subs = inner.subscriptionrepo.get_all_entries();
         let mut connected_child_list: HashSet<isize> = HashSet::default();
         let mut folder_todo: Vec<isize> = Vec::default();
         folder_todo.push(0);
@@ -92,7 +94,7 @@ impl Step<CleanerInner> for RemoveNonConnected {
             });
         }
         let mut delete_list: HashSet<isize> = HashSet::default();
-        all_entries.iter().for_each(|se| {
+        all_subs.iter().for_each(|se| {
             if se.deleted || se.parent_subs_id < 0 {
                 delete_list.insert(se.subs_id);
             } else if !connected_child_list.contains(&se.subs_id) {
@@ -247,7 +249,6 @@ pub struct ReduceTooManyMessages(pub CleanerInner);
 impl Step<CleanerInner> for ReduceTooManyMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-
         if inner.max_messages_per_subscription > 1 {
             let subs_ids = inner
                 .subscriptionrepo
@@ -288,7 +289,6 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 }
             }
         }
-
         StepResult::Continue(Box::new(DeleteDoubleSameMessages(inner)))
     }
 }
@@ -296,14 +296,59 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
 pub struct DeleteDoubleSameMessages(pub CleanerInner);
 impl Step<CleanerInner> for DeleteDoubleSameMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
-		///  TODO : delete double messages
-		
+        let inner = self.0;
+        let subs_ids_active: Vec<i32> = inner
+            .subscriptionrepo
+            .get_all_nonfolder()
+            .iter()
+            .map(|se| se.subs_id as i32)
+            .collect();
 
-        StepResult::Continue(Box::new(Notify(self.0)))
+        debug!("DeleteDoubleSameMessages : active={:?}", subs_ids_active);
+
+        //  TODO : delete double messages
+        for subs_id in subs_ids_active {
+            let mut msglist: Vec<MessageRow> =
+                inner.messgesrepo.get_by_src_id(subs_id as isize, true);
+            if msglist.is_empty() {
+                continue;
+            }
+            msglist.sort_by(|a, b| a.fetch_date.cmp(&b.fetch_date));
+
+            let mut known: HashSet<(i64, String)> = HashSet::new();
+            let mut delete_list: Vec<MessageRow> = Vec::default();
+            msglist.iter().for_each(|msg| {
+                if known.contains(&(msg.entry_src_date, msg.title.clone())) {
+                    delete_list.push(msg.clone());
+                } else {
+                    known.insert((msg.entry_src_date, msg.title.clone()));
+                };
+            });
+
+            for d in &delete_list {
+                trace!(
+                    "{} double: ID:{}\tdate:{} fetch:{}\t{}",
+                    subs_id,
+                    d.message_id,
+                    db_time_to_display(d.entry_src_date),
+                    db_time_to_display(d.fetch_date),
+                    decompress(&d.title),
+                );
+            }
+            let del_indices: Vec<i32> = delete_list.iter().map(|m| m.message_id as i32).collect();
+            // inner.messgesrepo.delete_by_index(&del_indices);
+            debug!("setting deleted: {} messages", del_indices.len());
+            inner
+                .messgesrepo
+                .update_is_deleted_many(del_indices.as_slice(), true);
+        }
+
+        StepResult::Continue(Box::new(Notify(inner)))
     }
 }
 
-// later : clean out all deleted messagesrepo
+// later : clean out all deleted messages
+
 
 pub struct Notify(pub CleanerInner);
 impl Step<CleanerInner> for Notify {
