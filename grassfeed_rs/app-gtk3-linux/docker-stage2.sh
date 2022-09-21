@@ -2,7 +2,8 @@
 
 DIR=`pwd` 
 VERSION=`cat Cargo.toml  |grep "^version"  |sed -e "s/.*= \"//" -e "s/\"//"`
-test -d target || mkdir target
+rm -rf target
+mkdir target
 
 # the output file is used by the docker file
 (cd ../../ ; tar c --exclude=grassfeed_rs/target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >$DIR/target/gf.tar.gz )
