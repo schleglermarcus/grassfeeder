@@ -1,6 +1,6 @@
 To Do List
 
-23h59
+
 
 - check: subscription  Reload shall refresh  message list
 - Copy Message address into clipboard
@@ -69,7 +69,7 @@ Perhaps:
 -----
 
 * Get the branch and test it:
-  git clone -b  v0_0_5  https://github.com/schleglermarcus/grassfeeder gf-v005  
+  git clone -b  v0_0_5  https://github.com/schleglermarcus/grassfeeder gf-v005
 
 
 * Merge Branch and build release
@@ -122,9 +122,10 @@ https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 Docker:  3 Phasen:  aus,   build, run
 	https://kerkour.com/rust-small-docker-image#/from-buster-slim
 	https://windsoilder.github.io/writing_dockerfile_in_rust_project.html
+https://middleware.io/blog/docker-cleanup/
+# docker image prune
 
-
-	- Multiple instances shall be blocking.
+-------------------
 	       GTK_DEBUG=interactive
 	https://docs.gtk.org/gio/class.Application.html
 	https://wiki.gnome.org/HowDoI/GtkApplication

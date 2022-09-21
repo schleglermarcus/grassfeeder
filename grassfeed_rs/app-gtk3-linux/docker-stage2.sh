@@ -9,7 +9,7 @@ test -d target || mkdir target
 
 docker build -t grassfeeder:stage2 -f  stage2.docker .
 
-docker cp $(docker create --name tc grassfeeder:stage2):/usr/src/gf/grassfeed_rs/target/debian/grassfeeder_D_amd64.deb target/ ; docker rm tc
+docker cp $(docker create --name tc grassfeeder:stage2):/usr/src/grassfeed_rs/target/debian/grassfeeder_D_amd64.deb target/ ; docker rm tc
 mv target/grassfeeder_D_amd64.deb  target/grassfeeder_${VERSION}_amd64.deb
 
  

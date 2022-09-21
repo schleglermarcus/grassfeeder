@@ -10,4 +10,4 @@ Wed, 21 Sep 2022 00:12:00 +0000
 * Bugfix: Fetch-All shall not include folder scheduling
 * Bugfix: on start create logging folder
 * Refactored test for new_entries_filter
-* New-Feed allowed umlaut in name, deacticated iso8859 filter
+* New-Feed allowed umlaut in name, deactivated iso8859 filter
