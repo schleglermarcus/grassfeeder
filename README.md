@@ -11,4 +11,6 @@ RSS Feed Reader anno 2022
 * Translations: english, german.
 * It is yet very fresh, not production ready
 
+![Version 0.0.5 light](web/screenshot-v005-bright.jpg)
+
 ![Version 0.0.5 dark](web/screenshot-v005-dark.jpg)
