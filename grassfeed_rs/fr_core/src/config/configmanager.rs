@@ -187,8 +187,6 @@ impl Buildable for ConfigManager {
         let _r = cm.load_user_conf(&cm.cconf_filename);
         cm
     }
-
-    // fn section_name() -> String {        String::from(ID_CONFIG)    }
 }
 
 impl TimerReceiver for ConfigManager {

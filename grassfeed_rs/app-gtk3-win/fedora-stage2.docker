@@ -1,0 +1,50 @@
+FROM fedora:stage1
+
+ENV PKG_CONFIG_ALLOW_CROSS=1
+ENV PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/pkgconfig/
+ENV GTK_INSTALL_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/
+
+COPY target/cr_src.tar.gz /usr/src/
+RUN mkdir /usr/src/cross
+WORKDIR /usr/src/cross
+RUN cat ../cr_src.tar.gz |gzip -d |tar x
+
+# ADD fedora-package.sh /usr/src/cross/
+#  RUN chmod +x fedora-package.sh
+# RUN ls -l   
+# RUN ./fedora-package.sh
+
+
+RUN cargo build --target=x86_64-pc-windows-gnu --release
+RUN mkdir -p package
+RUN cp target/x86_64-pc-windows-gnu/release/*.exe package
+RUN for DLL in `peldd package/*.exe -t --ignore-errors` ;      do cp "$DLL" package ;  done
+
+RUN mkdir -p package/share/themes
+RUN  mkdir -p package/share/gtk-3.0
+RUN cp -r $GTK_INSTALL_PATH/share/glib-2.0/schemas package/share/glib-2.0
+RUN cp -r $GTK_INSTALL_PATH/share/icons package/share/icons
+
+#cat << EOF > package/share/gtk-3.0/settings.ini
+#[Settings]
+#gtk-theme-name = Windows10
+#gtk-font-name = Segoe UI 10
+#gtk-xft-rgba = rgb
+#gtk-xft-antialias = 1
+#EOF
+RUN mv settings.ini  package/share/gtk-3.0/
+
+RUN ls -lh package/
+RUN du -shx package
+
+RUN mingw-strip package/*.dll
+RUN mingw-strip package/*.exe
+
+RUN ls -lh package/
+RUN du -shx package
+
+# RUN tar c package |gzip  >out_package.tar.gz
+# RUN mv out_package.tar.gz ..
+RUN zip -q -r target/out_package.zip  package
+RUN mv target/out_package.zip ..
+

@@ -774,7 +774,6 @@ impl Buildable for FeedContents {
         fc.config.list_sort_order_up = conf.get_bool(&PropDef::GuiList0SortAscending.to_string());
         fc
     }
-    // fn section_name() -> String {        String::from("contentlist")    }
 }
 
 impl StartupWithAppContext for FeedContents {

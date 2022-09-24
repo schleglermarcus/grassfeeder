@@ -185,7 +185,6 @@ impl Buildable for BrowserPane {
         }
         bp
     }
-    //  fn section_name() -> String {        String::from("browser")    }
 }
 
 impl StartupWithAppContext for BrowserPane {

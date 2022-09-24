@@ -160,7 +160,7 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#157;", " Š ");
     ret = ret.replace("&#164;", " ");
     ret = ret.replace("&#190;", "¾");
-    ret = ret.replace("&#226;", "â");
+    ret = ret.replace("&#226;", "\"");	// â
     ret = ret.replace("&#8211;", "\"");
     ret = ret.replace("&#8220;", "\"");
     ret = ret.replace("&#8221;", "\"");

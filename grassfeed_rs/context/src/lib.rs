@@ -9,12 +9,7 @@ use std::rc::Rc;
 
 pub trait Buildable: Sized {
     type Output;
-
-    /// Phase 1
     fn build(conf: Box<dyn BuildConfig>, appcontext: &AppContext) -> Self::Output;
-
-    // #[deprecated]
-    // fn section_name() -> String {      String::default()    }
 }
 
 pub trait BuildConfig {

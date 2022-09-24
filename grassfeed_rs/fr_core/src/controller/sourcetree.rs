@@ -1550,7 +1550,6 @@ impl Buildable for SourceTreeController {
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         SourceTreeController::new_ac(_appcontext)
     }
-    // fn section_name() -> String {         String::from("sourcetree")    }
 }
 
 impl StartupWithAppContext for SourceTreeController {
