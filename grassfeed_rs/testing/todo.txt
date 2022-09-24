@@ -1,7 +1,6 @@
 To Do List
 
 - Windows Build
-  https://www.ebbflow.io/blog/vending-win
 
 - check: subscription  Reload shall refresh  message list
 - Copy Message address into clipboard

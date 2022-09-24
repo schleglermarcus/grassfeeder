@@ -1,37 +1,58 @@
-FROM fedora:stage1
+FROM grassfeeder:fedora1
 
 ENV PKG_CONFIG_ALLOW_CROSS=1
-ENV PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/pkgconfig/
+ENV PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/pkgconfig/:/usr/i686-w64-mingw32/sys-root/mingw/lib/pkgconfig/
 ENV GTK_INSTALL_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/
+
+
+RUN cat /etc/redhat-release 
+
+# RUN dnf install -y   
+
+
+# Error: Unable to find a match: rust-javascriptcore-rs+default-devel 
+# Error: Unable to find a match: rust-javascriptcore-rs-sys
+# Error: Unable to find a match: rust-javascriptcore-rs-sys-devel
+# RUN dnf list javascriptcore*
+
+RUN find / -name javascriptcoregtk4.0.pc   
+
+RUN pkg-config --modversion  javascriptcoregtk4.0 
+RUN pkg-config --exists --print-errors 'javascriptcoregtk-4.0 >= 2.24'
+RUN pkg-config --libs --cflags javascriptcoregtk-4.0 "javascriptcoregtk-4.0 >= 2.24"
+
+
+#warning: `"pkg-config" "--libs" "--cflags" "javascriptcoregtk-4.0" "javascriptcoregtk-4.0 >= 2.24"` did not exit successfully: exit status: 1
+#error: failed to run custom build command for `javascriptcore-rs-sys v0.4.0`
+#  process didn't exit successfully: `/usr/src/cross/target/release/build/javascriptcore-rs-sys-35bf1758902a5093/build-script-build` (exit status: 1)
+#  cargo:warning=`"pkg-config" "--libs" "--cflags" "javascriptcoregtk-4.0" "javascriptcoregtk-4.0 >= 2.24"` did not exit successfully: exit status: 1
+#  error: could not find system library 'javascriptcoregtk-4.0' required by the 'javascriptcore-rs-sys' crate
+#  Package javascriptcoregtk-4.0 was not found in the pkg-config search path.
+#  Perhaps you should add the directory containing `javascriptcoregtk-4.0.pc'
+#  to the PKG_CONFIG_PATH environment variable
+#  Package 'javascriptcoregtk-4.0', required by 'virtual:world', not found
+ 
+
+
+
 
 COPY target/cr_src.tar.gz /usr/src/
 RUN mkdir /usr/src/cross
 WORKDIR /usr/src/cross
 RUN cat ../cr_src.tar.gz |gzip -d |tar x
 
-# ADD fedora-package.sh /usr/src/cross/
-#  RUN chmod +x fedora-package.sh
-# RUN ls -l   
-# RUN ./fedora-package.sh
 
-
+WORKDIR /usr/src/cross/app-gtk3-win
 RUN cargo build --target=x86_64-pc-windows-gnu --release
 RUN mkdir -p package
 RUN cp target/x86_64-pc-windows-gnu/release/*.exe package
 RUN for DLL in `peldd package/*.exe -t --ignore-errors` ;      do cp "$DLL" package ;  done
 
 RUN mkdir -p package/share/themes
-RUN  mkdir -p package/share/gtk-3.0
+RUN mkdir -p package/share/gtk-3.0
 RUN cp -r $GTK_INSTALL_PATH/share/glib-2.0/schemas package/share/glib-2.0
 RUN cp -r $GTK_INSTALL_PATH/share/icons package/share/icons
 
-#cat << EOF > package/share/gtk-3.0/settings.ini
-#[Settings]
-#gtk-theme-name = Windows10
-#gtk-font-name = Segoe UI 10
-#gtk-xft-rgba = rgb
-#gtk-xft-antialias = 1
-#EOF
 RUN mv settings.ini  package/share/gtk-3.0/
 
 RUN ls -lh package/

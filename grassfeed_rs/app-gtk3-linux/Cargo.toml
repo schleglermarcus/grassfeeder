@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.0.5"
+version = "0.0.6-pre"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 
@@ -34,6 +34,17 @@ copyright = "2022 <schlegler_marcus@posteo.de>"
 name = "grassfeeder"
 extended-description = "$description"
 changelog = "src/changelog.txt"
+section = "utility"
+priority = "optional"
+assets =[
+    ["target/release/grassfeeder", "usr/bin/", "755"],
+		["assets/grassfeeder.xpm", "/usr/share/pixmaps/", "755"],
+		["assets/grassfeeder.desktop", "/usr/share/applications/", "755"],
+# 		["README.md", "usr/share/doc/grassfeeder/README", "644"],
+]
+depends = "$auto"
+
+
 
 
 [package.metadata.i18n]
