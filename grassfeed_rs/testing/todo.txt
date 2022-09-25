@@ -20,7 +20,7 @@ To Do List
 - Subscriptions Sanitize:  test and clean with recursive folders
 - Sanitize: Message clean out those with deleted flag
 - Reduce Size of Binary:
-   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html 
+   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
 - Browser CleanUp Cache, on startup / finish
 - Subscription Tree: hide zeroes when nothing to read
 - refactor messages / separate state_map
@@ -134,3 +134,36 @@ https://middleware.io/blog/docker-cleanup/
 	https://wiki.gnome.org/HowDoI/GtkApplication
 	https://developer.gnome.org/documentation/tutorials/application.html
 	https://docs.gtk.org/gio/method.Application.run.html
+
+
+
+-------------------
+
+
+
+
+
+
+cat /proc/1/smaps |grep -i pagesize  |sort -u
+KernelPageSize:        4 kB
+
+
+/proc/self/statm
+
+
+https://www.kernel.org/doc/Documentation/filesystems/proc.txt
+
+Table 1-3: Contents of the statm files (as of 2.6.8-rc3)
+..............................................................................
+ Field    Content
+ size     total program size (pages)		(same as VmSize in status)
+ resident size of memory portions (pages)	(same as VmRSS in status)
+ shared   number of pages that are shared	(i.e. backed by a file, same
+						as RssFile+RssShmem in status)
+ trs      number of pages that are 'code'	(not including libs; broken,
+							includes data segment)
+ lrs      number of pages of library		(always 0 on 2.6)
+ drs      number of pages of data/stack		(including libs; broken,
+							includes library text)
+ dt       number of dirty pages			(always 0 on 2.6)
+..............................................................................

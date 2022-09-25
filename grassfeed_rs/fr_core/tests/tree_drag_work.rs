@@ -5,11 +5,31 @@ mod tree_drag_common;
 // use crate::tree_drag_common::dataset_three_folders;
 // use crate::tree_drag_common::prepare_source_tree_controller;
 // use fr_core::db::subscription_entry::SubscriptionEntry;
+use chrono::DateTime;
 use fr_core::db::message::MessageRow;
 use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::util::db_time_to_display_nonnull;
-use chrono::DateTime;
 use regex::Regex;
+
+#[test]
+fn memtest() {
+    setup();
+    if false {
+        let ps = proc_status::ProcStatus::read().unwrap();
+        for entry in ps.entries() {
+            let entry = entry.unwrap();
+            debug!("PS {:?} = {:?}  ", &entry.key, &entry.value);
+        }
+    }
+    let mem = proc_status::mem_usage().unwrap();
+    debug!(
+        "Mem usage in kb: current={}, peak={} ",
+        mem.current / 1024,
+        mem.peak / 1024
+    );
+
+
+}
 
 // #[ignore]
 //  #[test]

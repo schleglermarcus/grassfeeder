@@ -2,17 +2,17 @@ Wed, 21 Sep 2022 00:12:00 +0000
 * added desktop icon
 * Bugfix: rename folder crash
 * Delete Messages
+* Memory usage display in status bar
 
 
 - Windows Build
 
 - Show message sums on folders
-- Memory usage display in status bar
 	https://github.com/Tommoa/rs-process-memory
 	https://docs.rs/procfs/latest/procfs/
 	https://unix.stackexchange.com/questions/224015/memory-usage-of-a-given-process-using-linux-proc-filesystem
 
-	
+
 
 - Keyboard commands for:  mark-as-unread, next unread message
 - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom

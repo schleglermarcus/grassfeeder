@@ -1,5 +1,5 @@
 # FROM fedora:latest   gives version Fedora 36, which does not contain rust-javascriptcore-rs-devel  .   fedora::rawhide does not contain it either
-FROM fedora:37
+FROM fedora:rawhide
 
 RUN cat /etc/redhat-release 
 RUN dnf -y update

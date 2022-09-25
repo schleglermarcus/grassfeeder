@@ -1,16 +1,18 @@
 #[allow(unused_imports)]
 #[macro_use]
 extern crate log;
-
-#[cfg(test)]
-extern crate mockall;
-#[cfg(test)]
-extern crate rand;
 #[macro_use]
 extern crate rust_i18n;
-
 extern crate jpeg_decoder;
 extern crate libwebp_image;
+// extern crate nix;
+extern crate proc_status;
+
+// #[cfg(test)]
+// extern crate mockall;
+#[cfg(test)]
+extern crate rand;
+
 
 pub mod config;
 pub mod controller;

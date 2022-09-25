@@ -525,12 +525,8 @@ impl IFeedContents for FeedContents {
                 debug!("update_content_list_some  isdeleted: {}", &msg);
                 continue;
             }
-
             if let Some(state) = self.fc_state_map.read().unwrap().get(&msg.message_id) {
-                trace!(                    "update_content_list_some {:?} {} ",
-                    vec_pos_dbid,
-                    state.title_d
-                );
+                // trace!(                    "update_content_list_some {:?} {} ",                    vec_pos_dbid,                    state.title_d                );
                 let av_list = Self::message_to_row(
                     &msg,
                     self.list_fontsize as u32,
