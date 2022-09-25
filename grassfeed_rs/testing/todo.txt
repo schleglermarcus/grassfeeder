@@ -19,6 +19,8 @@ To Do List
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
 - Sanitize: Message clean out those with deleted flag
+- Reduce Size of Binary:
+   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html 
 - Browser CleanUp Cache, on startup / finish
 - Subscription Tree: hide zeroes when nothing to read
 - refactor messages / separate state_map

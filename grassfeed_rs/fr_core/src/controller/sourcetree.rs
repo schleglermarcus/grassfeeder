@@ -1350,7 +1350,13 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let fse: SubscriptionEntry = self.current_edit_fse.take().unwrap();
-        let newname = values.get(0).unwrap().str().unwrap();
+        assert!(!values.is_empty());
+        let mut newname = String::default();
+        if let Some(s) = values.get(0) {
+            if let Some(t) = s.str() {
+                newname = t;
+            }
+        }
         let newname = (*newname).trim();
         if !newname.is_empty() && fse.display_name != newname {
             (*self.subscriptionrepo_r)

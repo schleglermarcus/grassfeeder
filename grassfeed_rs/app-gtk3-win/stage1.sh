@@ -1,4 +1,4 @@
 #!/bin/bash
-docker build -t grassfeeder:fedora1 -f fedora-stage1.docker .
+docker build -t grassfeeder:fedora37   -f fedora-stage1.docker .
 
 

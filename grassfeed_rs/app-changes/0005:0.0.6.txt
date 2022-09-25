@@ -1,18 +1,23 @@
 Wed, 21 Sep 2022 00:12:00 +0000
+* added desktop icon
+* Bugfix: rename folder crash
+* Delete Messages
+
 
 - Windows Build
-  https://www.ebbflow.io/blog/vending-win
 
-
-- Desktop Icon:
-	    https://unalfaruk.com/2018/09/10/creating-a-shortcut-icon-on-debian/
-- Delete Messages
+- Show message sums on folders
 - Memory usage display in status bar
+	https://github.com/Tommoa/rs-process-memory
+	https://docs.rs/procfs/latest/procfs/
+	https://unix.stackexchange.com/questions/224015/memory-usage-of-a-given-process-using-linux-proc-filesystem
+
+	
+
 - Keyboard commands for:  mark-as-unread, next unread message
 - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
 - refactor messages / separate state_map
 - find common code parts of    folder:mark-as-read  ,  folder:update
-- Show message sums on folders
 - Browser: get rid of white display on start
 
 

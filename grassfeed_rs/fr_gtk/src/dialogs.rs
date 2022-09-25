@@ -222,11 +222,9 @@ pub fn create_new_feedsource_dialog(
     dialog.connect_response(move |dialog, rt| {
         match rt {
             ResponseType::Ok => {
-
                 let f2txt = ent2_c.text().as_str().to_string();
                 debug!("new-subscr: hp={}", &f2txt);
 
-				
                 let payload = vec![
                     AValue::ASTR(ent1_c.text().as_str().to_string()),
                     AValue::ASTR(f2txt),
@@ -480,7 +478,7 @@ fn create_feedsource_edit_dialog(
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-        // debug!("feedsource_edit: delete_event ");
+         debug!("feedsource_edit: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });
@@ -574,9 +572,7 @@ fn create_folder_edit_dialog(
     dialog.connect_response(move |dialog, rt| {
         match rt {
             ResponseType::Ok => {
-                // let mut av = Vec::<AValue>::default();
-                // av.push(AValue::ASTR(entry1c.text().to_string()));
-                let av = vec![AValue::None, AValue::ASTR(entry1c.text().to_string())];
+                let av = vec![AValue::ASTR(entry1c.text().to_string()), AValue::None];
                 let _r = ev_se.send(GuiEvents::DialogData("folder-edit".to_string(), av));
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {

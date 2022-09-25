@@ -521,9 +521,16 @@ impl IFeedContents for FeedContents {
                 continue;
             }
             let msg: MessageRow = o_msg.unwrap();
+            if msg.is_deleted {
+                debug!("update_content_list_some  isdeleted: {}", &msg);
+                continue;
+            }
 
             if let Some(state) = self.fc_state_map.read().unwrap().get(&msg.message_id) {
-                // trace!(                "update_content_list_some {:?} {} ",                vec_pos_dbid,                title_text            );
+                trace!(                    "update_content_list_some {:?} {} ",
+                    vec_pos_dbid,
+                    state.title_d
+                );
                 let av_list = Self::message_to_row(
                     &msg,
                     self.list_fontsize as u32,
@@ -551,7 +558,6 @@ impl IFeedContents for FeedContents {
         (*self.gui_updater)
             .borrow()
             .update_list_some(TREEVIEW1, &[list_position as u32]);
-        // trace!(            "toggle_feed_item_read {}",            *self.last_activated_subscription_id.borrow()        );
         self.addjob(CJob::RequestUnreadAllCount(
             *self.last_activated_subscription_id.borrow(),
         ));
@@ -641,13 +647,18 @@ impl IFeedContents for FeedContents {
                 self.set_read_many(&repoid_listpos, false);
             }
             "open-in-browser" => {
-                let repoids: Vec<i32> = repoid_listpos.iter().map(|(db, _lp)| *db).collect();
+                let db_ids: Vec<i32> = repoid_listpos.iter().map(|(db, _lp)| *db).collect();
                 // trace!("list ->  start external browser {:?}", repoid_listpos);
-                self.start_web_browser(repoids);
+                self.start_web_browser(db_ids);
                 self.set_read_many(&repoid_listpos, true);
             }
             "messages-delete" => {
-                debug!("TODO  delete messages  ");
+                let db_ids: Vec<i32> = repoid_listpos.iter().map(|(db, _lp)| *db).collect();
+                (self.messagesrepo_r)
+                    .borrow()
+                    .update_is_deleted_many(&db_ids, true);
+                let subs_id = *self.last_activated_subscription_id.borrow();
+                self.update_feed_list_contents(subs_id);
             }
             "copy-link" => {
                 debug!("TODO  instrument the clipboard ");
@@ -852,7 +863,6 @@ pub fn message_from_modelentry(me: &Entry) -> MessageRow {
         }
     }
     for media in &me.media {
-        // trace!("#content={}", media.content.len());
         for cont in &media.content {
             if let Some(m_url) = &cont.url {
                 let u: Url = m_url.clone();

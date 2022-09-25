@@ -913,21 +913,21 @@ fn show_context_menu_message(
     mi_open_browser.connect_activate(move |_menuiten| {
         esc.send();
     });
-    /*		later
-        let mi_delete = MenuItem::with_label(&t!("CM_MSG_DELETE"));
-        let esc = EvSenderCache(
-            g_ev_se.clone(),
-            GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.clone()),
-        );
-        mi_delete.connect_activate(move |_menuiten| {
-            esc.send();
-        });
-    */
+
+    let mi_delete = MenuItem::with_label(&t!("CM_MSG_DELETE"));
+    let esc = EvSenderCache(
+        g_ev_se.clone(),
+        GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.clone()),
+    );
+    mi_delete.connect_activate(move |_menuiten| {
+        esc.send();
+    });
+
     let mi_copy_link = MenuItem::with_label(&t!("CM_MSG_COPY_LINK_CLIPBOARD"));
     if repoid_listpos.len() == 1 {
         let esc = EvSenderCache(
             g_ev_se,
-            GuiEvents::ListSelectedAction(0, "copy-link".to_string(), repoid_listpos.clone()),
+            GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.clone()),
         );
         mi_copy_link.connect_activate(move |_menuiten| {
             esc.send();
@@ -941,7 +941,7 @@ fn show_context_menu_message(
     }
     menu.append(&mi_mark_read);
     menu.append(&mi_mark_unread);
-    //    menu.append(&mi_delete);		// later
+    menu.append(&mi_delete); // later
     menu.show_all();
     let c_ev_time = gtk::current_event_time();
     menu.popup_easy(ev_button, c_ev_time);
