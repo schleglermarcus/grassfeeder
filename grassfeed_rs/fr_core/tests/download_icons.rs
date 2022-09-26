@@ -218,8 +218,6 @@ fn test_retrieve_homepages() {
             "tests/data/arstechnica_feed.rss",
             "https://arstechnica.com/",
         ),
-        // (            "tests/data/chaosradio-complete.rss",           "https://chaosradio.de/",        ),
-        // ("tests/data/relay_rd.rss", "https://www.relay.fm/rd"),
     ];
     files_urls.iter().for_each(|(f, u)| {
         let buffer: Vec<u8> = file_to_bin(f).unwrap();

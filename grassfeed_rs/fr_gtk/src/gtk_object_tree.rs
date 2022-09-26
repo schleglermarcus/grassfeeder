@@ -65,6 +65,7 @@ use webkit2gtk::TLSErrorsPolicy;
 use webkit2gtk::WebContext;
 use webkit2gtk::WebContextExt;
 use webkit2gtk::WebView;
+use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
 
 const TOOLBAR_ICON_SIZE: i32 = 24;
@@ -333,13 +334,13 @@ impl GtkObjectTree {
             error!("build_gtk BrowserDir missing!");
             wconte = WebContext::default().unwrap();
         }
-
         wconte.set_spell_checking_enabled(false);
         wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
         let webview1: WebView = WebView::with_context(&wconte);
         webview1.set_widget_name("webview_0");
         webview1.set_border_width(4);
-
+        webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
+        // webview1.load_plain_text(" ");
         box1_v.pack_start(&webview1, true, true, 0);
         {
             let mut ret = (*gtk_obj_a).write().unwrap();

@@ -6,3 +6,4 @@ pub mod subscription_entry;
 pub mod subscription_repo;
 pub mod subscription_state;
 pub mod check_consistency;
+pub mod message_state;

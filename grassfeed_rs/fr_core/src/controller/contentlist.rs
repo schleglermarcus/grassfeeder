@@ -6,6 +6,7 @@ use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::db::message::decompress;
 use crate::db::message::MessageRow;
+use crate::db::message_state::MessageStateMap;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::timer::Timer;
@@ -82,13 +83,15 @@ pub trait IFeedContents {
     /// for clicking on the is-read icon
     fn toggle_feed_item_read(&self, content_repo_id: isize, list_position: i32);
 
-    /// updates existing entries,  returns the new entries only,
-    #[deprecated]
-    fn match_new_entries_to_db(
-        &self,
-        new_list: &[MessageRow],
-        source_repo_id: isize,
-    ) -> Vec<MessageRow>;
+    /*
+        /// updates existing entries,  returns the new entries only,
+        #[deprecated]
+        fn match_new_entries_to_db(
+            &self,
+            new_list: &[MessageRow],
+            source_repo_id: isize,
+        ) -> Vec<MessageRow>;
+    */
 
     fn get_job_receiver(&self) -> Receiver<CJob>;
     fn get_job_sender(&self) -> Sender<CJob>;
@@ -110,7 +113,10 @@ pub trait IFeedContents {
     fn set_selected_content_ids(&self, list: Vec<i32>);
     fn get_selected_content_ids(&self) -> Vec<i32>;
 
-    fn get_msg_state(&self, msg_id: isize, current_row: Option<&MessageRow>) -> FeedContentState;
+    /*
+        #[deprecated]
+        fn get_msg_state(&self, msg_id: isize, current_row: Option<&MessageRow>) -> FeedContentState;
+    */
 
     ///  decompressed
     fn get_msg_content_author_categories(
@@ -119,12 +125,14 @@ pub trait IFeedContents {
         current_row: Option<&MessageRow>,
     ) -> (String, String, String);
 
-    fn set_state_gui_listpos(
-        &self,
-        msg_id: isize,
-        listpos: isize,
-        current_row: Option<&MessageRow>,
-    );
+    /*
+        fn set_state_gui_listpos(
+            &self,
+            msg_id: isize,
+            listpos: isize,
+            current_row: Option<&MessageRow>,
+        );
+    */
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
@@ -141,11 +149,13 @@ pub struct FeedContents {
 
     /// source-repo-id  -> state,
     /// Later check:  shall contain only the current selected subscription's message states.
-    fc_state_map: RwLock<HashMap<isize, FeedContentState>>,
+    //    fc_state_map: RwLock<HashMap<isize, FeedContentState>>,
     config: Config,
     list_fontsize: u32,
     list_selected_ids: RwLock<Vec<i32>>,
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
+
+    msg_state: RwLock<MessageStateMap>,
 }
 
 impl FeedContents {
@@ -171,11 +181,12 @@ impl FeedContents {
             job_queue_sender: q_s,
             feedsources_w: Weak::new(),
             last_activated_subscription_id: RefCell::new(-1),
-            fc_state_map: Default::default(),
+            //            fc_state_map: Default::default(),
             config: Config::default(),
             list_fontsize: 0,
             list_selected_ids: RwLock::new(Vec::default()),
             messagesrepo_r: msg_r,
+            msg_state: Default::default(),
         }
     }
 
@@ -232,13 +243,21 @@ impl FeedContents {
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_many(&repo_ids, is_read);
-        // trace!(            "set_read_many: {}   repoids={:?}  ",            *self.last_activated_subscription_id.borrow(),            repo_ids        );
-        self.fc_state_map
+
+        /*
+                trace!(            "set_read_many: {}   repoids={:?}  ",            *self.last_activated_subscription_id.borrow(),            repo_ids        );
+                self.fc_state_map
+                    .write()
+                    .unwrap()
+                    .iter_mut()
+                    .filter(|(id, _st)| repo_ids.contains(&((**id) as i32)))
+                    .for_each(|(_id, st)| st.is_read_c_u = is_read);
+        */
+        self.msg_state
             .write()
             .unwrap()
-            .iter_mut()
-            .filter(|(id, _st)| repo_ids.contains(&((**id) as i32)))
-            .for_each(|(_id, st)| st.is_read_c_u = is_read);
+            .set_read_many(&repo_ids, true);
+
         self.addjob(CJob::RequestUnreadAllCount(
             *self.last_activated_subscription_id.borrow(),
         ));
@@ -282,19 +301,28 @@ impl FeedContents {
                     self.config.list_sort_column,
                     self.config.list_sort_order_up
                 );
-                let mut highest_created_timestamp: i64 = 0; // Most Recent
-                let mut highest_ts_repo_id: isize = -1;
-                self.fc_state_map
+
+                /*
+                                let mut highest_created_timestamp: i64 = 0; // Most Recent
+                                let mut highest_ts_repo_id: isize = -1;
+                                self.fc_state_map
+                                    .read()
+                                    .unwrap()
+                                    .iter()
+                                    .for_each(|(fc_id, fc_state)| {
+                                        if fc_state.msg_created_timestamp > highest_created_timestamp {
+                                            highest_created_timestamp = fc_state.msg_created_timestamp;
+                                            highest_ts_repo_id = *fc_id;
+                                        }
+                                    });
+                                //debug!(                    "mostRecent={} {}",                    highest_ts_repo_id,                    highest_created_timestamp                );
+                */
+                let (highest_ts_repo_id, _highest_created_timestamp) = self
+                    .msg_state
                     .read()
                     .unwrap()
-                    .iter()
-                    .for_each(|(fc_id, fc_state)| {
-                        if fc_state.msg_created_timestamp > highest_created_timestamp {
-                            highest_created_timestamp = fc_state.msg_created_timestamp;
-                            highest_ts_repo_id = *fc_id;
-                        }
-                    });
-                //debug!(                    "mostRecent={} {}",                    highest_ts_repo_id,                    highest_created_timestamp                );
+                    .get_highest_created_timestamp();
+
                 if highest_ts_repo_id > 0 {
                     (*self.gui_updater).borrow().list_set_cursor(
                         TREEVIEW1,
@@ -311,19 +339,29 @@ impl FeedContents {
     }
 
     fn insert_state_from_row(&self, msg: &MessageRow, list_position: Option<isize>) {
-        let mut st = FeedContentState {
-            is_read_c_u: msg.is_read,
-            gui_list_position: list_position.unwrap_or(-1),
-            msg_created_timestamp: msg.entry_src_date,
-            ..Default::default()
-        };
-        if !msg.title.is_empty() {
-            st.title_d = decompress(&msg.title);
-        }
-        self.fc_state_map
-            .write()
-            .unwrap()
-            .insert(msg.message_id, st);
+        /*
+                let mut st = FeedContentState {
+                    is_read_c_u: msg.is_read,
+                    gui_list_position: list_position.unwrap_or(-1),
+                    msg_created_timestamp: msg.entry_src_date,
+                    ..Default::default()
+                };
+                if !msg.title.is_empty() {
+                    st.title_d = decompress(&msg.title);
+                }
+                self.fc_state_map
+                    .write()
+                    .unwrap()
+                    .insert(msg.message_id, st);
+        */
+
+        self.msg_state.write().unwrap().insert(
+            msg.message_id,
+            msg.is_read,
+            list_position.unwrap_or(-1),
+            msg.entry_src_date,
+            msg.title.clone(),
+        );
     }
 } // impl FeedContents
 
@@ -368,21 +406,50 @@ impl IFeedContents for FeedContents {
                         .update_list_some(TREEVIEW1, &list_pos);
                 }
 
-                CJob::SwitchBrowserTabContent(fc_id) => {
-                    let mut st = self.get_msg_state(fc_id as isize, None);
-                    if st.contents_author_categories_d.is_none() {
-                        let msg = (*self.messagesrepo_r)
-                            .borrow()
-                            .get_by_index(fc_id as isize)
-                            .unwrap();
-                        let triplet =
-                            self.get_msg_content_author_categories(fc_id as isize, Some(&msg));
-                        st.contents_author_categories_d.replace(triplet);
+                CJob::SwitchBrowserTabContent(msg_id) => {
+                    /*
+                                        let mut st = self.get_msg_state(fc_id as isize, None);
+                                        if st.contents_author_categories_d.is_none() {
+                                            let msg = (*self.messagesrepo_r)
+                                                .borrow()
+                                                .get_by_index(fc_id as isize)
+                                                .unwrap();
+                                            let triplet =
+                                                self.get_msg_content_author_categories(fc_id as isize, Some(&msg));
+                                            st.contents_author_categories_d.replace(triplet);
+                                        }
+                                        // debug!("JOB {} SwitchBrowserTabContent  {:?}", fc_id, st);
+                    */
+
+                    // TODO: put lazy init  inside  method, not here
+                    if self
+                        .msg_state
+                        .read()
+                        .unwrap()
+                        .get_contents_author_categories(msg_id as isize)
+                        .is_none()
+                    {
+                        let triplet = self.get_msg_content_author_categories(msg_id as isize, None);
+                        // st.contents_author_categories_d.replace(triplet);
+                        self.msg_state
+                            .write()
+                            .unwrap()
+                            .set_contents_author_categories(msg_id as isize, &triplet);
                     }
-                    // debug!("JOB {} SwitchBrowserTabContent  {:?}", fc_id, st);
+                    let o_co_au_ca = self
+                        .msg_state
+                        .read()
+                        .unwrap()
+                        .get_contents_author_categories(msg_id as isize);
+                    let title = self
+                        .msg_state
+                        .read()
+                        .unwrap()
+                        .get_title(msg_id as isize)
+                        .unwrap_or_default();
                     (*self.browserpane_r)
                         .borrow()
-                        .switch_browsertab_content(fc_id, st);
+                        .switch_browsertab_content(msg_id, title, o_co_au_ca);
                 }
                 CJob::ListSetCursorToPolicy => self.set_cursor_to_policy(),
                 CJob::StartWebBrowser(db_id) => {
@@ -426,22 +493,37 @@ impl IFeedContents for FeedContents {
         let unread_repo_ids = fc_repo_ids
             .iter()
             .filter(|c_id| {
-                if let Some(st) = self.fc_state_map.read().unwrap().get(&(**c_id as isize)) {
-                    !st.is_read_c_u
-                } else {
-                    true
-                }
+                //
+
+                /*
+                                if let Some(st) = self.fc_state_map.read().unwrap().get(&(**c_id as isize)) {
+                                    !st.is_read_c_u
+                                } else {
+                                    true
+                                }
+                */
+                self.msg_state.read().unwrap().get_isread(**c_id as isize)
+
+                //
             })
             .map(|c_id| *c_id as i32)
             .collect::<Vec<i32>>();
-        self.fc_state_map
+
+        /*
+                self.fc_state_map
+                    .write()
+                    .unwrap()
+                    .iter_mut()
+                    .filter(|(id, _st)| fc_repo_ids.contains(&(**id as i32)))
+                    .for_each(|(_id, st)| {
+                        st.is_read_c_u = true;
+                    });
+        */
+        self.msg_state
             .write()
             .unwrap()
-            .iter_mut()
-            .filter(|(id, _st)| fc_repo_ids.contains(&(**id as i32)))
-            .for_each(|(_id, st)| {
-                st.is_read_c_u = true;
-            });
+            .set_read_many(&fc_repo_ids, true);
+
         let (last_content_id, _last_list_pos) = act_dbid_listpos.iter().last().unwrap();
         self.addjob(CJob::SwitchBrowserTabContent(*last_content_id));
         let list_pos_dbid = act_dbid_listpos
@@ -484,17 +566,31 @@ impl IFeedContents for FeedContents {
         self.last_activated_subscription_id.replace(feed_source_id);
         let mut messagelist: Vec<MessageRow> =
             (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(feed_source_id, false);
-        self.fc_state_map.write().unwrap().clear();
+
+        // self.fc_state_map.write().unwrap().clear();
+        self.msg_state.write().unwrap().clear();
+
         messagelist.iter_mut().enumerate().for_each(|(i, fc)| {
             self.insert_state_from_row(fc, Some(i as isize));
         });
         let mut valstore = (*self.gui_val_store).write().unwrap();
         valstore.clear_list(0);
         messagelist.iter_mut().enumerate().for_each(|(i, fc)| {
-            let mut title_string = String::default();
-            if let Some(st) = self.fc_state_map.read().unwrap().get(&(fc.message_id)) {
-                title_string = st.title_d.clone();
-            }
+            //
+
+            /*
+                         if let Some(st) = self.fc_state_map.read().unwrap().get(&(fc.message_id)) {
+
+                            title_string = titl;
+                        }
+            */
+            let title_string = self
+                .msg_state
+                .read()
+                .unwrap()
+                .get_title(fc.message_id)
+                .unwrap_or_default();
+
             valstore.insert_list_item(
                 0,
                 i as i32,
@@ -525,12 +621,13 @@ impl IFeedContents for FeedContents {
                 debug!("update_content_list_some  isdeleted: {}", &msg);
                 continue;
             }
-            if let Some(state) = self.fc_state_map.read().unwrap().get(&msg.message_id) {
-                // trace!(                    "update_content_list_some {:?} {} ",                    vec_pos_dbid,                    state.title_d                );
+
+            // if let Some(state) = self.fc_state_map.read().unwrap().get(&msg.message_id) {
+            if let Some(titl) = self.msg_state.read().unwrap().get_title(msg.message_id) {
                 let av_list = Self::message_to_row(
                     &msg,
                     self.list_fontsize as u32,
-                    state.title_d.clone(),
+                    titl, // state.title_d.clone(),
                     self.config.mode_debug,
                 );
                 (*self.gui_val_store).write().unwrap().insert_list_item(
@@ -559,22 +656,24 @@ impl IFeedContents for FeedContents {
         ));
     }
 
-    /// updates existing entries,
-    /// returns the new entries only,
-    fn match_new_entries_to_db(
-        &self,
-        new_list: &[MessageRow],
-        source_repo_id: isize,
-    ) -> Vec<MessageRow> {
-        let existing_entries = (*self.messagesrepo_r)
-            .borrow()
-            .get_by_src_id(source_repo_id, false);
-        match_new_entries_to_existing(
-            &new_list.to_vec(),
-            &existing_entries,
-            self.job_queue_sender.clone(),
-        )
-    }
+    /*
+        /// updates existing entries,
+        /// returns the new entries only,
+        fn match_new_entries_to_db(
+            &self,
+            new_list: &[MessageRow],
+            source_repo_id: isize,
+        ) -> Vec<MessageRow> {
+            let existing_entries = (*self.messagesrepo_r)
+                .borrow()
+                .get_by_src_id(source_repo_id, false);
+            match_new_entries_to_existing(
+                &new_list.to_vec(),
+                &existing_entries,
+                self.job_queue_sender.clone(),
+            )
+        }
+    */
 
     fn get_job_receiver(&self) -> Receiver<CJob> {
         self.job_queue_receiver.clone()
@@ -684,79 +783,109 @@ impl IFeedContents for FeedContents {
             .for_each(|dbid| self.addjob(CJob::StartWebBrowser(*dbid)));
     }
 
-    fn get_msg_state(&self, msg_id: isize, current_row: Option<&MessageRow>) -> FeedContentState {
-        let sm_r = self.fc_state_map.read().unwrap();
-        if sm_r.contains_key(&msg_id) {
-            return sm_r.get(&msg_id).unwrap().clone();
+    /*
+        #[deprecated]
+        fn get_msg_state(&self, msg_id: isize, current_row: Option<&MessageRow>) -> FeedContentState {
+            let sm_r = self.fc_state_map.read().unwrap();
+            if sm_r.contains_key(&msg_id) {
+                return sm_r.get(&msg_id).unwrap().clone();
+            }
+            if let Some(msg) = current_row {
+                self.insert_state_from_row(msg, None);
+            }
+            if sm_r.contains_key(&msg_id) {
+                return sm_r.get(&msg_id).unwrap().clone();
+            }
+            FeedContentState::default()
         }
-        if let Some(msg) = current_row {
-            self.insert_state_from_row(msg, None);
-        }
-        if sm_r.contains_key(&msg_id) {
-            return sm_r.get(&msg_id).unwrap().clone();
-        }
-        debug!("get_msg_state() fall through default ");
-        FeedContentState::default()
-    }
+    */
 
     fn get_msg_content_author_categories(
         &self,
         msg_id: isize,
         current_row: Option<&MessageRow>,
     ) -> (String, String, String) {
-        let contains = self.fc_state_map.read().unwrap().contains_key(&msg_id);
+        // let contains = self.fc_state_map.read().unwrap().contains_key(&msg_id);
+        let contains = self.msg_state.read().unwrap().contains(msg_id);
         if !contains {
             if let Some(msg) = current_row {
                 self.insert_state_from_row(msg, None);
             }
         }
-        let mut needs_decompress: bool = false;
-        if let Some(state) = self.fc_state_map.read().unwrap().get(&msg_id) {
-            if state.contents_author_categories_d.is_none() {
-                needs_decompress = true;
-            } else {
-                return state.contents_author_categories_d.as_ref().unwrap().clone();
-            }
-        }
-        if needs_decompress {
-            if let Some(msg) = current_row {
-                let triplet = (
-                    decompress(&msg.content_text),
-                    decompress(&msg.author),
-                    decompress(&msg.categories),
-                );
-                self.fc_state_map
-                    .write()
-                    .unwrap()
-                    .get_mut(&msg_id)
-                    .unwrap()
-                    .contents_author_categories_d = Some(triplet.clone());
-                return triplet;
-            }
-        }
-        debug!("get_msg_content_author_categories() fall through default ");
-        (String::default(), String::default(), String::default())
-    }
 
-    fn set_state_gui_listpos(
-        &self,
-        msg_id: isize,
-        listpos: isize,
-        current_row: Option<&MessageRow>,
-    ) {
-        let contains = self.fc_state_map.read().unwrap().contains_key(&msg_id);
-        if !contains {
-            if let Some(msg) = current_row {
-                self.insert_state_from_row(msg, None);
-            }
+        /*
+        let mut needs_decompress: bool = false;
+                if let Some(state) = self.fc_state_map.read().unwrap().get(&msg_id) {
+                    if state.contents_author_categories_d.is_none() {
+                        needs_decompress = true;
+                    } else {
+                        return state.contents_author_categories_d.as_ref().unwrap().clone();
+                    }
+                }
+        */
+        let o_co_au_ca = self
+            .msg_state
+            .read()
+            .unwrap()
+            .get_contents_author_categories(msg_id);
+        if let Some((co, au, ca)) = o_co_au_ca {
+            return (co, au, ca);
         }
-        self.fc_state_map
+
+        let msg = (*self.messagesrepo_r)
+            .borrow()
+            .get_by_index(msg_id)
+            .unwrap();
+
+        // if let Some(msg) = current_row {
+        let triplet = (
+            decompress(&msg.content_text),
+            decompress(&msg.author),
+            decompress(&msg.categories),
+        );
+        /*
+                        self.fc_state_map
+                            .write()
+                            .unwrap()
+                            .get_mut(&msg_id)
+                            .unwrap()
+                            .contents_author_categories_d = Some(triplet.clone());
+        */
+        self.msg_state
             .write()
             .unwrap()
-            .get_mut(&msg_id)
-            .unwrap()
-            .gui_list_position = listpos;
+            .set_contents_author_categories(msg_id, &triplet);
+
+        return triplet;
+        // }
+
+        // warn!("get_msg_content_author_categories() fall through default ");
+        // (String::default(), String::default(), String::default())
     }
+
+    /*
+        fn set_state_gui_listpos(
+            &self,
+            msg_id: isize,
+            listpos: isize,
+            current_row: Option<&MessageRow>,
+        ) {
+            let contains = self.fc_state_map.read().unwrap().contains_key(&msg_id);
+            if !contains {
+                if let Some(msg) = current_row {
+                    self.insert_state_from_row(msg, None);
+                }
+            }
+            self.fc_state_map
+                .write()
+                .unwrap()
+                .get_mut(&msg_id)
+                .unwrap()
+                .gui_list_position = listpos;
+        }
+    */
+
+    // impl FeedContents
 }
 
 impl Buildable for FeedContents {
@@ -984,6 +1113,8 @@ pub fn match_new_entries_to_existing(
     ret_list
 }
 
+/*
+#[deprecated]
 #[derive(Default, Debug, Clone)]
 pub struct FeedContentState {
     is_read_c_u: bool,
@@ -995,6 +1126,7 @@ pub struct FeedContentState {
     /// display text, decompressed
     pub title_d: String,
 }
+*/
 
 #[derive(Clone, Debug)]
 pub struct Config {

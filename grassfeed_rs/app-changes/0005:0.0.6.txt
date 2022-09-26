@@ -4,13 +4,12 @@ Wed, 21 Sep 2022 00:12:00 +0000
 * Delete Messages
 * Memory usage display in status bar
 * Show message sums on folders
-
-
-- Windows Build
+* added build with gtk on windows on fedora, no success.
+* refactor messages / separate state_map
+* Browser: get rid of white display on start
 
 
 - Keyboard commands for:  mark-as-unread, next unread message
 - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
-- refactor messages / separate state_map
 - find common code parts of    folder:mark-as-read  ,  folder:update
-- Browser: get rid of white display on start
+- rename previous log file  .old

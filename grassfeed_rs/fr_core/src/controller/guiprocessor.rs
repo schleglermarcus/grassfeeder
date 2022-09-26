@@ -759,12 +759,17 @@ impl GuiProcessor {
                 "{:5} / {:5}",
                 self.statusbar_items.num_msg_unread, self.statusbar_items.num_msg_all
             );
+            let memdisplay = if self.statusbar_items.mode_debug {
+                format!(
+                    "  {}MB ",
+                    self.statusbar_items.mem_usage_vmrss_bytes / 1048576,
+                )
+            } else {
+                String::default()
+            };
             let msg1 = format!(
-                "<tt>\u{25df}{}\u{25de} {}    \u{2595}{}\u{258F}  {}MB   </tt>",
-                downloader_display,
-                unread_all,
-                block_vertical,
-                self.statusbar_items.mem_usage_vmrss_bytes / 1048576,
+                "<tt>\u{25df}{}\u{25de} {}    \u{2595}{}\u{258F} {}</tt>",
+                downloader_display, unread_all, block_vertical, memdisplay,
             );
 
             (*self.gui_val_store)
@@ -877,24 +882,14 @@ impl GuiProcessor {
         (*self.gui_updater).borrow().update_dialog(DIALOG_ABOUT);
     }
 
-    /*
-
-
-
-    Mem usage in kb: current=105983, peak=118747411
-    Htop:  103M    SHR: 73580m   0,7% mem
-    top:	Res:106MB   SHR:78MB
-
-
-    */
-
+    // Mem usage in kb: current=105983, peak=118747411
+    // Htop:  103M    SHR: 73580m   0,7% mem
+    // top:	Res:106MB   SHR:78MB
+    // estimation of the current physical memory used by the application, in bytes. 			Comes from proc//status/VmRSS
     pub fn update_memory_stats(&mut self) {
         if let Ok(mem) = proc_status::mem_usage() {
-            // estimation of the current physical memory used by the application, in bytes. 			Comes from proc//status/VmRSS
             self.statusbar_items.mem_usage_vmrss_bytes =
                 (self.statusbar_items.mem_usage_vmrss_bytes + mem.current as isize) / 2;
-            // self.statusbar_items.mem_usage_peakrss_bytes =                (self.statusbar_items.mem_usage_peakrss_bytes + mem.peak as isize) / 2;
-            // debug!("Mem usage in MB: current={}, peak={} ",                self.statusbar_items.mem_usage_vmrss_bytes / 1048576,                self.statusbar_items.mem_usage_peakrss_bytes / 1048576            );
         }
     }
 
@@ -963,6 +958,15 @@ impl StartupWithAppContext for GuiProcessor {
             .borrow()
             .get_config()
             .num_downloader_threads;
+
+        if let Some(s) = (*self.configmanager_r)
+            .borrow()
+            .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
+        {
+            if let Ok(b) = s.parse::<bool>() {
+                self.statusbar_items.mode_debug = b;
+            }
+        }
     }
 }
 
@@ -980,8 +984,7 @@ struct StatusBarItems {
     selected_msg_url: String,
     /// proc//status/VmRSS  Resident set size, estimation of the current physical memory used by the application
     mem_usage_vmrss_bytes: isize,
-    //  * VmHWM: Peak resident set size ("high water mark"). estimation of the peak physical memory used by the application
-    // mem_usage_peakrss_bytes: isize,
+    mode_debug: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]

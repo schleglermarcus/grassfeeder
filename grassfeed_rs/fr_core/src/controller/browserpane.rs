@@ -1,7 +1,5 @@
 use crate::config::configmanager::ConfigManager;
-use crate::controller::contentlist::FeedContentState;
 use crate::controller::contentlist::FeedContents;
-// use crate::controller::contentlist::IFeedContents;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::timer::Timer;
@@ -20,11 +18,15 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub enum BJob {    Something,}
-
 pub trait IBrowserPane {
-    fn switch_browsertab_content(&self, repo_id: i32, fc_state: FeedContentState);
+    // fn switch_browsertab_content(&self, repo_id: i32, fc_state: FeedContentState);
+    fn switch_browsertab_content(
+        &self,
+        repo_id: i32,
+        title: String,
+        co_au_ca: Option<(String, String, String)>,
+    );
+
     fn get_config(&self) -> Config;
     fn set_conf_browser_bg(&mut self, c: u32);
     fn get_last_selected_link(&self) -> String;
@@ -83,7 +85,12 @@ impl BrowserPane {
 }
 
 impl IBrowserPane for BrowserPane {
-    fn switch_browsertab_content(&self, repo_id: i32, state: FeedContentState) {
+    fn switch_browsertab_content(
+        &self,
+        repo_id: i32,
+        title: String,
+        co_au_ca: Option<(String, String, String)>,
+    ) {
         if repo_id < 0 {
             error!("switch_browsertab_content_r  repo_id<0");
             return;
@@ -96,18 +103,17 @@ impl IBrowserPane for BrowserPane {
             return;
         }
         let fce = o_msg.unwrap();
-
-        //        let mut state = FeedContentState::default();
         let mut content = String::default();
         let mut author = String::default();
         let mut categories = String::default();
 
-        if let Some(triplet) = state.contents_author_categories_d {
+        // if let Some(triplet) = state.contents_author_categories_d {
+        if let Some(triplet) = co_au_ca {
             (content, author, categories) = triplet;
         }
         //        debug!("switch_browsertab_content   {} {}", author, categories);
 
-        let mut display = state.title_d;
+        let mut display = title;
         if let Some(_pos) = display.find("http") {
             display = display.split("http").next().unwrap().to_string();
             display = display.trim().to_string();

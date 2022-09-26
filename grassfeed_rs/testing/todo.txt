@@ -1,18 +1,20 @@
 To Do List
+- rename previous log file  .old
+- find common code parts of    folder:mark-as-read  ,  folder:update
 
 
 - check: subscription  Reload shall refresh  message list
 - Copy Message address into clipboard
-- Desktop Icon:
-    https://unalfaruk.com/2018/09/10/creating-a-shortcut-icon-on-debian/
 - Memory usage display in status bar
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
-- Show message sums on folders
+
+
+- Databases consistency check with open Dialog.
+- Databases consistency check  on startup configurable.
 - Keyboard commands for:  mark-as-unread, next unread message
 - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
 - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
 - check  https://www.linuxcompatible.org/  feed: icon + entries
-- rename previous log file  .old
 - see if  diylib  can be used for ui_gtk
 - Sanitize: cross-check icon ids of tree if they are present in icon db
 - Subscriptions Sanitize:  Folder shall have only folder icon
@@ -21,26 +23,23 @@ To Do List
 - Reduce Size of Binary:
    https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
 - Browser CleanUp Cache, on startup / finish
+    webcontextext:  clear_cache(&self)
 - Subscription Tree: hide zeroes when nothing to read
 - refactor messages / separate state_map
+
 - Create https://github.com/StratusFearMe21/cargo-appimage
 - Flatpak  https://lib.rs/crates/cargo-pkg
-- Delete Messages
 - Browser Display :  wrap over   title
 - Create Backups for Subscriptions-DB
 - Error-DB for Subscription Requests, display in edit dialog
 - React on Minimize, do memory usage reduction
-- find common code parts of    folder:mark-as-read  ,  folder:update
 - move logger config this into fr_core
 - implement focus policy: before last unread
 - Opml export formatted / pretty
 - Browser: enable theme related colors
 - Modify Browser Font size
 - Browser: get rid of white display on start
-- Databases consistency check with open Dialog.
-- Databases consistency check  on startup configurable.
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
-- Delete Messages
 - Startup, create gui:  delayed creation of dialogs
 - Searching inside feeds
 - Message List: set scroll position to upper edge from Cursor
@@ -48,13 +47,13 @@ To Do List
 
 
 Later:
-- Windows Gui
-  https://github.com/gabdube/native-windows-gui/tree/master/showcase
 - GTK4: block multiple instances
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal
 	https://docs.gtk.org/gio/method.Application.run.html
-- Windows Build
-	  https://www.ebbflow.io/blog/vending-win
+
+- Windows  Build, Gui
+  https://github.com/gabdube/native-windows-gui/tree/master/showcase
+  https://www.ebbflow.io/blog/vending-win
 	https://gtk-rs.org/gtk4-rs/git/book/installation_windows.html
 
 
