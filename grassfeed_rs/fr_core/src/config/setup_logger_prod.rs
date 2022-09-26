@@ -1,6 +1,3 @@
-// TODO move logger config this into fr_core
-// TODO rename previous log file
-
 use fern::colors::Color;
 use fern::colors::ColoredLevelConfig;
 
@@ -24,10 +21,10 @@ pub fn setup_logger(
     colors.info = Color::Green;
     colors.warn = Color::Yellow;
     colors.error = Color::Red;
+
     let logfilename = format!("{}{}.log", cache_dir, app_name);
-
-    let _r = std::fs::remove_file(logfilename.clone());
-
+    let old_log_fn = format!("{}.old", logfilename);
+    let _r = std::fs::rename(&logfilename, &old_log_fn);
     let o_logfile = fern::log_file(logfilename.clone());
     if o_logfile.is_err() {
         eprintln!("setup_logger: cannot create {}", &logfilename);

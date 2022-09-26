@@ -8,7 +8,7 @@ pub struct MessageStateMap {
 
 impl MessageStateMap {
     pub fn insert(
-        & mut self,
+        &mut self,
         msg_id: isize,
         is_read: bool,
         list_pos: isize,
@@ -61,10 +61,7 @@ impl MessageStateMap {
                 highest_ts_repo_id = *fc_id;
             }
         });
-        debug!(
-            "mostRecent={} {}",
-            highest_ts_repo_id, highest_created_timestamp
-        );
+        // debug!(            "mostRecent={} {}",            highest_ts_repo_id, highest_created_timestamp        );
         (highest_ts_repo_id, highest_created_timestamp)
     }
 
@@ -82,7 +79,7 @@ impl MessageStateMap {
     pub fn set_contents_author_categories(
         &mut self,
         msg_id: isize,
-        co_au_ca: & (String, String, String),
+        co_au_ca: &(String, String, String),
     ) {
         if let Some(st) = self.msgmap.get_mut(&msg_id) {
             st.contents_author_categories_d.replace(co_au_ca.clone());

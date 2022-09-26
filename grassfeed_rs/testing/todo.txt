@@ -1,46 +1,45 @@
 To Do List
-- rename previous log file  .old
-- find common code parts of    folder:mark-as-read  ,  folder:update
+- Keyboard commands for:  mark-as-unread, next unread message
+
+- Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
 
 
+- see if  diylib  can be used for ui_gtk
+- Menu Item and  Help text into browser
+- Error-DB for Subscription Requests, display in edit dialog
+- Create Backups for Subscriptions-DB
 - check: subscription  Reload shall refresh  message list
 - Copy Message address into clipboard
-- Memory usage display in status bar
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
-
-
-- Databases consistency check with open Dialog.
-- Databases consistency check  on startup configurable.
-- Keyboard commands for:  mark-as-unread, next unread message
-- Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
 - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
 - check  https://www.linuxcompatible.org/  feed: icon + entries
-- see if  diylib  can be used for ui_gtk
+- Browser CleanUp Cache, on startup / finish
+      webcontextext:  clear_cache(&self)
+- Investigate why   subscriptions.db  is so large.
+- DragAndDrop for Websites into Tree
+
+- Databases consistency check  on startup configurable.
 - Sanitize: cross-check icon ids of tree if they are present in icon db
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
 - Sanitize: Message clean out those with deleted flag
+
 - Reduce Size of Binary:
    https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
-- Browser CleanUp Cache, on startup / finish
-    webcontextext:  clear_cache(&self)
+	 - Startup, create gui:  delayed creation of dialogs
 - Subscription Tree: hide zeroes when nothing to read
 - refactor messages / separate state_map
 
 - Create https://github.com/StratusFearMe21/cargo-appimage
 - Flatpak  https://lib.rs/crates/cargo-pkg
 - Browser Display :  wrap over   title
-- Create Backups for Subscriptions-DB
-- Error-DB for Subscription Requests, display in edit dialog
 - React on Minimize, do memory usage reduction
-- move logger config this into fr_core
 - implement focus policy: before last unread
 - Opml export formatted / pretty
 - Browser: enable theme related colors
 - Modify Browser Font size
-- Browser: get rid of white display on start
+
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
-- Startup, create gui:  delayed creation of dialogs
 - Searching inside feeds
 - Message List: set scroll position to upper edge from Cursor
 - Keybard configuration in settings
@@ -127,6 +126,8 @@ Docker:  3 Phasen:  aus,   build, run
 	https://windsoilder.github.io/writing_dockerfile_in_rust_project.html
 https://middleware.io/blog/docker-cleanup/
 # docker image prune
+# docker  system prune
+
 
 -------------------
 	       GTK_DEBUG=interactive

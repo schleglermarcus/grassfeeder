@@ -6,11 +6,15 @@ mod tree_drag_common;
 // use crate::tree_drag_common::prepare_source_tree_controller;
 // use fr_core::db::subscription_entry::SubscriptionEntry;
 use chrono::DateTime;
+use feed_rs::parser;
+use fr_core::controller::contentlist;
 use fr_core::db::message::MessageRow;
 use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::util::db_time_to_display_nonnull;
 use regex::Regex;
 
+
+/*
 #[test]
 fn memtest() {
     setup();
@@ -28,10 +32,20 @@ fn memtest() {
         mem.peak / 1024
     );
 
+*/
 
+// #[test]
+#[allow(dead_code)]
+fn parse_naturalnews_aug() {
+    let rss_str =
+        std::fs::read_to_string("../testing/tests/fr_htdocs/naturalnews_aug.xml").unwrap();
+    let feeds = parser::parse(rss_str.as_bytes()).unwrap();
+    let entry0 = feeds.entries.get(0).unwrap();
+    let msg0: MessageRow = contentlist::message_from_modelentry(&entry0);
+    println!("title={}=", msg0.title);
+    //        assert!(msg2.title.starts_with("Borderlands-"));
 }
 
-// #[ignore]
 //  #[test]
 #[allow(dead_code)]
 fn dl_naturalnews() {

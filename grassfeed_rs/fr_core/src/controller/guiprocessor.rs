@@ -805,14 +805,30 @@ impl GuiProcessor {
         (*self.gui_updater).borrow().show_dialog(DIALOG_ABOUT);
     }
 
+    ///  for key codes look at selec.rs                           gdk_sys::GDK_KEY_Escape => KeyCodes::Escape,
     fn process_key_press(&mut self, keycode: isize, _o_char: Option<char>) {
-        let kc: KeyCodes = select::ui_select::from_isize(keycode);
         let mut new_focus_by_tab = self.focus_by_tab.clone();
+        let kc: KeyCodes = select::ui_select::from_isize(keycode);
         match kc {
             KeyCodes::Tab => new_focus_by_tab = self.focus_by_tab.next(),
             KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.prev(),
+            KeyCodes::Key_a => {
+                let o_se = (*self.feedsources_r).borrow().get_current_selected_fse();
+                debug!("    A  mark-all  {} ", o_se.is_some());
+                if let Some(subs_e) = o_se {
+                    (*self.feedsources_r)
+                        .borrow_mut()
+                        .mark_as_read(subs_e.subs_id);
+                }
+            }
+            KeyCodes::Key_b => {
+                debug!("TODO   B  before ");
+            }
+            KeyCodes::Key_n => {
+                debug!("TODO  N next ");
+            }
             _ => {
-                //                trace!("key-pressed: other {} {:?} {:?}", keycode, o_char, kc);
+                // trace!("key-pressed: other {} {:?} {:?}", keycode, _o_char, kc);
             }
         }
         if new_focus_by_tab != self.focus_by_tab {

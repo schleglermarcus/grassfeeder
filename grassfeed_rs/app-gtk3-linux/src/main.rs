@@ -3,9 +3,10 @@ extern crate xdg;
 extern crate rust_i18n;
 
 mod args_lang;
-mod setup_logger;
+// mod setup_logger;
 
 use fr_core::config::init_system;
+use fr_core::config::setup_logger_prod;
 use fr_core::db::check_consistency;
 use resources::application_id::*;
 
@@ -40,7 +41,7 @@ fn main() {
         debug_level = 5;
     }
     init_system::check_or_create_folder(&cache);
-    let r = setup_logger::setup_logger(debug_level, &cache, APP_NAME);
+    let r = setup_logger_prod::setup_logger(debug_level, &cache, APP_NAME);
     if r.is_err() {
         eprintln!("Stopping: {:?}", &r);
         return;

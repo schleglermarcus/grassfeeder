@@ -83,16 +83,6 @@ pub trait IFeedContents {
     /// for clicking on the is-read icon
     fn toggle_feed_item_read(&self, content_repo_id: isize, list_position: i32);
 
-    /*
-        /// updates existing entries,  returns the new entries only,
-        #[deprecated]
-        fn match_new_entries_to_db(
-            &self,
-            new_list: &[MessageRow],
-            source_repo_id: isize,
-        ) -> Vec<MessageRow>;
-    */
-
     fn get_job_receiver(&self) -> Receiver<CJob>;
     fn get_job_sender(&self) -> Sender<CJob>;
 
@@ -146,15 +136,10 @@ pub struct FeedContents {
     job_queue_receiver: Receiver<CJob>,
     job_queue_sender: Sender<CJob>,
     last_activated_subscription_id: RefCell<isize>,
-
-    /// source-repo-id  -> state,
-    /// Later check:  shall contain only the current selected subscription's message states.
-    //    fc_state_map: RwLock<HashMap<isize, FeedContentState>>,
     config: Config,
     list_fontsize: u32,
     list_selected_ids: RwLock<Vec<i32>>,
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
-
     msg_state: RwLock<MessageStateMap>,
 }
 
@@ -181,7 +166,6 @@ impl FeedContents {
             job_queue_sender: q_s,
             feedsources_w: Weak::new(),
             last_activated_subscription_id: RefCell::new(-1),
-            //            fc_state_map: Default::default(),
             config: Config::default(),
             list_fontsize: 0,
             list_selected_ids: RwLock::new(Vec::default()),
@@ -235,6 +219,7 @@ impl FeedContents {
         newrow
     }
 
+
     fn set_read_many(&self, repoid_listpos: &Vec<(i32, i32)>, is_read: bool) {
         if repoid_listpos.is_empty() {
             return;
@@ -243,21 +228,10 @@ impl FeedContents {
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_many(&repo_ids, is_read);
-
-        /*
-                trace!(            "set_read_many: {}   repoids={:?}  ",            *self.last_activated_subscription_id.borrow(),            repo_ids        );
-                self.fc_state_map
-                    .write()
-                    .unwrap()
-                    .iter_mut()
-                    .filter(|(id, _st)| repo_ids.contains(&((**id) as i32)))
-                    .for_each(|(_id, st)| st.is_read_c_u = is_read);
-        */
         self.msg_state
             .write()
             .unwrap()
             .set_read_many(&repo_ids, true);
-
         self.addjob(CJob::RequestUnreadAllCount(
             *self.last_activated_subscription_id.borrow(),
         ));
@@ -743,7 +717,6 @@ impl IFeedContents for FeedContents {
             }
             "open-in-browser" => {
                 let db_ids: Vec<i32> = repoid_listpos.iter().map(|(db, _lp)| *db).collect();
-                // trace!("list ->  start external browser {:?}", repoid_listpos);
                 self.start_web_browser(db_ids);
                 self.set_read_many(&repoid_listpos, true);
             }
@@ -783,46 +756,17 @@ impl IFeedContents for FeedContents {
             .for_each(|dbid| self.addjob(CJob::StartWebBrowser(*dbid)));
     }
 
-    /*
-        #[deprecated]
-        fn get_msg_state(&self, msg_id: isize, current_row: Option<&MessageRow>) -> FeedContentState {
-            let sm_r = self.fc_state_map.read().unwrap();
-            if sm_r.contains_key(&msg_id) {
-                return sm_r.get(&msg_id).unwrap().clone();
-            }
-            if let Some(msg) = current_row {
-                self.insert_state_from_row(msg, None);
-            }
-            if sm_r.contains_key(&msg_id) {
-                return sm_r.get(&msg_id).unwrap().clone();
-            }
-            FeedContentState::default()
-        }
-    */
-
     fn get_msg_content_author_categories(
         &self,
         msg_id: isize,
         current_row: Option<&MessageRow>,
     ) -> (String, String, String) {
-        // let contains = self.fc_state_map.read().unwrap().contains_key(&msg_id);
         let contains = self.msg_state.read().unwrap().contains(msg_id);
         if !contains {
             if let Some(msg) = current_row {
                 self.insert_state_from_row(msg, None);
             }
         }
-
-        /*
-        let mut needs_decompress: bool = false;
-                if let Some(state) = self.fc_state_map.read().unwrap().get(&msg_id) {
-                    if state.contents_author_categories_d.is_none() {
-                        needs_decompress = true;
-                    } else {
-                        return state.contents_author_categories_d.as_ref().unwrap().clone();
-                    }
-                }
-        */
         let o_co_au_ca = self
             .msg_state
             .read()
@@ -837,53 +781,17 @@ impl IFeedContents for FeedContents {
             .get_by_index(msg_id)
             .unwrap();
 
-        // if let Some(msg) = current_row {
         let triplet = (
             decompress(&msg.content_text),
             decompress(&msg.author),
             decompress(&msg.categories),
         );
-        /*
-                        self.fc_state_map
-                            .write()
-                            .unwrap()
-                            .get_mut(&msg_id)
-                            .unwrap()
-                            .contents_author_categories_d = Some(triplet.clone());
-        */
         self.msg_state
             .write()
             .unwrap()
             .set_contents_author_categories(msg_id, &triplet);
-
         return triplet;
-        // }
-
-        // warn!("get_msg_content_author_categories() fall through default ");
-        // (String::default(), String::default(), String::default())
     }
-
-    /*
-        fn set_state_gui_listpos(
-            &self,
-            msg_id: isize,
-            listpos: isize,
-            current_row: Option<&MessageRow>,
-        ) {
-            let contains = self.fc_state_map.read().unwrap().contains_key(&msg_id);
-            if !contains {
-                if let Some(msg) = current_row {
-                    self.insert_state_from_row(msg, None);
-                }
-            }
-            self.fc_state_map
-                .write()
-                .unwrap()
-                .get_mut(&msg_id)
-                .unwrap()
-                .gui_list_position = listpos;
-        }
-    */
 
     // impl FeedContents
 }
@@ -1113,21 +1021,6 @@ pub fn match_new_entries_to_existing(
     ret_list
 }
 
-/*
-#[deprecated]
-#[derive(Default, Debug, Clone)]
-pub struct FeedContentState {
-    is_read_c_u: bool,
-    /// remember  list position for setting the cursor
-    gui_list_position: isize,
-    msg_created_timestamp: i64,
-    pub contents_author_categories_d: Option<(String, String, String)>,
-
-    /// display text, decompressed
-    pub title_d: String,
-}
-*/
-
 #[derive(Clone, Debug)]
 pub struct Config {
     /// None,    LastSelected,    MostRecent,    BeforeUnread
@@ -1176,18 +1069,16 @@ mod feedcontents_test {
     use feed_rs::parser;
     use std::fs;
 
-    // TODO
-    //cargo watch -s "cargo test controller::contentlist::feedcontents_test::parse_naturalnews_aug  --lib -- --exact --nocapture"
-    #[ignore]
-    #[test]
-    fn parse_naturalnews_aug() {
-        let rss_str = fs::read_to_string("../testing/tests/fr_htdocs/naturalnews_aug.xml").unwrap();
-        let feeds = parser::parse(rss_str.as_bytes()).unwrap();
-        let entry0 = feeds.entries.get(0).unwrap();
-        let msg0: MessageRow = contentlist::message_from_modelentry(&entry0);
-        println!("title={}=", msg0.title);
-        //        assert!(msg2.title.starts_with("Borderlands-"));
-    }
+    /*
+        fn parse_naturalnews_aug() {
+            let rss_str = fs::read_to_string("../testing/tests/fr_htdocs/naturalnews_aug.xml").unwrap();
+            let feeds = parser::parse(rss_str.as_bytes()).unwrap();
+            let entry0 = feeds.entries.get(0).unwrap();
+            let msg0: MessageRow = contentlist::message_from_modelentry(&entry0);
+            println!("title={}=", msg0.title);
+            //        assert!(msg2.title.starts_with("Borderlands-"));
+        }
+    */
 
     //  Maybe later:
     //  The file contains an invalid  single  &  as title.   The parse does not like that and returns  no title.

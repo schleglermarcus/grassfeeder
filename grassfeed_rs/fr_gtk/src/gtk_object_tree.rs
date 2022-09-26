@@ -653,14 +653,31 @@ fn create_listview(
     content_tree_view
 }
 
+// gdk_sys::GDK_KEY_space			 gdk-sys / src / lib.rs
+// https://gtk-rs.org/gtk3-rs/stable/latest/docs/gdk_sys/index.html
 fn connect_keyboard(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
     let esw = EvSenderWrapper(g_ev_se);
-
     if let Some(win) = (*gtk_obj_a).read().unwrap().get_window() {
         win.connect_key_press_event(move |_win, key| {
             let keyval = key.keyval();
-            let _keystate = key.state();
-            esw.sendw(GuiEvents::KeyPressed(*keyval as isize, keyval.to_unicode()));
+            let keystate = key.state();
+            // trace!("            keypress: {:?} {:?} ", keyval, keystate);
+            if keystate.intersects(gdk::ModifierType::CONTROL_MASK) {
+                // debug!("! CONTROL_MASK Ctrl- ");
+            } else if keystate.intersects(gdk::ModifierType::MOD1_MASK) {
+                // debug!("! MOD1_MASK   Alt- ");
+            } else if keystate.intersects(gdk::ModifierType::MOD4_MASK) {
+                // debug!("! MOD4_MASK   Win-Right- ");
+            } else if keystate.intersects(gdk::ModifierType::MOD5_MASK) {
+                // debug!("! MOD5_MASK   AltGr- ");
+            } else if keystate.intersects(gdk::ModifierType::SUPER_MASK) {
+                // debug!("! SUPER_MASK   Win-Left- ");
+            } else if keystate.intersects(gdk::ModifierType::SHIFT_MASK) {
+                // debug!("! SHIFT_MASK    ");
+            } else if !keystate.intersects(gdk::ModifierType::CONTROL_MASK) {
+                esw.sendw(GuiEvents::KeyPressed(*keyval as isize, keyval.to_unicode()));
+            }
+
             Inhibit(false)
         });
     }

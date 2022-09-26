@@ -342,7 +342,7 @@ impl SourceTreeController {
                                 // trace!("ScanEmptyUnread Folder: {:?} => {}", unread_id, r);
                             } else {
                                 if let Some(feedcontents) = self.feedcontents_w.upgrade() {
-									// trace!("ScanEmptyUnread Subscr: {:?} ", unread_id);
+                                    // trace!("ScanEmptyUnread Subscr: {:?} ", unread_id);
                                     (*feedcontents)
                                         .borrow()
                                         .addjob(CJob::RequestUnreadAllCount(unread_id));
@@ -1089,7 +1089,6 @@ impl ISourceTreeController for SourceTreeController {
                 .filter(|fse| !fse.is_folder)
                 .map(|fse| fse.subs_id)
                 .collect::<Vec<isize>>();
-            // trace!("mark_schedule_fetch child_feeds: {:?}   ", child_repo_ids);
             self.statemap.borrow_mut().set_status(
                 &child_repo_ids,
                 StatusMask::FetchScheduled,
