@@ -20,9 +20,9 @@ pub trait BoldFuncDiscriminator {
     fn column_nr() -> i32;
 
     fn attrlist(act_bits: u32) -> AttrList {
-        let (fontsize, is_read) = FontAttributes::from_activation_bits (act_bits);
+        let (fontsize, is_read, is_folder) = FontAttributes::from_activation_bits (act_bits);
         let r = AttrList::new();
-        if !is_read {
+        if !is_read && !is_folder {
             r.insert(Attribute::from(AttrInt::new_weight(Weight::Bold)));
         }
         if fontsize > 0 {
@@ -75,7 +75,11 @@ where
             crt.set_attributes(None);
             let val: Value = (*t_model).value(t_iter, D::column_nr());
             if let Ok(col_val) = val.get::<u32>() {
+
+
                 crt.set_attributes(Some(&D::attrlist(col_val)));
+
+
             }
         }
     }

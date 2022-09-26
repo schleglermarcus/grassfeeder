@@ -266,8 +266,6 @@ impl SourceTreeController {
                 }
                 SJob::GuiUpdateTree(feed_source_id) => {
                     if let Some(path) = self.get_path_for_src(feed_source_id) {
-                        // debug!("GuiUpdateTree-update_tree_single {:?}", &path);
-
                         (*self.gui_updater)
                             .borrow()
                             .update_tree_single(0, path.as_slice());
@@ -282,7 +280,6 @@ impl SourceTreeController {
                     self.statemap.borrow_mut().set_schedule_fetch_all();
                 }
                 SJob::ScheduleUpdateFeed(subs_id) => {
-                    debug!("ScheduleUpdateFeed:  {}", subs_id);
                     self.mark_schedule_fetch(subs_id);
                 }
                 SJob::CheckSpinnerActive => {
@@ -494,6 +491,7 @@ impl SourceTreeController {
         tv.push(AValue::AU32(FontAttributes::to_activation_bits(
             self.tree_fontsize,
             num_msg_unread <= 0,
+            fse.is_folder,
         ))); //  6: num_content_unread
         tv.push(AValue::AU32(m_status)); //	7 : status
 
@@ -771,7 +769,7 @@ impl SourceTreeController {
 
     pub fn process_newsource_edit(&mut self) {
         if self.new_source.state == NewSourceState::UrlChanged {
-            debug!("process_newsource_edit:  {:?}  ", self.new_source);
+            // trace!("process_newsource_edit:  {:?}  ", self.new_source);
             if self.new_source.edit_url.starts_with("http") {
                 self.new_source.state = NewSourceState::Requesting;
                 let dd: Vec<AValue> = vec![
@@ -955,7 +953,6 @@ impl SourceTreeController {
         let mut next_subs_id = std::cmp::max(subs_repo_highest + 1, 10);
         if let Some(messagesrepo) = self.messagesrepo_w.upgrade() {
             let h = (*messagesrepo).borrow().get_max_src_index();
-            // debug!("highest from messages: {}   from subscriptions: {}", h, next_subs_id );
             if h >= next_subs_id {
                 next_subs_id = h + 1;
             } else {
@@ -1032,7 +1029,7 @@ impl SourceTreeController {
 
 impl ISourceTreeController for SourceTreeController {
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool {
-        debug!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
+        trace!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
         let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
         let length_before = all1.len();
         let mut success: bool = false;
@@ -1328,14 +1325,8 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let fs_id = self.feedsource_delete_id.unwrap();
-        let fse: SubscriptionEntry = (*self.subscriptionrepo_r)
-            .borrow()
-            .get_by_index(fs_id as isize)
-            .unwrap();
-        debug!(
-            "feedsource_delete {:?}   Parent: {}  ",
-            self.feedsource_delete_id, fse.parent_subs_id
-        );
+        // let fse: SubscriptionEntry = (*self.subscriptionrepo_r)            .borrow()            .get_by_index(fs_id as isize)            .unwrap();
+        // debug!(            "feedsource_delete {:?}   Parent: {}  ",            self.feedsource_delete_id, fse.parent_subs_id        );
         (*self.subscriptionrepo_r)
             .borrow()
             .delete_by_index(fs_id as isize);
@@ -1433,10 +1424,7 @@ impl ISourceTreeController for SourceTreeController {
                 }
             }
         }
-        debug!(
-            "show_dialog {}   parent={:?}",
-            dialog_id, self.current_new_folder_parent_id
-        );
+        // debug!(            "show_dialog {}   parent={:?}",            dialog_id, self.current_new_folder_parent_id        );
         (*self.gui_updater).borrow().update_dialog(dialog_id);
         (*self.gui_updater).borrow().show_dialog(dialog_id);
     }
@@ -1455,8 +1443,6 @@ impl ISourceTreeController for SourceTreeController {
             AValue::ASTR(fse.display_name.clone()), // 1
             AValue::ASTR(fse.url),                  // 2
         ];
-
-        debug!("start_delete_dialog  DDD={:?}", &dd);
         (*self.gui_val_store)
             .write()
             .unwrap()
@@ -1546,7 +1532,7 @@ impl ISourceTreeController for SourceTreeController {
         let mut opmlreader = OpmlReader::new(self.subscriptionrepo_r.clone());
         match opmlreader.read_from_file(filename) {
             Ok(_) => {
-                debug!("import-opml read ok  -> {}", new_folder_id);
+                // debug!("import-opml read ok  -> {}", new_folder_id);
                 opmlreader.transfer_to_db(new_folder_id);
                 self.addjob(SJob::UpdateTreePaths);
             }

@@ -168,12 +168,8 @@ pub fn create_treeview(
                 .collect::<Vec<u16>>();
             let mut w_state = (*drag_s4).write().unwrap();
             if w_state.inserted.is_none() {
-                // debug!("drag: row_inserted  path={:?}", indices);
                 w_state.inserted.replace(indices);
             }
-            //  else {
-            //     debug!("drag: row_inserted    skipping other paths {:?}", indices);
-            // }
         }
     });
     let drag_s2 = drag_state.clone();
