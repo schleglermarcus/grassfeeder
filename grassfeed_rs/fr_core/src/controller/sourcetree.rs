@@ -235,15 +235,11 @@ impl SourceTreeController {
             let now = Instant::now();
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
-                    let o_subs_state = self
+                    if let Some(su_st) = self
                         .statemap
                         .borrow_mut()
-                        .set_num_all_unread(subs_id, msg_all, msg_unread);
-                    if o_subs_state.is_none() {
-                        warn!("could not store readcount for id {}", subs_id);
-                    } else {
-                        let su_st = o_subs_state.unwrap();
-
+                        .set_num_all_unread(subs_id, msg_all, msg_unread)
+                    {
                         let subs_e = (*self.subscriptionrepo_r)
                             .borrow()
                             .get_by_index(subs_id)
@@ -257,6 +253,8 @@ impl SourceTreeController {
                         }
 
                         self.tree_update_one(&subs_e, &su_st);
+                    } else {
+                        warn!("could not store readcount for id {}", subs_id);
                     }
                 }
                 SJob::UpdateTreePaths => {
@@ -421,14 +419,7 @@ impl SourceTreeController {
                     SubsMapEntry::default()
                 }
             };
-            trace!(
-                "insert_tree_row:{} {:?}\t{:?}\t{:?}",
-                n,
-                &path,
-                &fse,
-                &subs_map
-            );
-
+            // trace!(                "insert_tree_row:{} {:?}\t{:?}\t{:?}",                n,                &path,                &fse,                &subs_map            );
             let treevalues = self.tree_row_to_values(fse, &subs_map);
             (*self.gui_val_store)
                 .write()

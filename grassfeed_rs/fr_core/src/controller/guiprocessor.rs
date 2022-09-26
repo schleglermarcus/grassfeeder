@@ -978,10 +978,9 @@ struct StatusBarItems {
     num_dl_queue_length: usize,
     selected_msg_id: i32,
     selected_msg_url: String,
-
-    ///  proc//status/VmRSS			Resident set size,  estimation of the current physical memory used by the application
+    /// proc//status/VmRSS  Resident set size, estimation of the current physical memory used by the application
     mem_usage_vmrss_bytes: isize,
-    //    * VmHWM: Peak resident set size ("high water mark"). estimation of the peak physical memory used by the application
+    //  * VmHWM: Peak resident set size ("high water mark"). estimation of the peak physical memory used by the application
     // mem_usage_peakrss_bytes: isize,
 }
 

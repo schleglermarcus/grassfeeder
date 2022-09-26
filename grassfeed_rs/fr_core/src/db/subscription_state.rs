@@ -69,17 +69,10 @@ impl ISubscriptionState for SubscriptionState {
     }
 
     fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)> {
-        let o_state = self.statemap.get(&subs_id);
-        if o_state.is_none() {
-            return None;
-        }
-        let st = o_state.unwrap();
-        if st.num_msg_all_unread.is_none() {
-            if st.is_folder() {
-                debug!("TODO sum up stats of all children of {}", subs_id);
-            }
-        }
-
+        let st = self.statemap.get(&subs_id)?;
+        // if o_state.is_none() {            return None;        }
+        // let st = o_state.unwrap();
+        // if st.num_msg_all_unread.is_none() && st.is_folder() {            debug!("TODO sum up stats of all children of {}", subs_id);        }
         st.num_msg_all_unread
     }
 
