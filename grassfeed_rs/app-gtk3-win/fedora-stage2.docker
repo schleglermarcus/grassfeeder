@@ -7,12 +7,9 @@ ENV GTK_INSTALL_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/
 RUN cat /etc/redhat-release 	#  tells:   Fedora release 38 (Rawhide)
 RUN rustc --version
 
+RUN dnf install -y  rust-gio-sys+default-devel  rust-gio+default-devel mingw64-gtk3
 
 
-RUN dnf install -y  rust-gio-sys+default-devel  rust-gio+default-devel
-
-
-# NOW libsoup
 RUN dnf list libsoup
 RUN dnf install -y   libsoup 
 ## fedora35  does not contain libsoup3
@@ -24,15 +21,9 @@ RUN pkg-config --exists --print-errors 'libsoup-2.4  >= 2.28.2'
 
 RUN dnf install -y javascriptcoregtk4.0-devel		#   Package javascriptcoregtk4.0-devel-2.38.0-2.fc38.x86_64 is already installed
 RUN dnf install -y webkit2gtk4.0-devel
-#    https://fedora.pkgs.org/rawhide/fedora-x86_64/javascriptcoregtk4.0-2.38.0-2.fc38.x86_64.rpm.html 
 RUN dnf install -y  javascriptcoregtk4.0		# Package javascriptcoregtk4.0-2.38.0-2.fc38.x86_64 is already installed.
 
-# Error: Unable to find a match: rust-javascriptcore-rs+default-devel 
-# Error: Unable to find a match: rust-javascriptcore-rs-sys
-# Error: Unable to find a match: rust-javascriptcore-rs-sys-devel
-# RUN dnf install -y   
 RUN dnf list javascriptcore*
-
 RUN find / -name javascriptcore*.pc   	#  leer
 # RUN pkg-config --modversion  javascriptcoregtk4.0 
 # Fedora35, 36, 
@@ -42,6 +33,18 @@ RUN find / -name javascriptcore*.pc   	#  leer
 #Package 'javascriptcoregtk4.0', required by 'virtual:world', not found
 RUN pkg-config --exists --print-errors 'javascriptcoregtk-4.0 >= 2.24'
 RUN pkg-config --libs --cflags javascriptcoregtk-4.0 "javascriptcoregtk-4.0 >= 2.24"
+
+# linux,local Version	gio v0.15.12	gio-sys v0.15.10 	webkit2gtk v0.18.0
+# win, docker version	gio v0.15.12	gio-sys v0.15.10	webkit2gtk v0.18.0
+
+#error[E0412]: cannot find type `UnixFDList` in crate `gio`
+#  --> /root/.cargo/registry/src/github.com-1ecc6299db9ec823/webkit2gtk-0.18.0/src/auto/user_message.rs:46:36
+#46 |     fd_list: Option<&impl IsA<gio::UnixFDList>>,
+#   |                                    ^^^^^^^^^^ not found in `gio`
+#error[E0412]: cannot find type `UnixFDList` in crate `gio`
+#  --> /root/.cargo/registry/src/github.com-1ecc6299db9ec823/webkit2gtk-0.18.0/src/auto/user_message.rs:85:24
+#85 |   fd_list: Option<gio::UnixFDList>,
+#   |                        ^^^^^^^^^^ not found in `gio`
 
 
 COPY target/cr_src.tar.gz /usr/src/

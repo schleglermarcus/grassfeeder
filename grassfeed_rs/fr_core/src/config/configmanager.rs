@@ -73,7 +73,7 @@ impl ConfigManager {
     pub fn load_user_conf(&self, filename: &String) -> bool {
         if !std::path::Path::new(&filename).exists() {
             trace!(
-                "load_subscriptions_pretty file {} not found. ",
+                "load_user_conf file {} not found. ",
                 &self.cconf_filename
             );
             return false;

@@ -333,17 +333,20 @@ impl SourceTreeController {
                 }
                 SJob::ScanEmptyUnread => {
                     let unread_ids = self.statemap.borrow().scan_num_all_unread();
+
                     if !unread_ids.is_empty() {
                         self.addjob(SJob::ScanEmptyUnread);
                         for (unread_id, is_folder) in unread_ids {
-                            if !is_folder {
+                            if is_folder {
+                                let _r = self.sum_up_num_all_unread(unread_id);
+                                // trace!("ScanEmptyUnread Folder: {:?} => {}", unread_id, r);
+                            } else {
                                 if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+									// trace!("ScanEmptyUnread Subscr: {:?} ", unread_id);
                                     (*feedcontents)
                                         .borrow()
                                         .addjob(CJob::RequestUnreadAllCount(unread_id));
                                 }
-                            } else {
-                                self.sum_up_num_all_unread(unread_id);
                             }
                         }
                     }
@@ -362,7 +365,8 @@ impl SourceTreeController {
         }
     }
 
-    fn sum_up_num_all_unread(&self, folder_subs_id: isize) {
+    /// returns: true if we could sum up all children.  If one stat was missing, returns false
+    fn sum_up_num_all_unread(&self, folder_subs_id: isize) -> bool {
         let children = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(folder_subs_id);
@@ -379,17 +383,19 @@ impl SourceTreeController {
                 one_missing = true;
             }
         });
-        if !one_missing {
-            // trace!(                "SUM UP {} {:?}  => {} / {} ",                folder_subs_id,                &child_subs_ids,                sum_all,                sum_unread            );
-            self.statemap
-                .borrow_mut()
-                .set_num_all_unread(folder_subs_id, sum_all, sum_unread);
-            self.addjob(SJob::NotifyTreeReadCount(
-                folder_subs_id,
-                sum_all,
-                sum_unread,
-            ));
+        if one_missing {
+            return false;
         }
+        // trace!(            "SUM UP {} {:?}  => {} / {} ",            folder_subs_id,            &child_subs_ids,            sum_all,            sum_unread        );
+        self.statemap
+            .borrow_mut()
+            .set_num_all_unread(folder_subs_id, sum_all, sum_unread);
+        self.addjob(SJob::NotifyTreeReadCount(
+            folder_subs_id,
+            sum_all,
+            sum_unread,
+        ));
+        true
     }
 
     ///  Read all sources   from db and put into ModelValueAdapter
@@ -1689,9 +1695,4 @@ impl Default for NewSourceState {
     fn default() -> Self {
         NewSourceState::None
     }
-}
-
-#[cfg(test)]
-pub mod feedsources_t {
-    // use super::*;
 }

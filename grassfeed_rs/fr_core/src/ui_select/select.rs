@@ -75,7 +75,7 @@ pub mod ui_select {
     use std::collections::HashMap;
     use std::rc::Rc;
 
-	#[allow(clippy::type_complexity)]
+    #[allow(clippy::type_complexity)]
     pub fn init_gui(
         _initvalues: HashMap<PropDef, String>,
     ) -> (
@@ -84,6 +84,7 @@ pub mod ui_select {
         Rc<RefCell<dyn GuiRunner>>,
     ) {
         let mock = UIMock::new();
+        info!("Using UI MOCK");
         (mock.val_sto(), mock.upd_adp(), mock.guirunner())
     }
 

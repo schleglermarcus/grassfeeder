@@ -35,7 +35,6 @@ pub fn start(conf: GrassFeederConfig) -> AppContext {
     appcontext.build::<ConfigManager>();
     let configmanager_r: Rc<RefCell<ConfigManager>> = appcontext.get_rc::<ConfigManager>().unwrap();
     appcontext.set_user_conf((*configmanager_r).borrow().get_user_conf());
-
     appcontext.build::<Timer>();
     appcontext.build::<GuiContext>();
     appcontext.build::<subscription_repo::SubscriptionRepo>();

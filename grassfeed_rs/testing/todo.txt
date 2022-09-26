@@ -1,6 +1,5 @@
 To Do List
 
-- Windows Build
 
 - check: subscription  Reload shall refresh  message list
 - Copy Message address into clipboard
@@ -49,6 +48,8 @@ To Do List
 
 
 Later:
+- Windows Gui
+  https://github.com/gabdube/native-windows-gui/tree/master/showcase
 - GTK4: block multiple instances
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal
 	https://docs.gtk.org/gio/method.Application.run.html

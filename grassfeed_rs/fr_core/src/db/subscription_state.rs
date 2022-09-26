@@ -70,9 +70,6 @@ impl ISubscriptionState for SubscriptionState {
 
     fn get_num_all_unread(&self, subs_id: isize) -> Option<(isize, isize)> {
         let st = self.statemap.get(&subs_id)?;
-        // if o_state.is_none() {            return None;        }
-        // let st = o_state.unwrap();
-        // if st.num_msg_all_unread.is_none() && st.is_folder() {            debug!("TODO sum up stats of all children of {}", subs_id);        }
         st.num_msg_all_unread
     }
 
@@ -99,25 +96,26 @@ impl ISubscriptionState for SubscriptionState {
         }
     }
 
-    /// don't include deleted ones
-    //new: also  folders,
+    /// don't include deleted ones, sort folders to the end
     /// Usability+Speed:  dispatch 2 subscriptions at one time for re-calculating
     /// returns    subs_id,  is_folder
     fn scan_num_all_unread(&self) -> Vec<(isize, bool)> {
-        let unproc_ids: Vec<(isize, bool)> = self
+        let mut unproc_ids: Vec<(isize, bool)> = self
             .statemap
             .iter()
             .filter_map(|(id, se)| {
-                if
-                //  !se.is_folder() &&
-                se.num_msg_all_unread.is_none() && *id > 0 && !se.is_deleted() {
+                if se.num_msg_all_unread.is_none() && *id > 0 && !se.is_deleted() {
                     Some((*id, se.is_folder()))
                 } else {
                     None
                 }
             })
-            .take(SCAN_EMPTY_UNREAD_GROUP as usize)
             .collect::<Vec<(isize, bool)>>();
+        unproc_ids.sort_by(|a, b| a.1.cmp(&b.1));
+        if unproc_ids.len() > SCAN_EMPTY_UNREAD_GROUP as usize {
+            unproc_ids.truncate(SCAN_EMPTY_UNREAD_GROUP as usize)
+        }
+        // trace!(            "scan_num_all_unread:  unproc: {:?}  KEYS={:?}",           unproc_ids,            self.statemap.keys()        );
         unproc_ids
     }
 
@@ -198,7 +196,7 @@ impl ISubscriptionState for SubscriptionState {
 
 #[allow(dead_code)]
 pub enum StatusMask {
-    Dirty = 1,
+    // Dirty = 1,
     FetchScheduled = 8,
     FetchScheduledJobCreated = 16,
     FetchInProgress = 32,
@@ -215,18 +213,6 @@ pub struct SubsMapEntry {
     pub tree_path: Option<Vec<u16>>,
     pub status: usize,
     pub num_msg_all_unread: Option<(isize, isize)>,
-    // later: remove this
-    // #[deprecated]
-    // pub is_dirty: bool,
-    // copied
-    // #[deprecated]
-    // pub is_folder: bool,
-    // copied
-    // #[deprecated]
-    // pub is_deleted: bool,
-    // copied
-    // #[deprecated]
-    // pub is_expanded: bool,
 }
 
 pub trait FeedSourceState {
@@ -291,20 +277,16 @@ impl FeedSourceState for SubsMapEntry {
     }
 
     fn is_deleted(&self) -> bool {
-        // self.is_deleted
         self.check_bitmask(StatusMask::IsDeletedCopy as usize)
     }
     fn set_deleted(&mut self, n: bool) {
-        // self.is_deleted = n
         self.change_bitmask(StatusMask::IsDeletedCopy as usize, n)
     }
 
     fn is_expanded(&self) -> bool {
-        // self.is_expanded
         self.check_bitmask(StatusMask::IsExpandedCopy as usize)
     }
     fn set_expanded(&mut self, n: bool) {
-        // self.is_expanded = new_exp;
         self.change_bitmask(StatusMask::IsExpandedCopy as usize, n);
     }
 
@@ -335,5 +317,30 @@ impl FeedSourceState for SubsMapEntry {
 
     fn set_folder(&mut self, n: bool) {
         self.change_bitmask(StatusMask::IsFolderCopy as usize, n);
+    }
+}
+
+#[cfg(test)]
+pub mod t {
+    use super::*;
+
+    //cargo watch -s "cargo test db::subscription_state::t::t_scan_num_all_unread  --lib -- --exact --nocapture"
+    #[test]
+    fn t_scan_num_all_unread() {
+        let lim: isize = SCAN_EMPTY_UNREAD_GROUP as isize;
+        let mut ss = SubscriptionState::default();
+        let mut sme = SubsMapEntry {
+            status: StatusMask::IsFolderCopy as usize,
+            ..Default::default()
+        };
+        for a in 0..lim {
+            ss.statemap.insert(a + 1, sme.clone());
+        }
+        sme.status = 0;
+        ss.statemap.insert(lim + 3, sme.clone());
+        let r = ss.scan_num_all_unread();
+        assert_eq!(r.len(), lim as usize);
+        println!("scan: {:?}", r);
+        assert!(r.contains(&(lim + 3, false)));
     }
 }
