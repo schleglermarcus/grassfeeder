@@ -235,11 +235,11 @@ impl SourceTreeController {
             let now = Instant::now();
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
-                    if let Some(su_st) = self
+                    let o_subs_state = self
                         .statemap
                         .borrow_mut()
-                        .set_num_all_unread(subs_id, msg_all, msg_unread)
-                    {
+                        .set_num_all_unread(subs_id, msg_all, msg_unread);
+                    if let Some(su_st) = o_subs_state {
                         let subs_e = (*self.subscriptionrepo_r)
                             .borrow()
                             .get_by_index(subs_id)
