@@ -1,3 +1,23 @@
+grassfeeder (0.0.6) unstable; urgency=low
+
+  * added desktop icon
+  * Bugfix: rename folder crash
+  * Delete Messages
+  * Memory usage display in status bar
+  * Show message sums on folders
+  
+  
+  - Windows Build
+  
+  
+  - Keyboard commands for:  mark-as-unread, next unread message
+  - Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
+  - refactor messages / separate state_map
+  - find common code parts of    folder:mark-as-read  ,  folder:update
+  - Browser: get rid of white display on start
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Wed, 21 Sep 2022 00:12:00 +0000
+
 grassfeeder (0.0.5) unstable; urgency=low
 
   * StatusBar: copy Feed address into clipboard
@@ -11,7 +31,7 @@ grassfeeder (0.0.5) unstable; urgency=low
   * Bugfix: Fetch-All shall not include folder scheduling
   * Bugfix: on start create logging folder
   * Refactored test for new_entries_filter
-  * New-Feed allowed umlaut in name, deacticated iso8859 filter
+  * New-Feed allowed umlaut in name, deactivated iso8859 filter
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Wed, 21 Sep 2022 00:12:00 +0000
 

@@ -241,7 +241,7 @@ mod t {
         );
         assert_eq!(
             remove_invalid_chars_from_input("Jenkins &#226;&#128;&#147; Brighteon".to_string()),
-            "Jenkins â€› Brighteon".to_string()
+            "Jenkins \"€› Brighteon".to_string()
         );
     }
 
