@@ -5,7 +5,11 @@ ENV PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/pkgconfig/:/usr/i
 ENV GTK_INSTALL_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/
 
 RUN cat /etc/redhat-release 	#  tells:   Fedora release 38 (Rawhide)
+RUN rustc --version
 
+
+
+RUN dnf install -y  rust-gio-sys+default-devel  rust-gio+default-devel
 
 
 # NOW libsoup
@@ -40,7 +44,6 @@ RUN pkg-config --exists --print-errors 'javascriptcoregtk-4.0 >= 2.24'
 RUN pkg-config --libs --cflags javascriptcoregtk-4.0 "javascriptcoregtk-4.0 >= 2.24"
 
 
-
 COPY target/cr_src.tar.gz /usr/src/
 RUN mkdir /usr/src/cross
 WORKDIR /usr/src/cross
@@ -48,7 +51,9 @@ RUN cat ../cr_src.tar.gz |gzip -d |tar x
 
 
 WORKDIR /usr/src/cross/app-gtk3-win
+RUN cargo tree 
 RUN cargo build --target=x86_64-pc-windows-gnu --release
+RUN rustc --version
 RUN mkdir -p package
 RUN cp target/x86_64-pc-windows-gnu/release/*.exe package
 RUN for DLL in `peldd package/*.exe -t --ignore-errors` ;      do cp "$DLL" package ;  done

@@ -399,7 +399,7 @@ impl IFeedContents for FeedContents {
                     let read_count = (*self.messagesrepo_r).borrow().get_read_sum(feed_source_id);
                     let unread_count = msg_count - read_count;
                     if msg_count >= 0 {
-                        // trace!(                        "RequestUnreadAllCount: {:?}  {}/{}",                        feed_source_id,                        unread_count,                        msg_count                    );
+                        // trace!(     "RequestUnreadAllCount: {:?}  {}/{}",     feed_source_id,                        unread_count,                        msg_count                    );
                         if let Some(feedsources) = self.feedsources_w.upgrade() {
                             (*feedsources).borrow().addjob(SJob::NotifyTreeReadCount(
                                 feed_source_id,

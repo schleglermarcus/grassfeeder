@@ -235,19 +235,28 @@ impl SourceTreeController {
             let now = Instant::now();
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
-                    if let Some(su_st) = self
+                    let o_subs_state = self
                         .statemap
                         .borrow_mut()
-                        .set_num_all_unread(subs_id, msg_all, msg_unread)
-                    {
-                        //  trace!(                            "NotifyTreeReadCount {} {}/{} {}",                            subs_id,                            msg_unread,                            msg_all,                            subs_e.display_name                        );
+                        .set_num_all_unread(subs_id, msg_all, msg_unread);
+                    if o_subs_state.is_none() {
+                        warn!("could not store readcount for id {}", subs_id);
+                    } else {
+                        let su_st = o_subs_state.unwrap();
+
                         let subs_e = (*self.subscriptionrepo_r)
                             .borrow()
                             .get_by_index(subs_id)
                             .unwrap();
+                        // trace!(                            "NotifyTreeReadCount {} {}/{} clearing parent {} ",                            subs_id,                            msg_unread,                            msg_all,                            subs_e.parent_subs_id                        );
+                        if subs_e.parent_subs_id > 0 {
+                            self.statemap
+                                .borrow_mut()
+                                .clear_num_all_unread(subs_e.parent_subs_id);
+                            self.addjob(SJob::ScanEmptyUnread);
+                        }
+
                         self.tree_update_one(&subs_e, &su_st);
-                    } else {
-                        warn!("could not store readcount for id {}", subs_id);
                     }
                 }
                 SJob::UpdateTreePaths => {
@@ -274,8 +283,9 @@ impl SourceTreeController {
                 SJob::ScheduleFetchAllFeeds => {
                     self.statemap.borrow_mut().set_schedule_fetch_all();
                 }
-                SJob::ScheduleUpdateFeed(fs_id) => {
-                    self.mark_schedule_fetch(fs_id);
+                SJob::ScheduleUpdateFeed(subs_id) => {
+                    debug!("ScheduleUpdateFeed:  {}", subs_id);
+                    self.mark_schedule_fetch(subs_id);
                 }
                 SJob::CheckSpinnerActive => {
                     // let fetch_in_progress_ids = (*self.subscriptionrepo_r)                        .borrow()                        .get_ids_by_status(StatusMask::FetchInProgress, true, false);
@@ -294,7 +304,6 @@ impl SourceTreeController {
                 }
                 SJob::SetIconId(fs_id, icon_id) => {
                     let ts_now = timestamp_now();
-                    // trace!(                        "SetIconId {} {} {}",                        fs_id,                        icon_id,                        db_time_to_display(ts_now)                    );
                     (*self.subscriptionrepo_r).borrow().update_icon_id(
                         fs_id,
                         icon_id as usize,
@@ -331,11 +340,15 @@ impl SourceTreeController {
                     let unread_ids = self.statemap.borrow().scan_num_all_unread();
                     if !unread_ids.is_empty() {
                         self.addjob(SJob::ScanEmptyUnread);
-                        for unread_id in unread_ids {
-                            if let Some(feedcontents) = self.feedcontents_w.upgrade() {
-                                (*feedcontents)
-                                    .borrow()
-                                    .addjob(CJob::RequestUnreadAllCount(unread_id));
+                        for (unread_id, is_folder) in unread_ids {
+                            if !is_folder {
+                                if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+                                    (*feedcontents)
+                                        .borrow()
+                                        .addjob(CJob::RequestUnreadAllCount(unread_id));
+                                }
+                            } else {
+                                self.sum_up_num_all_unread(unread_id);
                             }
                         }
                     }
@@ -351,6 +364,36 @@ impl SourceTreeController {
                     debug!("   SJOB: {:?} took {:?}", &job, elapsed_m);
                 }
             }
+        }
+    }
+
+    fn sum_up_num_all_unread(&self, folder_subs_id: isize) {
+        let children = (*self.subscriptionrepo_r)
+            .borrow()
+            .get_by_parent_repo_id(folder_subs_id);
+        let child_subs_ids: Vec<isize> = children.iter().map(|se| se.subs_id).collect();
+        let mut sum_all = 0;
+        let mut sum_unread = 0;
+        let mut one_missing = false;
+        child_subs_ids.iter().for_each(|id| {
+            let num_all_unread = self.statemap.borrow().get_num_all_unread(*id);
+            if let Some((n_a, n_u)) = num_all_unread {
+                sum_all += n_a;
+                sum_unread += n_u;
+            } else {
+                one_missing = true;
+            }
+        });
+        if !one_missing {
+            // trace!(                "SUM UP {} {:?}  => {} / {} ",                folder_subs_id,                &child_subs_ids,                sum_all,                sum_unread            );
+            self.statemap
+                .borrow_mut()
+                .set_num_all_unread(folder_subs_id, sum_all, sum_unread);
+            self.addjob(SJob::NotifyTreeReadCount(
+                folder_subs_id,
+                sum_all,
+                sum_unread,
+            ));
         }
     }
 
@@ -378,8 +421,15 @@ impl SourceTreeController {
                     SubsMapEntry::default()
                 }
             };
+            trace!(
+                "insert_tree_row:{} {:?}\t{:?}\t{:?}",
+                n,
+                &path,
+                &fse,
+                &subs_map
+            );
+
             let treevalues = self.tree_row_to_values(fse, &subs_map);
-            // trace!("insert_tree_row:{} {:?}\t{:?}", n, &path, &fse);
             (*self.gui_val_store)
                 .write()
                 .unwrap()
@@ -394,16 +444,17 @@ impl SourceTreeController {
         let mut tv: Vec<AValue> = Vec::new(); // linked to ObjectTree
         let mut rightcol_text = String::default(); // later:  folder sum stats
         let mut num_msg_unread = 0;
-        if !fse.is_folder {
-            if let Some((num_all, num_unread)) = su_st.num_msg_all_unread {
-                if self.config.display_feedcount_all {
-                    rightcol_text = format!("{}/{}", num_unread, num_all);
-                } else {
-                    rightcol_text = format!("{}", num_unread);
-                }
-                num_msg_unread = num_unread;
+
+        // if !fse.is_folder {
+        if let Some((num_all, num_unread)) = su_st.num_msg_all_unread {
+            if self.config.display_feedcount_all {
+                rightcol_text = format!("{}/{}", num_unread, num_all);
+            } else {
+                rightcol_text = format!("{}", num_unread);
             }
+            num_msg_unread = num_unread;
         }
+        // }
         let mut fs_iconstr: String = String::default();
         if let Some(ie) = self.iconrepo_r.borrow().get_by_index(fse.icon_id as isize) {
             fs_iconstr = ie.icon;
@@ -649,7 +700,6 @@ impl SourceTreeController {
                     from_entry.subs_id, &from_path, to_parent_id, to_path_parent
                 ));
             }
-            // if to_entry_direct.is_folder {                to_parent_folderpos = 0;            } else {                to_parent_folderpos = to_entry_direct.folder_position;            }
             to_parent_folderpos = to_entry_direct.folder_position; // dragging insidethe tree down
             return Ok((from_entry, to_parent_id, to_parent_folderpos));
         }
@@ -1148,6 +1198,7 @@ impl ISourceTreeController for SourceTreeController {
         let p_id = self.current_new_folder_parent_id.unwrap_or(0);
         self.add_new_subscription_at_parent(newsource, display, p_id, false)
     }
+
     fn add_new_subscription_at_parent(
         &mut self,
         newsource: String,
@@ -1236,7 +1287,6 @@ impl ISourceTreeController for SourceTreeController {
         self.statemap
             .borrow_mut()
             .clear_num_all_unread(source_repo_id);
-
         if let Some(fse) = &self.current_selected_fse {
             if fse.subs_id == source_repo_id {
                 if let Some(feedcontents) = self.feedcontents_w.upgrade() {
@@ -1301,7 +1351,6 @@ impl ISourceTreeController for SourceTreeController {
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::FillSourcesTree);
         self.addjob(SJob::GuiUpdateTreeAll);
-
         self.feedsource_delete_id = None;
     }
 

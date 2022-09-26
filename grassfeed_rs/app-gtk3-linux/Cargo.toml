@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.0.6-B2"
+version = "0.0.6-B3"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 
@@ -42,7 +42,7 @@ assets =[
 		["assets/grassfeeder.desktop", "/usr/share/applications/", "755"],
 # 		["README.md", "usr/share/doc/grassfeeder/README", "644"],
 ]
-depends = "$auto"
+# depends = "$auto"
 
 
 
