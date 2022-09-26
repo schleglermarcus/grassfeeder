@@ -3,15 +3,10 @@ Wed, 21 Sep 2022 00:12:00 +0000
 * Bugfix: rename folder crash
 * Delete Messages
 * Memory usage display in status bar
+* Show message sums on folders
 
 
 - Windows Build
-
-- Show message sums on folders
-	https://github.com/Tommoa/rs-process-memory
-	https://docs.rs/procfs/latest/procfs/
-	https://unix.stackexchange.com/questions/224015/memory-usage-of-a-given-process-using-linux-proc-filesystem
-
 
 
 - Keyboard commands for:  mark-as-unread, next unread message
@@ -19,7 +14,3 @@ Wed, 21 Sep 2022 00:12:00 +0000
 - refactor messages / separate state_map
 - find common code parts of    folder:mark-as-read  ,  folder:update
 - Browser: get rid of white display on start
-
-
-# sudo apt-get remove   libboost-all-dev
-#
