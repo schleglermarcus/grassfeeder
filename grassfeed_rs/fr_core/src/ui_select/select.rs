@@ -37,8 +37,7 @@ pub mod ui_select {
         (m_v_store_a, ui_updater, r_runner)
     }
 
-
-	// https://gtk-rs.org/gtk3-rs/stable/latest/docs/gdk_sys/index.html
+    // https://gtk-rs.org/gtk3-rs/stable/latest/docs/gdk_sys/index.html
     #[allow(unused_variables)]
     pub fn from_isize(code: isize) -> KeyCodes {
         match code as i32 {
@@ -64,6 +63,9 @@ pub mod ui_select {
             gdk_sys::GDK_KEY_b => KeyCodes::Key_b,
             gdk_sys::GDK_KEY_N => KeyCodes::Key_N,
             gdk_sys::GDK_KEY_n => KeyCodes::Key_n,
+            gdk_sys::GDK_KEY_s => KeyCodes::Key_s,
+            gdk_sys::GDK_KEY_v => KeyCodes::Key_v,
+            gdk_sys::GDK_KEY_x => KeyCodes::Key_x,
 
             _ => KeyCodes::Nothing,
         }

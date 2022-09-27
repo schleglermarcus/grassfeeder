@@ -13,26 +13,17 @@ use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::util::db_time_to_display_nonnull;
 use regex::Regex;
 
-
-/*
-#[test]
-fn memtest() {
-    setup();
-    if false {
-        let ps = proc_status::ProcStatus::read().unwrap();
-        for entry in ps.entries() {
-            let entry = entry.unwrap();
-            debug!("PS {:?} = {:?}  ", &entry.key, &entry.value);
-        }
-    }
-    let mem = proc_status::mem_usage().unwrap();
-    debug!(
-        "Mem usage in kb: current={}, peak={} ",
-        mem.current / 1024,
-        mem.peak / 1024
-    );
-
-*/
+//  Maybe later:
+//  The file contains an invalid  single  &  as title.   The parse does not like that and returns  no title.
+#[allow(dead_code)]
+fn parse_with_ampersand() {
+    let rss_str = std::fs::read_to_string("../testing/tests/fr_htdocs/dieneuewelle.xml").unwrap();
+    let feeds = parser::parse(rss_str.as_bytes()).unwrap();
+    let entry2 = feeds.entries.get(2).unwrap();
+    let msg2: MessageRow = contentlist::message_from_modelentry(&entry2);
+    // println!("entry2.title={}=", msg2.title);
+    assert!(msg2.title.starts_with("Borderlands-"));
+}
 
 // #[test]
 #[allow(dead_code)]

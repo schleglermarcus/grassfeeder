@@ -11,20 +11,22 @@ pub const TAB_MARKER_HEIGHT: u8 = 1;
 
 use crate::gtk::prelude::CssProviderExt;
 
+// double curly brackets for rust strings
 fn style_scrolled(name: &str, w_id: u8, height: u8) -> String {
     format!(
         "\
-    #{}_{}	{{ border-top:{}px solid transparent;  }} \
-  	#{}_{}_1	{{ border-top:{}px solid green;    }} \
-    #{}_{}_2	{{ border-top:{}px solid transparent;  \
-         transition-property:border-top-color; transition-duration:3s;  \
-		  transition-timing-function:linear;  transition-delay:0s; }} ",
+    #{}_{}    {{ border-top:{}px solid transparent; }} \
+    #{}_{}_1  {{ border-top:{}px solid green;    }} \
+    #{}_{}_2  {{ border-top:{}px solid transparent;  \
+    transition-property:border-top-color; transition-duration:3s;  \
+    transition-timing-function:linear;  transition-delay:1s; }} ",
         name, w_id, height, name, w_id, height, name, w_id, height
     )
 }
 
 pub fn load_css() {
     let provider = gtk::CssProvider::new();
+    provider.connect_parsing_error(|_a1, section, p_err| error!("{:?} {:?} ", section, p_err));
     let s1 = style_scrolled("scrolledwindow", 0, TAB_MARKER_HEIGHT);
     let s2 = style_scrolled("scrolledwindow", 1, TAB_MARKER_HEIGHT);
     let s3 = style_scrolled("box", 1, TAB_MARKER_HEIGHT);

@@ -672,8 +672,8 @@ fn connect_keyboard(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
                 // debug!("! MOD5_MASK   AltGr- ");
             } else if keystate.intersects(gdk::ModifierType::SUPER_MASK) {
                 // debug!("! SUPER_MASK   Win-Left- ");
-            } else if keystate.intersects(gdk::ModifierType::SHIFT_MASK) {
-                // debug!("! SHIFT_MASK    ");
+                /*                 } else if keystate.intersects(gdk::ModifierType::SHIFT_MASK) {
+                debug!("! SHIFT_MASK    ");   */
             } else if !keystate.intersects(gdk::ModifierType::CONTROL_MASK) {
                 esw.sendw(GuiEvents::KeyPressed(*keyval as isize, keyval.to_unicode()));
             }

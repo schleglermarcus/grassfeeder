@@ -312,4 +312,7 @@ pub enum KeyCodes {
 	Key_b,
 	Key_N,
 	Key_n,
+	Key_s,
+	Key_v,
+	Key_x,
 }

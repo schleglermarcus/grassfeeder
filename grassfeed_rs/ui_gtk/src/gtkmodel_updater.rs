@@ -512,6 +512,7 @@ impl GtkModelUpdaterInt {
         } else {
             format!("{}{}", name, idx)
         };
+		// trace!("widget_mark {}", &widget_name );
         if let Some(widget) = self.widget_for_typ(typ, idx) {
             widget.set_widget_name(widget_name.as_str());
             widget.queue_draw();

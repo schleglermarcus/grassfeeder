@@ -13,8 +13,6 @@ use std::collections::HashMap;
 use std::io::BufWriter;
 use std::rc::Rc;
 
-// const ID_CONFIG: &str = "config";
-
 pub struct ConfigManager {
     cconf_modified: RefCell<bool>,
     cconf_filename: String,
@@ -72,10 +70,7 @@ impl ConfigManager {
 
     pub fn load_user_conf(&self, filename: &String) -> bool {
         if !std::path::Path::new(&filename).exists() {
-            trace!(
-                "load_user_conf file {} not found. ",
-                &self.cconf_filename
-            );
+            trace!("load_user_conf file {} not found. ", &self.cconf_filename);
             return false;
         }
 
@@ -116,7 +111,7 @@ impl ConfigManager {
             warn!("serializing into {} => {:?}", filename, r_ser.err());
             return false;
         }
-        trace!("written {} to {}", &writemap.len(), &filename);
+        // trace!("written {} to {}", &writemap.len(), &filename);
         true
     }
 

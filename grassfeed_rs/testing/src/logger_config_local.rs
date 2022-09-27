@@ -11,17 +11,6 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
     colors.info = Color::Green;
     colors.warn = Color::Yellow;
     colors.error = Color::Red;
-    /*
-
-        let logfilename = "../target/testing.log";
-        let _r = std::fs::remove_file(logfilename);
-        let o_logfile = fern::log_file(logfilename);
-        if o_logfile.is_err() {
-            error!("setup_logger: cannot create {}", logfilename);
-            return Err(fern::InitError::Io(o_logfile.err().unwrap()));
-        }
-        let logfile = o_logfile.unwrap();
-    */
     fern::Dispatch::new()
         .format(move |out, message, record| {
             const TARGET_WIDTH: usize = 25;
@@ -44,8 +33,7 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
         .level_for("sqlparser::parser", log::LevelFilter::Info)
         .level_for("ureq", log::LevelFilter::Info)
         .level_for("testing::minihttpserver", log::LevelFilter::Info)
-        .level_for("fr_core::downloader", log::LevelFilter::Trace)
-        // .chain(logfile)
+        .level_for("fr_core::downloader", log::LevelFilter::Debug)
         .chain(std::io::stdout())
         .apply()?;
     Ok(())
