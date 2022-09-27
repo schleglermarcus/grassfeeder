@@ -1,3 +1,10 @@
+grassfeeder (00.0.6) unstable; urgency=low
+
+  
+  -
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 27 Sep 2022 00:23:00 +0000
+
 grassfeeder (0.0.6) unstable; urgency=low
 
   * Added desktop icon

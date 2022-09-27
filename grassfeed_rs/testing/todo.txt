@@ -1,16 +1,18 @@
 To Do List
-- Keyboard commands for:  mark-as-unread, next unread message
-
-- Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
 
 
 - see if  diylib  can be used for ui_gtk
-- Menu Item and  Help text into browser
 - Error-DB for Subscription Requests, display in edit dialog
+
 - Create  AppImage
    https://github.com/StratusFearMe21/cargo-appimage
    https://lib.rs/crates/cargo-appimage
 
+ - Menu Item and  Help text into browser
+ - Browser CleanUp Cache, on startup / finish
+	       webcontextext:  clear_cache(&self)
+ - Databases consistency check  on startup configurable.
+ - Subscription Tree: hide zeroes when nothing to read
 
 - Copy Message address into clipboard
 - Create Backups for Subscriptions-DB
@@ -18,13 +20,10 @@ To Do List
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
 - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
 
+
+
 - check  https://www.linuxcompatible.org/  feed: icon + entries
-- Browser CleanUp Cache, on startup / finish
-      webcontextext:  clear_cache(&self)
-
 - Investigate why   subscriptions.db  is so large.
-
-- Databases consistency check  on startup configurable.
 - Sanitize: cross-check icon ids of tree if they are present in icon db
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
@@ -32,8 +31,6 @@ To Do List
 - Flatpak  https://lib.rs/crates/cargo-pkg
 
 - Startup, create gui:  delayed creation of dialogs
-- Subscription Tree: hide zeroes when nothing to read
-- refactor messages / separate state_map
 - Browser Display :  wrap over   title
 - React on Minimize, do memory usage reduction
 - implement focus policy: before last unread
@@ -45,7 +42,7 @@ To Do List
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
 - DragAndDrop for Websites into Tree
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
-- Searching inside feeds
+- Searching inside messages
 - Message List: set scroll position to upper edge from Cursor
 - Keybard configuration in settings
 
@@ -80,12 +77,10 @@ Perhaps:
 
 
 * Merge Branch and build release
-
     git checkout main
     git merge origin/v0_0_3
     git push origin main
-
-		# (cd grassfeed_rs/app-gtk3-linux/ ; cargo clean;  rm Cargo.lock ; cargo test && nice -n9 cargo deb )
+		cd grassfeder_rs/app-gtk3-linux/ ; ./ docker-stage2.sh
 
 
 * Put the work folder back to main

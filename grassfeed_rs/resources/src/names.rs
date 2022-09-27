@@ -7,9 +7,6 @@ pub enum FetchUpdaterIntervalNames {
     Days,
 }
 
-// #[deprecated]
-// pub const FETCH_UPDATER_INTERVAL_NAMES: [&str; 4] = ["", "Minutes", "Hours", "Days"];
-
 pub const FOCUS_POLICY_NAMES: [&str; 5] = [
     "",
     "None",

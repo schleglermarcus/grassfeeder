@@ -332,7 +332,6 @@ impl IFeedContents for FeedContents {
                         .borrow()
                         .update_list_some(TREEVIEW1, &list_pos);
                 }
-
                 CJob::SwitchBrowserTabContent(msg_id) => {
                     if self
                         .msg_state
