@@ -432,8 +432,6 @@ impl SourceTreeController {
         let mut tv: Vec<AValue> = Vec::new(); // linked to ObjectTree
         let mut rightcol_text = String::default(); // later:  folder sum stats
         let mut num_msg_unread = 0;
-
-        // if !fse.is_folder {
         if let Some((num_all, num_unread)) = su_st.num_msg_all_unread {
             if self.config.display_feedcount_all {
                 rightcol_text = format!("{}/{}", num_unread, num_all);
@@ -442,7 +440,6 @@ impl SourceTreeController {
             }
             num_msg_unread = num_unread;
         }
-        // }
         let mut fs_iconstr: String = String::default();
         if let Some(ie) = self.iconrepo_r.borrow().get_by_index(fse.icon_id as isize) {
             fs_iconstr = ie.icon;
