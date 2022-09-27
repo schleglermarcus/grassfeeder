@@ -1,0 +1,21 @@
+Tue, 27 Sep 2022 00:23:00 +0000
+
+- see if  diylib  can be used for ui_gtk
+
+
+- Error-DB for Subscription Requests, display in edit dialog
+- Create  AppImage
+   https://github.com/StratusFearMe21/cargo-appimage
+   https://lib.rs/crates/cargo-appimage
+
+ - Menu Item and  Help text into browser
+ - Browser CleanUp Cache, on startup / finish
+	       webcontextext:  clear_cache(&self)
+ - Databases consistency check  on startup configurable.
+ - Subscription Tree: hide zeroes when nothing to read
+
+- Copy Message address into clipboard
+- Create Backups for Subscriptions-DB
+- check: subscription  Reload shall refresh  message list
+- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
+- Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
