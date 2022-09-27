@@ -333,25 +333,19 @@ impl SourceTreeController {
                 }
                 SJob::ScanEmptyUnread => {
                     let unread_ids = self.statemap.borrow().scan_num_all_unread();
-
                     if !unread_ids.is_empty() {
                         self.addjob(SJob::ScanEmptyUnread);
                         for (unread_id, is_folder) in unread_ids {
                             if is_folder {
                                 let _r = self.sum_up_num_all_unread(unread_id);
-                                // trace!("ScanEmptyUnread Folder: {:?} => {}", unread_id, r);
-                            } else {
-                                if let Some(feedcontents) = self.feedcontents_w.upgrade() {
-                                    // trace!("ScanEmptyUnread Subscr: {:?} ", unread_id);
-                                    (*feedcontents)
-                                        .borrow()
-                                        .addjob(CJob::RequestUnreadAllCount(unread_id));
-                                }
+                            } else if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+                                (*feedcontents)
+                                    .borrow()
+                                    .addjob(CJob::RequestUnreadAllCount(unread_id));
                             }
                         }
                     }
                 }
-
                 SJob::EmptyTreeCreateDefaultSubscriptions => {
                     self.empty_create_default_subscriptions()
                 }

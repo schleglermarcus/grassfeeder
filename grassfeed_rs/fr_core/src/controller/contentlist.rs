@@ -191,7 +191,6 @@ impl FeedContents {
         ))); // 4
         newrow.push(AValue::AU32(fc.message_id as u32)); // 5
         if debug_mode {
-            // let escaped_post_id = crate::util::string_escape_url(fc.post_id.clone());
             let isdel = if fc.is_deleted { 1 } else { 0 };
             newrow.push(AValue::ASTR(format!(
                 "id{} src{}  D:{} F:{}",
@@ -378,7 +377,6 @@ impl IFeedContents for FeedContents {
                     let read_count = (*self.messagesrepo_r).borrow().get_read_sum(feed_source_id);
                     let unread_count = msg_count - read_count;
                     if msg_count >= 0 {
-                        // trace!(     "RequestUnreadAllCount: {:?}  {}/{}",     feed_source_id,                        unread_count,                        msg_count                    );
                         if let Some(feedsources) = self.feedsources_w.upgrade() {
                             (*feedsources).borrow().addjob(SJob::NotifyTreeReadCount(
                                 feed_source_id,
@@ -407,7 +405,6 @@ impl IFeedContents for FeedContents {
             .filter(|c_id| !self.msg_state.read().unwrap().get_isread(**c_id as isize))
             .map(|c_id| *c_id as i32)
             .collect::<Vec<i32>>();
-        // debug!(            "   fc_repo_ids={:?}  unread_ids={:?}",            fc_repo_ids, unread_repo_ids        );
         self.msg_state
             .write()
             .unwrap()
@@ -420,12 +417,7 @@ impl IFeedContents for FeedContents {
             .map(|(k, v)| (*v as u32, *k as u32))
             .collect::<Vec<(u32, u32)>>();
         if !unread_repo_ids.is_empty() {
-            trace!(
-                "process_list_row_activated:  list_pos_dbid={:?}   #unread={}  act_id={}",
-                list_pos_dbid,
-                unread_repo_ids.len(),
-                *self.last_activated_subscription_id.borrow()
-            );
+            // trace!(                "process_list_row_activated:  list_pos_dbid={:?}   #unread={}  act_id={}",                list_pos_dbid,                unread_repo_ids.len(),                *self.last_activated_subscription_id.borrow()            );
             (*self.messagesrepo_r)
                 .borrow_mut()
                 .update_is_read_many(&unread_repo_ids, true);
@@ -445,7 +437,6 @@ impl IFeedContents for FeedContents {
         self.set_selected_content_ids(vec![*last_content_id]);
     }
 
-    // later:  check if update_feed_list_contents()    is a good option, or if cursor shall remain
     fn set_read_all(&mut self, src_repo_id: isize) {
         (*self.messagesrepo_r)
             .borrow_mut()
@@ -503,8 +494,6 @@ impl IFeedContents for FeedContents {
                 debug!("update_content_list_some  isdeleted: {}", &msg);
                 continue;
             }
-
-            // if let Some(state) = self.fc_state_map.read().unwrap().get(&msg.message_id) {
             if let Some(titl) = self.msg_state.read().unwrap().get_title(msg.message_id) {
                 let av_list = Self::message_to_row(
                     &msg,
@@ -679,7 +668,7 @@ impl IFeedContents for FeedContents {
             .write()
             .unwrap()
             .set_contents_author_categories(msg_id, &triplet);
-        return triplet;
+        triplet
     }
 
     fn move_list_cursor(&self, c: ListMoveCommand) {
@@ -701,12 +690,7 @@ impl IFeedContents for FeedContents {
             .read()
             .unwrap()
             .find_unread_message(first_selected_msg, select_later);
-        trace!(
-            "move_list_cursor {:?}  SEL={:?}  later:{}",
-            c,
-            o_dest_subs_id,
-            select_later
-        );
+        // trace!(            "move_list_cursor {:?}  SEL={:?}  later:{}",            c,            o_dest_subs_id,            select_later        );
         if let Some(dest_id) = o_dest_subs_id {
             (*self.gui_updater)
                 .borrow()
@@ -978,7 +962,7 @@ pub fn get_font_size_from_config(configmanager_r: Rc<RefCell<ConfigManager>>) ->
     0
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ListMoveCommand {
     None,
     LaterUnreadMessage,
@@ -995,23 +979,6 @@ mod feedcontents_test {
     use crate::util::db_time_to_display_nonnull;
     use feed_rs::parser;
     use std::fs;
-
-    /*
-        //  Maybe later:
-        //  The file contains an invalid  single  &  as title.   The parse does not like that and returns  no title.
-        //cargo watch -s "cargo test controller::contentlist::feedcontents_test::parse_with_ampersand  --lib -- --exact --nocapture"
-        // #[ignore]
-        // #[test]
-        #[allow(dead_code)]
-        fn parse_with_ampersand() {
-            let rss_str = fs::read_to_string("../testing/tests/fr_htdocs/dieneuewelle.xml").unwrap();
-            let feeds = parser::parse(rss_str.as_bytes()).unwrap();
-            let entry2 = feeds.entries.get(2).unwrap();
-            let msg2: MessageRow = contentlist::message_from_modelentry(&entry2);
-            // println!("entry2.title={}=", msg2.title);
-            assert!(msg2.title.starts_with("Borderlands-"));
-        }
-    */
 
     // #[ignore]
     #[test]
@@ -1147,48 +1114,6 @@ mod feedcontents_test {
         let fce: MessageRow = contentlist::message_from_modelentry(&first_entry);
         assert!(fce.content_text.len() > 10);
     }
-
-    /*
-        //cargo watch -s "cargo test controller::contentlist::feedcontents_test::from_modelentry_naturalnews  --lib -- --exact --nocapture"
-        // TODO:  check condition
-        #[ignore]
-        #[test]
-        fn from_modelentry_naturalnews() {
-            let wrongdate = "Wed, 22 Jun 2022  15:59:0 CST";
-
-            match DateTime::parse_from_rfc2822(&wrongdate) {
-                Ok(_) => (),
-                Err(e) => {
-                    println!("Problem: {:?} {:?} ", &wrongdate, &e);
-                    //				return Some(format!("Error parse_from_rfc2822(`{}`) {:?} ", &inner, &e));
-                }
-            }
-
-            if false {
-                let rsstext = r#"<?xml version="1.0" encoding="ISO-8859-1"?>
-    <rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
-      <channel>
-        <title>NaturalNews.com</title>
-        <lastBuildDate>Wed, 22 Jun 2022 00:00:00 CST</lastBuildDate>
-        <item>
-          <title>chemical</title>
-          <description>hello</description>
-          <author>mike</author>
-          <pubDate>Wed, 22 Jun 2022  15:59:0 CST</pubDate>
-        </item>
-      </channel>
-    </rss>     "#;
-
-                let feeds = parser::parse(rsstext.as_bytes()).unwrap();
-                let first_entry = feeds.entries.get(0).unwrap();
-                let fce: MessageRow = contentlist::message_from_modelentry(&first_entry);
-                println!(
-                    "    entry_src_date={:?}",
-                    db_time_to_display_nonnull(fce.entry_src_date),
-                );
-            }
-        }
-    */
 
     // #[allow(dead_code)]
     #[test]

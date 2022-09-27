@@ -197,7 +197,6 @@ pub fn create_new_feedsource_dialog(
     );
     box3h.pack_end(&image_icon, false, false, 0);
     box1v.pack_start(&box3h, false, false, 1);
-
     let ev_se = g_ev_se.clone();
     entry_url.connect_text_notify(move |entry_url| {
         let _r = ev_se.send(GuiEvents::DialogEditData(
@@ -205,7 +204,6 @@ pub fn create_new_feedsource_dialog(
             AValue::ASTR(entry_url.text().as_str().to_string()),
         ));
     });
-
     entry_url.set_activates_default(true);
     dialog.set_default_response(ResponseType::Ok);
     let dialog_c = dialog.clone();
@@ -215,7 +213,6 @@ pub fn create_new_feedsource_dialog(
         dialog_c.set_response_sensitive(ResponseType::Ok, !isempty);
     });
     entry_name.set_activates_default(true);
-
     let ent1_c = entry_url.clone();
     let ent2_c = entry_name.clone();
     let ev_se = g_ev_se;
@@ -223,8 +220,6 @@ pub fn create_new_feedsource_dialog(
         match rt {
             ResponseType::Ok => {
                 let f2txt = ent2_c.text().as_str().to_string();
-                debug!("new-subscr: hp={}", &f2txt);
-
                 let payload = vec![
                     AValue::ASTR(ent1_c.text().as_str().to_string()),
                     AValue::ASTR(f2txt),
@@ -278,7 +273,6 @@ pub fn create_new_feedsource_dialog(
         }
         spinner_c.set_active(dialogdata.get(3).unwrap().boo());
     });
-
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_NEW_FEED_SOURCE, &dialog);
     ret.set_text_entry(TEXTENTRY_NEWSOURCE_URL, &entry_url);
@@ -478,7 +472,7 @@ fn create_feedsource_edit_dialog(
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-         debug!("feedsource_edit: delete_event ");
+        debug!("feedsource_edit: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });

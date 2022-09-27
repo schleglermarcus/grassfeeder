@@ -655,6 +655,7 @@ fn create_listview(
 
 // gdk_sys::GDK_KEY_space			 gdk-sys / src / lib.rs
 // https://gtk-rs.org/gtk3-rs/stable/latest/docs/gdk_sys/index.html
+#[allow(clippy::if_same_then_else)]
 fn connect_keyboard(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
     let esw = EvSenderWrapper(g_ev_se);
     if let Some(win) = (*gtk_obj_a).read().unwrap().get_window() {
@@ -672,12 +673,9 @@ fn connect_keyboard(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
                 // debug!("! MOD5_MASK   AltGr- ");
             } else if keystate.intersects(gdk::ModifierType::SUPER_MASK) {
                 // debug!("! SUPER_MASK   Win-Left- ");
-                /*                 } else if keystate.intersects(gdk::ModifierType::SHIFT_MASK) {
-                debug!("! SHIFT_MASK    ");   */
-            } else if !keystate.intersects(gdk::ModifierType::CONTROL_MASK) {
+            } else {
                 esw.sendw(GuiEvents::KeyPressed(*keyval as isize, keyval.to_unicode()));
             }
-
             Inhibit(false)
         });
     }

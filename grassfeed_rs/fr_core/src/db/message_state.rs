@@ -99,7 +99,7 @@ impl MessageStateMap {
         self.msgmap.contains_key(&msg_id)
     }
 
-    pub fn set_read_many(&mut self, msg_ids: &Vec<i32>, is_read: bool) {
+    pub fn set_read_many(&mut self, msg_ids: &[i32], is_read: bool) {
         self.msgmap
             .iter_mut()
             .filter(|(id, _st)| msg_ids.contains(&((**id) as i32)))
@@ -135,8 +135,8 @@ impl MessageStateMap {
         let mut vals: Vec<MessageState> = self.msgmap.values().cloned().collect();
         vals.sort_by(|a, b| b.msg_created_timestamp.cmp(&a.msg_created_timestamp));
         let mut current_index: isize = -1;
-        for a in 0..vals.len() {
-            if vals[a].msg_id == current_msg_id {
+        for (a, msg) in vals.iter().enumerate() {
+            if msg.msg_id == current_msg_id {
                 current_index = a as isize;
             }
         }

@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.0.6-B8"
+version = "0.0.6"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 
@@ -21,18 +21,16 @@ fern = { version = "0.6", features = ["colored", "chrono"] }
 chrono = ">=0.4.19"
 gumdrop = ">=0.8.1"
 
-
 [profile.release]
 opt-level = 's'     # Optimize for size.
 lto = true          # Enable Link Time Optimization
 strip = true        # Strip symbols from binary*
 
-
 [package.metadata.deb]
 maintainer = "Marcus <schlegler_marcus@posteo.de>"
 copyright = "2022 <schlegler_marcus@posteo.de>"
 name = "grassfeeder"
-extended-description = "$description"
+extended-description = "Feed Reader Linux-Gtk3 Application"
 changelog = "assets/changelog.txt"
 section = "utility"
 priority = "optional"
@@ -40,12 +38,7 @@ assets =[
     ["target/release/grassfeeder", "usr/bin/", "755"],
 		["assets/grassfeeder.xpm", "/usr/share/pixmaps/", "755"],
 		["assets/grassfeeder.desktop", "/usr/share/applications/", "755"],
-# 		["README.md", "usr/share/doc/grassfeeder/README", "644"],
 ]
-# depends = "$auto"
-
-
-
 
 [package.metadata.i18n]
 available-locales = ["en", "de"]
