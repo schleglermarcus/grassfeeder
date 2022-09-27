@@ -235,16 +235,23 @@ impl SourceTreeController {
             let now = Instant::now();
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
-                    if let Some(su_st) = self
+                    let o_subs_state = self
                         .statemap
                         .borrow_mut()
-                        .set_num_all_unread(subs_id, msg_all, msg_unread)
-                    {
-                        //  trace!(                            "NotifyTreeReadCount {} {}/{} {}",                            subs_id,                            msg_unread,                            msg_all,                            subs_e.display_name                        );
+                        .set_num_all_unread(subs_id, msg_all, msg_unread);
+                    if let Some(su_st) = o_subs_state {
                         let subs_e = (*self.subscriptionrepo_r)
                             .borrow()
                             .get_by_index(subs_id)
                             .unwrap();
+                        // trace!(                            "NotifyTreeReadCount {} {}/{} clearing parent {} ",                            subs_id,                            msg_unread,                            msg_all,                            subs_e.parent_subs_id                        );
+                        if subs_e.parent_subs_id > 0 {
+                            self.statemap
+                                .borrow_mut()
+                                .clear_num_all_unread(subs_e.parent_subs_id);
+                            self.addjob(SJob::ScanEmptyUnread);
+                        }
+
                         self.tree_update_one(&subs_e, &su_st);
                     } else {
                         warn!("could not store readcount for id {}", subs_id);
@@ -259,8 +266,6 @@ impl SourceTreeController {
                 }
                 SJob::GuiUpdateTree(feed_source_id) => {
                     if let Some(path) = self.get_path_for_src(feed_source_id) {
-                        // debug!("GuiUpdateTree-update_tree_single {:?}", &path);
-
                         (*self.gui_updater)
                             .borrow()
                             .update_tree_single(0, path.as_slice());
@@ -274,8 +279,8 @@ impl SourceTreeController {
                 SJob::ScheduleFetchAllFeeds => {
                     self.statemap.borrow_mut().set_schedule_fetch_all();
                 }
-                SJob::ScheduleUpdateFeed(fs_id) => {
-                    self.mark_schedule_fetch(fs_id);
+                SJob::ScheduleUpdateFeed(subs_id) => {
+                    self.mark_schedule_fetch(subs_id);
                 }
                 SJob::CheckSpinnerActive => {
                     // let fetch_in_progress_ids = (*self.subscriptionrepo_r)                        .borrow()                        .get_ids_by_status(StatusMask::FetchInProgress, true, false);
@@ -294,7 +299,6 @@ impl SourceTreeController {
                 }
                 SJob::SetIconId(fs_id, icon_id) => {
                     let ts_now = timestamp_now();
-                    // trace!(                        "SetIconId {} {} {}",                        fs_id,                        icon_id,                        db_time_to_display(ts_now)                    );
                     (*self.subscriptionrepo_r).borrow().update_icon_id(
                         fs_id,
                         icon_id as usize,
@@ -331,8 +335,10 @@ impl SourceTreeController {
                     let unread_ids = self.statemap.borrow().scan_num_all_unread();
                     if !unread_ids.is_empty() {
                         self.addjob(SJob::ScanEmptyUnread);
-                        for unread_id in unread_ids {
-                            if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+                        for (unread_id, is_folder) in unread_ids {
+                            if is_folder {
+                                let _r = self.sum_up_num_all_unread(unread_id);
+                            } else if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                                 (*feedcontents)
                                     .borrow()
                                     .addjob(CJob::RequestUnreadAllCount(unread_id));
@@ -340,7 +346,6 @@ impl SourceTreeController {
                         }
                     }
                 }
-
                 SJob::EmptyTreeCreateDefaultSubscriptions => {
                     self.empty_create_default_subscriptions()
                 }
@@ -352,6 +357,39 @@ impl SourceTreeController {
                 }
             }
         }
+    }
+
+    /// returns: true if we could sum up all children.  If one stat was missing, returns false
+    fn sum_up_num_all_unread(&self, folder_subs_id: isize) -> bool {
+        let children = (*self.subscriptionrepo_r)
+            .borrow()
+            .get_by_parent_repo_id(folder_subs_id);
+        let child_subs_ids: Vec<isize> = children.iter().map(|se| se.subs_id).collect();
+        let mut sum_all = 0;
+        let mut sum_unread = 0;
+        let mut one_missing = false;
+        child_subs_ids.iter().for_each(|id| {
+            let num_all_unread = self.statemap.borrow().get_num_all_unread(*id);
+            if let Some((n_a, n_u)) = num_all_unread {
+                sum_all += n_a;
+                sum_unread += n_u;
+            } else {
+                one_missing = true;
+            }
+        });
+        if one_missing {
+            return false;
+        }
+        // trace!(            "SUM UP {} {:?}  => {} / {} ",            folder_subs_id,            &child_subs_ids,            sum_all,            sum_unread        );
+        self.statemap
+            .borrow_mut()
+            .set_num_all_unread(folder_subs_id, sum_all, sum_unread);
+        self.addjob(SJob::NotifyTreeReadCount(
+            folder_subs_id,
+            sum_all,
+            sum_unread,
+        ));
+        true
     }
 
     ///  Read all sources   from db and put into ModelValueAdapter
@@ -378,8 +416,8 @@ impl SourceTreeController {
                     SubsMapEntry::default()
                 }
             };
+            // trace!(                "insert_tree_row:{} {:?}\t{:?}\t{:?}",                n,                &path,                &fse,                &subs_map            );
             let treevalues = self.tree_row_to_values(fse, &subs_map);
-            // trace!("insert_tree_row:{} {:?}\t{:?}", n, &path, &fse);
             (*self.gui_val_store)
                 .write()
                 .unwrap()
@@ -394,16 +432,17 @@ impl SourceTreeController {
         let mut tv: Vec<AValue> = Vec::new(); // linked to ObjectTree
         let mut rightcol_text = String::default(); // later:  folder sum stats
         let mut num_msg_unread = 0;
-        if !fse.is_folder {
-            if let Some((num_all, num_unread)) = su_st.num_msg_all_unread {
-                if self.config.display_feedcount_all {
-                    rightcol_text = format!("{}/{}", num_unread, num_all);
-                } else {
-                    rightcol_text = format!("{}", num_unread);
-                }
-                num_msg_unread = num_unread;
+
+        // if !fse.is_folder {
+        if let Some((num_all, num_unread)) = su_st.num_msg_all_unread {
+            if self.config.display_feedcount_all {
+                rightcol_text = format!("{}/{}", num_unread, num_all);
+            } else {
+                rightcol_text = format!("{}", num_unread);
             }
+            num_msg_unread = num_unread;
         }
+        // }
         let mut fs_iconstr: String = String::default();
         if let Some(ie) = self.iconrepo_r.borrow().get_by_index(fse.icon_id as isize) {
             fs_iconstr = ie.icon;
@@ -452,6 +491,7 @@ impl SourceTreeController {
         tv.push(AValue::AU32(FontAttributes::to_activation_bits(
             self.tree_fontsize,
             num_msg_unread <= 0,
+            fse.is_folder,
         ))); //  6: num_content_unread
         tv.push(AValue::AU32(m_status)); //	7 : status
 
@@ -649,7 +689,6 @@ impl SourceTreeController {
                     from_entry.subs_id, &from_path, to_parent_id, to_path_parent
                 ));
             }
-            // if to_entry_direct.is_folder {                to_parent_folderpos = 0;            } else {                to_parent_folderpos = to_entry_direct.folder_position;            }
             to_parent_folderpos = to_entry_direct.folder_position; // dragging insidethe tree down
             return Ok((from_entry, to_parent_id, to_parent_folderpos));
         }
@@ -730,7 +769,7 @@ impl SourceTreeController {
 
     pub fn process_newsource_edit(&mut self) {
         if self.new_source.state == NewSourceState::UrlChanged {
-            debug!("process_newsource_edit:  {:?}  ", self.new_source);
+            // trace!("process_newsource_edit:  {:?}  ", self.new_source);
             if self.new_source.edit_url.starts_with("http") {
                 self.new_source.state = NewSourceState::Requesting;
                 let dd: Vec<AValue> = vec![
@@ -914,7 +953,6 @@ impl SourceTreeController {
         let mut next_subs_id = std::cmp::max(subs_repo_highest + 1, 10);
         if let Some(messagesrepo) = self.messagesrepo_w.upgrade() {
             let h = (*messagesrepo).borrow().get_max_src_index();
-            // debug!("highest from messages: {}   from subscriptions: {}", h, next_subs_id );
             if h >= next_subs_id {
                 next_subs_id = h + 1;
             } else {
@@ -991,7 +1029,7 @@ impl SourceTreeController {
 
 impl ISourceTreeController for SourceTreeController {
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool {
-        debug!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
+        trace!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
         let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
         let length_before = all1.len();
         let mut success: bool = false;
@@ -1045,7 +1083,6 @@ impl ISourceTreeController for SourceTreeController {
                 .filter(|fse| !fse.is_folder)
                 .map(|fse| fse.subs_id)
                 .collect::<Vec<isize>>();
-            // trace!("mark_schedule_fetch child_feeds: {:?}   ", child_repo_ids);
             self.statemap.borrow_mut().set_status(
                 &child_repo_ids,
                 StatusMask::FetchScheduled,
@@ -1148,6 +1185,7 @@ impl ISourceTreeController for SourceTreeController {
         let p_id = self.current_new_folder_parent_id.unwrap_or(0);
         self.add_new_subscription_at_parent(newsource, display, p_id, false)
     }
+
     fn add_new_subscription_at_parent(
         &mut self,
         newsource: String,
@@ -1236,7 +1274,6 @@ impl ISourceTreeController for SourceTreeController {
         self.statemap
             .borrow_mut()
             .clear_num_all_unread(source_repo_id);
-
         if let Some(fse) = &self.current_selected_fse {
             if fse.subs_id == source_repo_id {
                 if let Some(feedcontents) = self.feedcontents_w.upgrade() {
@@ -1287,21 +1324,14 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let fs_id = self.feedsource_delete_id.unwrap();
-        let fse: SubscriptionEntry = (*self.subscriptionrepo_r)
-            .borrow()
-            .get_by_index(fs_id as isize)
-            .unwrap();
-        debug!(
-            "feedsource_delete {:?}   Parent: {}  ",
-            self.feedsource_delete_id, fse.parent_subs_id
-        );
+        // let fse: SubscriptionEntry = (*self.subscriptionrepo_r)            .borrow()            .get_by_index(fs_id as isize)            .unwrap();
+        // debug!(            "feedsource_delete {:?}   Parent: {}  ",            self.feedsource_delete_id, fse.parent_subs_id        );
         (*self.subscriptionrepo_r)
             .borrow()
             .delete_by_index(fs_id as isize);
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::FillSourcesTree);
         self.addjob(SJob::GuiUpdateTreeAll);
-
         self.feedsource_delete_id = None;
     }
 
@@ -1350,7 +1380,13 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let fse: SubscriptionEntry = self.current_edit_fse.take().unwrap();
-        let newname = values.get(0).unwrap().str().unwrap();
+        assert!(!values.is_empty());
+        let mut newname = String::default();
+        if let Some(s) = values.get(0) {
+            if let Some(t) = s.str() {
+                newname = t;
+            }
+        }
         let newname = (*newname).trim();
         if !newname.is_empty() && fse.display_name != newname {
             (*self.subscriptionrepo_r)
@@ -1387,10 +1423,7 @@ impl ISourceTreeController for SourceTreeController {
                 }
             }
         }
-        debug!(
-            "show_dialog {}   parent={:?}",
-            dialog_id, self.current_new_folder_parent_id
-        );
+        // debug!(            "show_dialog {}   parent={:?}",            dialog_id, self.current_new_folder_parent_id        );
         (*self.gui_updater).borrow().update_dialog(dialog_id);
         (*self.gui_updater).borrow().show_dialog(dialog_id);
     }
@@ -1409,8 +1442,6 @@ impl ISourceTreeController for SourceTreeController {
             AValue::ASTR(fse.display_name.clone()), // 1
             AValue::ASTR(fse.url),                  // 2
         ];
-
-        debug!("start_delete_dialog  DDD={:?}", &dd);
         (*self.gui_val_store)
             .write()
             .unwrap()
@@ -1500,7 +1531,7 @@ impl ISourceTreeController for SourceTreeController {
         let mut opmlreader = OpmlReader::new(self.subscriptionrepo_r.clone());
         match opmlreader.read_from_file(filename) {
             Ok(_) => {
-                debug!("import-opml read ok  -> {}", new_folder_id);
+                // debug!("import-opml read ok  -> {}", new_folder_id);
                 opmlreader.transfer_to_db(new_folder_id);
                 self.addjob(SJob::UpdateTreePaths);
             }
@@ -1550,7 +1581,6 @@ impl Buildable for SourceTreeController {
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         SourceTreeController::new_ac(_appcontext)
     }
-    // fn section_name() -> String {         String::from("sourcetree")    }
 }
 
 impl StartupWithAppContext for SourceTreeController {
@@ -1658,9 +1688,4 @@ impl Default for NewSourceState {
     fn default() -> Self {
         NewSourceState::None
     }
-}
-
-#[cfg(test)]
-pub mod feedsources_t {
-    // use super::*;
 }

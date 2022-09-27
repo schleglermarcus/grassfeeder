@@ -5,6 +5,7 @@ use crate::controller::contentdownloader::Downloader;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
+use crate::controller::contentlist::ListMoveCommand;
 use crate::controller::sourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
@@ -144,9 +145,7 @@ impl GuiProcessor {
                 GuiEvents::AppWasAlreadyRunning => {
                     let _r = self.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
                     self.addjob(Job::StopApplication);
-                    // trace!("GP: AppWasAlreadyRunning  jobs sent   {:?}", _r);
                 }
-
                 GuiEvents::MenuActivate(ref s) => match s.as_str() {
                     "M_FILE_QUIT" => {
                         debug!("sending: Job::StopApplication");
@@ -524,7 +523,6 @@ impl GuiProcessor {
                     .end_feedsource_edit_dialog(&payload);
             }
             "settings" => {
-                // debug!("settings == {} {:?}", payload.len(), payload);
                 self.feedsources_r
                     .borrow_mut()
                     .set_conf_load_on_start(payload.get(0).unwrap().boo());
@@ -555,7 +553,6 @@ impl GuiProcessor {
                 (*self.browserpane_r)
                     .borrow_mut() // 9 : browser bg
                     .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
-
                 self.addjob(Job::NotifyConfigChanged);
             }
             _ => {
@@ -656,7 +653,6 @@ impl GuiProcessor {
         } else {
             repo_id_new = -1;
         }
-
         let content_ids = (*self.feedcontents_r).borrow().get_selected_content_ids();
         let mut selected_msg_id = -1;
         if !content_ids.is_empty() {
@@ -673,7 +669,6 @@ impl GuiProcessor {
             || repo_id_new != self.statusbar_items.selected_repo_id
         {
             self.statusbar_items.selected_msg_id = selected_msg_id;
-            //if let Some((n_a, n_u)) = (*self.subscriptionrepo_r).borrow().get_num_all_unread(repo_id_new)
             if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
                 num_msg_all = n_a;
                 num_msg_unread = n_u;
@@ -748,7 +743,6 @@ impl GuiProcessor {
             self.statusbar_items.num_dl_queue_length = new_qsize;
             need_update1 = true;
         }
-
         if need_update1 {
             let mut downloader_display: String = String::default();
             for a in 0..(self.statusbar_items.num_downloader_threads as usize) {
@@ -759,11 +753,18 @@ impl GuiProcessor {
                 "{:5} / {:5}",
                 self.statusbar_items.num_msg_unread, self.statusbar_items.num_msg_all
             );
+            let memdisplay = if self.statusbar_items.mode_debug {
+                format!(
+                    "  {}MB ",
+                    self.statusbar_items.mem_usage_vmrss_bytes / 1048576,
+                )
+            } else {
+                String::default()
+            };
             let msg1 = format!(
-                "<tt>\u{25df}{}\u{25de} {}    \u{2595}{}\u{258F}  </tt>",
-                downloader_display, unread_all, block_vertical
+                "<tt>\u{25df}{}\u{25de} {}    \u{2595}{}\u{258F} {}</tt>",
+                downloader_display, unread_all, block_vertical, memdisplay,
             );
-
             (*self.gui_val_store)
                 .write()
                 .unwrap()
@@ -797,20 +798,45 @@ impl GuiProcessor {
         (*self.gui_updater).borrow().show_dialog(DIALOG_ABOUT);
     }
 
+    ///  for key codes look at selec.rs                           gdk_sys::GDK_KEY_Escape => KeyCodes::Escape,
     fn process_key_press(&mut self, keycode: isize, _o_char: Option<char>) {
-        let kc: KeyCodes = select::ui_select::from_isize(keycode);
         let mut new_focus_by_tab = self.focus_by_tab.clone();
+        let kc: KeyCodes = select::ui_select::from_isize(keycode);
+        let subscription_id: isize = match (*self.feedsources_r).borrow().get_current_selected_fse()
+        {
+            Some(subs_e) => subs_e.subs_id,
+            None => -1,
+        };
         match kc {
             KeyCodes::Tab => new_focus_by_tab = self.focus_by_tab.next(),
             KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.prev(),
+            KeyCodes::Key_a => {
+                // let o_se = (*self.feedsources_r).borrow().get_current_selected_fse();
+                if subscription_id > 0 {
+                    (*self.feedcontents_r)
+                        .borrow_mut()
+                        .set_read_all(subscription_id);
+                }
+            }
+            KeyCodes::Key_s => {
+                (*self.feedcontents_r)
+                    .borrow_mut()
+                    .move_list_cursor(ListMoveCommand::PreviousUnreadMessage);
+            }
+            KeyCodes::Key_x => {
+                (*self.feedcontents_r)
+                    .borrow_mut()
+                    .move_list_cursor(ListMoveCommand::LaterUnreadMessage);
+            }
             _ => {
-                //                trace!("key-pressed: other {} {:?} {:?}", keycode, o_char, kc);
+                // trace!("key-pressed: other {} {:?} {:?}", keycode, _o_char, kc);
             }
         }
         if new_focus_by_tab != self.focus_by_tab {
             self.focus_by_tab = new_focus_by_tab;
             self.switch_focus_marker(true);
-            self.addjob(Job::CheckFocusMarker(1));
+            self.addjob(Job::CheckFocusMarker(2));
+            // trace!("FOCUS:  {:?} ", &self.focus_by_tab );
             match &self.focus_by_tab {
                 FocusByTab::FocusSubscriptions => {
                     (*self.gui_updater)
@@ -834,7 +860,7 @@ impl GuiProcessor {
 
     fn switch_focus_marker(&self, marker_active: bool) {
         let mark = if marker_active { 1 } else { 2 };
-        // trace!("switch_focus_marker: {:?} {:?} ", self.focus_by_tab, mark);
+        trace!("switch_focus_marker: {:?} {:?} ", self.focus_by_tab, mark);
         match &self.focus_by_tab {
             FocusByTab::FocusSubscriptions => {
                 (*self.gui_updater).borrow().widget_mark(
@@ -874,6 +900,17 @@ impl GuiProcessor {
         (*self.gui_updater).borrow().update_dialog(DIALOG_ABOUT);
     }
 
+    // Mem usage in kb: current=105983, peak=118747411
+    // Htop:  103M    SHR: 73580m   0,7% mem
+    // top:	Res:106MB   SHR:78MB
+    // estimation of the current physical memory used by the application, in bytes. 			Comes from proc//status/VmRSS
+    pub fn update_memory_stats(&mut self) {
+        if let Ok(mem) = proc_status::mem_usage() {
+            self.statusbar_items.mem_usage_vmrss_bytes =
+                (self.statusbar_items.mem_usage_vmrss_bytes + mem.current as isize) / 2;
+        }
+    }
+
     // GuiProcessor
 }
 
@@ -895,9 +932,11 @@ pub fn dl_char_for_kind(kind: u8) -> char {
 impl Buildable for GuiProcessor {
     type Output = GuiProcessor;
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
-        GuiProcessor::new(_appcontext)
+        let mut gp = GuiProcessor::new(_appcontext);
+        // gp.statusbar_items.mem_usage_peakrss_bytes = -1;
+        gp.statusbar_items.mem_usage_vmrss_bytes = -1;
+        gp
     }
-    // fn section_name() -> String {        String::from("guiprocessor")    }
 }
 
 impl TimerReceiver for GuiProcessor {
@@ -907,6 +946,9 @@ impl TimerReceiver for GuiProcessor {
                 self.process_event();
                 self.process_jobs();
                 self.update_status_bar();
+            }
+            TimerEvent::Timer1s => {
+                self.update_memory_stats();
             }
             TimerEvent::Startup => {
                 self.process_jobs();
@@ -923,8 +965,8 @@ impl StartupWithAppContext for GuiProcessor {
         {
             let mut t = (*self.timer_r).borrow_mut();
             t.register(&TimerEvent::Timer100ms, gp_r.clone());
-            // t.register(&TimerEvent::Timer1s, gp_r.clone());
-            t.register(&TimerEvent::Timer10s, gp_r.clone());
+            t.register(&TimerEvent::Timer1s, gp_r.clone());
+            // t.register(&TimerEvent::Timer10s, gp_r.clone());
             t.register(&TimerEvent::Startup, gp_r);
             self.timer_sender = Some((*t).get_ctrl_sender());
         }
@@ -934,6 +976,15 @@ impl StartupWithAppContext for GuiProcessor {
             .borrow()
             .get_config()
             .num_downloader_threads;
+
+        if let Some(s) = (*self.configmanager_r)
+            .borrow()
+            .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
+        {
+            if let Ok(b) = s.parse::<bool>() {
+                self.statusbar_items.mode_debug = b;
+            }
+        }
     }
 }
 
@@ -949,6 +1000,9 @@ struct StatusBarItems {
     num_dl_queue_length: usize,
     selected_msg_id: i32,
     selected_msg_url: String,
+    /// proc//status/VmRSS  Resident set size, estimation of the current physical memory used by the application
+    mem_usage_vmrss_bytes: isize,
+    mode_debug: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]

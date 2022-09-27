@@ -144,6 +144,7 @@ pub fn filter_by_iso8859_1(input: &str) -> (String, bool) {
 }
 
 ///  https://www.freeformatter.com/html-entities.html
+///  https://www.w3schools.com/charsets/ref_html_entities_a.asp
 pub fn remove_invalid_chars_from_input(inp: String) -> String {
     let mut ret = inp;
     // ret = ret.replace(&['(', ')', '\"', '\n', '\'', '\"'][..], "");
@@ -153,14 +154,19 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#128;", "€");
     ret = ret.replace("&#147;", "›");
     ret = ret.replace("&#148;", "-");
-    ret = ret.replace("&#x166;", " ... ");
     ret = ret.replace("&#xF6;", "ö");
     ret = ret.replace("&#153;", " - ");
     ret = ret.replace("&#156;", " - ");
     ret = ret.replace("&#157;", " Š ");
     ret = ret.replace("&#164;", " ");
     ret = ret.replace("&#190;", "¾");
-    ret = ret.replace("&#226;", "â");
+    ret = ret.replace("&#220;", "Ü");
+    ret = ret.replace("&#223;", "ß");
+    ret = ret.replace("&#226;", "\"");
+    ret = ret.replace("&#228;", "ä");
+    ret = ret.replace("&#246;", "ö");
+    ret = ret.replace("&#252;", "ü");
+    ret = ret.replace("&#x166;", " ... ");
     ret = ret.replace("&#8211;", "\"");
     ret = ret.replace("&#8220;", "\"");
     ret = ret.replace("&#8221;", "\"");
@@ -241,7 +247,7 @@ mod t {
         );
         assert_eq!(
             remove_invalid_chars_from_input("Jenkins &#226;&#128;&#147; Brighteon".to_string()),
-            "Jenkins â€› Brighteon".to_string()
+            "Jenkins \"€› Brighteon".to_string()
         );
     }
 

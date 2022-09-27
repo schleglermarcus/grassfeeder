@@ -33,3 +33,9 @@ rust-i18n = ">=0.6.1"
 [package.metadata.i18n]
 available-locales = ["en", "de"]
 default-locale = "en"
+
+
+#  cargo watch -s "cargo run  --example regular --features ui-gtk   "
+[[example]]
+name = "regular"
+path = "examples/regular.rs"

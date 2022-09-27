@@ -12,17 +12,16 @@ use gtk::CellRendererText;
 use gtk::TreeIter;
 use gtk::TreeModel;
 use gtk::TreeViewColumn;
-use std::marker::PhantomData;
 use gui_layer::gui_values::FontAttributes;
-
+use std::marker::PhantomData;
 
 pub trait BoldFuncDiscriminator {
     fn column_nr() -> i32;
 
     fn attrlist(act_bits: u32) -> AttrList {
-        let (fontsize, is_read) = FontAttributes::from_activation_bits (act_bits);
+        let (fontsize, is_read, is_folder) = FontAttributes::from_activation_bits(act_bits);
         let r = AttrList::new();
-        if !is_read {
+        if !is_read && !is_folder {
             r.insert(Attribute::from(AttrInt::new_weight(Weight::Bold)));
         }
         if fontsize > 0 {
@@ -41,7 +40,6 @@ impl BoldFuncDiscriminator for TreeBoldDiscr {
     fn column_nr() -> i32 {
         6
     }
-
 }
 
 #[derive(Default)]

@@ -197,7 +197,6 @@ pub fn create_new_feedsource_dialog(
     );
     box3h.pack_end(&image_icon, false, false, 0);
     box1v.pack_start(&box3h, false, false, 1);
-
     let ev_se = g_ev_se.clone();
     entry_url.connect_text_notify(move |entry_url| {
         let _r = ev_se.send(GuiEvents::DialogEditData(
@@ -205,7 +204,6 @@ pub fn create_new_feedsource_dialog(
             AValue::ASTR(entry_url.text().as_str().to_string()),
         ));
     });
-
     entry_url.set_activates_default(true);
     dialog.set_default_response(ResponseType::Ok);
     let dialog_c = dialog.clone();
@@ -215,18 +213,13 @@ pub fn create_new_feedsource_dialog(
         dialog_c.set_response_sensitive(ResponseType::Ok, !isempty);
     });
     entry_name.set_activates_default(true);
-
     let ent1_c = entry_url.clone();
     let ent2_c = entry_name.clone();
     let ev_se = g_ev_se;
     dialog.connect_response(move |dialog, rt| {
         match rt {
             ResponseType::Ok => {
-
                 let f2txt = ent2_c.text().as_str().to_string();
-                debug!("new-subscr: hp={}", &f2txt);
-
-				
                 let payload = vec![
                     AValue::ASTR(ent1_c.text().as_str().to_string()),
                     AValue::ASTR(f2txt),
@@ -280,7 +273,6 @@ pub fn create_new_feedsource_dialog(
         }
         spinner_c.set_active(dialogdata.get(3).unwrap().boo());
     });
-
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_NEW_FEED_SOURCE, &dialog);
     ret.set_text_entry(TEXTENTRY_NEWSOURCE_URL, &entry_url);
@@ -480,7 +472,7 @@ fn create_feedsource_edit_dialog(
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-        // debug!("feedsource_edit: delete_event ");
+        debug!("feedsource_edit: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });
@@ -574,9 +566,7 @@ fn create_folder_edit_dialog(
     dialog.connect_response(move |dialog, rt| {
         match rt {
             ResponseType::Ok => {
-                // let mut av = Vec::<AValue>::default();
-                // av.push(AValue::ASTR(entry1c.text().to_string()));
-                let av = vec![AValue::None, AValue::ASTR(entry1c.text().to_string())];
+                let av = vec![AValue::ASTR(entry1c.text().to_string()), AValue::None];
                 let _r = ev_se.send(GuiEvents::DialogData("folder-edit".to_string(), av));
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {
@@ -681,7 +671,7 @@ fn create_settings_dialog(
     let spinb_numthread = SpinButton::with_range(1.0, DOWNLOADER_MAX_NUM_THREADS as f64, 1.0);
     let cbt_focuspolicy = ComboBoxText::with_entry();
     let sw_display_feedcount = Switch::new();
-    let spinb_msg_keep_count = SpinButton::with_range(10.0, 10000.0, 10.0);
+    let spinb_msg_keep_count = SpinButton::with_range(20.0, 10000.0, 20.0);
     let sw_fontsize_manual_enable = Switch::new();
     let spinb_fontsize_manual = SpinButton::with_range(FONTSIZE_MIN, FONTSIZE_MAX, 1.0);
     let scale_bright = Scale::with_range(Orientation::Horizontal, 0.0, 255.0, 1.0);

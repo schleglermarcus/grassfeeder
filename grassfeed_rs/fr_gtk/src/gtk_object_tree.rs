@@ -65,6 +65,7 @@ use webkit2gtk::TLSErrorsPolicy;
 use webkit2gtk::WebContext;
 use webkit2gtk::WebContextExt;
 use webkit2gtk::WebView;
+use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
 
 const TOOLBAR_ICON_SIZE: i32 = 24;
@@ -333,13 +334,13 @@ impl GtkObjectTree {
             error!("build_gtk BrowserDir missing!");
             wconte = WebContext::default().unwrap();
         }
-
         wconte.set_spell_checking_enabled(false);
         wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
         let webview1: WebView = WebView::with_context(&wconte);
         webview1.set_widget_name("webview_0");
         webview1.set_border_width(4);
-
+        webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
+        // webview1.load_plain_text(" ");
         box1_v.pack_start(&webview1, true, true, 0);
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
@@ -652,14 +653,29 @@ fn create_listview(
     content_tree_view
 }
 
+// gdk_sys::GDK_KEY_space			 gdk-sys / src / lib.rs
+// https://gtk-rs.org/gtk3-rs/stable/latest/docs/gdk_sys/index.html
+#[allow(clippy::if_same_then_else)]
 fn connect_keyboard(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
     let esw = EvSenderWrapper(g_ev_se);
-
     if let Some(win) = (*gtk_obj_a).read().unwrap().get_window() {
         win.connect_key_press_event(move |_win, key| {
             let keyval = key.keyval();
-            let _keystate = key.state();
-            esw.sendw(GuiEvents::KeyPressed(*keyval as isize, keyval.to_unicode()));
+            let keystate = key.state();
+            // trace!("            keypress: {:?} {:?} ", keyval, keystate);
+            if keystate.intersects(gdk::ModifierType::CONTROL_MASK) {
+                // debug!("! CONTROL_MASK Ctrl- ");
+            } else if keystate.intersects(gdk::ModifierType::MOD1_MASK) {
+                // debug!("! MOD1_MASK   Alt- ");
+            } else if keystate.intersects(gdk::ModifierType::MOD4_MASK) {
+                // debug!("! MOD4_MASK   Win-Right- ");
+            } else if keystate.intersects(gdk::ModifierType::MOD5_MASK) {
+                // debug!("! MOD5_MASK   AltGr- ");
+            } else if keystate.intersects(gdk::ModifierType::SUPER_MASK) {
+                // debug!("! SUPER_MASK   Win-Left- ");
+            } else {
+                esw.sendw(GuiEvents::KeyPressed(*keyval as isize, keyval.to_unicode()));
+            }
             Inhibit(false)
         });
     }
@@ -913,21 +929,21 @@ fn show_context_menu_message(
     mi_open_browser.connect_activate(move |_menuiten| {
         esc.send();
     });
-    /*		later
-        let mi_delete = MenuItem::with_label(&t!("CM_MSG_DELETE"));
-        let esc = EvSenderCache(
-            g_ev_se.clone(),
-            GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.clone()),
-        );
-        mi_delete.connect_activate(move |_menuiten| {
-            esc.send();
-        });
-    */
+
+    let mi_delete = MenuItem::with_label(&t!("CM_MSG_DELETE"));
+    let esc = EvSenderCache(
+        g_ev_se.clone(),
+        GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.clone()),
+    );
+    mi_delete.connect_activate(move |_menuiten| {
+        esc.send();
+    });
+
     let mi_copy_link = MenuItem::with_label(&t!("CM_MSG_COPY_LINK_CLIPBOARD"));
     if repoid_listpos.len() == 1 {
         let esc = EvSenderCache(
             g_ev_se,
-            GuiEvents::ListSelectedAction(0, "copy-link".to_string(), repoid_listpos.clone()),
+            GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.clone()),
         );
         mi_copy_link.connect_activate(move |_menuiten| {
             esc.send();
@@ -941,7 +957,7 @@ fn show_context_menu_message(
     }
     menu.append(&mi_mark_read);
     menu.append(&mi_mark_unread);
-    //    menu.append(&mi_delete);		// later
+    menu.append(&mi_delete); // later
     menu.show_all();
     let c_ev_time = gtk::current_event_time();
     menu.popup_easy(ev_button, c_ev_time);

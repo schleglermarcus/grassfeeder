@@ -5,14 +5,13 @@ use resources::loc;
 extern crate rust_i18n;
 i18n!("../resources/locales");
 
-#[ignore]
-#[test]
-fn rungui_regular() {
+// cargo watch -s "cargo run  --example regular --features ui-gtk   "
+fn main() {
     setup();
     loc::init_locales();
     let gfconf = init_system::GrassFeederConfig {
-        path_config: "../target/db_rungui_reg/".to_string(),
-        path_cache: "../target/db_rungui_reg/".to_string(),
+        path_config: "target/db_rungui_reg/".to_string(),
+        path_cache: "target/db_rungui_reg/".to_string(),
         debug_mode: true,
         version: "run_reg_todo".to_string(),
     };
@@ -29,6 +28,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = testing::logger_config::setup_logger();
+        let _r = testing::logger_config_local::setup_logger();
     });
 }

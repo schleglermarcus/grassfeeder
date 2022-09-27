@@ -130,6 +130,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
+    feedsources.add_new_subscription_at_parent(url_staseve, "staseve11".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(
         url_gui_proc.clone(),
         "gui_proc_2 & aaa".to_string(),
@@ -138,10 +139,11 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     );
     if false {
         let src = [
-            (url_staseve.as_str(), "staseve11"),
+            // (url_staseve.as_str(), "staseve11"),
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
+            ("http://www.nachdenkseiten.de/?feed=atom", "nachdenk"),
             ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             (
                 "https://www.linuxcompatible.org/news/atom.xml",
@@ -346,6 +348,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = testing::logger_config::setup_logger();
+        let _r = testing::logger_config_local::setup_logger();
     });
 }

@@ -78,21 +78,28 @@ impl std::fmt::Display for PropDef {
 
 pub struct FontAttributes {}
 impl FontAttributes {
+    const BITMASK_ISFOLDER: u32 = 512;
     const BITMASK_ISREAD: u32 = 256;
     const BITMASK_FONTSIZE: u32 = 255;
 
-    pub fn to_activation_bits(fontsize: u32, is_read: bool) -> u32 {
+    pub fn to_activation_bits(fontsize: u32, is_read: bool, is_folder: bool) -> u32 {
         (fontsize & Self::BITMASK_FONTSIZE)
             | match is_read {
                 true => Self::BITMASK_ISREAD,
                 _ => 0,
             }
+            | match is_folder {
+                true => Self::BITMASK_ISFOLDER,
+                _ => 0,
+            }
     }
 
-    pub fn from_activation_bits(bits: u32) -> (u32, bool) {
+    /// returns  font_size, is_read, is_folder
+    pub fn from_activation_bits(bits: u32) -> (u32, bool, bool) {
         (
             (bits & Self::BITMASK_FONTSIZE),
             ((bits & Self::BITMASK_ISREAD) > 0),
+            ((bits & Self::BITMASK_ISFOLDER) > 0),
         )
     }
 }

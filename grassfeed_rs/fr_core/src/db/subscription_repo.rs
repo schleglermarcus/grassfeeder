@@ -464,8 +464,6 @@ impl Buildable for SubscriptionRepo {
             }
         }
     }
-
-    // fn section_name() -> String {        String::from("subscriptions_repo")    }
 }
 
 impl StartupWithAppContext for SubscriptionRepo {

@@ -300,6 +300,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = testing::logger_config::setup_logger();
+        let _r = testing::logger_config_local::setup_logger();
     });
 }

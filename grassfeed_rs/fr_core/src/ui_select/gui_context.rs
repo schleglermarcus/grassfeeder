@@ -146,8 +146,6 @@ impl Buildable for GuiContext {
             window_title: String::default(),
         }
     }
-
-    // fn section_name() -> String {        String::from("window")    }
 }
 
 impl Drop for GuiContext {

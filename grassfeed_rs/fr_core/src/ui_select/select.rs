@@ -37,6 +37,7 @@ pub mod ui_select {
         (m_v_store_a, ui_updater, r_runner)
     }
 
+    // https://gtk-rs.org/gtk3-rs/stable/latest/docs/gdk_sys/index.html
     #[allow(unused_variables)]
     pub fn from_isize(code: isize) -> KeyCodes {
         match code as i32 {
@@ -56,6 +57,15 @@ pub mod ui_select {
             gdk_sys::GDK_KEY_Down => KeyCodes::CursorDown,
             gdk_sys::GDK_KEY_Right => KeyCodes::CursorRight,
             gdk_sys::GDK_KEY_Left => KeyCodes::CursorLeft,
+            gdk_sys::GDK_KEY_A => KeyCodes::Key_A,
+            gdk_sys::GDK_KEY_a => KeyCodes::Key_a,
+            gdk_sys::GDK_KEY_B => KeyCodes::Key_B,
+            gdk_sys::GDK_KEY_b => KeyCodes::Key_b,
+            gdk_sys::GDK_KEY_N => KeyCodes::Key_N,
+            gdk_sys::GDK_KEY_n => KeyCodes::Key_n,
+            gdk_sys::GDK_KEY_s => KeyCodes::Key_s,
+            gdk_sys::GDK_KEY_v => KeyCodes::Key_v,
+            gdk_sys::GDK_KEY_x => KeyCodes::Key_x,
 
             _ => KeyCodes::Nothing,
         }
@@ -75,7 +85,7 @@ pub mod ui_select {
     use std::collections::HashMap;
     use std::rc::Rc;
 
-	#[allow(clippy::type_complexity)]
+    #[allow(clippy::type_complexity)]
     pub fn init_gui(
         _initvalues: HashMap<PropDef, String>,
     ) -> (
@@ -84,6 +94,7 @@ pub mod ui_select {
         Rc<RefCell<dyn GuiRunner>>,
     ) {
         let mock = UIMock::new();
+        info!("Using UI MOCK");
         (mock.val_sto(), mock.upd_adp(), mock.guirunner())
     }
 

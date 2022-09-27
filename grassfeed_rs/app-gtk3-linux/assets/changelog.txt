@@ -1,3 +1,20 @@
+grassfeeder (0.0.6) unstable; urgency=low
+
+  * Added desktop icon
+  * Show message sums on folders
+  * Delete Messages
+  * Keyboard command for: mark-as-read a
+  * Keyboard command for: next unread message s, previous unread message x
+  * Memory usage display in debug mode
+  * Browser: get rid of white display on start
+  * added build for windows on fedora, no success.
+  * refactor messages / separate state_map
+  * rename previous log file to .old
+  * Bugfix: rename folder crash
+  * Bugfix messages with umlaut titles
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 27 Sep 2022 00:23:00 +0000
+
 grassfeeder (0.0.5) unstable; urgency=low
 
   * StatusBar: copy Feed address into clipboard
@@ -11,7 +28,7 @@ grassfeeder (0.0.5) unstable; urgency=low
   * Bugfix: Fetch-All shall not include folder scheduling
   * Bugfix: on start create logging folder
   * Refactored test for new_entries_filter
-  * New-Feed allowed umlaut in name, deacticated iso8859 filter
+  * New-Feed allowed umlaut in name, deactivated iso8859 filter
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Wed, 21 Sep 2022 00:12:00 +0000
 
