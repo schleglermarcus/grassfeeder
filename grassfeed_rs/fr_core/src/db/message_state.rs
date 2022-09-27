@@ -183,8 +183,8 @@ pub mod t {
             );
         }
         msm.dump();
-        assert_eq!(msm.find_unread_message(4, false), Some(2));
-        assert_eq!(msm.find_unread_message(4, true), Some(6));
+        assert_eq!(msm.find_unread_message(4, true), Some(2));
+        assert_eq!(msm.find_unread_message(4, false), Some(6));
     }
 
     //cargo watch -s "cargo test db::message_state::t::t_find_unread_message_simple --lib -- --exact --nocapture"

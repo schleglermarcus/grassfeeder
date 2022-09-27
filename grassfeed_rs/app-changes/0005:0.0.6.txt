@@ -1,13 +1,13 @@
-Wed, 21 Sep 2022 00:12:00 +0000
+Tue, 27 Sep 2022 00:23:00 +0000
 * added desktop icon
-* Bugfix: rename folder crash
 * Show message sums on folders
 * Delete Messages
-* Browser: get rid of white display on start
+* Keyboard command for: mark-as-read a
+* Keyboard command for: next unread message s, previous unread message x
 * Memory usage display in debug mode
+* Browser: get rid of white display on start
 * added build with gtk on windows on fedora, no success.
 * refactor messages / separate state_map
 * rename previous log file to .old
+* Bugfix: rename folder crash
 * Bugfix messages with umlaut titles
-* Keyboard command for:  mark-as-read a
-* Keyboard command for:   next unread message , previous unread message
