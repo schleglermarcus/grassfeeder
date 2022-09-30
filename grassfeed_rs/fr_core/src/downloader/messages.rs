@@ -80,9 +80,6 @@ impl Step<FetchInner> for EvalStringAndFilter {
         let existing_entries = inner.messgesrepo.get_by_src_id(inner.fs_repo_id, false);
         let filtered_list =
             match_new_entries_to_existing(&new_list, &existing_entries, inner.cjob_sender.clone());
-
-        // filtered_list.iter().for_each(|f| {            trace!(                "F:{} P:{} title={:#?}",                f.message_id,                f.post_id,                 decompress(&f.title)            )        });
-
         match inner.messgesrepo.insert_tx(&filtered_list) {
             Ok(_num) => {
                 inner.download_text.clear();
@@ -210,9 +207,6 @@ pub fn feed_text_to_entries(
             err_text = format!("Parsing: {}  length={}   {}", &url, text.len(), detail);
         }
     };
-
-    // debug!("feed_text_to_entries:   {}", fce_list.len());
-
     (fce_list, created_ts, err_text)
 }
 

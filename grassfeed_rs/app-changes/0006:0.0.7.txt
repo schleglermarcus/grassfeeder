@@ -1,20 +1,32 @@
 Tue, 27 Sep 2022 00:23:00 +0000
 
-- see if  diylib  can be used for ui_gtk
+- Create  AppImage
+   https://lib.rs/crates/cargo-appimage
+	 https://appimage-builder.readthedocs.io/en/stable/intro/install.html
+   https://docs.appimage.org/packaging-guide/index.html
+
+	 https://askubuntu.com/questions/1021420/glibc-2-25-not-found-on-ubuntu-windows-subsystem-for-linux
+	 https://distrowatch.com/table.php?distribution=mint
+	 https://docs.appimage.org/reference/best-practices.html#binaries-compiled-on-old-enough-base-system
+
+	 ## The ingredients used in your AppImage should not be built on a more recent base system than the oldest base system your AppImage is intended to run on.
+
+
+
+# Install appimagetool AppImage
+sudo apt install -y python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse
+sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+sudo chmod +x /usr/local/bin/appimagetool
+
 
 
 - Error-DB for Subscription Requests, display in edit dialog
-- Create  AppImage
-   https://github.com/StratusFearMe21/cargo-appimage
-   https://lib.rs/crates/cargo-appimage
-
- - Menu Item and  Help text into browser
- - Browser CleanUp Cache, on startup / finish
-	       webcontextext:  clear_cache(&self)
- - Databases consistency check  on startup configurable.
- - Subscription Tree: hide zeroes when nothing to read
-
+- Menu Item and  Help text into browser
 - Copy Message address into clipboard
+- Browser CleanUp Cache, on startup / finish
+	       webcontextext:  clear_cache(&self)
+- Databases consistency check  on startup configurable.
+- Subscription Tree: hide zeroes when nothing to read
 - Create Backups for Subscriptions-DB
 - check: subscription  Reload shall refresh  message list
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)

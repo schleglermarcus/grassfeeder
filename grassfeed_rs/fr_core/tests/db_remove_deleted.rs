@@ -106,13 +106,11 @@ fn clean_phase1(subs_repo: &SubscriptionRepo) {
 fn db_cleanup_remove_deleted() {
     setup();
     let db_problem_json = "../fr_core/tests/data/san_subs_list_dmg1.json";
-
     let subsrepo = SubscriptionRepo::new_inmem();
     subsrepo.scrub_all_subscriptions();
     let lines = std::fs::read_to_string(db_problem_json.to_string()).unwrap();
     let dec_r: serde_json::Result<Vec<SubscriptionEntry>> = serde_json::from_str(&lines);
     let json_vec = dec_r.unwrap();
-
     json_vec.iter().enumerate().for_each(|(n, entry)| {
         let r = subsrepo.store_entry(&entry);
         if r.is_err() {
@@ -125,10 +123,8 @@ fn db_cleanup_remove_deleted() {
             );
         }
     });
-
     clean_phase1(&subsrepo);
     let all_entries = subsrepo.get_all_entries();
-    debug!("Phase1: #all: {}", all_entries.len());
     assert_eq!(all_entries.len(), 309);
 }
 

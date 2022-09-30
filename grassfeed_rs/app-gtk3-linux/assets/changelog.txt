@@ -1,7 +1,21 @@
-grassfeeder (00.0.6) unstable; urgency=low
+grassfeeder (0.0.7) unstable; urgency=low
 
   
-  -
+  - Create  AppImage
+     https://lib.rs/crates/cargo-appimage
+  
+  
+  - Error-DB for Subscription Requests, display in edit dialog
+  - Menu Item and  Help text into browser
+  - Copy Message address into clipboard
+  - Browser CleanUp Cache, on startup / finish
+  	       webcontextext:  clear_cache(&self)
+  - Databases consistency check  on startup configurable.
+  - Subscription Tree: hide zeroes when nothing to read
+  - Create Backups for Subscriptions-DB
+  - check: subscription  Reload shall refresh  message list
+  - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
+  - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 27 Sep 2022 00:23:00 +0000
 

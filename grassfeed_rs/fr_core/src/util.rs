@@ -174,6 +174,7 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#8217;", "\'");
     ret = ret.replace("&#8230;", " ... ");
     ret = ret.replace("&#x8211;", " - ");
+    ret = ret.replace("&quot;", "\"");
     ret.trim().to_string()
 }
 

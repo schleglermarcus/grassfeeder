@@ -43,3 +43,7 @@ assets =[
 [package.metadata.i18n]
 available-locales = ["en", "de"]
 default-locale = "en"
+
+
+[package.metadata.appimage]
+# assets = ["images", "sounds"]
