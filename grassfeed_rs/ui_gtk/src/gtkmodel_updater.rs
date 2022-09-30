@@ -390,17 +390,32 @@ impl GtkModelUpdaterInt {
         }
     }
 
-    // later: check if load_html() needs a base_url
+    // This contains a workaroundfor:  WebView hangs occasionally on some feed contents.
     pub fn update_web_view(&self, idx: u8) {
         let g_o = (*self.g_o_a).read().unwrap();
         if let Some(webview) = g_o.get_web_view(idx) {
             let store = (self.m_v_store).read().unwrap();
             let o_wv_t = store.get_web_view_text(idx);
             if let Some(text) = o_wv_t {
-                let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
-                let bright: f64 = bright_int as f64 / 255.0;
-                let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
-                webview.set_background_color(&c_bg);
+                if webview.is_loading() {
+                    webview.stop_loading();
+                    std::thread::sleep(std::time::Duration::from_millis(3));
+                } else {
+                    let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
+                    let bright: f64 = bright_int as f64 / 255.0;
+                    let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
+                    webview.set_background_color(&c_bg);
+                }
+                if webview.is_loading() {
+                    // trace!("WV: #text={} still loading, going back", text.len(),);
+                    webview.go_back();
+                    std::thread::sleep(std::time::Duration::from_millis(3));
+                }
+                if webview.is_loading() {
+                    //  debug!("WV: #text={}  STILL LOADING  ", text.len(),);
+                    webview.stop_loading();
+                    std::thread::sleep(std::time::Duration::from_millis(3));
+                }
                 webview.load_html(&text, None);
             }
         } else {

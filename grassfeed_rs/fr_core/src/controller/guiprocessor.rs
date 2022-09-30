@@ -48,7 +48,6 @@ use std::collections::HashSet;
 use std::rc::Rc;
 use std::time::Instant;
 
-// #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Job {
     StartApplication,
@@ -169,7 +168,11 @@ impl GuiProcessor {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
                         .set_selected_feedsource(source_repo_id as isize);
-                    // trace!(                        "GP: TreeRowActivated {} => update_feed_list_contents, DL {} ",                        source_repo_id,                        (*self.downloader_r).borrow().get_queue_size()                    );
+                    trace!(
+                        "GP: TreeRowActivated {} => update_feed_list_contents, DL {} ",
+                        source_repo_id,
+                        (*self.downloader_r).borrow().get_queue_size()
+                    );
                     (*self.feedcontents_r)
                         .borrow()
                         .update_feed_list_contents(source_repo_id as isize);

@@ -1,4 +1,5 @@
 Tue, 27 Sep 2022 00:23:00 +0000
+* Workaround for WebView hangs occasionally on some feeds.
 
 - Create  AppImage
    https://lib.rs/crates/cargo-appimage
@@ -19,8 +20,9 @@ sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/a
 sudo chmod +x /usr/local/bin/appimagetool
 
 
-
 - Error-DB for Subscription Requests, display in edit dialog
+
+
 - Menu Item and  Help text into browser
 - Copy Message address into clipboard
 - Browser CleanUp Cache, on startup / finish

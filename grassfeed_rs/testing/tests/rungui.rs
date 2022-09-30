@@ -77,7 +77,7 @@ fn write_feed() {
     // debug!("written to {} {}", RSS_DYNAMIC_FILENAME, ts_now);
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn rungui_local_clear() {
     setup();
@@ -130,19 +130,25 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
-    feedsources.add_new_subscription_at_parent(url_staseve, "staseve11".to_string(), folder2, false);
+    feedsources.add_new_subscription_at_parent(
+        url_staseve,
+        "staseve11".to_string(),
+        folder2,
+        false,
+    );
     feedsources.add_new_subscription_at_parent(
         url_gui_proc.clone(),
         "gui_proc_2 & aaa".to_string(),
         folder3,
         false,
     );
-    if false {
+    if true {
         let src = [
             // (url_staseve.as_str(), "staseve11"),
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
+            ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
             ("http://www.nachdenkseiten.de/?feed=atom", "nachdenk"),
             ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             (

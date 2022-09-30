@@ -140,7 +140,6 @@ pub fn create_new_folder_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObject
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-        trace!("new_folder: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });
@@ -323,7 +322,6 @@ pub fn create_feedsource_delete_dialog(
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-        trace!("fsource-delete: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });
@@ -472,7 +470,6 @@ fn create_feedsource_edit_dialog(
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-        debug!("feedsource_edit: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });
@@ -812,7 +809,6 @@ fn create_settings_dialog(
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-        trace!("settings: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });

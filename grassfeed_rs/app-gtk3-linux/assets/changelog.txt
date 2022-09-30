@@ -1,11 +1,31 @@
 grassfeeder (0.0.7) unstable; urgency=low
 
+  * Workaround for WebView hangs occasionally on some feeds.
   
   - Create  AppImage
      https://lib.rs/crates/cargo-appimage
+  	 https://appimage-builder.readthedocs.io/en/stable/intro/install.html
+     https://docs.appimage.org/packaging-guide/index.html
   
+  	 https://askubuntu.com/questions/1021420/glibc-2-25-not-found-on-ubuntu-windows-subsystem-for-linux
+  	 https://distrowatch.com/table.php?distribution=mint
+  	 https://docs.appimage.org/reference/best-practices.html#binaries-compiled-on-old-enough-base-system
+  
+  	 ## The ingredients used in your AppImage should not be built on a more recent base system than the oldest base system your AppImage is intended to run on.
+  
+  
+  
+  # Install appimagetool AppImage
+  sudo apt install -y python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse
+  sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+  sudo chmod +x /usr/local/bin/appimagetool
+  
+  
+  - investigate  Browser Hanging
   
   - Error-DB for Subscription Requests, display in edit dialog
+  
+  
   - Menu Item and  Help text into browser
   - Copy Message address into clipboard
   - Browser CleanUp Cache, on startup / finish

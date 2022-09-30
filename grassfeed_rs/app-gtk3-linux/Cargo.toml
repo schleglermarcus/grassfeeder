@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.0.7-B1"
+version = "0.0.7-B6"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 

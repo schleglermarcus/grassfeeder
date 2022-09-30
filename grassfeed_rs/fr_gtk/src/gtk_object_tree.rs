@@ -288,6 +288,7 @@ impl GtkObjectTree {
     //
     // fn set_preferred_languages(&self, languages: &[&str])
     // fn set_spell_checking_enabled(&self, enabled: bool)
+    #[allow(deprecated)]
     fn create_content_tabs_2(&self, gtk_obj_a: GtkObjectsType) -> Container {
         let box1_v = gtk::Box::new(Orientation::Vertical, 0);
         let linkbutton1 = gtk::LinkButton::new("--");
@@ -336,10 +337,16 @@ impl GtkObjectTree {
         }
         wconte.set_spell_checking_enabled(false);
         wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
+
         let webview1: WebView = WebView::with_context(&wconte);
         webview1.set_widget_name("webview_0");
         webview1.set_border_width(4);
         webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
+        webview1.connect_web_process_crashed(|wv: &WebView| {
+            warn!("WebView Crashed! going back ...");
+            wv.go_back();
+            true // inhibit-signal.   False means: do not propagate further
+        });
         // webview1.load_plain_text(" ");
         box1_v.pack_start(&webview1, true, true, 0);
         {
