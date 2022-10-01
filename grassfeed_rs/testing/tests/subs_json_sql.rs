@@ -1,6 +1,21 @@
+use fr_core::db::errors_repo::ErrorEntry;
+use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::sqlite_context::SqliteContext;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 
+
+#[ignore]
+#[test]
+fn t_error_repo_store() {
+    setup();
+    let mut e_repo = ErrorRepo::new("../target/err_rep/");
+    let mut e1 = ErrorEntry::default();
+    e1.text = "Hello!".to_string();
+    e_repo.add_error(&e1);
+    e_repo.check_or_store();
+}
+
+/*
 fn get_env(key: &str) -> Option<String> {
     if let Some(s1) = std::env::var_os(key) {
         if let Some(s2) = s1.to_str() {
@@ -24,6 +39,7 @@ pub fn do_changelog() {
         "Marcus der Schlegler <schleglermarcus@posteo.de>",
     );
 }
+*/
 
 const IN_JSON: &str = "../fr_core/tests/data/san_subs_list_dmg1.json";
 const OUT_DB: &str = "../target/db_rungui_reg/subscriptions.db";
@@ -77,5 +93,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = testing::logger_config_local::setup_logger();    });
+        let _r = testing::logger_config_local::setup_logger();
+    });
 }

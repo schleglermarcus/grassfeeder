@@ -14,6 +14,8 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::fs::File;
+use std::fs::OpenOptions;
 use std::io::BufWriter;
 use std::io::Write;
 use std::rc::Rc;
@@ -50,62 +52,67 @@ impl std::fmt::Debug for ErrorEntry {
 pub struct ErrorRepo {
     folder_name: String,
     ///  ID -> Entry
-    list: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
-    last_list_count: usize,
+    list_unstored: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
+    unstored_list_count: usize,
+    highest_id: isize,
 }
 
 impl ErrorRepo {
     pub fn new(folder_name_: &str) -> Self {
         ErrorRepo {
-            list: Arc::new(RwLock::new(HashMap::new())),
+            list_unstored: Arc::new(RwLock::new(HashMap::new())),
             folder_name: folder_name_.to_string(),
-            last_list_count: 0,
+            unstored_list_count: 0,
+            highest_id: -1,
         }
     }
 
     pub fn by_existing_list(existing: Arc<RwLock<HashMap<isize, ErrorEntry>>>) -> Self {
         ErrorRepo {
-            list: existing,
+            list_unstored: existing,
             folder_name: String::default(),
-            last_list_count: 0,
+            unstored_list_count: 0,
+            highest_id: 0,
         }
     }
 
     fn filename(&self) -> String {
-        format!("{}/{}", self.folder_name, FILENAME)
+        let slash = if self.folder_name.ends_with('/') {
+            ""
+        } else {
+            "/"
+        };
+        format!("{}{}{}", self.folder_name, slash, FILENAME)
+    }
+
+    // make sure the file exists
+    pub fn check_file(&self) -> std::io::Result<()> {
+        let filename = self.filename();
+        if !std::path::Path::new(&filename).exists() {
+            std::fs::create_dir_all(&self.folder_name)?;
+            let _file = File::create(&filename)?;
+        }
+        Ok(())
     }
 
     pub fn startup(&mut self) {
-        match std::fs::create_dir_all(&self.folder_name) {
-            Ok(()) => (),
-            Err(e) => {
-                error!(
-                    "ErrorRepo cannot create folder {} {:?}",
-                    &self.folder_name, e
-                );
-            }
+        if let Err(e) = self.check_file() {
+            warn!("ErrorRepo Startup {:?}", e);
         }
-        /*
-        let filename = self.filename();
-        if std::path::Path::new(&filename).exists() {
-            let slist = read_from(filename.clone(), CONV_TO);
-            let mut hm = (*self.list).write().unwrap();
-            slist.into_iter().for_each(|se| {
-                let id = se.err_id;
-                hm.insert(id, se);
-            });
-        }
-        */
     }
 
     pub fn check_or_store(&mut self) {
-        if (*self.list).read().unwrap().len() != self.last_list_count {
-            self.store_to_file();
+        let unstored_len = (*self.list_unstored).read().unwrap().len();
+        if unstored_len > 0 {
+            debug!("check_or_store: {}", unstored_len);
+            if self.store_to_file() {
+                (*self.list_unstored).write().unwrap().clear();
+            }
         }
     }
 
-    fn store_to_file(&mut self) {
-        let mut values = (*self.list)
+    fn store_to_file(&mut self) -> bool {
+        let mut values = (*self.list_unstored)
             .read()
             .unwrap()
             .values()
@@ -113,32 +120,52 @@ impl ErrorRepo {
             .collect::<Vec<ErrorEntry>>();
         values.sort_by(|a, b| a.err_id.cmp(&b.err_id));
 
-        match write_to(self.filename(), &values, CONV_FROM) {
+        let _r = self.check_file();
+        debug!("check result={:?}", _r);
+
+        match append_to_file(self.filename(), &values, CONV_FROM) {
             Ok(_bytes_written) => {
-                self.last_list_count = values.len();
+                self.unstored_list_count = values.len();
             }
             Err(e) => {
                 error!("IconRepo:store_to_file  {}  {:?} ", &self.filename(), e);
+                return false;
             }
         }
+        true
     }
 
-    pub fn clear(&self) {
-        (*self.list).write().unwrap().clear();
+    // pub fn clear(&self) {       (*self.list_unstored).write().unwrap().clear();    }
+
+    pub fn add_error(&mut self, entry: &ErrorEntry) {
+        self.unstored_list_count += 1;
+        self.highest_id += 1;
+        let mut entrym = entry.clone();
+        entrym.date = crate::util::timestamp_now();
+        entrym.err_id = self.highest_id as isize;
+        (*self.list_unstored)
+            .write()
+            .unwrap()
+            .insert(self.highest_id as isize, entrym);
     }
 
-    /* TODO
-        pub fn store_error(&mut self, icon_id_: isize, new_icon: String) {
-            (*self.list).write().unwrap().insert(
-                icon_id_,
-                ErrorEntry {
-                    err_id: icon_id_,
-                    icon: new_icon,
-                },
-            );
-            self.last_list_count += 1;
+    pub fn next_id(&mut self) -> isize {
+        if self.highest_id < 1 {
+            if self.check_file().is_err() {
+                panic!("cannot access error storage");
+            }
+            /*
+                        let slist = read_from(self.filename.clone(), CONV_TO);
+                        let mut hm = (*self.list).write().unwrap();
+                        slist.into_iter().for_each(|se| {
+                            let id = se.icon_id;
+                            hm.insert(id, se);
+                        });
+            */
         }
-    */
+        self.highest_id += 1;
+        self.highest_id
+    }
 
     /*
         pub fn get_by_icon(&self, icon_s: String) -> Vec<ErrorEntry> {
@@ -162,15 +189,6 @@ impl ErrorRepo {
         }
     */
 
-    pub fn get_all_entries(&self) -> Vec<ErrorEntry> {
-        (*self.list)
-            .read()
-            .unwrap()
-            .iter()
-            .map(|(_id, sub)| sub.clone())
-            .collect::<Vec<ErrorEntry>>()
-    }
-
     /*	TODO
         pub fn store_entry(&self, entry: &ErrorEntry) -> Result<ErrorEntry, Box<dyn std::error::Error>> {
             let mut new_id = entry.icon_id;
@@ -193,6 +211,19 @@ impl ErrorRepo {
     /*
         pub fn get_list(&self) -> Arc<RwLock<HashMap<isize, ErrorEntry>>> {
             self.list.clone()
+        }
+    */
+
+    /* TODO   load all error entries,  but discard them on timer
+
+
+        pub fn get_all_entries(&self) -> Vec<ErrorEntry> {
+            (*self.list)
+                .read()
+                .unwrap()
+                .iter()
+                .map(|(_id, sub)| sub.clone())
+                .collect::<Vec<ErrorEntry>>()
         }
     */
 }
@@ -293,14 +324,26 @@ fn txt_to_error_entry(line: String) -> Option<ErrorEntry> {
 }
 
 // #[allow(dead_code)]
-fn write_to(
+fn append_to_file(
     filename: String,
     input: &[ErrorEntry],
     converter: &dyn Fn(&ErrorEntry) -> Option<String>,
 ) -> std::io::Result<usize> {
     let mut bytes_written: usize = 0;
-    let out = std::fs::File::create(filename)?;
-    let mut buf = BufWriter::new(out);
+    let file: File;
+
+    if std::path::Path::new(&filename).exists() {
+        debug!("appending... {}", filename.clone());
+        file = OpenOptions::new()
+            .write(true)
+            .append(true)
+            .open(filename.clone())?;
+    } else {
+        debug!("creating ... {}", filename);
+        file = File::create(&filename)?;
+    }
+
+    let mut buf = BufWriter::new(file);
     input
         .iter()
         .filter_map(|se| converter(se))

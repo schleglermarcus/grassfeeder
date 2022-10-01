@@ -346,12 +346,8 @@ impl GtkObjectTree {
             .get(&PropDef::BrowserDir)
             .cloned()
             .unwrap_or(String::default());
-        // let (webcontext1, webview1) = create_webview_and_context(&browserdir);
-        //    box1_v.pack_start(&webview1, true, true, 0);
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
-            // ret.set_web_context(&webcontext1);
-            // ret.set_web_view(&webview1);
             ret.set_label(LABEL_BROWSER_MSG_DATE, &label_date);
             ret.set_label(LABEL_BROWSER_MSG_AUTHOR, &label_author);
             ret.set_label(LABEL_BROWSER_MSG_CATEGORIES, &label_cat);
@@ -391,7 +387,7 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
     wconte
 }
 
-pub fn create_webview(/* b_conf: CreateBrowserConfig,*/ w_context: &WebContext) -> WebView {
+pub fn create_webview(w_context: &WebContext) -> WebView {
     let webview1: WebView = WebView::with_context(w_context);
     webview1.set_widget_name("webview_0");
     webview1.set_border_width(4);
@@ -411,7 +407,6 @@ pub fn create_webview(/* b_conf: CreateBrowserConfig,*/ w_context: &WebContext) 
     // webview1.connect_web_process_crashed(|wv: &WebView| {        warn!("WebView Crashed! going back ...");        true     });
     // webview1.connect_estimated_load_progress_notify(|_wv: &WebView| {         trace!(            "estimated_load_progress_notify: {}",            wv.estimated_load_progress()        );    });
     // webview1.connect_is_loading_notify(|_wv: &WebView| {         trace!("is_loading_notify: {}", wv.is_loading());    });
-    // debug!("create_webview_and_context done");
     webview1
 }
 

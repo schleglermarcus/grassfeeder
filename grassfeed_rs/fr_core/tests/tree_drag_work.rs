@@ -8,10 +8,22 @@ mod tree_drag_common;
 use chrono::DateTime;
 use feed_rs::parser;
 use fr_core::controller::contentlist;
+use fr_core::db::errors_repo::ErrorEntry;
+use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::message::MessageRow;
 use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::util::db_time_to_display_nonnull;
 use regex::Regex;
+
+#[test]
+fn t_error_repo_store() {
+    setup();
+    let mut e_repo = ErrorRepo::new("../target/err_rep/");
+    let mut e1 = ErrorEntry::default();
+    e1.text = "Hello!".to_string();
+    e_repo.add_error(&e1);
+    e_repo.check_or_store();
+}
 
 //  Maybe later:
 //  The file contains an invalid  single  &  as title.   The parse does not like that and returns  no title.

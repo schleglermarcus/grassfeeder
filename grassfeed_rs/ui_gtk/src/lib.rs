@@ -95,7 +95,6 @@ pub trait GtkObjects {
     fn set_web_view(&mut self, wv: Option<WebView>);
 
     fn get_web_context(&self) -> Option<WebContext>;
-    #[deprecated]
     fn set_web_context(&mut self, wc: Option<WebContext>);
 
     fn get_text_entry(&self, idx: u8) -> Option<&gtk::Entry>;

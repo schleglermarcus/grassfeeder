@@ -396,7 +396,7 @@ impl GtkModelUpdaterInt {
         let webviewtext_index = 0;
         let g_o = (*self.g_o_a).read().unwrap();
 
-        let mut webview_hangs: bool = false;
+        // let mut webview_hangs: bool = false;
 
         if let Some(webview) = g_o.get_web_view() {
             let store = (self.m_v_store).read().unwrap();
@@ -412,26 +412,19 @@ impl GtkModelUpdaterInt {
             if webview.is_loading() {
                 let isresponsive = webview.is_web_process_responsive();
                 if !isresponsive {
-                    webview_hangs = true;
-                    warn!("WV:  HANG   ");
+					warn!("update_web_view: create new browser instance !   ");
+		            return false;
                 }
             }
         } else {
             error!("update_web_view: NO VIEW! ");
         }
-        if webview_hangs {
-            warn!("update_web_view: create new browser instance !   ");
-            return false;
-        }
-
         if let Some(webview) = g_o.get_web_view() {
             let store = (self.m_v_store).read().unwrap();
-
             let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
             let bright: f64 = bright_int as f64 / 255.0;
             let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
             webview.set_background_color(&c_bg);
-
             let o_wv_t = store.get_web_view_text(webviewtext_index);
             if let Some(text) = o_wv_t {
                 if webview.is_loading() {
