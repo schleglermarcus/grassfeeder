@@ -26,6 +26,7 @@ To Do List
 - Subscriptions Sanitize:  test and clean with recursive folders
 - Sanitize: Message clean out those with deleted flag
 - Flatpak  https://lib.rs/crates/cargo-pkg
+- Updating the tree: speed up the gtk part
 
 - Startup, create gui:  delayed creation of dialogs
 - Browser Display :  wrap over   title
@@ -39,6 +40,7 @@ To Do List
 - Reduce Size of Binary:
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
 - DragAndDrop for Websites into Tree
+
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 - Searching inside messages
 - Message List: set scroll position to upper edge from Cursor

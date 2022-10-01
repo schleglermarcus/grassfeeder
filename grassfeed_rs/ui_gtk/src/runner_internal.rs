@@ -175,11 +175,8 @@ impl GtkRunnerInternal {
                     IntCommands::UpdateWebView(_i) => {
                         let update_ok = upd_int.update_web_view();
                         if !update_ok {
-                            // TODO
-                            warn!("INT:  need re-create browser!");
-
-                            // (gtk_objects_a).read().unwrap().set_web_view();
-                            // (gtk_objects_a).read().unwrap().set_web_context();
+                            warn!("INT:  need re-create browser. ");
+                            (gtk_objects_a).write().unwrap().set_web_view(None);
                         }
                     } // only one view
 

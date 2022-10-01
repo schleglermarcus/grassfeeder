@@ -417,10 +417,10 @@ impl GtkModelUpdaterInt {
                 }
             }
         } else {
-            warn!("update_web_view: NO VIEW! ");
+            error!("update_web_view: NO VIEW! ");
         }
         if webview_hangs {
-            warn!("update_web_view: create new browser instance !  TODO ");
+            warn!("update_web_view: create new browser instance !   ");
             return false;
         }
 
@@ -435,7 +435,7 @@ impl GtkModelUpdaterInt {
             let o_wv_t = store.get_web_view_text(webviewtext_index);
             if let Some(text) = o_wv_t {
                 if webview.is_loading() {
-                    warn!("WV: #text={}  STILL LOADING  ", text.len(),);
+                    // trace!("WV: #text={}  still loading ", text.len(),);
                     webview.stop_loading();
                     std::thread::sleep(std::time::Duration::from_millis(3));
                 }

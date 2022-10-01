@@ -92,13 +92,11 @@ pub trait GtkObjects {
     fn add_text_view(&mut self, tv: &gtk::TextView);
 
     fn get_web_view(&self) -> Option<WebView>;
+    fn set_web_view(&mut self, wv: Option<WebView>);
 
-    #[deprecated]
-    fn set_web_view(&mut self, wv: &WebView);
     fn get_web_context(&self) -> Option<WebContext>;
-
     #[deprecated]
-    fn set_web_context(&mut self, wc: &WebContext);
+    fn set_web_context(&mut self, wc: Option<WebContext>);
 
     fn get_text_entry(&self, idx: u8) -> Option<&gtk::Entry>;
     fn add_text_entry(&mut self, e: &gtk::Entry);
@@ -133,11 +131,16 @@ pub trait GtkObjects {
     fn get_scrolledwindow(&self, idx: u8) -> Option<&gtk::ScrolledWindow>;
     fn set_scrolledwindow(&mut self, idx: u8, p: &gtk::ScrolledWindow);
 
-    fn set_create_browser_fn(
+    fn set_create_webcontext_fn(
         &mut self,
-        cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> (WebContext, WebView)>>,
+        cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
         browser_dir: &String,
         a_box_index: u8,
+    );
+
+    fn set_create_webview_fn(
+        &mut self,
+        cb_fn: Option<Box<dyn Fn(  &WebContext  ) -> WebView>>,
     );
 }
 

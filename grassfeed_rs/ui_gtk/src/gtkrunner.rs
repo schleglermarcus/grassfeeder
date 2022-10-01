@@ -1,3 +1,4 @@
+use crate::gtk::prelude::ContainerExt;
 use crate::gtk::prelude::WidgetExt;
 use crate::runner_internal::GtkRunnerInternal;
 use crate::DialogDataDistributor;
@@ -7,7 +8,6 @@ use crate::IntCommands;
 use flume::Receiver;
 use flume::Sender;
 use gtk::prelude::BoxExt;
-use gtk::prelude::ContainerExt;
 use gtk::Application;
 use gtk::Button;
 use gtk::CellRendererSpinner;
@@ -177,10 +177,6 @@ pub struct GtkObjectsImpl {
     pub list_stores_max_columns: Vec<u8>,
     pub list_views: Vec<TreeView>,
     pub text_views: Vec<TextView>,
-
-    pub web_context: RefCell<Option<WebContext>>, // allow only one browser in the application
-    pub web_view: RefCell<Option<WebView>>,
-
     pub text_entries: Vec<Entry>,
     pub c_r_spinner_w: Option<(CellRendererSpinner, TreeViewColumn)>,
     pub labels: Vec<Label>,
@@ -191,16 +187,28 @@ pub struct GtkObjectsImpl {
     pub scrolledwindows: Vec<ScrolledWindow>,
     dialogdata_dist: Option<DialogDataDistributor>,
 
-    create_browser_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> (WebContext, WebView)>>,
+    pub web_context: RefCell<Option<WebContext>>, // allow only one browser in the application
+    pub web_view: RefCell<Option<WebView>>,
+    create_webcontext_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
+    create_webview_fn: Option<Box<dyn Fn(&WebContext) -> WebView>>,
     browser_config: CreateBrowserConfig,
 }
 
 impl GtkObjectsImpl {
-    // TODO split in separate :  w_context, w_view
     fn check_or_create_browser(&self) {
-        if self.web_context.borrow().is_none() || self.web_view.borrow().is_none() {
-            if self.create_browser_fn.is_none() {
-                warn!("cannot create browser, no create function here!");
+        if self.web_context.borrow().is_none() {
+            if self.create_webcontext_fn.is_none() {
+                warn!("cannot create webContext, no create function here!");
+                return;
+            }
+            if let Some(create_fn) = &self.create_webcontext_fn {
+                let w_context = (create_fn)(self.browser_config.clone());
+                self.web_context.borrow_mut().replace(w_context);
+            }
+        }
+        if self.web_view.borrow().is_none() {
+            if self.create_webview_fn.is_none() {
+                warn!("cannot create WebView, no create function here!");
                 return;
             }
             let o_dest_box = self.get_box(self.browser_config.attach_box_index as u8);
@@ -209,15 +217,10 @@ impl GtkObjectsImpl {
                 return;
             }
             let dest_box = o_dest_box.unwrap();
-            if let Some(create_fn) = &self.create_browser_fn {
-                let (w_context, w_view) = (create_fn)(self.browser_config.clone());
-                // debug!(                    "check_or_create_browser - put it into   gtk-box !!! {:?}   #children={} ",                    dest_box.widget_name(),                    dest_box.children().len()                );
+            if let Some(create_fn) = &self.create_webview_fn {
+                let w_view = (create_fn)(&self.web_context.borrow().as_ref().unwrap());
                 dest_box.pack_start(&w_view, true, true, 0);
                 w_view.show();
-                // w_view.show_all();                // w_view.set_visible(true);
-                // dest_box.set_widget_name("dest_browser_packed");
-                // debug!(                    "after box {:?}  #children={}",                    dest_box.widget_name(),                    dest_box.children().len()                );
-                self.web_context.borrow_mut().replace(w_context);
                 self.web_view.borrow_mut().replace(w_view);
             }
         }
@@ -318,8 +321,26 @@ impl GtkObjects for GtkObjectsImpl {
         self.web_view.borrow().clone()
     }
 
-    fn set_web_view(&mut self, wv: &WebView) {
-        self.web_view.borrow_mut().replace(wv.clone());
+    fn set_web_view(&mut self, o_wv: Option<WebView>) {
+        match o_wv {
+            None => {
+                debug!("runner: removing webView");
+                let o_dest_box = self
+                    .boxes
+                    .get(self.browser_config.attach_box_index as usize);
+                if o_dest_box.is_none() {
+                    error!("set_web_view:None - Box index not found !");
+                    return;
+                }
+                let dest_box = o_dest_box.unwrap();
+                dest_box.remove(self.web_view.borrow().as_ref().unwrap());
+                self.web_view = RefCell::new(None);
+            }
+            Some(wv) => {
+                debug!("runner:setting webView");
+                let _r = self.web_view.borrow_mut().replace(wv);
+            }
+        };
     }
 
     fn get_web_context(&self) -> Option<WebContext> {
@@ -327,8 +348,13 @@ impl GtkObjects for GtkObjectsImpl {
         self.web_context.borrow().clone()
     }
 
-    fn set_web_context(&mut self, wc: &WebContext) {
-        self.web_context.borrow_mut().replace(wc.clone());
+    fn set_web_context(&mut self, o_wc: Option<WebContext>) {
+        match o_wc {
+            None => self.web_context = RefCell::new(None),
+            Some(wc) => {
+                let _r = self.web_context.borrow_mut().replace(wc);
+            }
+        };
     }
 
     fn get_text_entry(&self, index: u8) -> Option<&Entry> {
@@ -463,17 +489,21 @@ impl GtkObjects for GtkObjectsImpl {
         self.scrolledwindows[idx as usize] = p.clone();
     }
 
-    fn set_create_browser_fn(
+    fn set_create_webcontext_fn(
         &mut self,
-        cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> (WebContext, WebView)>>,
+        cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
         browser_folder: &String,
         a_box_index: u8,
     ) {
-        self.create_browser_fn = cb_fn;
+        self.create_webcontext_fn = cb_fn;
         self.browser_config = CreateBrowserConfig {
             browser_dir: browser_folder.clone(),
             attach_box_index: a_box_index,
         };
+    }
+
+    fn set_create_webview_fn(&mut self, cb_fn: Option<Box<dyn Fn(&WebContext) -> WebView>>) {
+        self.create_webview_fn = cb_fn;
     }
 }
 

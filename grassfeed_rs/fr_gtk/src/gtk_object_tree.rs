@@ -313,12 +313,10 @@ impl GtkObjectTree {
     // fn set_spell_checking_enabled(&self, enabled: bool)
     fn create_content_tabs_2(&self, gtk_obj_a: GtkObjectsType) -> Container {
         let box1_v = gtk::Box::new(Orientation::Vertical, 0);
-		box1_v.set_widget_name("browser_box");
-
+        // box1_v.set_widget_name("browser_box");
         let linkbutton1 = gtk::LinkButton::new("--");
         linkbutton1.set_label("--");
         linkbutton1.set_halign(Align::Start);
-        // linkbutton1.set_(true);
         box1_v.pack_start(&linkbutton1, false, false, 0);
 
         let box3_h = gtk::Box::new(Orientation::Horizontal, 0);
@@ -348,12 +346,8 @@ impl GtkObjectTree {
             .get(&PropDef::BrowserDir)
             .cloned()
             .unwrap_or(String::default());
-
-        /*
-             let (webcontext1, webview1) = create_webview_and_context(&browserdir);
-                box1_v.pack_start(&webview1, true, true, 0);
-        */
-
+        // let (webcontext1, webview1) = create_webview_and_context(&browserdir);
+        //    box1_v.pack_start(&webview1, true, true, 0);
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
             // ret.set_web_context(&webcontext1);
@@ -364,22 +358,19 @@ impl GtkObjectTree {
             ret.set_linkbutton(LINKBUTTON_BROWSER_TITLE, &linkbutton1);
             ret.set_box(BOX_CONTAINER_4_BROWSER, &box1_v);
             ret.set_box(BOX_CONTAINER_3_MARK, &box3_h);
-
-            ret.set_create_browser_fn(
-                Some(Box::new(create_webview_and_context)),
+            ret.set_create_webcontext_fn(
+                Some(Box::new(create_webcontext)),
                 &browserdir,
                 BOX_CONTAINER_4_BROWSER,
             );
+            ret.set_create_webview_fn(Some(Box::new(create_webview)));
         }
         box1_v.upcast()
     }
 }
 
-// #[allow(deprecated)]
-pub fn create_webview_and_context(b_conf: CreateBrowserConfig) -> (WebContext, WebView) {
-	// debug!("create_webview_and_context ... {:?}", b_conf);
+pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
     let wconte: WebContext;
-    //	        if let Some(browserdir) = self.initvalues.get(&PropDef::BrowserDir) {
     if b_conf.browser_dir.len() > 0 {
         let wk_dm = WebsiteDataManager::builder()
             .base_cache_directory(&b_conf.browser_dir)
@@ -397,8 +388,11 @@ pub fn create_webview_and_context(b_conf: CreateBrowserConfig) -> (WebContext, W
     }
     wconte.set_spell_checking_enabled(false);
     wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
+    wconte
+}
 
-    let webview1: WebView = WebView::with_context(&wconte);
+pub fn create_webview(/* b_conf: CreateBrowserConfig,*/ w_context: &WebContext) -> WebView {
+    let webview1: WebView = WebView::with_context(w_context);
     webview1.set_widget_name("webview_0");
     webview1.set_border_width(4);
     webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
@@ -415,14 +409,10 @@ pub fn create_webview_and_context(b_conf: CreateBrowserConfig) -> (WebContext, W
         .build();
     webview1.set_settings(&webview_settings);
     // webview1.connect_web_process_crashed(|wv: &WebView| {        warn!("WebView Crashed! going back ...");        true     });
-    webview1.connect_estimated_load_progress_notify(|_wv: &WebView| {
-        // trace!(            "estimated_load_progress_notify: {}",            wv.estimated_load_progress()        );
-    });
-    webview1.connect_is_loading_notify(|_wv: &WebView| {
-        // trace!("is_loading_notify: {}", wv.is_loading());
-    });
-	// debug!("create_webview_and_context done");
-    (wconte, webview1)
+    // webview1.connect_estimated_load_progress_notify(|_wv: &WebView| {         trace!(            "estimated_load_progress_notify: {}",            wv.estimated_load_progress()        );    });
+    // webview1.connect_is_loading_notify(|_wv: &WebView| {         trace!("is_loading_notify: {}", wv.is_loading());    });
+    // debug!("create_webview_and_context done");
+    webview1
 }
 
 fn set_sort_indicator(tvc: &TreeViewColumn, _sort_column: i32, sort_ascending: bool) {
