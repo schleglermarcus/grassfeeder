@@ -33,7 +33,8 @@ To Do List
 - implement focus policy: before last unread
 - Opml export formatted / pretty
 - Browser: enable theme related colors
-- Modify Browser Font size
+- Browser: Modify  Font size
+- Browser: add Zoom Control
 
 - Reduce Size of Binary:
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
@@ -117,11 +118,27 @@ Desktop:
 https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 
 
+------ AppImage
+https://lib.rs/crates/cargo-appimage
+https://appimage-builder.readthedocs.io/en/stable/intro/install.html
+https://docs.appimage.org/packaging-guide/index.html
+https://askubuntu.com/questions/1021420/glibc-2-25-not-found-on-ubuntu-windows-subsystem-for-linux
+https://distrowatch.com/table.php?distribution=mint
+https://docs.appimage.org/reference/best-practices.html#binaries-compiled-on-old-enough-base-system
+## The ingredients used in your AppImage should not be built on a more recent base system than the oldest base system your AppImage is intended to run on.
+## Install appimagetool AppImage
+#sudo apt install -y python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse
+#sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+#sudo chmod +x /usr/local/bin/appimagetool
+
+
+
+
+
+
 ------ dylib
 https://prog.world/building-and-using-dynamic-link-libraries-in-rust/
 https://zicklag.github.io/rust-tutorials/rust-plugins.html
-
-
 https://robert.kra.hn/posts/2022-09-09-speeding-up-incremental-rust-compilation-with-dylibs/
 https://stackoverflow.com/questions/tagged/dynamic-library+rust
 https://users.rust-lang.org/t/what-is-the-difference-between-dylib-and-cdylib/28847
@@ -140,13 +157,11 @@ https://middleware.io/blog/docker-cleanup/
 
 
 -------------------
-	       GTK_DEBUG=interactive
+GTK_DEBUG=interactive
 	https://docs.gtk.org/gio/class.Application.html
 	https://wiki.gnome.org/HowDoI/GtkApplication
 	https://developer.gnome.org/documentation/tutorials/application.html
 	https://docs.gtk.org/gio/method.Application.run.html
-
-
 
 -------------------
 

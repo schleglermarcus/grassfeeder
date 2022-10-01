@@ -77,7 +77,7 @@ fn write_feed() {
     // debug!("written to {} {}", RSS_DYNAMIC_FILENAME, ts_now);
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn rungui_local_clear() {
     setup();
@@ -142,7 +142,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder3,
         false,
     );
-    if true {
+    if false {
         let src = [
             // (url_staseve.as_str(), "staseve11"),
             (url_r_foto.as_str(), "fotograf"),

@@ -1,3 +1,4 @@
+use crate::gtk::prelude::WidgetExt;
 use crate::runner_internal::GtkRunnerInternal;
 use crate::DialogDataDistributor;
 use crate::GtkBuilderType;
@@ -5,6 +6,8 @@ use crate::GtkObjects;
 use crate::IntCommands;
 use flume::Receiver;
 use flume::Sender;
+use gtk::prelude::BoxExt;
+use gtk::prelude::ContainerExt;
 use gtk::Application;
 use gtk::Button;
 use gtk::CellRendererSpinner;
@@ -174,8 +177,10 @@ pub struct GtkObjectsImpl {
     pub list_stores_max_columns: Vec<u8>,
     pub list_views: Vec<TreeView>,
     pub text_views: Vec<TextView>,
-    pub web_contexts: Vec<WebContext>,
-    pub web_views: Vec<WebView>,
+
+    pub web_context: RefCell<Option<WebContext>>, // allow only one browser in the application
+    pub web_view: RefCell<Option<WebView>>,
+
     pub text_entries: Vec<Entry>,
     pub c_r_spinner_w: Option<(CellRendererSpinner, TreeViewColumn)>,
     pub labels: Vec<Label>,
@@ -185,6 +190,38 @@ pub struct GtkObjectsImpl {
     pub paneds: Vec<Paned>,
     pub scrolledwindows: Vec<ScrolledWindow>,
     dialogdata_dist: Option<DialogDataDistributor>,
+
+    create_browser_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> (WebContext, WebView)>>,
+    browser_config: CreateBrowserConfig,
+}
+
+impl GtkObjectsImpl {
+    // TODO split in separate :  w_context, w_view
+    fn check_or_create_browser(&self) {
+        if self.web_context.borrow().is_none() || self.web_view.borrow().is_none() {
+            if self.create_browser_fn.is_none() {
+                warn!("cannot create browser, no create function here!");
+                return;
+            }
+            let o_dest_box = self.get_box(self.browser_config.attach_box_index as u8);
+            if o_dest_box.is_none() {
+                warn!("should not create browser, no gtk-box to attach to !");
+                return;
+            }
+            let dest_box = o_dest_box.unwrap();
+            if let Some(create_fn) = &self.create_browser_fn {
+                let (w_context, w_view) = (create_fn)(self.browser_config.clone());
+                // debug!(                    "check_or_create_browser - put it into   gtk-box !!! {:?}   #children={} ",                    dest_box.widget_name(),                    dest_box.children().len()                );
+                dest_box.pack_start(&w_view, true, true, 0);
+                w_view.show();
+                // w_view.show_all();                // w_view.set_visible(true);
+                // dest_box.set_widget_name("dest_browser_packed");
+                // debug!(                    "after box {:?}  #children={}",                    dest_box.widget_name(),                    dest_box.children().len()                );
+                self.web_context.borrow_mut().replace(w_context);
+                self.web_view.borrow_mut().replace(w_view);
+            }
+        }
+    }
 }
 
 /// may not be Send
@@ -206,10 +243,6 @@ impl GtkObjects for GtkObjectsImpl {
     fn get_tree_store(&self, index: usize) -> Option<&gtk::TreeStore> {
         self.tree_stores.get(index)
     }
-
-    // fn add_tree_store(&mut self, ts: &gtk::TreeStore) {
-    //     self.tree_stores.push(ts.clone());
-    // }
 
     fn set_tree_store(&mut self, idx: u8, ts: &gtk::TreeStore) {
         if self.tree_stores.len() < idx as usize + 1 {
@@ -273,10 +306,6 @@ impl GtkObjects for GtkObjectsImpl {
         self.list_stores_max_columns[list_index] = mc;
     }
 
-    // fn get_list_view(&self, list_index: usize) -> Option<&gtk::TreeView> {
-    //     self.list_views.get(list_index)
-    // }
-
     fn get_text_view(&self, index: usize) -> Option<&gtk::TextView> {
         self.text_views.get(index)
     }
@@ -284,18 +313,22 @@ impl GtkObjects for GtkObjectsImpl {
         self.text_views.push(tv.clone());
     }
 
-    fn get_web_view(&self, index: u8) -> Option<&WebView> {
-        self.web_views.get(index as usize)
-    }
-    fn add_web_view(&mut self, wv: &WebView) {
-        self.web_views.push(wv.clone());
+    fn get_web_view(&self) -> Option<WebView> {
+        self.check_or_create_browser();
+        self.web_view.borrow().clone()
     }
 
-    fn get_web_context(&self, index: u8) -> Option<&WebContext> {
-        self.web_contexts.get(index as usize)
+    fn set_web_view(&mut self, wv: &WebView) {
+        self.web_view.borrow_mut().replace(wv.clone());
     }
-    fn add_web_context(&mut self, wc: &WebContext) {
-        self.web_contexts.push(wc.clone());
+
+    fn get_web_context(&self) -> Option<WebContext> {
+        self.check_or_create_browser();
+        self.web_context.borrow().clone()
+    }
+
+    fn set_web_context(&mut self, wc: &WebContext) {
+        self.web_context.borrow_mut().replace(wc.clone());
     }
 
     fn get_text_entry(&self, index: u8) -> Option<&Entry> {
@@ -429,6 +462,25 @@ impl GtkObjects for GtkObjectsImpl {
         }
         self.scrolledwindows[idx as usize] = p.clone();
     }
+
+    fn set_create_browser_fn(
+        &mut self,
+        cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> (WebContext, WebView)>>,
+        browser_folder: &String,
+        a_box_index: u8,
+    ) {
+        self.create_browser_fn = cb_fn;
+        self.browser_config = CreateBrowserConfig {
+            browser_dir: browser_folder.clone(),
+            attach_box_index: a_box_index,
+        };
+    }
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct CreateBrowserConfig {
+    pub attach_box_index: u8,
+    pub browser_dir: String,
 }
 
 struct ReceiverWrapperImpl(Receiver<GuiEvents>);

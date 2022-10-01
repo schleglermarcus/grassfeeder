@@ -391,36 +391,58 @@ impl GtkModelUpdaterInt {
     }
 
     // This contains a workaroundfor:  WebView hangs occasionally on some feed contents.
-    pub fn update_web_view(&self, idx: u8) {
+    // return false if webView hangs
+    pub fn update_web_view(&self) -> bool {
+        let webviewtext_index = 0;
         let g_o = (*self.g_o_a).read().unwrap();
-        if let Some(webview) = g_o.get_web_view(idx) {
+
+        let mut webview_hangs: bool = false;
+
+        if let Some(webview) = g_o.get_web_view() {
             let store = (self.m_v_store).read().unwrap();
-            let o_wv_t = store.get_web_view_text(idx);
+            if webview.is_loading() {
+                webview.stop_loading();
+                std::thread::sleep(std::time::Duration::from_millis(3));
+            } else {
+                let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
+                let bright: f64 = bright_int as f64 / 255.0;
+                let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
+                webview.set_background_color(&c_bg);
+            }
+            if webview.is_loading() {
+                let isresponsive = webview.is_web_process_responsive();
+                if !isresponsive {
+                    webview_hangs = true;
+                    warn!("WV:  HANG   ");
+                }
+            }
+        } else {
+            warn!("update_web_view: NO VIEW! ");
+        }
+        if webview_hangs {
+            warn!("update_web_view: create new browser instance !  TODO ");
+            return false;
+        }
+
+        if let Some(webview) = g_o.get_web_view() {
+            let store = (self.m_v_store).read().unwrap();
+
+            let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
+            let bright: f64 = bright_int as f64 / 255.0;
+            let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
+            webview.set_background_color(&c_bg);
+
+            let o_wv_t = store.get_web_view_text(webviewtext_index);
             if let Some(text) = o_wv_t {
                 if webview.is_loading() {
-                    webview.stop_loading();
-                    std::thread::sleep(std::time::Duration::from_millis(3));
-                } else {
-                    let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
-                    let bright: f64 = bright_int as f64 / 255.0;
-                    let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
-                    webview.set_background_color(&c_bg);
-                }
-                if webview.is_loading() {
-                    // trace!("WV: #text={} still loading, going back", text.len(),);
-                    webview.go_back();
-                    std::thread::sleep(std::time::Duration::from_millis(3));
-                }
-                if webview.is_loading() {
-                    //  debug!("WV: #text={}  STILL LOADING  ", text.len(),);
+                    warn!("WV: #text={}  STILL LOADING  ", text.len(),);
                     webview.stop_loading();
                     std::thread::sleep(std::time::Duration::from_millis(3));
                 }
                 webview.load_html(&text, None);
             }
-        } else {
-            warn!("updater:update_web_view  idx:{} not found", idx);
         }
+        true
     }
 
     pub fn update_label(&self, idx: u8) {
@@ -558,7 +580,7 @@ impl GtkModelUpdaterInt {
                 }
             }
             UIUpdaterMarkWidgetType::WebView => {
-                if let Some(wv) = g_o.get_web_view(idx) {
+                if let Some(wv) = g_o.get_web_view() {
                     return Some(wv.clone().upcast::<Widget>());
                 }
             }

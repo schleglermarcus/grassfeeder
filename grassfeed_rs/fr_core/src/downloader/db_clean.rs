@@ -310,7 +310,6 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
                 continue;
             }
             msglist.sort_by(|a, b| a.fetch_date.cmp(&b.fetch_date));
-
             let mut known: HashSet<(i64, String)> = HashSet::new();
             let mut delete_list: Vec<MessageRow> = Vec::default();
             msglist.iter().for_each(|msg| {
@@ -330,11 +329,14 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
                     decompress(&d.title),
                 );
             }
-            let del_indices: Vec<i32> = delete_list.iter().map(|m| m.message_id as i32).collect();
-            debug!("setting deleted: {} messages", del_indices.len());
-            inner
-                .messgesrepo
-                .update_is_deleted_many(del_indices.as_slice(), true);
+            if !delete_list.is_empty() {
+                let del_indices: Vec<i32> =
+                    delete_list.iter().map(|m| m.message_id as i32).collect();
+                // trace!("setting deleted: {} messages", del_indices.len());
+                inner
+                    .messgesrepo
+                    .update_is_deleted_many(del_indices.as_slice(), true);
+            }
         }
 
         StepResult::Continue(Box::new(Notify(inner)))

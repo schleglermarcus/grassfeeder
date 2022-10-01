@@ -194,7 +194,6 @@ pub trait UIUpdaterAdapter {
     fn update_list_some(&self, list_index: u8, list_position: &[u32]);
 
     fn update_text_view(&self, nr: u8);
-    fn update_web_view(&self, nr: u8);
     fn update_text_entry(&self, nr: u8);
     fn update_label(&self, nr: u8);
     fn update_label_markup(&self, nr: u8);
@@ -209,6 +208,10 @@ pub trait UIUpdaterAdapter {
 
     fn update_window_title(&self);
     fn update_window_icon(&self);
+
+	fn update_web_view(&self, nr: u8);
+	// fn update_web_view(&self, nr: u8) -> WebViewUpdateResult;
+
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]
@@ -217,6 +220,11 @@ pub enum UIUpdaterMarkWidgetType {
     Box,
     TreeView,
     WebView,
+}
+
+pub enum WebViewUpdateResult{
+	Ok,
+	NeedRestartView,
 }
 
 //  Values Wrapper as intermediate for  glib::values

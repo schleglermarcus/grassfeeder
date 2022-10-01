@@ -255,7 +255,7 @@ fn error_entry_to_json(input: &ErrorEntry) -> Option<String> {
     }
 }
 
-// #[allow(dead_code)]
+#[allow(dead_code)]
 fn error_entry_to_txt(input: &ErrorEntry) -> Option<String> {
     match bincode::serialize(input) {
         //         Ok(encoded) => Some(compress(&encoded)),
@@ -279,7 +279,7 @@ fn json_to_error_entry(line: String) -> Option<ErrorEntry> {
     }
 }
 
-// #[allow(dead_code)]
+#[allow(dead_code)]
 fn txt_to_error_entry(line: String) -> Option<ErrorEntry> {
     let dc_bytes: String = decompress(&line);
     let dec_r: bincode::Result<ErrorEntry> = bincode::deserialize(dc_bytes.as_bytes());
@@ -320,6 +320,7 @@ fn write_to(
     Ok(bytes_written)
 }
 
+#[allow(dead_code)]
 fn read_from(
     filename: String,
     converter: &dyn Fn(String) -> Option<ErrorEntry>,

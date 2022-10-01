@@ -10,6 +10,7 @@ pub mod runner_internal;
 pub mod ui_value_adapter;
 
 use crate::dialogdatadistributor::DialogDataDistributor;
+use crate::gtkrunner::CreateBrowserConfig;
 use flume::Sender;
 use gtk::Application;
 use gtk::Window;
@@ -31,7 +32,7 @@ pub trait GtkGuiBuilder: 'static {
         ddd: &mut DialogDataDistributor,
     );
 
-    // fn create_browser(&self, obj_a: GtkObjectsType);
+    // fn build_browser(&self, obj_a: GtkObjectsType);
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
@@ -90,10 +91,14 @@ pub trait GtkObjects {
     fn get_text_view(&self, list_index: usize) -> Option<&gtk::TextView>;
     fn add_text_view(&mut self, tv: &gtk::TextView);
 
-    fn get_web_view(&self, idx: u8) -> Option<&WebView>;
-    fn add_web_view(&mut self, wv: &WebView);
-    fn get_web_context(&self, idx: u8) -> Option<&WebContext>;
-    fn add_web_context(&mut self, wc: &WebContext);
+    fn get_web_view(&self) -> Option<WebView>;
+
+    #[deprecated]
+    fn set_web_view(&mut self, wv: &WebView);
+    fn get_web_context(&self) -> Option<WebContext>;
+
+    #[deprecated]
+    fn set_web_context(&mut self, wc: &WebContext);
 
     fn get_text_entry(&self, idx: u8) -> Option<&gtk::Entry>;
     fn add_text_entry(&mut self, e: &gtk::Entry);
@@ -127,6 +132,13 @@ pub trait GtkObjects {
 
     fn get_scrolledwindow(&self, idx: u8) -> Option<&gtk::ScrolledWindow>;
     fn set_scrolledwindow(&mut self, idx: u8, p: &gtk::ScrolledWindow);
+
+    fn set_create_browser_fn(
+        &mut self,
+        cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> (WebContext, WebView)>>,
+        browser_dir: &String,
+        a_box_index: u8,
+    );
 }
 
 #[derive(Clone, Debug)]

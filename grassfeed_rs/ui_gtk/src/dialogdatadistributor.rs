@@ -6,7 +6,6 @@ pub type DDDMap = HashMap<u8, Box<dyn Fn(DiaDistContent)>>;
 
 #[derive(Default)]
 pub struct DialogDataDistributor {
-    // dist_map: HashMap<u8, Box<dyn Fn(DiaDistContent)>>,
     dist_map: DDDMap,
 }
 

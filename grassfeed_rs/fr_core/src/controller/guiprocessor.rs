@@ -164,18 +164,14 @@ impl GuiProcessor {
                     }
                     _ => debug!("GP2 Button:  {:?}", b),
                 },
-                GuiEvents::TreeRowActivated(_tree_idx, ref _path, source_repo_id) => {
+                GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) => {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
-                        .set_selected_feedsource(source_repo_id as isize);
-                    trace!(
-                        "GP: TreeRowActivated {} => update_feed_list_contents, DL {} ",
-                        source_repo_id,
-                        (*self.downloader_r).borrow().get_queue_size()
-                    );
+                        .set_selected_feedsource(subs_id as isize);
+                    // trace!(                        "GP:TreeRowActivated{} #q:{} {:?} ",subs_id,  (*self.downloader_r).borrow().get_queue_size(),                        _path                    );
                     (*self.feedcontents_r)
                         .borrow()
-                        .update_feed_list_contents(source_repo_id as isize);
+                        .update_feed_list_contents(subs_id as isize);
                 }
                 GuiEvents::ListRowActivated(_list_idx, list_position, fc_repo_id) => {
                     list_row_activated_map.insert(fc_repo_id, list_position);
