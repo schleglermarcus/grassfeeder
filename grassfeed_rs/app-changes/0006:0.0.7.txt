@@ -1,8 +1,8 @@
 Tue, 27 Sep 2022 00:23:00 +0000
-
 * Workaround for WebView hangs occasionally on some feeds.
+* Bugfix: Delete Messages shall update status bar
+* Create  AppImage
 
-- Create  AppImage
 
 - Error-DB for Subscription Requests, display in edit dialog
 

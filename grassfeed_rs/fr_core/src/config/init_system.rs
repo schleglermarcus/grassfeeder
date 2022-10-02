@@ -18,6 +18,7 @@ use gui_layer::gui_values::PropDef;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use crate::db::errors_repo::ErrorRepo;
 
 #[derive(Debug)]
 pub struct GrassFeederConfig {
@@ -41,6 +42,7 @@ pub fn start(conf: GrassFeederConfig) -> AppContext {
     appcontext.build::<icon_repo::IconRepo>();
     appcontext.build::<MessagesRepo>();
     appcontext.build::<OpmlReader>();
+	appcontext.build::<ErrorRepo>();
     appcontext.build::<Downloader>();
     appcontext.build::<SourceTreeController>();
     appcontext.build::<BrowserPane>();

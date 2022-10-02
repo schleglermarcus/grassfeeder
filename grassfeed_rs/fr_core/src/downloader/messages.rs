@@ -2,6 +2,7 @@ use crate::controller::contentlist::match_new_entries_to_existing;
 use crate::controller::contentlist::message_from_modelentry;
 use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::message::compress;
 use crate::db::message::MessageRow;
@@ -19,6 +20,39 @@ use chrono::Local;
 use feed_rs::parser::ParseFeedError;
 use flume::Sender;
 use regex::Regex;
+
+pub struct FetchInner {
+    pub fs_repo_id: isize,
+    pub url: String,
+    pub cjob_sender: Sender<CJob>,
+    pub subscriptionrepo: SubscriptionRepo,
+    pub iconrepo: IconRepo,
+    pub web_fetcher: WebFetcherType,
+    pub download_text: String,
+    pub download_error_happened: bool,
+    pub download_error_text: String,
+    pub sourcetree_job_sender: Sender<SJob>,
+    pub timestamp_created: i64,
+    pub messgesrepo: MessagesRepo,
+    pub erro_repo: ErrorRepo,
+}
+
+impl std::fmt::Debug for FetchInner {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("")
+            .field("repo_id", &self.fs_repo_id)
+            .field("url", &self.url)
+            .field("T", &self.download_text)
+            .field("E", &self.download_error_happened)
+            .finish()
+    }
+}
+
+impl PartialEq for FetchInner {
+    fn eq(&self, other: &Self) -> bool {
+        self.fs_repo_id == other.fs_repo_id
+    }
+}
 
 #[derive(Debug)]
 pub struct FetchStart(pub FetchInner);
@@ -51,7 +85,16 @@ impl Step<FetchInner> for DownloadStart {
             }
             _ => {
                 inner.download_error_happened = true;
-                debug!("Http Request {} failed: {}  ", &inner.url, r.status);
+
+                info!("ADD_E: {}  {}", inner.fs_repo_id, r.status);
+                inner.erro_repo.add_error(
+                    inner.fs_repo_id,
+                    r.status as isize,
+                    inner.url.to_string(),
+                    "Http request failed".to_string(),
+                );
+                info!("ADD_E: {} done ", inner.fs_repo_id);
+
                 StepResult::Continue(Box::new(NotifyDlStop(inner)))
             }
         }
@@ -69,8 +112,11 @@ impl Step<FetchInner> for EvalStringAndFilter {
                 inner.url.clone(),
             );
         if !err_text.is_empty() {
-            debug!("{:?}", err_text);
             inner.download_error_happened = true;
+            inner
+                .erro_repo
+                .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_text.clone());
+            debug!("{:?}", err_text);
         }
         let o_err_msg = strange_datetime_recover(&mut new_list, &inner.download_text);
         if let Some(err_msg) = o_err_msg {
@@ -132,38 +178,6 @@ struct Final(FetchInner);
 impl Step<FetchInner> for Final {
     fn step(self: Box<Self>) -> StepResult<FetchInner> {
         StepResult::Stop(self.0)
-    }
-}
-
-pub struct FetchInner {
-    pub fs_repo_id: isize,
-    pub url: String,
-    pub cjob_sender: Sender<CJob>,
-    pub subscriptionrepo: SubscriptionRepo,
-    pub iconrepo: IconRepo,
-    pub web_fetcher: WebFetcherType,
-    pub download_text: String,
-    pub download_error_happened: bool,
-    pub download_error_text: String,
-    pub sourcetree_job_sender: Sender<SJob>,
-    pub timestamp_created: i64,
-    pub messgesrepo: MessagesRepo,
-}
-
-impl std::fmt::Debug for FetchInner {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("")
-            .field("repo_id", &self.fs_repo_id)
-            .field("url", &self.url)
-            .field("T", &self.download_text)
-            .field("E", &self.download_error_happened)
-            .finish()
-    }
-}
-
-impl PartialEq for FetchInner {
-    fn eq(&self, other: &Self) -> bool {
-        self.fs_repo_id == other.fs_repo_id
     }
 }
 

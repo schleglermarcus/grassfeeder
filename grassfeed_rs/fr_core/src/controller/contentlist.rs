@@ -604,6 +604,10 @@ impl IFeedContents for FeedContents {
                     .update_is_deleted_many(&db_ids, true);
                 let subs_id = *self.last_activated_subscription_id.borrow();
                 self.update_feed_list_contents(subs_id);
+                if let Some(feedsources) = self.feedsources_w.upgrade() {
+                    feedsources.borrow().invalidate_read_unread(subs_id);
+                    self.addjob(CJob::RequestUnreadAllCount(subs_id));
+                }
             }
             "copy-link" => {
                 debug!("TODO  instrument the clipboard ");

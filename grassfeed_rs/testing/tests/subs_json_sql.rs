@@ -3,43 +3,24 @@ use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::sqlite_context::SqliteContext;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 
-
-#[ignore]
+// #[ignore]
 #[test]
 fn t_error_repo_store() {
     setup();
     let mut e_repo = ErrorRepo::new("../target/err_rep/");
     let mut e1 = ErrorEntry::default();
     e1.text = "Hello!".to_string();
-    e_repo.add_error(&e1);
+    e1.subs_id = 13;
+    e_repo.store_error(&e1);
     e_repo.check_or_store();
+    let next_id = e_repo.next_id();
+    assert!(next_id > 10);
+    let subs_list = e_repo.get_by_subscription(13);
+    assert!(subs_list.len() >= 1);
+    // debug!("LIST={:?}", subs_list);
 }
 
-/*
-fn get_env(key: &str) -> Option<String> {
-    if let Some(s1) = std::env::var_os(key) {
-        if let Some(s2) = s1.to_str() {
-            return Some(s2.to_string());
-        }
-    }
-    None
-}
-
-#[ignore]
-#[test]
-pub fn do_changelog() {
-    setup();
-    debug!("DISPLAY={:?}", get_env("DISPLAY"));
-    debug!("HOME={:?}", get_env("HOME"));
-    resources::changelog_debian::create_debian_changelog(
-        "../app-changes/",
-        "../target/test_debian_changelog.txt",
-        "grassfeeder",
-        "unstable; urgency=low",
-        "Marcus der Schlegler <schleglermarcus@posteo.de>",
-    );
-}
-*/
+//
 
 const IN_JSON: &str = "../fr_core/tests/data/san_subs_list_dmg1.json";
 const OUT_DB: &str = "../target/db_rungui_reg/subscriptions.db";

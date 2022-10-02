@@ -647,7 +647,6 @@ impl GuiProcessor {
                 .borrow()
                 .get_config()
                 .num_downloader_threads;
-
             is_folder = fse.is_folder;
         } else {
             repo_id_new = -1;
@@ -659,7 +658,6 @@ impl GuiProcessor {
         }
         let mut num_msg_all = self.statusbar_items.num_msg_all;
         let mut num_msg_unread = self.statusbar_items.num_msg_unread;
-
         let subs_state: SubsMapEntry = (*self.feedsources_r)
             .borrow()
             .get_state(repo_id_new)
@@ -668,13 +666,17 @@ impl GuiProcessor {
             || repo_id_new != self.statusbar_items.selected_repo_id
         {
             self.statusbar_items.selected_msg_id = selected_msg_id;
-            if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
-                num_msg_all = n_a;
-                num_msg_unread = n_u;
+        }
+        if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
+            num_msg_all = n_a;
+            num_msg_unread = n_u;
+            if n_a != self.statusbar_items.num_msg_all || n_u != self.statusbar_items.num_msg_unread
+            {
+                // trace!(                    "STATUS :   {}  unread/all ={}/{}",                   repo_id_new, num_msg_unread, num_msg_all                );
                 need_update2 = true;
             }
-            // debug!(                "STATUS :   {}  unread/all ={}/{}",                repo_id_new, num_msg_unread, num_msg_all            );
         }
+
         if repo_id_new > 0 {
             if num_msg_all != self.statusbar_items.num_msg_all {
                 self.statusbar_items.num_msg_all = num_msg_all;
@@ -690,7 +692,6 @@ impl GuiProcessor {
                 need_update2 = true;
             }
         }
-
         let last_msg_url = if selected_msg_id < 0 {
             String::default()
         } else {

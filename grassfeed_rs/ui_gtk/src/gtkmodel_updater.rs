@@ -412,7 +412,7 @@ impl GtkModelUpdaterInt {
             if webview.is_loading() {
                 let isresponsive = webview.is_web_process_responsive();
                 if !isresponsive {
-					warn!("update_web_view: create new browser instance !   ");
+					warn!("WebView is still loading, not responsive !   ");
 		            return false;
                 }
             }

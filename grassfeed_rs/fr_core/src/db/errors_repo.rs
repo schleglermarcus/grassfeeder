@@ -41,10 +41,13 @@ pub struct ErrorEntry {
 
 impl std::fmt::Debug for ErrorEntry {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        fmt.debug_struct("IconEntry")
+        fmt.debug_struct("ErrorE")
             .field("ID", &self.err_id)
             .field("subs_id", &self.subs_id)
             .field("date", &db_time_to_display(self.date))
+            .field("code", &self.err_code)
+            .field("text", &self.text)
+            .field("url", &self.remote_address)
             .finish()
     }
 }
@@ -55,6 +58,8 @@ pub struct ErrorRepo {
     list_unstored: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
     unstored_list_count: usize,
     highest_id: isize,
+
+    list_stored: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
 }
 
 impl ErrorRepo {
@@ -64,6 +69,7 @@ impl ErrorRepo {
             folder_name: folder_name_.to_string(),
             unstored_list_count: 0,
             highest_id: -1,
+            list_stored: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
@@ -73,7 +79,12 @@ impl ErrorRepo {
             folder_name: String::default(),
             unstored_list_count: 0,
             highest_id: 0,
+            list_stored: Arc::new(RwLock::new(HashMap::new())),
         }
+    }
+
+    pub fn get_list(&self) -> Arc<RwLock<HashMap<isize, ErrorEntry>>> {
+        self.list_unstored.clone()
     }
 
     fn filename(&self) -> String {
@@ -103,11 +114,21 @@ impl ErrorRepo {
 
     pub fn check_or_store(&mut self) {
         let unstored_len = (*self.list_unstored).read().unwrap().len();
+        let stored_len = (*self.list_stored).read().unwrap().len();
+        if unstored_len > 0 || stored_len > 0 {
+            trace!(
+                "check_or_store: unstored:{}   stored:{}",
+                unstored_len,
+                stored_len
+            );
+        }
         if unstored_len > 0 {
-            debug!("check_or_store: {}", unstored_len);
             if self.store_to_file() {
                 (*self.list_unstored).write().unwrap().clear();
             }
+        }
+        if stored_len > 0 {
+            (*self.list_stored).write().unwrap().clear();
         }
     }
 
@@ -135,97 +156,88 @@ impl ErrorRepo {
         true
     }
 
-    // pub fn clear(&self) {       (*self.list_unstored).write().unwrap().clear();    }
+    pub fn add_error(
+        &mut self,
+        subs_id_: isize,
+        error_code_: isize,
+        http_url: String,
+        msg: String,
+    ) {
+        let en = ErrorEntry {
+            subs_id: subs_id_,
+            err_code: error_code_,
+            text: msg,
+            remote_address: http_url,
+            date: crate::util::timestamp_now(),
+            ..Default::default()
+        };
+        debug!("   ADD: {:?}", &en);
+        self.store_error(&en);
+        debug!("   ADD: {:?} done", &en);
+    }
 
-    pub fn add_error(&mut self, entry: &ErrorEntry) {
+    pub fn store_error(&mut self, entry: &ErrorEntry) {
         self.unstored_list_count += 1;
-        self.highest_id += 1;
+        info!("before  next_id");
+        let n_id = self.next_id();
         let mut entrym = entry.clone();
         entrym.date = crate::util::timestamp_now();
-        entrym.err_id = self.highest_id as isize;
+        entrym.err_id = n_id;
+        info!("before write");
         (*self.list_unstored)
             .write()
             .unwrap()
-            .insert(self.highest_id as isize, entrym);
+            .insert(n_id as isize, entrym);
+        info!("after write");
     }
 
     pub fn next_id(&mut self) -> isize {
-        if self.highest_id < 1 {
+        trace!("next_id:1");
+        let num_stored = (*self.list_stored).read().unwrap().len();
+        trace!("next_id:2");
+        if self.highest_id <= 0 || num_stored <= 0 {
             if self.check_file().is_err() {
-                panic!("cannot access error storage");
+                error!(
+                    "error_repo: cannot access stored error list {} ! stopping",
+                    self.filename()
+                );
+                return 8;
             }
-            /*
-                        let slist = read_from(self.filename.clone(), CONV_TO);
-                        let mut hm = (*self.list).write().unwrap();
-                        slist.into_iter().for_each(|se| {
-                            let id = se.icon_id;
-                            hm.insert(id, se);
-                        });
-            */
+            trace!("next_id:3");
+            self.read_stored();
         }
+        trace!("next_id:4");
         self.highest_id += 1;
+        debug!("next_id {}", self.highest_id);
         self.highest_id
     }
 
-    /*
-        pub fn get_by_icon(&self, icon_s: String) -> Vec<ErrorEntry> {
-            (*self.list)
-                .read()
-                .unwrap()
-                .iter()
-                .filter(|(_id, ie)| ie.icon == icon_s)
-                .map(|(_id, ie)| ie.clone())
-                .collect()
-        }
+    pub fn read_stored(&mut self) {
+        let slist = read_from(self.filename(), CONV_TO);
+        let mut st = (*self.list_stored).write().unwrap();
+        let mut highest: isize = 9;
+        slist.into_iter().for_each(|se| {
+            highest = std::cmp::max(highest, se.err_id);
+            st.insert(se.err_id, se);
+        });
+        self.highest_id = std::cmp::max(self.highest_id, highest);
+    }
 
-        pub fn get_by_index(&self, icon_id: isize) -> Option<ErrorEntry> {
-            (*self.list)
-                .read()
-                .unwrap()
-                .iter()
-                .filter(|(_id, ie)| ie.icon_id == icon_id)
-                .map(|(_id, ie)| ie.clone())
-                .next()
-        }
-    */
-
-    /*	TODO
-        pub fn store_entry(&self, entry: &ErrorEntry) -> Result<ErrorEntry, Box<dyn std::error::Error>> {
-            let mut new_id = entry.icon_id;
-            if new_id <= 0 {
-                let max_id = match (*self.list).read().unwrap().keys().max() {
-                    Some(id) => *id,
-                    None => 9, // start value
-                };
-                new_id = max_id + 1;
-            }
-            let mut store_entry = entry.clone();
-            store_entry.icon_id = new_id;
-            (*self.list)
-                .write()
-                .unwrap()
-                .insert(new_id, store_entry.clone());
-            Ok(store_entry)
-        }
-    */
-    /*
-        pub fn get_list(&self) -> Arc<RwLock<HashMap<isize, ErrorEntry>>> {
-            self.list.clone()
-        }
-    */
-
-    /* TODO   load all error entries,  but discard them on timer
-
-
-        pub fn get_all_entries(&self) -> Vec<ErrorEntry> {
-            (*self.list)
-                .read()
-                .unwrap()
-                .iter()
-                .map(|(_id, sub)| sub.clone())
-                .collect::<Vec<ErrorEntry>>()
-        }
-    */
+    pub fn get_by_subscription(&self, subs_id: isize) -> Vec<ErrorEntry> {
+        (*self.list_stored)
+            .read()
+            .unwrap()
+            .iter()
+            .filter_map(|(_id, se)| {
+                if se.subs_id == subs_id {
+                    Some(se)
+                } else {
+                    None
+                }
+            })
+            .cloned()
+            .collect()
+    }
 }
 
 //-------------------
@@ -234,13 +246,15 @@ impl Buildable for ErrorRepo {
     type Output = ErrorRepo;
     fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         let o_folder = conf.get(&PropDef::BrowserDir.tostring());
-        match o_folder {
-            Some(folder) => ErrorRepo::new(&folder),
-            None => {
-                conf.dump();
-                panic!("iconrepo config has no {} ", PropDef::BrowserDir.tostring());
-            }
+        if o_folder.is_none() {
+            conf.dump();
+            panic!("E-Repo config has no {} ", PropDef::BrowserDir.tostring());
         }
+        let folder = o_folder.unwrap();
+        if folder.is_empty() {
+            error!("ErrorRepo: Folder empty!!");
+        }
+        ErrorRepo::new(&folder)
     }
 }
 
@@ -289,7 +303,6 @@ fn error_entry_to_json(input: &ErrorEntry) -> Option<String> {
 #[allow(dead_code)]
 fn error_entry_to_txt(input: &ErrorEntry) -> Option<String> {
     match bincode::serialize(input) {
-        //         Ok(encoded) => Some(compress(&encoded)),
         Ok(encoded) => Some(compress(String::from_utf8(encoded).unwrap().as_str())),
         Err(er) => {
             error!("bincode_serizalize {:?} \n {:?}", er, &input.err_id);
@@ -363,15 +376,14 @@ fn append_to_file(
     Ok(bytes_written)
 }
 
-#[allow(dead_code)]
 fn read_from(
     filename: String,
     converter: &dyn Fn(String) -> Option<ErrorEntry>,
 ) -> Vec<ErrorEntry> {
-    let mut subscriptions_list: Vec<ErrorEntry> = Vec::default();
+    let mut e_list: Vec<ErrorEntry> = Vec::default();
     match std::fs::read_to_string(filename.clone()) {
         Ok(f_str) => {
-            subscriptions_list = f_str
+            e_list = f_str
                 .lines()
                 .filter_map(|line| converter(line.to_string()))
                 .collect();
@@ -380,39 +392,29 @@ fn read_from(
             error!("{:?}  {}", e, filename)
         }
     }
-    subscriptions_list
+    e_list
 }
 
 #[cfg(test)]
-mod ut {
-    /*
-
-
+mod t {
     use super::*;
-    pub const TEST_FOLDER1: &'static str = "../target/db_t_ico_rep";
 
+    // #[ignore]
+    #[test]
+    fn t_error_repo_store() {
+        setup();
+        let mut e_repo = ErrorRepo::new("../target/err_rep/");
+        let mut e1 = ErrorEntry::default();
+        e1.text = "Hello!".to_string();
+        e1.subs_id = 13;
+        e_repo.store_error(&e1);
+        e_repo.check_or_store();
+        let next_id = e_repo.next_id();
+        assert!(next_id > 10);
+        let subs_list = e_repo.get_by_subscription(13);
+        assert!(subs_list.len() >= 1);
+    }
 
-
-        #[test]
-        fn t_store_file() {
-            {
-                let mut iconrepo = IconRepo::new(TEST_FOLDER1);
-                iconrepo.startup();
-                iconrepo.clear();
-                let s1 = IconEntry::default();
-                assert!(iconrepo.store_entry(&s1).is_ok());
-                assert!(iconrepo.store_entry(&s1).is_ok());
-                let list = iconrepo.get_all_entries();
-                assert_eq!(list.len(), 2);
-                iconrepo.check_or_store();
-            }
-
-            {
-                let mut sr = IconRepo::new(TEST_FOLDER1);
-                sr.startup();
-                let list = sr.get_all_entries();
-                assert_eq!(list.len(), 2);
-            }
-        }
-    */
+    // dummy instead of log configuration
+    fn setup() {}
 }

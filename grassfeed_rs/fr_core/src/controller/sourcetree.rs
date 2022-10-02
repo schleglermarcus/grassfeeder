@@ -133,9 +133,10 @@ pub trait ISourceTreeController {
     fn mark_as_read(&self, src_repo_id: isize);
     fn get_current_selected_fse(&self) -> Option<SubscriptionEntry>;
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry>;
-
     /// writes the path array into the cached subscription list
     fn update_cached_paths(&self);
+
+    fn invalidate_read_unread(&self, subs_id: isize);
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -251,7 +252,6 @@ impl SourceTreeController {
                                 .clear_num_all_unread(subs_e.parent_subs_id);
                             self.addjob(SJob::ScanEmptyUnread);
                         }
-
                         self.tree_update_one(&subs_e, &su_st);
                     } else {
                         warn!("could not store readcount for id {}", subs_id);
@@ -283,7 +283,6 @@ impl SourceTreeController {
                     self.mark_schedule_fetch(subs_id);
                 }
                 SJob::CheckSpinnerActive => {
-                    // let fetch_in_progress_ids = (*self.subscriptionrepo_r)                        .borrow()                        .get_ids_by_status(StatusMask::FetchInProgress, true, false);
                     let fetch_in_progress_ids = self.statemap.borrow().get_ids_by_status(
                         StatusMask::FetchInProgress,
                         true,
@@ -329,10 +328,11 @@ impl SourceTreeController {
                 SJob::UpdateLastSelectedMessageId(fs_id, fc_id) => {
                     (*self.subscriptionrepo_r)
                         .borrow()
-                        .update_last_selected(fs_id, fc_id);
+                        .update_last_selected(fs_id, fc_id); // later: this  takes a long time sometimes
                 }
                 SJob::ScanEmptyUnread => {
                     let unread_ids = self.statemap.borrow().scan_num_all_unread();
+                    // trace!("processing ScanEmptyUnread   unread_ids={:?}", unread_ids);
                     if !unread_ids.is_empty() {
                         self.addjob(SJob::ScanEmptyUnread);
                         for (unread_id, is_folder) in unread_ids {
@@ -598,7 +598,6 @@ impl SourceTreeController {
             self.tree_store_update_one(source_id);
             self.check_icon(source_id);
         }
-        // (*self.subscriptionrepo_r).borrow().set_status(
         self.statemap
             .borrow_mut()
             .set_status(&[source_id], StatusMask::FetchScheduled, false);
@@ -1321,8 +1320,6 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let fs_id = self.feedsource_delete_id.unwrap();
-        // let fse: SubscriptionEntry = (*self.subscriptionrepo_r)            .borrow()            .get_by_index(fs_id as isize)            .unwrap();
-        // debug!(            "feedsource_delete {:?}   Parent: {}  ",            self.feedsource_delete_id, fse.parent_subs_id        );
         (*self.subscriptionrepo_r)
             .borrow()
             .delete_by_index(fs_id as isize);
@@ -1550,6 +1547,11 @@ impl ISourceTreeController for SourceTreeController {
 
     fn update_cached_paths(&self) {
         self.update_paths_rec(&Vec::<u16>::default(), 0, false);
+    }
+
+    fn invalidate_read_unread(&self, subs_id: isize) {
+        self.statemap.borrow_mut().clear_num_all_unread(subs_id);
+        self.addjob(SJob::ScanEmptyUnread);
     }
 } // impl ISourceTreeController
 

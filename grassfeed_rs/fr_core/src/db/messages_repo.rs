@@ -22,7 +22,7 @@ pub trait IMessagesRepo {
     /// returns  the number of read lines for that source id:   -1 for undefined
     fn get_read_sum(&self, src_id: isize) -> isize;
 
-    /// return count of all lines for that source-id.  if not found, returns -1
+    /// return count of all lines for that source-id, excluding deleted ones.  if not found, returns -1
     fn get_src_sum(&self, src_id: isize) -> isize;
 
     /// return count of all lines for that source-id
@@ -155,7 +155,7 @@ impl IMessagesRepo for MessagesRepo {
     /// returns  the number of read lines for that source id:   -1 for undefined
     fn get_read_sum(&self, src_id: isize) -> isize {
         let sql = format!(
-            "SELECT COUNT({}) FROM {} WHERE feed_src_id = {} and is_read = true ",
+            "SELECT COUNT({}) FROM {} WHERE feed_src_id = {} and is_read = true  and  is_deleted=false  ",
             MessageRow::index_column_name(),
             MessageRow::table_name(),
             src_id
@@ -165,7 +165,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn get_src_sum(&self, src_id: isize) -> isize {
         let sql = format!(
-            "SELECT COUNT({}) FROM {} WHERE feed_src_id = {} ",
+            "SELECT COUNT({}) FROM {} WHERE feed_src_id = {}  and  is_deleted=false   ",
             MessageRow::index_column_name(),
             MessageRow::table_name(),
             src_id

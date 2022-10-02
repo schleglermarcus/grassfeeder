@@ -124,12 +124,13 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_r_foto = format!("{}/reddit-Fotografie.rss", addr);
     let url_insi = format!("{}/newsinsideout_com.rss", addr);
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
-    let _url_relay = format!("{}/relay_rd.rss", addr); // very big
+    let url_relay = format!("{}/relay_rd.rss", addr); // very big
 
     let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
+    feedsources.add_new_subscription_at_parent(url_relay, "relay_rd".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(
         url_staseve,
         "staseve11".to_string(),
@@ -142,6 +143,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder3,
         false,
     );
+
     if false {
         let src = [
             // (url_staseve.as_str(), "staseve11"),
