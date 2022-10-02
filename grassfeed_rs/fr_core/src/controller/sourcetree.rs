@@ -5,6 +5,7 @@ use crate::controller::contentlist::get_font_size_from_config;
 use crate::controller::contentlist::CJob;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
@@ -153,7 +154,6 @@ pub struct SourceTreeController {
     job_queue_sender: Sender<SJob>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_val_store: UIAdapterValueStoreType,
-
     config: Config,
     feedsource_delete_id: Option<usize>,
     current_edit_fse: Option<SubscriptionEntry>,
@@ -164,6 +164,7 @@ pub struct SourceTreeController {
     any_spinner_visible: RefCell<bool>,
     need_check_fs_paths: RefCell<bool>,
     statemap: RefCell<SubscriptionState>,
+    erro_repo_r: Rc<RefCell<ErrorRepo>>,
 }
 
 impl SourceTreeController {
@@ -177,6 +178,7 @@ impl SourceTreeController {
         let u_a = (*gc_r).borrow().get_updater_adapter();
         let v_s_a = (*gc_r).borrow().get_values_adapter();
         let dl_r = (*ac).get_rc::<Downloader>().unwrap();
+        let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
         Self::new(
             (*ac).get_rc::<Timer>().unwrap(),
             (*ac).get_rc::<SubscriptionRepo>().unwrap(),
@@ -185,6 +187,7 @@ impl SourceTreeController {
             u_a,
             v_s_a,
             dl_r,
+            err_rep,
         )
     }
 
@@ -196,6 +199,7 @@ impl SourceTreeController {
         upd_ad: Rc<RefCell<dyn UIUpdaterAdapter>>,
         v_s_a: UIAdapterValueStoreType,
         downloader_: Rc<RefCell<dyn IDownloader>>,
+        err_rep: Rc<RefCell<ErrorRepo>>,
     ) -> Self {
         let (q_s, q_r) = flume::bounded::<SJob>(JOBQUEUE_SIZE);
         SourceTreeController {
@@ -221,6 +225,7 @@ impl SourceTreeController {
             messagesrepo_w: Weak::new(),
             need_check_fs_paths: RefCell::new(true),
             statemap: RefCell::new(SubscriptionState::default()),
+            erro_repo_r: err_rep,
         }
     }
 
@@ -1189,7 +1194,7 @@ impl ISourceTreeController for SourceTreeController {
         parent_id: isize,
         load_messages: bool,
     ) -> isize {
-        let san_source = remove_invalid_chars_from_input(newsource)
+        let san_source = remove_invalid_chars_from_input(newsource.clone())
             .trim()
             .to_string();
         let mut san_display = remove_invalid_chars_from_input(display.clone())
@@ -1197,13 +1202,19 @@ impl ISourceTreeController for SourceTreeController {
             .to_string();
         let (filtered, was_truncated) = filter_by_iso8859_1(&san_display);
         if !was_truncated {
-            san_display = filtered;
-        } else {
-            debug!("Found non-ISO chars in Subscription Title: {}", &display); // later see how to filter  https://www.ksta.de/feed/index.rss
+            san_display = filtered; // later see how to filter  https://www.ksta.de/feed/index.rss
         }
         let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
         fse.subs_id = self.get_next_available_subscription_id();
         fse.parent_subs_id = parent_id;
+
+        if was_truncated {
+            let msg = format!("Found non-ISO chars in Subscription Title: {}", &display);
+            (*self.erro_repo_r)
+                .borrow()
+                .add_error(fse.subs_id, 0, newsource, msg);
+        }
+
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_id)

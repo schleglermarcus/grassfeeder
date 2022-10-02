@@ -85,16 +85,12 @@ impl Step<FetchInner> for DownloadStart {
             }
             _ => {
                 inner.download_error_happened = true;
-
-                info!("ADD_E: {}  {}", inner.fs_repo_id, r.status);
                 inner.erro_repo.add_error(
                     inner.fs_repo_id,
                     r.status as isize,
                     inner.url.to_string(),
-                    "Http request failed".to_string(),
+                    r.error_description,
                 );
-                info!("ADD_E: {} done ", inner.fs_repo_id);
-
                 StepResult::Continue(Box::new(NotifyDlStop(inner)))
             }
         }
@@ -116,11 +112,14 @@ impl Step<FetchInner> for EvalStringAndFilter {
             inner
                 .erro_repo
                 .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_text.clone());
-            debug!("{:?}", err_text);
+            debug!("ID{}  :  {:?}", inner.fs_repo_id, err_text);
         }
         let o_err_msg = strange_datetime_recover(&mut new_list, &inner.download_text);
         if let Some(err_msg) = o_err_msg {
-            warn!("{} {}", err_msg, &inner.url); // later put this into  error database
+            inner
+                .erro_repo
+                .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_msg.clone());
+            // warn!("{} {}", err_msg, &inner.url);
         }
         inner.timestamp_created = ts_created;
         let existing_entries = inner.messgesrepo.get_by_src_id(inner.fs_repo_id, false);
@@ -144,7 +143,6 @@ impl Step<FetchInner> for SetSourceUpdatedExt {
     fn step(self: Box<Self>) -> StepResult<FetchInner> {
         let inner = self.0;
         let now = timestamp_now();
-        // trace!(            "DL: updating timestamps DB:{}   int:{} ext:{}",            inner.fs_repo_id, now, inner.timestamp_created        );
         inner.subscriptionrepo.update_timestamps(
             inner.fs_repo_id,
             now,
@@ -169,7 +167,6 @@ impl Step<FetchInner> for NotifyDlStop {
             inner.fs_repo_id,
             inner.download_error_happened,
         ));
-
         StepResult::Continue(Box::new(Final(self.0)))
     }
 }

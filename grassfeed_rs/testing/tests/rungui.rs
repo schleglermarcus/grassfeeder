@@ -161,10 +161,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
             ("http://thehighersidechats.com/feed/", "higherside-300"),
             (
-                "https://packages.gentoo.org/packages/added.atom",
-                "gentoo-added_no-pubdate-500",
-            ), //  pubDate not there, but <updaed>
-            (
                 "http://feeds.feedburner.com/RichardHerringLSTPodcast",
                 "RichardHerring-560",
             ),
@@ -251,6 +247,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            (
+                "https://packages.gentoo.org/packages/added.atom",
+                "gentoo-added_no-pubdate-500",
+            ), //  pubDate not there, but <updaed>
             (
                 "http://www.tagesschau.de/newsticker.rdf",
                 "tagesschau-no-pubdate",

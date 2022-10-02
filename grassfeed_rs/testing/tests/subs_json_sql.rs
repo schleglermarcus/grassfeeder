@@ -1,7 +1,12 @@
-use fr_core::db::errors_repo::ErrorEntry;
-use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::sqlite_context::SqliteContext;
 use fr_core::db::subscription_entry::SubscriptionEntry;
+
+
+/*
+
+use fr_core::db::errors_repo::ErrorEntry;
+use fr_core::db::errors_repo::ErrorRepo;
+
 
 // #[ignore]
 #[test]
@@ -20,7 +25,7 @@ fn t_error_repo_store() {
     // debug!("LIST={:?}", subs_list);
 }
 
-//
+*/
 
 const IN_JSON: &str = "../fr_core/tests/data/san_subs_list_dmg1.json";
 const OUT_DB: &str = "../target/db_rungui_reg/subscriptions.db";

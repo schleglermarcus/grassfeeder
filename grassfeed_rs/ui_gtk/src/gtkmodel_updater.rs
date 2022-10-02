@@ -219,9 +219,9 @@ impl GtkModelUpdaterInt {
         }
 
         let elapsed_fin = now.elapsed().as_millis();
-        if elapsed_fin > 100 {
-            debug!(
-                "	update_tree_model_single({} {:?})  maxcol={}  {:?}  ms: {}  {} ",
+        if elapsed_fin > 200 {
+            warn!(
+                "TOO LONG: 	update_tree_model_single({} {:?})  maxcol={}  {:?}  time: {}ms  {} ",
                 index, path, max_columns, &gti, elapsed_3, elapsed_fin
             );
         }

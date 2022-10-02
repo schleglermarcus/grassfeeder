@@ -9,6 +9,7 @@ use crate::controller::contentlist::ListMoveCommand;
 use crate::controller::sourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
@@ -63,8 +64,8 @@ pub enum Job {
     NotifyConfigChanged,
     /// thread-nr,  job-kind
     DownloaderJobStarted(u8, u8),
-    /// thread-nr, job-kind
-    DownloaderJobFinished(u8, u8),
+    /// thread-nr, job-kind, elapsed_ms , job-description
+    DownloaderJobFinished(isize, u8, u8, u32, String),
     CheckFocusMarker(u8),
 }
 
@@ -90,6 +91,7 @@ pub struct GuiProcessor {
     iconrepo_r: Rc<RefCell<IconRepo>>,
     statusbar_items: StatusBarItems,
     focus_by_tab: FocusByTab,
+    erro_repo_r: Rc<RefCell<ErrorRepo>>,
 }
 
 impl GuiProcessor {
@@ -100,6 +102,7 @@ impl GuiProcessor {
         let v_s_a = (*guicontex_r).borrow().get_values_adapter();
         let guirunner = (*guicontex_r).borrow().get_gui_runner();
         let dl_r = (*ac).get_rc::<Downloader>().unwrap();
+        let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
         GuiProcessor {
             subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
             configmanager_r: (*ac).get_rc::<ConfigManager>().unwrap(),
@@ -118,6 +121,7 @@ impl GuiProcessor {
             browserpane_r: (*ac).get_rc::<BrowserPane>().unwrap(),
             statusbar_items: StatusBarItems::default(),
             focus_by_tab: FocusByTab::None,
+            erro_repo_r: err_rep,
         }
     }
 
@@ -421,7 +425,17 @@ impl GuiProcessor {
                 Job::DownloaderJobStarted(threadnr, kind) => {
                     self.statusbar_items.downloader_kind_new[threadnr as usize] = kind;
                 }
-                Job::DownloaderJobFinished(threadnr, _kind) => {
+                Job::DownloaderJobFinished(subs_id, threadnr, _kind, elapsed_ms, description) => {
+                    if elapsed_ms > 5000 && subs_id > 0 {
+                        //  trace!(                            "DL: {} {} took {} ms {}    TODO store error ",                            threadnr,                            _kind,                            elapsed_ms,                            description                        );
+                        (*self.erro_repo_r).borrow().add_error(
+                            subs_id,
+                            elapsed_ms as isize,
+                            String::default(),
+                            description,
+                        );
+                    }
+
                     self.statusbar_items.downloader_kind_new[threadnr as usize] = 0;
                 }
                 Job::CheckFocusMarker(num) => {

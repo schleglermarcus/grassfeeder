@@ -8,6 +8,7 @@ use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::IDownloader;
 use fr_core::controller::sourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
+use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
@@ -132,6 +133,8 @@ fn prepare_stc(
     let r_dl: Rc<RefCell<dyn IDownloader>> = Rc::new(RefCell::new(downloaderdummy));
     let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
     let r_icons_repo = Rc::new(RefCell::new(IconRepo::new("")));
+    let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
+
     let fs = SourceTreeController::new(
         r_timer,
         r_subscriptions_repo.clone(),
@@ -140,6 +143,7 @@ fn prepare_stc(
         uimock.upd_adp(),
         uimock.val_sto(),
         r_dl,
+        r_error_repo,
     );
     (fs, r_subscriptions_repo)
 }

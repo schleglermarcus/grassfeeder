@@ -77,6 +77,7 @@ trait DLKind {
     fn hostname(&self) -> Option<String> {
         None
     }
+    fn subscription_id(&self) -> isize;
 }
 
 impl DLKind for DLJob {
@@ -96,6 +97,16 @@ impl DLKind for DLJob {
             DLJob::Feed(fetch_inner) => Downloader::host_from_url(&fetch_inner.url),
             DLJob::Icon(icon_inner) => Downloader::host_from_url(&icon_inner.feed_url),
             _ => None,
+        }
+    }
+
+    fn subscription_id(&self) -> isize {
+        match self {
+            DLJob::None => -1,
+            DLJob::Feed(inner) => inner.fs_repo_id,
+            DLJob::Icon(inner) => inner.fs_repo_id,
+            DLJob::ComprehensiveFeed(_) => -2,
+            DLJob::CleanDatabase(_) => -3,
         }
     }
 }
@@ -218,13 +229,19 @@ impl Downloader {
         }
     }
 
-    fn process_job(dljob: DLJob, gp_sender: Sender<Job>, proc_num: u8) {
+    // returns   used time in milliseconds
+    fn process_job(dljob: DLJob, gp_sender: Sender<Job>, proc_num: u8) -> u64 {
         let now = std::time::Instant::now();
         let job_kind = dljob.kind();
+        let subs_id = dljob.subscription_id();
         let _r = gp_sender.send(Job::DownloaderJobStarted(proc_num, job_kind));
-        let job_description = format!("{:?}", &dljob);
-        let t_name: String = std::thread::current().name().unwrap().to_string();
-        // trace!("PROC   {} {}  ", t_name, job_description);
+        // let description = format!("{}", &dljob);
+        let job_description = format!(
+            "{}  {:?}",
+            std::thread::current().name().unwrap().to_string(),
+            &dljob
+        );
+
         match dljob {
             DLJob::None => {}
             DLJob::Feed(i) => {
@@ -241,10 +258,16 @@ impl Downloader {
             }
         }
         let elapsedms = now.elapsed().as_millis();
-        if elapsedms > 1000 {
-            trace!("{} {:?} took {}ms  ", t_name, job_description, elapsedms);
-        }
-        let _r = gp_sender.send(Job::DownloaderJobFinished(proc_num, job_kind));
+        // let t_name: String = std::thread::current().name().unwrap().to_string();
+        // if elapsedms > 5000 {            trace!("{} {:?} took {}ms  ", t_name, job_description, elapsedms);        }
+        let _r = gp_sender.send(Job::DownloaderJobFinished(
+            subs_id,
+            proc_num,
+            job_kind,
+            elapsedms as u32,
+            job_description,
+        ));
+        elapsedms as u64
     }
 
     pub fn host_from_url(url: &String) -> Option<String> {
@@ -293,7 +316,6 @@ impl IDownloader for Downloader {
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
         let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
-
         let new_fetch_job = FetchInner {
             fs_repo_id: f_source_repo_id,
             url: fse.url,
@@ -314,11 +336,10 @@ impl IDownloader for Downloader {
 
     fn load_icon(&self, fs_id: isize, fs_url: String, old_icon_id: usize) {
         let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
-
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
-
+        let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
         let dl_inner = IconInner {
             fs_repo_id: fs_id,
             feed_url: fs_url,
@@ -332,6 +353,7 @@ impl IDownloader for Downloader {
             feed_homepage: String::default(),
             feed_download_text: String::default(),
             subscriptionrepo: subscription_repo,
+            erro_repo: errors_rep,
         };
         self.add_to_queue(DLJob::Icon(dl_inner));
     }

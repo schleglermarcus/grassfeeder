@@ -9,7 +9,6 @@ use context::StartupWithAppContext;
 use context::TimerEvent;
 use context::TimerReceiver;
 use context::TimerRegistry;
-use gui_layer::gui_values::PropDef;
 use serde::Deserialize;
 use serde::Serialize;
 use std::cell::RefCell;
@@ -22,6 +21,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::RwLock;
 
+pub const KEY_FOLDERNAME: &str = "cache_folder";
 pub const FILENAME: &str = "errors.json.txt";
 pub const CONV_TO: &dyn Fn(String) -> Option<ErrorEntry> = &json_to_error_entry;
 pub const CONV_FROM: &dyn Fn(&ErrorEntry) -> Option<String> = &error_entry_to_json;
@@ -53,37 +53,42 @@ impl std::fmt::Debug for ErrorEntry {
 }
 
 pub struct ErrorRepo {
-    folder_name: String,
     ///  ID -> Entry
-    list_unstored: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
-    unstored_list_count: usize,
-    highest_id: isize,
+    // list_unstored: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
+    list_unstored: Arc<RwLock<MapAndId>>,
 
+    folder_name: String,
+    unstored_list_count: RwLock<usize>,
+    // highest_id: isize,
     list_stored: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
+}
+
+#[derive(Default, Debug)]
+pub struct MapAndId {
+    map: HashMap<isize, ErrorEntry>,
+    highest_id: isize,
 }
 
 impl ErrorRepo {
     pub fn new(folder_name_: &str) -> Self {
         ErrorRepo {
-            list_unstored: Arc::new(RwLock::new(HashMap::new())),
+            list_unstored: Default::default(), //  Arc::new(RwLock::new(HashMap::new())),
             folder_name: folder_name_.to_string(),
-            unstored_list_count: 0,
-            highest_id: -1,
+            unstored_list_count: Default::default(),
             list_stored: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
-    pub fn by_existing_list(existing: Arc<RwLock<HashMap<isize, ErrorEntry>>>) -> Self {
+    pub fn by_existing_list(existing: Arc<RwLock<MapAndId>>) -> Self {
         ErrorRepo {
             list_unstored: existing,
             folder_name: String::default(),
-            unstored_list_count: 0,
-            highest_id: 0,
+            unstored_list_count: Default::default(),
             list_stored: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
-    pub fn get_list(&self) -> Arc<RwLock<HashMap<isize, ErrorEntry>>> {
+    pub fn get_list(&self) -> Arc<RwLock<MapAndId>> {
         self.list_unstored.clone()
     }
 
@@ -99,6 +104,7 @@ impl ErrorRepo {
     // make sure the file exists
     pub fn check_file(&self) -> std::io::Result<()> {
         let filename = self.filename();
+        // debug!("checking: {} {}", self.folder_name, filename);
         if !std::path::Path::new(&filename).exists() {
             std::fs::create_dir_all(&self.folder_name)?;
             let _file = File::create(&filename)?;
@@ -106,25 +112,21 @@ impl ErrorRepo {
         Ok(())
     }
 
-    pub fn startup(&mut self) {
+    pub fn startup_read(&self) {
         if let Err(e) = self.check_file() {
             warn!("ErrorRepo Startup {:?}", e);
         }
+        self.read_stored();
+        // trace!(            "STARTUP highest={}",            self.list_unstored.read().unwrap().highest_id        );
     }
 
     pub fn check_or_store(&mut self) {
-        let unstored_len = (*self.list_unstored).read().unwrap().len();
+        let unstored_len = (*self.list_unstored).read().unwrap().map.len();
         let stored_len = (*self.list_stored).read().unwrap().len();
-        if unstored_len > 0 || stored_len > 0 {
-            trace!(
-                "check_or_store: unstored:{}   stored:{}",
-                unstored_len,
-                stored_len
-            );
-        }
+        // if unstored_len > 0 || stored_len > 0 {            trace!(                "check_or_store: unstored:{}   stored:{}",                unstored_len,               stored_len            );        }
         if unstored_len > 0 {
             if self.store_to_file() {
-                (*self.list_unstored).write().unwrap().clear();
+                (*self.list_unstored).write().unwrap().map.clear();
             }
         }
         if stored_len > 0 {
@@ -132,21 +134,20 @@ impl ErrorRepo {
         }
     }
 
-    fn store_to_file(&mut self) -> bool {
+    fn store_to_file(&self) -> bool {
         let mut values = (*self.list_unstored)
             .read()
             .unwrap()
+            .map
             .values()
             .cloned()
             .collect::<Vec<ErrorEntry>>();
         values.sort_by(|a, b| a.err_id.cmp(&b.err_id));
-
         let _r = self.check_file();
-        debug!("check result={:?}", _r);
-
+        // debug!("check result={:?}", _r);
         match append_to_file(self.filename(), &values, CONV_FROM) {
             Ok(_bytes_written) => {
-                self.unstored_list_count = values.len();
+                *self.unstored_list_count.write().unwrap() = values.len();
             }
             Err(e) => {
                 error!("IconRepo:store_to_file  {}  {:?} ", &self.filename(), e);
@@ -156,13 +157,7 @@ impl ErrorRepo {
         true
     }
 
-    pub fn add_error(
-        &mut self,
-        subs_id_: isize,
-        error_code_: isize,
-        http_url: String,
-        msg: String,
-    ) {
+    pub fn add_error(&self, subs_id_: isize, error_code_: isize, http_url: String, msg: String) {
         let en = ErrorEntry {
             subs_id: subs_id_,
             err_code: error_code_,
@@ -171,48 +166,36 @@ impl ErrorRepo {
             date: crate::util::timestamp_now(),
             ..Default::default()
         };
-        debug!("   ADD: {:?}", &en);
         self.store_error(&en);
-        debug!("   ADD: {:?} done", &en);
     }
 
-    pub fn store_error(&mut self, entry: &ErrorEntry) {
-        self.unstored_list_count += 1;
-        info!("before  next_id");
+    pub fn store_error(&self, entry: &ErrorEntry) {
+        *self.unstored_list_count.write().unwrap() += 1;
+        // trace!("store_error   before  next_id");
         let n_id = self.next_id();
         let mut entrym = entry.clone();
         entrym.date = crate::util::timestamp_now();
         entrym.err_id = n_id;
-        info!("before write");
         (*self.list_unstored)
             .write()
             .unwrap()
+            .map
             .insert(n_id as isize, entrym);
-        info!("after write");
     }
 
-    pub fn next_id(&mut self) -> isize {
-        trace!("next_id:1");
-        let num_stored = (*self.list_stored).read().unwrap().len();
-        trace!("next_id:2");
-        if self.highest_id <= 0 || num_stored <= 0 {
-            if self.check_file().is_err() {
-                error!(
-                    "error_repo: cannot access stored error list {} ! stopping",
-                    self.filename()
-                );
-                return 8;
-            }
-            trace!("next_id:3");
-            self.read_stored();
+    pub fn next_id(&self) -> isize {
+        let mut highest_id = (*self.list_unstored).read().unwrap().highest_id;
+        if highest_id <= 0 {
+            error!("need to call startup_read");
+            return 7;
         }
-        trace!("next_id:4");
-        self.highest_id += 1;
-        debug!("next_id {}", self.highest_id);
-        self.highest_id
+        highest_id += 1;
+        // debug!("next_id {}", highest_id);
+        (*self.list_unstored).write().unwrap().highest_id = highest_id;
+        highest_id
     }
 
-    pub fn read_stored(&mut self) {
+    pub fn read_stored(&self) {
         let slist = read_from(self.filename(), CONV_TO);
         let mut st = (*self.list_stored).write().unwrap();
         let mut highest: isize = 9;
@@ -220,10 +203,21 @@ impl ErrorRepo {
             highest = std::cmp::max(highest, se.err_id);
             st.insert(se.err_id, se);
         });
-        self.highest_id = std::cmp::max(self.highest_id, highest);
+        let highest_cur = (*self.list_unstored).read().unwrap().highest_id;
+        if highest > highest_cur {
+            (*self.list_unstored).write().unwrap().highest_id = highest;
+        }
+    }
+
+    fn check_stored_are_present(&self) {
+        let numstored = (*self.list_stored).read().unwrap().len();
+        if numstored == 0 {
+            self.read_stored();
+        }
     }
 
     pub fn get_by_subscription(&self, subs_id: isize) -> Vec<ErrorEntry> {
+        self.check_stored_are_present();
         (*self.list_stored)
             .read()
             .unwrap()
@@ -245,10 +239,10 @@ impl ErrorRepo {
 impl Buildable for ErrorRepo {
     type Output = ErrorRepo;
     fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
-        let o_folder = conf.get(&PropDef::BrowserDir.tostring());
+        let o_folder = conf.get(KEY_FOLDERNAME);
         if o_folder.is_none() {
             conf.dump();
-            panic!("E-Repo config has no {} ", PropDef::BrowserDir.tostring());
+            panic!("E-Repo config has no {} ", KEY_FOLDERNAME);
         }
         let folder = o_folder.unwrap();
         if folder.is_empty() {
@@ -270,8 +264,7 @@ impl StartupWithAppContext for ErrorRepo {
                 .borrow_mut()
                 .register(&TimerEvent::Shutdown, su_r);
         }
-
-        self.startup();
+        self.startup_read();
     }
 }
 
@@ -336,7 +329,6 @@ fn txt_to_error_entry(line: String) -> Option<ErrorEntry> {
     }
 }
 
-// #[allow(dead_code)]
 fn append_to_file(
     filename: String,
     input: &[ErrorEntry],
@@ -344,18 +336,14 @@ fn append_to_file(
 ) -> std::io::Result<usize> {
     let mut bytes_written: usize = 0;
     let file: File;
-
     if std::path::Path::new(&filename).exists() {
-        debug!("appending... {}", filename.clone());
         file = OpenOptions::new()
             .write(true)
             .append(true)
             .open(filename.clone())?;
     } else {
-        debug!("creating ... {}", filename);
         file = File::create(&filename)?;
     }
-
     let mut buf = BufWriter::new(file);
     input
         .iter()
@@ -399,7 +387,8 @@ fn read_from(
 mod t {
     use super::*;
 
-    // #[ignore]
+    // RUST_BACKTRACE=1 cargo watch -s "cargo test  db::errors_repo::t::t_error_repo_store     --lib -- --exact --nocapture"
+
     #[test]
     fn t_error_repo_store() {
         setup();
@@ -410,8 +399,11 @@ mod t {
         e_repo.store_error(&e1);
         e_repo.check_or_store();
         let next_id = e_repo.next_id();
-        assert!(next_id > 10);
+
+        println!("next_id={}", next_id);
+        assert!(next_id >= 7);
         let subs_list = e_repo.get_by_subscription(13);
+        println!("#subs_list={}", subs_list.len());
         assert!(subs_list.len() >= 1);
     }
 

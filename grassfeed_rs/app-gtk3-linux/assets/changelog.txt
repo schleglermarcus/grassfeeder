@@ -1,9 +1,9 @@
 grassfeeder (0.0.7) unstable; urgency=low
 
-  
   * Workaround for WebView hangs occasionally on some feeds.
+  * Bugfix: Delete Messages shall update status bar
+  * Create  AppImage
   
-  - Create  AppImage
   
   - Error-DB for Subscription Requests, display in edit dialog
   
