@@ -95,6 +95,7 @@ fn rungui_local_clear() {
     };
     let appcontext = fr_core::config::init_system::start(gfconf);
     test_setup_values(&appcontext, mini_server_c.get_address());
+
     fr_core::config::init_system::run(&appcontext);
     mini_server_c.stop();
 }
@@ -105,12 +106,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         let _r = (*messagesrepo_r.borrow()).get_ctx().delete_table();
         (*messagesrepo_r.borrow()).get_ctx().create_table();
     }
-    let fsrwr: Rc<RefCell<dyn ISubscriptionRepo>> = acr.get_rc::<SubscriptionRepo>().unwrap();
-    (*fsrwr.borrow()).scrub_all_subscriptions();
-    if false {
-        let msg_r: Rc<RefCell<dyn IMessagesRepo>> = acr.get_rc::<MessagesRepo>().unwrap();
-        let _r = (*msg_r).borrow().get_ctx().delete_table();
-        (*msg_r).borrow().get_ctx().create_table();
+    if true {
+        let fsrwr: Rc<RefCell<dyn ISubscriptionRepo>> = acr.get_rc::<SubscriptionRepo>().unwrap();
+        (*fsrwr.borrow()).scrub_all_subscriptions();
     }
 
     let feedsources_r: Rc<RefCell<dyn ISourceTreeController>> =

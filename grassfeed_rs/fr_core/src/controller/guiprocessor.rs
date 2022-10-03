@@ -1,7 +1,7 @@
 use crate::config::configmanager::ConfigManager;
-use crate::controller::browserpane::BrowserPane;
+use crate::controller::browserpane; // ::CONF_BROWSER_CACHE_CLEANUP;
 use crate::controller::browserpane::IBrowserPane;
-use crate::controller::contentdownloader::Downloader;
+use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
@@ -101,7 +101,7 @@ impl GuiProcessor {
         let u_a = (*guicontex_r).borrow().get_updater_adapter();
         let v_s_a = (*guicontex_r).borrow().get_values_adapter();
         let guirunner = (*guicontex_r).borrow().get_gui_runner();
-        let dl_r = (*ac).get_rc::<Downloader>().unwrap();
+        let dl_r = (*ac).get_rc::<contentdownloader::Downloader>().unwrap();
         let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
         GuiProcessor {
             subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
@@ -118,7 +118,7 @@ impl GuiProcessor {
             gui_runner: guirunner,
             downloader_r: dl_r,
             gui_context_r: guicontex_r,
-            browserpane_r: (*ac).get_rc::<BrowserPane>().unwrap(),
+            browserpane_r: (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
             statusbar_items: StatusBarItems::default(),
             focus_by_tab: FocusByTab::None,
             erro_repo_r: err_rep,
@@ -172,12 +172,7 @@ impl GuiProcessor {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
                         .set_selected_feedsource(subs_id as isize);
-                    trace!(
-                        "GP:TreeRowActivated{} #q:{} {:?} ",
-                        subs_id,
-                        (*self.downloader_r).borrow().get_queue_size(),
-                        _path
-                    );
+                    // trace!(                        "GP:TreeRowActivated{} #q:{} {:?} ",                        subs_id,                        (*self.downloader_r).borrow().get_queue_size(),                        _path                    );
                     (*self.feedcontents_r)
                         .borrow()
                         .update_feed_list_contents(subs_id as isize);
@@ -571,6 +566,14 @@ impl GuiProcessor {
                 (*self.browserpane_r)
                     .borrow_mut() // 9 : browser bg
                     .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
+                (self.configmanager_r).borrow().set_val(
+                    &PropDef::BrowserClearCache.to_string(),
+                    payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
+                );
+                (self.configmanager_r).borrow().set_val(
+                    contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
+                    payload.get(11).unwrap().boo().to_string(),
+                );
                 self.addjob(Job::NotifyConfigChanged);
             }
             _ => {
@@ -622,6 +625,12 @@ impl GuiProcessor {
             .read()
             .unwrap()
             .get_gui_int_or(PropDef::GuiFontSizeManual, 10) as u32;
+        let browser_cache_clear = (self.configmanager_r)
+            .borrow()
+            .get_val_bool(&PropDef::BrowserClearCache.to_string());
+        let databases_cleanup = (self.configmanager_r)
+            .borrow()
+            .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP);
         let dd: Vec<AValue> = vec![
             AValue::ABOOL(sources_conf.feeds_fetch_at_start), // 0 : FetchFeedsOnStart
             AValue::AU32(sources_conf.feeds_fetch_interval),  // 1 UpdateFeeds Cardinal
@@ -633,6 +642,8 @@ impl GuiProcessor {
             AValue::ABOOL(fontsize_manual_enable),                // 7 : FontSizeManualEnable
             AValue::AU32(fontsize_manual),                        // 8 : Font size Manual
             AValue::AU32(browser_conf.browser_bg as u32),         // 9 : Browser_BG
+            AValue::ABOOL(browser_cache_clear),                   // 10 : Browser Cache Cleanup
+            AValue::ABOOL(databases_cleanup),                     // 11 : Cleanup-on-start
         ];
         (*self.gui_val_store)
             .write()

@@ -135,12 +135,10 @@ pub trait GtkObjects {
         cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
         browser_dir: &String,
         a_box_index: u8,
+        browser_clear_cache: bool,
     );
 
-    fn set_create_webview_fn(
-        &mut self,
-        cb_fn: Option<Box<dyn Fn(  &WebContext  ) -> WebView>>,
-    );
+    fn set_create_webview_fn(&mut self, cb_fn: Option<Box<dyn Fn(&WebContext) -> WebView>>);
 }
 
 #[derive(Clone, Debug)]

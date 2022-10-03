@@ -127,7 +127,7 @@ impl Buildable for GuiContext {
                 initvalues.insert(PropDef::AppModeDebug, b.to_string());
             }
         }
-        // trace!("gui_context:   initvals={:#?}", &initvalues);
+		// debug!("gui_context:   initvals={:#?}", &initvalues);
         let (m_v_store_a, ui_updater, g_runner): (
             UIAdapterValueStoreType,
             Rc<RefCell<dyn UIUpdaterAdapter>>,

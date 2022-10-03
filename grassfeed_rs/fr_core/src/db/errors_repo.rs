@@ -74,7 +74,6 @@ impl ErrorEntry {
 pub struct ErrorRepo {
     ///  ID -> Entry
     list_unstored: Arc<RwLock<MapAndId>>,
-
     folder_name: String,
     unstored_list_count: RwLock<usize>,
     list_stored: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
@@ -118,7 +117,7 @@ impl ErrorRepo {
         format!("{}{}{}", self.folder_name, slash, FILENAME)
     }
 
-    // make sure the file exists
+    /// make sure the file exists
     pub fn check_file(&self) -> std::io::Result<()> {
         let filename = self.filename();
         if !std::path::Path::new(&filename).exists() {
@@ -138,7 +137,6 @@ impl ErrorRepo {
     pub fn check_or_store(&mut self) {
         let unstored_len = (*self.list_unstored).read().unwrap().map.len();
         let stored_len = (*self.list_stored).read().unwrap().len();
-        // if unstored_len > 0 || stored_len > 0 {            trace!(                "check_or_store: unstored:{}   stored:{}",                unstored_len,               stored_len            );        }
         if unstored_len > 0 {
             if self.store_to_file() {
                 (*self.list_unstored).write().unwrap().map.clear();
@@ -208,7 +206,6 @@ impl ErrorRepo {
     }
 
     pub fn read_stored(&self) {
-        debug!("read_stored ....");
         let slist = read_from(self.filename(), CONV_TO);
         let mut st = (*self.list_stored).write().unwrap();
         let mut highest: isize = 9;

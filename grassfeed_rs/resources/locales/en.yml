@@ -80,6 +80,9 @@ en:
   D_SETTINGS_FOCUS_POLICY_LAST_SELECTED: "Last Selected Message"
   D_SETTINGS_FOCUS_POLICY_NEWEST: "Most Recent Message"
   D_SETTINGS_FOCUS_POLICY_BEFORE_UNREAD: "Before Oldest Unread Message"
+  D_SETTINGS_DATABASES_CLEAN_ONSTART: "Clean up databases on start"
+  D_SETTINGS_BROWSER_CACHE_CLEAR: "Clear browser cache"
+
 
   D_IMPORT_OPML_SELECT_FILE: "Select Opml file"
   D_STORE_OPML_SELECT_FILE: "Name Opml file"

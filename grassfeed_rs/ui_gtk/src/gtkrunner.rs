@@ -499,11 +499,13 @@ impl GtkObjects for GtkObjectsImpl {
         cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
         browser_folder: &String,
         a_box_index: u8,
+		browser_clear_cache : bool,
     ) {
         self.create_webcontext_fn = cb_fn;
         self.browser_config = CreateBrowserConfig {
             browser_dir: browser_folder.clone(),
             attach_box_index: a_box_index,
+			startup_clear_cache: browser_clear_cache,
         };
     }
 
@@ -516,6 +518,7 @@ impl GtkObjects for GtkObjectsImpl {
 pub struct CreateBrowserConfig {
     pub attach_box_index: u8,
     pub browser_dir: String,
+	pub startup_clear_cache : bool,
 }
 
 struct ReceiverWrapperImpl(Receiver<GuiEvents>);

@@ -16,12 +16,13 @@ pub enum PropDef {
     AppUrl,
     BrowserDir,
     BrowserBackgroundLevel,
+    BrowserClearCache,
     AppRcsVersion,
     AppModeDebug,
 }
 
 #[allow(dead_code)]
-pub const PROPDEF_ARRAY: [PropDef; 15] = [
+pub const PROPDEF_ARRAY: [PropDef; 16] = [
     PropDef::GuiWindowWidth,
     PropDef::GuiWindowHeight,
     PropDef::GuiWindowTitle,
@@ -35,6 +36,7 @@ pub const PROPDEF_ARRAY: [PropDef; 15] = [
     PropDef::AppUrl,
     PropDef::BrowserDir,
     PropDef::BrowserBackgroundLevel,
+    PropDef::BrowserClearCache,
     PropDef::AppRcsVersion,
     PropDef::AppModeDebug,
 ];

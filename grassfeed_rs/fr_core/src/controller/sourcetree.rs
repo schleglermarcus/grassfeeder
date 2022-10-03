@@ -1,5 +1,5 @@
 use crate::config::configmanager::ConfigManager;
-use crate::controller::contentdownloader::Downloader;
+use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::get_font_size_from_config;
 use crate::controller::contentlist::CJob;
@@ -177,7 +177,7 @@ impl SourceTreeController {
         let gc_r = (*ac).get_rc::<GuiContext>().unwrap();
         let u_a = (*gc_r).borrow().get_updater_adapter();
         let v_s_a = (*gc_r).borrow().get_values_adapter();
-        let dl_r = (*ac).get_rc::<Downloader>().unwrap();
+        let dl_r = (*ac).get_rc::<contentdownloader::Downloader>().unwrap();
         let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
         Self::new(
             (*ac).get_rc::<Timer>().unwrap(),
@@ -1626,9 +1626,12 @@ impl StartupWithAppContext for SourceTreeController {
         }
         self.addjob(SJob::ScanEmptyUnread);
         self.addjob(SJob::GuiUpdateTreeAll);
-
-        // self.addjob(SJob::SanitizeSources);	// later: do that with dialog,  with config setting
-
+        if (self.configmanager_r)
+            .borrow()
+            .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP)
+        {
+            self.addjob(SJob::SanitizeSources);
+        }
         self.addjob(SJob::UpdateTreePaths);
     }
 }

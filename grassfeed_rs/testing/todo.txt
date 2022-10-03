@@ -1,25 +1,23 @@
 To Do List
 
-
-
- - Error-DB for Subscription Requests, display in edit dialog
-
  - Menu Item and  Help text into browser
  - Browser CleanUp Cache, on startup / finish
 	       webcontextext:  clear_cache(&self)
  - Databases consistency check  on startup configurable.
- - Subscription Tree: hide zeroes when nothing to read
 - Copy Message address into clipboard
-- Create Backups for Subscriptions-DB
 - check: subscription  Reload shall refresh  message list
-- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
 - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
 
 
 - Bug:  add-folder   leads to  expanding one that is closed
-
+- Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
+- Bug: Dialog Folder-edit shall show statistics information
+- Subscription Tree: hide zeroes when nothing to read
+- refactor: gtk - separate file for the message list
+- Message List: translate titles
 - Delete Messages by delete key
 - re-scale icons before going into database.  Example   http://feeds.feedburner.com/TechmemeRideHome
+- Create Backups for Subscriptions-DB
 - check  https://www.linuxcompatible.org/  feed: icon + entries
 - Investigate why   subscriptions.db  is so large.
 - Sanitize: cross-check icon ids of tree if they are present in icon db
@@ -37,6 +35,7 @@ To Do List
 - Browser: enable theme related colors
 - Browser: Modify  Font size
 - Browser: add Zoom Control
+- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
 
 - Reduce Size of Binary:
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html

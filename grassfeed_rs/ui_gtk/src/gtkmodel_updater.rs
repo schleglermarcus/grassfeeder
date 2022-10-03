@@ -218,8 +218,8 @@ impl GtkModelUpdaterInt {
         }
 
         let elapsed_fin = now.elapsed().as_millis();
-        if elapsed_fin > 100 {
-            warn!(
+        if elapsed_fin > 50 {	// later:  reduce icon size before going into database
+            debug!(
                 "update_tree_model_single({} {:?}) TOO LONG {:?} times:{} {} ",
                 index, path,  &gti, elapsed_3, elapsed_fin
             );

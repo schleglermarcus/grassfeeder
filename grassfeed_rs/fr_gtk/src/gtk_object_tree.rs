@@ -246,28 +246,6 @@ impl GtkGuiBuilder for GtkObjectTree {
             ret.set_scrolledwindow(SCROLLEDWINDOW_1, &scrolledwindow_1);
         }
         connect_keyboard(gui_event_sender, gtk_obj_a.clone());
-
-        /*
-                // TODO
-                let browserdir = self
-                    .initvalues
-                    .get(&PropDef::BrowserDir)
-                    .cloned()
-                    .unwrap_or(String::default());
-
-                let (webcontext1, webview1) = create_webview_and_context(browserdir);
-
-                let mut ret = (*gtk_obj_a).write().unwrap();
-                ret.set_web_context(&webcontext1);
-                ret.set_web_view(&webview1);
-                if let Some(box1_v) = ret.get_box(BOX_CONTAINER_4_BROWSER) {
-                    box1_v.pack_start(&webview1, true, true, 0);
-                } else {
-                    warn!("build browser, while box to mount not here !");
-                }
-        */
-
-        //
     }
 }
 
@@ -346,6 +324,8 @@ impl GtkObjectTree {
             .get(&PropDef::BrowserDir)
             .cloned()
             .unwrap_or(String::default());
+        let clear_cache: bool = self.get_bool(PropDef::BrowserClearCache);
+
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
             ret.set_label(LABEL_BROWSER_MSG_DATE, &label_date);
@@ -358,6 +338,7 @@ impl GtkObjectTree {
                 Some(Box::new(create_webcontext)),
                 &browserdir,
                 BOX_CONTAINER_4_BROWSER,
+                clear_cache,
             );
             ret.set_create_webview_fn(Some(Box::new(create_webview)));
         }
@@ -384,6 +365,10 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
     }
     wconte.set_spell_checking_enabled(false);
     wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
+    if b_conf.startup_clear_cache {
+        debug!("WebContext.clear_cache()! ");
+        wconte.clear_cache();
+    }
     wconte
 }
 

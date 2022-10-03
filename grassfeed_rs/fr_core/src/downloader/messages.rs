@@ -112,7 +112,7 @@ impl Step<FetchInner> for EvalStringAndFilter {
             inner
                 .erro_repo
                 .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_text.clone());
-            debug!("ID{}  :  {:?}", inner.fs_repo_id, err_text);
+            //  debug!("ID{}  :  {:?}", inner.fs_repo_id, err_text);
         }
         let o_err_msg = strange_datetime_recover(&mut new_list, &inner.download_text);
         if let Some(err_msg) = o_err_msg {
@@ -289,31 +289,6 @@ mod t_ {
         assert!(o_msg.is_none());
         assert_eq!(new_list[0].entry_src_date, 1655935140)
     }
-
-    /*
-        //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::dl_entries_breakingnews    --lib -- --exact --nocapture "
-        #[ignore]
-        #[test]
-        fn dl_entries_breakingnews() {
-            let filenames = [
-                "tests/data/gui_proc_v2.rss",
-                "tests/data/breakingnewsworld-2.xml",
-            ];
-            for filename in filenames {
-                println!("FILE={}", filename);
-                let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
-                    feed_text_to_entries(
-                        std::fs::read_to_string(filename).unwrap(),
-                        5,
-                        "some-url".to_string(),
-                    );
-
-                println!("LIST= {:#?}", &new_list);
-
-                assert!(new_list.get(0).unwrap().entry_src_date > 0);
-            }
-        }
-    */
 
     //RUST_BACKTRACE=1 cargo watch -s "cargo test   downloader::messages::t_::feed_text_to_entries_naturalnews  --lib -- --exact --nocapture   "
     #[test]

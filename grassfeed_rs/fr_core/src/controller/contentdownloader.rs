@@ -45,6 +45,7 @@ use std::time::Duration;
 
 pub static KEEPRUNNING: AtomicBool = AtomicBool::new(true);
 pub const CONF_DOWNLOADER_THREADS: &str = "DownloaderThreads";
+pub const CONF_DATABASES_CLEANUP: &str = "DatabasesCleanup";
 pub const DOWNLOADER_THREADS_DEFAULT: u8 = 2;
 pub const DOWNLOADER_LOOP_DELAY_S: u8 = 1;
 pub const DOWNLOADER_LOOP_WAIT_MS: u64 = 200; // between downloader queue requests
@@ -223,7 +224,7 @@ impl Downloader {
         let contains = (*self.job_queue).read().unwrap().contains(&dljob);
         if contains {
             let kind = dljob.kind();
-            debug!("download job already queued:  {}:{:?}", kind, &dljob);
+            trace!("download job already queued:  {}:{:?}", kind, &dljob);
         } else {
             (*self.job_queue).write().unwrap().push_back(dljob);
         }
@@ -468,12 +469,14 @@ impl TimerReceiver for Downloader {
 #[derive(Clone, Debug)]
 pub struct Config {
     pub num_downloader_threads: u8,
+    // pub cleanup_databases: bool,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
             num_downloader_threads: 1,
+            // cleanup_databases: false,
         }
     }
 }

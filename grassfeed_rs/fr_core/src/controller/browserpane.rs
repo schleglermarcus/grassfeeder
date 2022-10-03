@@ -13,13 +13,15 @@ use context::TimerEvent;
 use context::TimerReceiver;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
+use gui_layer::gui_values::PropDef;
 use resources::id::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 
+//  pub const CONF_BROWSER_CACHE_CLEANUP: &str = "BrowserCacheCleanup";
+
 pub trait IBrowserPane {
-    // fn switch_browsertab_content(&self, repo_id: i32, fc_state: FeedContentState);
     fn switch_browsertab_content(
         &self,
         repo_id: i32,
@@ -143,7 +145,6 @@ impl IBrowserPane for BrowserPane {
             .write()
             .unwrap()
             .set_label_text(LABEL_BROWSER_MSG_AUTHOR, author);
-
         (*self.gui_updater)
             .borrow()
             .update_label(LABEL_BROWSER_MSG_AUTHOR);
@@ -165,11 +166,11 @@ impl IBrowserPane for BrowserPane {
         (*self.configmanager_r)
             .borrow()
             .set_val(&PropDef::BrowserBackgroundLevel.to_string(), c.to_string());
-
         (*self.gui_val_store)
             .write()
             .unwrap()
             .set_gui_property(PropDef::BrowserBackgroundLevel, c.to_string());
+
         (*self.gui_updater).borrow().update_web_view(0);
     }
 
@@ -177,8 +178,6 @@ impl IBrowserPane for BrowserPane {
         self.last_selected_link_text.borrow().clone()
     }
 }
-
-use gui_layer::gui_values::PropDef;
 
 impl Buildable for BrowserPane {
     type Output = BrowserPane;
@@ -196,12 +195,12 @@ impl Buildable for BrowserPane {
 impl StartupWithAppContext for BrowserPane {
     fn startup(&mut self, ac: &AppContext) {
         self.feedcontents_w = Rc::downgrade(&(*ac).get_rc::<FeedContents>().unwrap());
+        self.create_browser_dir();
         let _browserpane_r = ac.get_rc::<BrowserPane>().unwrap();
         if false {
             let mut _t = (*self.timer_r).borrow_mut();
             // t.register(&TimerEvent::Timer1s, fc_r.clone());
         }
-        self.create_browser_dir();
     }
 }
 
@@ -212,6 +211,7 @@ impl TimerReceiver for BrowserPane {
 #[derive(Default, Clone, Debug)]
 pub struct Config {
     pub browser_bg: u8,
+    // pub cache_cleanup: bool,
 }
 
 //------------------------------------------------------

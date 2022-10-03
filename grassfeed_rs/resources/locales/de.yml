@@ -62,7 +62,7 @@ de:
   D_EDIT_SUBSCRIPTION_LAST_CREATION: Abonnement zusammengestellt
 
   D_SETTINGS_TITLE: Einstellungen
-  D_SETTINGS_TAB1: Quellen
+  D_SETTINGS_TAB1: Abonnements
   D_SETTINGS_UPDATE_ON_START: "Beim Start aktualisieren: "
   D_SETTINGS_UPDATE_UPDATE_AFTER: "Automatisch aktualisieren nach: "
   D_SETTINGS_UPDATERS_PARALLEL: "Gleichzeitige Web-Abfragen: "
@@ -79,6 +79,9 @@ de:
   D_SETTINGS_FOCUS_POLICY_LAST_SELECTED: "Letzte ausgewählte"
   D_SETTINGS_FOCUS_POLICY_NEWEST: "Neueste"
   D_SETTINGS_FOCUS_POLICY_BEFORE_UNREAD: "Vor letzter ungelesener"
+  D_SETTINGS_DATABASES_CLEAN_ONSTART: "Datenbanken beim Start aufräumen"
+  D_SETTINGS_BROWSER_CACHE_CLEAR: "Browser Zwischenspeicher löschen"
+
 
   D_IMPORT_OPML_SELECT_FILE: Opml Datei auswählen
   D_STORE_OPML_SELECT_FILE: Opml Datei bestimmen
