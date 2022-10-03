@@ -799,7 +799,16 @@ pub fn create_menubar(
         menubar.append(&m_item);
         let menu = Menu::new();
         m_item.set_submenu(Some(&menu));
-        {
+		{
+            let m_about = MenuItem::with_label(&t!("M_SHORT_HELP"));
+            m_about.set_widget_name("M_SHORT_HELP");
+            menu.add(&m_about);
+            let esw = EvSenderWrapper(g_ev_se.clone());
+            m_about.connect_activate(move |_m| {
+                esw.sendw(GuiEvents::MenuActivate(_m.widget_name().to_string()));
+            });
+        }
+		{
             let m_about = MenuItem::with_label(&t!("M_ABOUT"));
             m_about.set_widget_name("M_ABOUT");
             menu.add(&m_about);
@@ -808,6 +817,7 @@ pub fn create_menubar(
                 esw.sendw(GuiEvents::MenuActivate(_m.widget_name().to_string()));
             });
         }
+
         if mode_debug {
             let m_icons = MenuItem::with_label(&t!("M_ICONS"));
             m_icons.set_widget_name("M_ICONS");

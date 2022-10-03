@@ -1,9 +1,5 @@
 To Do List
 
- - Menu Item and  Help text into browser
- - Browser CleanUp Cache, on startup / finish
-	       webcontextext:  clear_cache(&self)
- - Databases consistency check  on startup configurable.
 - Copy Message address into clipboard
 - check: subscription  Reload shall refresh  message list
 - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/

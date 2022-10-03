@@ -878,8 +878,8 @@ impl SourceTreeController {
         }
         if self.config.feeds_fetch_interval_unit == 0 {
             self.config.feeds_fetch_interval_unit = DEFAULT_CONFIG_FETCH_FEED_UNIT as u32;
-            // Hours
-        }
+        } // Hours
+
         self.config.feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
             .get_val_bool(Self::CONF_FETCH_ON_START);

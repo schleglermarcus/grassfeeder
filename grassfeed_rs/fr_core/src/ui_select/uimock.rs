@@ -214,10 +214,6 @@ impl UIUpdaterAdapter for UpdAda {
     fn update_list_single(&self, _list_index: u8, _list_position: u32) {}
     fn update_list_some(&self, _list_index: u8, _list_position: &[u32]) {}
     fn update_text_view(&self, _nr: u8) {}
-
-    // fn update_web_view(&self, _nr: u8) -> WebViewUpdateResult {        WebViewUpdateResult::Ok    }
-    fn update_web_view(&self, _nr: u8) {}
-
     fn update_text_entry(&self, _nr: u8) {
         if let Some(te) = (*self.ada_val_sto_a).read().unwrap().get_text_entry(_nr) {
             (*self.r_event_sender)
@@ -244,7 +240,10 @@ impl UIUpdaterAdapter for UpdAda {
 
     fn update_window_title(&self) {}
     fn update_window_icon(&self) {}
+    fn update_web_view(&self, _nr: u8) {}
+    fn update_web_view_plain(&self, _nr: u8) {}
 }
+
 struct MockRunner {
     up_ad: Rc<RefCell<UpdAda>>,
     event_receiver: Rc<dyn ReceiverWrapper>,

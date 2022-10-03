@@ -12,6 +12,7 @@ de:
   M_HELP: Hilfe
   M_ABOUT: Über
   M_ICONS: Icons
+  M_SHORT_HELP: Kurzhilfe
 
   TB_ADD_FOLDER: Ordner hinzufügen
   TB_ADD_FEED: Quelle hinzufügen
@@ -82,6 +83,13 @@ de:
   D_SETTINGS_DATABASES_CLEAN_ONSTART: "Datenbanken beim Start aufräumen"
   D_SETTINGS_BROWSER_CACHE_CLEAR: "Browser Zwischenspeicher löschen"
 
-
   D_IMPORT_OPML_SELECT_FILE: Opml Datei auswählen
   D_STORE_OPML_SELECT_FILE: Opml Datei bestimmen
+
+  M_SHORTHELP_TEXT: "Grassfeeder RSS Anzeiger Tastenbelegung\n
+    Tab         Fokuswechsel vorwärts: Abonnements, Meldungen, Browser \n
+    Shift-Tab   Fokuswechsel rückwärts \n
+    a           Alle Meldungen für das gewählte Abonnement als gelesen setzen \n
+    s           Zur zeitlich vorigen ungelesenen Meldung springen \n
+    x           Zur zeitlich nächsten ungelesenen Meldung springen \n
+    "

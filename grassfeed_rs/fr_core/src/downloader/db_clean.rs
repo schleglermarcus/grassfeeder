@@ -107,7 +107,7 @@ impl Step<CleanerInner> for RemoveNonConnected {
         });
         if delete_list.len() > 3 {
             debug!(
-                "Cleanup:  #connected: {}   #to_delete: {}",
+                "Sanitize Subscriptions:  #connected: {}   #to_delete: {}",
                 connected_child_list.len(),
                 delete_list.len()
             );
@@ -222,6 +222,7 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
             .messgesrepo
             .get_src_not_contained(&parent_ids_active)
             .iter()
+            .filter(|se| !se.is_deleted)
             .map(|fse| fse.message_id as i32)
             .collect::<Vec<i32>>();
         if !noncon_ids.is_empty() {
@@ -270,9 +271,6 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                     msg_per_subscription.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
                     let (_stay, remove) =
                         msg_per_subscription.split_at(inner.max_messages_per_subscription as usize);
-                    // _stay.iter().for_each(|e| {                        debug!(                            "STAY  {}\t{}",                            e.message_id,                            db_time_to_display(e.entry_src_date)                        )                    });
-                    //  remove.iter().for_each(|e| {                        debug!(                            "REMOVE  {}\t{}",                            e.message_id,                            db_time_to_display(e.entry_src_date)                        )                    });
-
                     if !remove.is_empty() {
                         let id_list: Vec<i32> =
                             remove.iter().map(|e| e.message_id as i32).collect();
@@ -321,12 +319,13 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
             });
             for d in &delete_list {
                 trace!(
-                    "{} double: ID:{}\tdate:{} fetch:{}\t{}",
+                    "{} double: ID:{}\tdate:{} fetch:{}\t{}  post-id:{}",
                     subs_id,
                     d.message_id,
                     db_time_to_display(d.entry_src_date),
                     db_time_to_display(d.fetch_date),
                     decompress(&d.title),
+                    d.post_id
                 );
             }
             if !delete_list.is_empty() {
@@ -339,16 +338,42 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
             }
         }
 
-        StepResult::Continue(Box::new(Notify(inner)))
+        StepResult::Continue(Box::new(PurgeMessages(inner)))
     }
 }
 
-// later : clean out all deleted messages
+pub struct PurgeMessages(pub CleanerInner);
+impl Step<CleanerInner> for PurgeMessages {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let inner = self.0;
+        let to_delete: Vec<i32> = inner
+            .messgesrepo
+            .get_all_messages()
+            .iter()
+            .filter_map(|m| {
+                if m.is_deleted {
+                    Some(m.message_id as i32)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        let num_deleted = inner.messgesrepo.delete_by_index(&to_delete);
+        if to_delete.len() != num_deleted {
+            warn!("TO_DELETE: {}  DELETED:{}", to_delete.len(), num_deleted);
+        } else {
+            debug!("Sanitize Messages: Deleted {} messages", num_deleted);
+        }
+        StepResult::Continue(Box::new(Notify(inner)))
+    }
+}
 
 pub struct Notify(pub CleanerInner);
 impl Step<CleanerInner> for Notify {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
+        inner.subscriptionrepo.db_vacuum();
+        inner.messgesrepo.db_vacuum();
         if inner.need_update_subscriptions {
             let _r = inner.sourcetree_job_sender.send(SJob::FillSourcesTree);
             let _r = inner.sourcetree_job_sender.send(SJob::UpdateTreePaths);

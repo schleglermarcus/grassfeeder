@@ -316,7 +316,8 @@ impl GtkObjects for GtkObjectsImpl {
 
     fn set_text_view(&mut self, list_index: u8, tv: &gtk::TextView) {
         if self.text_views.len() < list_index as usize + 1 {
-            self.text_views.resize(list_index as usize + 1, TextView::new());
+            self.text_views
+                .resize(list_index as usize + 1, TextView::new());
         }
         self.text_views[list_index as usize] = tv.clone();
     }
@@ -499,13 +500,13 @@ impl GtkObjects for GtkObjectsImpl {
         cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
         browser_folder: &String,
         a_box_index: u8,
-		browser_clear_cache : bool,
+        browser_clear_cache: bool,
     ) {
         self.create_webcontext_fn = cb_fn;
         self.browser_config = CreateBrowserConfig {
             browser_dir: browser_folder.clone(),
             attach_box_index: a_box_index,
-			startup_clear_cache: browser_clear_cache,
+            startup_clear_cache: browser_clear_cache,
         };
     }
 
@@ -518,7 +519,7 @@ impl GtkObjects for GtkObjectsImpl {
 pub struct CreateBrowserConfig {
     pub attach_box_index: u8,
     pub browser_dir: String,
-	pub startup_clear_cache : bool,
+    pub startup_clear_cache: bool,
 }
 
 struct ReceiverWrapperImpl(Receiver<GuiEvents>);
@@ -619,6 +620,9 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
 
     fn update_web_view(&self, nr: u8) {
         self.send_to_int(&IntCommands::UpdateWebView(nr));
+    }
+    fn update_web_view_plain(&self, nr: u8) {
+        self.send_to_int(&IntCommands::UpdateWebViewPlain(nr));
     }
 
     fn update_label(&self, nr: u8) {

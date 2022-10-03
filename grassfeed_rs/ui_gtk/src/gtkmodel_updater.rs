@@ -218,10 +218,11 @@ impl GtkModelUpdaterInt {
         }
 
         let elapsed_fin = now.elapsed().as_millis();
-        if elapsed_fin > 50 {	// later:  reduce icon size before going into database
+        if elapsed_fin > 50 {
+            // later:  reduce icon size before going into database
             debug!(
                 "update_tree_model_single({} {:?}) TOO LONG {:?} times:{} {} ",
-                index, path,  &gti, elapsed_3, elapsed_fin
+                index, path, &gti, elapsed_3, elapsed_fin
             );
         }
     }
@@ -407,13 +408,13 @@ impl GtkModelUpdaterInt {
             if webview.is_loading() {
                 let isresponsive = webview.is_web_process_responsive();
                 if !isresponsive {
-					warn!("WebView is still loading, not responsive !   ");
-		            return false;
+                    warn!("WebView is still loading, not responsive !   ");
+                    return false;
                 }
             }
         } else {
             error!("update_web_view: NO VIEW! ");
-			return false;
+            return false;
         }
         if let Some(webview) = g_o.get_web_view() {
             let store = (self.m_v_store).read().unwrap();
@@ -421,6 +422,7 @@ impl GtkModelUpdaterInt {
             let bright: f64 = bright_int as f64 / 255.0;
             let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
             webview.set_background_color(&c_bg);
+
             let o_wv_t = store.get_web_view_text(webviewtext_index);
             if let Some(text) = o_wv_t {
                 if webview.is_loading() {
@@ -432,6 +434,21 @@ impl GtkModelUpdaterInt {
             }
         }
         true
+    }
+
+    pub fn update_web_view_plain(&self) {
+        if let Some(webview) = (*self.g_o_a).read().unwrap().get_web_view() {
+            let store = (self.m_v_store).read().unwrap();
+            let o_wv_t = store.get_web_view_text(0);
+            if let Some(text) = o_wv_t {
+                let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
+                let bright: f64 = bright_int as f64 / 255.0;
+                let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
+                webview.set_background_color(&c_bg);
+
+                webview.load_plain_text(&text);
+            }
+        }
     }
 
     pub fn update_label(&self, idx: u8) {

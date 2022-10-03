@@ -142,20 +142,16 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         false,
     );
 
-    if false {
+    if true {
         let src = [
             // (url_staseve.as_str(), "staseve11"),
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
-            ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
-            ("http://www.nachdenkseiten.de/?feed=atom", "nachdenk"),
-            ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             (
-                "https://www.linuxcompatible.org/news/atom.xml",
-                "linuxcompatible",
+                "https://afternarcissisticabuse.wordpress.com/feed/",
+                "afternarc",
             ),
-            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
             ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
             ("http://thehighersidechats.com/feed/", "higherside-300"),
             (
@@ -166,14 +162,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "http://chaosradio.ccc.de/chaosradio-complete.rss",
                 "chaosradio-267",
             ),
-            ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             (
                 "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
                 "youtube",
             ),
-            ("http://feeds.feedburner.com/TechmemeRideHome", "techmeme"),
-            ("https://www.gistpaper.com/feed", "gistpaper"),
-            ("https://www.opendesktop.org/content.rdf", "opendesktop"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -186,6 +178,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+			("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
+            ("https://www.gistpaper.com/feed", "gistpaper"),
+            ("https://www.opendesktop.org/content.rdf", "opendesktop"),
+            ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
+            ("http://www.nachdenkseiten.de/?feed=atom", "nachdenk"),
+            ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),
@@ -231,6 +229,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://terraherz.wpcomstaging.com/feed/", "terraherz"),
             ("https://www.reddit.com/r/aww.rss", "aww"),
             ("https://feeds.breakingnews.ie/bnworld", "breaknew"),
+            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
         ];
 
         let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
@@ -245,6 +244,15 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+		(
+			"http://feeds.feedburner.com/TechmemeRideHome",
+			"techmeme-big-icon",
+		),
+
+            (
+                "https://www.linuxcompatible.org/news/atom.xml",
+                "linuxcompatible",
+            ),
             (
                 "https://packages.gentoo.org/packages/added.atom",
                 "gentoo-added_no-pubdate-500",

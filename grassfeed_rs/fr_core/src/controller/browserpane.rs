@@ -32,6 +32,7 @@ pub trait IBrowserPane {
     fn get_config(&self) -> Config;
     fn set_conf_browser_bg(&mut self, c: u32);
     fn get_last_selected_link(&self) -> String;
+    fn display_short_help(&self);
 }
 
 pub struct BrowserPane {
@@ -84,6 +85,61 @@ impl BrowserPane {
                 .debug_dump("create_browser_dir");
         }
     }
+
+    fn set_browser_contents_html(&self, msg: String) {
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_web_view_text(0, msg);
+        (*self.gui_updater).borrow().update_web_view(0);
+    }
+
+    /// load plain text into the browser display
+    fn set_browser_contents_plain(&self, msg: String) {
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_web_view_text(0, msg);
+        (*self.gui_updater).borrow().update_web_view_plain(0);
+    }
+
+    fn set_browser_info_area(
+        &self,
+        link_title: String,
+        link_url: String,
+        msg_date: String,
+        msg_author: String,
+        msg_categories: String,
+    ) {
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_linkbutton_text(LINKBUTTON_BROWSER_TITLE, (link_title, link_url));
+        (*self.gui_updater)
+            .borrow()
+            .update_linkbutton(LINKBUTTON_BROWSER_TITLE);
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_label_text(LABEL_BROWSER_MSG_DATE, msg_date);
+        (*self.gui_updater)
+            .borrow()
+            .update_label(LABEL_BROWSER_MSG_DATE);
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_label_text(LABEL_BROWSER_MSG_AUTHOR, msg_author);
+        (*self.gui_updater)
+            .borrow()
+            .update_label(LABEL_BROWSER_MSG_AUTHOR);
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_label_text(LABEL_BROWSER_MSG_CATEGORIES, msg_categories);
+        (*self.gui_updater)
+            .borrow()
+            .update_label(LABEL_BROWSER_MSG_CATEGORIES);
+    }
 }
 
 impl IBrowserPane for BrowserPane {
@@ -108,53 +164,55 @@ impl IBrowserPane for BrowserPane {
         let mut content = String::default();
         let mut author = String::default();
         let mut categories = String::default();
-
-        // if let Some(triplet) = state.contents_author_categories_d {
         if let Some(triplet) = co_au_ca {
             (content, author, categories) = triplet;
         }
-        //        debug!("switch_browsertab_content   {} {}", author, categories);
-
         let mut display = title;
         if let Some(_pos) = display.find("http") {
             display = display.split("http").next().unwrap().to_string();
             display = display.trim().to_string();
         }
         self.last_selected_link_text.replace(fce.link.clone()); //;
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_web_view_text(0, content);
-        (*self.gui_updater).borrow().update_web_view(0);
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_linkbutton_text(LINKBUTTON_BROWSER_TITLE, (display, fce.link));
-        (*self.gui_updater)
-            .borrow()
-            .update_linkbutton(LINKBUTTON_BROWSER_TITLE);
         let srcdate = util::db_time_to_display(fce.entry_src_date);
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_label_text(LABEL_BROWSER_MSG_DATE, srcdate);
-        (*self.gui_updater)
-            .borrow()
-            .update_label(LABEL_BROWSER_MSG_DATE);
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_label_text(LABEL_BROWSER_MSG_AUTHOR, author);
-        (*self.gui_updater)
-            .borrow()
-            .update_label(LABEL_BROWSER_MSG_AUTHOR);
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_label_text(LABEL_BROWSER_MSG_CATEGORIES, categories);
-        (*self.gui_updater)
-            .borrow()
-            .update_label(LABEL_BROWSER_MSG_CATEGORIES);
+        /*
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_web_view_text(0, content);
+                (*self.gui_updater).borrow().update_web_view(0);
+        */
+        self.set_browser_contents_html(content);
+        /*
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_linkbutton_text(LINKBUTTON_BROWSER_TITLE, (display, fce.link));
+                (*self.gui_updater)
+                    .borrow()
+                    .update_linkbutton(LINKBUTTON_BROWSER_TITLE);
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_label_text(LABEL_BROWSER_MSG_DATE, srcdate);
+                (*self.gui_updater)
+                    .borrow()
+                    .update_label(LABEL_BROWSER_MSG_DATE);
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_label_text(LABEL_BROWSER_MSG_AUTHOR, author);
+                (*self.gui_updater)
+                    .borrow()
+                    .update_label(LABEL_BROWSER_MSG_AUTHOR);
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_label_text(LABEL_BROWSER_MSG_CATEGORIES, categories);
+                (*self.gui_updater)
+                    .borrow()
+                    .update_label(LABEL_BROWSER_MSG_CATEGORIES);
+        */
+        self.set_browser_info_area(display, fce.link, srcdate, author, categories)
     }
 
     fn get_config(&self) -> Config {
@@ -176,6 +234,17 @@ impl IBrowserPane for BrowserPane {
 
     fn get_last_selected_link(&self) -> String {
         self.last_selected_link_text.borrow().clone()
+    }
+
+    fn display_short_help(&self) {
+        self.set_browser_info_area(
+            String::default(),
+            String::default(),
+            String::default(),
+            String::default(),
+            String::default(),
+        );
+        self.set_browser_contents_plain(t!("M_SHORTHELP_TEXT"));
     }
 }
 

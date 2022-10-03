@@ -179,6 +179,7 @@ impl GtkRunnerInternal {
                             (gtk_objects_a).write().unwrap().set_web_view(None);
                         }
                     } // only one view
+                    IntCommands::UpdateWebViewPlain(_i) => upd_int.update_web_view_plain(),
                     _ => {
                         warn!("GTKS other cmd {:?}", command);
                     }

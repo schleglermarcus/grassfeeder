@@ -50,6 +50,7 @@ pub enum IntCommands {
     UpdateListModelSome(u8, Vec<u32>),
     UpdateTextView(u8),
     UpdateWebView(u8),
+    UpdateWebViewPlain(u8),
     UpdateLabel(u8),
     UpdateLabelMarkup(u8),
     UpdateDialog(u8),

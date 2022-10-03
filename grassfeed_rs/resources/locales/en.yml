@@ -12,6 +12,8 @@ en:
   M_HELP: Help
   M_ABOUT: About
   M_ICONS: Icons
+  M_SHORT_HELP: Short help text
+
 
   TB_ADD_FOLDER: Add Folder
   TB_ADD_FEED: Add Subscription
@@ -83,6 +85,13 @@ en:
   D_SETTINGS_DATABASES_CLEAN_ONSTART: "Clean up databases on start"
   D_SETTINGS_BROWSER_CACHE_CLEAR: "Clear browser cache"
 
-
   D_IMPORT_OPML_SELECT_FILE: "Select Opml file"
   D_STORE_OPML_SELECT_FILE: "Name Opml file"
+
+  M_SHORTHELP_TEXT: "Grassfeeder RSS Reader Keyboard assignments\n
+    Tab         switch focus forward:  Subscriptions, Messages, Browser \n
+    Shift-Tab   switch focus reverse  \n
+    a           Mark all messages of that subscription as read \n
+    s           Jump to previous unread message \n
+    x           Jump to next unread message \n
+    "

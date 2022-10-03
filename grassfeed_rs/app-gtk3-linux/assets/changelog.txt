@@ -6,10 +6,13 @@ grassfeeder (0.0.7) unstable; urgency=low
   * Error-DB of rubscription updating errors, display in edit dialog
   * Databases consistency check  on startup configurable.
   * Browser CleanUp Cache, on startup
+  * Menu Item and  Help text into browser
   
   
   - check: subscription  Reload shall refresh  message list
-  - Menu Item and  Help text into browser
+  
+  
+  
   - Copy Message address into clipboard
   - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
 

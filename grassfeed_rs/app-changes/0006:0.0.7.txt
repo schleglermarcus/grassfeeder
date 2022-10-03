@@ -5,9 +5,12 @@ Tue, 27 Sep 2022 00:23:00 +0000
 * Error-DB of rubscription updating errors, display in edit dialog
 * Databases consistency check  on startup configurable.
 * Browser CleanUp Cache, on startup
+* Menu Item and  Help text into browser
 
 
 - check: subscription  Reload shall refresh  message list
-- Menu Item and  Help text into browser
+
+
+
 - Copy Message address into clipboard
 - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/

@@ -44,7 +44,7 @@ pub trait SenderWrapper {
 pub enum GuiEvents {
     None,
     InternalStarted,
-	AppWasAlreadyRunning,
+    AppWasAlreadyRunning,
     WinDelete,
     WindowSizeChanged(i32, i32),
     MenuFileQuit,
@@ -209,9 +209,8 @@ pub trait UIUpdaterAdapter {
     fn update_window_title(&self);
     fn update_window_icon(&self);
 
-	fn update_web_view(&self, nr: u8);
-	// fn update_web_view(&self, nr: u8) -> WebViewUpdateResult;
-
+    fn update_web_view(&self, nr: u8);
+    fn update_web_view_plain(&self, nr: u8);
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]
@@ -222,9 +221,9 @@ pub enum UIUpdaterMarkWidgetType {
     WebView,
 }
 
-pub enum WebViewUpdateResult{
-	Ok,
-	NeedRestartView,
+pub enum WebViewUpdateResult {
+    Ok,
+    NeedRestartView,
 }
 
 //  Values Wrapper as intermediate for  glib::values
@@ -296,7 +295,6 @@ impl TreeRowExpand {
     }
 }
 
-
 #[allow(non_camel_case_types)]
 #[derive(Debug)]
 pub enum KeyCodes {
@@ -314,13 +312,13 @@ pub enum KeyCodes {
     F2,
     F3,
     F4,
-	Key_A,
-	Key_a,
-	Key_B,
-	Key_b,
-	Key_N,
-	Key_n,
-	Key_s,
-	Key_v,
-	Key_x,
+    Key_A,
+    Key_a,
+    Key_B,
+    Key_b,
+    Key_N,
+    Key_n,
+    Key_s,
+    Key_v,
+    Key_x,
 }

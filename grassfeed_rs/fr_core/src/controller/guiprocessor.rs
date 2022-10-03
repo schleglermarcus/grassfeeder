@@ -160,6 +160,9 @@ impl GuiProcessor {
                     "M_ABOUT" => {
                         self.start_about_dialog();
                     }
+                    "M_SHORT_HELP" => {
+                        (*self.browserpane_r).borrow().display_short_help();
+                    }
                     _ => warn!("Menu Unprocessed:{:?} ", s),
                 },
                 GuiEvents::ButtonClicked(ref b) => match b.as_str() {
