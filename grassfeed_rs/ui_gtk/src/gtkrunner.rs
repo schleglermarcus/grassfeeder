@@ -309,11 +309,16 @@ impl GtkObjects for GtkObjectsImpl {
         self.list_stores_max_columns[list_index] = mc;
     }
 
-    fn get_text_view(&self, index: usize) -> Option<&gtk::TextView> {
-        self.text_views.get(index)
+    fn get_text_view(&self, index: u8) -> Option<&gtk::TextView> {
+        self.text_views.get(index as usize)
     }
-    fn add_text_view(&mut self, tv: &gtk::TextView) {
-        self.text_views.push(tv.clone());
+    // fn add_text_view(&mut self, tv: &gtk::TextView) {        self.text_views.push(tv.clone());    }
+
+    fn set_text_view(&mut self, list_index: u8, tv: &gtk::TextView) {
+        if self.text_views.len() < list_index as usize + 1 {
+            self.text_views.resize(list_index as usize + 1, TextView::new());
+        }
+        self.text_views[list_index as usize] = tv.clone();
     }
 
     fn get_web_view(&self) -> Option<WebView> {

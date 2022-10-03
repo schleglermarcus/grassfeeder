@@ -235,13 +235,11 @@ impl Downloader {
         let job_kind = dljob.kind();
         let subs_id = dljob.subscription_id();
         let _r = gp_sender.send(Job::DownloaderJobStarted(proc_num, job_kind));
-        // let description = format!("{}", &dljob);
         let job_description = format!(
             "{}  {:?}",
             std::thread::current().name().unwrap().to_string(),
             &dljob
         );
-
         match dljob {
             DLJob::None => {}
             DLJob::Feed(i) => {
@@ -258,8 +256,6 @@ impl Downloader {
             }
         }
         let elapsedms = now.elapsed().as_millis();
-        // let t_name: String = std::thread::current().name().unwrap().to_string();
-        // if elapsedms > 5000 {            trace!("{} {:?} took {}ms  ", t_name, job_description, elapsedms);        }
         let _r = gp_sender.send(Job::DownloaderJobFinished(
             subs_id,
             proc_num,
@@ -483,8 +479,4 @@ impl Default for Config {
 }
 
 // ---
-
-#[cfg(test)]
-mod downloader_test {
-    //  use super::*;
-}
+// #[cfg(test)]mod downloader_test {     use super::*;  }

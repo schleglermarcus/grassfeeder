@@ -88,8 +88,8 @@ pub trait GtkObjects {
     fn get_list_store_max_columns(&self, list_index: usize) -> u8;
     fn set_list_store_max_columns(&mut self, list_index: usize, mc: u8);
 
-    fn get_text_view(&self, list_index: usize) -> Option<&gtk::TextView>;
-    fn add_text_view(&mut self, tv: &gtk::TextView);
+    fn get_text_view(&self, list_index: u8) -> Option<&gtk::TextView>;
+    fn set_text_view(&mut self, list_index: u8, tv: &gtk::TextView);
 
     fn get_web_view(&self) -> Option<WebView>;
     fn set_web_view(&mut self, wv: Option<WebView>);

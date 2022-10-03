@@ -183,7 +183,6 @@ impl GtkModelUpdaterInt {
     //  replaces a single line of the tree
     pub fn update_tree_model_single(&self, index: u8, path: Vec<u16>) {
         let now = Instant::now();
-
         let max_columns;
         let tree_store: TreeStore;
         {
@@ -219,10 +218,10 @@ impl GtkModelUpdaterInt {
         }
 
         let elapsed_fin = now.elapsed().as_millis();
-        if elapsed_fin > 200 {
+        if elapsed_fin > 100 {
             warn!(
-                "TOO LONG: 	update_tree_model_single({} {:?})  maxcol={}  {:?}  time: {}ms  {} ",
-                index, path, max_columns, &gti, elapsed_3, elapsed_fin
+                "update_tree_model_single({} {:?}) TOO LONG {:?} times:{} {} ",
+                index, path,  &gti, elapsed_3, elapsed_fin
             );
         }
     }
@@ -374,14 +373,13 @@ impl GtkModelUpdaterInt {
 
     pub fn update_text_view(&self, text_view_index: u8) {
         let g_o = (*self.g_o_a).read().unwrap();
-        if let Some(textview) = g_o.get_text_view(text_view_index as usize) {
+        if let Some(textview) = g_o.get_text_view(text_view_index) {
             let o_tv = (self.m_v_store)
                 .read()
                 .unwrap()
                 .get_text_view(text_view_index);
             if let Some(newtext) = o_tv {
                 if let Some(buffer) = textview.buffer() {
-                    // let nt: String = newtext;
                     buffer.set_text(newtext.as_str());
                 }
             }
@@ -390,14 +388,11 @@ impl GtkModelUpdaterInt {
         }
     }
 
-    // This contains a workaroundfor:  WebView hangs occasionally on some feed contents.
+    // This contains a workaround for:  WebView hangs occasionally on some feed contents.
     // return false if webView hangs
     pub fn update_web_view(&self) -> bool {
         let webviewtext_index = 0;
         let g_o = (*self.g_o_a).read().unwrap();
-
-        // let mut webview_hangs: bool = false;
-
         if let Some(webview) = g_o.get_web_view() {
             let store = (self.m_v_store).read().unwrap();
             if webview.is_loading() {
@@ -418,6 +413,7 @@ impl GtkModelUpdaterInt {
             }
         } else {
             error!("update_web_view: NO VIEW! ");
+			return false;
         }
         if let Some(webview) = g_o.get_web_view() {
             let store = (self.m_v_store).read().unwrap();

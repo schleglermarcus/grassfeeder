@@ -337,7 +337,6 @@ impl SourceTreeController {
                 }
                 SJob::ScanEmptyUnread => {
                     let unread_ids = self.statemap.borrow().scan_num_all_unread();
-                    // trace!("processing ScanEmptyUnread   unread_ids={:?}", unread_ids);
                     if !unread_ids.is_empty() {
                         self.addjob(SJob::ScanEmptyUnread);
                         for (unread_id, is_folder) in unread_ids {
@@ -934,7 +933,6 @@ impl SourceTreeController {
         let entries: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_subs_id as isize);
-        // let child_ids: Vec<isize> = entries            .iter()            .map(|entry| entry.subs_id)            .collect::<Vec<isize>>();
         entries.iter().enumerate().for_each(|(num, entry)| {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(localpath);
@@ -968,7 +966,7 @@ impl SourceTreeController {
         if before {
             return;
         }
-        info!("SUBS:   existed DB :  {} ", before);
+        // info!("SUBS:   existed DB :  {} ", before);
         {
             let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
             self.add_new_subscription_at_parent(
@@ -1207,14 +1205,12 @@ impl ISourceTreeController for SourceTreeController {
         let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
         fse.subs_id = self.get_next_available_subscription_id();
         fse.parent_subs_id = parent_id;
-
         if was_truncated {
             let msg = format!("Found non-ISO chars in Subscription Title: {}", &display);
             (*self.erro_repo_r)
                 .borrow()
                 .add_error(fse.subs_id, 0, newsource, msg);
         }
-
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_id)
@@ -1360,6 +1356,7 @@ impl ISourceTreeController for SourceTreeController {
         if let Some(ie) = self.iconrepo_r.borrow().get_by_index(fse.icon_id as isize) {
             fs_iconstr = ie.icon;
         }
+
         dd.push(AValue::ASTR(fse.display_name.clone())); // 0
         if fse.is_folder {
             dialog_id = DIALOG_FOLDER_EDIT;
@@ -1371,6 +1368,17 @@ impl ISourceTreeController for SourceTreeController {
             dd.push(AValue::ASTR(fse.website_url)); // 5
             dd.push(AValue::ASTR(db_time_to_display_nonnull(fse.updated_int))); // 6
             dd.push(AValue::ASTR(db_time_to_display_nonnull(fse.updated_ext))); // 7
+
+            let lines: Vec<String> = (*self.erro_repo_r)
+                .borrow()
+                .get_by_subscription(src_repo_id)
+                .iter()
+                .map(|ee| ee.to_line(fse.display_name.clone()))
+                .collect();
+
+            let joined = lines.join("\n");
+            // debug!("SUBS_EDIT:  {:?}", &joined);
+            dd.push(AValue::ASTR(joined)); // 8
         }
         (*self.gui_val_store)
             .write()
@@ -1610,9 +1618,7 @@ impl StartupWithAppContext for SourceTreeController {
             .borrow()
             .store_default_db_entries();
         self.startup_read_config();
-
         self.addjob(SJob::EmptyTreeCreateDefaultSubscriptions);
-
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::FillSourcesTree);
         if self.config.feeds_fetch_at_start {
@@ -1620,7 +1626,9 @@ impl StartupWithAppContext for SourceTreeController {
         }
         self.addjob(SJob::ScanEmptyUnread);
         self.addjob(SJob::GuiUpdateTreeAll);
+
         // self.addjob(SJob::SanitizeSources);	// later: do that with dialog,  with config setting
+
         self.addjob(SJob::UpdateTreePaths);
     }
 }
@@ -1698,4 +1706,12 @@ impl Default for NewSourceState {
     fn default() -> Self {
         NewSourceState::None
     }
+}
+
+#[cfg(test)]
+mod t {
+
+    // use super::*;
+    // use std::cell::RefCell;
+    // use std::rc::Rc;
 }

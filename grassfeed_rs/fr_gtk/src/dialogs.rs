@@ -6,6 +6,7 @@ use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::WidgetExt;
 use gtk::prelude::*;
 use gtk::AboutDialog;
+use gtk::Adjustment;
 use gtk::Align;
 use gtk::ComboBoxText;
 use gtk::Dialog;
@@ -16,13 +17,16 @@ use gtk::Grid;
 use gtk::Image;
 use gtk::Label;
 use gtk::Notebook;
+use gtk::ShadowType;
 use gtk::Orientation;
 use gtk::PositionType;
 use gtk::ResponseType;
 use gtk::Scale;
+use gtk::ScrolledWindow;
 use gtk::SpinButton;
 use gtk::Spinner;
 use gtk::Switch;
+use gtk::TextView;
 use gtk::Window;
 use gui_layer::abstract_ui::AValue;
 use gui_layer::abstract_ui::GuiEvents;
@@ -445,6 +449,20 @@ fn create_feedsource_edit_dialog(
     grid2.attach(&label5b, 1, line, 1, 1);
     // line += 1;
 
+    const NONE_ADJ: Option<&Adjustment> = None;
+    let label_nb3 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB3")));
+
+    let scrolledwindow1 = ScrolledWindow::new(NONE_ADJ, NONE_ADJ);
+    scrolledwindow1.set_widget_name("scrolledwindow_0");
+    scrolledwindow1.set_policy(gtk::PolicyType::Automatic, gtk::PolicyType::Automatic); // scrollbar-h, scrollbar-v
+    scrolledwindow1.set_vexpand(true);
+    scrolledwindow1.set_shadow_type(ShadowType::EtchedIn);
+
+    let textview = TextView::new();
+    textview.set_vexpand(true);
+    notebook.append_page(&scrolledwindow1, Some(&label_nb3));
+	scrolledwindow1.add(&textview);
+
     let ev_se = g_ev_se;
     let entry1c = entry1.clone();
     let entry2c = entry2.clone();
@@ -482,6 +500,7 @@ fn create_feedsource_edit_dialog(
     let label3b_c = label3b;
     let label4b_c = label4b;
     let label5b_c = label5b;
+    let textview_c = textview.clone();
     ddd.set_dialog_distribute(DIALOG_FS_EDIT, move |dialogdata| {
         let mut url = String::default();
         if let Some(s) = dialogdata.get(0).unwrap().str() {
@@ -499,14 +518,14 @@ fn create_feedsource_edit_dialog(
                 DIALOG_ICON_SIZE,
             );
         }
-        if let Some(s) = dialogdata.get(5).unwrap().str() {
-            label1b_c.set_text(&s); // main website
-        }
         if let Some(s) = dialogdata.get(3).unwrap().str() {
             label2b_c.set_text(&s); // num-all
         }
         if let Some(s) = dialogdata.get(4).unwrap().str() {
             label3b_c.set_text(&s); // num-unread
+        }
+        if let Some(s) = dialogdata.get(5).unwrap().str() {
+            label1b_c.set_text(&s); // main website
         }
         if let Some(s) = dialogdata.get(6).unwrap().str() {
             label4b_c.set_text(&s); // update-int
@@ -514,9 +533,15 @@ fn create_feedsource_edit_dialog(
         if let Some(s) = dialogdata.get(7).unwrap().str() {
             label5b_c.set_text(&s); // update-ext
         }
+        debug!("DD8={:?}", dialogdata.get(8));
+        if let Some(s) = dialogdata.get(8).unwrap().str() {
+            let buffer = textview_c.buffer().unwrap(); // error lines
+            buffer.set_text(&s);
+        }
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_FS_EDIT, &dialog);
+    ret.set_text_view(DIALOG_TEXTVIEW_ERR, &textview);
 }
 
 fn create_folder_edit_dialog(

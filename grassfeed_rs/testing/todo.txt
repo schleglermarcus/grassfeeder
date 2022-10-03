@@ -16,8 +16,10 @@ To Do List
 - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
 
 
+- Bug:  add-folder   leads to  expanding one that is closed
 
 - Delete Messages by delete key
+- re-scale icons before going into database.  Example   http://feeds.feedburner.com/TechmemeRideHome
 - check  https://www.linuxcompatible.org/  feed: icon + entries
 - Investigate why   subscriptions.db  is so large.
 - Sanitize: cross-check icon ids of tree if they are present in icon db
