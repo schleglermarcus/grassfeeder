@@ -180,6 +180,10 @@ impl GtkRunnerInternal {
                         }
                     } // only one view
                     IntCommands::UpdateWebViewPlain(_i) => upd_int.update_web_view_plain(),
+                    IntCommands::ClipBoardSetText(ref s) => {
+                        gtk::Clipboard::get(&gtk::gdk::SELECTION_CLIPBOARD).set_text(&s);
+                    }
+
                     _ => {
                         warn!("GTKS other cmd {:?}", command);
                     }

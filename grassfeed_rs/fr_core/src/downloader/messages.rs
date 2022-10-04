@@ -191,13 +191,14 @@ pub fn feed_text_to_entries(
     match feed_rs::parser::parse(text.as_bytes()) {
         Ok(feed) => {
             for e in feed.entries {
-                let mut fce = message_from_modelentry(&e);
+                let (mut fce, err_t) = message_from_modelentry(&e);
                 fce.subscription_id = source_repo_id;
                 fce.title = compress(&fce.title);
                 fce.content_text = compress(&fce.content_text);
                 fce.categories = compress(&fce.categories);
                 fce.author = compress(&fce.author);
                 fce_list.push(fce);
+                err_text.push_str(&err_t);
             }
             if let Some(utc_date) = feed.updated {
                 created_ts = timestamp_from_utc(utc_date);

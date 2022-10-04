@@ -462,28 +462,40 @@ impl SourceTreeController {
             Some(tp) => format!("{:?}", &tp),
             None => "".to_string(),
         };
-        let tooltip = format!(
-            "{} ST{} X{}  P{:?} I{} L{}",
-            fse.subs_id,
-            su_st.status,
-            match fse.expanded {
-                true => 1,
-                _ => 0,
-            },
-            tp,
-            fse.icon_id,
-            fse.last_selected_msg
-        );
         let mut m_status = su_st.status as u32;
         if fse.expanded {
-            m_status |= TREE0_COL_STATUS_EXPANDED; //StatusMask::FolderExpanded as u32;
+            m_status |= TREE0_COL_STATUS_EXPANDED;
         }
         let displayname = if fse.display_name.is_empty() {
             String::from("--")
         } else {
             fse.display_name.clone()
         };
-        tv.push(AValue::AIMG(fs_iconstr));
+        let mut tooltip_a = AValue::None;
+        if su_st.is_err_on_fetch() {
+            if let Some(last_e) = (*self.erro_repo_r).borrow().get_last_entry(fse.subs_id) {
+                // debug!("err-list {}  => {:?}", fse.subs_id, errorlist);
+                let mut e_part = last_e.text;
+                e_part.truncate(100);
+                tooltip_a = AValue::ASTR(e_part);
+            }
+        }
+        if self.config.mode_debug && tooltip_a == AValue::None {
+            tooltip_a = AValue::ASTR(format!(
+                "{} ST{} X{}  P{:?} I{} L{}",
+                fse.subs_id,
+                su_st.status,
+                match fse.expanded {
+                    true => 1,
+                    _ => 0,
+                },
+                tp,
+                fse.icon_id,
+                fse.last_selected_msg
+            ));
+        }
+
+        tv.push(AValue::AIMG(fs_iconstr)); // 0
         tv.push(AValue::ASTR(displayname)); // 1:
         tv.push(AValue::ASTR(rightcol_text));
         tv.push(AValue::AIMG(status_icon.to_string()));
@@ -495,12 +507,7 @@ impl SourceTreeController {
             fse.is_folder,
         ))); //  6: num_content_unread
         tv.push(AValue::AU32(m_status)); //	7 : status
-
-        if self.config.mode_debug {
-            tv.push(AValue::ASTR(tooltip)); //  : 8 tooltip
-        } else {
-            tv.push(AValue::None); //  : 8 tooltip
-        }
+        tv.push(tooltip_a); //  : 8 tooltip
         let show_spinner = su_st.is_fetch_in_progress();
         tv.push(AValue::ABOOL(show_spinner)); //  : 9	spinner visible
         tv.push(AValue::ABOOL(!show_spinner)); //  : 10	StatusIcon Visible

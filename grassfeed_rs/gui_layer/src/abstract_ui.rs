@@ -205,12 +205,12 @@ pub trait UIUpdaterAdapter {
     fn grab_focus(&self, typ: UIUpdaterMarkWidgetType, sw_idx: u8);
     //  list-idx,     db-id: -1 for no cursor,        select column for db-id
     fn list_set_cursor(&self, list_index: u8, db_id: isize, column: u8);
-
     fn update_window_title(&self);
     fn update_window_icon(&self);
-
     fn update_web_view(&self, nr: u8);
     fn update_web_view_plain(&self, nr: u8);
+
+	fn clipboard_set_text(&self, s: String);
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]

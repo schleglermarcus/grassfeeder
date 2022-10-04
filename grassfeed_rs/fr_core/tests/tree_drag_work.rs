@@ -44,7 +44,7 @@ fn parse_with_ampersand() {
     let rss_str = std::fs::read_to_string("../testing/tests/fr_htdocs/dieneuewelle.xml").unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let entry2 = feeds.entries.get(2).unwrap();
-    let msg2: MessageRow = contentlist::message_from_modelentry(&entry2);
+    let msg2: MessageRow = contentlist::message_from_modelentry(&entry2).0;
     assert!(msg2.title.starts_with("Borderlands-"));
 }
 
@@ -55,7 +55,7 @@ fn parse_naturalnews_aug() {
         std::fs::read_to_string("../testing/tests/fr_htdocs/naturalnews_aug.xml").unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let entry0 = feeds.entries.get(0).unwrap();
-    let msg0: MessageRow = contentlist::message_from_modelentry(&entry0);
+    let msg0: MessageRow = contentlist::message_from_modelentry(&entry0).0;
     println!("title={}=", msg0.title);
 }
 

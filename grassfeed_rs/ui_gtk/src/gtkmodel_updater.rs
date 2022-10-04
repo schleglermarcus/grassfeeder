@@ -445,7 +445,6 @@ impl GtkModelUpdaterInt {
                 let bright: f64 = bright_int as f64 / 255.0;
                 let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
                 webview.set_background_color(&c_bg);
-
                 webview.load_plain_text(&text);
             }
         }

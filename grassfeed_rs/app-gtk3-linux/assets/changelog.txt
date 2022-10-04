@@ -1,20 +1,17 @@
 grassfeeder (0.0.7) unstable; urgency=low
 
-  * Workaround for WebView hangs occasionally on some feeds.
-  * Bugfix: Delete Messages shall update status bar
-  * Create  AppImage
   * Error-DB of rubscription updating errors, display in edit dialog
+  * Create  AppImage
   * Databases consistency check  on startup configurable.
-  * Browser CleanUp Cache, on startup
+  * Browser CleanUp Cache on startup, configurable
   * Menu Item and  Help text into browser
+  * Workaround for WebView hangs occasionally on some feeds
+  * Workaround for feeds without message title
+  * Bugfix: Delete Messages shall update status bar
+  * Copy Message address into clipboard
   
   
   - check: subscription  Reload shall refresh  message list
-  
-  
-  
-  - Copy Message address into clipboard
-  - Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 27 Sep 2022 00:23:00 +0000
 

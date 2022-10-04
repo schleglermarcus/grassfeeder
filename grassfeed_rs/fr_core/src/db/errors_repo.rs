@@ -221,7 +221,7 @@ impl ErrorRepo {
 
     fn check_stored_are_present(&self) {
         let numstored = (*self.list_stored).read().unwrap().len();
-        debug!("check_stored_are_present : numstored={}", numstored);
+        // debug!("check_stored_are_present : numstored={}", numstored);
         if numstored == 0 {
             self.read_stored();
         }
@@ -242,6 +242,41 @@ impl ErrorRepo {
             })
             .cloned()
             .collect()
+    }
+
+    pub fn get_last_entry(&self, subs_id: isize) -> Option<ErrorEntry> {
+        let mut ret_list: Vec<ErrorEntry> = (*self.list_unstored)
+            .read()
+            .unwrap()
+            .map
+            .iter()
+            .filter_map(|(_id, se)| {
+                if se.subs_id == subs_id {
+                    Some(se)
+                } else {
+                    None
+                }
+            })
+            .cloned()
+            .collect();
+        if ret_list.is_empty() {
+            self.check_stored_are_present();
+            ret_list = (*self.list_stored)
+                .read()
+                .unwrap()
+                .iter()
+                .filter_map(|(_id, se)| {
+                    if se.subs_id == subs_id {
+                        Some(se)
+                    } else {
+                        None
+                    }
+                })
+                .cloned()
+                .collect()
+        }
+        ret_list.sort_by(|a, b| a.date.cmp(&b.date));
+        ret_list.get(0).cloned()
     }
 }
 

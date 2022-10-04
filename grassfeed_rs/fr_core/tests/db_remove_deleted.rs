@@ -152,8 +152,8 @@ fn t_db_cleanup_1() {
         .starts_with("unnamed"));
     assert!(subsrepo1.get_by_index(2).unwrap().display_name.len() < 10);
     assert!(!subsrepo1.get_by_index(2).unwrap().expanded);
-    msgrepo2        .get_all_messages()        .iter()        .for_each(|m| debug!("MSG {}", m));
-     // assert_eq!(msgrepo2.get_by_index(1).unwrap().is_deleted, true); //  belongs to folder,   delete it
+    // msgrepo2        .get_all_messages()        .iter()        .for_each(|m| debug!("MSG {}", m));
+    // assert_eq!(msgrepo2.get_by_index(1).unwrap().is_deleted, true); //  belongs to folder,   delete it
     assert_eq!(msgrepo2.get_by_index(2).unwrap().is_deleted, false); // belongs to subscription, keep it
 }
 

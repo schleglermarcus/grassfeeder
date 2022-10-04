@@ -68,6 +68,7 @@ use webkit2gtk::WebContextExt;
 use webkit2gtk::WebView;
 use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
+// use gtk::Clipboard;
 
 const TOOLBAR_ICON_SIZE: i32 = 24;
 const TOOLBAR_BORDER_WIDTH: u32 = 0;
@@ -799,7 +800,7 @@ pub fn create_menubar(
         menubar.append(&m_item);
         let menu = Menu::new();
         m_item.set_submenu(Some(&menu));
-		{
+        {
             let m_about = MenuItem::with_label(&t!("M_SHORT_HELP"));
             m_about.set_widget_name("M_SHORT_HELP");
             menu.add(&m_about);
@@ -808,7 +809,7 @@ pub fn create_menubar(
                 esw.sendw(GuiEvents::MenuActivate(_m.widget_name().to_string()));
             });
         }
-		{
+        {
             let m_about = MenuItem::with_label(&t!("M_ABOUT"));
             m_about.set_widget_name("M_ABOUT");
             menu.add(&m_about);
@@ -991,7 +992,11 @@ fn show_context_menu_message(
     if repoid_listpos.len() == 1 {
         let esc = EvSenderCache(
             g_ev_se,
-            GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.clone()),
+            GuiEvents::ListSelectedAction(
+                0,
+                "message-copy-link".to_string(),
+                repoid_listpos.clone(),
+            ),
         );
         mi_copy_link.connect_activate(move |_menuiten| {
             esc.send();
@@ -1005,7 +1010,7 @@ fn show_context_menu_message(
     }
     menu.append(&mi_mark_read);
     menu.append(&mi_mark_unread);
-    menu.append(&mi_delete); // later
+    menu.append(&mi_delete);
     menu.show_all();
     let c_ev_time = gtk::current_event_time();
     menu.popup_easy(ev_button, c_ev_time);

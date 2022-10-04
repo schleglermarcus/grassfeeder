@@ -667,4 +667,8 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     fn update_window_icon(&self) {
         self.send_to_int(&IntCommands::UpdateWindowIcon);
     }
+
+    fn clipboard_set_text(&self, s: String) {
+        self.send_to_int(&IntCommands::ClipBoardSetText(s));
+    }
 } //

@@ -90,7 +90,7 @@ fn rungui_local_clear() {
     let gfconf = GrassFeederConfig {
         path_config: "../target/db_rungui_local/".to_string(),
         path_cache: "../target/db_rungui_local/".to_string(),
-        debug_mode: true,
+        debug_mode: false,
         version: "rungui:rungui_local_clear".to_string(),
     };
     let appcontext = fr_core::config::init_system::start(gfconf);
@@ -142,7 +142,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         false,
     );
 
-    if true {
+    if false {
         let src = [
             // (url_staseve.as_str(), "staseve11"),
             (url_r_foto.as_str(), "fotograf"),
@@ -152,6 +152,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "https://afternarcissisticabuse.wordpress.com/feed/",
                 "afternarc",
             ),
+            ("http://lisahaven.news/feed/", "lisa_haven"), // why error ?
             ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
             ("http://thehighersidechats.com/feed/", "higherside-300"),
             (

@@ -2,7 +2,7 @@ To Do List
 
 - Copy Message address into clipboard
 - check: subscription  Reload shall refresh  message list
-- Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
+
 
 
 - Bug:  add-folder   leads to  expanding one that is closed
@@ -10,6 +10,9 @@ To Do List
 - Bug: Dialog Folder-edit shall show statistics information
 - Subscription Tree: hide zeroes when nothing to read
 - refactor: gtk - separate file for the message list
+
+- Change Layout: wide bottom line.
+
 - Message List: translate titles
 - Delete Messages by delete key
 - re-scale icons before going into database.  Example   http://feeds.feedburner.com/TechmemeRideHome

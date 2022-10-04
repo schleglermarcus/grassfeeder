@@ -66,6 +66,7 @@ pub enum IntCommands {
     GrabFocus(UIUpdaterMarkWidgetType, u8),
     UpdateWindowTitle,
     UpdateWindowIcon,
+    ClipBoardSetText(String),
 }
 
 pub trait GtkObjects {

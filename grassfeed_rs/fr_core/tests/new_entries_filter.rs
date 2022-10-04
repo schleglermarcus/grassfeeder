@@ -133,13 +133,11 @@ fn parse_wissensmanufaktur() {
     setup();
     let rss_str: String = std::fs::read_to_string("tests/data/wissensmanufaktur_rss.xml").unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
-
     let mut fce_list: Vec<MessageRow> = feeds
         .entries
         .iter()
-        .map(|fe| message_from_modelentry(&fe))
+        .map(|fe| message_from_modelentry(&fe).0)
         .collect();
-
     let msg18 = fce_list.get_mut(18).unwrap();
     assert_eq!(
         msg18.title,
@@ -156,7 +154,7 @@ fn parse_youtube() {
     let mut fce_list: Vec<MessageRow> = feeds
         .entries
         .iter()
-        .map(|fe| message_from_modelentry(&fe))
+        .map(|fe| message_from_modelentry(&fe).0)
         .collect();
     let msg0 = fce_list.get_mut(0).unwrap();
     // debug!("msg0={:?}", msg0.content_text);
