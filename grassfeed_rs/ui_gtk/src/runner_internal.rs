@@ -81,11 +81,7 @@ impl GtkRunnerInternal {
             let window: &gtk::Window = appwindow.upcast_ref::<gtk::Window>();
             let mut dd = DialogDataDistributor::default();
             (*obj_c).write().unwrap().set_window(window);
-
             (*builder_c).build_gtk(ev_se.clone(), obj_c2.clone(), &mut dd);
-
-            // (*builder_c).build_browser( obj_c2.clone());
-
             (*obj_c).write().unwrap().set_dddist(dd);
             window.show_all();
         });
@@ -173,7 +169,7 @@ impl GtkRunnerInternal {
                     IntCommands::UpdateWindowTitle => upd_int.update_window_title(),
                     IntCommands::UpdateWindowIcon => upd_int.update_window_icon(),
                     IntCommands::UpdateWebView(_i) => {
-                        if upd_int.update_web_view() {
+                        if !upd_int.update_web_view() {
                             (gtk_objects_a).write().unwrap().set_web_view(None);
                         }
                     } // only one view
