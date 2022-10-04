@@ -3,6 +3,7 @@ To Do List
 
 - Flatpak  https://lib.rs/crates/cargo-pkg
 - Change Layout: wide bottom line.
+- Investigate why   subscriptions.db  is so large.
 - Bug:  add-folder   leads to  expanding one that is closed
 - Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
 - Bug: Dialog Folder-edit shall show statistics information
@@ -17,7 +18,6 @@ To Do List
 
 
 - Graphics:  scale down icons before going into database.  Example   http://feeds.feedburner.com/TechmemeRideHome
-- Investigate why   subscriptions.db  is so large.
 - Message List: set scroll position to upper edge from Cursor
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders

@@ -365,7 +365,6 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
     wconte.set_spell_checking_enabled(false);
     wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
     if b_conf.startup_clear_cache {
-        debug!("WebContext.clear_cache()! ");
         wconte.clear_cache();
     }
     wconte
@@ -388,7 +387,6 @@ pub fn create_webview(w_context: &WebContext) -> WebView {
         .enable_xss_auditor(false)
         .build();
     webview1.set_settings(&webview_settings);
-    // webview1.connect_web_process_crashed(|wv: &WebView| {        warn!("WebView Crashed! going back ...");        true     });
     // webview1.connect_estimated_load_progress_notify(|_wv: &WebView| {         trace!(            "estimated_load_progress_notify: {}",            wv.estimated_load_progress()        );    });
     // webview1.connect_is_loading_notify(|_wv: &WebView| {         trace!("is_loading_notify: {}", wv.is_loading());    });
     webview1
