@@ -430,7 +430,7 @@ impl GuiProcessor {
                 }
                 Job::DownloaderJobFinished(subs_id, threadnr, _kind, elapsed_ms, description) => {
                     if elapsed_ms > 5000 && subs_id > 0 {
-                    //  trace!(                            "DL: {} {} took {} ms {}    ",                           threadnr,                            _kind,                            elapsed_ms,                            description                        );
+                        //  trace!(                            "DL: {} {} took {} ms {}    ",                           threadnr,                            _kind,                            elapsed_ms,                            description                        );
                         (*self.erro_repo_r).borrow().add_error(
                             subs_id,
                             elapsed_ms as isize,

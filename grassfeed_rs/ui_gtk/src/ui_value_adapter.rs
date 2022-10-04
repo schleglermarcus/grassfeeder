@@ -162,7 +162,6 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
             error!(" replace_tree_item : path is empty ");
             return;
         }
-
         if let Some((ref mut add_node, last_path_pos)) = self.get_tree_add_node_for_path(path) {
             let mut new_child = GuiTreeItem::new_values(treevalues);
             if add_node.children.len() < (last_path_pos + 1) as usize {
@@ -170,10 +169,6 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
                     .children
                     .resize((last_path_pos + 1) as usize, new_child.clone());
             }
-
-			// add_node.children[last_path_pos as usize]                .children                .into_iter()                .for_each(|c| new_child.children.push(c));
-
-
             new_child.children = (add_node).children[last_path_pos as usize].children.clone();
             (add_node).children[last_path_pos as usize] = new_child;
         } else {

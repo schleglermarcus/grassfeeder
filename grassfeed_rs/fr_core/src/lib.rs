@@ -13,7 +13,6 @@ extern crate proc_status;
 #[cfg(test)]
 extern crate rand;
 
-
 pub mod config;
 pub mod controller;
 pub mod db;

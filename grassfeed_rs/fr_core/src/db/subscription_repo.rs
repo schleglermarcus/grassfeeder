@@ -90,11 +90,10 @@ pub trait ISubscriptionRepo {
 
     fn get_connection(&self) -> Arc<Mutex<Connection>>;
 
-	fn db_vacuum(&self) -> usize ;
+    fn db_vacuum(&self) -> usize;
 
-	//  is false if no DB was present - on fresh start
-	fn db_existed_before(&self) -> bool;
-
+    //  is false if no DB was present - on fresh start
+    fn db_existed_before(&self) -> bool;
 }
 
 pub struct SubscriptionRepo {
@@ -410,7 +409,6 @@ impl ISubscriptionRepo for SubscriptionRepo {
         self.ctx.one_number(sql)
     }
 
-
     fn store_default_db_entries(&self) {
         let mut fse = SubscriptionEntry {
             subs_id: SRC_REPO_ID_DELETED,
@@ -437,17 +435,13 @@ impl ISubscriptionRepo for SubscriptionRepo {
         self.ctx.get_connection()
     }
 
-	fn db_vacuum(&self) -> usize {
+    fn db_vacuum(&self) -> usize {
         self.ctx.execute("VACUUM".to_string())
     }
 
-
-	fn db_existed_before(&self) -> bool
-	{
-		self.ctx.db_existed_before()
-	}
-
-
+    fn db_existed_before(&self) -> bool {
+        self.ctx.db_existed_before()
+    }
 } // ISubscriptionRepo
 
 //-------------------

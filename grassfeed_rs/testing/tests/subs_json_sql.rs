@@ -1,7 +1,6 @@
 use fr_core::db::sqlite_context::SqliteContext;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 
-
 /*
 
 use fr_core::db::errors_repo::ErrorEntry;

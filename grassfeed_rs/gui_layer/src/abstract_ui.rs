@@ -210,7 +210,7 @@ pub trait UIUpdaterAdapter {
     fn update_web_view(&self, nr: u8);
     fn update_web_view_plain(&self, nr: u8);
 
-	fn clipboard_set_text(&self, s: String);
+    fn clipboard_set_text(&self, s: String);
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]

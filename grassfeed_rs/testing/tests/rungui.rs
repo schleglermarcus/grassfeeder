@@ -179,7 +179,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
-			("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
+            ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
             ("https://www.opendesktop.org/content.rdf", "opendesktop"),
             ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
@@ -245,11 +245,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
-		(
-			"http://feeds.feedburner.com/TechmemeRideHome",
-			"techmeme-big-icon",
-		),
-
+            (
+                "http://feeds.feedburner.com/TechmemeRideHome",
+                "techmeme-big-icon",
+            ),
             (
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",

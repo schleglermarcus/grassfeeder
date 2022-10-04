@@ -18,8 +18,6 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::atomic::Ordering;
 
-
-
 // 1: Storing the pane position  into file on shutown
 // 2:  Detect circular dependency among context objects that prevent freeing them
 #[test]
@@ -56,7 +54,6 @@ fn shutdown_store_ini() {
     let inuse = fr_core::ui_select::gui_context::IN_USE.load(Ordering::Relaxed);
     assert_eq!(inuse, false);
 }
-
 
 #[test]
 fn add_folder_and_feed() {
