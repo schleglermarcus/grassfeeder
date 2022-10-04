@@ -68,16 +68,15 @@ fn db_cleanup_too_many_messages() {
 fn clean_phase1(subs_repo: &SubscriptionRepo) {
     let all_entries = subs_repo.get_all_entries();
     let mut connected_child_list: HashSet<isize> = HashSet::default();
-    let mut folder_todo: Vec<isize> = Vec::default();
-    folder_todo.push(0);
-    while folder_todo.len() > 0 {
-        let parent_subs_id = folder_todo.pop().unwrap();
-        // trace!("looking at parent {}", parent_subs_id);
+    let mut folder_work: Vec<isize> = Vec::default();
+    folder_work.push(0);
+    while folder_work.len() > 0 {
+        let parent_subs_id = folder_work.pop().unwrap();
         let childs = subs_repo.get_by_parent_repo_id(parent_subs_id);
         childs.iter().for_each(|se| {
             connected_child_list.insert(se.subs_id);
             if se.is_folder {
-                folder_todo.push(se.subs_id);
+                folder_work.push(se.subs_id);
             }
         });
     }
@@ -95,7 +94,6 @@ fn clean_phase1(subs_repo: &SubscriptionRepo) {
             }
         }
     });
-    // debug!(        "  #connected: {}   #to_delete: {}",        connected_child_list.len(),        delete_list.len()    );
     delete_list
         .iter()
         .for_each(|id| subs_repo.delete_by_index(*id));

@@ -81,15 +81,15 @@ impl Step<CleanerInner> for RemoveNonConnected {
         let mut inner = self.0;
         let all_subs = inner.subscriptionrepo.get_all_entries();
         let mut connected_child_list: HashSet<isize> = HashSet::default();
-        let mut folder_todo: Vec<isize> = Vec::default();
-        folder_todo.push(0);
-        while !folder_todo.is_empty() {
-            let parent_subs_id = folder_todo.pop().unwrap();
+        let mut folder_work: Vec<isize> = Vec::default();
+        folder_work.push(0);
+        while !folder_work.is_empty() {
+            let parent_subs_id = folder_work.pop().unwrap();
             let childs = inner.subscriptionrepo.get_by_parent_repo_id(parent_subs_id);
             childs.iter().for_each(|se| {
                 connected_child_list.insert(se.subs_id);
                 if se.is_folder {
-                    folder_todo.push(se.subs_id);
+                    folder_work.push(se.subs_id);
                 }
             });
         }

@@ -21,6 +21,7 @@ To Do List
 - Message List: set scroll position to upper edge from Cursor
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
+- import opml: see if we can get the web main url from  the outline
 - Updating the tree: speed up the gtk part
 - Startup, create gui:  delayed creation of dialogs
 - Browser Display :  wrap over   title
