@@ -5,6 +5,8 @@ use crate::DialogDataDistributor;
 use crate::GtkBuilderType;
 use crate::GtkObjects;
 use crate::IntCommands;
+use crate::WebViewType;
+use crate::WebContentType;
 use flume::Receiver;
 use flume::Sender;
 use gtk::prelude::BoxExt;
@@ -186,11 +188,10 @@ pub struct GtkObjectsImpl {
     pub paneds: Vec<Paned>,
     pub scrolledwindows: Vec<ScrolledWindow>,
     dialogdata_dist: Option<DialogDataDistributor>,
-
     pub web_context: RefCell<Option<WebContext>>, // allow only one browser in the application
     pub web_view: RefCell<Option<WebView>>,
-    create_webcontext_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
-    create_webview_fn: Option<Box<dyn Fn(&WebContext) -> WebView>>,
+    create_webcontext_fn: WebContentType,
+    create_webview_fn: WebViewType,
     browser_config: CreateBrowserConfig,
 }
 
@@ -218,7 +219,7 @@ impl GtkObjectsImpl {
             }
             let dest_box = o_dest_box.unwrap();
             if let Some(create_fn) = &self.create_webview_fn {
-                let w_view = (create_fn)(&self.web_context.borrow().as_ref().unwrap());
+                let w_view = (create_fn)(self.web_context.borrow().as_ref().unwrap());
                 dest_box.pack_start(&w_view, true, true, 0);
                 w_view.show();
                 self.web_view.borrow_mut().replace(w_view);
@@ -498,13 +499,13 @@ impl GtkObjects for GtkObjectsImpl {
     fn set_create_webcontext_fn(
         &mut self,
         cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
-        browser_folder: &String,
+        browser_folder: &str,
         a_box_index: u8,
         browser_clear_cache: bool,
     ) {
         self.create_webcontext_fn = cb_fn;
         self.browser_config = CreateBrowserConfig {
-            browser_dir: browser_folder.clone(),
+            browser_dir: browser_folder.to_string(),
             attach_box_index: a_box_index,
             startup_clear_cache: browser_clear_cache,
         };

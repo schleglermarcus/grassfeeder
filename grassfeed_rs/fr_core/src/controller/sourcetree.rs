@@ -191,6 +191,7 @@ impl SourceTreeController {
         )
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         timer_: Rc<RefCell<dyn ITimer>>,
         subscr_rr: Rc<RefCell<dyn ISubscriptionRepo>>,

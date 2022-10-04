@@ -236,11 +236,7 @@ impl Downloader {
         let job_kind = dljob.kind();
         let subs_id = dljob.subscription_id();
         let _r = gp_sender.send(Job::DownloaderJobStarted(proc_num, job_kind));
-        let job_description = format!(
-            "{}  {:?}",
-            std::thread::current().name().unwrap().to_string(),
-            &dljob
-        );
+        let job_description = format!("{}  {:?}", std::thread::current().name().unwrap(), &dljob);
         match dljob {
             DLJob::None => {}
             DLJob::Feed(i) => {

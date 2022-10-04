@@ -319,14 +319,12 @@ impl GtkObjectTree {
         label_cat.set_wrap(true);
         label_cat.set_line_wrap_mode(WrapMode::Word);
         box2_h.pack_end(&label_cat, false, false, 5);
-
         let browserdir = self
             .initvalues
             .get(&PropDef::BrowserDir)
             .cloned()
-            .unwrap_or(String::default());
+            .unwrap_or_default();
         let clear_cache: bool = self.get_bool(PropDef::BrowserClearCache);
-
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
             ret.set_label(LABEL_BROWSER_MSG_DATE, &label_date);
@@ -349,7 +347,7 @@ impl GtkObjectTree {
 
 pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
     let wconte: WebContext;
-    if b_conf.browser_dir.len() > 0 {
+    if !b_conf.browser_dir.is_empty() {
         let wk_dm = WebsiteDataManager::builder()
             .base_cache_directory(&b_conf.browser_dir)
             .base_data_directory(&b_conf.browser_dir)

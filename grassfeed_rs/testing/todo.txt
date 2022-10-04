@@ -1,31 +1,27 @@
 To Do List
 
-- Copy Message address into clipboard
-- check: subscription  Reload shall refresh  message list
 
-
-
+- Flatpak  https://lib.rs/crates/cargo-pkg
+- Change Layout: wide bottom line.
 - Bug:  add-folder   leads to  expanding one that is closed
 - Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
 - Bug: Dialog Folder-edit shall show statistics information
-- Subscription Tree: hide zeroes when nothing to read
-- refactor: gtk - separate file for the message list
-
-- Change Layout: wide bottom line.
-
-- Message List: translate titles
+- Bug messages:  set unread ->  is not processed in following set-reading
 - Delete Messages by delete key
-- re-scale icons before going into database.  Example   http://feeds.feedburner.com/TechmemeRideHome
+- Subscription Tree: hide zeroes when nothing to read
 - Create Backups for Subscriptions-DB
-- check  https://www.linuxcompatible.org/  feed: icon + entries
-- Investigate why   subscriptions.db  is so large.
 - Sanitize: cross-check icon ids of tree if they are present in icon db
+- refactor: gtk - separate file for the message list
+- Message List: translate titles
+- check  https://www.linuxcompatible.org/  feed: icon + entries
+
+
+- Graphics:  scale down icons before going into database.  Example   http://feeds.feedburner.com/TechmemeRideHome
+- Investigate why   subscriptions.db  is so large.
+- Message List: set scroll position to upper edge from Cursor
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
-- Sanitize: Message clean out those with deleted flag
-- Flatpak  https://lib.rs/crates/cargo-pkg
 - Updating the tree: speed up the gtk part
-
 - Startup, create gui:  delayed creation of dialogs
 - Browser Display :  wrap over   title
 - React on Minimize, do memory usage reduction
@@ -35,15 +31,13 @@ To Do List
 - Browser: Modify  Font size
 - Browser: add Zoom Control
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
-
 - Reduce Size of Binary:
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
-- DragAndDrop for Websites into Tree
 
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 - Searching inside messages
-- Message List: set scroll position to upper edge from Cursor
 - Keybard configuration in settings
+- DragAndDrop for Websites into Tree
 
 
 Later:
@@ -55,7 +49,6 @@ Later:
   https://github.com/gabdube/native-windows-gui/tree/master/showcase
   https://www.ebbflow.io/blog/vending-win
 	https://gtk-rs.org/gtk4-rs/git/book/installation_windows.html
-
 
 
 Perhaps:

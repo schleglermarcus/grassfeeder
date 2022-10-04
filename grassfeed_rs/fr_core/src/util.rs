@@ -69,14 +69,8 @@ pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Result
         ImageFormat::Png,
     );
     match rw {
-        Err(e) => {
-            return Err(format!("convert_webp_to_png:2 {:?}", e));
-            // debug!("convert_webp_to_png:2 {:?}", e);
-            // None
-        }
-        Ok(_written) => {
-            return Ok(cursor.get_ref().clone());
-        }
+        Err(e) => Err(format!("convert_webp_to_png:2 {:?}", e)),
+        Ok(_written) => Ok(cursor.get_ref().clone()),
     }
 }
 

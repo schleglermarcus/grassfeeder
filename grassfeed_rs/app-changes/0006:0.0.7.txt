@@ -1,13 +1,11 @@
-Tue, 27 Sep 2022 00:23:00 +0000
-* Error-DB of rubscription updating errors, display in edit dialog
+Wed, 04 Oct 2022 00:12:00 +0000
+* Error-DB of subscription updating errors, display in edit dialog
 * Create  AppImage
 * Databases consistency check  on startup configurable.
 * Browser CleanUp Cache on startup, configurable
 * Menu Item and  Help text into browser
+* Copy Message address into clipboard
+* Database sanitize: remove messages with deleted flag
 * Workaround for WebView hangs occasionally on some feeds
 * Workaround for feeds without message title
 * Bugfix: Delete Messages shall update status bar
-* Copy Message address into clipboard
-
-
-- check: subscription  Reload shall refresh  message list

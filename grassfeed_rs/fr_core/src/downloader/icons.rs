@@ -79,9 +79,8 @@ impl Step<IconInner> for FeedTextDownload {
                     inner.fs_repo_id,
                     result.status as isize,
                     inner.feed_url.clone(),
-                    result.error_description.clone(),
+                    result.error_description,
                 );
-                // trace!(                    "Feed download:  '{}' => {} {} {:?}  -> FallbackSimple ",                    &inner.feed_url,                    result.get_status(),                    result.get_kind(),                    result.error_description                );
                 return StepResult::Continue(Box::new(IconFallbackSimple(inner)));
             }
         }
@@ -98,7 +97,6 @@ impl Step<IconInner> for HomepageDownload {
             &inner.feed_url,
         ) {
             inner.feed_homepage = homepage;
-            // trace!("FeedTextDownload:2   HP={:?}  title={:?}",                inner.feed_homepage,                _feed_title            );
             return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
         }
         StepResult::Continue(Box::new(IconFallbackSimple(inner)))
@@ -112,7 +110,6 @@ impl Step<IconInner> for CompareHomepageToDB {
 
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.fs_repo_id) {
             if !inner.feed_homepage.is_empty() && inner.feed_homepage != subs_e.website_url {
-                // debug!(                    "CompareHomepageToDB     Update TO db: {}",                    &inner.feed_homepage                );
                 inner
                     .subscriptionrepo
                     .update_homepage(inner.fs_repo_id, &inner.feed_homepage);
@@ -139,12 +136,11 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                 };
             }
             _ => {
-                // debug!(                    "IconAnalyzeHomepage: {} {:?} {}",                    inner.feed_homepage, r.status, r.error_description                );
                 inner.erro_repo.add_error(
                     inner.fs_repo_id,
                     r.status as isize,
                     inner.feed_homepage.clone(),
-                    r.error_description.clone(),
+                    r.error_description,
                 );
             }
         }

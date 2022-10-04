@@ -31,8 +31,6 @@ pub trait GtkGuiBuilder: 'static {
         obj_a: GtkObjectsType,
         ddd: &mut DialogDataDistributor,
     );
-
-    // fn build_browser(&self, obj_a: GtkObjectsType);
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
@@ -68,6 +66,9 @@ pub enum IntCommands {
     UpdateWindowIcon,
     ClipBoardSetText(String),
 }
+
+pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;
+pub type WebViewType = Option<Box<dyn Fn(&WebContext) -> WebView>>;
 
 pub trait GtkObjects {
     fn get_window(&self) -> Option<Window>;
@@ -135,12 +136,12 @@ pub trait GtkObjects {
     fn set_create_webcontext_fn(
         &mut self,
         cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
-        browser_dir: &String,
+        browser_dir: &str,
         a_box_index: u8,
         browser_clear_cache: bool,
     );
 
-    fn set_create_webview_fn(&mut self, cb_fn: Option<Box<dyn Fn(&WebContext) -> WebView>>);
+    fn set_create_webview_fn(&mut self, cb_fn: WebViewType);
 }
 
 #[derive(Clone, Debug)]

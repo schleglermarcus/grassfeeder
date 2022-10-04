@@ -173,15 +173,13 @@ impl GtkRunnerInternal {
                     IntCommands::UpdateWindowTitle => upd_int.update_window_title(),
                     IntCommands::UpdateWindowIcon => upd_int.update_window_icon(),
                     IntCommands::UpdateWebView(_i) => {
-                        let update_ok = upd_int.update_web_view();
-                        if !update_ok {
-                            // warn!("INT:  need re-create browser. ");
+                        if upd_int.update_web_view() {
                             (gtk_objects_a).write().unwrap().set_web_view(None);
                         }
                     } // only one view
                     IntCommands::UpdateWebViewPlain(_i) => upd_int.update_web_view_plain(),
                     IntCommands::ClipBoardSetText(ref s) => {
-                        gtk::Clipboard::get(&gtk::gdk::SELECTION_CLIPBOARD).set_text(&s);
+                        gtk::Clipboard::get(&gtk::gdk::SELECTION_CLIPBOARD).set_text(s);
                     }
 
                     _ => {

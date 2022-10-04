@@ -586,7 +586,7 @@ impl GtkModelUpdaterInt {
             }
             UIUpdaterMarkWidgetType::WebView => {
                 if let Some(wv) = g_o.get_web_view() {
-                    return Some(wv.clone().upcast::<Widget>());
+                    return Some(wv.upcast::<Widget>());
                 }
             }
         }

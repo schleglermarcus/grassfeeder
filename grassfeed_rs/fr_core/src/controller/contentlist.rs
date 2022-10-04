@@ -610,7 +610,7 @@ impl IFeedContents for FeedContents {
                 }
             }
             "message-copy-link" => {
-                if let Some((subs_id, _lispos)) = repoid_listpos.get(0) {
+                if let Some((subs_id, _lispos)) = repoid_listpos.first() {
                     if let Some(e_msg) = (*self.messagesrepo_r)
                         .borrow()
                         .get_by_index(*subs_id as isize)

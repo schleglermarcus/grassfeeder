@@ -111,15 +111,13 @@ impl Step<FetchInner> for EvalStringAndFilter {
             inner.download_error_happened = true;
             inner
                 .erro_repo
-                .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_text.clone());
-            //  debug!("ID{}  :  {:?}", inner.fs_repo_id, err_text);
+                .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_text);
         }
         let o_err_msg = strange_datetime_recover(&mut new_list, &inner.download_text);
         if let Some(err_msg) = o_err_msg {
             inner
                 .erro_repo
-                .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_msg.clone());
-            // warn!("{} {}", err_msg, &inner.url);
+                .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_msg);
         }
         inner.timestamp_created = ts_created;
         let existing_entries = inner.messgesrepo.get_by_src_id(inner.fs_repo_id, false);

@@ -137,10 +137,8 @@ impl ErrorRepo {
     pub fn check_or_store(&mut self) {
         let unstored_len = (*self.list_unstored).read().unwrap().map.len();
         let stored_len = (*self.list_stored).read().unwrap().len();
-        if unstored_len > 0 {
-            if self.store_to_file() {
-                (*self.list_unstored).write().unwrap().map.clear();
-            }
+        if unstored_len > 0 && self.store_to_file() {
+            (*self.list_unstored).write().unwrap().map.clear();
         }
         if stored_len > 0 {
             (*self.list_stored).write().unwrap().clear();
@@ -380,15 +378,11 @@ fn append_to_file(
     converter: &dyn Fn(&ErrorEntry) -> Option<String>,
 ) -> std::io::Result<usize> {
     let mut bytes_written: usize = 0;
-    let file: File;
-    if std::path::Path::new(&filename).exists() {
-        file = OpenOptions::new()
-            .write(true)
-            .append(true)
-            .open(filename.clone())?;
+    let file: File = if std::path::Path::new(&filename).exists() {
+        OpenOptions::new().write(true).append(true).open(filename)?
     } else {
-        file = File::create(&filename)?;
-    }
+        File::create(&filename)?
+    };
     let mut buf = BufWriter::new(file);
     input
         .iter()
