@@ -2,6 +2,7 @@ use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::IDownloader;
 use fr_core::controller::sourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
+use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
@@ -29,6 +30,7 @@ pub fn prepare_source_tree_controller(
     let downloaderdummy = DownloaderDummy::default();
     let r_dl: Rc<RefCell<dyn IDownloader>> = Rc::new(RefCell::new(downloaderdummy));
     let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
+    let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
     let fs = SourceTreeController::new(
         r_timer,
         r_subscriptions_repo.clone(),
@@ -37,6 +39,7 @@ pub fn prepare_source_tree_controller(
         uimock.upd_adp(),
         uimock.val_sto(),
         r_dl,
+        r_error_repo,
     );
     fs.update_cached_paths();
     (fs, r_subscriptions_repo)
@@ -162,9 +165,6 @@ impl IDownloader for DownloaderDummy {
     fn set_conf_num_threads(&mut self, _: u8) {
         unimplemented!()
     }
-
-    // fn is_dl_busy(&self) -> [u8; DOWNLOADER_MAX_NUM_THREADS] {        [0; DOWNLOADER_MAX_NUM_THREADS]    }
-
     fn cleanup_db(&self) {
         unimplemented!()
     }

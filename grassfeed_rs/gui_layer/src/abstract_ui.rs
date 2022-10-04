@@ -44,7 +44,7 @@ pub trait SenderWrapper {
 pub enum GuiEvents {
     None,
     InternalStarted,
-	AppWasAlreadyRunning,
+    AppWasAlreadyRunning,
     WinDelete,
     WindowSizeChanged(i32, i32),
     MenuFileQuit,
@@ -194,7 +194,6 @@ pub trait UIUpdaterAdapter {
     fn update_list_some(&self, list_index: u8, list_position: &[u32]);
 
     fn update_text_view(&self, nr: u8);
-    fn update_web_view(&self, nr: u8);
     fn update_text_entry(&self, nr: u8);
     fn update_label(&self, nr: u8);
     fn update_label_markup(&self, nr: u8);
@@ -206,9 +205,12 @@ pub trait UIUpdaterAdapter {
     fn grab_focus(&self, typ: UIUpdaterMarkWidgetType, sw_idx: u8);
     //  list-idx,     db-id: -1 for no cursor,        select column for db-id
     fn list_set_cursor(&self, list_index: u8, db_id: isize, column: u8);
-
     fn update_window_title(&self);
     fn update_window_icon(&self);
+    fn update_web_view(&self, nr: u8);
+    fn update_web_view_plain(&self, nr: u8);
+
+    fn clipboard_set_text(&self, s: String);
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]
@@ -217,6 +219,11 @@ pub enum UIUpdaterMarkWidgetType {
     Box,
     TreeView,
     WebView,
+}
+
+pub enum WebViewUpdateResult {
+    Ok,
+    NeedRestartView,
 }
 
 //  Values Wrapper as intermediate for  glib::values
@@ -288,7 +295,6 @@ impl TreeRowExpand {
     }
 }
 
-
 #[allow(non_camel_case_types)]
 #[derive(Debug)]
 pub enum KeyCodes {
@@ -306,13 +312,13 @@ pub enum KeyCodes {
     F2,
     F3,
     F4,
-	Key_A,
-	Key_a,
-	Key_B,
-	Key_b,
-	Key_N,
-	Key_n,
-	Key_s,
-	Key_v,
-	Key_x,
+    Key_A,
+    Key_a,
+    Key_B,
+    Key_b,
+    Key_N,
+    Key_n,
+    Key_s,
+    Key_v,
+    Key_x,
 }

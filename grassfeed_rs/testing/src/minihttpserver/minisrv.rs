@@ -334,27 +334,22 @@ pub fn analyse_request(
     index_file_name: &str,
     req_path: &str,
 ) -> AttachFileInfo {
-     let mut path_expanded = req_path.to_string();
+    let mut path_expanded = req_path.to_string();
     // let mut path_expanded =     format!("{}", req_path);
-    match check_request_dir(htdocs_dir, req_path)
-    {
+    match check_request_dir(htdocs_dir, req_path) {
         (false, false, _) => {
             return AttachFileInfo::FileNotFound(
                 Some(format!("Path does not exist: {}{}", &htdocs_dir, &req_path)),
                 StatusCode::NOT_FOUND,
             );
         }
-        (true, false, _) => {        }  // File
+        (true, false, _) => {} // File
         (false, true, path_exp) => {
             path_expanded = path_exp;
-            if check_create_dir_index(
-                htdocs_dir,
-                &path_expanded,
-                index_file_name,
-            ) {
-                let det :String = create_direntry_text(htdocs_dir, &path_expanded);
+            if check_create_dir_index(htdocs_dir, &path_expanded, index_file_name) {
+                let det: String = create_direntry_text(htdocs_dir, &path_expanded);
                 let folderlist_html = wrap_text_in_html(&det);
-                return  AttachFileInfo::ReplacementText(folderlist_html, StatusCode::OK) ;
+                return AttachFileInfo::ReplacementText(folderlist_html, StatusCode::OK);
             } else {
                 path_expanded = format!("{}{}", &path_expanded, index_file_name);
             }
@@ -523,8 +518,7 @@ fn format_response(response: &Response) -> String {
     //     None => "",
     // };
 
-let status_reason = 	response.status.canonical_reason().unwrap_or("");
-
+    let status_reason = response.status.canonical_reason().unwrap_or("");
 
     result = format!(
         "{} {} {}\r\n",

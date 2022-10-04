@@ -2,6 +2,7 @@ use crate::controller::contentlist::match_new_entries_to_existing;
 use crate::controller::contentlist::message_from_modelentry;
 use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::message::compress;
 use crate::db::message::MessageRow;
@@ -19,6 +20,39 @@ use chrono::Local;
 use feed_rs::parser::ParseFeedError;
 use flume::Sender;
 use regex::Regex;
+
+pub struct FetchInner {
+    pub fs_repo_id: isize,
+    pub url: String,
+    pub cjob_sender: Sender<CJob>,
+    pub subscriptionrepo: SubscriptionRepo,
+    pub iconrepo: IconRepo,
+    pub web_fetcher: WebFetcherType,
+    pub download_text: String,
+    pub download_error_happened: bool,
+    pub download_error_text: String,
+    pub sourcetree_job_sender: Sender<SJob>,
+    pub timestamp_created: i64,
+    pub messgesrepo: MessagesRepo,
+    pub erro_repo: ErrorRepo,
+}
+
+impl std::fmt::Debug for FetchInner {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("")
+            .field("repo_id", &self.fs_repo_id)
+            .field("url", &self.url)
+            .field("T", &self.download_text)
+            .field("E", &self.download_error_happened)
+            .finish()
+    }
+}
+
+impl PartialEq for FetchInner {
+    fn eq(&self, other: &Self) -> bool {
+        self.fs_repo_id == other.fs_repo_id
+    }
+}
 
 #[derive(Debug)]
 pub struct FetchStart(pub FetchInner);
@@ -51,7 +85,12 @@ impl Step<FetchInner> for DownloadStart {
             }
             _ => {
                 inner.download_error_happened = true;
-                debug!("Http Request {} failed: {}  ", &inner.url, r.status);
+                inner.erro_repo.add_error(
+                    inner.fs_repo_id,
+                    r.status as isize,
+                    inner.url.to_string(),
+                    r.error_description,
+                );
                 StepResult::Continue(Box::new(NotifyDlStop(inner)))
             }
         }
@@ -69,20 +108,21 @@ impl Step<FetchInner> for EvalStringAndFilter {
                 inner.url.clone(),
             );
         if !err_text.is_empty() {
-            debug!("{:?}", err_text);
             inner.download_error_happened = true;
+            inner
+                .erro_repo
+                .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_text);
         }
         let o_err_msg = strange_datetime_recover(&mut new_list, &inner.download_text);
         if let Some(err_msg) = o_err_msg {
-            warn!("{} {}", err_msg, &inner.url); // later put this into  error database
+            inner
+                .erro_repo
+                .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_msg);
         }
         inner.timestamp_created = ts_created;
         let existing_entries = inner.messgesrepo.get_by_src_id(inner.fs_repo_id, false);
         let filtered_list =
             match_new_entries_to_existing(&new_list, &existing_entries, inner.cjob_sender.clone());
-
-        // filtered_list.iter().for_each(|f| {            trace!(                "F:{} P:{} title={:#?}",                f.message_id,                f.post_id,                 decompress(&f.title)            )        });
-
         match inner.messgesrepo.insert_tx(&filtered_list) {
             Ok(_num) => {
                 inner.download_text.clear();
@@ -101,7 +141,6 @@ impl Step<FetchInner> for SetSourceUpdatedExt {
     fn step(self: Box<Self>) -> StepResult<FetchInner> {
         let inner = self.0;
         let now = timestamp_now();
-        // trace!(            "DL: updating timestamps DB:{}   int:{} ext:{}",            inner.fs_repo_id, now, inner.timestamp_created        );
         inner.subscriptionrepo.update_timestamps(
             inner.fs_repo_id,
             now,
@@ -126,7 +165,6 @@ impl Step<FetchInner> for NotifyDlStop {
             inner.fs_repo_id,
             inner.download_error_happened,
         ));
-
         StepResult::Continue(Box::new(Final(self.0)))
     }
 }
@@ -135,38 +173,6 @@ struct Final(FetchInner);
 impl Step<FetchInner> for Final {
     fn step(self: Box<Self>) -> StepResult<FetchInner> {
         StepResult::Stop(self.0)
-    }
-}
-
-pub struct FetchInner {
-    pub fs_repo_id: isize,
-    pub url: String,
-    pub cjob_sender: Sender<CJob>,
-    pub subscriptionrepo: SubscriptionRepo,
-    pub iconrepo: IconRepo,
-    pub web_fetcher: WebFetcherType,
-    pub download_text: String,
-    pub download_error_happened: bool,
-    pub download_error_text: String,
-    pub sourcetree_job_sender: Sender<SJob>,
-    pub timestamp_created: i64,
-    pub messgesrepo: MessagesRepo,
-}
-
-impl std::fmt::Debug for FetchInner {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("")
-            .field("repo_id", &self.fs_repo_id)
-            .field("url", &self.url)
-            .field("T", &self.download_text)
-            .field("E", &self.download_error_happened)
-            .finish()
-    }
-}
-
-impl PartialEq for FetchInner {
-    fn eq(&self, other: &Self) -> bool {
-        self.fs_repo_id == other.fs_repo_id
     }
 }
 
@@ -183,13 +189,14 @@ pub fn feed_text_to_entries(
     match feed_rs::parser::parse(text.as_bytes()) {
         Ok(feed) => {
             for e in feed.entries {
-                let mut fce = message_from_modelentry(&e);
+                let (mut fce, err_t) = message_from_modelentry(&e);
                 fce.subscription_id = source_repo_id;
                 fce.title = compress(&fce.title);
                 fce.content_text = compress(&fce.content_text);
                 fce.categories = compress(&fce.categories);
                 fce.author = compress(&fce.author);
                 fce_list.push(fce);
+                err_text.push_str(&err_t);
             }
             if let Some(utc_date) = feed.updated {
                 created_ts = timestamp_from_utc(utc_date);
@@ -210,9 +217,6 @@ pub fn feed_text_to_entries(
             err_text = format!("Parsing: {}  length={}   {}", &url, text.len(), detail);
         }
     };
-
-    // debug!("feed_text_to_entries:   {}", fce_list.len());
-
     (fce_list, created_ts, err_text)
 }
 
@@ -224,7 +228,6 @@ pub fn strange_datetime_recover(
     if newmessages.is_empty() {
         return None;
     }
-
     let invalidpubdatecount = newmessages
         .iter()
         .filter(|m| m.entry_invalid_pubdate)
@@ -284,26 +287,6 @@ mod t_ {
         let o_msg = strange_datetime_recover(&mut new_list, &mtext);
         assert!(o_msg.is_none());
         assert_eq!(new_list[0].entry_src_date, 1655935140)
-    }
-
-    //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::dl_entries_breakingnews    --lib -- --exact --nocapture "
-    #[ignore]
-    #[test]
-    fn dl_entries_breakingnews() {
-        let filenames = [
-            "tests/data/gui_proc_v2.rss",
-            "tests/data/breakingnewsworld-2.xml",
-        ];
-        for filename in filenames {
-            println!("FILE={}", filename);
-            let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
-                feed_text_to_entries(
-                    std::fs::read_to_string(filename).unwrap(),
-                    5,
-                    "some-url".to_string(),
-                );
-            assert!(new_list.get(0).unwrap().entry_src_date > 0);
-        }
     }
 
     //RUST_BACKTRACE=1 cargo watch -s "cargo test   downloader::messages::t_::feed_text_to_entries_naturalnews  --lib -- --exact --nocapture   "

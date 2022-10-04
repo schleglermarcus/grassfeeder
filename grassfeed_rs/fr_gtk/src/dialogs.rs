@@ -6,6 +6,7 @@ use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::WidgetExt;
 use gtk::prelude::*;
 use gtk::AboutDialog;
+use gtk::Adjustment;
 use gtk::Align;
 use gtk::ComboBoxText;
 use gtk::Dialog;
@@ -20,9 +21,12 @@ use gtk::Orientation;
 use gtk::PositionType;
 use gtk::ResponseType;
 use gtk::Scale;
+use gtk::ScrolledWindow;
+use gtk::ShadowType;
 use gtk::SpinButton;
 use gtk::Spinner;
 use gtk::Switch;
+use gtk::TextView;
 use gtk::Window;
 use gui_layer::abstract_ui::AValue;
 use gui_layer::abstract_ui::GuiEvents;
@@ -50,9 +54,9 @@ pub fn create_dialogs(
 ) {
     create_icons_dialog(gtk_obj_a.clone());
     create_new_folder_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
-    create_new_feedsource_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
-    create_feedsource_delete_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
-    create_feedsource_edit_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
+    create_new_subscription_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
+    create_subscription_delete_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
+    create_subscription_edit_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_folder_edit_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_settings_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_opml_import_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
@@ -140,7 +144,6 @@ pub fn create_new_folder_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObject
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-        trace!("new_folder: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });
@@ -148,7 +151,7 @@ pub fn create_new_folder_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObject
     ret.set_dialog(DIALOG_NEW_FOLDER, &dialog);
 }
 
-pub fn create_new_feedsource_dialog(
+pub fn create_new_subscription_dialog(
     g_ev_se: Sender<GuiEvents>,
     gtk_obj_a: GtkObjectsType,
     ddd: &mut DialogDataDistributor,
@@ -228,7 +231,7 @@ pub fn create_new_feedsource_dialog(
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {}
             _ => {
-                warn!("newsource:response unexpected {}", rt);
+                warn!("new-subscription:response unexpected {}", rt);
             }
         }
         dialog.hide();
@@ -254,7 +257,7 @@ pub fn create_new_feedsource_dialog(
     ddd.set_dialog_distribute(DIALOG_NEW_FEED_SOURCE, move |dialogdata| {
         if dialogdata.len() < 2 {
             error!(
-                "create_new_feedsource_dialog: dialog data too short:{}",
+                "create_new_subscription_dialog: dialog data too short:{}",
                 dialogdata.len()
             );
             return;
@@ -279,7 +282,7 @@ pub fn create_new_feedsource_dialog(
     ret.set_text_entry(TEXTENTRY_NEWSOURCE_E2, &entry_name);
 }
 
-pub fn create_feedsource_delete_dialog(
+pub fn create_subscription_delete_dialog(
     g_ev_se: Sender<GuiEvents>,
     gtk_obj_a: GtkObjectsType,
     ddd: &mut DialogDataDistributor,
@@ -323,7 +326,6 @@ pub fn create_feedsource_delete_dialog(
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-        trace!("fsource-delete: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });
@@ -352,7 +354,7 @@ pub fn create_feedsource_delete_dialog(
     ret.set_dialog(DIALOG_FS_DELETE, &dialog);
 }
 
-fn create_feedsource_edit_dialog(
+fn create_subscription_edit_dialog(
     g_ev_se: Sender<GuiEvents>,
     gtk_obj_a: GtkObjectsType,
     ddd: &mut DialogDataDistributor,
@@ -447,6 +449,20 @@ fn create_feedsource_edit_dialog(
     grid2.attach(&label5b, 1, line, 1, 1);
     // line += 1;
 
+    const NONE_ADJ: Option<&Adjustment> = None;
+    let label_nb3 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB3")));
+
+    let scrolledwindow1 = ScrolledWindow::new(NONE_ADJ, NONE_ADJ);
+    scrolledwindow1.set_widget_name("scrolledwindow_0");
+    scrolledwindow1.set_policy(gtk::PolicyType::Automatic, gtk::PolicyType::Automatic); // scrollbar-h, scrollbar-v
+    scrolledwindow1.set_vexpand(true);
+    scrolledwindow1.set_shadow_type(ShadowType::EtchedIn);
+
+    let textview = TextView::new();
+    textview.set_vexpand(true);
+    notebook.append_page(&scrolledwindow1, Some(&label_nb3));
+    scrolledwindow1.add(&textview);
+
     let ev_se = g_ev_se;
     let entry1c = entry1.clone();
     let entry2c = entry2.clone();
@@ -472,7 +488,6 @@ fn create_feedsource_edit_dialog(
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-        debug!("feedsource_edit: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });
@@ -485,6 +500,7 @@ fn create_feedsource_edit_dialog(
     let label3b_c = label3b;
     let label4b_c = label4b;
     let label5b_c = label5b;
+    let textview_c = textview.clone();
     ddd.set_dialog_distribute(DIALOG_FS_EDIT, move |dialogdata| {
         let mut url = String::default();
         if let Some(s) = dialogdata.get(0).unwrap().str() {
@@ -502,14 +518,14 @@ fn create_feedsource_edit_dialog(
                 DIALOG_ICON_SIZE,
             );
         }
-        if let Some(s) = dialogdata.get(5).unwrap().str() {
-            label1b_c.set_text(&s); // main website
-        }
         if let Some(s) = dialogdata.get(3).unwrap().str() {
             label2b_c.set_text(&s); // num-all
         }
         if let Some(s) = dialogdata.get(4).unwrap().str() {
             label3b_c.set_text(&s); // num-unread
+        }
+        if let Some(s) = dialogdata.get(5).unwrap().str() {
+            label1b_c.set_text(&s); // main website
         }
         if let Some(s) = dialogdata.get(6).unwrap().str() {
             label4b_c.set_text(&s); // update-int
@@ -517,9 +533,15 @@ fn create_feedsource_edit_dialog(
         if let Some(s) = dialogdata.get(7).unwrap().str() {
             label5b_c.set_text(&s); // update-ext
         }
+        debug!("DD8={:?}", dialogdata.get(8));
+        if let Some(s) = dialogdata.get(8).unwrap().str() {
+            let buffer = textview_c.buffer().unwrap(); // error lines
+            buffer.set_text(&s);
+        }
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_FS_EDIT, &dialog);
+    ret.set_text_view(DIALOG_TEXTVIEW_ERR, &textview);
 }
 
 fn create_folder_edit_dialog(
@@ -547,7 +569,7 @@ fn create_folder_edit_dialog(
         .build();
     dialog.content_area().add(&notebook);
     let grid1 = Grid::new();
-    grid1.set_vexpand(true);
+    grid1.set_vexpand(false);
     grid1.set_hexpand(true);
     grid1.set_column_spacing(2);
     let label_nb1 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB1")));
@@ -665,16 +687,19 @@ fn create_settings_dialog(
         .width_request(50)
         .build();
     dialog.content_area().add(&notebook);
-    let sw_update_all = Switch::new();
+    let sw_subs_update_onstart = Switch::new();
     let spinb_source_update = SpinButton::with_range(1.0, 60.0, 1.0);
     let cbt_timescale = ComboBoxText::with_entry();
     let spinb_numthread = SpinButton::with_range(1.0, DOWNLOADER_MAX_NUM_THREADS as f64, 1.0);
     let cbt_focuspolicy = ComboBoxText::with_entry();
+    let sw_subs_db_cleanup = Switch::new();
     let sw_display_feedcount = Switch::new();
     let spinb_msg_keep_count = SpinButton::with_range(20.0, 10000.0, 20.0);
     let sw_fontsize_manual_enable = Switch::new();
     let spinb_fontsize_manual = SpinButton::with_range(FONTSIZE_MIN, FONTSIZE_MAX, 1.0);
     let scale_bright = Scale::with_range(Orientation::Horizontal, 0.0, 255.0, 1.0);
+    let sw_browser_cache_clear = Switch::new();
+
     {
         let grid1 = Grid::new();
         grid1.set_vexpand(true);
@@ -687,9 +712,8 @@ fn create_settings_dialog(
         let mut line = 0;
         let label1 = Label::new(Some(&t!("D_SETTINGS_UPDATE_ON_START")));
         grid1.attach(&label1, 0, line, 1, 1);
-        // sw_update_all.connect_state_set(|_sw, state| {            gtk::Inhibit(false)        });
-        grid1.attach(&sw_update_all, 1, line, 1, 1);
-        sw_update_all.set_halign(Align::Center);
+        grid1.attach(&sw_subs_update_onstart, 1, line, 1, 1);
+        sw_subs_update_onstart.set_halign(Align::Center);
         line += 1;
 
         let label2 = Label::new(Some(&t!("D_SETTINGS_UPDATE_UPDATE_AFTER")));
@@ -718,13 +742,16 @@ fn create_settings_dialog(
         cbt_focuspolicy.append_text(&get_focus_policy_name(1));
         cbt_focuspolicy.append_text(&get_focus_policy_name(2));
         cbt_focuspolicy.append_text(&get_focus_policy_name(3));
-        /* LATER
-                cbt_focuspolicy.append_text(FOCUS_POLICY_NAMES[4]);
-        */
+        //  LATER                cbt_focuspolicy.append_text(FOCUS_POLICY_NAMES[4]);
 
         cbt_focuspolicy.set_id_column(0);
         grid1.attach(&cbt_focuspolicy, 1, line, 1, 1);
-        //         line += 1;
+        line += 1;
+
+        let label3 = Label::new(Some(&t!("D_SETTINGS_DATABASES_CLEAN_ONSTART")));
+        grid1.attach(&label3, 0, line, 1, 1);
+        grid1.attach(&sw_subs_db_cleanup, 1, line, 1, 1);
+        // line += 1;
     }
     let label_nb2 = Label::new(Some(&t!("D_SETTINGS_TAB2")));
     {
@@ -766,9 +793,14 @@ fn create_settings_dialog(
         let label2_4 = Label::new(Some(&t!("D_SETTINGS_BROWSER_BACKGROUND_BRIGHTNESS")));
         grid2.attach(&label2_4, 0, line, 1, 1);
         grid2.attach(&scale_bright, 1, line, 1, 1);
+        line += 1;
+
+        let label2_5 = Label::new(Some(&t!("D_SETTINGS_BROWSER_CACHE_CLEAR")));
+        grid2.attach(&label2_5, 0, line, 1, 1);
+        grid2.attach(&sw_browser_cache_clear, 1, line, 1, 1);
     }
     let ev_se = g_ev_se;
-    let sw_update_all_c = sw_update_all.clone();
+    let sw_subs_update_onstart_c = sw_subs_update_onstart.clone();
     let spinb_source_update_c = spinb_source_update.clone();
     let cbt_timescale_c: ComboBoxText = cbt_timescale.clone();
     let spinb_numthread_c = spinb_numthread.clone();
@@ -778,11 +810,13 @@ fn create_settings_dialog(
     let sw_fontsize_manual_enable_c = sw_fontsize_manual_enable.clone();
     let spinb_fontsize_manual_c = spinb_fontsize_manual.clone();
     let scale_bright_c = scale_bright.clone();
+    let sw_subs_db_cleanup_c = sw_subs_db_cleanup.clone();
+    let sw_browser_cache_clear_c = sw_browser_cache_clear.clone();
     dialog.connect_response(move |dialog, rt| {
         match rt {
             ResponseType::Ok => {
                 let mut av = Vec::<AValue>::default();
-                av.push(AValue::ABOOL(sw_update_all_c.state())); // 0
+                av.push(AValue::ABOOL(sw_subs_update_onstart_c.state())); // 0
                 av.push(AValue::AI32(spinb_source_update_c.value() as i32)); // 1
                 if let Some(fetch_interval_n) = cbt_timescale_c.active() {
                     av.push(AValue::AI32((fetch_interval_n + 1) as i32)); // 2 UpdateFeeds Unit:  1:minutes  2:hours  3:days
@@ -800,6 +834,8 @@ fn create_settings_dialog(
                 av.push(AValue::ABOOL(sw_fontsize_manual_enable_c.state())); // 7 : ManualFontSizeEnable
                 av.push(AValue::AI32(spinb_fontsize_manual_c.value() as i32)); // 8 : ManualFontSizeEnable
                 av.push(AValue::AU32(scale_bright_c.value() as u32)); // 9 : Browser BG
+                av.push(AValue::ABOOL(sw_browser_cache_clear_c.state())); // 10 : browser cache cleanup
+                av.push(AValue::ABOOL(sw_subs_db_cleanup_c.state())); // 11 : DB cleanup
                 let _r = ev_se.send(GuiEvents::DialogData("settings".to_string(), av));
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {
@@ -812,13 +848,12 @@ fn create_settings_dialog(
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
-        trace!("settings: delete_event ");
         dia.hide();
         gtk::Inhibit(true)
     });
 
     ddd.set_dialog_distribute(DIALOG_SETTINGS, move |dialogdata| {
-        sw_update_all.set_state(dialogdata.get(0).unwrap().boo()); // 0 : UpdateFeedsOnStart
+        sw_subs_update_onstart.set_state(dialogdata.get(0).unwrap().boo()); // 0 : UpdateFeedsOnStart
         let mut interval_cardinal = dd_get_uint(dialogdata, 1, 1); // 1 UpdateFeeds Cardinal
         interval_cardinal = std::cmp::max(1, interval_cardinal);
         let spinbuttonvalue: f64 = interval_cardinal as f64;
@@ -839,6 +874,8 @@ fn create_settings_dialog(
         spinb_fontsize_manual.set_value(fontsize_manual as f64);
         let browser_bg = dd_get_uint(dialogdata, 9, 0); // 9 : Browser_bg
         scale_bright.set_value(browser_bg as f64);
+        sw_browser_cache_clear.set_state(dialogdata.get(10).unwrap().boo()); // 10 : browser cache cleanup
+        sw_subs_db_cleanup.set_state(dialogdata.get(11).unwrap().boo()); // 11 : DB cleanup
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_SETTINGS, &dialog);

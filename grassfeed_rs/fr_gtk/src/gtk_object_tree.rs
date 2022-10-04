@@ -59,6 +59,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::RwLock;
 use ui_gtk::dialogdatadistributor::DialogDataDistributor;
+use ui_gtk::gtkrunner::CreateBrowserConfig;
 use ui_gtk::GtkGuiBuilder;
 use ui_gtk::GtkObjectsType;
 use webkit2gtk::TLSErrorsPolicy;
@@ -67,6 +68,7 @@ use webkit2gtk::WebContextExt;
 use webkit2gtk::WebView;
 use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
+// use gtk::Clipboard;
 
 const TOOLBAR_ICON_SIZE: i32 = 24;
 const TOOLBAR_BORDER_WIDTH: u32 = 0;
@@ -290,10 +292,10 @@ impl GtkObjectTree {
     // fn set_spell_checking_enabled(&self, enabled: bool)
     fn create_content_tabs_2(&self, gtk_obj_a: GtkObjectsType) -> Container {
         let box1_v = gtk::Box::new(Orientation::Vertical, 0);
+        // box1_v.set_widget_name("browser_box");
         let linkbutton1 = gtk::LinkButton::new("--");
         linkbutton1.set_label("--");
         linkbutton1.set_halign(Align::Start);
-        // linkbutton1.set_(true);
         box1_v.pack_start(&linkbutton1, false, false, 0);
 
         let box3_h = gtk::Box::new(Orientation::Horizontal, 0);
@@ -317,44 +319,79 @@ impl GtkObjectTree {
         label_cat.set_wrap(true);
         label_cat.set_line_wrap_mode(WrapMode::Word);
         box2_h.pack_end(&label_cat, false, false, 5);
-
-        let wconte: WebContext;
-        if let Some(browserdir) = self.initvalues.get(&PropDef::BrowserDir) {
-            let wk_dm = WebsiteDataManager::builder()
-                .base_cache_directory(browserdir)
-                .base_data_directory(browserdir)
-                .disk_cache_directory(browserdir)
-                .hsts_cache_directory(browserdir)
-                .indexeddb_directory(browserdir)
-                .local_storage_directory(browserdir)
-                .build();
-            wconte = WebContext::with_website_data_manager(&wk_dm);
-            wconte.set_favicon_database_directory(Some(browserdir));
-        } else {
-            error!("build_gtk BrowserDir missing!");
-            wconte = WebContext::default().unwrap();
-        }
-        wconte.set_spell_checking_enabled(false);
-        wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
-        let webview1: WebView = WebView::with_context(&wconte);
-        webview1.set_widget_name("webview_0");
-        webview1.set_border_width(4);
-        webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
-        // webview1.load_plain_text(" ");
-        box1_v.pack_start(&webview1, true, true, 0);
+        let browserdir = self
+            .initvalues
+            .get(&PropDef::BrowserDir)
+            .cloned()
+            .unwrap_or_default();
+        let clear_cache: bool = self.get_bool(PropDef::BrowserClearCache);
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
-            ret.add_web_context(&wconte);
-            ret.add_web_view(&webview1);
             ret.set_label(LABEL_BROWSER_MSG_DATE, &label_date);
             ret.set_label(LABEL_BROWSER_MSG_AUTHOR, &label_author);
             ret.set_label(LABEL_BROWSER_MSG_CATEGORIES, &label_cat);
             ret.set_linkbutton(LINKBUTTON_BROWSER_TITLE, &linkbutton1);
             ret.set_box(BOX_CONTAINER_4_BROWSER, &box1_v);
             ret.set_box(BOX_CONTAINER_3_MARK, &box3_h);
+            ret.set_create_webcontext_fn(
+                Some(Box::new(create_webcontext)),
+                &browserdir,
+                BOX_CONTAINER_4_BROWSER,
+                clear_cache,
+            );
+            ret.set_create_webview_fn(Some(Box::new(create_webview)));
         }
         box1_v.upcast()
     }
+}
+
+pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
+    let wconte: WebContext;
+    if !b_conf.browser_dir.is_empty() {
+        let wk_dm = WebsiteDataManager::builder()
+            .base_cache_directory(&b_conf.browser_dir)
+            .base_data_directory(&b_conf.browser_dir)
+            .disk_cache_directory(&b_conf.browser_dir)
+            .hsts_cache_directory(&b_conf.browser_dir)
+            .indexeddb_directory(&b_conf.browser_dir)
+            .local_storage_directory(&b_conf.browser_dir)
+            .build();
+        wconte = WebContext::with_website_data_manager(&wk_dm);
+        wconte.set_favicon_database_directory(Some(&b_conf.browser_dir));
+    } else {
+        error!("build_gtk BrowserDir missing!");
+        wconte = WebContext::default().unwrap();
+    }
+    wconte.set_spell_checking_enabled(false);
+    wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
+    if b_conf.startup_clear_cache {
+        debug!("WebContext.clear_cache()! ");
+        wconte.clear_cache();
+    }
+    wconte
+}
+
+pub fn create_webview(w_context: &WebContext) -> WebView {
+    let webview1: WebView = WebView::with_context(w_context);
+    webview1.set_widget_name("webview_0");
+    webview1.set_border_width(4);
+    webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
+    let webview_settings = webkit2gtk::SettingsBuilder::new()
+        //.default_font_size(10)		// later
+        .enable_java(false)
+        .enable_media_capabilities(false)
+        .enable_javascript_markup(false)
+        .enable_html5_local_storage(false)
+        .enable_developer_extras(false)
+        .enable_smooth_scrolling(true)
+        .enable_webgl(false)
+        .enable_xss_auditor(false)
+        .build();
+    webview1.set_settings(&webview_settings);
+    // webview1.connect_web_process_crashed(|wv: &WebView| {        warn!("WebView Crashed! going back ...");        true     });
+    // webview1.connect_estimated_load_progress_notify(|_wv: &WebView| {         trace!(            "estimated_load_progress_notify: {}",            wv.estimated_load_progress()        );    });
+    // webview1.connect_is_loading_notify(|_wv: &WebView| {         trace!("is_loading_notify: {}", wv.is_loading());    });
+    webview1
 }
 
 fn set_sort_indicator(tvc: &TreeViewColumn, _sort_column: i32, sort_ascending: bool) {
@@ -762,6 +799,15 @@ pub fn create_menubar(
         let menu = Menu::new();
         m_item.set_submenu(Some(&menu));
         {
+            let m_about = MenuItem::with_label(&t!("M_SHORT_HELP"));
+            m_about.set_widget_name("M_SHORT_HELP");
+            menu.add(&m_about);
+            let esw = EvSenderWrapper(g_ev_se.clone());
+            m_about.connect_activate(move |_m| {
+                esw.sendw(GuiEvents::MenuActivate(_m.widget_name().to_string()));
+            });
+        }
+        {
             let m_about = MenuItem::with_label(&t!("M_ABOUT"));
             m_about.set_widget_name("M_ABOUT");
             menu.add(&m_about);
@@ -770,6 +816,7 @@ pub fn create_menubar(
                 esw.sendw(GuiEvents::MenuActivate(_m.widget_name().to_string()));
             });
         }
+
         if mode_debug {
             let m_icons = MenuItem::with_label(&t!("M_ICONS"));
             m_icons.set_widget_name("M_ICONS");
@@ -943,7 +990,11 @@ fn show_context_menu_message(
     if repoid_listpos.len() == 1 {
         let esc = EvSenderCache(
             g_ev_se,
-            GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.clone()),
+            GuiEvents::ListSelectedAction(
+                0,
+                "message-copy-link".to_string(),
+                repoid_listpos.clone(),
+            ),
         );
         mi_copy_link.connect_activate(move |_menuiten| {
             esc.send();
@@ -957,7 +1008,7 @@ fn show_context_menu_message(
     }
     menu.append(&mi_mark_read);
     menu.append(&mi_mark_unread);
-    menu.append(&mi_delete); // later
+    menu.append(&mi_delete);
     menu.show_all();
     let c_ev_time = gtk::current_event_time();
     menu.popup_easy(ev_button, c_ev_time);

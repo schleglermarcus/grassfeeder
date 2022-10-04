@@ -90,11 +90,12 @@ fn rungui_local_clear() {
     let gfconf = GrassFeederConfig {
         path_config: "../target/db_rungui_local/".to_string(),
         path_cache: "../target/db_rungui_local/".to_string(),
-        debug_mode: true,
+        debug_mode: false,
         version: "rungui:rungui_local_clear".to_string(),
     };
     let appcontext = fr_core::config::init_system::start(gfconf);
     test_setup_values(&appcontext, mini_server_c.get_address());
+
     fr_core::config::init_system::run(&appcontext);
     mini_server_c.stop();
 }
@@ -105,12 +106,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         let _r = (*messagesrepo_r.borrow()).get_ctx().delete_table();
         (*messagesrepo_r.borrow()).get_ctx().create_table();
     }
-    let fsrwr: Rc<RefCell<dyn ISubscriptionRepo>> = acr.get_rc::<SubscriptionRepo>().unwrap();
-    (*fsrwr.borrow()).scrub_all_subscriptions();
-    if false {
-        let msg_r: Rc<RefCell<dyn IMessagesRepo>> = acr.get_rc::<MessagesRepo>().unwrap();
-        let _r = (*msg_r).borrow().get_ctx().delete_table();
-        (*msg_r).borrow().get_ctx().create_table();
+    if true {
+        let fsrwr: Rc<RefCell<dyn ISubscriptionRepo>> = acr.get_rc::<SubscriptionRepo>().unwrap();
+        (*fsrwr.borrow()).scrub_all_subscriptions();
     }
 
     let feedsources_r: Rc<RefCell<dyn ISourceTreeController>> =
@@ -124,38 +122,39 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_r_foto = format!("{}/reddit-Fotografie.rss", addr);
     let url_insi = format!("{}/newsinsideout_com.rss", addr);
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
-    let _url_relay = format!("{}/relay_rd.rss", addr); // very big
+    let url_relay = format!("{}/relay_rd.rss", addr); // very big
 
     let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
-    feedsources.add_new_subscription_at_parent(url_staseve, "staseve11".to_string(), folder2, false);
+    feedsources.add_new_subscription_at_parent(url_relay, "relay_rd".to_string(), folder2, false);
+    feedsources.add_new_subscription_at_parent(
+        url_staseve,
+        "staseve11".to_string(),
+        folder2,
+        false,
+    );
     feedsources.add_new_subscription_at_parent(
         url_gui_proc.clone(),
         "gui_proc_2 & aaa".to_string(),
         folder3,
         false,
     );
+
     if false {
         let src = [
             // (url_staseve.as_str(), "staseve11"),
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
-            ("http://www.nachdenkseiten.de/?feed=atom", "nachdenk"),
-            ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             (
-                "https://www.linuxcompatible.org/news/atom.xml",
-                "linuxcompatible",
+                "https://afternarcissisticabuse.wordpress.com/feed/",
+                "afternarc",
             ),
-            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
+            ("http://lisahaven.news/feed/", "lisa_haven"), // why error ?
             ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
             ("http://thehighersidechats.com/feed/", "higherside-300"),
-            (
-                "https://packages.gentoo.org/packages/added.atom",
-                "gentoo-added_no-pubdate-500",
-            ), //  pubDate not there, but <updaed>
             (
                 "http://feeds.feedburner.com/RichardHerringLSTPodcast",
                 "RichardHerring-560",
@@ -164,14 +163,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "http://chaosradio.ccc.de/chaosradio-complete.rss",
                 "chaosradio-267",
             ),
-            ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             (
                 "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
                 "youtube",
             ),
-            ("http://feeds.feedburner.com/TechmemeRideHome", "techmeme"),
-            ("https://www.gistpaper.com/feed", "gistpaper"),
-            ("https://www.opendesktop.org/content.rdf", "opendesktop"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -184,6 +179,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
+            ("https://www.gistpaper.com/feed", "gistpaper"),
+            ("https://www.opendesktop.org/content.rdf", "opendesktop"),
+            ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
+            ("http://www.nachdenkseiten.de/?feed=atom", "nachdenk"),
+            ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),
@@ -229,6 +230,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://terraherz.wpcomstaging.com/feed/", "terraherz"),
             ("https://www.reddit.com/r/aww.rss", "aww"),
             ("https://feeds.breakingnews.ie/bnworld", "breaknew"),
+            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
         ];
 
         let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
@@ -243,6 +245,18 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            (
+                "http://feeds.feedburner.com/TechmemeRideHome",
+                "techmeme-big-icon",
+            ),
+            (
+                "https://www.linuxcompatible.org/news/atom.xml",
+                "linuxcompatible",
+            ),
+            (
+                "https://packages.gentoo.org/packages/added.atom",
+                "gentoo-added_no-pubdate-500",
+            ), //  pubDate not there, but <updaed>
             (
                 "http://www.tagesschau.de/newsticker.rdf",
                 "tagesschau-no-pubdate",

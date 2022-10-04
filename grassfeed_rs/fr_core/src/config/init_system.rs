@@ -6,6 +6,8 @@ use crate::controller::contentdownloader::DOWNLOADER_THREADS_DEFAULT;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::guiprocessor::GuiProcessor;
 use crate::controller::sourcetree::SourceTreeController;
+use crate::db::errors_repo;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo;
@@ -41,6 +43,7 @@ pub fn start(conf: GrassFeederConfig) -> AppContext {
     appcontext.build::<icon_repo::IconRepo>();
     appcontext.build::<MessagesRepo>();
     appcontext.build::<OpmlReader>();
+    appcontext.build::<ErrorRepo>();
     appcontext.build::<Downloader>();
     appcontext.build::<SourceTreeController>();
     appcontext.build::<BrowserPane>();
@@ -70,6 +73,10 @@ pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, Stri
     ret.insert(
         subscription_repo::KEY_FOLDERNAME.to_string(),
         gf_conf.path_config.clone(),
+    );
+    ret.insert(
+        errors_repo::KEY_FOLDERNAME.to_string(),
+        gf_conf.path_cache.clone(),
     );
     ret.insert(
         ConfigManager::CONF_PATH_KEY.to_string(),

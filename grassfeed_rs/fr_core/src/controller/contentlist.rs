@@ -332,7 +332,6 @@ impl IFeedContents for FeedContents {
                         .borrow()
                         .update_list_some(TREEVIEW1, &list_pos);
                 }
-
                 CJob::SwitchBrowserTabContent(msg_id) => {
                     if self
                         .msg_state
@@ -605,9 +604,22 @@ impl IFeedContents for FeedContents {
                     .update_is_deleted_many(&db_ids, true);
                 let subs_id = *self.last_activated_subscription_id.borrow();
                 self.update_feed_list_contents(subs_id);
+                if let Some(feedsources) = self.feedsources_w.upgrade() {
+                    feedsources.borrow().invalidate_read_unread(subs_id);
+                    self.addjob(CJob::RequestUnreadAllCount(subs_id));
+                }
             }
-            "copy-link" => {
-                debug!("TODO  instrument the clipboard ");
+            "message-copy-link" => {
+                if let Some((subs_id, _lispos)) = repoid_listpos.first() {
+                    if let Some(e_msg) = (*self.messagesrepo_r)
+                        .borrow()
+                        .get_by_index(*subs_id as isize)
+                    {
+                        (*self.gui_updater).borrow().clipboard_set_text(e_msg.link);
+                    }
+                } else {
+                    debug!("copy-link : no subs-id !!");
+                }
             }
             _ => {
                 warn!("contentlist_action unknown {}", &action);
@@ -761,9 +773,11 @@ impl TimerReceiver for FeedContents {
 ///         * RSS 2 (optional) "pubDate": Indicates when the item was published.
 ///
 ///  if title  contains invalid chars (for instance  & ), the Option<title>  is empty
-pub fn message_from_modelentry(me: &Entry) -> MessageRow {
+/// returns  converted Message-Entry,  Error-Text
+pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     let mut msg = MessageRow::default();
     let mut published_ts: i64 = 0;
+    let mut error_text = String::default();
 
     if let Some(publis) = me.published {
         published_ts = DateTime::<Local>::from(publis).timestamp();
@@ -778,13 +792,6 @@ pub fn message_from_modelentry(me: &Entry) -> MessageRow {
     msg.message_id = -1;
     if !me.links.is_empty() {
         msg.link = me.links.get(0).unwrap().href.clone();
-    }
-    if let Some(t) = me.title.clone() {
-        let mut filtered = remove_invalid_chars_from_input(t.content);
-        filtered = filtered.trim().to_string();
-        msg.title = filtered; // not compressed yet
-    } else {
-        debug!("Message ID {} has no valid title. ", &me.id);
     }
     if let Some(summary) = me.summary.clone() {
         if !summary.content.is_empty() {
@@ -813,11 +820,27 @@ pub fn message_from_modelentry(me: &Entry) -> MessageRow {
         if msg.content_text.is_empty() {
             if let Some(descrip) = &media.description {
                 if descrip.content_type.to_string().starts_with("text") {
-                    // debug!(" content={:?}=", descrip.content);
                     msg.content_text = descrip.content.clone();
                 }
             }
         }
+    }
+
+    if let Some(t) = me.title.clone() {
+        let mut filtered = remove_invalid_chars_from_input(t.content);
+        filtered = filtered.trim().to_string();
+        msg.title = filtered;
+    } else {
+        error_text = format!("Message ID {} has no valid title.", &me.id);
+        msg.title = msg.post_id.clone();
+        /*
+                if !msg.content_text.is_empty() {
+                    msg.title = msg.content_text.split_at(100).0.to_string();
+                    let regex = Regex::new(r"<.*>").unwrap();
+                    regex.replace(&msg.title, "");
+                    msg.title = msg.title.replace("<.*>", "");
+                } else {        }
+        */
     }
     let authorlist = me
         .authors
@@ -836,7 +859,7 @@ pub fn message_from_modelentry(me: &Entry) -> MessageRow {
         .join(", ");
     msg.author = authorlist;
     msg.categories = cate_list;
-    msg
+    (msg, error_text)
 }
 
 enum ContentMatchMask {
@@ -995,7 +1018,7 @@ mod feedcontents_test {
 	        </rss>"#;
         let feeds = parser::parse(rss_str.as_bytes()).unwrap();
         let first_entry = feeds.entries.get(0).unwrap();
-        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry);
+        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry).0;
         assert_eq!(fce.content_text, "Lorem1");
     }
 
@@ -1029,7 +1052,7 @@ mod feedcontents_test {
         let first_entry = feeds.entries.get(0).unwrap();
         assert!(!first_entry.authors.is_empty());
         assert_eq!(first_entry.authors[0].name, "Kino.de Redaktion");
-        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry);
+        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry).0;
         assert_eq!(fce.content_text, "Lorem2");
         assert_eq!(fce.post_id, "1234");
     }
@@ -1060,7 +1083,7 @@ mod feedcontents_test {
 	</rss>"#;
         let feeds = parser::parse(rsstext.as_bytes()).unwrap();
         let first_entry = feeds.entries.get(0).unwrap();
-        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry);
+        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry).0;
         assert_eq!(fce.content_text, "Felix Zeiler verbringt");
         assert_eq!(
             fce.enclosure_url,
@@ -1074,7 +1097,7 @@ mod feedcontents_test {
         let rss_str = fs::read_to_string("tests/data/gui_proc_rss2_v1.rss").unwrap();
         let feeds = parser::parse(rss_str.as_bytes()).unwrap();
         let first_entry = feeds.entries.get(0).unwrap();
-        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry);
+        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry).0;
         assert_eq!(fce.content_text, "Today: Lorem ipsum dolor sit amet");
     }
 
@@ -1111,7 +1134,7 @@ mod feedcontents_test {
 	</rss>"#;
         let feeds = parser::parse(rsstext.as_bytes()).unwrap();
         let first_entry = feeds.entries.get(0).unwrap();
-        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry);
+        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry).0;
         assert!(fce.content_text.len() > 10);
     }
 
@@ -1136,7 +1159,7 @@ mod feedcontents_test {
 
         let feeds = parser::parse(rsstext.as_bytes()).unwrap();
         let first_entry = feeds.entries.get(0).unwrap();
-        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry);
+        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry).0;
         println!(
             "entry_src_date={:?}   ",
             db_time_to_display_nonnull(fce.entry_src_date),

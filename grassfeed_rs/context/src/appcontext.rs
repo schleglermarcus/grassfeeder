@@ -17,7 +17,6 @@ pub struct AppContext {
     conf_user: Rc<RefCell<HashMap<String, String>>>,
 }
 
-
 impl AppContext {
     pub fn set<T: Any + 'static>(&mut self, t: T) {
         self.typmap.insert(TypeId::of::<T>(), Box::new(t));

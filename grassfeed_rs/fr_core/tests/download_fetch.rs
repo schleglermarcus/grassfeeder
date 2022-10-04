@@ -3,6 +3,7 @@ mod logger_config;
 use chrono::DateTime;
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::sourcetree::SJob;
+use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
@@ -24,12 +25,13 @@ fn single_dl_regular() {
     setup();
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
     let f_src_repo = SubscriptionRepo::new_inmem();
-	f_src_repo.scrub_all_subscriptions();
+    f_src_repo.scrub_all_subscriptions();
     let icon_repo = IconRepo::new("");
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
     let msgrepo_req = MessagesRepo::new_by_connection(msgrepo.get_ctx().get_connection());
+    let erro_rep = ErrorRepo::new(&String::default());
     let inner = FetchInner {
         fs_repo_id: 1,
         url: "gui_proc_rss2_v1.rss".to_string(),
@@ -43,6 +45,7 @@ fn single_dl_regular() {
         timestamp_created: 0,
         messgesrepo: msgrepo,
         download_error_text: String::default(),
+        erro_repo: erro_rep,
     };
     let ts_now = timestamp_now();
     let date_copied_from_example =
@@ -72,12 +75,13 @@ fn download_with_create_date() {
     setup();
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
     let subsc_r = SubscriptionRepo::new_inmem();
-	subsc_r.scrub_all_subscriptions();
+    subsc_r.scrub_all_subscriptions();
     let icon_repo = IconRepo::new("");
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let msgrepo = MessagesRepo::new_in_mem();
     let msgrepo_req = MessagesRepo::new_by_connection(msgrepo.get_ctx().get_connection());
     msgrepo.get_ctx().create_table();
+    let erro_rep = ErrorRepo::new(&String::default());
     let inner = FetchInner {
         fs_repo_id: 3,
         url: "gui_proc_rss2_v1.rss".to_string(),
@@ -91,6 +95,7 @@ fn download_with_create_date() {
         messgesrepo: msgrepo,
         download_text: String::default(),
         download_error_text: String::default(),
+        erro_repo: erro_rep,
     };
     let ts_now = timestamp_now();
     let date_copied_from_example =

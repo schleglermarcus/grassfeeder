@@ -1,10 +1,15 @@
+use crate::gtk::prelude::ContainerExt;
+use crate::gtk::prelude::WidgetExt;
 use crate::runner_internal::GtkRunnerInternal;
 use crate::DialogDataDistributor;
 use crate::GtkBuilderType;
 use crate::GtkObjects;
 use crate::IntCommands;
+use crate::WebContentType;
+use crate::WebViewType;
 use flume::Receiver;
 use flume::Sender;
+use gtk::prelude::BoxExt;
 use gtk::Application;
 use gtk::Button;
 use gtk::CellRendererSpinner;
@@ -174,8 +179,6 @@ pub struct GtkObjectsImpl {
     pub list_stores_max_columns: Vec<u8>,
     pub list_views: Vec<TreeView>,
     pub text_views: Vec<TextView>,
-    pub web_contexts: Vec<WebContext>,
-    pub web_views: Vec<WebView>,
     pub text_entries: Vec<Entry>,
     pub c_r_spinner_w: Option<(CellRendererSpinner, TreeViewColumn)>,
     pub labels: Vec<Label>,
@@ -185,6 +188,44 @@ pub struct GtkObjectsImpl {
     pub paneds: Vec<Paned>,
     pub scrolledwindows: Vec<ScrolledWindow>,
     dialogdata_dist: Option<DialogDataDistributor>,
+    pub web_context: RefCell<Option<WebContext>>, // allow only one browser in the application
+    pub web_view: RefCell<Option<WebView>>,
+    create_webcontext_fn: WebContentType,
+    create_webview_fn: WebViewType,
+    browser_config: CreateBrowserConfig,
+}
+
+impl GtkObjectsImpl {
+    fn check_or_create_browser(&self) {
+        if self.web_context.borrow().is_none() {
+            if self.create_webcontext_fn.is_none() {
+                warn!("cannot create webContext, no create function here!");
+                return;
+            }
+            if let Some(create_fn) = &self.create_webcontext_fn {
+                let w_context = (create_fn)(self.browser_config.clone());
+                self.web_context.borrow_mut().replace(w_context);
+            }
+        }
+        if self.web_view.borrow().is_none() {
+            if self.create_webview_fn.is_none() {
+                warn!("cannot create WebView, no create function here!");
+                return;
+            }
+            let o_dest_box = self.get_box(self.browser_config.attach_box_index as u8);
+            if o_dest_box.is_none() {
+                warn!("should not create browser, no gtk-box to attach to !");
+                return;
+            }
+            let dest_box = o_dest_box.unwrap();
+            if let Some(create_fn) = &self.create_webview_fn {
+                let w_view = (create_fn)(self.web_context.borrow().as_ref().unwrap());
+                dest_box.pack_start(&w_view, true, true, 0);
+                w_view.show();
+                self.web_view.borrow_mut().replace(w_view);
+            }
+        }
+    }
 }
 
 /// may not be Send
@@ -206,10 +247,6 @@ impl GtkObjects for GtkObjectsImpl {
     fn get_tree_store(&self, index: usize) -> Option<&gtk::TreeStore> {
         self.tree_stores.get(index)
     }
-
-    // fn add_tree_store(&mut self, ts: &gtk::TreeStore) {
-    //     self.tree_stores.push(ts.clone());
-    // }
 
     fn set_tree_store(&mut self, idx: u8, ts: &gtk::TreeStore) {
         if self.tree_stores.len() < idx as usize + 1 {
@@ -273,29 +310,58 @@ impl GtkObjects for GtkObjectsImpl {
         self.list_stores_max_columns[list_index] = mc;
     }
 
-    // fn get_list_view(&self, list_index: usize) -> Option<&gtk::TreeView> {
-    //     self.list_views.get(list_index)
-    // }
+    fn get_text_view(&self, index: u8) -> Option<&gtk::TextView> {
+        self.text_views.get(index as usize)
+    }
+    // fn add_text_view(&mut self, tv: &gtk::TextView) {        self.text_views.push(tv.clone());    }
 
-    fn get_text_view(&self, index: usize) -> Option<&gtk::TextView> {
-        self.text_views.get(index)
-    }
-    fn add_text_view(&mut self, tv: &gtk::TextView) {
-        self.text_views.push(tv.clone());
-    }
-
-    fn get_web_view(&self, index: u8) -> Option<&WebView> {
-        self.web_views.get(index as usize)
-    }
-    fn add_web_view(&mut self, wv: &WebView) {
-        self.web_views.push(wv.clone());
+    fn set_text_view(&mut self, list_index: u8, tv: &gtk::TextView) {
+        if self.text_views.len() < list_index as usize + 1 {
+            self.text_views
+                .resize(list_index as usize + 1, TextView::new());
+        }
+        self.text_views[list_index as usize] = tv.clone();
     }
 
-    fn get_web_context(&self, index: u8) -> Option<&WebContext> {
-        self.web_contexts.get(index as usize)
+    fn get_web_view(&self) -> Option<WebView> {
+        self.check_or_create_browser();
+        self.web_view.borrow().clone()
     }
-    fn add_web_context(&mut self, wc: &WebContext) {
-        self.web_contexts.push(wc.clone());
+
+    fn set_web_view(&mut self, o_wv: Option<WebView>) {
+        match o_wv {
+            None => {
+                debug!("runner: removing webView");
+                let o_dest_box = self
+                    .boxes
+                    .get(self.browser_config.attach_box_index as usize);
+                if o_dest_box.is_none() {
+                    error!("set_web_view:None - Box index not found !");
+                    return;
+                }
+                let dest_box = o_dest_box.unwrap();
+                dest_box.remove(self.web_view.borrow().as_ref().unwrap());
+                self.web_view = RefCell::new(None);
+            }
+            Some(wv) => {
+                debug!("runner:setting webView");
+                let _r = self.web_view.borrow_mut().replace(wv);
+            }
+        };
+    }
+
+    fn get_web_context(&self) -> Option<WebContext> {
+        self.check_or_create_browser();
+        self.web_context.borrow().clone()
+    }
+
+    fn set_web_context(&mut self, o_wc: Option<WebContext>) {
+        match o_wc {
+            None => self.web_context = RefCell::new(None),
+            Some(wc) => {
+                let _r = self.web_context.borrow_mut().replace(wc);
+            }
+        };
     }
 
     fn get_text_entry(&self, index: u8) -> Option<&Entry> {
@@ -429,6 +495,32 @@ impl GtkObjects for GtkObjectsImpl {
         }
         self.scrolledwindows[idx as usize] = p.clone();
     }
+
+    fn set_create_webcontext_fn(
+        &mut self,
+        cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
+        browser_folder: &str,
+        a_box_index: u8,
+        browser_clear_cache: bool,
+    ) {
+        self.create_webcontext_fn = cb_fn;
+        self.browser_config = CreateBrowserConfig {
+            browser_dir: browser_folder.to_string(),
+            attach_box_index: a_box_index,
+            startup_clear_cache: browser_clear_cache,
+        };
+    }
+
+    fn set_create_webview_fn(&mut self, cb_fn: Option<Box<dyn Fn(&WebContext) -> WebView>>) {
+        self.create_webview_fn = cb_fn;
+    }
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct CreateBrowserConfig {
+    pub attach_box_index: u8,
+    pub browser_dir: String,
+    pub startup_clear_cache: bool,
 }
 
 struct ReceiverWrapperImpl(Receiver<GuiEvents>);
@@ -530,6 +622,9 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     fn update_web_view(&self, nr: u8) {
         self.send_to_int(&IntCommands::UpdateWebView(nr));
     }
+    fn update_web_view_plain(&self, nr: u8) {
+        self.send_to_int(&IntCommands::UpdateWebViewPlain(nr));
+    }
 
     fn update_label(&self, nr: u8) {
         self.send_to_int(&IntCommands::UpdateLabel(nr));
@@ -572,5 +667,9 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
 
     fn update_window_icon(&self) {
         self.send_to_int(&IntCommands::UpdateWindowIcon);
+    }
+
+    fn clipboard_set_text(&self, s: String) {
+        self.send_to_int(&IntCommands::ClipBoardSetText(s));
     }
 } //

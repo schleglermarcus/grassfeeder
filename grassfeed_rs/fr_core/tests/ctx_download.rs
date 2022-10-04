@@ -6,6 +6,7 @@ use fr_core::controller::contentdownloader::IDownloader;
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::guiprocessor::Job;
 use fr_core::controller::sourcetree::SJob;
+use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
@@ -73,13 +74,15 @@ fn downloader_load_message_into_db() {
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
     let msgrepo_r = Rc::new(RefCell::new(msgrepo));
-
+    let erro_rep = ErrorRepo::new(&String::default());
+    let erro_r = Rc::new(RefCell::new(erro_rep));
     let mut downloader = Downloader::new(
         fetcher,
         fsrc_r,
         icon_repo_r,
         r_configmanager,
         msgrepo_r.clone(),
+        erro_r,
     );
     downloader.contentlist_job_sender = Some(content_q_s);
     downloader.source_c_sender = Some(stc_job_s);

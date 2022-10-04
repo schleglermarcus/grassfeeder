@@ -82,11 +82,8 @@ impl OpmlReader {
         outl: &Outline,
     ) {
         let db_entry = from_outline(outl, parent_subs_id, position);
-
         let repo_id: isize = match (*subscription_repo).borrow().store_entry(&db_entry) {
-            Ok(r_entry) => {
-                r_entry.subs_id
-            }
+            Ok(r_entry) => r_entry.subs_id,
             Err(e) => {
                 error!("store_outline {:?}", &e);
                 return;
@@ -115,7 +112,6 @@ impl OpmlReader {
         fse: &SubscriptionEntry,
         feed_src_repo: Rc<RefCell<dyn ISubscriptionRepo>>,
     ) {
-        // debug!(            "feedsource_to_outline: {} {}",            &fse.repo_id, &fse.display_name        );
         let fse_list = (*feed_src_repo).borrow().get_by_parent_repo_id(fse.subs_id);
         for fse in fse_list {
             let mut outl = from_feed_source(&fse);
@@ -172,14 +168,12 @@ pub fn from_outline(o: &Outline, repo_parent_id: isize, folder_pos: isize) -> Su
     } else {
         gen_icons::IDX_05_RSS_FEEDS_GREY_64_D
     };
-
     let mut feed_url = String::default();
     let mut websit_url = String::default();
     if let Some(x_u) = &o.xml_url {
         feed_url = x_u.clone();
     }
-
-    //TODO see if we can get the web main url from  the outline
+    //later:  see if we can get the web main url from  the outline
     if let Some(h_u) = &o.html_url {
         if feed_url.is_empty() {
             feed_url = h_u.clone();
@@ -203,15 +197,10 @@ pub fn from_outline(o: &Outline, repo_parent_id: isize, folder_pos: isize) -> Su
         expanded: false,
         website_url: websit_url,
         last_selected_msg: -1,
-        // num_msg_all_unread: None,
-        // is_dirty: true,
-        // status: 0,
-        // tree_path: None,
         deleted: false,
     }
 }
 
-// o: &Outline, repo_parent_id: isize, folder_pos: usize
 pub fn from_feed_source(fse: &SubscriptionEntry) -> Outline {
     Outline {
         r#type: if fse.is_folder {
@@ -239,7 +228,7 @@ mod t_ {
     fn opml_import_w_folders() {
         setup();
         let fsrr = Rc::new(RefCell::new(SubscriptionRepo::new_inmem()));
-		(*fsrr).borrow().scrub_all_subscriptions();
+        (*fsrr).borrow().scrub_all_subscriptions();
         let mut opmlreader = OpmlReader::new(fsrr.clone());
         let r = opmlreader.read_from_file(String::from("../testing/tests/opml/reader_wp.opml"));
         assert!(r.is_ok());
@@ -256,7 +245,7 @@ mod t_ {
     #[test]
     fn opmlread_simple1() {
         let fsr = SubscriptionRepo::new_inmem();
-		fsr.scrub_all_subscriptions();
+        fsr.scrub_all_subscriptions();
         let fsrr = Rc::new(RefCell::new(fsr));
         let mut opmlreader = OpmlReader::new(fsrr.clone());
         let r = opmlreader.read_from_file(String::from("tests/data/simple_local.opml"));
@@ -283,7 +272,7 @@ mod t_ {
     #[test]
     fn opml_write() {
         let fsr = SubscriptionRepo::new_inmem();
-		fsr.scrub_all_subscriptions();
+        fsr.scrub_all_subscriptions();
         let fsrr: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(fsr));
         {
             let mut opmlreader = OpmlReader::new(fsrr.clone());

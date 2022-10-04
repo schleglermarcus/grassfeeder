@@ -133,13 +133,11 @@ fn parse_wissensmanufaktur() {
     setup();
     let rss_str: String = std::fs::read_to_string("tests/data/wissensmanufaktur_rss.xml").unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
-
     let mut fce_list: Vec<MessageRow> = feeds
         .entries
         .iter()
-        .map(|fe| message_from_modelentry(&fe))
+        .map(|fe| message_from_modelentry(&fe).0)
         .collect();
-
     let msg18 = fce_list.get_mut(18).unwrap();
     assert_eq!(
         msg18.title,
@@ -156,7 +154,7 @@ fn parse_youtube() {
     let mut fce_list: Vec<MessageRow> = feeds
         .entries
         .iter()
-        .map(|fe| message_from_modelentry(&fe))
+        .map(|fe| message_from_modelentry(&fe).0)
         .collect();
     let msg0 = fce_list.get_mut(0).unwrap();
     // debug!("msg0={:?}", msg0.content_text);
@@ -173,6 +171,8 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_fern_logger(logger_config::QuietFlags::Config as u64);
+        let _r = logger_config::setup_fern_logger(
+            logger_config::QuietFlags::Config as u64 | logger_config::QuietFlags::Db as u64,
+        );
     });
 }

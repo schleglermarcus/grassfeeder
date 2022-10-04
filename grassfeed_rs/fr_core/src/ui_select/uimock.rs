@@ -214,8 +214,6 @@ impl UIUpdaterAdapter for UpdAda {
     fn update_list_single(&self, _list_index: u8, _list_position: u32) {}
     fn update_list_some(&self, _list_index: u8, _list_position: &[u32]) {}
     fn update_text_view(&self, _nr: u8) {}
-
-    fn update_web_view(&self, _nr: u8) {}
     fn update_text_entry(&self, _nr: u8) {
         if let Some(te) = (*self.ada_val_sto_a).read().unwrap().get_text_entry(_nr) {
             (*self.r_event_sender)
@@ -239,10 +237,13 @@ impl UIUpdaterAdapter for UpdAda {
     fn widget_mark(&self, _typ: UIUpdaterMarkWidgetType, _sw_idx: u8, _mark: u8) {}
     fn grab_focus(&self, _typ: UIUpdaterMarkWidgetType, _idx: u8) {}
     fn list_set_cursor(&self, _list_index: u8, _db_id: isize, _column: u8) {}
-
     fn update_window_title(&self) {}
     fn update_window_icon(&self) {}
+    fn update_web_view(&self, _nr: u8) {}
+    fn update_web_view_plain(&self, _nr: u8) {}
+    fn clipboard_set_text(&self, _s: String) {}
 }
+
 struct MockRunner {
     up_ad: Rc<RefCell<UpdAda>>,
     event_receiver: Rc<dyn ReceiverWrapper>,

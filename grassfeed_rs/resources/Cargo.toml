@@ -1,6 +1,6 @@
 [package]
 name = "resources"
-version = "0.0.888"	# marker number, should not be present in the release version
+version = "0.1.0"
 edition = "2021"
 
 [dependencies]

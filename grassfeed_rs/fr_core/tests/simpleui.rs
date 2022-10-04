@@ -54,8 +54,7 @@ mod ui_select {
         UIAdapterValueStoreType,
         Rc<RefCell<dyn UIUpdaterAdapter>>,
     ) {
-        let mock = UIMock::new(
-		);
+        let mock = UIMock::new();
         (mock.rec_wr(), mock.val_sto(), mock.upd_adp())
     }
 }
@@ -95,6 +94,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-		let _r = logger_config::setup_fern_logger(0);
+        let _r = logger_config::setup_fern_logger(0);
     });
 }

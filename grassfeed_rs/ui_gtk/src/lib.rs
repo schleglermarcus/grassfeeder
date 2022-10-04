@@ -10,6 +10,7 @@ pub mod runner_internal;
 pub mod ui_value_adapter;
 
 use crate::dialogdatadistributor::DialogDataDistributor;
+use crate::gtkrunner::CreateBrowserConfig;
 use flume::Sender;
 use gtk::Application;
 use gtk::Window;
@@ -30,8 +31,6 @@ pub trait GtkGuiBuilder: 'static {
         obj_a: GtkObjectsType,
         ddd: &mut DialogDataDistributor,
     );
-
-    // fn create_browser(&self, obj_a: GtkObjectsType);
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
@@ -49,6 +48,7 @@ pub enum IntCommands {
     UpdateListModelSome(u8, Vec<u32>),
     UpdateTextView(u8),
     UpdateWebView(u8),
+    UpdateWebViewPlain(u8),
     UpdateLabel(u8),
     UpdateLabelMarkup(u8),
     UpdateDialog(u8),
@@ -64,7 +64,11 @@ pub enum IntCommands {
     GrabFocus(UIUpdaterMarkWidgetType, u8),
     UpdateWindowTitle,
     UpdateWindowIcon,
+    ClipBoardSetText(String),
 }
+
+pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;
+pub type WebViewType = Option<Box<dyn Fn(&WebContext) -> WebView>>;
 
 pub trait GtkObjects {
     fn get_window(&self) -> Option<Window>;
@@ -87,13 +91,14 @@ pub trait GtkObjects {
     fn get_list_store_max_columns(&self, list_index: usize) -> u8;
     fn set_list_store_max_columns(&mut self, list_index: usize, mc: u8);
 
-    fn get_text_view(&self, list_index: usize) -> Option<&gtk::TextView>;
-    fn add_text_view(&mut self, tv: &gtk::TextView);
+    fn get_text_view(&self, list_index: u8) -> Option<&gtk::TextView>;
+    fn set_text_view(&mut self, list_index: u8, tv: &gtk::TextView);
 
-    fn get_web_view(&self, idx: u8) -> Option<&WebView>;
-    fn add_web_view(&mut self, wv: &WebView);
-    fn get_web_context(&self, idx: u8) -> Option<&WebContext>;
-    fn add_web_context(&mut self, wc: &WebContext);
+    fn get_web_view(&self) -> Option<WebView>;
+    fn set_web_view(&mut self, wv: Option<WebView>);
+
+    fn get_web_context(&self) -> Option<WebContext>;
+    fn set_web_context(&mut self, wc: Option<WebContext>);
 
     fn get_text_entry(&self, idx: u8) -> Option<&gtk::Entry>;
     fn add_text_entry(&mut self, e: &gtk::Entry);
@@ -127,6 +132,16 @@ pub trait GtkObjects {
 
     fn get_scrolledwindow(&self, idx: u8) -> Option<&gtk::ScrolledWindow>;
     fn set_scrolledwindow(&mut self, idx: u8, p: &gtk::ScrolledWindow);
+
+    fn set_create_webcontext_fn(
+        &mut self,
+        cb_fn: Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>,
+        browser_dir: &str,
+        a_box_index: u8,
+        browser_clear_cache: bool,
+    );
+
+    fn set_create_webview_fn(&mut self, cb_fn: WebViewType);
 }
 
 #[derive(Clone, Debug)]

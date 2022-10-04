@@ -24,6 +24,8 @@ pub const DIALOG_OPML_EXPORT: u8 = 7;
 pub const DIALOG_SETTINGS: u8 = 8;
 pub const DIALOG_ABOUT: u8 = 9;
 
+pub const DIALOG_TEXTVIEW_ERR: u8 = 0;
+
 pub const TEXTENTRY_NEWSOURCE_URL: u8 = 0;
 pub const TEXTENTRY_NEWSOURCE_E2: u8 = 1;
 

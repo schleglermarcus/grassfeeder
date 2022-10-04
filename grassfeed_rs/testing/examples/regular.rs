@@ -13,7 +13,7 @@ fn main() {
         path_config: "target/db_rungui_reg/".to_string(),
         path_cache: "target/db_rungui_reg/".to_string(),
         debug_mode: true,
-        version: "run_reg_todo".to_string(),
+        version: "run_reg-0".to_string(),
     };
     let appcontext = init_system::start(gfconf);
     init_system::run(&appcontext);

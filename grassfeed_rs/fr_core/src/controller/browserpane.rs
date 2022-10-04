@@ -13,13 +13,15 @@ use context::TimerEvent;
 use context::TimerReceiver;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
+use gui_layer::gui_values::PropDef;
 use resources::id::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 
+//  pub const CONF_BROWSER_CACHE_CLEANUP: &str = "BrowserCacheCleanup";
+
 pub trait IBrowserPane {
-    // fn switch_browsertab_content(&self, repo_id: i32, fc_state: FeedContentState);
     fn switch_browsertab_content(
         &self,
         repo_id: i32,
@@ -30,6 +32,7 @@ pub trait IBrowserPane {
     fn get_config(&self) -> Config;
     fn set_conf_browser_bg(&mut self, c: u32);
     fn get_last_selected_link(&self) -> String;
+    fn display_short_help(&self);
 }
 
 pub struct BrowserPane {
@@ -82,6 +85,61 @@ impl BrowserPane {
                 .debug_dump("create_browser_dir");
         }
     }
+
+    fn set_browser_contents_html(&self, msg: String) {
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_web_view_text(0, msg);
+        (*self.gui_updater).borrow().update_web_view(0);
+    }
+
+    /// load plain text into the browser display
+    fn set_browser_contents_plain(&self, msg: String) {
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_web_view_text(0, msg);
+        (*self.gui_updater).borrow().update_web_view_plain(0);
+    }
+
+    fn set_browser_info_area(
+        &self,
+        link_title: String,
+        link_url: String,
+        msg_date: String,
+        msg_author: String,
+        msg_categories: String,
+    ) {
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_linkbutton_text(LINKBUTTON_BROWSER_TITLE, (link_title, link_url));
+        (*self.gui_updater)
+            .borrow()
+            .update_linkbutton(LINKBUTTON_BROWSER_TITLE);
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_label_text(LABEL_BROWSER_MSG_DATE, msg_date);
+        (*self.gui_updater)
+            .borrow()
+            .update_label(LABEL_BROWSER_MSG_DATE);
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_label_text(LABEL_BROWSER_MSG_AUTHOR, msg_author);
+        (*self.gui_updater)
+            .borrow()
+            .update_label(LABEL_BROWSER_MSG_AUTHOR);
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_label_text(LABEL_BROWSER_MSG_CATEGORIES, msg_categories);
+        (*self.gui_updater)
+            .borrow()
+            .update_label(LABEL_BROWSER_MSG_CATEGORIES);
+    }
 }
 
 impl IBrowserPane for BrowserPane {
@@ -106,54 +164,55 @@ impl IBrowserPane for BrowserPane {
         let mut content = String::default();
         let mut author = String::default();
         let mut categories = String::default();
-
-        // if let Some(triplet) = state.contents_author_categories_d {
         if let Some(triplet) = co_au_ca {
             (content, author, categories) = triplet;
         }
-        //        debug!("switch_browsertab_content   {} {}", author, categories);
-
         let mut display = title;
         if let Some(_pos) = display.find("http") {
             display = display.split("http").next().unwrap().to_string();
             display = display.trim().to_string();
         }
         self.last_selected_link_text.replace(fce.link.clone()); //;
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_web_view_text(0, content);
-        (*self.gui_updater).borrow().update_web_view(0);
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_linkbutton_text(LINKBUTTON_BROWSER_TITLE, (display, fce.link));
-        (*self.gui_updater)
-            .borrow()
-            .update_linkbutton(LINKBUTTON_BROWSER_TITLE);
         let srcdate = util::db_time_to_display(fce.entry_src_date);
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_label_text(LABEL_BROWSER_MSG_DATE, srcdate);
-        (*self.gui_updater)
-            .borrow()
-            .update_label(LABEL_BROWSER_MSG_DATE);
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_label_text(LABEL_BROWSER_MSG_AUTHOR, author);
-
-        (*self.gui_updater)
-            .borrow()
-            .update_label(LABEL_BROWSER_MSG_AUTHOR);
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_label_text(LABEL_BROWSER_MSG_CATEGORIES, categories);
-        (*self.gui_updater)
-            .borrow()
-            .update_label(LABEL_BROWSER_MSG_CATEGORIES);
+        /*
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_web_view_text(0, content);
+                (*self.gui_updater).borrow().update_web_view(0);
+        */
+        self.set_browser_contents_html(content);
+        /*
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_linkbutton_text(LINKBUTTON_BROWSER_TITLE, (display, fce.link));
+                (*self.gui_updater)
+                    .borrow()
+                    .update_linkbutton(LINKBUTTON_BROWSER_TITLE);
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_label_text(LABEL_BROWSER_MSG_DATE, srcdate);
+                (*self.gui_updater)
+                    .borrow()
+                    .update_label(LABEL_BROWSER_MSG_DATE);
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_label_text(LABEL_BROWSER_MSG_AUTHOR, author);
+                (*self.gui_updater)
+                    .borrow()
+                    .update_label(LABEL_BROWSER_MSG_AUTHOR);
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_label_text(LABEL_BROWSER_MSG_CATEGORIES, categories);
+                (*self.gui_updater)
+                    .borrow()
+                    .update_label(LABEL_BROWSER_MSG_CATEGORIES);
+        */
+        self.set_browser_info_area(display, fce.link, srcdate, author, categories)
     }
 
     fn get_config(&self) -> Config {
@@ -165,20 +224,29 @@ impl IBrowserPane for BrowserPane {
         (*self.configmanager_r)
             .borrow()
             .set_val(&PropDef::BrowserBackgroundLevel.to_string(), c.to_string());
-
         (*self.gui_val_store)
             .write()
             .unwrap()
             .set_gui_property(PropDef::BrowserBackgroundLevel, c.to_string());
+
         (*self.gui_updater).borrow().update_web_view(0);
     }
 
     fn get_last_selected_link(&self) -> String {
         self.last_selected_link_text.borrow().clone()
     }
-}
 
-use gui_layer::gui_values::PropDef;
+    fn display_short_help(&self) {
+        self.set_browser_info_area(
+            String::default(),
+            String::default(),
+            String::default(),
+            String::default(),
+            String::default(),
+        );
+        self.set_browser_contents_plain(t!("M_SHORTHELP_TEXT"));
+    }
+}
 
 impl Buildable for BrowserPane {
     type Output = BrowserPane;
@@ -196,12 +264,12 @@ impl Buildable for BrowserPane {
 impl StartupWithAppContext for BrowserPane {
     fn startup(&mut self, ac: &AppContext) {
         self.feedcontents_w = Rc::downgrade(&(*ac).get_rc::<FeedContents>().unwrap());
+        self.create_browser_dir();
         let _browserpane_r = ac.get_rc::<BrowserPane>().unwrap();
         if false {
             let mut _t = (*self.timer_r).borrow_mut();
             // t.register(&TimerEvent::Timer1s, fc_r.clone());
         }
-        self.create_browser_dir();
     }
 }
 
@@ -212,6 +280,7 @@ impl TimerReceiver for BrowserPane {
 #[derive(Default, Clone, Debug)]
 pub struct Config {
     pub browser_bg: u8,
+    // pub cache_cleanup: bool,
 }
 
 //------------------------------------------------------

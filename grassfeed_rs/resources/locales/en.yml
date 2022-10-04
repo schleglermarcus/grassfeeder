@@ -12,6 +12,8 @@ en:
   M_HELP: Help
   M_ABOUT: About
   M_ICONS: Icons
+  M_SHORT_HELP: Short help text
+
 
   TB_ADD_FOLDER: Add Folder
   TB_ADD_FEED: Add Subscription
@@ -46,8 +48,6 @@ en:
   CM_SUB_EDIT: Edit
   CM_SUB_DELETE: Delete
 
-
-
   D_NEW_SUBSCRIPTION_TITLE: New Subscription
   D_NEW_SUBSCRIPTION_URL: Feed Address
   D_NEW_SUBSCRIPTION_NAME: Name
@@ -56,6 +56,8 @@ en:
   D_EDIT_SUBSCRIPTION_TAB1: Basic
   D_EDIT_SUBSCRIPTION_ICON: Icon
   D_EDIT_SUBSCRIPTION_TAB2: Statistics
+  D_EDIT_SUBSCRIPTION_TAB3: Errors
+
   D_EDIT_SUBSCRIPTION_MAIN_WEBSITE: Main Website
   D_EDIT_SUBSCRIPTION_NUM_MESSAGES: Number of Messages
   D_EDIT_SUBSCRIPTION_NUM_UNREAD: Unread Messages
@@ -80,6 +82,16 @@ en:
   D_SETTINGS_FOCUS_POLICY_LAST_SELECTED: "Last Selected Message"
   D_SETTINGS_FOCUS_POLICY_NEWEST: "Most Recent Message"
   D_SETTINGS_FOCUS_POLICY_BEFORE_UNREAD: "Before Oldest Unread Message"
+  D_SETTINGS_DATABASES_CLEAN_ONSTART: "Clean up databases on start"
+  D_SETTINGS_BROWSER_CACHE_CLEAR: "Clear browser cache"
 
   D_IMPORT_OPML_SELECT_FILE: "Select Opml file"
   D_STORE_OPML_SELECT_FILE: "Name Opml file"
+
+  M_SHORTHELP_TEXT: "Grassfeeder RSS Reader Keyboard assignments\n
+    Tab         switch focus forward:  Subscriptions, Messages, Browser \n
+    Shift-Tab   switch focus reverse  \n
+    a           Mark all messages of that subscription as read \n
+    s           Jump to previous unread message \n
+    x           Jump to next unread message \n
+    "

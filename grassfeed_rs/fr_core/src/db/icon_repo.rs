@@ -292,7 +292,7 @@ fn write_to(
             let bbuf = line.as_bytes();
             match buf.write(bbuf) {
                 Ok(bytes) => {
-                    let _r = buf.write(&[ b'\n' ]);
+                    let _r = buf.write(&[b'\n']);
                     bytes_written += bytes + 1;
                 }
                 Err(e) => {

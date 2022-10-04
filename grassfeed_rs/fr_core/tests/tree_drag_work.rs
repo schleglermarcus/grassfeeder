@@ -4,14 +4,38 @@ mod tree_drag_common;
 
 // use crate::tree_drag_common::dataset_three_folders;
 // use crate::tree_drag_common::prepare_source_tree_controller;
-// use fr_core::db::subscription_entry::SubscriptionEntry;
+
 use chrono::DateTime;
 use feed_rs::parser;
 use fr_core::controller::contentlist;
+use fr_core::db::errors_repo::ErrorEntry;
+use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::message::MessageRow;
 use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::util::db_time_to_display_nonnull;
 use regex::Regex;
+
+#[test]
+fn t_error_repo_store() {
+    setup();
+    let mut e_repo = ErrorRepo::new("../target/err_rep/");
+    e_repo.startup_read();
+    let mut e1 = ErrorEntry::default();
+    e1.text = "Hello!".to_string();
+    e_repo.add_error(
+        5,
+        0,
+        "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg".to_string(),
+        "some y message".to_string(),
+    );
+    e_repo.check_or_store();
+
+    let list = e_repo.get_by_subscription(5);
+    debug!("LIST={:#?}", list);
+    for ee in list {
+        debug!("{}", ee.to_line("feed-name".to_string()));
+    }
+}
 
 //  Maybe later:
 //  The file contains an invalid  single  &  as title.   The parse does not like that and returns  no title.
@@ -20,8 +44,7 @@ fn parse_with_ampersand() {
     let rss_str = std::fs::read_to_string("../testing/tests/fr_htdocs/dieneuewelle.xml").unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let entry2 = feeds.entries.get(2).unwrap();
-    let msg2: MessageRow = contentlist::message_from_modelentry(&entry2);
-    // println!("entry2.title={}=", msg2.title);
+    let msg2: MessageRow = contentlist::message_from_modelentry(&entry2).0;
     assert!(msg2.title.starts_with("Borderlands-"));
 }
 
@@ -32,9 +55,8 @@ fn parse_naturalnews_aug() {
         std::fs::read_to_string("../testing/tests/fr_htdocs/naturalnews_aug.xml").unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let entry0 = feeds.entries.get(0).unwrap();
-    let msg0: MessageRow = contentlist::message_from_modelentry(&entry0);
+    let msg0: MessageRow = contentlist::message_from_modelentry(&entry0).0;
     println!("title={}=", msg0.title);
-    //        assert!(msg2.title.starts_with("Borderlands-"));
 }
 
 //  #[test]
@@ -50,7 +72,6 @@ fn dl_naturalnews() {
     debug!("list={:?}", new_list.len());
     // for entry in new_list {        debug!("date={:?}", db_time_to_display_nonnull(entry.entry_src_date));    }
     let e0: &MessageRow = new_list.get(0).unwrap();
-
     debug!("date={:?}  ", db_time_to_display_nonnull(e0.entry_src_date));
 }
 

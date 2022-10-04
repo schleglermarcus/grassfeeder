@@ -6,13 +6,12 @@ use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::downloader::db_clean::CleanerInner;
 use crate::downloader::db_clean::CleanerStart;
-use crate::util::StepResult;
 use crate::util::file_exists;
+use crate::util::StepResult;
 
 pub fn databases_consistency_check(foldername: &str) {
     databases_consistency_check_u(foldername, false, true);
 }
-
 
 pub fn databases_consistency_check_u(foldername: &str, set_undelete: bool, really_remove: bool) {
     let subs_fn = SubscriptionRepo::filename(foldername);

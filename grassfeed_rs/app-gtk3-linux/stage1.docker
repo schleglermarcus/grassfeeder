@@ -4,13 +4,26 @@ run echo "deb     http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib 
 run echo "deb-src http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free" >>/etc/apt/sources.list
 
 
-## Use the next older debian: will not compile 
-## Package 'gtk+-3.0' has version '3.24.5', required version is '>= 3.24.8' 
+## Use the next older debian: will not compile
+## Package 'gtk+-3.0' has version '3.24.5', required version is '>= 3.24.8'
 # FROM rust:1.63-slim-buster
 # run echo "deb     http://ftp-stud.hs-esslingen.de/debian/ buster main contrib non-free"  >/etc/apt/sources.list
 # run echo "deb-src http://ftp-stud.hs-esslingen.de/debian/ buster main contrib non-free" >>/etc/apt/sources.list
 
-
 RUN apt update
 RUN apt install -y wget git pkgconf librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev
+
 RUN cargo install cargo-deb
+RUN cargo install cargo-appimage
+
+
+# for AppImage
+RUN apt install -y  file python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse libfuse
+RUN wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+RUN chmod +x /usr/local/bin/appimagetool
+#RUN apt install -y libfuse2
+#RUN modprobe fuse
+#RUN groupadd fuse
+#ENV user="$(whoami)"
+#RUN usermod -a -G fuse $user
+

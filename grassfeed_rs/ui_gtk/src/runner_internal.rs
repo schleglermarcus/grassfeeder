@@ -55,6 +55,7 @@ impl GtkRunnerInternal {
         let ev_se = self.gui_event_sender.clone();
         let obj_c = self.gtk_objects.clone();
         let obj_c2 = self.gtk_objects.clone();
+
         let builder_c = builder.clone();
         let mut appflags: ApplicationFlags = ApplicationFlags::default();
         appflags.set(ApplicationFlags::HANDLES_COMMAND_LINE, false);
@@ -80,7 +81,11 @@ impl GtkRunnerInternal {
             let window: &gtk::Window = appwindow.upcast_ref::<gtk::Window>();
             let mut dd = DialogDataDistributor::default();
             (*obj_c).write().unwrap().set_window(window);
+
             (*builder_c).build_gtk(ev_se.clone(), obj_c2.clone(), &mut dd);
+
+            // (*builder_c).build_browser( obj_c2.clone());
+
             (*obj_c).write().unwrap().set_dddist(dd);
             window.show_all();
         });
@@ -150,7 +155,6 @@ impl GtkRunnerInternal {
                         upd_int.update_list_model_some(i, list_pos.clone())
                     }
                     IntCommands::UpdateTextView(i) => upd_int.update_text_view(i),
-                    IntCommands::UpdateWebView(i) => upd_int.update_web_view(i),
                     IntCommands::UpdateLabel(i) => upd_int.update_label(i),
                     IntCommands::UpdateLabelMarkup(i) => upd_int.update_label_markup(i),
                     IntCommands::UpdateDialog(i) => upd_int.update_dialog(i),
@@ -168,6 +172,15 @@ impl GtkRunnerInternal {
                     }
                     IntCommands::UpdateWindowTitle => upd_int.update_window_title(),
                     IntCommands::UpdateWindowIcon => upd_int.update_window_icon(),
+                    IntCommands::UpdateWebView(_i) => {
+                        if upd_int.update_web_view() {
+                            (gtk_objects_a).write().unwrap().set_web_view(None);
+                        }
+                    } // only one view
+                    IntCommands::UpdateWebViewPlain(_i) => upd_int.update_web_view_plain(),
+                    IntCommands::ClipBoardSetText(ref s) => {
+                        gtk::Clipboard::get(&gtk::gdk::SELECTION_CLIPBOARD).set_text(s);
+                    }
 
                     _ => {
                         warn!("GTKS other cmd {:?}", command);

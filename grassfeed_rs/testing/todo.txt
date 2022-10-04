@@ -1,53 +1,44 @@
 To Do List
-- Keyboard commands for:  mark-as-unread, next unread message
-
-- Messages with Umlaut:  http://www.nachdenkseiten.de/?feed=atom
 
 
-- see if  diylib  can be used for ui_gtk
-- Menu Item and  Help text into browser
-- Error-DB for Subscription Requests, display in edit dialog
-- Create  AppImage
-   https://github.com/StratusFearMe21/cargo-appimage
-   https://lib.rs/crates/cargo-appimage
-
-
-- Copy Message address into clipboard
+- Flatpak  https://lib.rs/crates/cargo-pkg
+- Change Layout: wide bottom line.
+- Bug:  add-folder   leads to  expanding one that is closed
+- Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
+- Bug: Dialog Folder-edit shall show statistics information
+- Bug messages:  set unread ->  is not processed in following set-reading
+- Delete Messages by delete key
+- Subscription Tree: hide zeroes when nothing to read
 - Create Backups for Subscriptions-DB
-- check: subscription  Reload shall refresh  message list
-- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
-- Messages missing in  https://afternarcissisticabuse.wordpress.com/feed/
-
-- check  https://www.linuxcompatible.org/  feed: icon + entries
-- Browser CleanUp Cache, on startup / finish
-      webcontextext:  clear_cache(&self)
-
-- Investigate why   subscriptions.db  is so large.
-
-- Databases consistency check  on startup configurable.
 - Sanitize: cross-check icon ids of tree if they are present in icon db
+- refactor: gtk - separate file for the message list
+- Message List: translate titles
+- check  https://www.linuxcompatible.org/  feed: icon + entries
+
+
+- Graphics:  scale down icons before going into database.  Example   http://feeds.feedburner.com/TechmemeRideHome
+- Investigate why   subscriptions.db  is so large.
+- Message List: set scroll position to upper edge from Cursor
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
-- Sanitize: Message clean out those with deleted flag
-- Flatpak  https://lib.rs/crates/cargo-pkg
-
+- import opml: see if we can get the web main url from  the outline
+- Updating the tree: speed up the gtk part
 - Startup, create gui:  delayed creation of dialogs
-- Subscription Tree: hide zeroes when nothing to read
-- refactor messages / separate state_map
 - Browser Display :  wrap over   title
 - React on Minimize, do memory usage reduction
 - implement focus policy: before last unread
 - Opml export formatted / pretty
 - Browser: enable theme related colors
-- Modify Browser Font size
-
+- Browser: Modify  Font size
+- Browser: add Zoom Control
+- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
 - Reduce Size of Binary:
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
-- DragAndDrop for Websites into Tree
+
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
-- Searching inside feeds
-- Message List: set scroll position to upper edge from Cursor
+- Searching inside messages
 - Keybard configuration in settings
+- DragAndDrop for Websites into Tree
 
 
 Later:
@@ -59,7 +50,6 @@ Later:
   https://github.com/gabdube/native-windows-gui/tree/master/showcase
   https://www.ebbflow.io/blog/vending-win
 	https://gtk-rs.org/gtk4-rs/git/book/installation_windows.html
-
 
 
 Perhaps:
@@ -80,12 +70,10 @@ Perhaps:
 
 
 * Merge Branch and build release
-
     git checkout main
     git merge origin/v0_0_3
     git push origin main
-
-		# (cd grassfeed_rs/app-gtk3-linux/ ; cargo clean;  rm Cargo.lock ; cargo test && nice -n9 cargo deb )
+		cd grassfeder_rs/app-gtk3-linux/ ; ./ docker-stage2.sh
 
 
 * Put the work folder back to main
@@ -125,7 +113,36 @@ Desktop:
 https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 
 
-------
+------ AppImage
+https://lib.rs/crates/cargo-appimage
+https://appimage-builder.readthedocs.io/en/stable/intro/install.html
+https://docs.appimage.org/packaging-guide/index.html
+https://askubuntu.com/questions/1021420/glibc-2-25-not-found-on-ubuntu-windows-subsystem-for-linux
+https://distrowatch.com/table.php?distribution=mint
+https://docs.appimage.org/reference/best-practices.html#binaries-compiled-on-old-enough-base-system
+## The ingredients used in your AppImage should not be built on a more recent base system than the oldest base system your AppImage is intended to run on.
+## Install appimagetool AppImage
+#sudo apt install -y python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse
+#sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+#sudo chmod +x /usr/local/bin/appimagetool
+
+
+
+
+
+
+------ dylib
+https://prog.world/building-and-using-dynamic-link-libraries-in-rust/
+https://zicklag.github.io/rust-tutorials/rust-plugins.html
+https://robert.kra.hn/posts/2022-09-09-speeding-up-incremental-rust-compilation-with-dylibs/
+https://stackoverflow.com/questions/tagged/dynamic-library+rust
+https://users.rust-lang.org/t/what-is-the-difference-between-dylib-and-cdylib/28847
+https://doc.rust-lang.org/reference/linkage.html
+https://stackoverflow.com/questions/44169635/rust-cargo-dylib-clarification
+
+
+
+------ DOCKER
 Docker:  3 Phasen:  aus,   build, run
 	https://kerkour.com/rust-small-docker-image#/from-buster-slim
 	https://windsoilder.github.io/writing_dockerfile_in_rust_project.html
@@ -135,13 +152,11 @@ https://middleware.io/blog/docker-cleanup/
 
 
 -------------------
-	       GTK_DEBUG=interactive
+GTK_DEBUG=interactive
 	https://docs.gtk.org/gio/class.Application.html
 	https://wiki.gnome.org/HowDoI/GtkApplication
 	https://developer.gnome.org/documentation/tutorials/application.html
 	https://docs.gtk.org/gio/method.Application.run.html
-
-
 
 -------------------
 

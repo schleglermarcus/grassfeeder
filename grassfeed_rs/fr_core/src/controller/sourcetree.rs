@@ -1,10 +1,11 @@
 use crate::config::configmanager::ConfigManager;
-use crate::controller::contentdownloader::Downloader;
+use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::get_font_size_from_config;
 use crate::controller::contentlist::CJob;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
@@ -133,9 +134,10 @@ pub trait ISourceTreeController {
     fn mark_as_read(&self, src_repo_id: isize);
     fn get_current_selected_fse(&self) -> Option<SubscriptionEntry>;
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry>;
-
     /// writes the path array into the cached subscription list
     fn update_cached_paths(&self);
+
+    fn invalidate_read_unread(&self, subs_id: isize);
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -152,7 +154,6 @@ pub struct SourceTreeController {
     job_queue_sender: Sender<SJob>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_val_store: UIAdapterValueStoreType,
-
     config: Config,
     feedsource_delete_id: Option<usize>,
     current_edit_fse: Option<SubscriptionEntry>,
@@ -163,6 +164,7 @@ pub struct SourceTreeController {
     any_spinner_visible: RefCell<bool>,
     need_check_fs_paths: RefCell<bool>,
     statemap: RefCell<SubscriptionState>,
+    erro_repo_r: Rc<RefCell<ErrorRepo>>,
 }
 
 impl SourceTreeController {
@@ -175,7 +177,8 @@ impl SourceTreeController {
         let gc_r = (*ac).get_rc::<GuiContext>().unwrap();
         let u_a = (*gc_r).borrow().get_updater_adapter();
         let v_s_a = (*gc_r).borrow().get_values_adapter();
-        let dl_r = (*ac).get_rc::<Downloader>().unwrap();
+        let dl_r = (*ac).get_rc::<contentdownloader::Downloader>().unwrap();
+        let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
         Self::new(
             (*ac).get_rc::<Timer>().unwrap(),
             (*ac).get_rc::<SubscriptionRepo>().unwrap(),
@@ -184,9 +187,11 @@ impl SourceTreeController {
             u_a,
             v_s_a,
             dl_r,
+            err_rep,
         )
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         timer_: Rc<RefCell<dyn ITimer>>,
         subscr_rr: Rc<RefCell<dyn ISubscriptionRepo>>,
@@ -195,6 +200,7 @@ impl SourceTreeController {
         upd_ad: Rc<RefCell<dyn UIUpdaterAdapter>>,
         v_s_a: UIAdapterValueStoreType,
         downloader_: Rc<RefCell<dyn IDownloader>>,
+        err_rep: Rc<RefCell<ErrorRepo>>,
     ) -> Self {
         let (q_s, q_r) = flume::bounded::<SJob>(JOBQUEUE_SIZE);
         SourceTreeController {
@@ -220,6 +226,7 @@ impl SourceTreeController {
             messagesrepo_w: Weak::new(),
             need_check_fs_paths: RefCell::new(true),
             statemap: RefCell::new(SubscriptionState::default()),
+            erro_repo_r: err_rep,
         }
     }
 
@@ -251,7 +258,6 @@ impl SourceTreeController {
                                 .clear_num_all_unread(subs_e.parent_subs_id);
                             self.addjob(SJob::ScanEmptyUnread);
                         }
-
                         self.tree_update_one(&subs_e, &su_st);
                     } else {
                         warn!("could not store readcount for id {}", subs_id);
@@ -283,7 +289,6 @@ impl SourceTreeController {
                     self.mark_schedule_fetch(subs_id);
                 }
                 SJob::CheckSpinnerActive => {
-                    // let fetch_in_progress_ids = (*self.subscriptionrepo_r)                        .borrow()                        .get_ids_by_status(StatusMask::FetchInProgress, true, false);
                     let fetch_in_progress_ids = self.statemap.borrow().get_ids_by_status(
                         StatusMask::FetchInProgress,
                         true,
@@ -329,7 +334,7 @@ impl SourceTreeController {
                 SJob::UpdateLastSelectedMessageId(fs_id, fc_id) => {
                     (*self.subscriptionrepo_r)
                         .borrow()
-                        .update_last_selected(fs_id, fc_id);
+                        .update_last_selected(fs_id, fc_id); // later: this  takes a long time sometimes
                 }
                 SJob::ScanEmptyUnread => {
                     let unread_ids = self.statemap.borrow().scan_num_all_unread();
@@ -432,8 +437,6 @@ impl SourceTreeController {
         let mut tv: Vec<AValue> = Vec::new(); // linked to ObjectTree
         let mut rightcol_text = String::default(); // later:  folder sum stats
         let mut num_msg_unread = 0;
-
-        // if !fse.is_folder {
         if let Some((num_all, num_unread)) = su_st.num_msg_all_unread {
             if self.config.display_feedcount_all {
                 rightcol_text = format!("{}/{}", num_unread, num_all);
@@ -442,7 +445,6 @@ impl SourceTreeController {
             }
             num_msg_unread = num_unread;
         }
-        // }
         let mut fs_iconstr: String = String::default();
         if let Some(ie) = self.iconrepo_r.borrow().get_by_index(fse.icon_id as isize) {
             fs_iconstr = ie.icon;
@@ -461,28 +463,40 @@ impl SourceTreeController {
             Some(tp) => format!("{:?}", &tp),
             None => "".to_string(),
         };
-        let tooltip = format!(
-            "{} ST{} X{}  P{:?} I{} L{}",
-            fse.subs_id,
-            su_st.status,
-            match fse.expanded {
-                true => 1,
-                _ => 0,
-            },
-            tp,
-            fse.icon_id,
-            fse.last_selected_msg
-        );
         let mut m_status = su_st.status as u32;
         if fse.expanded {
-            m_status |= TREE0_COL_STATUS_EXPANDED; //StatusMask::FolderExpanded as u32;
+            m_status |= TREE0_COL_STATUS_EXPANDED;
         }
         let displayname = if fse.display_name.is_empty() {
             String::from("--")
         } else {
             fse.display_name.clone()
         };
-        tv.push(AValue::AIMG(fs_iconstr));
+        let mut tooltip_a = AValue::None;
+        if su_st.is_err_on_fetch() {
+            if let Some(last_e) = (*self.erro_repo_r).borrow().get_last_entry(fse.subs_id) {
+                // debug!("err-list {}  => {:?}", fse.subs_id, errorlist);
+                let mut e_part = last_e.text;
+                e_part.truncate(100);
+                tooltip_a = AValue::ASTR(e_part);
+            }
+        }
+        if self.config.mode_debug && tooltip_a == AValue::None {
+            tooltip_a = AValue::ASTR(format!(
+                "{} ST{} X{}  P{:?} I{} L{}",
+                fse.subs_id,
+                su_st.status,
+                match fse.expanded {
+                    true => 1,
+                    _ => 0,
+                },
+                tp,
+                fse.icon_id,
+                fse.last_selected_msg
+            ));
+        }
+
+        tv.push(AValue::AIMG(fs_iconstr)); // 0
         tv.push(AValue::ASTR(displayname)); // 1:
         tv.push(AValue::ASTR(rightcol_text));
         tv.push(AValue::AIMG(status_icon.to_string()));
@@ -494,12 +508,7 @@ impl SourceTreeController {
             fse.is_folder,
         ))); //  6: num_content_unread
         tv.push(AValue::AU32(m_status)); //	7 : status
-
-        if self.config.mode_debug {
-            tv.push(AValue::ASTR(tooltip)); //  : 8 tooltip
-        } else {
-            tv.push(AValue::None); //  : 8 tooltip
-        }
+        tv.push(tooltip_a); //  : 8 tooltip
         let show_spinner = su_st.is_fetch_in_progress();
         tv.push(AValue::ABOOL(show_spinner)); //  : 9	spinner visible
         tv.push(AValue::ABOOL(!show_spinner)); //  : 10	StatusIcon Visible
@@ -601,7 +610,6 @@ impl SourceTreeController {
             self.tree_store_update_one(source_id);
             self.check_icon(source_id);
         }
-        // (*self.subscriptionrepo_r).borrow().set_status(
         self.statemap
             .borrow_mut()
             .set_status(&[source_id], StatusMask::FetchScheduled, false);
@@ -878,8 +886,8 @@ impl SourceTreeController {
         }
         if self.config.feeds_fetch_interval_unit == 0 {
             self.config.feeds_fetch_interval_unit = DEFAULT_CONFIG_FETCH_FEED_UNIT as u32;
-            // Hours
-        }
+        } // Hours
+
         self.config.feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
             .get_val_bool(Self::CONF_FETCH_ON_START);
@@ -933,7 +941,6 @@ impl SourceTreeController {
         let entries: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_subs_id as isize);
-        // let child_ids: Vec<isize> = entries            .iter()            .map(|entry| entry.subs_id)            .collect::<Vec<isize>>();
         entries.iter().enumerate().for_each(|(num, entry)| {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(localpath);
@@ -967,7 +974,7 @@ impl SourceTreeController {
         if before {
             return;
         }
-        info!("SUBS:   existed DB :  {} ", before);
+        // info!("SUBS:   existed DB :  {} ", before);
         {
             let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
             self.add_new_subscription_at_parent(
@@ -1193,7 +1200,7 @@ impl ISourceTreeController for SourceTreeController {
         parent_id: isize,
         load_messages: bool,
     ) -> isize {
-        let san_source = remove_invalid_chars_from_input(newsource)
+        let san_source = remove_invalid_chars_from_input(newsource.clone())
             .trim()
             .to_string();
         let mut san_display = remove_invalid_chars_from_input(display.clone())
@@ -1201,13 +1208,17 @@ impl ISourceTreeController for SourceTreeController {
             .to_string();
         let (filtered, was_truncated) = filter_by_iso8859_1(&san_display);
         if !was_truncated {
-            san_display = filtered;
-        } else {
-            debug!("Found non-ISO chars in Subscription Title: {}", &display); // later see how to filter  https://www.ksta.de/feed/index.rss
+            san_display = filtered; // later see how to filter  https://www.ksta.de/feed/index.rss
         }
         let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
         fse.subs_id = self.get_next_available_subscription_id();
         fse.parent_subs_id = parent_id;
+        if was_truncated {
+            let msg = format!("Found non-ISO chars in Subscription Title: {}", &display);
+            (*self.erro_repo_r)
+                .borrow()
+                .add_error(fse.subs_id, 0, newsource, msg);
+        }
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_id)
@@ -1324,8 +1335,6 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let fs_id = self.feedsource_delete_id.unwrap();
-        // let fse: SubscriptionEntry = (*self.subscriptionrepo_r)            .borrow()            .get_by_index(fs_id as isize)            .unwrap();
-        // debug!(            "feedsource_delete {:?}   Parent: {}  ",            self.feedsource_delete_id, fse.parent_subs_id        );
         (*self.subscriptionrepo_r)
             .borrow()
             .delete_by_index(fs_id as isize);
@@ -1355,6 +1364,7 @@ impl ISourceTreeController for SourceTreeController {
         if let Some(ie) = self.iconrepo_r.borrow().get_by_index(fse.icon_id as isize) {
             fs_iconstr = ie.icon;
         }
+
         dd.push(AValue::ASTR(fse.display_name.clone())); // 0
         if fse.is_folder {
             dialog_id = DIALOG_FOLDER_EDIT;
@@ -1366,6 +1376,17 @@ impl ISourceTreeController for SourceTreeController {
             dd.push(AValue::ASTR(fse.website_url)); // 5
             dd.push(AValue::ASTR(db_time_to_display_nonnull(fse.updated_int))); // 6
             dd.push(AValue::ASTR(db_time_to_display_nonnull(fse.updated_ext))); // 7
+
+            let lines: Vec<String> = (*self.erro_repo_r)
+                .borrow()
+                .get_by_subscription(src_repo_id)
+                .iter()
+                .map(|ee| ee.to_line(fse.display_name.clone()))
+                .collect();
+
+            let joined = lines.join("\n");
+            // debug!("SUBS_EDIT:  {:?}", &joined);
+            dd.push(AValue::ASTR(joined)); // 8
         }
         (*self.gui_val_store)
             .write()
@@ -1554,6 +1575,11 @@ impl ISourceTreeController for SourceTreeController {
     fn update_cached_paths(&self) {
         self.update_paths_rec(&Vec::<u16>::default(), 0, false);
     }
+
+    fn invalidate_read_unread(&self, subs_id: isize) {
+        self.statemap.borrow_mut().clear_num_all_unread(subs_id);
+        self.addjob(SJob::ScanEmptyUnread);
+    }
 } // impl ISourceTreeController
 
 impl TimerReceiver for SourceTreeController {
@@ -1600,9 +1626,7 @@ impl StartupWithAppContext for SourceTreeController {
             .borrow()
             .store_default_db_entries();
         self.startup_read_config();
-
         self.addjob(SJob::EmptyTreeCreateDefaultSubscriptions);
-
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::FillSourcesTree);
         if self.config.feeds_fetch_at_start {
@@ -1610,7 +1634,12 @@ impl StartupWithAppContext for SourceTreeController {
         }
         self.addjob(SJob::ScanEmptyUnread);
         self.addjob(SJob::GuiUpdateTreeAll);
-        // self.addjob(SJob::SanitizeSources);	// later: do that with dialog,  with config setting
+        if (self.configmanager_r)
+            .borrow()
+            .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP)
+        {
+            self.addjob(SJob::SanitizeSources);
+        }
         self.addjob(SJob::UpdateTreePaths);
     }
 }
@@ -1688,4 +1717,12 @@ impl Default for NewSourceState {
     fn default() -> Self {
         NewSourceState::None
     }
+}
+
+#[cfg(test)]
+mod t {
+
+    // use super::*;
+    // use std::cell::RefCell;
+    // use std::rc::Rc;
 }

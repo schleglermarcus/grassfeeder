@@ -1,7 +1,7 @@
 use crate::config::configmanager::ConfigManager;
-use crate::controller::browserpane::BrowserPane;
+use crate::controller::browserpane; // ::CONF_BROWSER_CACHE_CLEANUP;
 use crate::controller::browserpane::IBrowserPane;
-use crate::controller::contentdownloader::Downloader;
+use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
@@ -9,6 +9,7 @@ use crate::controller::contentlist::ListMoveCommand;
 use crate::controller::sourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
@@ -48,7 +49,6 @@ use std::collections::HashSet;
 use std::rc::Rc;
 use std::time::Instant;
 
-// #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Job {
     StartApplication,
@@ -64,8 +64,8 @@ pub enum Job {
     NotifyConfigChanged,
     /// thread-nr,  job-kind
     DownloaderJobStarted(u8, u8),
-    /// thread-nr, job-kind
-    DownloaderJobFinished(u8, u8),
+    /// thread-nr, job-kind, elapsed_ms , job-description
+    DownloaderJobFinished(isize, u8, u8, u32, String),
     CheckFocusMarker(u8),
 }
 
@@ -91,6 +91,7 @@ pub struct GuiProcessor {
     iconrepo_r: Rc<RefCell<IconRepo>>,
     statusbar_items: StatusBarItems,
     focus_by_tab: FocusByTab,
+    erro_repo_r: Rc<RefCell<ErrorRepo>>,
 }
 
 impl GuiProcessor {
@@ -100,7 +101,8 @@ impl GuiProcessor {
         let u_a = (*guicontex_r).borrow().get_updater_adapter();
         let v_s_a = (*guicontex_r).borrow().get_values_adapter();
         let guirunner = (*guicontex_r).borrow().get_gui_runner();
-        let dl_r = (*ac).get_rc::<Downloader>().unwrap();
+        let dl_r = (*ac).get_rc::<contentdownloader::Downloader>().unwrap();
+        let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
         GuiProcessor {
             subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
             configmanager_r: (*ac).get_rc::<ConfigManager>().unwrap(),
@@ -116,9 +118,10 @@ impl GuiProcessor {
             gui_runner: guirunner,
             downloader_r: dl_r,
             gui_context_r: guicontex_r,
-            browserpane_r: (*ac).get_rc::<BrowserPane>().unwrap(),
+            browserpane_r: (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
             statusbar_items: StatusBarItems::default(),
             focus_by_tab: FocusByTab::None,
+            erro_repo_r: err_rep,
         }
     }
 
@@ -157,6 +160,9 @@ impl GuiProcessor {
                     "M_ABOUT" => {
                         self.start_about_dialog();
                     }
+                    "M_SHORT_HELP" => {
+                        (*self.browserpane_r).borrow().display_short_help();
+                    }
                     _ => warn!("Menu Unprocessed:{:?} ", s),
                 },
                 GuiEvents::ButtonClicked(ref b) => match b.as_str() {
@@ -165,14 +171,14 @@ impl GuiProcessor {
                     }
                     _ => debug!("GP2 Button:  {:?}", b),
                 },
-                GuiEvents::TreeRowActivated(_tree_idx, ref _path, source_repo_id) => {
+                GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) => {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
-                        .set_selected_feedsource(source_repo_id as isize);
-                    // trace!(                        "GP: TreeRowActivated {} => update_feed_list_contents, DL {} ",                        source_repo_id,                        (*self.downloader_r).borrow().get_queue_size()                    );
+                        .set_selected_feedsource(subs_id as isize);
+                    // trace!(                        "GP:TreeRowActivated{} #q:{} {:?} ",                        subs_id,                        (*self.downloader_r).borrow().get_queue_size(),                        _path                    );
                     (*self.feedcontents_r)
                         .borrow()
-                        .update_feed_list_contents(source_repo_id as isize);
+                        .update_feed_list_contents(subs_id as isize);
                 }
                 GuiEvents::ListRowActivated(_list_idx, list_position, fc_repo_id) => {
                     list_row_activated_map.insert(fc_repo_id, list_position);
@@ -422,7 +428,17 @@ impl GuiProcessor {
                 Job::DownloaderJobStarted(threadnr, kind) => {
                     self.statusbar_items.downloader_kind_new[threadnr as usize] = kind;
                 }
-                Job::DownloaderJobFinished(threadnr, _kind) => {
+                Job::DownloaderJobFinished(subs_id, threadnr, _kind, elapsed_ms, description) => {
+                    if elapsed_ms > 5000 && subs_id > 0 {
+                        //  trace!(                            "DL: {} {} took {} ms {}    ",                           threadnr,                            _kind,                            elapsed_ms,                            description                        );
+                        (*self.erro_repo_r).borrow().add_error(
+                            subs_id,
+                            elapsed_ms as isize,
+                            String::default(),
+                            description,
+                        );
+                    }
+
                     self.statusbar_items.downloader_kind_new[threadnr as usize] = 0;
                 }
                 Job::CheckFocusMarker(num) => {
@@ -553,6 +569,14 @@ impl GuiProcessor {
                 (*self.browserpane_r)
                     .borrow_mut() // 9 : browser bg
                     .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
+                (self.configmanager_r).borrow().set_val(
+                    &PropDef::BrowserClearCache.to_string(),
+                    payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
+                );
+                (self.configmanager_r).borrow().set_val(
+                    contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
+                    payload.get(11).unwrap().boo().to_string(),
+                );
                 self.addjob(Job::NotifyConfigChanged);
             }
             _ => {
@@ -604,6 +628,12 @@ impl GuiProcessor {
             .read()
             .unwrap()
             .get_gui_int_or(PropDef::GuiFontSizeManual, 10) as u32;
+        let browser_cache_clear = (self.configmanager_r)
+            .borrow()
+            .get_val_bool(&PropDef::BrowserClearCache.to_string());
+        let databases_cleanup = (self.configmanager_r)
+            .borrow()
+            .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP);
         let dd: Vec<AValue> = vec![
             AValue::ABOOL(sources_conf.feeds_fetch_at_start), // 0 : FetchFeedsOnStart
             AValue::AU32(sources_conf.feeds_fetch_interval),  // 1 UpdateFeeds Cardinal
@@ -615,6 +645,8 @@ impl GuiProcessor {
             AValue::ABOOL(fontsize_manual_enable),                // 7 : FontSizeManualEnable
             AValue::AU32(fontsize_manual),                        // 8 : Font size Manual
             AValue::AU32(browser_conf.browser_bg as u32),         // 9 : Browser_BG
+            AValue::ABOOL(browser_cache_clear),                   // 10 : Browser Cache Cleanup
+            AValue::ABOOL(databases_cleanup),                     // 11 : Cleanup-on-start
         ];
         (*self.gui_val_store)
             .write()
@@ -648,7 +680,6 @@ impl GuiProcessor {
                 .borrow()
                 .get_config()
                 .num_downloader_threads;
-
             is_folder = fse.is_folder;
         } else {
             repo_id_new = -1;
@@ -660,7 +691,6 @@ impl GuiProcessor {
         }
         let mut num_msg_all = self.statusbar_items.num_msg_all;
         let mut num_msg_unread = self.statusbar_items.num_msg_unread;
-
         let subs_state: SubsMapEntry = (*self.feedsources_r)
             .borrow()
             .get_state(repo_id_new)
@@ -669,13 +699,17 @@ impl GuiProcessor {
             || repo_id_new != self.statusbar_items.selected_repo_id
         {
             self.statusbar_items.selected_msg_id = selected_msg_id;
-            if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
-                num_msg_all = n_a;
-                num_msg_unread = n_u;
+        }
+        if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
+            num_msg_all = n_a;
+            num_msg_unread = n_u;
+            if n_a != self.statusbar_items.num_msg_all || n_u != self.statusbar_items.num_msg_unread
+            {
+                // trace!(                    "STATUS :   {}  unread/all ={}/{}",                   repo_id_new, num_msg_unread, num_msg_all                );
                 need_update2 = true;
             }
-            // debug!(                "STATUS :   {}  unread/all ={}/{}",                repo_id_new, num_msg_unread, num_msg_all            );
         }
+
         if repo_id_new > 0 {
             if num_msg_all != self.statusbar_items.num_msg_all {
                 self.statusbar_items.num_msg_all = num_msg_all;
@@ -691,7 +725,6 @@ impl GuiProcessor {
                 need_update2 = true;
             }
         }
-
         let last_msg_url = if selected_msg_id < 0 {
             String::default()
         } else {

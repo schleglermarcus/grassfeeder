@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 /// on each scan attempt, how many unread-jobs do we create.
-pub const SCAN_EMPTY_UNREAD_GROUP: u8 = 4;
+pub const SCAN_EMPTY_UNREAD_GROUP: u8 = 5;
 
 pub trait ISubscriptionState {
     fn get_state(&self, id: isize) -> Option<SubsMapEntry>;

@@ -48,12 +48,11 @@ pub fn timestamp_from_utc(in_utc: DateTime<Utc>) -> i64 {
     converted.timestamp()
 }
 
-pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Option<Vec<u8>> {
+pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Result<Vec<u8>, String> {
     let buffersize = 100000;
     let r = image::load_from_memory_with_format(bytes_webp, ImageFormat::WebP);
     if let Err(e) = r {
-        debug!("convert_webp_to_png:1 {:?}", e);
-        return None;
+        return Err(format!("convert_webp_to_png:1 {:?}", e));
     }
     let mut dynimg = r.unwrap();
     if let Some(width) = resize_w_h {
@@ -70,13 +69,8 @@ pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Option
         ImageFormat::Png,
     );
     match rw {
-        Err(e) => {
-            debug!("convert_webp_to_png:2 {:?}", e);
-            None
-        }
-        Ok(_written) => {
-            return Some(cursor.get_ref().clone());
-        }
+        Err(e) => Err(format!("convert_webp_to_png:2 {:?}", e)),
+        Ok(_written) => Ok(cursor.get_ref().clone()),
     }
 }
 
@@ -174,6 +168,7 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#8217;", "\'");
     ret = ret.replace("&#8230;", " ... ");
     ret = ret.replace("&#x8211;", " - ");
+    ret = ret.replace("&quot;", "\"");
     ret.trim().to_string()
 }
 

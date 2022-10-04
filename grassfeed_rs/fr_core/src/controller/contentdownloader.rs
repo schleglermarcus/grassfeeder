@@ -7,6 +7,7 @@ use crate::controller::guiprocessor::Job;
 use crate::controller::sourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
@@ -44,7 +45,8 @@ use std::time::Duration;
 
 pub static KEEPRUNNING: AtomicBool = AtomicBool::new(true);
 pub const CONF_DOWNLOADER_THREADS: &str = "DownloaderThreads";
-pub const DOWNLOADER_THREADS_DEFAULT  : u8 =2;
+pub const CONF_DATABASES_CLEANUP: &str = "DatabasesCleanup";
+pub const DOWNLOADER_THREADS_DEFAULT: u8 = 2;
 pub const DOWNLOADER_LOOP_DELAY_S: u8 = 1;
 pub const DOWNLOADER_LOOP_WAIT_MS: u64 = 200; // between downloader queue requests
 pub const DOWNLOADER_JOB_QUEUE: usize = 10000;
@@ -76,10 +78,11 @@ trait DLKind {
     fn hostname(&self) -> Option<String> {
         None
     }
+    fn subscription_id(&self) -> isize;
 }
 
 impl DLKind for DLJob {
-    /// see  [crate::guiprocessor::dl_char_for_kind ]
+    /// see  [crate::guiprocessor::dl_char_for_kind]
     fn kind(&self) -> u8 {
         match self {
             DLJob::None => 0,
@@ -97,6 +100,16 @@ impl DLKind for DLJob {
             _ => None,
         }
     }
+
+    fn subscription_id(&self) -> isize {
+        match self {
+            DLJob::None => -1,
+            DLJob::Feed(inner) => inner.fs_repo_id,
+            DLJob::Icon(inner) => inner.fs_repo_id,
+            DLJob::ComprehensiveFeed(_) => -2,
+            DLJob::CleanDatabase(_) => -3,
+        }
+    }
 }
 
 pub struct Downloader {
@@ -112,6 +125,7 @@ pub struct Downloader {
     pub busy_indicators: Arc<RwLock<[(u8, String); DOWNLOADER_MAX_NUM_THREADS as usize]>>,
     messagesrepo: Rc<RefCell<MessagesRepo>>,
     job_queue: Arc<RwLock<VecDeque<DLJob>>>,
+    erro_repo: Rc<RefCell<ErrorRepo>>,
 }
 
 impl Downloader {
@@ -121,6 +135,7 @@ impl Downloader {
         icon_repo_r: Rc<RefCell<IconRepo>>,
         cm_r: Rc<RefCell<ConfigManager>>,
         msgrepo: Rc<RefCell<MessagesRepo>>,
+        err_repo: Rc<RefCell<ErrorRepo>>,
     ) -> Self {
         Downloader {
             joinhandles: Vec::default(),
@@ -135,6 +150,7 @@ impl Downloader {
             busy_indicators: Arc::new(RwLock::new(Default::default())),
             messagesrepo: msgrepo,
             job_queue: Arc::new(RwLock::new(VecDeque::default())),
+            erro_repo: err_repo,
         }
     }
 
@@ -145,7 +161,8 @@ impl Downloader {
         let iconrepo_r: Rc<RefCell<IconRepo>> = (*ac).get_rc::<IconRepo>().unwrap();
         let cm_r = (*ac).get_rc::<ConfigManager>().unwrap();
         let msgrepo = (*ac).get_rc::<MessagesRepo>().unwrap();
-        Downloader::new(fetcher, subscr_r, iconrepo_r, cm_r, msgrepo)
+        let errors_r = (*ac).get_rc::<ErrorRepo>().unwrap();
+        Downloader::new(fetcher, subscr_r, iconrepo_r, cm_r, msgrepo, errors_r)
     }
 
     pub fn startup(&mut self) {
@@ -207,17 +224,19 @@ impl Downloader {
         let contains = (*self.job_queue).read().unwrap().contains(&dljob);
         if contains {
             let kind = dljob.kind();
-            debug!("download job already queued:  {}:{:?}", kind, &dljob);
+            trace!("download job already queued:  {}:{:?}", kind, &dljob);
         } else {
             (*self.job_queue).write().unwrap().push_back(dljob);
         }
     }
 
-    fn process_job(dljob: DLJob, gp_sender: Sender<Job>, proc_num: u8) {
+    // returns   used time in milliseconds
+    fn process_job(dljob: DLJob, gp_sender: Sender<Job>, proc_num: u8) -> u64 {
         let now = std::time::Instant::now();
         let job_kind = dljob.kind();
+        let subs_id = dljob.subscription_id();
         let _r = gp_sender.send(Job::DownloaderJobStarted(proc_num, job_kind));
-        let job_description = format!("{:?}", &dljob);
+        let job_description = format!("{}  {:?}", std::thread::current().name().unwrap(), &dljob);
         match dljob {
             DLJob::None => {}
             DLJob::Feed(i) => {
@@ -234,11 +253,14 @@ impl Downloader {
             }
         }
         let elapsedms = now.elapsed().as_millis();
-        let t_name: String = std::thread::current().name().unwrap().to_string();
-        if elapsedms > 5000 {
-            trace!("{} {:?} took {}ms  ", t_name, job_description, elapsedms);
-        }
-        let _r = gp_sender.send(Job::DownloaderJobFinished(proc_num, job_kind));
+        let _r = gp_sender.send(Job::DownloaderJobFinished(
+            subs_id,
+            proc_num,
+            job_kind,
+            elapsedms as u32,
+            job_description,
+        ));
+        elapsedms as u64
     }
 
     pub fn host_from_url(url: &String) -> Option<String> {
@@ -282,12 +304,11 @@ impl IDownloader for Downloader {
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
-
         let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
-
         let msgrepo = MessagesRepo::new_by_connection(
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
+        let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
         let new_fetch_job = FetchInner {
             fs_repo_id: f_source_repo_id,
             url: fse.url,
@@ -301,17 +322,17 @@ impl IDownloader for Downloader {
             messgesrepo: msgrepo,
             download_text: String::default(),
             download_error_text: String::default(),
+            erro_repo: errors_rep,
         };
         self.add_to_queue(DLJob::Feed(new_fetch_job));
     }
 
     fn load_icon(&self, fs_id: isize, fs_url: String, old_icon_id: usize) {
         let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
-
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
-
+        let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
         let dl_inner = IconInner {
             fs_repo_id: fs_id,
             feed_url: fs_url,
@@ -325,6 +346,7 @@ impl IDownloader for Downloader {
             feed_homepage: String::default(),
             feed_download_text: String::default(),
             subscriptionrepo: subscription_repo,
+            erro_repo: errors_rep,
         };
         self.add_to_queue(DLJob::Icon(dl_inner));
     }
@@ -443,19 +465,17 @@ impl TimerReceiver for Downloader {
 #[derive(Clone, Debug)]
 pub struct Config {
     pub num_downloader_threads: u8,
+    // pub cleanup_databases: bool,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
             num_downloader_threads: 1,
+            // cleanup_databases: false,
         }
     }
 }
 
 // ---
-
-#[cfg(test)]
-mod downloader_test {
-    //  use super::*;
-}
+// #[cfg(test)]mod downloader_test {     use super::*;  }

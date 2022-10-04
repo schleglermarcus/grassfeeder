@@ -103,7 +103,10 @@ pub fn extract_icon_from_homepage(hp_content: String, homepage_url: &String) -> 
                         homepage_host =
                             format!("{}://{}", parsed.scheme(), parsed.host_str().unwrap(),);
                     }
-                    Err(e) => debug!("extract_icon_from_homepage({})   ERR:{:?}", &homepage_url, e),
+                    Err(e) => debug!(
+                        "extract_icon_from_homepage({})   ERR:{:?}",
+                        &homepage_url, e
+                    ),
                 }
             }
             icon_href = format!("{}{}", homepage_host, icon_href);

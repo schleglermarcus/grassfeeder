@@ -237,10 +237,7 @@ pub fn create_treeview(
     treeview1.connect_row_expanded(move |t_view, t_iter, _t_path| {
         let mut repo_id: i32 = -1;
         if let Some(model) = t_view.model() {
-            repo_id = model
-                .value(t_iter, TREE0_COL_REPO_ID)
-                .get::<u32>()
-                .unwrap() as i32;
+            repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
         }
         esw.sendw(GuiEvents::TreeExpanded(0, repo_id));
     });
@@ -248,10 +245,7 @@ pub fn create_treeview(
     treeview1.connect_row_collapsed(move |t_view, t_iter, _t_path| {
         let mut repo_id: i32 = -1;
         if let Some(model) = t_view.model() {
-            repo_id = model
-                .value(t_iter, TREE0_COL_REPO_ID)
-                .get::<u32>()
-                .unwrap() as i32;
+            repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
         }
         esw.sendw(GuiEvents::TreeCollapsed(0, repo_id));
     });
@@ -327,13 +321,13 @@ fn show_context_menu_source(ev_button: u32, source_repo_id: i32, g_ev_se: Sender
         ));
     });
     if source_repo_id >= 0 {
-		menu.append(&mi_mark_all);
-		menu.append(&mi_update);
+        menu.append(&mi_mark_all);
+        menu.append(&mi_update);
         menu.append(&mi_edit);
         menu.append(&mi_del);
     }
     // if source_repo_id >= 0 {    }
-	menu.append(&mi_addfeed);
+    menu.append(&mi_addfeed);
     menu.append(&mi_afo);
     menu.show_all();
     let c_ev_time = gtk::current_event_time();

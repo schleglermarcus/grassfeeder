@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.0.6"
+version = "0.0.7"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 
@@ -43,3 +43,7 @@ assets =[
 [package.metadata.i18n]
 available-locales = ["en", "de"]
 default-locale = "en"
+
+
+[package.metadata.appimage]
+# assets = ["images", "sounds"]
