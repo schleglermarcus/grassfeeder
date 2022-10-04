@@ -365,7 +365,6 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
     wconte.set_spell_checking_enabled(false);
     wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
     if b_conf.startup_clear_cache {
-        debug!("WebContext.clear_cache()! ");
         wconte.clear_cache();
     }
     wconte
