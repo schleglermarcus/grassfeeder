@@ -53,7 +53,7 @@ fn main() {
             &version_str,
             &conf,
         );
-        check_consistency::databases_consistency_check_u(&conf, true, true);
+        check_consistency::databases_consistency_check_u(&conf);
         return; // no gui
     }
     info!(

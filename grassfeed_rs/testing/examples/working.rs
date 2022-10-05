@@ -23,11 +23,33 @@ extern crate rust_i18n;
 i18n!("../resources/locales");
 
 const MINIHTTPSERVER_PORT: usize = 8123;
-const RSS_DYNAMIC_FILENAME: &str = "../target/dynamic.rss";
+const RSS_DYNAMIC_FILENAME: &str = "target/dynamic.rss";
+
+// cargo watch -s "cargo run  --example working --features ui-gtk   "
+fn main() {
+    setup();
+    loc::init_locales();
+
+    let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT);
+    let _dyn_wr_handle = std::thread::spawn(|| loop {
+        write_feed();
+        std::thread::sleep(std::time::Duration::from_secs(19));
+    });
+    let gfconf = GrassFeederConfig {
+        path_config: "target/db_rungui_local/".to_string(),
+        path_cache: "target/db_rungui_local/".to_string(),
+        debug_mode: false,
+        version: "rungui:rungui_local_clear".to_string(),
+    };
+    let appcontext = fr_core::config::init_system::start(gfconf);
+    test_setup_values(&appcontext, mini_server_c.get_address());
+    fr_core::config::init_system::run(&appcontext);
+    mini_server_c.stop();
+}
 
 fn startup_minihttpserver(port: usize) -> MiniHttpServerController {
     let conf = ServerConfig {
-        htdocs_dir: String::from("tests/fr_htdocs"),
+        htdocs_dir: String::from("testing/tests/fr_htdocs"),
         index_file: String::from("index.html"),
         tcp_address: format!("127.0.0.1:{}", port).to_string(),
         binary_max_size: 1000000,
@@ -77,29 +99,6 @@ fn write_feed() {
     // debug!("written to {} {}", RSS_DYNAMIC_FILENAME, ts_now);
 }
 
-#[ignore]
-#[test]
-fn rungui_local_clear() {
-    setup();
-    loc::init_locales();
-    let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT);
-    let _dyn_wr_handle = std::thread::spawn(|| loop {
-        write_feed();
-        std::thread::sleep(std::time::Duration::from_secs(19));
-    });
-    let gfconf = GrassFeederConfig {
-        path_config: "../target/db_rungui_local/".to_string(),
-        path_cache: "../target/db_rungui_local/".to_string(),
-        debug_mode: false,
-        version: "rungui:rungui_local_clear".to_string(),
-    };
-    let appcontext = fr_core::config::init_system::start(gfconf);
-    test_setup_values(&appcontext, mini_server_c.get_address());
-
-    fr_core::config::init_system::run(&appcontext);
-    mini_server_c.stop();
-}
-
 fn test_setup_values(acr: &AppContext, addr: String) {
     if false {
         let messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>> = acr.get_rc::<MessagesRepo>().unwrap();
@@ -141,10 +140,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder3,
         false,
     );
-
-    if false {
+    if true {
         let src = [
-            // (url_staseve.as_str(), "staseve11"),
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
@@ -152,6 +149,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "https://afternarcissisticabuse.wordpress.com/feed/",
                 "afternarc",
             ),
+            ("http://henrymakow.com/index.xml", "makow"), // why error ?
             ("http://lisahaven.news/feed/", "lisa_haven"), // why error ?
             ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
             ("http://thehighersidechats.com/feed/", "higherside-300"),

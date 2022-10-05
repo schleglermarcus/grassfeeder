@@ -2,7 +2,6 @@ mod logger_config;
 
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::sourcetree::SJob;
-use fr_core::db::check_consistency;
 use fr_core::db::message::compress;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
@@ -15,17 +14,6 @@ use fr_core::downloader::db_clean::CleanerStart;
 use fr_core::util::timestamp_now;
 use fr_core::util::StepResult;
 use std::collections::HashSet;
-
-#[ignore]
-#[test]
-fn db_check_manual() {
-    setup();
-    check_consistency::databases_consistency_check_u(
-        &"/home/marcus/dbcheck/".to_string(),
-        true,
-        true,
-    );
-}
 
 // #[ignore]
 #[test]

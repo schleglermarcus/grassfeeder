@@ -1,3 +1,25 @@
+grassfeeder (0.0.8) unstable; urgency=low
+
+  
+  - Investigate why   subscriptions.db  is so large.  json-dump of subscriptions.
+  
+  - Subscription Tree: hide zeroes when nothing to read
+  - Change Layout: wide bottom line.
+  
+  - Browser: Modify  Font size
+  - Bug:  add-folder   leads to  expanding one that is closed
+  - Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
+  - Bug: Dialog Folder-edit shall show statistics information
+  - Bug messages:  set unread ->  is not processed in following set-reading
+  - Delete Messages by delete key
+  - Create Backups for Subscriptions-DB
+  - Sanitize: cross-check icon ids of tree if they are present in icon db
+  - refactor: gtk - separate file for the message list
+  - Message List: translate titles
+  - check  https://www.linuxcompatible.org/  feed: icon + entries
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Wed, 04 Oct 2022 00:12:00 +0000
+
 grassfeeder (0.0.7) unstable; urgency=low
 
   * Error-DB of subscription updating errors, display in edit dialog

@@ -108,7 +108,7 @@ impl Step<FetchInner> for EvalStringAndFilter {
                 inner.url.clone(),
             );
         if !err_text.is_empty() {
-            inner.download_error_happened = true;
+            // inner.download_error_happened = true;
             inner
                 .erro_repo
                 .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_text);

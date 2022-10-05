@@ -9,11 +9,12 @@ use crate::downloader::db_clean::CleanerStart;
 use crate::util::file_exists;
 use crate::util::StepResult;
 
-pub fn databases_consistency_check(foldername: &str) {
-    databases_consistency_check_u(foldername, false, true);
-}
+// pub fn databases_consistency_check(foldername: &str) {
+//     databases_consistency_check_u(foldername);
+// }
 
-pub fn databases_consistency_check_u(foldername: &str, set_undelete: bool, really_remove: bool) {
+pub fn databases_consistency_check_u(foldername: &str) {
+	let set_undelete : bool = false;
     let subs_fn = SubscriptionRepo::filename(foldername);
     if !file_exists(&subs_fn) {
         error!("No file {} ", subs_fn);
@@ -45,6 +46,7 @@ pub fn databases_consistency_check_u(foldername: &str, set_undelete: bool, reall
     let (c_q_s, c_q_r) = flume::bounded::<CJob>(9);
     let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo1, msgrepo1);
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
+
     c_q_r.drain().for_each(|cjob| debug!("CJOB: {:?}", cjob));
     stc_job_r
         .drain()
@@ -55,6 +57,7 @@ pub fn databases_consistency_check_u(foldername: &str, set_undelete: bool, reall
         debug!(" to_correct: {:?}", parent_ids_to_correct);
     }
 
+	/*
     let all_messages = inner.messgesrepo.get_all_messages();
     if really_remove {
         let to_delete: Vec<i32> = all_messages
@@ -79,6 +82,8 @@ pub fn databases_consistency_check_u(foldername: &str, set_undelete: bool, reall
     debug!("vacuuum messages ... ");
     let v_msg = inner.messgesrepo.db_vacuum();
     debug!("vacuuum done #vmsg={}  #vsubs={}", v_msg, v_sub);
+	*/
+
 
     let all_messages = inner.messgesrepo.get_all_messages();
     let count_not_deleted = all_messages.iter().filter(|m| !m.is_deleted).count();
