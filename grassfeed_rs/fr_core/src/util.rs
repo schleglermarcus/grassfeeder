@@ -149,6 +149,7 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#147;", "›");
     ret = ret.replace("&#148;", "-");
     ret = ret.replace("&#xF6;", "ö");
+    ret = ret.replace("&#152;", "\'");
     ret = ret.replace("&#153;", " - ");
     ret = ret.replace("&#156;", " - ");
     ret = ret.replace("&#157;", " Š ");

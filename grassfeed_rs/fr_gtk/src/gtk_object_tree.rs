@@ -1,38 +1,28 @@
-use crate::cell_data_func::*;
 use crate::dialogs::create_dialogs;
 use crate::load_css::TAB_MARKER_HEIGHT;
+use crate::messagelist::create_listview;
 use crate::util::process_string_to_image;
 use crate::util::DragState;
-use crate::util::EvSenderCache;
 use crate::util::EvSenderWrapper;
-use crate::util::MOUSE_BUTTON_LEFT;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
 use gdk::EventButton;
-use glib::types::Type;
 use gtk::builders::ToggleToolButtonBuilder;
 use gtk::builders::ToolButtonBuilder;
-use gtk::gdk_pixbuf::Pixbuf;
 use gtk::pango::WrapMode;
 use gtk::prelude::ContainerExt;
 use gtk::prelude::GtkMenuItemExt;
-use gtk::prelude::TreeModelExt;
-use gtk::prelude::TreeViewColumnExt;
-use gtk::prelude::TreeViewExt;
 use gtk::prelude::WidgetExt;
 use gtk::prelude::*;
 use gtk::Adjustment;
 use gtk::Align;
 use gtk::Button;
 use gtk::ButtonBox;
-use gtk::CellRendererPixbuf;
-use gtk::CellRendererText;
 use gtk::Container;
 use gtk::Dialog;
 use gtk::IconSize;
 use gtk::Image;
 use gtk::Label;
-use gtk::ListStore;
 use gtk::Menu;
 use gtk::MenuBar;
 use gtk::MenuItem;
@@ -40,15 +30,11 @@ use gtk::Orientation;
 use gtk::Paned;
 use gtk::ResizeMode;
 use gtk::ScrolledWindow;
+use gtk::SearchEntry;
 use gtk::ShadowType;
-use gtk::SortType;
 use gtk::ToggleToolButton;
 use gtk::ToolButton;
 use gtk::Toolbar;
-use gtk::TreeIter;
-use gtk::TreeModel;
-use gtk::TreeView;
-use gtk::TreeViewColumn;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
@@ -68,8 +54,6 @@ use webkit2gtk::WebContextExt;
 use webkit2gtk::WebView;
 use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
-// use gtk::Clipboard;
-
 const TOOLBAR_ICON_SIZE: i32 = 24;
 const TOOLBAR_BORDER_WIDTH: u32 = 0;
 const TOOLBAR_MARGIN: i32 = 0;
@@ -82,7 +66,7 @@ thread_local!(
 pub struct GuiCacheValues {
     pane0x: i32,
     pane1x: i32,
-    col0w: i32,
+    pub col0w: i32,
     window_width: i32,
     window_height: i32,
 }
@@ -152,9 +136,10 @@ impl GtkGuiBuilder for GtkObjectTree {
 
         let menubar = create_menubar(gui_event_sender.clone(), gtk_obj_a.clone(), mode_debug);
         box_2_h.pack_start(&menubar, false, false, 0);
-        let toolbar = create_toolbar(gui_event_sender.clone(), gtk_obj_a.clone());
-        box_2_h.add(&toolbar);
-        box_2_h.set_spacing(0);
+        // let toolbar =
+        create_toolbar(gui_event_sender.clone(), gtk_obj_a.clone(), &box_2_h);
+        // box_2_h.add(&toolbar);
+        box_2_h.set_spacing(-1);
 
         let paned_1 = Paned::new(Orientation::Horizontal);
         paned_1.set_size_request(100, -1);
@@ -393,328 +378,43 @@ pub fn create_webview(w_context: &WebContext) -> WebView {
     webview1
 }
 
-fn set_sort_indicator(tvc: &TreeViewColumn, _sort_column: i32, sort_ascending: bool) {
-    let sorttype = match sort_ascending {
-        true => SortType::Ascending,
-        _ => SortType::Descending,
-    };
-
-    tvc.set_sort_order(sorttype);
-    tvc.clicked();
-    if !sort_ascending {
-        tvc.clicked();
-    }
-}
-
-fn set_column_notifier(col: &TreeViewColumn, g_ev_se: Sender<GuiEvents>) {
-    let esw = EvSenderWrapper(g_ev_se.clone());
-    col.connect_sort_order_notify(move |col| {
-        //  trace!(            "sort_order_notify:  sort_order_notify col={} {:?}",            col.sort_column_id(),            col.sort_order()        );
-        esw.sendw(GuiEvents::ListSortOrderChanged(
-            0,
-            col.sort_column_id() as u8,
-            col.sort_order() == SortType::Ascending,
-        ));
-    });
-    let esw = EvSenderWrapper(g_ev_se);
-    col.connect_sort_column_id_notify(move |col| {
-        // trace!(            "sort_column_id_notify:  column_id_notify {} : {} ",            col.sort_column_id(),            col.is_sort_indicator()        );
-        esw.sendw(GuiEvents::ListSortOrderChanged(
-            0,
-            col.sort_column_id() as u8,
-            col.sort_order() == SortType::Ascending,
-        ));
-    });
-}
-
-fn create_listview(
-    g_ev_se: Sender<GuiEvents>,
-    col1width: i32,
-    gtk_obj_a: GtkObjectsType,
-    sort_column: i32,
-    sort_ascending: bool,
-) -> TreeView {
-    const TYPESTRING_TEXT: &str = "text";
-    let content_tree_view = TreeView::new();
-    content_tree_view.set_headers_visible(true);
-    content_tree_view.set_tooltip_column(6);
-    content_tree_view
-        .selection()
-        .set_mode(gtk::SelectionMode::Multiple);
-    content_tree_view.set_activate_on_single_click(false);
-    content_tree_view.set_enable_search(false);
-    content_tree_view.set_widget_name("TREEVIEW2");
-    content_tree_view.set_margin_top(2);
-    let liststoretypes = &[
-        Pixbuf::static_type(), // 0: feed icon
-        Type::STRING,          // title
-        Type::STRING,          // date
-        Pixbuf::static_type(), // status icon
-        u32::static_type(),    // is unread
-        u32::static_type(),    // 5 : db-id
-        Type::STRING,          // tooltip
-    ];
-    let title_column: TreeViewColumn;
-    let date_column: TreeViewColumn;
-    {
-        let col = TreeViewColumn::new();
-        let cellrendpixbuf = CellRendererPixbuf::new();
-        col.pack_start(&cellrendpixbuf, false);
-        col.add_attribute(&cellrendpixbuf, "gicon", 0_i32);
-        col.set_title("Fav");
-        col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
-        col.set_fixed_width(25);
-        col.set_expand(false);
-        content_tree_view.append_column(&col);
-    }
-    {
-        let cellrendtext = CellRendererText::new();
-        let col = TreeViewColumn::new();
-        col.pack_start(&cellrendtext, true);
-        col.add_attribute(&cellrendtext, TYPESTRING_TEXT, 1);
-        col.set_visible(true);
-        col.set_title("Title");
-        col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
-        col.set_resizable(true);
-        col.set_expand(true);
-        col.set_min_width(10);
-        col.set_max_width(1000);
-        col.set_sort_column_id(LIST0_COL_DISPLAYTEXT);
-        col.set_sort_indicator(true);
-        TreeViewColumnExt::set_cell_data_func(
-            &col,
-            &cellrendtext,
-            Some(Box::new(BoldFunction::<ListBoldDiscr>::tree_switch_bold)),
-        );
-        content_tree_view.append_column(&col);
-        col.connect_resizable_notify(|_col| {
-            info!("List resizable ");
-        });
-        let esw = EvSenderWrapper(g_ev_se.clone());
-        col.connect_width_notify(move |col| {
-            let new_width: i32 = col.width();
-            if new_width != GLOB_CACHE.with(|glob| (*glob.borrow()).col0w) {
-                GLOB_CACHE.with(|glob| {
-                    (*glob.borrow_mut()).col0w = new_width;
-                });
-                esw.sendw(GuiEvents::ColumnWidth(1, new_width));
-            }
-        });
-        col.set_fixed_width(col1width);
-        title_column = col;
-    }
-    {
-        let col = TreeViewColumn::new(); // is-read
-        let cellrendpixbuf = CellRendererPixbuf::new();
-        col.pack_end(&cellrendpixbuf, false);
-        col.add_attribute(&cellrendpixbuf, "gicon", 3_i32);
-        col.set_title("R");
-        col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
-        col.set_expand(false);
-        col.set_min_width(10);
-        col.set_max_width(20);
-        col.set_sort_column_id(LIST0_COL_ISREAD);
-        col.set_resizable(false);
-        content_tree_view.append_column(&col);
-    }
-    {
-        let cellrendtext = CellRendererText::new();
-        let col = TreeViewColumn::new();
-        col.pack_end(&cellrendtext, false);
-        col.add_attribute(&cellrendtext, TYPESTRING_TEXT, 2);
-        col.set_visible(true);
-        col.set_title("Date");
-        col.set_sizing(gtk::TreeViewColumnSizing::GrowOnly);
-        col.set_min_width(10);
-        col.set_resizable(true);
-        col.set_expand(false);
-        col.set_sort_column_id(LIST0_COL_TIMESTAMP);
-        col.set_sort_indicator(true);
-        col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
-        TreeViewColumnExt::set_cell_data_func(
-            &col,
-            &cellrendtext,
-            Some(Box::new(BoldFunction::<ListBoldDiscr>::tree_switch_bold)),
-        );
-        content_tree_view.append_column(&col);
-        date_column = col;
-    }
-    let list_store = ListStore::new(liststoretypes);
-    content_tree_view.set_model(Some(&list_store));
-
-    let esw = EvSenderWrapper(g_ev_se.clone());
-    content_tree_view.connect_cursor_changed(move |tree_view| {
-        let sel = tree_view.selection();
-        if tree_view.model().is_none() {
-            return;
-        }
-        if sel.count_selected_rows() != 1 {
-            return; // either no row selected, then it's a application focus setting, or too many - then it's a selection range
-        }
-        let t_model: TreeModel = tree_view.model().unwrap();
-        let mut list_pos = -1;
-        let mut o_t_iter: Option<TreeIter> = None;
-        let (o_tpath, o_tree_view_column) = tree_view.cursor();
-        if let Some(t_path) = o_tpath {
-            let indices = t_path.indices();
-            list_pos = indices[0];
-            o_t_iter = t_model.iter(&t_path);
-        }
-        let mut repo_id: i32 = -1;
-        if let Some(t_iter) = o_t_iter {
-            repo_id = t_model
-                .value(&t_iter, LIST0_COL_MSG_ID as i32)
-                .get::<u32>()
-                .unwrap() as i32;
-        }
-        let mut sort_col_id = -1;
-        if let Some(tvc) = o_tree_view_column {
-            sort_col_id = tvc.sort_column_id();
-        }
-        if list_pos >= 0 && sort_col_id != LIST0_COL_ISREAD {
-            esw.sendw(GuiEvents::ListRowActivated(0, list_pos, repo_id));
-        }
-    });
-    content_tree_view
-        .selection()
-        .connect_changed(move |t_selection| {
-            let n_rows = t_selection.count_selected_rows();
-            if n_rows <= 0 {
-                return;
-            }
-            if false {
-                let (tp_list, t_model) = t_selection.selected_rows();
-                for t_path in tp_list {
-                    if let Some(t_iter) = t_model.iter(&t_path) {
-                        let repo_id = t_model
-                            .value(&t_iter, LIST0_COL_MSG_ID as i32)
-                            .get::<u32>()
-                            .unwrap() as i32;
-                        trace!("LIST changed multiple {}  ", repo_id);
-                    }
-                }
-            }
-        });
-
-    let esw = EvSenderWrapper(g_ev_se.clone());
-    content_tree_view.connect_row_activated(move |t_view, t_path, _tv_column| {
-        let t_model = t_view.model().unwrap();
-        let t_iter = t_model.iter(t_path).unwrap();
-        let repo_id = t_model
-            .value(&t_iter, LIST0_COL_MSG_ID as i32)
-            .get::<u32>()
-            .unwrap() as i32;
-        let list_pos = t_path.indices()[0];
-        // debug!(            "ROW_ACTIVaTED, double click repoid: {} {}",            repo_id, list_pos        );
-        esw.sendw(GuiEvents::ListRowDoubleClicked(0, list_pos, repo_id));
-    });
-
-    let ev_se_3 = g_ev_se.clone();
-    let esw = EvSenderWrapper(g_ev_se.clone());
-    let gtk_obj_ac = gtk_obj_a.clone();
-    content_tree_view.connect_button_press_event(
-        move |p_tv: &TreeView, eventbutton: &EventButton| {
-            let treeview: gtk::TreeView = p_tv.clone().dynamic_cast::<gtk::TreeView>().unwrap();
-            let mut repo_id: i32 = -1;
-            let button_num = eventbutton.button();
-            let (posx, posy) = eventbutton.position();
-            if button_num == MOUSE_BUTTON_LEFT {
-                if let Some((o_tree_path, o_column, _x, _y)) =
-                    treeview.path_at_pos(posx as i32, posy as i32)
-                {
-                    if let Some(ref t_path) = o_tree_path {
-                        let t_model = treeview.model().unwrap();
-                        let t_iter = t_model.iter(t_path).unwrap();
-                        repo_id = t_model
-                            .value(&t_iter, LIST0_COL_MSG_ID as i32)
-                            .get::<u32>()
-                            .unwrap() as i32;
-                    }
-                    if let Some(tvc) = o_column {
-                        let mut list_pos = -1;
-                        if let Some(tp) = o_tree_path {
-                            let indices = tp.indices();
-                            list_pos = indices[0];
-                        }
-                        if tvc.sort_column_id() == LIST0_COL_ISREAD {
-                            esw.sendw(GuiEvents::ListCellClicked(
-                                0,
-                                list_pos,
-                                tvc.sort_column_id(),
-                                repo_id,
-                            ));
-                        }
-                    }
-                }
-            }
-            if button_num == MOUSE_BUTTON_RIGHT {
-                let (tp_list, t_model) = treeview.selection().selected_rows();
-                let mut repoid_listpos: Vec<(i32, i32)> = Vec::default();
-                //            let mut list_positions: Vec<i32> = Vec::default();
-                if !tp_list.is_empty() {
-                    for t_path in tp_list {
-                        if let Some(t_iter) = t_model.iter(&t_path) {
-                            let repo_id = t_model
-                                .value(&t_iter, LIST0_COL_MSG_ID as i32)
-                                .get::<u32>()
-                                .unwrap() as i32;
-                            repoid_listpos.push((repo_id, t_path.indices()[0]));
-                        }
-                    }
-                }
-                // trace!("LIST RightMouse repo_listpos={:?}  ", &repoid_listpos);
-                show_context_menu_message(
-                    button_num,
-                    ev_se_3.clone(),
-                    gtk_obj_ac.clone(),
-                    &repoid_listpos,
-                );
-                return gtk::Inhibit(true); // do  not propagate
-            }
-
-            gtk::Inhibit(false) // do propagate
-        },
-    );
-    match sort_column {
-        1 => set_sort_indicator(&title_column, sort_column, sort_ascending),
-        2 => set_sort_indicator(&date_column, sort_column, sort_ascending),
-        _ => (),
-    };
-    set_column_notifier(&title_column, g_ev_se.clone());
-    set_column_notifier(&date_column, g_ev_se);
-    let mut ret = (*gtk_obj_a).write().unwrap();
-    ret.set_tree_view(TREEVIEW1, &content_tree_view);
-    ret.set_list_store(TREEVIEW1, &list_store);
-    ret.set_list_store_max_columns(TREEVIEW1 as usize, liststoretypes.len() as u8);
-    content_tree_view
-}
-
 // gdk_sys::GDK_KEY_space			 gdk-sys / src / lib.rs
 // https://gtk-rs.org/gtk3-rs/stable/latest/docs/gdk_sys/index.html
 #[allow(clippy::if_same_then_else)]
 fn connect_keyboard(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
-    let esw = EvSenderWrapper(g_ev_se);
-    if let Some(win) = (*gtk_obj_a).read().unwrap().get_window() {
-        win.connect_key_press_event(move |_win, key| {
-            let keyval = key.keyval();
-            let keystate = key.state();
-            // trace!("            keypress: {:?} {:?} ", keyval, keystate);
-            if keystate.intersects(gdk::ModifierType::CONTROL_MASK) {
-                // debug!("! CONTROL_MASK Ctrl- ");
-            } else if keystate.intersects(gdk::ModifierType::MOD1_MASK) {
-                // debug!("! MOD1_MASK   Alt- ");
-            } else if keystate.intersects(gdk::ModifierType::MOD4_MASK) {
-                // debug!("! MOD4_MASK   Win-Right- ");
-            } else if keystate.intersects(gdk::ModifierType::MOD5_MASK) {
-                // debug!("! MOD5_MASK   AltGr- ");
-            } else if keystate.intersects(gdk::ModifierType::SUPER_MASK) {
-                // debug!("! SUPER_MASK   Win-Left- ");
-            } else {
-                esw.sendw(GuiEvents::KeyPressed(*keyval as isize, keyval.to_unicode()));
-            }
-            Inhibit(false)
-        });
+    let o_win = (*gtk_obj_a).read().unwrap().get_window();
+    if o_win.is_none() {
+        return;
     }
+    let win = o_win.unwrap();
+    let esw = EvSenderWrapper(g_ev_se);
+
+    win.connect_key_press_event(move |_win, key| {
+        let mut entry_has_focus: bool = false;
+        if let Some(searchentry) = (*gtk_obj_a).read().unwrap().get_searchentry(SEARCH_ENTRY_0) {
+            entry_has_focus = searchentry.has_focus();
+        }
+        if entry_has_focus {
+            return Inhibit(false);
+        }
+        let keyval = key.keyval();
+        let keystate = key.state();
+        // trace!("            keypress: {:?} {:?} ", keyval, keystate);
+        if keystate.intersects(gdk::ModifierType::CONTROL_MASK) {
+            // debug!("! CONTROL_MASK Ctrl- ");
+        } else if keystate.intersects(gdk::ModifierType::MOD1_MASK) {
+            // debug!("! MOD1_MASK   Alt- ");
+        } else if keystate.intersects(gdk::ModifierType::MOD4_MASK) {
+            // debug!("! MOD4_MASK   Win-Right- ");
+        } else if keystate.intersects(gdk::ModifierType::MOD5_MASK) {
+            // debug!("! MOD5_MASK   AltGr- ");
+        } else if keystate.intersects(gdk::ModifierType::SUPER_MASK) {
+            // debug!("! SUPER_MASK   Win-Left- ");
+        } else {
+            esw.sendw(GuiEvents::KeyPressed(*keyval as isize, keyval.to_unicode()));
+        }
+        Inhibit(false)
+    });
 }
 
 // MenuBar
@@ -829,7 +529,11 @@ pub fn create_menubar(
     menubar
 }
 
-pub fn create_toolbar(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) -> Toolbar {
+pub fn create_toolbar(
+    g_ev_se: Sender<GuiEvents>,
+    gtk_obj_a: GtkObjectsType,
+    containing_box: &gtk::Box,
+) {
     let toolbar = Toolbar::new();
     toolbar.set_height_request(16);
     toolbar.set_icon_size(IconSize::SmallToolbar);
@@ -900,6 +604,7 @@ pub fn create_toolbar(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) -> 
             esw.sendw(GuiEvents::ToolBarButton("reload-feeds-all".to_string()));
         });
     }
+
     if false {
         let image = Image::new();
         process_string_to_image(
@@ -934,7 +639,7 @@ pub fn create_toolbar(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) -> 
     if false {
         let ttb2: ToggleToolButton = ToggleToolButtonBuilder::new().label("Special2").build();
         toolbar.insert(&ttb2, -1);
-        let esw = EvSenderWrapper(g_ev_se);
+        let esw = EvSenderWrapper(g_ev_se.clone());
         ttb2.connect_active_notify(move |sw| {
             esw.sendw(GuiEvents::ToolBarToggle(
                 "special2".to_string(),
@@ -942,75 +647,30 @@ pub fn create_toolbar(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) -> 
             ));
         });
     }
-    toolbar
-}
+    // toolbar
 
-fn show_context_menu_message(
-    ev_button: u32,
-    g_ev_se: Sender<GuiEvents>,
-    _gtk_obj_a: GtkObjectsType,
-    repoid_listpos: &Vec<(i32, i32)>,
-) {
-    let mi_mark_read = MenuItem::with_label(&t!("CM_MSG_MARK_AS_READ"));
-    let esc = EvSenderCache(
-        g_ev_se.clone(),
-        GuiEvents::ListSelectedAction(0, "mark-as-read".to_string(), repoid_listpos.clone()),
-    );
-    mi_mark_read.connect_activate(move |_menuiten| {
-        esc.send();
-    });
-    let mi_mark_unread = MenuItem::with_label(&t!("CM_MSG_MARK_AS_UNREAD"));
-    let esc = EvSenderCache(
-        g_ev_se.clone(),
-        GuiEvents::ListSelectedAction(0, "mark-as-unread".to_string(), repoid_listpos.clone()),
-    );
-    mi_mark_unread.connect_activate(move |_menuiten| {
-        esc.send();
-    });
-    let mi_open_browser = MenuItem::with_label(&t!("CM_MSG_OPEN_IN_BROWSER"));
-    let esc = EvSenderCache(
-        g_ev_se.clone(),
-        GuiEvents::ListSelectedAction(0, "open-in-browser".to_string(), repoid_listpos.clone()),
-    );
-    mi_open_browser.connect_activate(move |_menuiten| {
-        esc.send();
+    containing_box.add(&toolbar);
+
+    let searchentry: SearchEntry = SearchEntry::new();
+    containing_box.add(&searchentry);
+    searchentry.set_tooltip_text(Some(&t!("TB_FILTER_1")));
+    let esw = EvSenderWrapper(g_ev_se.clone());
+
+    searchentry.connect_changed(move |se: &SearchEntry| {
+        esw.sendw(GuiEvents::SearchEntryTextChanged(
+            SEARCH_ENTRY_0,
+            se.buffer().text(),
+        ));
     });
 
-    let mi_delete = MenuItem::with_label(&t!("CM_MSG_DELETE"));
-    let esc = EvSenderCache(
-        g_ev_se.clone(),
-        GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.clone()),
-    );
-    mi_delete.connect_activate(move |_menuiten| {
-        esc.send();
-    });
-
-    let mi_copy_link = MenuItem::with_label(&t!("CM_MSG_COPY_LINK_CLIPBOARD"));
-    if repoid_listpos.len() == 1 {
-        let esc = EvSenderCache(
-            g_ev_se,
-            GuiEvents::ListSelectedAction(
-                0,
-                "message-copy-link".to_string(),
-                repoid_listpos.clone(),
-            ),
-        );
-        mi_copy_link.connect_activate(move |_menuiten| {
-            esc.send();
-        });
+    {
+        let mut ret = (*gtk_obj_a).write().unwrap();
+        ret.set_searchentry(SEARCH_ENTRY_0, &searchentry);
     }
 
-    let menu: gtk::Menu = Menu::new();
-    menu.append(&mi_open_browser);
-    if repoid_listpos.len() == 1 {
-        menu.append(&mi_copy_link);
+    {
+        // toolbar.insert(&searchentry, -1);
     }
-    menu.append(&mi_mark_read);
-    menu.append(&mi_mark_unread);
-    menu.append(&mi_delete);
-    menu.show_all();
-    let c_ev_time = gtk::current_event_time();
-    menu.popup_easy(ev_button, c_ev_time);
 }
 
 pub fn create_buttonbox(_g_ev_se: Sender<GuiEvents>) -> ButtonBox {

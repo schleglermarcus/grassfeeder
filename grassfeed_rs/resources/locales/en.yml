@@ -14,10 +14,10 @@ en:
   M_ICONS: Icons
   M_SHORT_HELP: Short help text
 
-
   TB_ADD_FOLDER: Add Folder
   TB_ADD_FEED: Add Subscription
   TB_REFRESH_ALL: Refresh all Feeds
+  TB_FILTER_1: Filter messages
 
   SUBSC_DEFAULT_FOLDER1: Examples
   SUBSC_DEFAULT_FOLDER2: Tech

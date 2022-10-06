@@ -48,3 +48,5 @@ pub const PANED_1_LEFT: u8 = 0;
 pub const SCROLLEDWINDOW_0: u8 = 0;
 pub const SCROLLEDWINDOW_1: u8 = 1;
 pub const SCROLLEDWINDOW_2: u8 = 2;
+
+pub const SEARCH_ENTRY_0: u8 = 0;

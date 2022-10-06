@@ -77,7 +77,6 @@ pub enum GuiEvents {
     ToolBarButton(String),
     /// button-name, is-active
     ToolBarToggle(String, bool),
-
     ///  column-id,  width
     ColumnWidth(i32, i32),
 
@@ -89,7 +88,11 @@ pub enum GuiEvents {
     ListSortOrderChanged(u8, u8, bool),
     // Key-Code via gdk,   Unicode-Char
     KeyPressed(isize, Option<char>),
+
+    /// index, new-text
+    SearchEntryTextChanged(u8, String),
 }
+
 
 pub trait UIAdapterValueStore {
     fn set_text_entry(&mut self, index: u8, newtext: String);

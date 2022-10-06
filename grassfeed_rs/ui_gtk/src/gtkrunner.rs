@@ -20,6 +20,7 @@ use gtk::LinkButton;
 use gtk::ListStore;
 use gtk::Paned;
 use gtk::ScrolledWindow;
+use gtk::SearchEntry;
 use gtk::TextView;
 use gtk::TreeStore;
 use gtk::TreeView;
@@ -193,6 +194,7 @@ pub struct GtkObjectsImpl {
     create_webcontext_fn: WebContentType,
     create_webview_fn: WebViewType,
     browser_config: CreateBrowserConfig,
+    pub searchentries: Vec<SearchEntry>,
 }
 
 impl GtkObjectsImpl {
@@ -367,9 +369,9 @@ impl GtkObjects for GtkObjectsImpl {
     fn get_text_entry(&self, index: u8) -> Option<&Entry> {
         self.text_entries.get(index as usize)
     }
-    fn add_text_entry(&mut self, e: &gtk::Entry) {
-        self.text_entries.push(e.clone());
-    }
+
+    // fn add_text_entry(&mut self, e: &gtk::Entry) {        self.text_entries.push(e.clone());    }
+
     fn set_text_entry(&mut self, idx: u8, e: &gtk::Entry) {
         if self.text_entries.len() < idx as usize + 1 {
             self.text_entries.resize(idx as usize + 1, Entry::new());
@@ -513,6 +515,22 @@ impl GtkObjects for GtkObjectsImpl {
 
     fn set_create_webview_fn(&mut self, cb_fn: Option<Box<dyn Fn(&WebContext) -> WebView>>) {
         self.create_webview_fn = cb_fn;
+    }
+
+    fn get_searchentry(&self, idx: u8) -> Option<&SearchEntry> {
+        if self.searchentries.len() < idx as usize + 1 {
+            error!("scrolledwindow not there yet: {}", idx);
+            return None;
+        }
+        self.searchentries.get(idx as usize)
+    }
+
+    fn set_searchentry(&mut self, idx: u8, p: &SearchEntry) {
+        if self.searchentries.len() < idx as usize + 1 {
+            self.searchentries
+                .resize(idx as usize + 1, SearchEntry::default());
+        }
+        self.searchentries[idx as usize] = p.clone();
     }
 }
 

@@ -101,7 +101,7 @@ pub trait GtkObjects {
     fn set_web_context(&mut self, wc: Option<WebContext>);
 
     fn get_text_entry(&self, idx: u8) -> Option<&gtk::Entry>;
-    fn add_text_entry(&mut self, e: &gtk::Entry);
+    // fn add_text_entry(&mut self, e: &gtk::Entry);
     fn set_text_entry(&mut self, idx: u8, e: &gtk::Entry);
 
     fn get_buttons(&self) -> Vec<gtk::Button>;
@@ -142,6 +142,9 @@ pub trait GtkObjects {
     );
 
     fn set_create_webview_fn(&mut self, cb_fn: WebViewType);
+
+    fn set_searchentry(&mut self, idx: u8, e: &gtk::SearchEntry);
+    fn get_searchentry(&self, idx: u8) -> Option<&gtk::SearchEntry>;
 }
 
 #[derive(Clone, Debug)]

@@ -30,6 +30,7 @@ use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::gui_values::FontAttributes;
 use gui_layer::gui_values::PropDef;
+use regex::RegexBuilder;
 use resources::gen_icons;
 use resources::id::LIST0_COL_MSG_ID;
 use resources::id::TREEVIEW1;
@@ -62,6 +63,7 @@ pub enum CJob {
     StartWebBrowser(i32),
     /// feed-source-id
     RequestUnreadAllCount(isize),
+    UpdateMessageList,
 }
 
 pub trait IFeedContents {
@@ -110,6 +112,8 @@ pub trait IFeedContents {
     ) -> (String, String, String);
 
     fn move_list_cursor(&self, c: ListMoveCommand);
+
+    fn set_messages_filter(&mut self, newtext: &String);
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
@@ -128,6 +132,7 @@ pub struct FeedContents {
     list_selected_ids: RwLock<Vec<i32>>,
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     msg_state: RwLock<MessageStateMap>,
+    msg_filter: Option<String>,
 }
 
 impl FeedContents {
@@ -158,6 +163,7 @@ impl FeedContents {
             list_selected_ids: RwLock::new(Vec::default()),
             messagesrepo_r: msg_r,
             msg_state: Default::default(),
+            msg_filter: None,
         }
     }
 
@@ -187,7 +193,7 @@ impl FeedContents {
             _ => gen_icons::ICON_16_DOCUMENT_PROPERTIES_48.to_string(),
         })); //  3
         newrow.push(AValue::AU32(FontAttributes::to_activation_bits(
-            fontsize, fc.is_read, false, false
+            fontsize, fc.is_read, false, false,
         ))); // 4
         newrow.push(AValue::AU32(fc.message_id as u32)); // 5
         if debug_mode {
@@ -290,6 +296,65 @@ impl FeedContents {
             msg.title.clone(),
         );
     }
+
+    fn filter_messages(&self, list_in: &Vec<MessageRow>) -> Vec<MessageRow> {
+        let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
+        let reg = RegexBuilder::new(&regex::escape(matchtext))
+            .case_insensitive(true)
+            .build()
+            .unwrap();
+
+        let out_list: Vec<MessageRow> = list_in
+            .iter()
+            .filter(|m| {
+                let o_title = self.msg_state.read().unwrap().get_title(m.message_id);
+                if o_title.is_none() {
+                    return true;
+                }
+                let title = o_title.unwrap();
+
+                if reg.is_match(&title) {
+                    return true;
+                }
+                false
+            })
+            .cloned()
+            .collect();
+        return out_list;
+    }
+
+    /// Read from db and put into the list view,
+    /// State Map shall contain only the current subscription's messages, for finding the cursor position for the focus policy
+    fn update_feed_list_contents_int(&self) {
+        let subs_id: isize = *self.last_activated_subscription_id.borrow();
+        let mut messagelist: Vec<MessageRow> =
+            (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
+        if self.msg_filter.is_some() {
+            messagelist = self.filter_messages(&messagelist);
+        }
+        let mut valstore = (*self.gui_val_store).write().unwrap();
+        valstore.clear_list(0);
+        messagelist.iter_mut().enumerate().for_each(|(i, fc)| {
+            let title_string = self
+                .msg_state
+                .read()
+                .unwrap()
+                .get_title(fc.message_id)
+                .unwrap_or_default();
+            valstore.insert_list_item(
+                0,
+                i as i32,
+                &Self::message_to_row(
+                    fc,
+                    self.list_fontsize as u32,
+                    title_string,
+                    self.config.mode_debug,
+                ),
+            );
+        });
+        (*self.gui_updater).borrow().update_list(TREEVIEW1);
+        self.list_selected_ids.write().unwrap().clear();
+    }
 } // impl FeedContents
 
 impl IFeedContents for FeedContents {
@@ -385,6 +450,10 @@ impl IFeedContents for FeedContents {
                         }
                     }
                 }
+                CJob::UpdateMessageList => {
+                    // let id = *self.last_activated_subscription_id.borrow();
+                    self.update_feed_list_contents_int();
+                }
             }
             let elapsed_m = now.elapsed().as_millis();
             if elapsed_m > 100 {
@@ -444,39 +513,19 @@ impl IFeedContents for FeedContents {
         self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
     }
 
-    /// Read from db and put into the list view,
-    /// State Map shall contain only the current subscription's messages, for finding the cursor position for the focus policy
-    fn update_feed_list_contents(&self, feed_source_id: isize) {
-        self.last_activated_subscription_id.replace(feed_source_id);
-        let mut messagelist: Vec<MessageRow> =
-            (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(feed_source_id, false);
-        self.msg_state.write().unwrap().clear();
-        messagelist.iter_mut().enumerate().for_each(|(i, fc)| {
-            self.insert_state_from_row(fc, Some(i as isize));
-        });
-        let mut valstore = (*self.gui_val_store).write().unwrap();
-        valstore.clear_list(0);
-        messagelist.iter_mut().enumerate().for_each(|(i, fc)| {
-            let title_string = self
-                .msg_state
-                .read()
-                .unwrap()
-                .get_title(fc.message_id)
-                .unwrap_or_default();
-            valstore.insert_list_item(
-                0,
-                i as i32,
-                &Self::message_to_row(
-                    fc,
-                    self.list_fontsize as u32,
-                    title_string,
-                    self.config.mode_debug,
-                ),
-            );
-        });
-        (*self.gui_updater).borrow().update_list(TREEVIEW1);
-        self.addjob(CJob::ListSetCursorToPolicy);
-        self.list_selected_ids.write().unwrap().clear();
+    fn update_feed_list_contents(&self, subscription_id: isize) {
+        let old_subs_id: isize = *self.last_activated_subscription_id.borrow();
+        if subscription_id != old_subs_id {
+            self.last_activated_subscription_id.replace(subscription_id);
+            let messagelist: Vec<MessageRow> =
+                (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subscription_id, false);
+            self.msg_state.write().unwrap().clear(); //  later: check if we need to clear every time
+            messagelist.iter().enumerate().for_each(|(i, fc)| {
+                self.insert_state_from_row(fc, Some(i as isize));
+            });
+        }
+        self.addjob(CJob::UpdateMessageList);
+		self.addjob(CJob::ListSetCursorToPolicy);
     }
 
     ///  Vec < list_position,   feed_content_id >
@@ -708,6 +757,15 @@ impl IFeedContents for FeedContents {
                 .borrow()
                 .list_set_cursor(TREEVIEW1, dest_id, LIST0_COL_MSG_ID);
         }
+    }
+
+    fn set_messages_filter(&mut self, newtext: &String) {
+        if newtext.is_empty() {
+            self.msg_filter = None;
+        } else {
+            self.msg_filter.replace(newtext.clone());
+        }
+        self.addjob(CJob::UpdateMessageList);
     }
 
     // impl IFeedContents

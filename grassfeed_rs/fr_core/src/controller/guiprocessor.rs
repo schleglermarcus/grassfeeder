@@ -349,8 +349,14 @@ impl GuiProcessor {
                 GuiEvents::KeyPressed(keycode, o_char) => {
                     self.process_key_press(keycode, o_char);
                 }
+                GuiEvents::SearchEntryTextChanged(_idx, ref newtext) => {
+                    (*self.feedcontents_r)
+                        .borrow_mut()
+                        .set_messages_filter(newtext);
+                }
+
                 _ => {
-                    warn!("other TreeEvent: {:?}", &ev);
+                    warn!("other GuiEvents: {:?}", &ev);
                 }
             }
 
@@ -893,7 +899,7 @@ impl GuiProcessor {
 
     fn switch_focus_marker(&self, marker_active: bool) {
         let mark = if marker_active { 1 } else { 2 };
-        trace!("switch_focus_marker: {:?} {:?} ", self.focus_by_tab, mark);
+        // trace!("switch_focus_marker: {:?} {:?} ", self.focus_by_tab, mark);
         match &self.focus_by_tab {
             FocusByTab::FocusSubscriptions => {
                 (*self.gui_updater).borrow().widget_mark(

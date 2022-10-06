@@ -1,18 +1,17 @@
 Wed, 04 Oct 2022 00:12:00 +0000
-
 * Subscription Tree: hide zeroes when all are read
+* refactor: gtk - separate file for the message list
+* Filter for messages, to search
 
 
-- Flush Databases on Shutdown
+- Flush Databases on Shutdown: subscr, msg, errors
 - Change Layout: wide bottom line.
-- refactor: gtk - separate file for the message list
 
-- Browser: Modify  Font size
+- Delete Messages by delete key
 - Bug:  add-folder   leads to  expanding one that is closed
 - Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
 - Bug: Dialog Folder-edit shall show statistics information
 - Bug messages:  set unread ->  is not processed in following set-reading
-- Delete Messages by delete key
 - Create Backups for Subscriptions-DB
 - Sanitize: cross-check icon ids of tree if they are present in icon db
 - Message List: translate titles
