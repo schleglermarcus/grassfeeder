@@ -187,7 +187,7 @@ impl FeedContents {
             _ => gen_icons::ICON_16_DOCUMENT_PROPERTIES_48.to_string(),
         })); //  3
         newrow.push(AValue::AU32(FontAttributes::to_activation_bits(
-            fontsize, fc.is_read, false,
+            fontsize, fc.is_read, false, false
         ))); // 4
         newrow.push(AValue::AU32(fc.message_id as u32)); // 5
         if debug_mode {

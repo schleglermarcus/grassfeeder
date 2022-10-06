@@ -23,22 +23,24 @@ extern crate rust_i18n;
 i18n!("../resources/locales");
 
 const MINIHTTPSERVER_PORT: usize = 8123;
-const RSS_DYNAMIC_FILENAME: &str = "target/dynamic.rss";
+//  const RSS_DYNAMIC_FILENAME: &str = "target/dynamic.rss";
 
 // cargo watch -s "cargo run  --example working --features ui-gtk   "
 fn main() {
     setup();
     loc::init_locales();
+    let env_dir = std::env::var("PWD").unwrap();
+    let dynamic_filename = format!("{}/target/dynamic.rss", env_dir);
 
     let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT);
-    let _dyn_wr_handle = std::thread::spawn(|| loop {
-        write_feed();
+    let _dyn_wr_handle = std::thread::spawn(move || loop {
+        write_feed(&dynamic_filename);
         std::thread::sleep(std::time::Duration::from_secs(19));
     });
     let gfconf = GrassFeederConfig {
-        path_config: "target/db_rungui_local/".to_string(),
-        path_cache: "target/db_rungui_local/".to_string(),
-        debug_mode: false,
+        path_config: format!("{}/target/db_rungui_local/", env_dir),
+        path_cache: format!("{}/target/db_rungui_local/", env_dir),
+        debug_mode: true,
         version: "rungui:rungui_local_clear".to_string(),
     };
     let appcontext = fr_core::config::init_system::start(gfconf);
@@ -70,7 +72,7 @@ fn entry(title: &str, link: &str, descr: &str, pubdate: i64) -> String {
     )
 }
 
-fn write_feed() {
+fn write_feed(filename: &String) {
     setup();
     let header = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
 <rss version=\"2.0\">
@@ -79,9 +81,9 @@ fn write_feed() {
   <description>some dynamic description:   lorem ipsum</description> \n";
     let footer = "\n </channel>\n</rss> \n";
     let ts_now = Local::now().timestamp();
-    let o_file = File::create(RSS_DYNAMIC_FILENAME);
+    let o_file = File::create(filename); //  RSS_DYNAMIC_FILENAME
     if o_file.is_err() {
-        error!("cannot open {}", RSS_DYNAMIC_FILENAME);
+        error!("cannot open {}", filename);
         return;
     }
     let mut file = o_file.unwrap();
@@ -140,7 +142,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder3,
         false,
     );
-    if true {
+    if false {
         let src = [
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),

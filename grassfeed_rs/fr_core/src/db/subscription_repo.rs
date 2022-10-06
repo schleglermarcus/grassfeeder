@@ -14,6 +14,7 @@ use rusqlite::Connection;
 use std::collections::HashSet;
 use std::sync::Arc;
 use std::sync::Mutex;
+// use fallible_iterator::FallibleIterator;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
 
@@ -178,6 +179,36 @@ impl SubscriptionRepo {
         );
         self.ctx.execute(sql);
     }
+
+
+/*
+    pub fn show_tables(&self) {
+        let sql = ".tables;".to_string();
+        let o_conn = self.get_connection();
+        let conn = o_conn.lock().unwrap();
+
+        let r_stmt = conn.prepare(&sql);
+        if r_stmt.is_err() {
+            error!("PREP {} {:?}", sql, r_stmt.err());
+            return;
+        }
+        let mut stmt = r_stmt.unwrap();
+        let r_rows = stmt.query([]);
+        if r_rows.is_err() {
+            error!("query {:?}", r_rows.err());
+            return;
+        }
+        let rows: rusqlite::Rows = r_rows.unwrap();
+
+        let firstcol = rows
+            .map(|r| r.get::<usize, String>(0))
+            .collect::<Vec<String>>();
+
+        debug!("ROW  {:?}", firstcol);
+    }
+*/
+
+
 }
 
 impl ISubscriptionRepo for SubscriptionRepo {
@@ -461,7 +492,7 @@ impl Buildable for SubscriptionRepo {
 }
 
 impl StartupWithAppContext for SubscriptionRepo {
-    // later: register shutdown to  flush databases
+    // TODO: register shutdown to  flush databases
     fn startup(&mut self, _ac: &AppContext) {
         // let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
         // let su_r = ac.get_rc::<SubscriptionRepo>().unwrap();

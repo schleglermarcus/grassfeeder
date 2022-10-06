@@ -439,7 +439,11 @@ impl SourceTreeController {
         let mut num_msg_unread = 0;
         if let Some((num_all, num_unread)) = su_st.num_msg_all_unread {
             if self.config.display_feedcount_all {
-                rightcol_text = format!("{}/{}", num_unread, num_all);
+                if num_unread > 0 {
+                    rightcol_text = format!("{}/{}", num_unread, num_all);
+                } else {
+                    rightcol_text = format!("{}", num_all);
+                }
             } else {
                 rightcol_text = format!("{}", num_unread);
             }
@@ -495,6 +499,11 @@ impl SourceTreeController {
                 fse.last_selected_msg
             ));
         }
+        let show_spinner = su_st.is_fetch_in_progress();
+        let mut rightcol_visible = !(show_status_icon | show_spinner);
+        if !self.config.display_feedcount_all && num_msg_unread == 0 {
+            rightcol_visible = false;
+        }
 
         tv.push(AValue::AIMG(fs_iconstr)); // 0
         tv.push(AValue::ASTR(displayname)); // 1:
@@ -506,13 +515,13 @@ impl SourceTreeController {
             self.tree_fontsize,
             num_msg_unread <= 0,
             fse.is_folder,
+            false,
         ))); //  6: num_content_unread
         tv.push(AValue::AU32(m_status)); //	7 : status
         tv.push(tooltip_a); //  : 8 tooltip
-        let show_spinner = su_st.is_fetch_in_progress();
         tv.push(AValue::ABOOL(show_spinner)); //  : 9	spinner visible
         tv.push(AValue::ABOOL(!show_spinner)); //  : 10	StatusIcon Visible
-        tv.push(AValue::ABOOL(!(show_status_icon | show_spinner))); //  11: unread-text visible
+        tv.push(AValue::ABOOL(rightcol_visible)); //  11: unread-text visible
         tv
     }
 

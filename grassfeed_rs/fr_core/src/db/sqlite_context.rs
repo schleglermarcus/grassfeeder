@@ -267,6 +267,8 @@ impl<T: TableInfo> SqliteContext<T> {
     pub fn db_existed_before(&self) -> bool {
         self.db_file_existed_before
     }
+
+
 }
 
 #[derive(Debug)]
