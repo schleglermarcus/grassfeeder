@@ -379,9 +379,11 @@ fn create_subscription_edit_dialog(
         .build();
     dialog.content_area().add(&notebook);
     let grid1 = Grid::new();
+    grid1.set_widget_name("subs_edit_grid1");
     grid1.set_vexpand(false);
     grid1.set_hexpand(true);
-    grid1.set_column_spacing(2);
+    grid1.set_column_spacing(3);
+    grid1.set_row_spacing(3);
     let label_nb1 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB1")));
     notebook.append_page(&grid1, Some(&label_nb1));
 
@@ -390,6 +392,8 @@ fn create_subscription_edit_dialog(
     grid1.attach(&label1, 0, line, 1, 1);
     let entry1 = Entry::new();
     entry1.set_expand(true);
+    entry1.set_hexpand(true);
+    entry1.set_vexpand(false);
     entry1.set_activates_default(true);
     entry1.set_max_length(MAX_LENGTH_NEW_SOURCE_NAME);
     grid1.attach(&entry1, 1, line, 1, 1);
@@ -398,7 +402,8 @@ fn create_subscription_edit_dialog(
     let label2 = Label::new(Some(&t!("D_NEW_SUBSCRIPTION_URL")));
     grid1.attach(&label2, 0, line, 1, 1);
     let entry2 = Entry::new();
-    entry2.set_expand(true);
+	entry1.set_hexpand(true);
+    entry1.set_vexpand(false);
     entry2.set_activates_default(true);
     entry2.set_max_length(MAX_LENGTH_NEW_SOURCE_URL);
     grid1.attach(&entry2, 1, line, 1, 1);
@@ -533,7 +538,7 @@ fn create_subscription_edit_dialog(
         if let Some(s) = dialogdata.get(7).unwrap().str() {
             label5b_c.set_text(&s); // update-ext
         }
-        debug!("DD8={:?}", dialogdata.get(8));
+        // debug!("DD8={:?}", dialogdata.get(8));
         if let Some(s) = dialogdata.get(8).unwrap().str() {
             let buffer = textview_c.buffer().unwrap(); // error lines
             buffer.set_text(&s);

@@ -4,21 +4,22 @@ use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_entry::SRC_REPO_ID_DELETED;
 use crate::db::subscription_entry::SRC_REPO_ID_DUMMY;
 use crate::db::subscription_entry::SRC_REPO_ID_MOVING;
+use crate::timer::Timer;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
 use context::StartupWithAppContext;
 use context::TimerEvent;
 use context::TimerReceiver;
+use context::TimerRegistry;
 use rusqlite::Connection;
 use std::collections::HashSet;
 use std::sync::Arc;
 use std::sync::Mutex;
-// use fallible_iterator::FallibleIterator;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
 
-/// sanity for recursion
+/// Later:  sanity for recursion
 /// TODO use for update_paths
 //  const MAX_PATH_DEPTH: usize = 30;
 
@@ -179,36 +180,6 @@ impl SubscriptionRepo {
         );
         self.ctx.execute(sql);
     }
-
-
-/*
-    pub fn show_tables(&self) {
-        let sql = ".tables;".to_string();
-        let o_conn = self.get_connection();
-        let conn = o_conn.lock().unwrap();
-
-        let r_stmt = conn.prepare(&sql);
-        if r_stmt.is_err() {
-            error!("PREP {} {:?}", sql, r_stmt.err());
-            return;
-        }
-        let mut stmt = r_stmt.unwrap();
-        let r_rows = stmt.query([]);
-        if r_rows.is_err() {
-            error!("query {:?}", r_rows.err());
-            return;
-        }
-        let rows: rusqlite::Rows = r_rows.unwrap();
-
-        let firstcol = rows
-            .map(|r| r.get::<usize, String>(0))
-            .collect::<Vec<String>>();
-
-        debug!("ROW  {:?}", firstcol);
-    }
-*/
-
-
 }
 
 impl ISubscriptionRepo for SubscriptionRepo {
@@ -241,7 +212,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     /// checks for  updated_int,  retrieves those earlier than the given date
-    /// new:  order by updated-time
+    /// returns the list   order by updated-time
     fn get_by_fetch_time(&self, updated_time_s: i64) -> Vec<SubscriptionEntry> {
         let prepared = format!(
             "SELECT * FROM {} WHERE updated_int<{}  order by updated_int ",
@@ -492,21 +463,27 @@ impl Buildable for SubscriptionRepo {
 }
 
 impl StartupWithAppContext for SubscriptionRepo {
-    // TODO: register shutdown to  flush databases
-    fn startup(&mut self, _ac: &AppContext) {
-        // let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
-        // let su_r = ac.get_rc::<SubscriptionRepo>().unwrap();
+    fn startup(&mut self, ac: &AppContext) {
+        let timer_r = ac.get_rc::<Timer>().unwrap();
+        let sr_r = ac.get_rc::<SubscriptionRepo>().unwrap();
+        {
+            (*timer_r)
+                .borrow_mut()
+                .register(&TimerEvent::Shutdown, sr_r);
+        }
 
         self.startup_int();
     }
 }
 
 impl TimerReceiver for SubscriptionRepo {
-    fn trigger(&mut self, _event: &TimerEvent) {
-        // match event {
-        //      TimerEvent::Timer10s => {                self.check_or_store();            }
-        //     _ => (),
-        // }
+    fn trigger(&mut self, event: &TimerEvent) {
+        match event {
+            TimerEvent::Shutdown => {
+                self.ctx.cache_flush();
+            }
+            _ => (),
+        }
     }
 }
 

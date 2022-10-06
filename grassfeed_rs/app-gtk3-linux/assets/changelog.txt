@@ -3,19 +3,21 @@ grassfeeder (0.0.8) unstable; urgency=low
   * Subscription Tree: hide zeroes when all are read
   * refactor: gtk - separate file for the message list
   * Filter for messages, to search
+  * Flush Databases on Shutdown: subscr, msg, errors
+  * Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
+  * Message List: translate titles
+  * Delete Messages by delete key
   
   
-  - Flush Databases on Shutdown: subscr, msg, errors
+  - Bug:  add-folder   leads to  expanding one that is closed
+  
+  
   - Change Layout: wide bottom line.
   
-  - Delete Messages by delete key
-  - Bug:  add-folder   leads to  expanding one that is closed
-  - Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
-  - Bug: Dialog Folder-edit shall show statistics information
   - Bug messages:  set unread ->  is not processed in following set-reading
+  
   - Create Backups for Subscriptions-DB
   - Sanitize: cross-check icon ids of tree if they are present in icon db
-  - Message List: translate titles
   - check  https://www.linuxcompatible.org/  feed: icon + entries
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Wed, 04 Oct 2022 00:12:00 +0000

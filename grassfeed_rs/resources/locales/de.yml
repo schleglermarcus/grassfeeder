@@ -18,10 +18,12 @@ de:
   TB_ADD_FEED: Quelle hinzufügen
   TB_REFRESH_ALL: Alle Quellen aktualisieren
   TB_FILTER_1: Nachrichten filtern
-  
 
   SUBSC_DEFAULT_FOLDER1: Beispiele
   SUBSC_DEFAULT_FOLDER2: Technik
+
+  MSGLIST_TOP_TITLE: "Titel"
+  MSGLIST_TOP_DATE: "Datum"
 
   CM_MSG_MARK_AS_READ: Als gelesen markieren
   CM_MSG_MARK_AS_UNREAD: Als ungelesen markieren

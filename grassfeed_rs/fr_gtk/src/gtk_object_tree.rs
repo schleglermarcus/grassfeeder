@@ -648,28 +648,20 @@ pub fn create_toolbar(
         });
     }
     // toolbar
-
     containing_box.add(&toolbar);
-
     let searchentry: SearchEntry = SearchEntry::new();
     containing_box.add(&searchentry);
     searchentry.set_tooltip_text(Some(&t!("TB_FILTER_1")));
     let esw = EvSenderWrapper(g_ev_se.clone());
-
     searchentry.connect_changed(move |se: &SearchEntry| {
         esw.sendw(GuiEvents::SearchEntryTextChanged(
             SEARCH_ENTRY_0,
             se.buffer().text(),
         ));
     });
-
     {
         let mut ret = (*gtk_obj_a).write().unwrap();
         ret.set_searchentry(SEARCH_ENTRY_0, &searchentry);
-    }
-
-    {
-        // toolbar.insert(&searchentry, -1);
     }
 }
 

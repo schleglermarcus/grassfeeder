@@ -45,7 +45,7 @@ pub fn create_listview(
         .set_mode(gtk::SelectionMode::Multiple);
     content_tree_view.set_activate_on_single_click(false);
     content_tree_view.set_enable_search(false);
-    content_tree_view.set_widget_name("TREEVIEW2");
+    content_tree_view.set_widget_name("msg_list");
     content_tree_view.set_margin_top(2);
     let liststoretypes = &[
         Pixbuf::static_type(), // 0: feed icon
@@ -75,7 +75,7 @@ pub fn create_listview(
         col.pack_start(&cellrendtext, true);
         col.add_attribute(&cellrendtext, TYPESTRING_TEXT, 1);
         col.set_visible(true);
-        col.set_title("Title");
+        col.set_title(&t!("MSGLIST_TOP_TITLE"));
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
         col.set_resizable(true);
         col.set_expand(true);
@@ -125,7 +125,7 @@ pub fn create_listview(
         col.pack_end(&cellrendtext, false);
         col.add_attribute(&cellrendtext, TYPESTRING_TEXT, 2);
         col.set_visible(true);
-        col.set_title("Date");
+        col.set_title(&t!("MSGLIST_TOP_DATE"));
         col.set_sizing(gtk::TreeViewColumnSizing::GrowOnly);
         col.set_min_width(10);
         col.set_resizable(true);
@@ -177,6 +177,7 @@ pub fn create_listview(
             esw.sendw(GuiEvents::ListRowActivated(0, list_pos, repo_id));
         }
     });
+    let esw = EvSenderWrapper(g_ev_se.clone());
     content_tree_view
         .selection()
         .connect_changed(move |t_selection| {
@@ -184,19 +185,28 @@ pub fn create_listview(
             if n_rows <= 0 {
                 return;
             }
-            if false {
-                let (tp_list, t_model) = t_selection.selected_rows();
-                for t_path in tp_list {
-                    if let Some(t_iter) = t_model.iter(&t_path) {
-                        let repo_id = t_model
-                            .value(&t_iter, LIST0_COL_MSG_ID as i32)
-                            .get::<u32>()
-                            .unwrap() as i32;
-                        trace!("LIST changed multiple {}  ", repo_id);
+            let (tp_list, t_model) = t_selection.selected_rows();
+            let id_list = tp_list
+                .iter()
+                .filter_map(|tp| {
+                    if let Some(t_iter) = t_model.iter(&tp) {
+                        if let Ok(val) =
+                            t_model.value(&t_iter, LIST0_COL_MSG_ID as i32).get::<u32>()
+                        {
+                            return Some(val as i32);
+                        }
                     }
-                }
-            }
+                    None
+                })
+                .collect::<Vec<i32>>();
+            // trace!("LIST changed multiple   #rows={}  {:?}  ", n_rows, &id_list);
+            esw.sendw(GuiEvents::ListSelected(0, id_list));
         });
+
+    content_tree_view.connect_selection_notify_event(|_tv, ev_sel| {
+        debug!("LIST  _selection_notify_event  {:?}", ev_sel);
+        Inhibit(false)
+    });
 
     let esw = EvSenderWrapper(g_ev_se.clone());
     content_tree_view.connect_row_activated(move |t_view, t_path, _tv_column| {
@@ -207,7 +217,10 @@ pub fn create_listview(
             .get::<u32>()
             .unwrap() as i32;
         let list_pos = t_path.indices()[0];
-        // debug!(            "ROW_ACTIVaTED, double click repoid: {} {}",            repo_id, list_pos        );
+        debug!(
+            "ROW_ACTIVaTED, double click repoid: {} {}",
+            repo_id, list_pos
+        );
         esw.sendw(GuiEvents::ListRowDoubleClicked(0, list_pos, repo_id));
     });
 

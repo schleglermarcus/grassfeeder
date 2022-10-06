@@ -7,15 +7,18 @@ To Do List
 - Bug: Dialog Folder-edit shall show statistics information
 - Bug messages:  set unread ->  is not processed in following set-reading
 - Delete Messages by delete key
-- Subscription Tree: hide zeroes when nothing to read
 - Create Backups for Subscriptions-DB
 - Sanitize: cross-check icon ids of tree if they are present in icon db
-- refactor: gtk - separate file for the message list
 - Message List: translate titles
 - check  https://www.linuxcompatible.org/  feed: icon + entries
 
 
 - Graphics:  scale down icons before going into database.  Example   http://feeds.feedburner.com/TechmemeRideHome
+- Browser: enable theme related colors
+- Browser: Modify  Font size
+- Browser: add Zoom Control
+- Browser: Modify  Font size
+
 - Message List: set scroll position to upper edge from Cursor
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
@@ -26,10 +29,6 @@ To Do List
 - React on Minimize, do memory usage reduction
 - implement focus policy: before last unread
 - Opml export formatted / pretty
-- Browser: enable theme related colors
-- Browser: Modify  Font size
-- Browser: add Zoom Control
-- Browser: Modify  Font size
 
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
 - Reduce Size of Binary:
@@ -60,7 +59,7 @@ Perhaps:
 - Do extra format to  dig up invalid feed titles  containg  &     :      dieneuewelle.xml
 - Grouping of feeds by folders ?
 - RSS-Content damaged with    http://n8waechter.info/feed/
-- look at Snap/Flatpak   https://linuxhint.com/snap_vs_flatpak_vs_appimage/ 
+- look at Snap/Flatpak   https://linuxhint.com/snap_vs_flatpak_vs_appimage/
 
 
 -----

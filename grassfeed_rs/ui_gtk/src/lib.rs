@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate log;
 extern crate gtk;
+extern crate gdk_sys;
 
 pub mod dialogdatadistributor;
 pub mod gtkmodel_updater;
@@ -8,6 +9,7 @@ pub mod gtkrunner;
 pub mod iconloader;
 pub mod runner_internal;
 pub mod ui_value_adapter;
+pub mod keyboard_codes;
 
 use crate::dialogdatadistributor::DialogDataDistributor;
 use crate::gtkrunner::CreateBrowserConfig;

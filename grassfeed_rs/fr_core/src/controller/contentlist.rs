@@ -110,10 +110,10 @@ pub trait IFeedContents {
         msg_id: isize,
         current_row: Option<&MessageRow>,
     ) -> (String, String, String);
-
     fn move_list_cursor(&self, c: ListMoveCommand);
-
     fn set_messages_filter(&mut self, newtext: &String);
+
+    fn process_kb_delete(&self);
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
@@ -355,6 +355,18 @@ impl FeedContents {
         (*self.gui_updater).borrow().update_list(TREEVIEW1);
         self.list_selected_ids.write().unwrap().clear();
     }
+
+    fn delete_messages(&self, db_ids: &[i32]) {
+        (self.messagesrepo_r)
+            .borrow()
+            .update_is_deleted_many(&db_ids, true);
+        let subs_id = *self.last_activated_subscription_id.borrow();
+        self.update_feed_list_contents(subs_id);
+        if let Some(feedsources) = self.feedsources_w.upgrade() {
+            feedsources.borrow().invalidate_read_unread(subs_id);
+            self.addjob(CJob::RequestUnreadAllCount(subs_id));
+        }
+    }
 } // impl FeedContents
 
 impl IFeedContents for FeedContents {
@@ -525,10 +537,9 @@ impl IFeedContents for FeedContents {
             });
         }
         self.addjob(CJob::UpdateMessageList);
-		self.addjob(CJob::ListSetCursorToPolicy);
+        self.addjob(CJob::ListSetCursorToPolicy);
     }
 
-    ///  Vec < list_position,   feed_content_id >
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]) {
         for (list_position, feed_content_id) in vec_pos_dbid {
             let o_msg: Option<MessageRow> =
@@ -546,7 +557,7 @@ impl IFeedContents for FeedContents {
                 let av_list = Self::message_to_row(
                     &msg,
                     self.list_fontsize as u32,
-                    titl, // state.title_d.clone(),
+                    titl,
                     self.config.mode_debug,
                 );
                 (*self.gui_val_store).write().unwrap().insert_list_item(
@@ -623,6 +634,7 @@ impl IFeedContents for FeedContents {
     }
 
     fn set_selected_content_ids(&self, list: Vec<i32>) {
+        // debug!("set_selected_content_ids : {:?}", &list);
         let mut l = self.list_selected_ids.write().unwrap();
         l.clear();
         let mut mutable = list;
@@ -648,15 +660,7 @@ impl IFeedContents for FeedContents {
             }
             "messages-delete" => {
                 let db_ids: Vec<i32> = repoid_listpos.iter().map(|(db, _lp)| *db).collect();
-                (self.messagesrepo_r)
-                    .borrow()
-                    .update_is_deleted_many(&db_ids, true);
-                let subs_id = *self.last_activated_subscription_id.borrow();
-                self.update_feed_list_contents(subs_id);
-                if let Some(feedsources) = self.feedsources_w.upgrade() {
-                    feedsources.borrow().invalidate_read_unread(subs_id);
-                    self.addjob(CJob::RequestUnreadAllCount(subs_id));
-                }
+                self.delete_messages(&db_ids);
             }
             "message-copy-link" => {
                 if let Some((subs_id, _lispos)) = repoid_listpos.first() {
@@ -766,6 +770,13 @@ impl IFeedContents for FeedContents {
             self.msg_filter.replace(newtext.clone());
         }
         self.addjob(CJob::UpdateMessageList);
+    }
+
+    fn process_kb_delete(&self) {
+        let del_ids = self.list_selected_ids.read().unwrap();
+        debug!("proc  delete   LIST= {:?}", del_ids);
+
+        self.delete_messages(&del_ids);
     }
 
     // impl IFeedContents

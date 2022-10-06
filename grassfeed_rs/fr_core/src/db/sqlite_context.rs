@@ -256,8 +256,7 @@ impl<T: TableInfo> SqliteContext<T> {
         -1
     }
 
-    #[allow(dead_code)]
-    fn cache_flush(&self) {
+    pub fn cache_flush(&self) {
         let r = (*self.connection).lock().unwrap().cache_flush();
         if r.is_err() {
             warn!("cache_flush {:?}", r.err());
@@ -267,8 +266,6 @@ impl<T: TableInfo> SqliteContext<T> {
     pub fn db_existed_before(&self) -> bool {
         self.db_file_existed_before
     }
-
-
 }
 
 #[derive(Debug)]

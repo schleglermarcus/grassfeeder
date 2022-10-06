@@ -22,6 +22,9 @@ en:
   SUBSC_DEFAULT_FOLDER1: Examples
   SUBSC_DEFAULT_FOLDER2: Tech
 
+  MSGLIST_TOP_TITLE: "Title"
+  MSGLIST_TOP_DATE: "Date"
+
   CM_MSG_MARK_AS_READ: Mark as read
   CM_MSG_MARK_AS_UNREAD: Mark as unread
   CM_MSG_OPEN_IN_BROWSER: Open in Browser
