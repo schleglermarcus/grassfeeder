@@ -236,19 +236,19 @@ pub fn create_treeview(
     });
     let esw = EvSenderWrapper(g_ev_se.clone());
     treeview1.connect_row_expanded(move |t_view, t_iter, _t_path| {
-        let mut repo_id: i32 = -1;
         if let Some(model) = t_view.model() {
-            repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+            let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+            debug!("G: expanded {}  ", repo_id);
+            esw.sendw(GuiEvents::TreeExpanded(0, repo_id));
         }
-        esw.sendw(GuiEvents::TreeExpanded(0, repo_id));
     });
+
     let esw = EvSenderWrapper(g_ev_se);
     treeview1.connect_row_collapsed(move |t_view, t_iter, _t_path| {
-        let mut repo_id: i32 = -1;
         if let Some(model) = t_view.model() {
-            repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+            let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+            esw.sendw(GuiEvents::TreeCollapsed(0, repo_id));
         }
-        esw.sendw(GuiEvents::TreeCollapsed(0, repo_id));
     });
     // treeview1.connect_focus(move |_t_view, directiontype| {        debug!("treeview:  focus {:?}", directiontype);        gtk::Inhibit(false)    });
     {

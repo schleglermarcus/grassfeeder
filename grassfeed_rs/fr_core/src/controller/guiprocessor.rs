@@ -283,11 +283,13 @@ impl GuiProcessor {
                     );
                 }
                 GuiEvents::TreeExpanded(_idx, repo_id) => {
+					// trace!("GP: set_tree_expanded {} TreeExpanded" , repo_id);
                     self.feedsources_r
                         .borrow()
                         .set_tree_expanded(repo_id as isize, true);
                 }
                 GuiEvents::TreeCollapsed(_idx, repo_id) => {
+					// trace!("GP: set_tree_expanded {} TreeCollapsed" , repo_id);
                     self.feedsources_r
                         .borrow()
                         .set_tree_expanded(repo_id as isize, false);

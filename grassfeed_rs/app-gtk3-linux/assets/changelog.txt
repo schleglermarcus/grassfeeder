@@ -8,14 +8,12 @@ grassfeeder (0.0.8) unstable; urgency=low
   * Message List: translate titles
   * Delete Messages by delete key
   
-  
   - Bug:  add-folder   leads to  expanding one that is closed
   
   
   - Change Layout: wide bottom line.
   
   - Bug messages:  set unread ->  is not processed in following set-reading
-  
   - Create Backups for Subscriptions-DB
   - Sanitize: cross-check icon ids of tree if they are present in icon db
   - check  https://www.linuxcompatible.org/  feed: icon + entries

@@ -221,10 +221,9 @@ impl Downloader {
     }
 
     fn add_to_queue(&self, dljob: DLJob) {
-        let contains = (*self.job_queue).read().unwrap().contains(&dljob);
-        if contains {
-            let kind = dljob.kind();
-            trace!("download job already queued:  {}:{:?}", kind, &dljob);
+        if (*self.job_queue).read().unwrap().contains(&dljob) {
+            // let _kind = dljob.kind();
+            // trace!("download job already queued:  {}:{:?}", kind, &dljob);
         } else {
             (*self.job_queue).write().unwrap().push_back(dljob);
         }

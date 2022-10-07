@@ -1143,8 +1143,9 @@ impl ISourceTreeController for SourceTreeController {
         }
     }
 
-    fn set_tree_expanded(&self, source_repo_id: isize, new_expanded: bool) {
-        let src_vec = vec![source_repo_id];
+    fn set_tree_expanded(&self, subs_id: isize, new_expanded: bool) {
+        let src_vec = vec![subs_id];
+        // trace!("subs: set_tree_expanded {} {}" , subs_id, new_expanded);
         (*self.subscriptionrepo_r)
             .borrow_mut()
             .update_expanded(src_vec, new_expanded);
@@ -1161,7 +1162,7 @@ impl ISourceTreeController for SourceTreeController {
 
     fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize {
         let mut fse = SubscriptionEntry::from_new_foldername(folder_name, parent_id);
-        fse.expanded = true;
+        fse.expanded = false;
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_id)

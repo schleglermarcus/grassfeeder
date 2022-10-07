@@ -179,6 +179,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
             ("https://www.opendesktop.org/content.rdf", "opendesktop"),
@@ -230,7 +231,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://terraherz.wpcomstaging.com/feed/", "terraherz"),
             ("https://www.reddit.com/r/aww.rss", "aww"),
             ("https://feeds.breakingnews.ie/bnworld", "breaknew"),
-            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
         ];
 
         let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
