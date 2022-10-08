@@ -1,35 +1,30 @@
 To Do List
 
-- Change Layout: wide bottom line.
-- Investigate why   subscriptions.db  is so large.
-- Bug:  add-folder   leads to  expanding one that is closed
-- Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
-- Bug: Dialog Folder-edit shall show statistics information
 - Bug messages:  set unread ->  is not processed in following set-reading
-- Delete Messages by delete key
 - Create Backups for Subscriptions-DB
 - Sanitize: cross-check icon ids of tree if they are present in icon db
-- Message List: translate titles
-- check  https://www.linuxcompatible.org/  feed: icon + entries
 
 
-- Graphics:  scale down icons before going into database.  Example   http://feeds.feedburner.com/TechmemeRideHome
+
+
+- implement focus policy: before last unread
+- import opml: see if we can get the web main url from  the outline
+- Updating the tree: speed up the gtk part
+- Subscriptions Sanitize:  Folder shall have only folder icon
+- Subscriptions Sanitize:  test and clean with recursive folders
+- Graphics:  scale down icons before going into database.
+     Example  lisahaven.news       http://feeds.feedburner.com/TechmemeRideHome
 - Browser: enable theme related colors
 - Browser: Modify  Font size
 - Browser: add Zoom Control
 - Browser: Modify  Font size
+- Browser Display :  wrap over   title
+
 
 - Message List: set scroll position to upper edge from Cursor
-- Subscriptions Sanitize:  Folder shall have only folder icon
-- Subscriptions Sanitize:  test and clean with recursive folders
-- import opml: see if we can get the web main url from  the outline
-- Updating the tree: speed up the gtk part
 - Startup, create gui:  delayed creation of dialogs
-- Browser Display :  wrap over   title
 - React on Minimize, do memory usage reduction
-- implement focus policy: before last unread
 - Opml export formatted / pretty
-
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
 - Reduce Size of Binary:
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html

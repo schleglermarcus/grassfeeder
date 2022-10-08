@@ -5,6 +5,7 @@ use crate::db::icon_repo::IconRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::downloader::util;
+use crate::downloader::util::workaround_https_declaration;
 use crate::util::convert_webp_to_png;
 use crate::util::Step;
 use crate::util::StepResult;
@@ -92,10 +93,10 @@ struct HomepageDownload(IconInner);
 impl Step<IconInner> for HomepageDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        if let (Some(homepage), Some(_feed_title)) = util::retrieve_homepage_from_feed_text(
-            inner.feed_download_text.as_bytes(),
-            &inner.feed_url,
-        ) {
+        let dl_text = workaround_https_declaration(inner.feed_download_text.clone());
+        if let (Some(homepage), Some(_feed_title)) =
+            util::retrieve_homepage_from_feed_text(dl_text.as_bytes(), &inner.feed_url)
+        {
             inner.feed_homepage = homepage;
             return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
         }

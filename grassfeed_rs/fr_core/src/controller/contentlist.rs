@@ -339,7 +339,7 @@ impl FeedContents {
         let mut messagelist: Vec<MessageRow> =
             (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
         if num_msg != messagelist.len() as isize {
-            trace!("upd_int: len unequal {}  != {}", messagelist.len(), num_msg);
+            // trace!("upd_int: len unequal {}  != {}", messagelist.len(), num_msg);
             self.fill_state_map(&messagelist);
         }
         if self.msg_filter.is_some() {
@@ -347,7 +347,6 @@ impl FeedContents {
         }
         let mut valstore = (*self.gui_val_store).write().unwrap();
         valstore.clear_list(0);
-        // debug!("upd_int:  ID{} len= {}", subs_id, messagelist.len());
         messagelist.iter().enumerate().for_each(|(i, fc)| {
             let title_string = self
                 .msg_state
@@ -886,9 +885,6 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     let mut msg = MessageRow::default();
     let mut published_ts: i64 = 0;
     let mut error_text = String::default();
-
-    // debug!("E {}", me.id);
-
     if let Some(publis) = me.published {
         published_ts = DateTime::<Local>::from(publis).timestamp();
     } else {
@@ -943,14 +939,6 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     } else {
         error_text = format!("Message ID {} has no valid title.", &me.id);
         msg.title = msg.post_id.clone();
-        /*
-                if !msg.content_text.is_empty() {
-                    msg.title = msg.content_text.split_at(100).0.to_string();
-                    let regex = Regex::new(r"<.*>").unwrap();
-                    regex.replace(&msg.title, "");
-                    msg.title = msg.title.replace("<.*>", "");
-                } else {        }
-        */
     }
     let authorlist = me
         .authors

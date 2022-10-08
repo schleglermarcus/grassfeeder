@@ -10,14 +10,15 @@ grassfeeder (0.0.8) unstable; urgency=low
   * Bugfix:  add-folder   leads to  expanding one that is closed
   * Bugfix:  Tree Drag Folders:  the parent items instead of all, don't jump to start
   * Change Layout: wide bottom line.
+  * Workaround for wrong atom  declaration https:// -> http://   linuxcompatible.org
+  * Create Backups for Subscriptions-DB
   
   
-  - check  https://www.linuxcompatible.org/  feed: icon + entries
+  - Cleanup messages at configured upper limit
   
+  - Sanitize: cross-check icon ids of tree if they are present in icon db
   
   - Bug messages:  set unread ->  is not processed in following set-reading
-  - Create Backups for Subscriptions-DB
-  - Sanitize: cross-check icon ids of tree if they are present in icon db
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Wed, 04 Oct 2022 00:12:00 +0000
 
@@ -57,7 +58,7 @@ grassfeeder (0.0.5) unstable; urgency=low
 
   * StatusBar: copy Feed address into clipboard
   * Multiple instances shall not be allowed
-  * Cleanup messages at configured upper limit, also double same messages
+  * Cleanup double same messages
   * Build via Docker container
   * On Shutdown:  Flush Databases
   * Databases check via command line, no more automatic
@@ -86,12 +87,12 @@ grassfeeder (0.0.4) unstable; urgency=low
 
 grassfeeder (0.0.3) unstable; urgency=low
 
-  * refactored subscriptions to sqlite
-  * cleaning out deleted subscriptions
   * Tree Unread-Calculation Speed increased, parallel web requests to 3
-  * fixed: message tooltip needs escaping
-  * remove icon dialog, leave it on  debug flag
   * SendToBrowser :   mark-as-read for all entries
+  * Cleaning out deleted subscriptions
+  * Refactored subscriptions to sqlite
+  * Bugfix: message tooltip needs escaping
+  * Removed icon dialog, leave it on  debug flag
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 13 Sep 2022 00:00:00 +0000
 

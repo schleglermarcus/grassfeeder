@@ -9,7 +9,7 @@ use crate::downloader::db_clean::CleanerStart;
 use crate::util::file_exists;
 use crate::util::StepResult;
 
-pub fn databases_consistency_check_u(foldername: &str) {
+pub fn databases_check_manual(foldername: &str) {
     let set_undelete: bool = false;
     let subs_fn = SubscriptionRepo::filename(foldername);
     if !file_exists(&subs_fn) {

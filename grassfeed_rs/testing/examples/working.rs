@@ -111,11 +111,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         let fsrwr: Rc<RefCell<dyn ISubscriptionRepo>> = acr.get_rc::<SubscriptionRepo>().unwrap();
         (*fsrwr.borrow()).scrub_all_subscriptions();
     }
-
     let feedsources_r: Rc<RefCell<dyn ISourceTreeController>> =
         acr.get_rc::<SourceTreeController>().unwrap();
     let ref mut feedsources = (*feedsources_r).borrow_mut();
-
     let url_dynamic = format!("{}/dynamic.rss", addr);
     let url_gui_proc = format!("{}/gui_proc_3.rss", addr);
     let url_feedburner = format!("{}/feedburner.rss", addr);
@@ -125,7 +123,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
     let url_relay = format!("{}/relay_rd.rss", addr); // very big
 
-	let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
+    let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
     let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder2);
     let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), folder2);
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
@@ -148,34 +146,16 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
-
-			(
+            (
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",
             ),
-
             (
                 "https://afternarcissisticabuse.wordpress.com/feed/",
                 "afternarc",
             ),
-            ("http://henrymakow.com/index.xml", "makow"), // why error ?
-            ("http://lisahaven.news/feed/", "lisa_haven"), // why error ?
-            ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
-            ("http://thehighersidechats.com/feed/", "higherside-300"),
-            (
-                "http://feeds.feedburner.com/RichardHerringLSTPodcast",
-                "RichardHerring-560",
-            ),
-            (
-                "http://chaosradio.ccc.de/chaosradio-complete.rss",
-                "chaosradio-267",
-            ),
-            (
-                "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
-                "youtube",
-            ),
         ];
-		let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
+        let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
@@ -187,6 +167,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            ("http://henrymakow.com/index.xml", "makow"),
+            ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
+            ("http://thehighersidechats.com/feed/", "higherside-300"),
+            ("http://lisahaven.news/feed/", "lisa_haven"), // Icon too big !!
             ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
@@ -251,6 +235,18 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            (
+                "http://feeds.feedburner.com/RichardHerringLSTPodcast",
+                "RichardHerring-560",
+            ),
+            (
+                "http://chaosradio.ccc.de/chaosradio-complete.rss",
+                "chaosradio-267",
+            ),
+            (
+                "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
+                "youtube",
+            ),
             (
                 "http://feeds.feedburner.com/TechmemeRideHome",
                 "techmeme-big-icon",

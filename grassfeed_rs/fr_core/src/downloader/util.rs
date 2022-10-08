@@ -143,3 +143,10 @@ pub fn compress_vec_to_string(uncompressed: &[u8]) -> String {
     let compressed_data = prelude::compress(uncompressed);
     base64::encode(compressed_data)
 }
+
+pub fn workaround_https_declaration(wrong: String) -> String {
+    wrong.replace(
+        "https://www.w3.org/2005/Atom",
+        "http://www.w3.org/2005/Atom",
+    )
+}

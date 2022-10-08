@@ -1,3 +1,4 @@
+use crate::db::errors_repo;
 use crate::db::sqlite_context::SqliteContext;
 use crate::db::sqlite_context::TableInfo;
 use crate::db::subscription_entry::SubscriptionEntry;
@@ -5,6 +6,7 @@ use crate::db::subscription_entry::SRC_REPO_ID_DELETED;
 use crate::db::subscription_entry::SRC_REPO_ID_DUMMY;
 use crate::db::subscription_entry::SRC_REPO_ID_MOVING;
 use crate::timer::Timer;
+use crate::util::file_exists;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
@@ -18,6 +20,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
+// pub const KEY_CACHE_DIR: &str = "cache_dir";
 
 /// Later:  sanity for recursion
 /// TODO use for update_paths
@@ -104,10 +107,26 @@ pub struct SubscriptionRepo {
 }
 
 impl SubscriptionRepo {
-    pub fn by_folder(foldername: &str) -> Self {
+    pub fn by_folder(folder_conf: &str, folder_cache: &str) -> Self {
+        let reg_filename = Self::filename(folder_conf);
+        let reg_existed = file_exists(&reg_filename);
+        if reg_existed {
+            let month_num = chrono::prelude::Utc::today().format("%m"); // %Y-%m-%d
+            let sub_copy_file = format!("{}subscriptions.db-{}", folder_cache, month_num);
+            let r = std::fs::copy(&reg_filename, &sub_copy_file);
+            if r.is_err() {
+                error!(
+                    "Error: copy {} to {}  => {:?}",
+                    reg_filename,
+                    sub_copy_file,
+                    r.err()
+                );
+            }
+        }
+
         SubscriptionRepo {
-            folder_name: foldername.to_string(),
-            ctx: SqliteContext::new(Self::filename(foldername)),
+            folder_name: folder_conf.to_string(),
+            ctx: SqliteContext::new(reg_filename),
         }
     }
 
@@ -451,9 +470,11 @@ impl ISubscriptionRepo for SubscriptionRepo {
 impl Buildable for SubscriptionRepo {
     type Output = SubscriptionRepo;
     fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
+        let o_cache = conf.get(errors_repo::KEY_FOLDERNAME);
+        let cachedir = o_cache.unwrap();
         let o_folder = conf.get(KEY_FOLDERNAME);
         match o_folder {
-            Some(folder) => SubscriptionRepo::by_folder(&folder),
+            Some(folder) => SubscriptionRepo::by_folder(&folder, &cachedir),
             None => {
                 conf.dump();
                 panic!("subscription config has no {} ", KEY_FOLDERNAME);
