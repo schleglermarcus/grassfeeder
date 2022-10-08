@@ -178,7 +178,7 @@ impl GuiProcessor {
                     // trace!(                        "GP:TreeRowActivated{} #q:{} {:?} ",                        subs_id,                        (*self.downloader_r).borrow().get_queue_size(),                        _path                    );
                     (*self.feedcontents_r)
                         .borrow()
-                        .update_feed_list_contents(subs_id as isize);
+                        .update_message_list(subs_id as isize);
 
                     self.focus_by_tab = FocusByTab::FocusSubscriptions;
                 }
@@ -419,7 +419,7 @@ impl GuiProcessor {
                     //                    debug!(                        "GP: SwitchContentList {}   => update_feed_list_contents ",                        feed_source_id                    );
                     (*self.feedcontents_r)
                         .borrow()
-                        .update_feed_list_contents(feed_source_id);
+                        .update_message_list(feed_source_id);
                     (*self.gui_updater).borrow().update_list(0);
                 }
                 Job::UpdateTextView(t_v_id) => {

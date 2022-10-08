@@ -1300,7 +1300,7 @@ impl ISourceTreeController for SourceTreeController {
                 if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                     (*feedcontents)
                         .borrow()
-                        .update_feed_list_contents(fse.subs_id);
+                        .update_message_list(fse.subs_id);
                 }
             }
         }

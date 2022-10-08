@@ -6,11 +6,13 @@ Wed, 04 Oct 2022 00:12:00 +0000
 * Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
 * Message List: translate titles
 * Delete Messages by delete key
+* Bugfix:  add-folder   leads to  expanding one that is closed
 
-- Bug:  add-folder   leads to  expanding one that is closed
 
+- Drag Folders :  refresh only the parent items instead of all
 
 - Change Layout: wide bottom line.
+
 
 - Bug messages:  set unread ->  is not processed in following set-reading
 - Create Backups for Subscriptions-DB

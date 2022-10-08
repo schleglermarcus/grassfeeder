@@ -238,7 +238,7 @@ pub fn create_treeview(
     treeview1.connect_row_expanded(move |t_view, t_iter, _t_path| {
         if let Some(model) = t_view.model() {
             let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
-            debug!("G: expanded {}  ", repo_id);
+            // debug!("G: expanded {}  ", repo_id);
             esw.sendw(GuiEvents::TreeExpanded(0, repo_id));
         }
     });
