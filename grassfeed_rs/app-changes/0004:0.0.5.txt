@@ -1,7 +1,7 @@
 Wed, 21 Sep 2022 00:12:00 +0000
 * StatusBar: copy Feed address into clipboard
 * Multiple instances shall not be allowed
-* Cleanup messages at configured upper limit, also double same messages
+* Cleanup double same messages
 * Build via Docker container
 * On Shutdown:  Flush Databases
 * Databases check via command line, no more automatic

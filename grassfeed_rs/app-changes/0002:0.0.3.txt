@@ -1,7 +1,7 @@
 Tue, 13 Sep 2022 00:00:00 +0000
-* refactored subscriptions to sqlite
-* cleaning out deleted subscriptions
 * Tree Unread-Calculation Speed increased, parallel web requests to 3
-* fixed: message tooltip needs escaping
-* remove icon dialog, leave it on  debug flag
 * SendToBrowser :   mark-as-read for all entries
+* Cleaning out deleted subscriptions
+* Refactored subscriptions to sqlite
+* Bugfix: message tooltip needs escaping
+* Removed icon dialog, leave it on  debug flag
