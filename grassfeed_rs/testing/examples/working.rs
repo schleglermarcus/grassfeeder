@@ -125,8 +125,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
     let url_relay = format!("{}/relay_rd.rss", addr); // very big
 
-    let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
-    let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
+	let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
+    let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder2);
+    let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), folder2);
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_relay, "relay_rd".to_string(), folder2, false);
@@ -142,11 +143,17 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder3,
         false,
     );
-    if false {
+    if true {
         let src = [
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
+
+			(
+                "https://www.linuxcompatible.org/news/atom.xml",
+                "linuxcompatible",
+            ),
+
             (
                 "https://afternarcissisticabuse.wordpress.com/feed/",
                 "afternarc",
@@ -168,11 +175,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "youtube",
             ),
         ];
+		let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
-                folder3,
+                folder1,
                 false,
             );
         });
@@ -232,8 +240,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://www.reddit.com/r/aww.rss", "aww"),
             ("https://feeds.breakingnews.ie/bnworld", "breaknew"),
         ];
-
-        let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
@@ -338,8 +344,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "seoulnews - 기사 요약 -",
             ),
         ];
-
-        let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),

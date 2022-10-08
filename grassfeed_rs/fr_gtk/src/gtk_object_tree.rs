@@ -109,10 +109,19 @@ impl GtkGuiBuilder for GtkObjectTree {
         });
         create_dialogs(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
         let drag_state = Rc::new(RwLock::new(DragState::default()));
+
+        let box_top = gtk::Box::new(Orientation::Vertical, 0);
+        box_top.set_widget_name("box_top");
+        window.add(&box_top);
+
         let paned_top = Paned::new(Orientation::Horizontal);
         paned_top.set_wide_handle(true);
-        window.add(&paned_top);
+        paned_top.set_widget_name("paned_top");
+        box_top.add(&paned_top);
+
         let box_1_v = gtk::Box::new(Orientation::Vertical, 0);
+        box_1_v.set_widget_name("box_1_v");
+
         paned_top.pack1(&box_1_v, false, false);
         paned_top.set_size_request(20, -1);
         let esw = EvSenderWrapper(gui_event_sender.clone());
@@ -136,9 +145,7 @@ impl GtkGuiBuilder for GtkObjectTree {
 
         let menubar = create_menubar(gui_event_sender.clone(), gtk_obj_a.clone(), mode_debug);
         box_2_h.pack_start(&menubar, false, false, 0);
-        // let toolbar =
         create_toolbar(gui_event_sender.clone(), gtk_obj_a.clone(), &box_2_h);
-        // box_2_h.add(&toolbar);
         box_2_h.set_spacing(-1);
 
         let paned_1 = Paned::new(Orientation::Horizontal);
@@ -162,7 +169,6 @@ impl GtkGuiBuilder for GtkObjectTree {
         let esw = EvSenderWrapper(gui_event_sender.clone());
         paned_1.connect_position_notify(move |paned| {
             let newpos: i32 = paned.position();
-            // debug!("paned1: pos {}", newpos);
             if newpos != GLOB_CACHE.with(|glob| (*glob.borrow()).pane0x) {
                 GLOB_CACHE.with(|glob| {
                     (*glob.borrow_mut()).pane0x = newpos;
@@ -170,7 +176,6 @@ impl GtkGuiBuilder for GtkObjectTree {
                 esw.sendw(GuiEvents::PanedMoved(0, newpos));
             }
         });
-        //         paned_1.connect_position_set_notify(|p| {            debug!("paned1: pos_set {}", p.position());        });
         let p1p = self.get_int(PropDef::GuiPane1Pos, 90) as i32;
         paned_1.set_position(p1p);
         let col1width = self.get_int(PropDef::GuiCol1Width, 200) as i32;
@@ -196,37 +201,35 @@ impl GtkGuiBuilder for GtkObjectTree {
 
         // box_1_v
         let box3_status = gtk::Box::new(Orientation::Horizontal, 0);
-        box_1_v.add(&box3_status);
+        box3_status.set_widget_name("box3_status");
+        // box_1_v
+        box_top.add(&box3_status);
         let label_st1 = Label::new(Some("|____|"));
         label_st1.set_width_request(20);
         box3_status.add(&label_st1);
-        label_st1.set_tooltip_text(Some("Hello"));
-
         let label_st2 = Label::new(Some(">some_url<"));
         label_st2.set_width_request(100);
         label_st2.set_selectable(true);
         label_st2.connect_button_press_event(|label2: &Label, evb: &EventButton| {
             if evb.button() == MOUSE_BUTTON_RIGHT {
-                // trace!(                    "L2   button_press_event  {:?}   button={:?}",                    label2.text(),                    evb.button()                );
                 label2.select_region(0, -1); // select all
             }
             gtk::Inhibit(false)
         });
-        // label_st2.connect_label_notify(move |label| {            let l2txt = label.text().to_string();            label.set_tooltip_text(Some(l2txt.as_str()));        });
-        // label_st2.connect_focus(|_l2: &Label, _dirtype| {            debug!("LABEL2 focus ");            gtk::Inhibit(false)        });
-        // label_st2.connect_focus_on_click_notify(|_l2: &Label| {            debug!("LABEL2   focus_on_click_notify ");        });
-        // label_st2.connect_activate_link(|_l2: &Label, _arg2| {            debug!("LABEL2   activate_link ");            gtk::Inhibit(false)        });
-
         let layout_st = gtk::Layout::new(NONE_ADJ, NONE_ADJ);
         layout_st.add(&label_st2);
         layout_st.set_width(100);
         layout_st.set_vexpand(false);
         layout_st.set_hexpand(true);
         box3_status.add(&layout_st);
+        let label_st3 = Label::new(Some("___"));
+        label_st3.set_width_request(10);
+        box3_status.add(&label_st3);
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
             ret.set_label(LABEL_STATUS_1, &label_st1);
             ret.set_label(LABEL_STATUS_2, &label_st2);
+            ret.set_label(LABEL_STATUS_3, &label_st3);
             ret.set_paned(PANED_1_LEFT, &paned_1);
             ret.set_scrolledwindow(SCROLLEDWINDOW_0, &scrolledwindow_0);
             ret.set_scrolledwindow(SCROLLEDWINDOW_1, &scrolledwindow_1);

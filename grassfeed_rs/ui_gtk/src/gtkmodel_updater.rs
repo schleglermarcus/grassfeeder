@@ -222,7 +222,7 @@ impl GtkModelUpdaterInt {
             // later:  reduce icon size before going into database
             debug!(
                 "update_tree_model_single({} {:?}) TOO LONG {:?} times:{} {} ",
-                index, path, &gti, elapsed_3, elapsed_fin
+                index, path, &gti.a_values[1], elapsed_3, elapsed_fin
             );
         }
     }

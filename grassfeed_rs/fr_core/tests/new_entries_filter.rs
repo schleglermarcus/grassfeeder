@@ -17,9 +17,34 @@ use fr_core::util;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-// test if feed update content matching works
-
 // #[ignore]
+#[test]
+fn parse_linuxcompati() {
+    setup();
+    let rss_str: String = std::fs::read_to_string("tests/data/linuxcompat-1.xml").unwrap();
+    // debug!("RSS={}", rss_str);
+
+    let feed_result = parser::parse(rss_str.as_bytes());
+    if feed_result.is_err() {
+        warn!("Err={:?}", feed_result.err());
+        assert!(false);
+        return;
+    }
+    let feeds = feed_result.unwrap();
+
+    let list: Vec<MessageRow> = feeds
+        .entries
+        .iter()
+        .map(|fe| message_from_modelentry(&fe).0)
+        .collect();
+
+    debug!("list= {:?}", list);
+
+    // let msg18 = fce_list.get_mut(18).unwrap();
+}
+
+// test if feed update content matching works
+#[ignore]
 #[test]
 fn test_new_entries_filter() {
     setup();
@@ -111,7 +136,7 @@ fn test_new_entries_filter() {
     }
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_feed_text_to_entries() {
     let filename = "tests/data/gui_proc_rss2_v1.rss";
@@ -127,7 +152,7 @@ fn test_feed_text_to_entries() {
     assert_eq!(r_list.len(), 2);
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn parse_wissensmanufaktur() {
     setup();
@@ -146,6 +171,7 @@ fn parse_wissensmanufaktur() {
     );
 }
 
+#[ignore]
 #[test]
 fn parse_youtube() {
     setup();
