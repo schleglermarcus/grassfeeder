@@ -7,16 +7,17 @@ grassfeeder (0.0.8) unstable; urgency=low
   * Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
   * Message List: translate titles
   * Delete Messages by delete key
+  * Bugfix:  add-folder   leads to  expanding one that is closed
+  * Bugfix:  Tree Drag Folders:  the parent items instead of all, don't jump to start
+  * Change Layout: wide bottom line.
   
-  - Bug:  add-folder   leads to  expanding one that is closed
   
+  - check  https://www.linuxcompatible.org/  feed: icon + entries
   
-  - Change Layout: wide bottom line.
   
   - Bug messages:  set unread ->  is not processed in following set-reading
   - Create Backups for Subscriptions-DB
   - Sanitize: cross-check icon ids of tree if they are present in icon db
-  - check  https://www.linuxcompatible.org/  feed: icon + entries
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Wed, 04 Oct 2022 00:12:00 +0000
 

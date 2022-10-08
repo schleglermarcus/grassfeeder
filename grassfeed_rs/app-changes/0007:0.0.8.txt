@@ -7,14 +7,13 @@ Wed, 04 Oct 2022 00:12:00 +0000
 * Message List: translate titles
 * Delete Messages by delete key
 * Bugfix:  add-folder   leads to  expanding one that is closed
+* Bugfix:  Tree Drag Folders:  the parent items instead of all, don't jump to start
+* Change Layout: wide bottom line.
 
 
-- Drag Folders :  refresh only the parent items instead of all
-
-- Change Layout: wide bottom line.
+- check  https://www.linuxcompatible.org/  feed: icon + entries
 
 
 - Bug messages:  set unread ->  is not processed in following set-reading
 - Create Backups for Subscriptions-DB
 - Sanitize: cross-check icon ids of tree if they are present in icon db
-- check  https://www.linuxcompatible.org/  feed: icon + entries

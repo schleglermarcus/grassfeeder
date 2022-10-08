@@ -887,7 +887,7 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     let mut published_ts: i64 = 0;
     let mut error_text = String::default();
 
-    debug!("E {}", me.id);
+    // debug!("E {}", me.id);
 
     if let Some(publis) = me.published {
         published_ts = DateTime::<Local>::from(publis).timestamp();
