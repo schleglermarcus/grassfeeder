@@ -12,11 +12,9 @@ grassfeeder (0.0.8) unstable; urgency=low
   * Change Layout: wide bottom line.
   * Workaround for wrong atom  declaration https:// -> http://   linuxcompatible.org
   * Create Backups for Subscriptions-DB
+  * Cleanup messages at configured upper limit
+  * Sanitize: cross-check icon ids of tree if they are present in icon db
   
-  
-  - Cleanup messages at configured upper limit
-  
-  - Sanitize: cross-check icon ids of tree if they are present in icon db
   
   - Bug messages:  set unread ->  is not processed in following set-reading
 

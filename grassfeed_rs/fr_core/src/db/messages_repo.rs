@@ -374,11 +374,8 @@ impl StartupWithAppContext for MessagesRepo {
 
 impl TimerReceiver for MessagesRepo {
     fn trigger(&mut self, event: &TimerEvent) {
-        match event {
-            TimerEvent::Shutdown => {
-                self.ctx.cache_flush();
-            }
-            _ => (),
+        if event == &TimerEvent::Shutdown {
+            self.ctx.cache_flush();
         }
     }
 }

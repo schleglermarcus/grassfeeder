@@ -1,13 +1,11 @@
 To Do List
 
 - Bug messages:  set unread ->  is not processed in following set-reading
-- Create Backups for Subscriptions-DB
 - Sanitize: cross-check icon ids of tree if they are present in icon db
 
 
 
-
-- implement focus policy: before last unread
+- Aggregate Messages on Folder Selection
 - import opml: see if we can get the web main url from  the outline
 - Updating the tree: speed up the gtk part
 - Subscriptions Sanitize:  Folder shall have only folder icon
@@ -23,6 +21,7 @@ To Do List
 
 - Message List: set scroll position to upper edge from Cursor
 - Startup, create gui:  delayed creation of dialogs
+- implement focus policy: before last unread
 - React on Minimize, do memory usage reduction
 - Opml export formatted / pretty
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)

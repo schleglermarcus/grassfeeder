@@ -1,9 +1,10 @@
 use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
-use crate::db::message::decompress;
+use crate::db::icon_repo::IconRepo;
 use crate::db::message::MessageRow;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
+use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::util::db_time_to_display;
@@ -11,6 +12,8 @@ use crate::util::filter_by_iso8859_1;
 use crate::util::Step;
 use crate::util::StepResult;
 use flume::Sender;
+use resources::gen_icons;
+use resources::gen_icons::ICON_LIST;
 use std::borrow::Borrow;
 use std::collections::HashSet;
 use std::sync::Mutex;
@@ -20,6 +23,7 @@ pub struct CleanerInner {
     pub sourcetree_job_sender: Sender<SJob>,
     pub subscriptionrepo: SubscriptionRepo,
     pub messgesrepo: MessagesRepo,
+    pub iconrepo: IconRepo,
     pub fp_correct_subs_parent: Mutex<Vec<i32>>,
     pub subs_parents_active: Mutex<Vec<i32>>,
     pub need_update_subscriptions: bool,
@@ -34,17 +38,20 @@ impl CleanerInner {
         s_se: Sender<SJob>,
         sub_re: SubscriptionRepo,
         msg_re: MessagesRepo,
+        ico_re: IconRepo,
+        max_msg: i32,
     ) -> Self {
         CleanerInner {
             cjob_sender: c_se,
             sourcetree_job_sender: s_se,
             subscriptionrepo: sub_re,
             messgesrepo: msg_re,
+            iconrepo: ico_re,
             fp_correct_subs_parent: Mutex::new(Vec::default()),
             subs_parents_active: Mutex::new(Vec::default()),
             need_update_messages: false,
             need_update_subscriptions: false,
-            max_messages_per_subscription: -1,
+            max_messages_per_subscription: max_msg,
         }
     }
 }
@@ -203,6 +210,44 @@ impl Step<CleanerInner> for CollapseSubscriptions {
             inner.subscriptionrepo.update_expanded(collapse_ids, false);
             inner.need_update_subscriptions = true;
         }
+        StepResult::Continue(Box::new(CheckIconAvailable(inner)))
+    }
+}
+
+pub struct CheckIconAvailable(pub CleanerInner);
+impl Step<CleanerInner> for CheckIconAvailable {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let mut inner = self.0;
+        let all_folders: Vec<SubscriptionEntry> = inner
+            .subscriptionrepo
+            .get_all_entries()
+            .into_iter()
+            .filter(|fse| !fse.is_folder)
+            .collect();
+        let mut reset_icon_subs_ids: Vec<i32> = Vec::default();
+        for se in all_folders {
+            if se.icon_id < ICON_LIST.len() && se.icon_id != gen_icons::IDX_05_RSS_FEEDS_GREY_64_D {
+                reset_icon_subs_ids.push(se.subs_id as i32);
+                continue;
+            }
+            let o_icon = inner.iconrepo.get_by_index(se.icon_id as isize);
+            if o_icon.is_none() {
+                reset_icon_subs_ids.push(se.subs_id as i32);
+                continue;
+            }
+            // let icon = o_icon.unwrap();            trace!(                "icon there subsID {}  {} :  #{} ",                se.subs_id,                se.icon_id,                icon.icon.len()            );
+        }
+        reset_icon_subs_ids.sort();
+        if !reset_icon_subs_ids.is_empty() {
+            debug!(
+                "CheckIconAvailable:  reset-icon folders: {:?}",
+                reset_icon_subs_ids
+            );
+            inner
+                .subscriptionrepo
+                .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_05_RSS_FEEDS_GREY_64_D);
+            inner.need_update_subscriptions = true;
+        }
         StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)))
     }
 }
@@ -258,15 +303,15 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 .filter(|fse| !fse.is_folder)
                 .map(|fse| fse.subs_id)
                 .collect::<Vec<isize>>();
-            trace!(
-                "ReduceTooManyMessages={:?}  SUBS={:?}",
+            debug!(
+                "ReduceTooManyMessages(max={})  #folders:{}",
                 inner.max_messages_per_subscription,
-                &subs_ids
+                subs_ids.len()
             );
-
             for su_id in &subs_ids {
                 let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id, true);
-                if msg_per_subscription.len() > inner.max_messages_per_subscription as usize {
+                let length_before = msg_per_subscription.len();
+                if length_before > inner.max_messages_per_subscription as usize {
                     inner.need_update_messages = true;
                     msg_per_subscription.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
                     let (_stay, remove) =
@@ -276,11 +321,12 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                             remove.iter().map(|e| e.message_id as i32).collect();
                         let first_msg = remove.iter().next().unwrap();
                         debug!(
-                            "Cleanup messages:  subsciption(id {}) ,  {} messages. Latest date: {}	\t message-ids={:?}",
+                            "Reduce(ID {}), has {}, reduce {} messages. Latest date: {}	", // \t message-ids={:?}
                             su_id,
+                            length_before,
                             id_list.len(),
                             db_time_to_display(first_msg.entry_src_date),
-                            id_list
+                            // id_list
                         );
                         inner.messgesrepo.update_is_deleted_many(&id_list, true);
                     }
@@ -317,27 +363,15 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
                     known.insert((msg.entry_src_date, msg.title.clone()));
                 };
             });
-            for d in &delete_list {
-                trace!(
-                    "{} double: ID:{}\tdate:{} fetch:{}\t{}  post-id:{}",
-                    subs_id,
-                    d.message_id,
-                    db_time_to_display(d.entry_src_date),
-                    db_time_to_display(d.fetch_date),
-                    decompress(&d.title),
-                    d.post_id
-                );
-            }
+            // for d in &delete_list {                trace!(                    "ID{} == ID:{}\tdate:{} fetch:{}\t{}  post-id:{}",                    subs_id,                    d.message_id,                    db_time_to_display(d.entry_src_date),                    db_time_to_display(d.fetch_date),                    crate::db::message::decompress(&d.title),                    d.post_id                );            }
             if !delete_list.is_empty() {
                 let del_indices: Vec<i32> =
                     delete_list.iter().map(|m| m.message_id as i32).collect();
-                // trace!("setting deleted: {} messages", del_indices.len());
                 inner
                     .messgesrepo
                     .update_is_deleted_many(del_indices.as_slice(), true);
             }
         }
-
         StepResult::Continue(Box::new(PurgeMessages(inner)))
     }
 }
@@ -346,10 +380,10 @@ pub struct PurgeMessages(pub CleanerInner);
 impl Step<CleanerInner> for PurgeMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
-        let to_delete: Vec<i32> = inner
-            .messgesrepo
-            .get_all_messages()
-            .iter()
+        let allmsg = inner.messgesrepo.get_all_messages();
+        let all_count = allmsg.len();
+        let to_delete: Vec<i32> = allmsg
+            .into_iter()
             .filter_map(|m| {
                 if m.is_deleted {
                     Some(m.message_id as i32)
@@ -358,6 +392,10 @@ impl Step<CleanerInner> for PurgeMessages {
                 }
             })
             .collect();
+        debug!(
+            "PurgeMessages: #all={} to-delete:{:?}",
+            all_count, to_delete
+        );
         let num_deleted = inner.messgesrepo.delete_by_index(&to_delete);
         if to_delete.len() != num_deleted {
             warn!("TO_DELETE: {}  DELETED:{}", to_delete.len(), num_deleted);

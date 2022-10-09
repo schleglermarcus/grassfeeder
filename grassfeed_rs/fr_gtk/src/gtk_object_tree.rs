@@ -655,7 +655,7 @@ pub fn create_toolbar(
     let searchentry: SearchEntry = SearchEntry::new();
     containing_box.add(&searchentry);
     searchentry.set_tooltip_text(Some(&t!("TB_FILTER_1")));
-    let esw = EvSenderWrapper(g_ev_se.clone());
+    let esw = EvSenderWrapper(g_ev_se);
     searchentry.connect_changed(move |se: &SearchEntry| {
         esw.sendw(GuiEvents::SearchEntryTextChanged(
             SEARCH_ENTRY_0,

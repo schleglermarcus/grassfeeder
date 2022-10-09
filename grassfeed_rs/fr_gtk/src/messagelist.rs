@@ -189,7 +189,7 @@ pub fn create_listview(
             let id_list = tp_list
                 .iter()
                 .filter_map(|tp| {
-                    if let Some(t_iter) = t_model.iter(&tp) {
+                    if let Some(t_iter) = t_model.iter(tp) {
                         if let Ok(val) =
                             t_model.value(&t_iter, LIST0_COL_MSG_ID as i32).get::<u32>()
                         {
@@ -217,10 +217,7 @@ pub fn create_listview(
             .get::<u32>()
             .unwrap() as i32;
         let list_pos = t_path.indices()[0];
-        debug!(
-            "ROW_ACTIVaTED, double click repoid: {} {}",
-            repo_id, list_pos
-        );
+        //  trace!(            "row_activated, double click repoid: {} {}",            repo_id, list_pos        );
         esw.sendw(GuiEvents::ListRowDoubleClicked(0, list_pos, repo_id));
     });
 

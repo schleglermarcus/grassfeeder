@@ -111,7 +111,7 @@ pub trait IFeedContents {
         current_row: Option<&MessageRow>,
     ) -> (String, String, String);
     fn move_list_cursor(&self, c: ListMoveCommand);
-    fn set_messages_filter(&mut self, newtext: &String);
+    fn set_messages_filter(&mut self, newtext: &str);
 
     fn process_kb_delete(&self);
 }
@@ -126,17 +126,12 @@ pub struct FeedContents {
     browserpane_r: Rc<RefCell<dyn IBrowserPane>>,
     job_queue_receiver: Receiver<CJob>,
     job_queue_sender: Sender<CJob>,
-
     config: Config,
     list_fontsize: u32,
     list_selected_ids: RwLock<Vec<i32>>,
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     msg_state: RwLock<MessageStateMap>,
     msg_filter: Option<String>,
-
-    //  todo: invalidate this when there are new messages
-    // last_activated_subscription_id: RefCell<isize>,
-
     //  subscription-id, number-of-lines
     current_subscription: RefCell<(isize, isize)>,
 }
@@ -306,7 +301,7 @@ impl FeedContents {
         );
     }
 
-    fn filter_messages(&self, list_in: &Vec<MessageRow>) -> Vec<MessageRow> {
+    fn filter_messages(&self, list_in: &[MessageRow]) -> Vec<MessageRow> {
         let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
         let reg = RegexBuilder::new(&regex::escape(matchtext))
             .case_insensitive(true)
@@ -329,7 +324,7 @@ impl FeedContents {
             })
             .cloned()
             .collect();
-        return out_list;
+        out_list
     }
 
     /// Read from db and put into the list view,
@@ -371,13 +366,11 @@ impl FeedContents {
 
     fn fill_state_map(&self, r_messagelist: &Vec<MessageRow>) {
         let (subs_id, _num_msg) = *self.current_subscription.borrow();
-        let messagelist: Vec<MessageRow>;
-        if r_messagelist.is_empty() {
-            // let mut messagelist: Vec<MessageRow> =
-            messagelist = (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
+        let messagelist: Vec<MessageRow> = if r_messagelist.is_empty() {
+            (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false)
         } else {
-            messagelist = r_messagelist.clone()
-        }
+            r_messagelist.clone()
+        };
         self.current_subscription
             .replace((subs_id, messagelist.len() as isize));
 
@@ -390,8 +383,7 @@ impl FeedContents {
     fn delete_messages(&self, db_ids: &[i32]) {
         (self.messagesrepo_r)
             .borrow()
-            .update_is_deleted_many(&db_ids, true);
-        // let subs_id = *self.last_activated_subscription_id.borrow();
+            .update_is_deleted_many(db_ids, true);
         let (subs_id, _num_msg) = *self.current_subscription.borrow();
         self.update_message_list(subs_id);
         if let Some(feedsources) = self.feedsources_w.upgrade() {
@@ -802,11 +794,11 @@ impl IFeedContents for FeedContents {
         }
     }
 
-    fn set_messages_filter(&mut self, newtext: &String) {
+    fn set_messages_filter(&mut self, newtext: &str) {
         if newtext.is_empty() {
             self.msg_filter = None;
         } else {
-            self.msg_filter.replace(newtext.clone());
+            self.msg_filter.replace(newtext.to_string());
         }
         self.addjob(CJob::UpdateMessageList);
     }

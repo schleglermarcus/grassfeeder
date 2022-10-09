@@ -455,12 +455,11 @@ impl SourceTreeController {
                 return;
             }
             let path = subs_map.tree_path.as_ref().unwrap();
-            // trace!(                "insert_single:{} {:?}\t{:?}\t{:?}",                n,                &path,                &fse,                &subs_map            );
             let treevalues = self.tree_row_to_values(fse, &subs_map);
             (*self.gui_val_store)
                 .write()
                 .unwrap()
-                .insert_tree_item(&path, treevalues.as_slice());
+                .insert_tree_item(path, treevalues.as_slice());
         });
     }
 

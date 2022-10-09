@@ -20,10 +20,8 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
-// pub const KEY_CACHE_DIR: &str = "cache_dir";
 
 /// Later:  sanity for recursion
-/// TODO use for update_paths
 //  const MAX_PATH_DEPTH: usize = 30;
 
 pub const FILENAME_JSON: &str = "subscription_list.json";
@@ -57,6 +55,7 @@ pub trait ISubscriptionRepo {
 
     ///   store IconID into feed source
     fn update_icon_id(&self, src_id: isize, icon_id: usize, timestamp_s: i64);
+    fn update_icon_id_many(&self, src_ids: Vec<i32>, icon_id: usize);
 
     fn update_folder_position(&self, src_id: isize, new_folder_pos: isize);
 
@@ -259,6 +258,23 @@ impl ISubscriptionRepo for SubscriptionRepo {
             timestamp_s,
             SubscriptionEntry::index_column_name(),
             subs_id
+        );
+        self.ctx.execute(sql);
+    }
+
+    fn update_icon_id_many(&self, src_ids: Vec<i32>, icon_id: usize) {
+        let joined = src_ids
+            .iter()
+            .map(|r| r.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+
+        let sql = format!(
+            "UPDATE {}  SET  icon_id={}  WHERE {} in ( {} ) ",
+            SubscriptionEntry::table_name(),
+            icon_id,
+            SubscriptionEntry::index_column_name(),
+            joined
         );
         self.ctx.execute(sql);
     }
@@ -499,11 +515,8 @@ impl StartupWithAppContext for SubscriptionRepo {
 
 impl TimerReceiver for SubscriptionRepo {
     fn trigger(&mut self, event: &TimerEvent) {
-        match event {
-            TimerEvent::Shutdown => {
-                self.ctx.cache_flush();
-            }
-            _ => (),
+        if event == &TimerEvent::Shutdown {
+            self.ctx.cache_flush();
         }
     }
 }

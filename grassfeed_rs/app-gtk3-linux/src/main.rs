@@ -47,8 +47,8 @@ fn main() {
         return;
     }
     if opts.check {
-        trace!("Database Check {} {} ", &version_str, &conf,);
-        check_consistency::databases_check_manual(&conf);
+        trace!("Database Check {} {} {} ", &version_str, &conf, &cache);
+        check_consistency::databases_check_manual(&conf, &cache);
         return; // no gui
     }
     info!(

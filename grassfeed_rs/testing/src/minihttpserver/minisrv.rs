@@ -335,10 +335,9 @@ pub fn analyse_request(
     req_path: &str,
 ) -> AttachFileInfo {
     let mut path_expanded = req_path.to_string();
-    // let mut path_expanded =     format!("{}", req_path);
     let current_dir = std::env::current_dir()
         .unwrap_or_default()
-        .to_path_buf()
+        // .to_path_buf()
         .into_os_string()
         .to_str()
         .unwrap_or_default()
