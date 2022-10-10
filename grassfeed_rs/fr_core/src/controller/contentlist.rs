@@ -801,10 +801,11 @@ impl IFeedContents for FeedContents {
     }
 
     fn set_messages_filter(&mut self, newtext: &str) {
-        if newtext.is_empty() {
+        let trimmed = newtext.trim();
+        if trimmed.is_empty() {
             self.msg_filter = None;
         } else {
-            self.msg_filter.replace(newtext.to_string());
+            self.msg_filter.replace(trimmed.to_string());
         }
         self.addjob(CJob::UpdateMessageList);
     }
