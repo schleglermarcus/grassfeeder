@@ -134,7 +134,7 @@ pub trait ISourceTreeController {
     fn set_selected_feedsource(&mut self, src_repo_id: isize);
     fn import_opml(&mut self, filename: String);
     fn mark_as_read(&self, src_repo_id: isize);
-    fn get_current_selected_fse(&self) -> Option<SubscriptionEntry>;
+    fn get_current_selected_fse(&self) -> Option< ( SubscriptionEntry , Vec<i32>) >;
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry>;
     /// writes the path array into the cached subscription list
     fn update_cached_paths(&self);
@@ -159,7 +159,7 @@ pub struct SourceTreeController {
     config: Config,
     feedsource_delete_id: Option<usize>,
     current_edit_fse: Option<SubscriptionEntry>,
-    current_selected_fse: Option<SubscriptionEntry>,
+    // current_selected_fse: Option<SubscriptionEntry>,
     current_new_folder_parent_id: Option<isize>,
     new_source: NewSourceTempData,
     tree_fontsize: u32,
@@ -167,6 +167,9 @@ pub struct SourceTreeController {
     need_check_fs_paths: RefCell<bool>,
     statemap: RefCell<SubscriptionState>,
     erro_repo_r: Rc<RefCell<ErrorRepo>>,
+
+    //  Subscription,  Non-Folder-Child-IDs
+    current_selected_subscription: Option<(SubscriptionEntry, Vec<i32>)>,
 }
 
 impl SourceTreeController {
@@ -223,7 +226,7 @@ impl SourceTreeController {
             config: Config::default(),
             new_source: NewSourceTempData::default(),
             tree_fontsize: 0,
-            current_selected_fse: None,
+            current_selected_subscription: None,
             gui_context_w: Weak::new(),
             messagesrepo_w: Weak::new(),
             need_check_fs_paths: RefCell::new(true),
@@ -1335,7 +1338,7 @@ impl ISourceTreeController for SourceTreeController {
         self.statemap
             .borrow_mut()
             .clear_num_all_unread(source_repo_id);
-        if let Some(fse) = &self.current_selected_fse {
+        if let Some((fse, _list)) = &self.current_selected_subscription {
             if fse.subs_id == source_repo_id {
                 if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                     (*feedcontents).borrow().update_message_list(fse.subs_id);
@@ -1591,7 +1594,8 @@ impl ISourceTreeController for SourceTreeController {
             if let Some(gui_context) = self.gui_context_w.upgrade() {
                 (*gui_context).borrow_mut().set_window_title(display_name);
             }
-            self.current_selected_fse = Some(fse);
+
+            self.current_selected_subscription = Some((fse, Vec::default()));
         }
     }
 
@@ -1612,8 +1616,8 @@ impl ISourceTreeController for SourceTreeController {
         self.addjob(SJob::FillSourcesTree);
     }
 
-    fn get_current_selected_fse(&self) -> Option<SubscriptionEntry> {
-        self.current_selected_fse.clone()
+    fn get_current_selected_fse(&self) -> Option<(SubscriptionEntry, Vec<i32>)> {
+        self.current_selected_subscription.clone()
     }
 
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry> {

@@ -126,13 +126,13 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
     let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder2);
     let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), folder2);
-    feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
-    feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
-    feedsources.add_new_subscription_at_parent(url_relay, "relay_rd".to_string(), folder2, false);
+    feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder3, false);
+    feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder3, false);
+    feedsources.add_new_subscription_at_parent(url_relay, "relay_rd".to_string(), folder3, false);
     feedsources.add_new_subscription_at_parent(
         url_staseve,
         "staseve11".to_string(),
-        folder2,
+        folder3,
         false,
     );
     feedsources.add_new_subscription_at_parent(

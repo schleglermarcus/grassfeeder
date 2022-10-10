@@ -132,8 +132,9 @@ pub struct FeedContents {
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     msg_state: RwLock<MessageStateMap>,
     msg_filter: Option<String>,
-    //  subscription-id, number-of-lines
-    current_subscription: RefCell<(isize, isize)>,
+
+    //  subscription-id, number-of-lines, is_folder
+    current_subscription: RefCell<(isize, isize, bool)>,
 }
 
 impl FeedContents {
@@ -165,8 +166,7 @@ impl FeedContents {
             messagesrepo_r: msg_r,
             msg_state: Default::default(),
             msg_filter: None,
-
-            current_subscription: RefCell::new((-1, -1)),
+            current_subscription: RefCell::new((-1, -1, false)),
         }
     }
 
@@ -227,7 +227,7 @@ impl FeedContents {
             .unwrap()
             .set_read_many(&repo_ids, is_read);
 
-        let (subs_id, _num_msg) = *self.current_subscription.borrow();
+        let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
 
         self.addjob(CJob::RequestUnreadAllCount(subs_id));
         let listpos_repoid: Vec<(u32, u32)> = repoid_listpos
@@ -251,7 +251,7 @@ impl FeedContents {
                 let mut last_selected_msg_id: isize = -1; // Last Selected
                 if let Some(feedsources) = self.feedsources_w.upgrade() {
                     if let Some(subs_e) = (*feedsources).borrow().get_current_selected_fse() {
-                        last_selected_msg_id = subs_e.last_selected_msg;
+                        last_selected_msg_id = subs_e.0.last_selected_msg;
                     }
                 }
                 if last_selected_msg_id > 0 {
@@ -330,9 +330,11 @@ impl FeedContents {
     /// Read from db and put into the list view,
     /// State Map shall contain only the current subscription's messages, for finding the cursor position for the focus policy
     fn update_feed_list_contents_int(&self) {
-        let (subs_id, num_msg) = *self.current_subscription.borrow();
+        let (subs_id, num_msg, _isfolder) = *self.current_subscription.borrow();
+
         let mut messagelist: Vec<MessageRow> =
             (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
+
         if num_msg != messagelist.len() as isize {
             self.fill_state_map(&messagelist);
         }
@@ -364,14 +366,26 @@ impl FeedContents {
     }
 
     fn fill_state_map(&self, r_messagelist: &Vec<MessageRow>) {
-        let (subs_id, _num_msg) = *self.current_subscription.borrow();
+        let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
+
+        debug!("fill_state_map {:?}", *self.current_subscription.borrow());
+
+        if isfolder {
+            // if let Some(feedsources) = self.feedsources_w.upgrade() {
+            //     if let Some(subs_e) = (*feedsources).borrow().get_current_selected_fse() {}
+            // }
+
+
+
+        }
+
         let messagelist: Vec<MessageRow> = if r_messagelist.is_empty() {
             (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false)
         } else {
             r_messagelist.clone()
         };
         self.current_subscription
-            .replace((subs_id, messagelist.len() as isize));
+            .replace((subs_id, messagelist.len() as isize, isfolder));
 
         self.msg_state.write().unwrap().clear();
         messagelist.iter().enumerate().for_each(|(i, fc)| {
@@ -383,7 +397,7 @@ impl FeedContents {
         (self.messagesrepo_r)
             .borrow()
             .update_is_deleted_many(db_ids, true);
-        let (subs_id, _num_msg) = *self.current_subscription.borrow();
+        let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         self.update_message_list(subs_id);
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             feedsources.borrow().invalidate_read_unread(subs_id);
@@ -486,7 +500,6 @@ impl IFeedContents for FeedContents {
                     }
                 }
                 CJob::UpdateMessageList => {
-                    // let id = *self.last_activated_subscription_id.borrow();
                     self.update_feed_list_contents_int();
                 }
             }
@@ -511,8 +524,6 @@ impl IFeedContents for FeedContents {
                 is_unread_ids.push(*msg_id as i32);
             }
         }
-        // fc_repo_ids            .iter()            .filter(|c_id| !self.msg_state.read().unwrap().get_isread(**c_id as isize))            .map(|c_id| *c_id as i32)            .collect::<Vec<i32>>();
-
         self.msg_state
             .write()
             .unwrap()
@@ -524,10 +535,7 @@ impl IFeedContents for FeedContents {
             .iter()
             .map(|(k, v)| (*v as u32, *k as u32))
             .collect::<Vec<(u32, u32)>>();
-        let (subs_id, _num_msg) = *self.current_subscription.borrow();
-
-        // trace!(            "process_list_row_activated:  list_pos_dbid={:?}   is_unread={:?}  current_id={:?}",            list_pos_dbid,            is_unread_ids,            *self.current_subscription.borrow()        );
-
+        let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         if !is_unread_ids.is_empty() {
             (*self.messagesrepo_r)
                 .borrow_mut()
@@ -555,21 +563,19 @@ impl IFeedContents for FeedContents {
     }
 
     fn update_message_list(&self, subscription_id: isize) {
-        // let old_subs_id: isize = *self.last_activated_subscription_id.borrow();
-        let (old_subs_id, _num_msg) = *self.current_subscription.borrow();
-
+        let (old_subs_id, _num_msg, mut isfolder) = *self.current_subscription.borrow();
         if subscription_id != old_subs_id {
-            self.current_subscription.replace((subscription_id, -1));
+            if let Some(feedsources) = self.feedsources_w.upgrade() {
+                if let Some(subs_e) = (*feedsources).borrow().get_current_selected_fse() {
+                    isfolder = subs_e.0.is_folder;
+                }
+            }
+            self.current_subscription
+                .replace((subscription_id, -1, isfolder));
+
+            // debug!(                "update_message_list: id: {:?}",                *self.current_subscription.borrow()            );
+
             self.fill_state_map(&Vec::default());
-            /*
-                        self.last_activated_subscription_id.replace(subscription_id);
-                        let messagelist: Vec<MessageRow> =
-                            (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subscription_id, false);
-                        self.msg_state.write().unwrap().clear(); //  later: check if we need to clear every time
-                        messagelist.iter().enumerate().for_each(|(i, fc)| {
-                            self.insert_state_from_row(fc, Some(i as isize));
-                        });
-            */
         }
         self.addjob(CJob::UpdateMessageList);
         self.addjob(CJob::ListSetCursorToPolicy);
@@ -617,7 +623,7 @@ impl IFeedContents for FeedContents {
         (*self.gui_updater)
             .borrow()
             .update_list_some(TREEVIEW1, &[list_position as u32]);
-        let (subs_id, _num_msg) = *self.current_subscription.borrow();
+        let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         self.addjob(CJob::RequestUnreadAllCount(subs_id));
     }
 
@@ -752,7 +758,6 @@ impl IFeedContents for FeedContents {
         if let Some((co, au, ca)) = o_co_au_ca {
             return (co, au, ca);
         }
-
         let msg = (*self.messagesrepo_r)
             .borrow()
             .get_by_index(msg_id)
@@ -774,11 +779,7 @@ impl IFeedContents for FeedContents {
         if ListMoveCommand::None == c {
             return;
         };
-
-        let (last_subs_id, _num_msg) = *self.current_subscription.borrow();
-
-        // let last_subs_id = *self.last_activated_subscription_id.borrow();
-
+        let (last_subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         if last_subs_id <= 0 {
             return;
         }

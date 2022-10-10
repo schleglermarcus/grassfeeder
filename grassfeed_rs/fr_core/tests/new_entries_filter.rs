@@ -39,7 +39,7 @@ fn parse_linuxcompati() {
 }
 
 // test if feed update content matching works
-#[ignore]
+// #[ignore]
 #[test]
 fn test_new_entries_filter() {
     setup();
@@ -131,7 +131,7 @@ fn test_new_entries_filter() {
     }
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_feed_text_to_entries() {
     let filename = "tests/data/gui_proc_rss2_v1.rss";
@@ -147,7 +147,7 @@ fn test_feed_text_to_entries() {
     assert_eq!(r_list.len(), 2);
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn parse_wissensmanufaktur() {
     setup();
@@ -166,7 +166,7 @@ fn parse_wissensmanufaktur() {
     );
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn parse_youtube() {
     setup();

@@ -1,5 +1,5 @@
 use crate::config::configmanager::ConfigManager;
-use crate::controller::browserpane; // ::CONF_BROWSER_CACHE_CLEANUP;
+use crate::controller::browserpane;
 use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
@@ -12,6 +12,7 @@ use crate::controller::sourcetree::SourceTreeController;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
+use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::db::subscription_state::SubsMapEntry;
@@ -175,7 +176,23 @@ impl GuiProcessor {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
                         .set_selected_feedsource(subs_id as isize);
-                    // trace!(                        "GP:TreeRowActivated{} #q:{} {:?} ",                        subs_id,                        (*self.downloader_r).borrow().get_queue_size(),                        _path                    );
+                    trace!(
+                        "GP:TreeRowActivated{} #q:{} {:?} ",
+                        subs_id,
+                        (*self.downloader_r).borrow().get_queue_size(),
+                        _path
+                    );
+
+// TODO 
+                    let mut child_list: Vec<SubscriptionEntry> = Vec::default();
+                    if let Some((se, _list)) = (*self.feedsources_r).borrow().get_current_selected_fse() {
+                        if se.is_folder {
+                            child_list = (*self.subscriptionrepo_r)
+                                .borrow()
+                                .get_by_parent_repo_id(subs_id as isize);
+                        }
+                    }
+
                     (*self.feedcontents_r)
                         .borrow()
                         .update_message_list(subs_id as isize);
@@ -678,7 +695,7 @@ impl GuiProcessor {
         let mut feed_src_link = String::default();
         let mut is_folder: bool = false;
         let o_fse = (*self.feedsources_r).borrow().get_current_selected_fse();
-        if let Some(fse) = o_fse {
+        if let Some((fse, _)) = o_fse {
             repo_id_new = fse.subs_id;
             last_fetch_time = fse.updated_int;
             feed_src_link = fse.url.clone();
@@ -843,7 +860,7 @@ impl GuiProcessor {
         let kc: KeyCodes = ui_select::from_gdk_sys(keycode);
         let subscription_id: isize = match (*self.feedsources_r).borrow().get_current_selected_fse()
         {
-            Some(subs_e) => subs_e.subs_id,
+            Some((subs_e, _)) => subs_e.subs_id,
             None => -1,
         };
         match kc {

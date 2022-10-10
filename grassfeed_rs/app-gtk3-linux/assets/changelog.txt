@@ -1,3 +1,24 @@
+grassfeeder (0.0.9) unstable; urgency=low
+
+  
+  - Aggregate Messages on Folder Selection
+  
+  
+  - Startup, create gui:  delayed creation of dialogs
+  - Updating the tree: speed up the gtk part
+  - Subscriptions Sanitize:  Folder shall have only folder icon
+  - Subscriptions Sanitize:  test and clean with recursive folders
+  - Browser Display :  wrap over   title
+  - Browser: enable theme related colors
+  - Browser: Modify  Font size
+  - Browser: add Zoom Control
+  - Browser: Modify  Font size
+  
+  - Graphics:  scale down icons before going into database.
+       Example  lisahaven.news       http://feeds.feedburner.com/TechmemeRideHome
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 10 Oct 2022 00:15:00 +0000
+
 grassfeeder (0.0.8) unstable; urgency=low
 
   * Search Filter for messages
