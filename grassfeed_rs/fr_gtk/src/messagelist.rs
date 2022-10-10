@@ -146,17 +146,17 @@ pub fn create_listview(
 
     let esw = EvSenderWrapper(g_ev_se.clone());
     content_tree_view.connect_cursor_changed(move |tree_view| {
-        let sel = tree_view.selection();
+        let sele = tree_view.selection();
         if tree_view.model().is_none() {
             return;
         }
-        if sel.count_selected_rows() != 1 {
+        if sele.count_selected_rows() != 1 {
             return; // either no row selected, then it's a application focus setting, or too many - then it's a selection range
         }
         let t_model: TreeModel = tree_view.model().unwrap();
         let mut list_pos = -1;
         let mut o_t_iter: Option<TreeIter> = None;
-        let (o_tpath, o_tree_view_column) = tree_view.cursor();
+        let (o_tpath, _o_tv_col) = tree_view.cursor();
         if let Some(t_path) = o_tpath {
             let indices = t_path.indices();
             list_pos = indices[0];
@@ -169,11 +169,13 @@ pub fn create_listview(
                 .get::<u32>()
                 .unwrap() as i32;
         }
-        let mut sort_col_id = -1;
-        if let Some(tvc) = o_tree_view_column {
-            sort_col_id = tvc.sort_column_id();
-        }
-        if list_pos >= 0 && sort_col_id != LIST0_COL_ISREAD {
+        // let mut sort_col_id = -1;
+        // if let Some(ref tvc) = o_tree_view_column {
+        //     sort_col_id = tvc.sort_column_id();
+        // }
+        if list_pos >= 0 && repo_id > 0
+        //  && sort_col_id != LIST0_COL_ISREAD   // solved by inhibit on button_press_event
+        {
             esw.sendw(GuiEvents::ListRowActivated(0, list_pos, repo_id));
         }
     });
@@ -217,7 +219,11 @@ pub fn create_listview(
             .get::<u32>()
             .unwrap() as i32;
         let list_pos = t_path.indices()[0];
-        //  trace!(            "row_activated, double click repoid: {} {}",            repo_id, list_pos        );
+        trace!(
+            "row_activated, double click repoid: {} {}",
+            repo_id,
+            list_pos
+        );
         esw.sendw(GuiEvents::ListRowDoubleClicked(0, list_pos, repo_id));
     });
 
@@ -249,12 +255,14 @@ pub fn create_listview(
                             list_pos = indices[0];
                         }
                         if tvc.sort_column_id() == LIST0_COL_ISREAD {
+                            // debug!(                                "button-left list_pos={:?}   SC={}",                                list_pos,                                tvc.sort_column_id()                            );
                             esw.sendw(GuiEvents::ListCellClicked(
                                 0,
                                 list_pos,
                                 tvc.sort_column_id(),
                                 repo_id,
                             ));
+                            return gtk::Inhibit(true); // do  not propagate
                         }
                     }
                 }
@@ -262,7 +270,6 @@ pub fn create_listview(
             if button_num == MOUSE_BUTTON_RIGHT {
                 let (tp_list, t_model) = treeview.selection().selected_rows();
                 let mut repoid_listpos: Vec<(i32, i32)> = Vec::default();
-                //            let mut list_positions: Vec<i32> = Vec::default();
                 if !tp_list.is_empty() {
                     for t_path in tp_list {
                         if let Some(t_iter) = t_model.iter(&t_path) {
@@ -274,7 +281,6 @@ pub fn create_listview(
                         }
                     }
                 }
-                // trace!("LIST RightMouse repo_listpos={:?}  ", &repoid_listpos);
                 show_context_menu_message(
                     button_num,
                     ev_se_3.clone(),

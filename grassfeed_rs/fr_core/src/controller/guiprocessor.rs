@@ -182,9 +182,9 @@ impl GuiProcessor {
 
                     self.focus_by_tab = FocusByTab::FocusSubscriptions;
                 }
-                GuiEvents::ListRowActivated(_list_idx, list_position, fc_repo_id) => {
+                GuiEvents::ListRowActivated(_list_idx, list_position, msg_id) => {
                     self.focus_by_tab = FocusByTab::FocusMessages;
-                    list_row_activated_map.insert(fc_repo_id, list_position);
+                    list_row_activated_map.insert(msg_id, list_position);
                 }
                 GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
                     self.focus_by_tab = FocusByTab::FocusMessages;
@@ -192,17 +192,12 @@ impl GuiProcessor {
                         .borrow()
                         .start_web_browser(vec![fc_repo_id]);
                 }
-                GuiEvents::ListCellClicked(
-                    _list_idx,
-                    list_position,
-                    sort_col_nr,
-                    content_repo_id,
-                ) => {
+                GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) => {
                     self.focus_by_tab = FocusByTab::FocusMessages;
-                    if sort_col_nr == LIST0_COL_ISREAD && content_repo_id >= 0 {
+                    if sort_col_nr == LIST0_COL_ISREAD && msg_id >= 0 {
                         (*self.feedcontents_r)
                             .borrow()
-                            .toggle_feed_item_read(content_repo_id as isize, list_position);
+                            .toggle_feed_item_read(msg_id as isize, list_position);
                     }
                 }
                 GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
@@ -283,13 +278,11 @@ impl GuiProcessor {
                     );
                 }
                 GuiEvents::TreeExpanded(_idx, repo_id) => {
-					// trace!("GP: set_tree_expanded {} TreeExpanded" , repo_id);
                     self.feedsources_r
                         .borrow()
                         .set_tree_expanded(repo_id as isize, true);
                 }
                 GuiEvents::TreeCollapsed(_idx, repo_id) => {
-					// trace!("GP: set_tree_expanded {} TreeCollapsed" , repo_id);
                     self.feedsources_r
                         .borrow()
                         .set_tree_expanded(repo_id as isize, false);

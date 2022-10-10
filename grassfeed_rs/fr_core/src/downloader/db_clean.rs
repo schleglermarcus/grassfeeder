@@ -392,15 +392,19 @@ impl Step<CleanerInner> for PurgeMessages {
                 }
             })
             .collect();
-        debug!(
-            "PurgeMessages: #all={} to-delete:{:?}",
-            all_count, to_delete
-        );
         let num_deleted = inner.messgesrepo.delete_by_index(&to_delete);
         if to_delete.len() != num_deleted {
-            warn!("TO_DELETE: {}  DELETED:{}", to_delete.len(), num_deleted);
+            warn!(
+                "PurgeMessages: #all={}   TO_DELETE: {}  DELETED:{}",
+                all_count,
+                to_delete.len(),
+                num_deleted,
+            );
         } else {
-            debug!("Sanitize Messages: Deleted {} messages", num_deleted);
+            debug!(
+                "PurgeMessages: #all={}  Deleted {} messages",
+                all_count, num_deleted
+            );
         }
         StepResult::Continue(Box::new(Notify(inner)))
     }

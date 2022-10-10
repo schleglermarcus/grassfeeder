@@ -334,7 +334,6 @@ impl FeedContents {
         let mut messagelist: Vec<MessageRow> =
             (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
         if num_msg != messagelist.len() as isize {
-            // trace!("upd_int: len unequal {}  != {}", messagelist.len(), num_msg);
             self.fill_state_map(&messagelist);
         }
         if self.msg_filter.is_some() {
@@ -503,16 +502,21 @@ impl IFeedContents for FeedContents {
     ///  Map<  repo-id  ,   list-position >
     ///       list-position comes from treemodel.path
     fn process_list_row_activated(&self, act_dbid_listpos: &HashMap<i32, i32>) {
-        let fc_repo_ids: Vec<i32> = act_dbid_listpos.keys().cloned().collect::<Vec<i32>>();
-        let unread_repo_ids = fc_repo_ids
-            .iter()
-            .filter(|c_id| !self.msg_state.read().unwrap().get_isread(**c_id as isize))
-            .map(|c_id| *c_id as i32)
-            .collect::<Vec<i32>>();
+        let mut is_unread_ids: Vec<i32> = Vec::default();
+        let mut is_read_ids: Vec<i32> = Vec::default();
+        for msg_id in act_dbid_listpos.keys() {
+            if self.msg_state.read().unwrap().get_isread(*msg_id as isize) {
+                is_read_ids.push(*msg_id as i32);
+            } else {
+                is_unread_ids.push(*msg_id as i32);
+            }
+        }
+        // fc_repo_ids            .iter()            .filter(|c_id| !self.msg_state.read().unwrap().get_isread(**c_id as isize))            .map(|c_id| *c_id as i32)            .collect::<Vec<i32>>();
+
         self.msg_state
             .write()
             .unwrap()
-            .set_read_many(&fc_repo_ids, true);
+            .set_read_many(&is_unread_ids, true);
 
         let (last_content_id, _last_list_pos) = act_dbid_listpos.iter().last().unwrap();
         self.addjob(CJob::SwitchBrowserTabContent(*last_content_id));
@@ -521,11 +525,13 @@ impl IFeedContents for FeedContents {
             .map(|(k, v)| (*v as u32, *k as u32))
             .collect::<Vec<(u32, u32)>>();
         let (subs_id, _num_msg) = *self.current_subscription.borrow();
-        if !unread_repo_ids.is_empty() {
-            // trace!(                "process_list_row_activated:  list_pos_dbid={:?}   #unread={}  act_id={}",                list_pos_dbid,                unread_repo_ids.len(),                *self.last_activated_subscription_id.borrow()            );
+
+        // trace!(            "process_list_row_activated:  list_pos_dbid={:?}   is_unread={:?}  current_id={:?}",            list_pos_dbid,            is_unread_ids,            *self.current_subscription.borrow()        );
+
+        if !is_unread_ids.is_empty() {
             (*self.messagesrepo_r)
                 .borrow_mut()
-                .update_is_read_many(&unread_repo_ids, true);
+                .update_is_read_many(&is_unread_ids, true);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
         }
         self.addjob(CJob::UpdateContentListSome(list_pos_dbid));
@@ -599,13 +605,24 @@ impl IFeedContents for FeedContents {
     }
 
     /// for clicking on the is-read icon
-    fn toggle_feed_item_read(&self, content_repo_id: isize, list_position: i32) {
-        let msg = (*(self.messagesrepo_r.borrow()))
-            .get_by_index(content_repo_id)
-            .unwrap();
-        (*(self.messagesrepo_r.borrow_mut()))
-            .update_is_read_many(&[content_repo_id as i32], !msg.is_read);
-        let vec_pos_db: Vec<(u32, u32)> = vec![(list_position as u32, content_repo_id as u32)];
+    fn toggle_feed_item_read(&self, msg_id: isize, list_position: i32) {
+        // if o_st.is_none() {
+        //     warn!("toggle_feed_item_read : no state for {}", msg_id);
+        // }
+        // let st = o_st.unwrap();
+        let is_read = self.msg_state.read().unwrap().get_isread(msg_id);
+
+        debug!("toggle_feed_item_read {} {}", msg_id, is_read);
+
+        // let msg = (*(self.messagesrepo_r.borrow()))            .get_by_index(msg_id)            .unwrap();
+
+        self.msg_state
+            .write()
+            .unwrap()
+            .set_read_many(&[msg_id as i32 ], !is_read);
+        (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[msg_id as i32], !is_read);
+
+        let vec_pos_db: Vec<(u32, u32)> = vec![(list_position as u32, msg_id as u32)];
         self.update_content_list_some(&vec_pos_db);
         (*self.gui_updater)
             .borrow()

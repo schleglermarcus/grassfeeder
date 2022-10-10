@@ -508,7 +508,6 @@ impl StartupWithAppContext for SubscriptionRepo {
                 .borrow_mut()
                 .register(&TimerEvent::Shutdown, sr_r);
         }
-
         self.startup_int();
     }
 }

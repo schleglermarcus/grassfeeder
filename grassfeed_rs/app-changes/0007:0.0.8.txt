@@ -1,4 +1,4 @@
-Wed, 04 Oct 2022 00:12:00 +0000
+Sun, 09 Oct 2022 00:22:00 +0000
 * Subscription Tree: hide zeroes when all are read
 * refactor: gtk - separate file for the message list
 * Filter for messages, to search
@@ -15,4 +15,4 @@ Wed, 04 Oct 2022 00:12:00 +0000
 * Sanitize: cross-check icon ids of tree if they are present in icon db
 
 
-- Bug messages:  set unread ->  is not processed in following set-reading
+- Bug messages:  set unread by icon ->  is not processed in following set-read by cursor
