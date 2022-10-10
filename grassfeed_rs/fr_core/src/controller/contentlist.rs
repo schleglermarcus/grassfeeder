@@ -606,28 +606,17 @@ impl IFeedContents for FeedContents {
 
     /// for clicking on the is-read icon
     fn toggle_feed_item_read(&self, msg_id: isize, list_position: i32) {
-        // if o_st.is_none() {
-        //     warn!("toggle_feed_item_read : no state for {}", msg_id);
-        // }
-        // let st = o_st.unwrap();
         let is_read = self.msg_state.read().unwrap().get_isread(msg_id);
-
-        debug!("toggle_feed_item_read {} {}", msg_id, is_read);
-
-        // let msg = (*(self.messagesrepo_r.borrow()))            .get_by_index(msg_id)            .unwrap();
-
         self.msg_state
             .write()
             .unwrap()
-            .set_read_many(&[msg_id as i32 ], !is_read);
+            .set_read_many(&[msg_id as i32], !is_read);
         (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[msg_id as i32], !is_read);
-
         let vec_pos_db: Vec<(u32, u32)> = vec![(list_position as u32, msg_id as u32)];
         self.update_content_list_some(&vec_pos_db);
         (*self.gui_updater)
             .borrow()
             .update_list_some(TREEVIEW1, &[list_position as u32]);
-
         let (subs_id, _num_msg) = *self.current_subscription.borrow();
         self.addjob(CJob::RequestUnreadAllCount(subs_id));
     }
@@ -822,7 +811,6 @@ impl IFeedContents for FeedContents {
 
     fn process_kb_delete(&self) {
         let del_ids = self.list_selected_ids.read().unwrap();
-        // debug!("proc  delete   LIST= {:?}", del_ids);
         self.delete_messages(&del_ids);
     }
 

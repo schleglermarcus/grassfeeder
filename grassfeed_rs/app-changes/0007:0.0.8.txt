@@ -1,18 +1,14 @@
-Sun, 09 Oct 2022 00:22:00 +0000
-* Subscription Tree: hide zeroes when all are read
-* refactor: gtk - separate file for the message list
-* Filter for messages, to search
-* Flush Databases on Shutdown: subscr, msg, errors
-* Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
-* Message List: translate titles
-* Delete Messages by delete key
-* Bugfix:  add-folder   leads to  expanding one that is closed
-* Bugfix:  Tree Drag Folders:  the parent items instead of all, don't jump to start
+Mon, 10 Oct 2022 00:15:00 +0000
+* Search Filter for messages
 * Change Layout: wide bottom line.
-* Workaround for wrong atom  declaration https:// -> http://   linuxcompatible.org
+* Delete Messages by delete key
+* Flush Databases on Shutdown: subscr, msg, errors
+* Subscription Tree: hide zeroes when all are read
 * Create Backups for Subscriptions-DB
 * Cleanup messages at configured upper limit
 * Sanitize: cross-check icon ids of tree if they are present in icon db
-
-
-- Bug messages:  set unread by icon ->  is not processed in following set-read by cursor
+* Bugfix: Subscription-edit  text fields are vertically expanding. Shall have fixed height
+* Bugfix: Add-folder   leads to  expanding one that is closed
+* Bugfix: Tree Drag Folders:  the parent items instead of all, don't jump to start
+* Bugfix: Set unread by icon ->  is not processed in following set-read by cursor
+* Workaround for wrong atom  declaration https:// -> http://   linuxcompatible.org

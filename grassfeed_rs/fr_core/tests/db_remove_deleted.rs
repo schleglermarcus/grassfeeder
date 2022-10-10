@@ -45,7 +45,7 @@ fn db_cleanup_too_many_messages() {
     subsrepo.scrub_all_subscriptions();
     let msgrepo1 = MessagesRepo::new_in_mem();
     let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
-	let iconrepo = IconRepo::new("");
+    let iconrepo = IconRepo::new("");
 
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
@@ -133,7 +133,7 @@ fn t_db_cleanup_1() {
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
 
-	let iconrepo = IconRepo::new("");
+    let iconrepo = IconRepo::new("");
 
     let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5);
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
@@ -210,8 +210,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            0,
-            // logger_config::QuietFlags::Downloader as u64,
+            // 0,
+            logger_config::QuietFlags::Downloader as u64,
         );
     });
 }

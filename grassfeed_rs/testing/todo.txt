@@ -1,8 +1,5 @@
 To Do List
 
-- Bug messages:  set unread ->  is not processed in following set-reading
-- Sanitize: cross-check icon ids of tree if they are present in icon db
-
 
 
 - Aggregate Messages on Folder Selection
