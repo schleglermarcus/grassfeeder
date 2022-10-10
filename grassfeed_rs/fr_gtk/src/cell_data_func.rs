@@ -19,7 +19,8 @@ pub trait BoldFuncDiscriminator {
     fn column_nr() -> i32;
 
     fn attrlist(act_bits: u32) -> AttrList {
-        let (fontsize, is_read, is_folder) = FontAttributes::from_activation_bits(act_bits);
+        let (fontsize, is_read, is_folder, _is_transparent) =
+            FontAttributes::from_activation_bits(act_bits);
         let r = AttrList::new();
         if !is_read && !is_folder {
             r.insert(Attribute::from(AttrInt::new_weight(Weight::Bold)));
@@ -29,6 +30,7 @@ pub trait BoldFuncDiscriminator {
                 fontsize as i32 * gtk::pango::SCALE,
             )));
         }
+        // if is_transparent && sort_column_id == 3 {            r.insert(Attribute::from(AttrColor::new_background(0, 65535, 0)));        }
         r
     }
 }
@@ -73,7 +75,7 @@ where
             crt.set_attributes(None);
             let val: Value = (*t_model).value(t_iter, D::column_nr());
             if let Ok(col_val) = val.get::<u32>() {
-                crt.set_attributes(Some(&D::attrlist(col_val)));
+                crt.set_attributes(Some(&D::attrlist(col_val))); // , t_v_col.sort_column_id()
             }
         }
     }

@@ -221,10 +221,9 @@ impl Downloader {
     }
 
     fn add_to_queue(&self, dljob: DLJob) {
-        let contains = (*self.job_queue).read().unwrap().contains(&dljob);
-        if contains {
-            let kind = dljob.kind();
-            trace!("download job already queued:  {}:{:?}", kind, &dljob);
+        if (*self.job_queue).read().unwrap().contains(&dljob) {
+            // let _kind = dljob.kind();
+            // trace!("download job already queued:  {}:{:?}", kind, &dljob);
         } else {
             (*self.job_queue).write().unwrap().push_back(dljob);
         }
@@ -371,18 +370,25 @@ impl IDownloader for Downloader {
 
     fn cleanup_db(&self) {
         // let subs_repo =            SubscriptionRepo::by_existing_list((*self.subscriptionrepo_r).borrow().get_list());
+        let msg_keep_count: i32 = (*self.configmanager_r)
+            .borrow()
+            .get_val_int(FeedContents::CONF_MSG_KEEP_COUNT)
+            .unwrap_or(-1) as i32;
         let subs_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
-
         let msgrepo1 = MessagesRepo::new_by_connection(
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
+        let iconrepo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+
         let cleaner_i = CleanerInner::new(
             self.contentlist_job_sender.as_ref().unwrap().clone(),
             self.source_c_sender.as_ref().unwrap().clone(),
             subs_repo,
             msgrepo1,
+            iconrepo,
+            msg_keep_count,
         );
         self.add_to_queue(DLJob::CleanDatabase(cleaner_i));
     }

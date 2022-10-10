@@ -20,7 +20,7 @@ use crate::timer::ITimer;
 use crate::timer::Timer;
 use crate::timer::TimerJob;
 use crate::ui_select::gui_context::GuiContext;
-use crate::ui_select::select;
+use crate::ui_select::select::ui_select;
 use crate::util::string_escape_url;
 use crate::util::timestamp_now;
 use context::appcontext::AppContext;
@@ -178,26 +178,26 @@ impl GuiProcessor {
                     // trace!(                        "GP:TreeRowActivated{} #q:{} {:?} ",                        subs_id,                        (*self.downloader_r).borrow().get_queue_size(),                        _path                    );
                     (*self.feedcontents_r)
                         .borrow()
-                        .update_feed_list_contents(subs_id as isize);
+                        .update_message_list(subs_id as isize);
+
+                    self.focus_by_tab = FocusByTab::FocusSubscriptions;
                 }
-                GuiEvents::ListRowActivated(_list_idx, list_position, fc_repo_id) => {
-                    list_row_activated_map.insert(fc_repo_id, list_position);
+                GuiEvents::ListRowActivated(_list_idx, list_position, msg_id) => {
+                    self.focus_by_tab = FocusByTab::FocusMessages;
+                    list_row_activated_map.insert(msg_id, list_position);
                 }
                 GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
+                    self.focus_by_tab = FocusByTab::FocusMessages;
                     (*self.feedcontents_r)
                         .borrow()
                         .start_web_browser(vec![fc_repo_id]);
                 }
-                GuiEvents::ListCellClicked(
-                    _list_idx,
-                    list_position,
-                    sort_col_nr,
-                    content_repo_id,
-                ) => {
-                    if sort_col_nr == LIST0_COL_ISREAD && content_repo_id >= 0 {
+                GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) => {
+                    self.focus_by_tab = FocusByTab::FocusMessages;
+                    if sort_col_nr == LIST0_COL_ISREAD && msg_id >= 0 {
                         (*self.feedcontents_r)
                             .borrow()
-                            .toggle_feed_item_read(content_repo_id as isize, list_position);
+                            .toggle_feed_item_read(msg_id as isize, list_position);
                     }
                 }
                 GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
@@ -349,8 +349,14 @@ impl GuiProcessor {
                 GuiEvents::KeyPressed(keycode, o_char) => {
                     self.process_key_press(keycode, o_char);
                 }
+                GuiEvents::SearchEntryTextChanged(_idx, ref newtext) => {
+                    (*self.feedcontents_r)
+                        .borrow_mut()
+                        .set_messages_filter(newtext);
+                }
+
                 _ => {
-                    warn!("other TreeEvent: {:?}", &ev);
+                    warn!("other GuiEvents: {:?}", &ev);
                 }
             }
 
@@ -406,7 +412,7 @@ impl GuiProcessor {
                     //                    debug!(                        "GP: SwitchContentList {}   => update_feed_list_contents ",                        feed_source_id                    );
                     (*self.feedcontents_r)
                         .borrow()
-                        .update_feed_list_contents(feed_source_id);
+                        .update_message_list(feed_source_id);
                     (*self.gui_updater).borrow().update_list(0);
                 }
                 Job::UpdateTextView(t_v_id) => {
@@ -834,7 +840,7 @@ impl GuiProcessor {
     ///  for key codes look at selec.rs                           gdk_sys::GDK_KEY_Escape => KeyCodes::Escape,
     fn process_key_press(&mut self, keycode: isize, _o_char: Option<char>) {
         let mut new_focus_by_tab = self.focus_by_tab.clone();
-        let kc: KeyCodes = select::ui_select::from_isize(keycode);
+        let kc: KeyCodes = ui_select::from_gdk_sys(keycode);
         let subscription_id: isize = match (*self.feedsources_r).borrow().get_current_selected_fse()
         {
             Some(subs_e) => subs_e.subs_id,
@@ -844,7 +850,6 @@ impl GuiProcessor {
             KeyCodes::Tab => new_focus_by_tab = self.focus_by_tab.next(),
             KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.prev(),
             KeyCodes::Key_a => {
-                // let o_se = (*self.feedsources_r).borrow().get_current_selected_fse();
                 if subscription_id > 0 {
                     (*self.feedcontents_r)
                         .borrow_mut()
@@ -860,6 +865,13 @@ impl GuiProcessor {
                 (*self.feedcontents_r)
                     .borrow_mut()
                     .move_list_cursor(ListMoveCommand::LaterUnreadMessage);
+            }
+            KeyCodes::Delete => {
+                if self.focus_by_tab == FocusByTab::FocusMessages {
+                    (*self.feedcontents_r).borrow().process_kb_delete();
+                } else {
+                    debug!("delete key but unfocused");
+                }
             }
             _ => {
                 // trace!("key-pressed: other {} {:?} {:?}", keycode, _o_char, kc);
@@ -893,7 +905,7 @@ impl GuiProcessor {
 
     fn switch_focus_marker(&self, marker_active: bool) {
         let mark = if marker_active { 1 } else { 2 };
-        trace!("switch_focus_marker: {:?} {:?} ", self.focus_by_tab, mark);
+        // trace!("switch_focus_marker: {:?} {:?} ", self.focus_by_tab, mark);
         match &self.focus_by_tab {
             FocusByTab::FocusSubscriptions => {
                 (*self.gui_updater).borrow().widget_mark(

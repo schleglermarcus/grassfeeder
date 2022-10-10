@@ -1,44 +1,37 @@
 To Do List
 
 
-- Flatpak  https://lib.rs/crates/cargo-pkg
-- Change Layout: wide bottom line.
-- Bug:  add-folder   leads to  expanding one that is closed
-- Bug: Subscription-edit  text fields are vertically expanding. Shall be static in set_height_request
-- Bug: Dialog Folder-edit shall show statistics information
-- Bug messages:  set unread ->  is not processed in following set-reading
-- Delete Messages by delete key
-- Subscription Tree: hide zeroes when nothing to read
-- Create Backups for Subscriptions-DB
-- Sanitize: cross-check icon ids of tree if they are present in icon db
-- refactor: gtk - separate file for the message list
-- Message List: translate titles
-- check  https://www.linuxcompatible.org/  feed: icon + entries
 
-
-- Graphics:  scale down icons before going into database.  Example   http://feeds.feedburner.com/TechmemeRideHome
-- Investigate why   subscriptions.db  is so large.
-- Message List: set scroll position to upper edge from Cursor
-- Subscriptions Sanitize:  Folder shall have only folder icon
-- Subscriptions Sanitize:  test and clean with recursive folders
+- Aggregate Messages on Folder Selection
 - import opml: see if we can get the web main url from  the outline
 - Updating the tree: speed up the gtk part
-- Startup, create gui:  delayed creation of dialogs
+- Subscriptions Sanitize:  Folder shall have only folder icon
+- Subscriptions Sanitize:  test and clean with recursive folders
+- Graphics:  scale down icons before going into database.
+     Example  lisahaven.news       http://feeds.feedburner.com/TechmemeRideHome
 - Browser Display :  wrap over   title
-- React on Minimize, do memory usage reduction
-- implement focus policy: before last unread
-- Opml export formatted / pretty
 - Browser: enable theme related colors
 - Browser: Modify  Font size
 - Browser: add Zoom Control
+- Browser: Modify  Font size
+
+
+
+- Message List: set scroll position to upper edge from Cursor
+- Startup, create gui:  delayed creation of dialogs
+- implement focus policy: before last unread
+- React on Minimize, do memory usage reduction
+- Opml export formatted / pretty
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
+- Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
+
 - Reduce Size of Binary:
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
-
-- Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
-- Searching inside messages
 - Keybard configuration in settings
 - DragAndDrop for Websites into Tree
+
+- Application Icon into Systray
+
 
 
 Later:
@@ -56,11 +49,10 @@ Perhaps:
 - Updating Sources:  prioritize by tree position, expanded flag
 - Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
 - Feed-Import with progress bar ?
-- Keyboard:  Delete on Subscription
-- Read articles when offline ?
 - Do extra format to  dig up invalid feed titles  containg  &     :      dieneuewelle.xml
 - Grouping of feeds by folders ?
 - RSS-Content damaged with    http://n8waechter.info/feed/
+- look at Snap/Flatpak   https://linuxhint.com/snap_vs_flatpak_vs_appimage/
 
 
 -----

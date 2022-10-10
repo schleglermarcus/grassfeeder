@@ -61,26 +61,28 @@ const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum SJob {
     FillSourcesTree,
+    // subscription_id
+    FillSourcesTreeSingle(isize),
     GuiUpdateTreeAll,
     ScheduleFetchAllFeeds,
     CheckSpinnerActive,
-    /// source_repo_id
+    /// subscription_id
     ScheduleUpdateFeed(isize),
     GuiUpdateTree(isize),
-    /// source_repo_id
+    /// subscription_id
     SetFetchInProgress(isize),
-    /// source_repo_id, error_happened
+    /// subscription_id, error_happened
     SetFetchFinished(isize, bool),
-    /// source_repo_id, new icon_repo_id
+    /// subscription_id, new icon_repo_id
     SetIconId(isize, isize),
     SanitizeSources,
-    /// source_repo_id, timestamp_feed_update,  timestamp_creation
+    /// subscription_id, timestamp_feed_update,  timestamp_creation
     StoreFeedCreateUpdate(isize, i64, i64),
     ///  feed-url,  Display-Name, icon-id, Feed-Homepage
     NewFeedSourceEdit(String, String, isize, String),
-    /// source_repo_id  - setting window title
+    /// subscription_id  - setting window title
     SetSelectedFeedSource(isize),
-    /// source_repo_id, content_repo_id
+    /// subscription_id, content_repo_id
     UpdateLastSelectedMessageId(isize, isize),
     UpdateTreePaths,
     /// subscription_id,  num_msg_all, num_msg_unread
@@ -92,8 +94,8 @@ pub enum SJob {
 // #[automock]
 pub trait ISourceTreeController {
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool;
-    fn mark_schedule_fetch(&self, src_repo_id: isize);
-    fn set_tree_expanded(&self, source_repo_id: isize, new_expanded: bool);
+    fn mark_schedule_fetch(&self, subscription_id: isize);
+    fn set_tree_expanded(&self, subscription_id: isize, new_expanded: bool);
     fn addjob(&self, nj: SJob);
 
     fn add_new_subscription(&mut self, newsource: String, display: String) -> isize;
@@ -108,8 +110,8 @@ pub trait ISourceTreeController {
     /// using internal state for parent id
     fn add_new_folder(&mut self, folder_name: String) -> isize;
     fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize;
-    fn set_fetch_in_progress(&self, source_repo_id: isize);
-    fn set_fetch_finished(&self, source_repo_id: isize, error_happened: bool);
+    fn set_fetch_in_progress(&self, subscription_id: isize);
+    fn set_fetch_finished(&self, subscription_id: isize, error_happened: bool);
 
     fn get_job_sender(&self) -> Sender<SJob>;
     fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>);
@@ -270,6 +272,9 @@ impl SourceTreeController {
                     self.feedsources_into_store_adapter();
                     (*self.gui_updater).borrow().update_tree(TREEVIEW0);
                 }
+                SJob::FillSourcesTreeSingle(subs_id) => {
+                    self.insert_tree_row_single(subs_id);
+                }
                 SJob::GuiUpdateTree(feed_source_id) => {
                     if let Some(path) = self.get_path_for_src(feed_source_id) {
                         (*self.gui_updater)
@@ -404,7 +409,7 @@ impl SourceTreeController {
         self.addjob(SJob::CheckSpinnerActive);
     }
 
-    /// Creates the tree,  is recursive.
+    /// Creates the tree, fills the gui_val_store ,  is recursive.
     pub fn insert_tree_row(&self, localpath: &[u16], parent_subs_id: i32) -> i32 {
         let entries = self
             .subscriptionrepo_r
@@ -432,6 +437,32 @@ impl SourceTreeController {
         entries.len() as i32
     }
 
+    /// Creates the tree, fills the gui_val_store ,  is recursive.
+    pub fn insert_tree_row_single(&self, parent_subscr_id: isize) {
+        let entries = self
+            .subscriptionrepo_r
+            .borrow()
+            .get_by_parent_repo_id(parent_subscr_id);
+        entries.iter().enumerate().for_each(|(_n, fse)| {
+            let o_subs_map = self.statemap.borrow().get_state(fse.subs_id);
+            if o_subs_map.is_none() {
+                warn!("insert_single : no state map entry for {}", fse.subs_id);
+                return;
+            }
+            let subs_map = o_subs_map.unwrap();
+            if subs_map.tree_path.is_none() {
+                warn!("insert_single : path for {}", fse.subs_id);
+                return;
+            }
+            let path = subs_map.tree_path.as_ref().unwrap();
+            let treevalues = self.tree_row_to_values(fse, &subs_map);
+            (*self.gui_val_store)
+                .write()
+                .unwrap()
+                .insert_tree_item(path, treevalues.as_slice());
+        });
+    }
+
     /// We overlap the  in-mem Folder-expanded with DB-Folder-Expanded
     fn tree_row_to_values(&self, fse: &SubscriptionEntry, su_st: &SubsMapEntry) -> Vec<AValue> {
         let mut tv: Vec<AValue> = Vec::new(); // linked to ObjectTree
@@ -439,7 +470,11 @@ impl SourceTreeController {
         let mut num_msg_unread = 0;
         if let Some((num_all, num_unread)) = su_st.num_msg_all_unread {
             if self.config.display_feedcount_all {
-                rightcol_text = format!("{}/{}", num_unread, num_all);
+                if num_unread > 0 {
+                    rightcol_text = format!("{}/{}", num_unread, num_all);
+                } else {
+                    rightcol_text = format!("{}", num_all);
+                }
             } else {
                 rightcol_text = format!("{}", num_unread);
             }
@@ -495,6 +530,11 @@ impl SourceTreeController {
                 fse.last_selected_msg
             ));
         }
+        let show_spinner = su_st.is_fetch_in_progress();
+        let mut rightcol_visible = !(show_status_icon | show_spinner);
+        if !self.config.display_feedcount_all && num_msg_unread == 0 {
+            rightcol_visible = false;
+        }
 
         tv.push(AValue::AIMG(fs_iconstr)); // 0
         tv.push(AValue::ASTR(displayname)); // 1:
@@ -506,13 +546,13 @@ impl SourceTreeController {
             self.tree_fontsize,
             num_msg_unread <= 0,
             fse.is_folder,
+            false,
         ))); //  6: num_content_unread
         tv.push(AValue::AU32(m_status)); //	7 : status
         tv.push(tooltip_a); //  : 8 tooltip
-        let show_spinner = su_st.is_fetch_in_progress();
         tv.push(AValue::ABOOL(show_spinner)); //  : 9	spinner visible
         tv.push(AValue::ABOOL(!show_spinner)); //  : 10	StatusIcon Visible
-        tv.push(AValue::ABOOL(!(show_status_icon | show_spinner))); //  11: unread-text visible
+        tv.push(AValue::ABOOL(rightcol_visible)); //  11: unread-text visible
         tv
     }
 
@@ -1040,16 +1080,18 @@ impl ISourceTreeController for SourceTreeController {
         let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
         let length_before = all1.len();
         let mut success: bool = false;
+        let mut from_parent_id: isize = -1;
+        let mut to_parent_subs_id: isize = -1;
         match self.drag_calc_positions(&from_path, &to_path) {
             Ok((from_entry, to_parent_id, to_folderpos)) => {
+                from_parent_id = from_entry.parent_subs_id;
+                to_parent_subs_id = to_parent_id;
                 self.drag_move(from_entry, to_parent_id, to_folderpos);
-
                 let all2 = (*self.subscriptionrepo_r).borrow().get_all_entries();
                 if all2.len() != length_before {
                     error!("Drag lost entries: {}->{}", length_before, all2.len());
                     success = false;
                 } else {
-                    //            self.update_cached_paths();
                     success = true;
                 }
             }
@@ -1061,7 +1103,15 @@ impl ISourceTreeController for SourceTreeController {
             }
         }
         self.addjob(SJob::UpdateTreePaths);
-        self.addjob(SJob::FillSourcesTree);
+        // trace!(            "on-drag updating:  {} {}",            from_parent_id, to_parent_subs_id        );
+        if from_parent_id >= 0 {
+            self.addjob(SJob::FillSourcesTreeSingle(from_parent_id));
+            self.addjob(SJob::GuiUpdateTree(from_parent_id));
+        }
+        if to_parent_subs_id >= 0 && to_parent_subs_id != from_parent_id {
+            self.addjob(SJob::FillSourcesTreeSingle(to_parent_subs_id));
+            self.addjob(SJob::GuiUpdateTree(to_parent_subs_id));
+        }
         success
     }
 
@@ -1134,8 +1184,8 @@ impl ISourceTreeController for SourceTreeController {
         }
     }
 
-    fn set_tree_expanded(&self, source_repo_id: isize, new_expanded: bool) {
-        let src_vec = vec![source_repo_id];
+    fn set_tree_expanded(&self, subs_id: isize, new_expanded: bool) {
+        let src_vec = vec![subs_id];
         (*self.subscriptionrepo_r)
             .borrow_mut()
             .update_expanded(src_vec, new_expanded);
@@ -1288,9 +1338,7 @@ impl ISourceTreeController for SourceTreeController {
         if let Some(fse) = &self.current_selected_fse {
             if fse.subs_id == source_repo_id {
                 if let Some(feedcontents) = self.feedcontents_w.upgrade() {
-                    (*feedcontents)
-                        .borrow()
-                        .update_feed_list_contents(fse.subs_id);
+                    (*feedcontents).borrow().update_message_list(fse.subs_id);
                 }
             }
         }

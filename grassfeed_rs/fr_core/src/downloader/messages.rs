@@ -10,6 +10,7 @@ use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
+use crate::downloader::util::workaround_https_declaration;
 use crate::util::timestamp_from_utc;
 use crate::util::timestamp_now;
 use crate::util::Step;
@@ -101,14 +102,10 @@ struct EvalStringAndFilter(FetchInner);
 impl Step<FetchInner> for EvalStringAndFilter {
     fn step(self: Box<Self>) -> StepResult<FetchInner> {
         let mut inner = self.0;
+        let dl_text = workaround_https_declaration(inner.download_text.clone());
         let (mut new_list, ts_created, err_text): (Vec<MessageRow>, i64, String) =
-            feed_text_to_entries(
-                inner.download_text.clone(),
-                inner.fs_repo_id,
-                inner.url.clone(),
-            );
+            feed_text_to_entries(dl_text, inner.fs_repo_id, inner.url.clone());
         if !err_text.is_empty() {
-            inner.download_error_happened = true;
             inner
                 .erro_repo
                 .add_error(inner.fs_repo_id, 0, inner.url.to_string(), err_text);

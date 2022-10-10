@@ -2,7 +2,7 @@ mod logger_config;
 
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::sourcetree::SJob;
-use fr_core::db::check_consistency;
+use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::compress;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
@@ -16,17 +16,6 @@ use fr_core::util::timestamp_now;
 use fr_core::util::StepResult;
 use std::collections::HashSet;
 
-#[ignore]
-#[test]
-fn db_check_manual() {
-    setup();
-    check_consistency::databases_consistency_check_u(
-        &"/home/marcus/dbcheck/".to_string(),
-        true,
-        true,
-    );
-}
-
 // #[ignore]
 #[test]
 fn cleanup_message_doublettes() {
@@ -36,9 +25,11 @@ fn cleanup_message_doublettes() {
     let subsrepo = SubscriptionRepo::new_inmem();
     subsrepo.scrub_all_subscriptions();
     let msgrepo1 = MessagesRepo::new_in_mem();
+    let iconrepo = IconRepo::new("");
+
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
-    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1);
+    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 1000);
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let msg4 = inner.messgesrepo.get_by_src_id(4, false);
     assert_eq!(msg4.len(), 1); // the other 10 are set deleted
@@ -54,13 +45,15 @@ fn db_cleanup_too_many_messages() {
     subsrepo.scrub_all_subscriptions();
     let msgrepo1 = MessagesRepo::new_in_mem();
     let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
+    let iconrepo = IconRepo::new("");
+
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
-    let mut cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1);
-    cleaner_i.max_messages_per_subscription = 5;
+    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5);
+    // cleaner_i.max_messages_per_subscription = 5;
     let _inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let msg1 = msgrepo2.get_by_src_id(5, false);
-    // msg1.iter().for_each(|m| debug!("CR: {}", m));
+    // msg1.iter().for_each(|m| debug!("leftover: {}", m));
     // debug!("#msg={}", msg1.len());
     assert_eq!(msg1.len(), 5);
 }
@@ -126,7 +119,7 @@ fn db_cleanup_remove_deleted() {
     assert_eq!(all_entries.len(), 309);
 }
 
-// #[ignore]
+//  #[ignore]
 #[test]
 fn t_db_cleanup_1() {
     setup();
@@ -139,7 +132,10 @@ fn t_db_cleanup_1() {
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
-    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1);
+
+    let iconrepo = IconRepo::new("");
+
+    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5);
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
     assert_eq!(parent_ids_to_correct.len(), 1);

@@ -1,15 +1,19 @@
+use crate::db::errors_repo;
 use crate::db::sqlite_context::SqliteContext;
 use crate::db::sqlite_context::TableInfo;
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_entry::SRC_REPO_ID_DELETED;
 use crate::db::subscription_entry::SRC_REPO_ID_DUMMY;
 use crate::db::subscription_entry::SRC_REPO_ID_MOVING;
+use crate::timer::Timer;
+use crate::util::file_exists;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
 use context::StartupWithAppContext;
 use context::TimerEvent;
 use context::TimerReceiver;
+use context::TimerRegistry;
 use rusqlite::Connection;
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -17,8 +21,7 @@ use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
 
-/// sanity for recursion
-/// TODO use for update_paths
+/// Later:  sanity for recursion
 //  const MAX_PATH_DEPTH: usize = 30;
 
 pub const FILENAME_JSON: &str = "subscription_list.json";
@@ -52,6 +55,7 @@ pub trait ISubscriptionRepo {
 
     ///   store IconID into feed source
     fn update_icon_id(&self, src_id: isize, icon_id: usize, timestamp_s: i64);
+    fn update_icon_id_many(&self, src_ids: Vec<i32>, icon_id: usize);
 
     fn update_folder_position(&self, src_id: isize, new_folder_pos: isize);
 
@@ -102,10 +106,26 @@ pub struct SubscriptionRepo {
 }
 
 impl SubscriptionRepo {
-    pub fn by_folder(foldername: &str) -> Self {
+    pub fn by_folder(folder_conf: &str, folder_cache: &str) -> Self {
+        let reg_filename = Self::filename(folder_conf);
+        let reg_existed = file_exists(&reg_filename);
+        if reg_existed {
+            let month_num = chrono::prelude::Utc::today().format("%m"); // %Y-%m-%d
+            let sub_copy_file = format!("{}subscriptions.db-{}", folder_cache, month_num);
+            let r = std::fs::copy(&reg_filename, &sub_copy_file);
+            if r.is_err() {
+                error!(
+                    "Error: copy {} to {}  => {:?}",
+                    reg_filename,
+                    sub_copy_file,
+                    r.err()
+                );
+            }
+        }
+
         SubscriptionRepo {
-            folder_name: foldername.to_string(),
-            ctx: SqliteContext::new(Self::filename(foldername)),
+            folder_name: folder_conf.to_string(),
+            ctx: SqliteContext::new(reg_filename),
         }
     }
 
@@ -210,7 +230,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     /// checks for  updated_int,  retrieves those earlier than the given date
-    /// new:  order by updated-time
+    /// returns the list   order by updated-time
     fn get_by_fetch_time(&self, updated_time_s: i64) -> Vec<SubscriptionEntry> {
         let prepared = format!(
             "SELECT * FROM {} WHERE updated_int<{}  order by updated_int ",
@@ -238,6 +258,23 @@ impl ISubscriptionRepo for SubscriptionRepo {
             timestamp_s,
             SubscriptionEntry::index_column_name(),
             subs_id
+        );
+        self.ctx.execute(sql);
+    }
+
+    fn update_icon_id_many(&self, src_ids: Vec<i32>, icon_id: usize) {
+        let joined = src_ids
+            .iter()
+            .map(|r| r.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+
+        let sql = format!(
+            "UPDATE {}  SET  icon_id={}  WHERE {} in ( {} ) ",
+            SubscriptionEntry::table_name(),
+            icon_id,
+            SubscriptionEntry::index_column_name(),
+            joined
         );
         self.ctx.execute(sql);
     }
@@ -449,9 +486,11 @@ impl ISubscriptionRepo for SubscriptionRepo {
 impl Buildable for SubscriptionRepo {
     type Output = SubscriptionRepo;
     fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
+        let o_cache = conf.get(errors_repo::KEY_FOLDERNAME);
+        let cachedir = o_cache.unwrap();
         let o_folder = conf.get(KEY_FOLDERNAME);
         match o_folder {
-            Some(folder) => SubscriptionRepo::by_folder(&folder),
+            Some(folder) => SubscriptionRepo::by_folder(&folder, &cachedir),
             None => {
                 conf.dump();
                 panic!("subscription config has no {} ", KEY_FOLDERNAME);
@@ -461,21 +500,23 @@ impl Buildable for SubscriptionRepo {
 }
 
 impl StartupWithAppContext for SubscriptionRepo {
-    // later: register shutdown to  flush databases
-    fn startup(&mut self, _ac: &AppContext) {
-        // let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
-        // let su_r = ac.get_rc::<SubscriptionRepo>().unwrap();
-
+    fn startup(&mut self, ac: &AppContext) {
+        let timer_r = ac.get_rc::<Timer>().unwrap();
+        let sr_r = ac.get_rc::<SubscriptionRepo>().unwrap();
+        {
+            (*timer_r)
+                .borrow_mut()
+                .register(&TimerEvent::Shutdown, sr_r);
+        }
         self.startup_int();
     }
 }
 
 impl TimerReceiver for SubscriptionRepo {
-    fn trigger(&mut self, _event: &TimerEvent) {
-        // match event {
-        //      TimerEvent::Timer10s => {                self.check_or_store();            }
-        //     _ => (),
-        // }
+    fn trigger(&mut self, event: &TimerEvent) {
+        if event == &TimerEvent::Shutdown {
+            self.ctx.cache_flush();
+        }
     }
 }
 

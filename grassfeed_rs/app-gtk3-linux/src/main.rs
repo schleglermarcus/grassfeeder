@@ -47,13 +47,8 @@ fn main() {
         return;
     }
     if opts.check {
-        trace!(
-            "{} {} Database consistency check: {}    ",
-            APP_NAME,
-            &version_str,
-            &conf,
-        );
-        check_consistency::databases_consistency_check_u(&conf, true, true);
+        trace!("Database Check {} {} {} ", &version_str, &conf, &cache);
+        check_consistency::databases_check_manual(&conf, &cache);
         return; // no gui
     }
     info!(

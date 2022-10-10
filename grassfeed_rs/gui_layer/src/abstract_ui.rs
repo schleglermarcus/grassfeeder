@@ -60,7 +60,6 @@ pub enum GuiEvents {
     ListCellClicked(i32, i32, i32, i32),
     ///  list index, list-position, db-id
     ListRowDoubleClicked(i32, i32, i32),
-
     /// identifier, payload
     DialogData(String, Vec<AValue>),
     /// single textfield editing:  identifier, payload
@@ -77,10 +76,8 @@ pub enum GuiEvents {
     ToolBarButton(String),
     /// button-name, is-active
     ToolBarToggle(String, bool),
-
     ///  column-id,  width
     ColumnWidth(i32, i32),
-
     /// list-id, List of Content-repo-id
     ListSelected(u8, Vec<i32>),
     /// list-id, action-name , List of ( Content-repo-id,   Gui-List-Positions)
@@ -89,6 +86,8 @@ pub enum GuiEvents {
     ListSortOrderChanged(u8, u8, bool),
     // Key-Code via gdk,   Unicode-Char
     KeyPressed(isize, Option<char>),
+    /// index, new-text
+    SearchEntryTextChanged(u8, String),
 }
 
 pub trait UIAdapterValueStore {
@@ -304,6 +303,7 @@ pub enum KeyCodes {
     Space,
     Escape,
     Enter,
+    Delete,
     CursorUp,
     CursorDown,
     CursorRight,

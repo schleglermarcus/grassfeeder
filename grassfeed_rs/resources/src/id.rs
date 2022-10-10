@@ -34,9 +34,9 @@ pub const LABEL_FS_DELETE_NAME: u8 = 1;
 pub const LABEL_BROWSER_MSG_DATE: u8 = 2;
 pub const LABEL_BROWSER_MSG_AUTHOR: u8 = 3;
 pub const LABEL_BROWSER_MSG_CATEGORIES: u8 = 4;
-
 pub const LABEL_STATUS_1: u8 = 5;
 pub const LABEL_STATUS_2: u8 = 6;
+pub const LABEL_STATUS_3: u8 = 7;
 
 pub const LINKBUTTON_BROWSER_TITLE: u8 = 0;
 
@@ -48,3 +48,5 @@ pub const PANED_1_LEFT: u8 = 0;
 pub const SCROLLEDWINDOW_0: u8 = 0;
 pub const SCROLLEDWINDOW_1: u8 = 1;
 pub const SCROLLEDWINDOW_2: u8 = 2;
+
+pub const SEARCH_ENTRY_0: u8 = 0;

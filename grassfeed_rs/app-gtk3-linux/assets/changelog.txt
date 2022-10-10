@@ -1,3 +1,21 @@
+grassfeeder (0.0.8) unstable; urgency=low
+
+  * Search Filter for messages
+  * Change Layout: wide bottom line.
+  * Delete Messages by delete key
+  * Flush Databases on Shutdown: subscr, msg, errors
+  * Subscription Tree: hide zeroes when all are read
+  * Create Backups for Subscriptions-DB
+  * Cleanup messages at configured upper limit
+  * Sanitize: cross-check icon ids of tree if they are present in icon db
+  * Bugfix: Subscription-edit  text fields are vertically expanding. Shall have fixed height
+  * Bugfix: Add-folder   leads to  expanding one that is closed
+  * Bugfix: Tree Drag Folders:  the parent items instead of all, don't jump to start
+  * Bugfix: Set unread by icon ->  is not processed in following set-read by cursor
+  * Workaround for wrong atom  declaration https:// -> http://   linuxcompatible.org
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 10 Oct 2022 00:15:00 +0000
+
 grassfeeder (0.0.7) unstable; urgency=low
 
   * Error-DB of subscription updating errors, display in edit dialog
@@ -34,7 +52,7 @@ grassfeeder (0.0.5) unstable; urgency=low
 
   * StatusBar: copy Feed address into clipboard
   * Multiple instances shall not be allowed
-  * Cleanup messages at configured upper limit, also double same messages
+  * Cleanup double same messages
   * Build via Docker container
   * On Shutdown:  Flush Databases
   * Databases check via command line, no more automatic
@@ -63,12 +81,12 @@ grassfeeder (0.0.4) unstable; urgency=low
 
 grassfeeder (0.0.3) unstable; urgency=low
 
-  * refactored subscriptions to sqlite
-  * cleaning out deleted subscriptions
   * Tree Unread-Calculation Speed increased, parallel web requests to 3
-  * fixed: message tooltip needs escaping
-  * remove icon dialog, leave it on  debug flag
   * SendToBrowser :   mark-as-read for all entries
+  * Cleaning out deleted subscriptions
+  * Refactored subscriptions to sqlite
+  * Bugfix: message tooltip needs escaping
+  * Removed icon dialog, leave it on  debug flag
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 13 Sep 2022 00:00:00 +0000
 

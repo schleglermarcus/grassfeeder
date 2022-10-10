@@ -15,5 +15,6 @@ pub mod gtk_object_tree;
 pub mod load_css;
 pub mod treeview2;
 pub mod util;
+pub mod messagelist;
 
 i18n!("../resources/locales");

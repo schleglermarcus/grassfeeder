@@ -23,11 +23,35 @@ extern crate rust_i18n;
 i18n!("../resources/locales");
 
 const MINIHTTPSERVER_PORT: usize = 8123;
-const RSS_DYNAMIC_FILENAME: &str = "../target/dynamic.rss";
+//  const RSS_DYNAMIC_FILENAME: &str = "target/dynamic.rss";
+
+// cargo watch -s "cargo run  --example working --features ui-gtk   "
+fn main() {
+    setup();
+    loc::init_locales();
+    let env_dir = std::env::var("PWD").unwrap();
+    let dynamic_filename = format!("{}/target/dynamic.rss", env_dir);
+
+    let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT);
+    let _dyn_wr_handle = std::thread::spawn(move || loop {
+        write_feed(&dynamic_filename);
+        std::thread::sleep(std::time::Duration::from_secs(19));
+    });
+    let gfconf = GrassFeederConfig {
+        path_config: format!("{}/target/db_rungui_local/", env_dir),
+        path_cache: format!("{}/target/db_rungui_local/", env_dir),
+        debug_mode: true,
+        version: "rungui:rungui_local_clear".to_string(),
+    };
+    let appcontext = fr_core::config::init_system::start(gfconf);
+    test_setup_values(&appcontext, mini_server_c.get_address());
+    fr_core::config::init_system::run(&appcontext);
+    mini_server_c.stop();
+}
 
 fn startup_minihttpserver(port: usize) -> MiniHttpServerController {
     let conf = ServerConfig {
-        htdocs_dir: String::from("tests/fr_htdocs"),
+        htdocs_dir: String::from("testing/tests/fr_htdocs"),
         index_file: String::from("index.html"),
         tcp_address: format!("127.0.0.1:{}", port).to_string(),
         binary_max_size: 1000000,
@@ -48,7 +72,7 @@ fn entry(title: &str, link: &str, descr: &str, pubdate: i64) -> String {
     )
 }
 
-fn write_feed() {
+fn write_feed(filename: &String) {
     setup();
     let header = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
 <rss version=\"2.0\">
@@ -57,9 +81,9 @@ fn write_feed() {
   <description>some dynamic description:   lorem ipsum</description> \n";
     let footer = "\n </channel>\n</rss> \n";
     let ts_now = Local::now().timestamp();
-    let o_file = File::create(RSS_DYNAMIC_FILENAME);
+    let o_file = File::create(filename); //  RSS_DYNAMIC_FILENAME
     if o_file.is_err() {
-        error!("cannot open {}", RSS_DYNAMIC_FILENAME);
+        error!("cannot open {}", filename);
         return;
     }
     let mut file = o_file.unwrap();
@@ -77,29 +101,6 @@ fn write_feed() {
     // debug!("written to {} {}", RSS_DYNAMIC_FILENAME, ts_now);
 }
 
-#[ignore]
-#[test]
-fn rungui_local_clear() {
-    setup();
-    loc::init_locales();
-    let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT);
-    let _dyn_wr_handle = std::thread::spawn(|| loop {
-        write_feed();
-        std::thread::sleep(std::time::Duration::from_secs(19));
-    });
-    let gfconf = GrassFeederConfig {
-        path_config: "../target/db_rungui_local/".to_string(),
-        path_cache: "../target/db_rungui_local/".to_string(),
-        debug_mode: false,
-        version: "rungui:rungui_local_clear".to_string(),
-    };
-    let appcontext = fr_core::config::init_system::start(gfconf);
-    test_setup_values(&appcontext, mini_server_c.get_address());
-
-    fr_core::config::init_system::run(&appcontext);
-    mini_server_c.stop();
-}
-
 fn test_setup_values(acr: &AppContext, addr: String) {
     if false {
         let messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>> = acr.get_rc::<MessagesRepo>().unwrap();
@@ -110,11 +111,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         let fsrwr: Rc<RefCell<dyn ISubscriptionRepo>> = acr.get_rc::<SubscriptionRepo>().unwrap();
         (*fsrwr.borrow()).scrub_all_subscriptions();
     }
-
     let feedsources_r: Rc<RefCell<dyn ISourceTreeController>> =
         acr.get_rc::<SourceTreeController>().unwrap();
     let ref mut feedsources = (*feedsources_r).borrow_mut();
-
     let url_dynamic = format!("{}/dynamic.rss", addr);
     let url_gui_proc = format!("{}/gui_proc_3.rss", addr);
     let url_feedburner = format!("{}/feedburner.rss", addr);
@@ -124,8 +123,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
     let url_relay = format!("{}/relay_rd.rss", addr); // very big
 
-    let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
+    let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder2);
+    let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), folder2);
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_relay, "relay_rd".to_string(), folder2, false);
@@ -141,44 +141,37 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder3,
         false,
     );
-
     if false {
         let src = [
-            // (url_staseve.as_str(), "staseve11"),
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (
+                "https://www.linuxcompatible.org/news/atom.xml",
+                "linuxcompatible",
+            ),
+            (
                 "https://afternarcissisticabuse.wordpress.com/feed/",
                 "afternarc",
             ),
-            ("http://lisahaven.news/feed/", "lisa_haven"), // why error ?
-            ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
-            ("http://thehighersidechats.com/feed/", "higherside-300"),
-            (
-                "http://feeds.feedburner.com/RichardHerringLSTPodcast",
-                "RichardHerring-560",
-            ),
-            (
-                "http://chaosradio.ccc.de/chaosradio-complete.rss",
-                "chaosradio-267",
-            ),
-            (
-                "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
-                "youtube",
-            ),
         ];
+        let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
-                folder3,
+                folder1,
                 false,
             );
         });
     }
     if false {
         let src = [
+            ("http://henrymakow.com/index.xml", "makow"),
+            ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
+            ("http://thehighersidechats.com/feed/", "higherside-300"),
+            ("http://lisahaven.news/feed/", "lisa_haven"), // Icon too big !!
+            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
             ("https://www.opendesktop.org/content.rdf", "opendesktop"),
@@ -230,10 +223,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://terraherz.wpcomstaging.com/feed/", "terraherz"),
             ("https://www.reddit.com/r/aww.rss", "aww"),
             ("https://feeds.breakingnews.ie/bnworld", "breaknew"),
-            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
         ];
-
-        let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
@@ -245,6 +235,18 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            (
+                "http://feeds.feedburner.com/RichardHerringLSTPodcast",
+                "RichardHerring-560",
+            ),
+            (
+                "http://chaosradio.ccc.de/chaosradio-complete.rss",
+                "chaosradio-267",
+            ),
+            (
+                "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
+                "youtube",
+            ),
             (
                 "http://feeds.feedburner.com/TechmemeRideHome",
                 "techmeme-big-icon",
@@ -338,8 +340,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "seoulnews - 기사 요약 -",
             ),
         ];
-
-        let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),

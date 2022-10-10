@@ -144,15 +144,18 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     // ret = ret.replace(&['(', ')', '\"', '\n', '\'', '\"'][..], "");
     ret = ret.replace(&['\"', '\n', '\'', '\"'][..], "");
     ret = ret.replace("&#38;", " & ");
+    ret = ret.replace("&gt;", ">");
     ret = ret.replace("&#038;", " & ");
     ret = ret.replace("&#128;", "€");
     ret = ret.replace("&#147;", "›");
     ret = ret.replace("&#148;", "-");
     ret = ret.replace("&#xF6;", "ö");
+    ret = ret.replace("&#152;", "\'");
     ret = ret.replace("&#153;", " - ");
     ret = ret.replace("&#156;", " - ");
     ret = ret.replace("&#157;", " Š ");
     ret = ret.replace("&#164;", " ");
+    ret = ret.replace("&#166;", " ... ");
     ret = ret.replace("&#190;", "¾");
     ret = ret.replace("&#220;", "Ü");
     ret = ret.replace("&#223;", "ß");
@@ -166,7 +169,8 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#8221;", "\"");
     ret = ret.replace("&#8216;", "\'");
     ret = ret.replace("&#8217;", "\'");
-    ret = ret.replace("&#8230;", " ... ");
+	ret = ret.replace("&#8230;", " ... ");
+	ret = ret.replace("&#8242;", "\'");
     ret = ret.replace("&#x8211;", " - ");
     ret = ret.replace("&quot;", "\"");
     ret.trim().to_string()

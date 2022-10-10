@@ -91,11 +91,11 @@ pub fn create_treeview(
         col.set_expand(true); // needed
         col.set_max_width(DIALOG_ICON_SIZE * 2); // needed
         col.set_min_width(DIALOG_ICON_SIZE); //  help with  maintaining minimum width
+                                             //  col.set_sort_column_id(2);	// for putting color attributes on cells
         treeview1.append_column(&col);
     }
     {
         let col = TreeViewColumn::new();
-
         let cellrendtext = CellRendererText::new();
         col.pack_start(&cellrendtext, false);
         col.add_attribute(&cellrendtext, "text", 2_i32); // unread-text
@@ -113,6 +113,7 @@ pub fn create_treeview(
         col.add_attribute(&cellrenderer_spinner, "active", 9_i32);
         col.add_attribute(&cellrenderer_spinner, "visible", 9_i32);
         col.set_fixed_width(DIALOG_ICON_SIZE * 2); // if we don't fix the size, the gtk system crashes on moving the pane-1
+                                                   // col.set_sort_column_id(3);	 	// for putting color attributes on cells
         treeview1.append_column(&col);
     }
     let drag_s7 = drag_state.clone();
@@ -235,19 +236,19 @@ pub fn create_treeview(
     });
     let esw = EvSenderWrapper(g_ev_se.clone());
     treeview1.connect_row_expanded(move |t_view, t_iter, _t_path| {
-        let mut repo_id: i32 = -1;
         if let Some(model) = t_view.model() {
-            repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+            let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+            // debug!("G: expanded {}  ", repo_id);
+            esw.sendw(GuiEvents::TreeExpanded(0, repo_id));
         }
-        esw.sendw(GuiEvents::TreeExpanded(0, repo_id));
     });
+
     let esw = EvSenderWrapper(g_ev_se);
     treeview1.connect_row_collapsed(move |t_view, t_iter, _t_path| {
-        let mut repo_id: i32 = -1;
         if let Some(model) = t_view.model() {
-            repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+            let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+            esw.sendw(GuiEvents::TreeCollapsed(0, repo_id));
         }
-        esw.sendw(GuiEvents::TreeCollapsed(0, repo_id));
     });
     // treeview1.connect_focus(move |_t_view, directiontype| {        debug!("treeview:  focus {:?}", directiontype);        gtk::Inhibit(false)    });
     {

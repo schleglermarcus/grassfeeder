@@ -2,9 +2,14 @@ use crate::db::message::MessageRow;
 use crate::db::sqlite_context::rusqlite_error_to_boxed;
 use crate::db::sqlite_context::SqliteContext;
 use crate::db::sqlite_context::TableInfo;
+use crate::timer::Timer;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
+use context::StartupWithAppContext;
+use context::TimerEvent;
+use context::TimerReceiver;
+use context::TimerRegistry;
 use rusqlite::Connection;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -354,10 +359,24 @@ impl Buildable for MessagesRepo {
     }
 }
 
-use context::StartupWithAppContext;
 impl StartupWithAppContext for MessagesRepo {
-    fn startup(&mut self, _ac: &AppContext) {
+    fn startup(&mut self, ac: &AppContext) {
         self.ctx.create_table();
+        let timer_r = ac.get_rc::<Timer>().unwrap();
+        let mr_r = ac.get_rc::<MessagesRepo>().unwrap();
+        {
+            (*timer_r)
+                .borrow_mut()
+                .register(&TimerEvent::Shutdown, mr_r);
+        }
+    }
+}
+
+impl TimerReceiver for MessagesRepo {
+    fn trigger(&mut self, event: &TimerEvent) {
+        if event == &TimerEvent::Shutdown {
+            self.ctx.cache_flush();
+        }
     }
 }
 

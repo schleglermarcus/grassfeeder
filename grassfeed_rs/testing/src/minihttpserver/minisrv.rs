@@ -335,11 +335,20 @@ pub fn analyse_request(
     req_path: &str,
 ) -> AttachFileInfo {
     let mut path_expanded = req_path.to_string();
-    // let mut path_expanded =     format!("{}", req_path);
+    let current_dir = std::env::current_dir()
+        .unwrap_or_default()
+        // .to_path_buf()
+        .into_os_string()
+        .to_str()
+        .unwrap_or_default()
+        .to_string();
     match check_request_dir(htdocs_dir, req_path) {
         (false, false, _) => {
             return AttachFileInfo::FileNotFound(
-                Some(format!("Path does not exist: {}{}", &htdocs_dir, &req_path)),
+                Some(format!(
+                    "Path does not exist:  {}{}  current_dir={}",
+                    &htdocs_dir, &req_path, current_dir
+                )),
                 StatusCode::NOT_FOUND,
             );
         }
