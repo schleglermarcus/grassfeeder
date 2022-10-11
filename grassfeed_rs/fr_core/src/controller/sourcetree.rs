@@ -134,7 +134,7 @@ pub trait ISourceTreeController {
     fn set_selected_feedsource(&mut self, src_repo_id: isize);
     fn import_opml(&mut self, filename: String);
     fn mark_as_read(&self, src_repo_id: isize);
-    fn get_current_selected_fse(&self) -> Option< ( SubscriptionEntry , Vec<i32>) >;
+    fn get_current_selected_fse(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry>;
     /// writes the path array into the cached subscription list
     fn update_cached_paths(&self);
@@ -1595,7 +1595,20 @@ impl ISourceTreeController for SourceTreeController {
                 (*gui_context).borrow_mut().set_window_title(display_name);
             }
 
-            self.current_selected_subscription = Some((fse, Vec::default()));
+            let mut child_ids: Vec<i32> = Vec::default();
+            if fse.is_folder {
+                child_ids = (*self.subscriptionrepo_r)
+                    .borrow()
+                    .get_by_parent_repo_id(fse.subs_id)
+                    .iter()
+                    .filter(|fse| !fse.is_folder)
+                    .map(|fse| fse.subs_id as i32)
+                    .collect::<Vec<i32>>();
+            }
+
+            self.current_selected_subscription = Some((fse, child_ids));
+
+            debug!("SUB-SET-SEL : {:?}", self.current_selected_subscription);
         }
     }
 

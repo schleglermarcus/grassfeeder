@@ -330,10 +330,29 @@ impl FeedContents {
     /// Read from db and put into the list view,
     /// State Map shall contain only the current subscription's messages, for finding the cursor position for the focus policy
     fn update_feed_list_contents_int(&self) {
-        let (subs_id, num_msg, _isfolder) = *self.current_subscription.borrow();
+        let (subs_id, num_msg, isfolder) = *self.current_subscription.borrow();
+        let mut messagelist: Vec<MessageRow> = Vec::default();
 
-        let mut messagelist: Vec<MessageRow> =
-            (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
+        let mut child_ids: Vec<i32> = Vec::default();
+        if isfolder {
+            if let Some(feedsources) = self.feedsources_w.upgrade() {
+                if let Some((_subs_e, child_subs)) =
+                    (*feedsources).borrow().get_current_selected_fse()
+                {
+                    child_ids = child_subs;
+                }
+            }
+
+            for subs_id in child_ids {
+                (*(self.messagesrepo_r.borrow_mut()))
+                    .get_by_src_id(subs_id as isize, false)
+                    .into_iter()
+                    .for_each(|m| messagelist.push(m));
+            }
+        } else {
+            messagelist = (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
+        }
+        // let mut messagelist: Vec<MessageRow> =            (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
 
         if num_msg != messagelist.len() as isize {
             self.fill_state_map(&messagelist);
@@ -370,14 +389,7 @@ impl FeedContents {
 
         debug!("fill_state_map {:?}", *self.current_subscription.borrow());
 
-        if isfolder {
-            // if let Some(feedsources) = self.feedsources_w.upgrade() {
-            //     if let Some(subs_e) = (*feedsources).borrow().get_current_selected_fse() {}
-            // }
-
-
-
-        }
+        // if isfolder {        }
 
         let messagelist: Vec<MessageRow> = if r_messagelist.is_empty() {
             (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false)
@@ -554,10 +566,16 @@ impl IFeedContents for FeedContents {
         self.set_selected_content_ids(vec![*last_content_id]);
     }
 
+
     fn set_read_all(&mut self, src_repo_id: isize) {
+		/// TODO
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_all(src_repo_id, true);
+
+
+
+
         self.update_message_list(src_repo_id);
         self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
     }

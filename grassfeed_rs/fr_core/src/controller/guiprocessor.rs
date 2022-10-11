@@ -12,7 +12,6 @@ use crate::controller::sourcetree::SourceTreeController;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
-use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::db::subscription_state::SubsMapEntry;
@@ -182,16 +181,6 @@ impl GuiProcessor {
                         (*self.downloader_r).borrow().get_queue_size(),
                         _path
                     );
-
-// TODO 
-                    let mut child_list: Vec<SubscriptionEntry> = Vec::default();
-                    if let Some((se, _list)) = (*self.feedsources_r).borrow().get_current_selected_fse() {
-                        if se.is_folder {
-                            child_list = (*self.subscriptionrepo_r)
-                                .borrow()
-                                .get_by_parent_repo_id(subs_id as isize);
-                        }
-                    }
 
                     (*self.feedcontents_r)
                         .borrow()
@@ -868,9 +857,15 @@ impl GuiProcessor {
             KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.prev(),
             KeyCodes::Key_a => {
                 if subscription_id > 0 {
+
+
+					
                     (*self.feedcontents_r)
                         .borrow_mut()
                         .set_read_all(subscription_id);
+
+
+
                 }
             }
             KeyCodes::Key_s => {
