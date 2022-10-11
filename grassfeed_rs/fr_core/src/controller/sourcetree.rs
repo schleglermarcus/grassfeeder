@@ -133,7 +133,9 @@ pub trait ISourceTreeController {
     fn notify_config_update(&mut self);
     fn set_selected_feedsource(&mut self, src_repo_id: isize);
     fn import_opml(&mut self, filename: String);
+
     fn mark_as_read(&self, src_repo_id: isize);
+
     fn get_current_selected_fse(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry>;
     /// writes the path array into the cached subscription list
@@ -1159,12 +1161,11 @@ impl ISourceTreeController for SourceTreeController {
 
     fn mark_as_read(&self, src_repo_id: isize) {
         let mut is_folder: bool = false;
-        if let Some(entry) = (*self.subscriptionrepo_r)
-            .borrow()
-            .get_by_index(src_repo_id)
-        {
-            is_folder = entry.is_folder;
+        if let Some(st) = self.statemap.borrow().get_state(src_repo_id) {
+            is_folder = st.is_folder();
         }
+        // if let Some(entry) = (*self.subscriptionrepo_r)            .borrow()            .get_by_index(src_repo_id)        {            is_folder = entry.is_folder;        }
+
         if is_folder {
             let child_fse: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
                 .borrow()
@@ -1173,16 +1174,24 @@ impl ISourceTreeController for SourceTreeController {
                 .iter()
                 .filter(|fse| !fse.is_folder)
                 .for_each(|fse| {
+                    trace!("mark_as_read{} {}  ", src_repo_id, fse.subs_id);
                     if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                         (feedcontents)
                             .borrow_mut()
-                            .set_read_all(fse.subs_id as isize);
+                            .set_read_complete_subscription(fse.subs_id as isize);
                     }
+                    self.statemap
+                        .borrow_mut() .clear_num_all_unread(fse.subs_id);
+
                 });
+            self.addjob(SJob::ScanEmptyUnread);
+            if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+                feedcontents.borrow().addjob(CJob::UpdateMessageList);
+            }
         } else if let Some(feedcontents) = self.feedcontents_w.upgrade() {
             (feedcontents)
                 .borrow_mut()
-                .set_read_all(src_repo_id as isize);
+                .set_read_complete_subscription(src_repo_id as isize);
             (*self.gui_updater).borrow().update_list(TREEVIEW1);
         }
     }

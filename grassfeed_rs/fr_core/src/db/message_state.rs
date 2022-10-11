@@ -11,6 +11,7 @@ pub struct MessageState {
     /// display text, decompressed
     pub title_d: String,
     pub msg_id: isize,
+    pub subscription_id_copy: isize,
 }
 
 impl std::fmt::Display for MessageState {
@@ -43,18 +44,33 @@ impl MessageStateMap {
         list_pos: isize,
         ts_created: i64,
         title_compressed: String,
+        subs_id: isize,
     ) {
         let mut st = MessageState {
             gui_list_position: list_pos as isize, // list_position.unwrap_or(-1),
             msg_created_timestamp: ts_created,
             is_read_copy: is_read,
             msg_id: msg_id_,
+            subscription_id_copy: subs_id,
             ..Default::default()
         };
         if !title_compressed.is_empty() {
             st.title_d = decompress(&title_compressed);
         }
         self.msgmap.insert(msg_id_, st);
+    }
+
+    pub fn get_subscription_ids(&self, msg_ids: & Vec<i32>) -> Vec<isize> {
+        let mut subs_ids: Vec<isize> = Vec::default();
+        self.msgmap.iter().for_each(|(id, m_state)| {
+            if msg_ids.contains( &(*id as i32)) {
+                if !subs_ids.contains(&m_state.subscription_id_copy) {
+                    subs_ids.push(m_state.subscription_id_copy);
+                }
+            }
+        });
+        subs_ids.sort();
+        subs_ids
     }
 
     pub fn get_isread(&self, msg_id: isize) -> bool {
@@ -180,6 +196,7 @@ pub mod t {
                 a + 100,
                 (a as i64) * 10000000,
                 String::default(),
+                0,
             );
         }
         msm.dump();
@@ -199,6 +216,7 @@ pub mod t {
                 a + 100,
                 (a as i64) * 10000000,
                 String::default(),
+                0,
             );
         }
         //  msm.dump();

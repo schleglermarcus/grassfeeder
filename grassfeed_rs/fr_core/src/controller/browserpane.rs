@@ -5,6 +5,7 @@ use crate::db::messages_repo::MessagesRepo;
 use crate::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util;
+use crate::util::string_escape_url;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
@@ -18,8 +19,6 @@ use resources::id::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
-
-//  pub const CONF_BROWSER_CACHE_CLEANUP: &str = "BrowserCacheCleanup";
 
 pub trait IBrowserPane {
     fn switch_browsertab_content(
@@ -111,13 +110,30 @@ impl BrowserPane {
         msg_author: String,
         msg_categories: String,
     ) {
+        if false {
+            (*self.gui_val_store).write().unwrap().set_linkbutton_text(
+                LINKBUTTON_BROWSER_TITLE,
+                (link_title.clone(), link_url.clone()),
+            );
+            (*self.gui_updater)
+                .borrow()
+                .update_linkbutton(LINKBUTTON_BROWSER_TITLE);
+        }
+
+        let linktext = format!(
+            "<a href=\"{}\">{}</a>",
+            string_escape_url(link_url),
+            string_escape_url(link_title)
+        );
+
         (*self.gui_val_store)
             .write()
             .unwrap()
-            .set_linkbutton_text(LINKBUTTON_BROWSER_TITLE, (link_title, link_url));
+            .set_label_text(LABEL_BROWSER_ENTRY_LINK, linktext);
         (*self.gui_updater)
             .borrow()
-            .update_linkbutton(LINKBUTTON_BROWSER_TITLE);
+            .update_label_markup(LABEL_BROWSER_ENTRY_LINK);
+
         (*self.gui_val_store)
             .write()
             .unwrap()

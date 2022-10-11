@@ -37,6 +37,7 @@ pub const LABEL_BROWSER_MSG_CATEGORIES: u8 = 4;
 pub const LABEL_STATUS_1: u8 = 5;
 pub const LABEL_STATUS_2: u8 = 6;
 pub const LABEL_STATUS_3: u8 = 7;
+pub const LABEL_BROWSER_ENTRY_LINK: u8 = 8;
 
 pub const LINKBUTTON_BROWSER_TITLE: u8 = 0;
 

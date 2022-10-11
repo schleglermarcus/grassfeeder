@@ -33,6 +33,7 @@ fn main() {
     let dynamic_filename = format!("{}/target/dynamic.rss", env_dir);
 
     let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT);
+
     let _dyn_wr_handle = std::thread::spawn(move || loop {
         write_feed(&dynamic_filename);
         std::thread::sleep(std::time::Duration::from_secs(19));
@@ -128,7 +129,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), folder2);
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder4, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder3, false);
-    feedsources.add_new_subscription_at_parent(url_relay, "relay_rd".to_string(), folder3, false);
+    feedsources.add_new_subscription_at_parent(url_relay, "relay_rd".to_string(), folder4, false);
     feedsources.add_new_subscription_at_parent(
         url_staseve,
         "staseve11".to_string(),
@@ -141,7 +142,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder3,
         false,
     );
-    if false {
+    if true {
         let src = [
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
@@ -154,6 +155,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "https://afternarcissisticabuse.wordpress.com/feed/",
                 "afternarc",
             ),
+			("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
         ];
         let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
@@ -178,7 +180,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
             ("http://www.nachdenkseiten.de/?feed=atom", "nachdenk"),
             ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
-            ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),
             ("https://www.asue.de/rss/gesamt.xml", "asue-no-pubdate"),
@@ -233,7 +234,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    if false {
+    if true {
         let src = [
             (
                 "http://feeds.feedburner.com/RichardHerringLSTPodcast",
@@ -344,7 +345,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
-                folder4,
+                folder3,
                 false,
             );
         });

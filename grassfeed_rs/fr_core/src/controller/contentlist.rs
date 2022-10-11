@@ -87,8 +87,6 @@ pub trait IFeedContents {
     fn get_job_receiver(&self) -> Receiver<CJob>;
     fn get_job_sender(&self) -> Sender<CJob>;
 
-    fn set_read_all(&mut self, source_repo_id: isize);
-
     //  all content entries, unread content entries
     fn get_counts(&self, source_repo_id: isize) -> Option<(i32, i32)>;
     fn get_config(&self) -> Config;
@@ -114,26 +112,26 @@ pub trait IFeedContents {
     fn set_messages_filter(&mut self, newtext: &str);
 
     fn process_kb_delete(&self);
+    fn set_read_complete_subscription(&mut self, source_repo_id: isize);
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
 pub struct FeedContents {
     timer_r: Rc<RefCell<Timer>>,
-    gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
-    gui_val_store: UIAdapterValueStoreType,
+    messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     feedsources_w: Weak<RefCell<SourceTreeController>>,
     configmanager_r: Rc<RefCell<ConfigManager>>,
     browserpane_r: Rc<RefCell<dyn IBrowserPane>>,
+    gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
+    gui_val_store: UIAdapterValueStoreType,
     job_queue_receiver: Receiver<CJob>,
     job_queue_sender: Sender<CJob>,
     config: Config,
-    list_fontsize: u32,
     list_selected_ids: RwLock<Vec<i32>>,
-    messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     msg_state: RwLock<MessageStateMap>,
     msg_filter: Option<String>,
 
-    //  subscription-id, number-of-lines, is_folder
+    ///  subscription-id, number-of-lines, is_folder
     current_subscription: RefCell<(isize, isize, bool)>,
 }
 
@@ -161,7 +159,7 @@ impl FeedContents {
             feedsources_w: Weak::new(),
             // last_activated_subscription_id: RefCell::new(-1),
             config: Config::default(),
-            list_fontsize: 0,
+            // list_fontsize: 0,
             list_selected_ids: RwLock::new(Vec::default()),
             messagesrepo_r: msg_r,
             msg_state: Default::default(),
@@ -219,6 +217,7 @@ impl FeedContents {
             return;
         }
         let repo_ids: Vec<i32> = repoid_listpos.iter().map(|(r, _p)| *r).collect();
+        // debug!("set_read_many : {} {:?}", is_read, repo_ids);
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_many(&repo_ids, is_read);
@@ -226,9 +225,19 @@ impl FeedContents {
             .write()
             .unwrap()
             .set_read_many(&repo_ids, is_read);
-
-        let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
-
+        let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
+        debug!("set_read_many : subs_id{}  isfolder{} ", subs_id, isfolder);
+        if isfolder {
+            if let Some(feedsources) = self.feedsources_w.upgrade() {
+                if let Some((_subs_e, children)) =
+                    (*feedsources).borrow().get_current_selected_fse()
+                {
+                    for c_id in children {
+                        self.addjob(CJob::RequestUnreadAllCount(c_id as isize));
+                    }
+                }
+            }
+        }
         self.addjob(CJob::RequestUnreadAllCount(subs_id));
         let listpos_repoid: Vec<(u32, u32)> = repoid_listpos
             .iter()
@@ -298,6 +307,7 @@ impl FeedContents {
             list_position.unwrap_or(-1),
             msg.entry_src_date,
             msg.title.clone(),
+            msg.subscription_id,
         );
     }
 
@@ -374,7 +384,7 @@ impl FeedContents {
                 i as i32,
                 &Self::message_to_row(
                     fc,
-                    self.list_fontsize as u32,
+                    self.config.list_fontsize as u32,
                     title_string,
                     self.config.mode_debug,
                 ),
@@ -386,11 +396,6 @@ impl FeedContents {
 
     fn fill_state_map(&self, r_messagelist: &Vec<MessageRow>) {
         let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
-
-        debug!("fill_state_map {:?}", *self.current_subscription.borrow());
-
-        // if isfolder {        }
-
         let messagelist: Vec<MessageRow> = if r_messagelist.is_empty() {
             (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false)
         } else {
@@ -398,7 +403,6 @@ impl FeedContents {
         };
         self.current_subscription
             .replace((subs_id, messagelist.len() as isize, isfolder));
-
         self.msg_state.write().unwrap().clear();
         messagelist.iter().enumerate().for_each(|(i, fc)| {
             self.insert_state_from_row(fc, Some(i as isize));
@@ -529,7 +533,8 @@ impl IFeedContents for FeedContents {
     fn process_list_row_activated(&self, act_dbid_listpos: &HashMap<i32, i32>) {
         let mut is_unread_ids: Vec<i32> = Vec::default();
         let mut is_read_ids: Vec<i32> = Vec::default();
-        for msg_id in act_dbid_listpos.keys() {
+        let msg_ids: Vec<i32> = act_dbid_listpos.keys().cloned().collect();
+        for msg_id in &msg_ids {
             if self.msg_state.read().unwrap().get_isread(*msg_id as isize) {
                 is_read_ids.push(*msg_id as i32);
             } else {
@@ -548,12 +553,28 @@ impl IFeedContents for FeedContents {
             .map(|(k, v)| (*v as u32, *k as u32))
             .collect::<Vec<(u32, u32)>>();
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
+
+        let subscr_ids = self
+            .msg_state
+            .read()
+            .unwrap()
+            .get_subscription_ids(&msg_ids);
+
+        subscr_ids
+            .iter()
+            .for_each(|subs_id| self.addjob(CJob::RequestUnreadAllCount(*subs_id)));
+
+        // for subs_id in subscr_ids {        }
+
         if !is_unread_ids.is_empty() {
             (*self.messagesrepo_r)
                 .borrow_mut()
                 .update_is_read_many(&is_unread_ids, true);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
         }
+
+        // if !subscr_ids.is_empty() || !is_unread_ids.is_empty() {}
+
         self.addjob(CJob::UpdateContentListSome(list_pos_dbid));
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             (*feedsources)
@@ -562,28 +583,32 @@ impl IFeedContents for FeedContents {
                     subs_id,
                     *last_content_id as isize,
                 ));
+            if !subscr_ids.is_empty() {
+                (*feedsources).borrow().addjob(SJob::ScanEmptyUnread);
+            }
         }
         self.set_selected_content_ids(vec![*last_content_id]);
     }
 
-
-    fn set_read_all(&mut self, src_repo_id: isize) {
-		/// TODO
+    fn set_read_complete_subscription(&mut self, src_repo_id: isize) {
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_all(src_repo_id, true);
 
+        let (subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
 
-
-
-        self.update_message_list(src_repo_id);
-        self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
+        if subs_id == src_repo_id {
+            self.update_message_list(src_repo_id);
+            self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
+        }
     }
 
     fn update_message_list(&self, subscription_id: isize) {
         let (old_subs_id, _num_msg, mut isfolder) = *self.current_subscription.borrow();
         if subscription_id != old_subs_id {
+            //:1
             if let Some(feedsources) = self.feedsources_w.upgrade() {
+                // borrow problem
                 if let Some(subs_e) = (*feedsources).borrow().get_current_selected_fse() {
                     isfolder = subs_e.0.is_folder;
                 }
@@ -615,7 +640,7 @@ impl IFeedContents for FeedContents {
             if let Some(titl) = self.msg_state.read().unwrap().get_title(msg.message_id) {
                 let av_list = Self::message_to_row(
                     &msg,
-                    self.list_fontsize as u32,
+                    self.config.list_fontsize as u32,
                     titl,
                     self.config.mode_debug,
                 );
@@ -689,7 +714,7 @@ impl IFeedContents for FeedContents {
     }
 
     fn notify_config_update(&mut self) {
-        self.list_fontsize = get_font_size_from_config(self.configmanager_r.clone());
+        self.config.list_fontsize = get_font_size_from_config(self.configmanager_r.clone()) as u8;
     }
 
     fn set_selected_content_ids(&self, list: Vec<i32>) {
@@ -1073,6 +1098,7 @@ pub struct Config {
     pub list_sort_column: u8,
     pub list_sort_order_up: bool,
     pub mode_debug: bool,
+    pub list_fontsize: u8,
 }
 
 impl Default for Config {
@@ -1083,6 +1109,7 @@ impl Default for Config {
             list_sort_column: 0,
             list_sort_order_up: false,
             mode_debug: false,
+            list_fontsize: 10,
         }
     }
 }

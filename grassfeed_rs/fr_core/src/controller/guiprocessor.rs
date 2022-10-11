@@ -175,17 +175,10 @@ impl GuiProcessor {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
                         .set_selected_feedsource(subs_id as isize);
-                    trace!(
-                        "GP:TreeRowActivated{} #q:{} {:?} ",
-                        subs_id,
-                        (*self.downloader_r).borrow().get_queue_size(),
-                        _path
-                    );
-
+                    // trace!(                        "GP:TreeRowActivated{} #q:{} {:?} ",                        subs_id,                        (*self.downloader_r).borrow().get_queue_size(),                        _path                    );
                     (*self.feedcontents_r)
                         .borrow()
                         .update_message_list(subs_id as isize);
-
                     self.focus_by_tab = FocusByTab::FocusSubscriptions;
                 }
                 GuiEvents::ListRowActivated(_list_idx, list_position, msg_id) => {
@@ -256,6 +249,7 @@ impl GuiProcessor {
                                 .start_feedsource_edit_dialog(src_repo_id as isize);
                         }
                         "feedsource-mark-as-read" => {
+                            debug!("GP command: {:?}", command);
                             (*self.feedsources_r)
                                 .borrow_mut()
                                 .mark_as_read(src_repo_id as isize);
@@ -857,15 +851,9 @@ impl GuiProcessor {
             KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.prev(),
             KeyCodes::Key_a => {
                 if subscription_id > 0 {
-
-
-					
-                    (*self.feedcontents_r)
-                        .borrow_mut()
-                        .set_read_all(subscription_id);
-
-
-
+                    // (*self.feedcontents_r).borrow_mut().set_read_all();
+                    debug!("key:a {}", subscription_id);
+                    (*self.feedsources_r).borrow().mark_as_read(subscription_id);
                 }
             }
             KeyCodes::Key_s => {

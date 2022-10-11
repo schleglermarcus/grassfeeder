@@ -10,9 +10,9 @@ use gdk::EventButton;
 use gtk::builders::ToggleToolButtonBuilder;
 use gtk::builders::ToolButtonBuilder;
 use gtk::pango::WrapMode;
-use gtk::prelude::ContainerExt;
-use gtk::prelude::GtkMenuItemExt;
-use gtk::prelude::WidgetExt;
+// use gtk::prelude::ContainerExt;
+// use gtk::prelude::GtkMenuItemExt;
+// use gtk::prelude::WidgetExt;
 use gtk::prelude::*;
 use gtk::Adjustment;
 use gtk::Align;
@@ -280,11 +280,30 @@ impl GtkObjectTree {
     // fn set_spell_checking_enabled(&self, enabled: bool)
     fn create_content_tabs_2(&self, gtk_obj_a: GtkObjectsType) -> Container {
         let box1_v = gtk::Box::new(Orientation::Vertical, 0);
-        // box1_v.set_widget_name("browser_box");
-        let linkbutton1 = gtk::LinkButton::new("--");
-        linkbutton1.set_label("--");
-        linkbutton1.set_halign(Align::Start);
-        box1_v.pack_start(&linkbutton1, false, false, 0);
+        if false {
+            let linkbutton1 = gtk::LinkButton::new("-linkbutton-");
+            linkbutton1.set_label("--");
+            linkbutton1.set_halign(Align::Start);
+            linkbutton1.set_relief(gtk::ReliefStyle::Normal);
+            box1_v.pack_start(&linkbutton1, false, false, 0);
+        }
+        if false {
+            let eventbox = gtk::EventBox::new(); //  Eventbox + Label
+            let linklabel = Label::new(Some("linklabel"));
+            eventbox.add(&linklabel);
+            eventbox.set_halign(Align::Start);
+            eventbox.connect_button_press_event(|_e_bo, e_bu: &EventButton| {
+                debug!("EVENTBOX!   {}", e_bu.button());
+                gtk::Inhibit(false)
+            });
+            box1_v.pack_start(&eventbox, false, false, 0);
+        }
+		let label_entry_link = Label::new(Some("feed-url"));
+        label_entry_link.set_halign(Align::Start);
+		label_entry_link.set_wrap(true);
+		box1_v.pack_start(&label_entry_link, false, false, 0);
+
+
 
         let box3_h = gtk::Box::new(Orientation::Horizontal, 0);
         box3_h.set_height_request(TAB_MARKER_HEIGHT as i32);
@@ -318,7 +337,13 @@ impl GtkObjectTree {
             ret.set_label(LABEL_BROWSER_MSG_DATE, &label_date);
             ret.set_label(LABEL_BROWSER_MSG_AUTHOR, &label_author);
             ret.set_label(LABEL_BROWSER_MSG_CATEGORIES, &label_cat);
-            ret.set_linkbutton(LINKBUTTON_BROWSER_TITLE, &linkbutton1);
+
+            ret.set_label(LABEL_BROWSER_ENTRY_LINK, &label_entry_link);
+
+
+//  TODO //            ret.set_linkbutton(LINKBUTTON_BROWSER_TITLE, &linkbutton1);
+
+
             ret.set_box(BOX_CONTAINER_4_BROWSER, &box1_v);
             ret.set_box(BOX_CONTAINER_3_MARK, &box3_h);
             ret.set_create_webcontext_fn(
