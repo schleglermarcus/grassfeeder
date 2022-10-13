@@ -1,4 +1,5 @@
 use crate::dialogs::create_dialogs;
+use crate::gtk::traits::SettingsExt;
 use crate::load_css::TAB_MARKER_HEIGHT;
 use crate::messagelist::create_listview;
 use crate::util::process_string_to_image;
@@ -7,17 +8,16 @@ use crate::util::EvSenderWrapper;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
 use gdk::EventButton;
+use gdk::RGBA;
 use gtk::builders::ToggleToolButtonBuilder;
 use gtk::builders::ToolButtonBuilder;
 use gtk::pango::WrapMode;
-// use gtk::prelude::ContainerExt;
-// use gtk::prelude::GtkMenuItemExt;
-// use gtk::prelude::WidgetExt;
 use gtk::prelude::*;
 use gtk::Adjustment;
 use gtk::Align;
 use gtk::Button;
 use gtk::ButtonBox;
+use gtk::CellRendererText;
 use gtk::Container;
 use gtk::Dialog;
 use gtk::IconSize;
@@ -54,6 +54,7 @@ use webkit2gtk::WebContextExt;
 use webkit2gtk::WebView;
 use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
+
 const TOOLBAR_ICON_SIZE: i32 = 24;
 const TOOLBAR_BORDER_WIDTH: u32 = 0;
 const TOOLBAR_MARGIN: i32 = 0;
@@ -69,7 +70,23 @@ pub struct GuiCacheValues {
     pub col0w: i32,
     window_width: i32,
     window_height: i32,
+    // theme_color_foreground: RGBA,
 }
+
+/*
+impl Default for GuiCacheValues {
+    fn default() -> GuiCacheValues {
+        GuiCacheValues {
+            pane0x: 0,
+            pane1x: 0,
+            col0w: 0,
+            window_width: 0,
+            window_height: 0,
+             theme_color_foreground: RGBA::new(0.0, 0.0, 0.0, 0.0),
+        }
+    }
+}
+*/
 
 #[derive(Default)]
 pub struct GtkObjectTree {
@@ -88,6 +105,16 @@ impl GtkGuiBuilder for GtkObjectTree {
         const FRAME_SHRINK: bool = true; // can this child be made smaller than its requisition.
         const NONE_ADJ: Option<&Adjustment> = None;
         let window: gtk::Window = (*gtk_obj_a).read().unwrap().get_window().unwrap();
+
+
+        if let Some(screen) = window.screen() {
+            if let Some(settings) = gtk::Settings::for_screen(&screen) {
+                if let Some(gstring) = settings.gtk_theme_name() {
+                    let s: String = gstring.to_string();
+                    let _r = gui_event_sender.send(GuiEvents::WindowThemeChanged(s));
+                }
+            }
+        }
         let esw = EvSenderWrapper(gui_event_sender.clone());
         crate::load_css::load_css();
         window.connect_size_allocate(move |_win, rectangle| {
@@ -239,6 +266,32 @@ impl GtkGuiBuilder for GtkObjectTree {
 }
 
 impl GtkObjectTree {
+    /*
+        fn guess_colors(&self, gtk_obj_a: GtkObjectsType) {
+            if let Some(win) = (*gtk_obj_a).read().unwrap().get_window() {
+                let stylecontext = win.style_context();
+                debug!(                "STYLE: normal:{:?}   ",                stylecontext.color(gtk::StateFlags::NORMAL)            );
+                let val: glib::Value =
+                    stylecontext.style_property_for_state("background-color", gtk::StateFlags::NORMAL);
+                // let o_valget: Result<gdk_pixbuf::Colorspace, _> = val.get();	// Err(ValueTypeMismatchError { actual: GdkRGBA, requested: GdkColorspace }
+                debug!("TYPE:  {:?} {:?}", val.type_(), val.value_type());
+                // let dg_rgba = gdk_sys::GdkRGBA {            red: 0.0,            green: 0.0,            blue: 0.0,            alpha: 0.0,        };
+                // let transf = val.transform::<gdk_sys::GdkRGBA>();
+                // let transf = val.transform_with_type( glib::Type::STRING );	// "Can't transform value of type 'GdkRGBA' into 'gchararray'",
+                // debug!("VARIANT:  {:?}", val.transform_with_type(glib::Type::ENUM));
+                // let o_valget: Result<gdk_sys::GdkRGBA, _> = val.get();
+                // let v_rgba = val.transform::<gdk_sys::GdkRGBA>();
+                // let rgba1 = gtk::gdk::RGBA::from(val);
+                // gdk_sys::GdkRGBA::from(val);
+                // gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5)
+                let crt = CellRendererText::new();
+                debug!("CRT:  {:?} {:?}", crt.background_rgba(), 0);
+                //  #383838
+                // rgb(56, 56, 56)
+            }
+        }
+    */
+
     fn get_int(&self, name: PropDef, defaul: usize) -> usize {
         if self.initvalues.is_empty() {
             error!("GtkObjectTree: gui_values not present.   {:?}", &name);
@@ -273,37 +326,15 @@ impl GtkObjectTree {
         }
     }
 
-    // Later1:  Stack + Stackswitcher
-    // Later2:  Set font size
-    //
     // fn set_preferred_languages(&self, languages: &[&str])
     // fn set_spell_checking_enabled(&self, enabled: bool)
     fn create_content_tabs_2(&self, gtk_obj_a: GtkObjectsType) -> Container {
         let box1_v = gtk::Box::new(Orientation::Vertical, 0);
-        if false {
-            let linkbutton1 = gtk::LinkButton::new("-linkbutton-");
-            linkbutton1.set_label("--");
-            linkbutton1.set_halign(Align::Start);
-            linkbutton1.set_relief(gtk::ReliefStyle::Normal);
-            box1_v.pack_start(&linkbutton1, false, false, 0);
-        }
-        if false {
-            let eventbox = gtk::EventBox::new(); //  Eventbox + Label
-            let linklabel = Label::new(Some("linklabel"));
-            eventbox.add(&linklabel);
-            eventbox.set_halign(Align::Start);
-            eventbox.connect_button_press_event(|_e_bo, e_bu: &EventButton| {
-                debug!("EVENTBOX!   {}", e_bu.button());
-                gtk::Inhibit(false)
-            });
-            box1_v.pack_start(&eventbox, false, false, 0);
-        }
-		let label_entry_link = Label::new(Some("feed-url"));
+
+        let label_entry_link = Label::new(Some("feed-url"));
         label_entry_link.set_halign(Align::Start);
-		label_entry_link.set_wrap(true);
-		box1_v.pack_start(&label_entry_link, false, false, 0);
-
-
+        label_entry_link.set_wrap(true);
+        box1_v.pack_start(&label_entry_link, false, false, 0);
 
         let box3_h = gtk::Box::new(Orientation::Horizontal, 0);
         box3_h.set_height_request(TAB_MARKER_HEIGHT as i32);
@@ -321,11 +352,19 @@ impl GtkObjectTree {
         let label_date = Label::new(Some("-"));
         label_date.set_halign(Align::Center);
         box2_h.pack_start(&label_date, false, false, 5);
+
+        let label_subscription = Label::new(Some("-"));
+        label_subscription.set_halign(Align::End);
+        label_subscription.set_wrap(true);
+        label_subscription.set_line_wrap_mode(WrapMode::Word);
+        box2_h.pack_end(&label_subscription, false, false, 5);
+
         let label_cat = Label::new(Some("-"));
         label_cat.set_halign(Align::End);
         label_cat.set_wrap(true);
         label_cat.set_line_wrap_mode(WrapMode::Word);
-        box2_h.pack_end(&label_cat, false, false, 5);
+        box1_v.pack_start(&label_cat, false, false, 0);
+
         let browserdir = self
             .initvalues
             .get(&PropDef::BrowserDir)
@@ -337,13 +376,8 @@ impl GtkObjectTree {
             ret.set_label(LABEL_BROWSER_MSG_DATE, &label_date);
             ret.set_label(LABEL_BROWSER_MSG_AUTHOR, &label_author);
             ret.set_label(LABEL_BROWSER_MSG_CATEGORIES, &label_cat);
-
             ret.set_label(LABEL_BROWSER_ENTRY_LINK, &label_entry_link);
-
-
-//  TODO //            ret.set_linkbutton(LINKBUTTON_BROWSER_TITLE, &linkbutton1);
-
-
+            ret.set_label(LABEL_BROWSER_SUBSCRIPTION, &label_subscription);
             ret.set_box(BOX_CONTAINER_4_BROWSER, &box1_v);
             ret.set_box(BOX_CONTAINER_3_MARK, &box3_h);
             ret.set_create_webcontext_fn(
@@ -383,10 +417,21 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
     wconte
 }
 
+
+// Later2:  Set font size
 pub fn create_webview(w_context: &WebContext) -> WebView {
     let webview1: WebView = WebView::with_context(w_context);
     webview1.set_widget_name("webview_0");
     webview1.set_border_width(4);
+
+/*  TODO
+	let store = (self.m_v_store).read().unwrap();
+	let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
+	let bright: f64 = bright_int as f64 / 255.0;
+	let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
+	webview.set_background_color(&c_bg);
+*/
+
     webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
     let webview_settings = webkit2gtk::SettingsBuilder::new()
         //.default_font_size(10)		// later

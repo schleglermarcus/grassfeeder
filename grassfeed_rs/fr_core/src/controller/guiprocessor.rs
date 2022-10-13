@@ -354,6 +354,9 @@ impl GuiProcessor {
                         .borrow_mut()
                         .set_messages_filter(newtext);
                 }
+                GuiEvents::WindowThemeChanged(ref theme_name) => {
+                    (*self.gui_context_r).borrow().set_theme_name(&theme_name);
+                }
 
                 _ => {
                     warn!("other GuiEvents: {:?}", &ev);

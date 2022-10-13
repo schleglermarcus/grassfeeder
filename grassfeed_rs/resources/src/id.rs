@@ -38,6 +38,7 @@ pub const LABEL_STATUS_1: u8 = 5;
 pub const LABEL_STATUS_2: u8 = 6;
 pub const LABEL_STATUS_3: u8 = 7;
 pub const LABEL_BROWSER_ENTRY_LINK: u8 = 8;
+pub const LABEL_BROWSER_SUBSCRIPTION: u8 = 9;
 
 pub const LINKBUTTON_BROWSER_TITLE: u8 = 0;
 

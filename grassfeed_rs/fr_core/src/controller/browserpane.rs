@@ -2,6 +2,8 @@ use crate::config::configmanager::ConfigManager;
 use crate::controller::contentlist::FeedContents;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
+use crate::db::subscription_repo::ISubscriptionRepo;
+use crate::db::subscription_repo::SubscriptionRepo;
 use crate::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util;
@@ -37,12 +39,13 @@ pub trait IBrowserPane {
 pub struct BrowserPane {
     timer_r: Rc<RefCell<Timer>>,
     configmanager_r: Rc<RefCell<ConfigManager>>,
+    feedcontents_w: Weak<RefCell<FeedContents>>, // YY
+    messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
+    subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_val_store: UIAdapterValueStoreType,
     config: Config,
     last_selected_link_text: RefCell<String>,
-    messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
-    feedcontents_w: Weak<RefCell<FeedContents>>, // YY
 }
 
 impl BrowserPane {
@@ -60,6 +63,7 @@ impl BrowserPane {
             last_selected_link_text: RefCell::new(String::default()),
             messagesrepo_r: (*ac).get_rc::<MessagesRepo>().unwrap(),
             feedcontents_w: Weak::new(),
+            subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
         }
     }
 
@@ -109,6 +113,7 @@ impl BrowserPane {
         msg_date: String,
         msg_author: String,
         msg_categories: String,
+        subscr_title: String,
     ) {
         if false {
             (*self.gui_val_store).write().unwrap().set_linkbutton_text(
@@ -137,6 +142,13 @@ impl BrowserPane {
         (*self.gui_val_store)
             .write()
             .unwrap()
+            .set_label_text(LABEL_BROWSER_SUBSCRIPTION, subscr_title);
+        (*self.gui_updater)
+            .borrow()
+            .update_label(LABEL_BROWSER_SUBSCRIPTION);
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
             .set_label_text(LABEL_BROWSER_MSG_DATE, msg_date);
         (*self.gui_updater)
             .borrow()
@@ -161,18 +173,17 @@ impl BrowserPane {
 impl IBrowserPane for BrowserPane {
     fn switch_browsertab_content(
         &self,
-        repo_id: i32,
+        msg_id: i32,
         title: String,
-        co_au_ca: Option<(String, String, String)>,
+        co_au_ca_su: Option<(String, String, String)>,
     ) {
-        if repo_id < 0 {
+        if msg_id < 0 {
             error!("switch_browsertab_content_r  repo_id<0");
             return;
         }
         let o_msg = (*self.messagesrepo_r)
             .borrow()
-            .get_by_index(repo_id as isize);
-
+            .get_by_index(msg_id as isize);
         if o_msg.is_none() {
             return;
         }
@@ -180,9 +191,17 @@ impl IBrowserPane for BrowserPane {
         let mut content = String::default();
         let mut author = String::default();
         let mut categories = String::default();
-        if let Some(triplet) = co_au_ca {
+        let mut su_title = String::default();
+        if let Some(triplet) = co_au_ca_su {
             (content, author, categories) = triplet;
         }
+        if let Some(sub_e) = (self.subscriptionrepo_r)
+            .borrow()
+            .get_by_index(fce.subscription_id)
+        {
+            su_title = sub_e.display_name;
+        }
+
         let mut display = title;
         if let Some(_pos) = display.find("http") {
             display = display.split("http").next().unwrap().to_string();
@@ -190,45 +209,8 @@ impl IBrowserPane for BrowserPane {
         }
         self.last_selected_link_text.replace(fce.link.clone()); //;
         let srcdate = util::db_time_to_display(fce.entry_src_date);
-        /*
-                (*self.gui_val_store)
-                    .write()
-                    .unwrap()
-                    .set_web_view_text(0, content);
-                (*self.gui_updater).borrow().update_web_view(0);
-        */
         self.set_browser_contents_html(content);
-        /*
-                (*self.gui_val_store)
-                    .write()
-                    .unwrap()
-                    .set_linkbutton_text(LINKBUTTON_BROWSER_TITLE, (display, fce.link));
-                (*self.gui_updater)
-                    .borrow()
-                    .update_linkbutton(LINKBUTTON_BROWSER_TITLE);
-                (*self.gui_val_store)
-                    .write()
-                    .unwrap()
-                    .set_label_text(LABEL_BROWSER_MSG_DATE, srcdate);
-                (*self.gui_updater)
-                    .borrow()
-                    .update_label(LABEL_BROWSER_MSG_DATE);
-                (*self.gui_val_store)
-                    .write()
-                    .unwrap()
-                    .set_label_text(LABEL_BROWSER_MSG_AUTHOR, author);
-                (*self.gui_updater)
-                    .borrow()
-                    .update_label(LABEL_BROWSER_MSG_AUTHOR);
-                (*self.gui_val_store)
-                    .write()
-                    .unwrap()
-                    .set_label_text(LABEL_BROWSER_MSG_CATEGORIES, categories);
-                (*self.gui_updater)
-                    .borrow()
-                    .update_label(LABEL_BROWSER_MSG_CATEGORIES);
-        */
-        self.set_browser_info_area(display, fce.link, srcdate, author, categories)
+        self.set_browser_info_area(display, fce.link, srcdate, author, categories, su_title)
     }
 
     fn get_config(&self) -> Config {
@@ -254,6 +236,7 @@ impl IBrowserPane for BrowserPane {
 
     fn display_short_help(&self) {
         self.set_browser_info_area(
+            String::default(),
             String::default(),
             String::default(),
             String::default(),

@@ -25,7 +25,10 @@ gio = "^0.15.5"
 glib = "^0.15.5"
 gdk = "^0.15.2"
 webkit2gtk = {  version = "0.18.0", default-features = false,  features = [ "v2_28"]  }
-gdk-sys = "^0.15.1"		
+gdk-sys = "^0.15.1"
+gdk-pixbuf = ">=0.15.11"
+# gtk-sys = ">=0.15.3"
+
 
 
 [package.metadata.i18n]

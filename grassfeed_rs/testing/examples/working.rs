@@ -142,7 +142,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder3,
         false,
     );
-    if true {
+    if false {
         let src = [
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
@@ -234,7 +234,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    if true {
+    if false {
         let src = [
             (
                 "http://feeds.feedburner.com/RichardHerringLSTPodcast",

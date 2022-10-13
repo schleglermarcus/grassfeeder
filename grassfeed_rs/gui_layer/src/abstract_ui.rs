@@ -47,6 +47,7 @@ pub enum GuiEvents {
     AppWasAlreadyRunning,
     WinDelete,
     WindowSizeChanged(i32, i32),
+	WindowThemeChanged(String),
     MenuFileQuit,
     MenuActivate(String),
     ButtonClicked(String),

@@ -96,6 +96,10 @@ impl GuiContext {
             .set_window_title(wtitle);
         (*self.updater_adapter).borrow().update_window_title();
     }
+
+    pub fn set_theme_name(&self, t_name: &String) {
+        trace!("guess with theme!  {}", t_name);
+    }
 }
 
 impl Buildable for GuiContext {

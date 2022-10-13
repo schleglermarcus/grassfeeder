@@ -60,10 +60,10 @@ impl MessageStateMap {
         self.msgmap.insert(msg_id_, st);
     }
 
-    pub fn get_subscription_ids(&self, msg_ids: & Vec<i32>) -> Vec<isize> {
+    pub fn get_subscription_ids(&self, msg_ids: &Vec<i32>) -> Vec<isize> {
         let mut subs_ids: Vec<isize> = Vec::default();
         self.msgmap.iter().for_each(|(id, m_state)| {
-            if msg_ids.contains( &(*id as i32)) {
+            if msg_ids.contains(&(*id as i32)) {
                 if !subs_ids.contains(&m_state.subscription_id_copy) {
                     subs_ids.push(m_state.subscription_id_copy);
                 }

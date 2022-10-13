@@ -1603,7 +1603,6 @@ impl ISourceTreeController for SourceTreeController {
             if let Some(gui_context) = self.gui_context_w.upgrade() {
                 (*gui_context).borrow_mut().set_window_title(display_name);
             }
-
             let mut child_ids: Vec<i32> = Vec::default();
             if fse.is_folder {
                 child_ids = (*self.subscriptionrepo_r)
@@ -1614,10 +1613,7 @@ impl ISourceTreeController for SourceTreeController {
                     .map(|fse| fse.subs_id as i32)
                     .collect::<Vec<i32>>();
             }
-
             self.current_selected_subscription = Some((fse, child_ids));
-
-            debug!("SUB-SET-SEL : {:?}", self.current_selected_subscription);
         }
     }
 

@@ -6,7 +6,7 @@ use crate::GtkBuilderType;
 use crate::GtkObjects;
 use crate::IntCommands;
 use crate::WebContentType;
-use crate::WebViewType;
+use crate::CreateWebViewFnType;
 use flume::Receiver;
 use flume::Sender;
 use gtk::prelude::BoxExt;
@@ -192,7 +192,7 @@ pub struct GtkObjectsImpl {
     pub web_context: RefCell<Option<WebContext>>, // allow only one browser in the application
     pub web_view: RefCell<Option<WebView>>,
     create_webcontext_fn: WebContentType,
-    create_webview_fn: WebViewType,
+    create_webview_fn: CreateWebViewFnType,
     browser_config: CreateBrowserConfig,
     pub searchentries: Vec<SearchEntry>,
 }

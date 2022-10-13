@@ -10,6 +10,7 @@
 pub const TAB_MARKER_HEIGHT: u8 = 1;
 
 use crate::gtk::prelude::CssProviderExt;
+// use crate::gtk::prelude::StyleProviderExt;
 
 // double curly brackets for rust strings
 fn style_scrolled(name: &str, w_id: u8, height: u8) -> String {
@@ -36,7 +37,20 @@ pub fn load_css() {
         Err(e) => {
             error!("Failed to load CSS: {}  \n{}", e, style);
         }
-    }
+    };
+
+/*
+    let wp = gtk::WidgetPath::new();
+
+    let val = provider.style_property(
+        &wp,
+        gtk::StateFlags::NORMAL,
+        glib::ParamSpecString::new("background-color", "", "", None, glib::ParamFlags::READABLE),
+    );
+    debug!("PROV: VAL={:?}", val);
+*/
+
+
     gtk::StyleContext::add_provider_for_screen(
         &gdk::Screen::default().expect("Error initializing gtk css provider."),
         &provider,

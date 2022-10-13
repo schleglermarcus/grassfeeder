@@ -23,7 +23,6 @@ impl HttpFetcher {
                     let mut length: u64 = 0;
                     if let Some(h_cole) = response.header("Content-Length") {
                         length = h_cole.parse().unwrap();
-                        // trace!("HttpFetcher:{}  Header content-length={}", url, h_cole);
                     }
                     if length > 0 {
                         length = std::cmp::min(length, MAX_BUFFER_LENGTH);
@@ -48,7 +47,11 @@ impl HttpFetcher {
                 } else {
                     match response.into_string() {
                         Ok(r_str) => r_text = r_str,
-                        Err(e) => warn!("HttpFetcher: {} response.into_string {:?}", url, e),
+                        Err(e) => {
+                            warn!("HttpFetcher: {} response.into_string {:?}", url, e);
+                            r_errorkind = 14;
+                            r_ed = format!("r.into_string() {} ", e);
+                        }
                     }
                 }
             }
@@ -58,15 +61,7 @@ impl HttpFetcher {
             }
             Err(ureq::Error::Transport(transp)) => {
                 r_errorkind = ureq_error_kind_to_u8(transp.kind()) as u8;
-                r_ed = format!(
-                    "{:?} {}",
-                    transp.kind(),
-                    // match transp.message() {
-                    //     Some(s) => s,
-                    //     None => "",
-                    // }
-                    transp.message().unwrap_or("")
-                );
+                r_ed = format!("{:?} {}", transp.kind(), transp.message().unwrap_or(""));
             }
         }
         HttpGetResult {
@@ -115,16 +110,6 @@ mod httpfetcher_t {
         HttpFetcher {}
     }
 
-    // Lieferte Zeitweise 502, jetzt wieder 200
-    #[ignore]
-    #[test]
-    fn test_502() {
-        let r =
-            prep_fetcher().request_url("https://lib.rs/development-tools/debugging".to_string());
-        assert_eq!(r.get_status(), 502);
-        assert_eq!(r.error_description, "Bad Gateway");
-    }
-
     // #[ignore]
     #[test]
     fn test_local404() {
@@ -142,7 +127,7 @@ mod httpfetcher_t {
     }
 
     // #[ignore]
-    // #[test]
+    #[test]
     #[allow(dead_code)]
     fn test_remote_403() {
         let r = prep_fetcher().request_url("https://static.foxnews.com/unknown.png".to_string());
@@ -163,7 +148,6 @@ mod httpfetcher_t {
     fn test_remote_404() {
         let r = prep_fetcher()
             .request_url_bin("https://www.heise.de/icons/ho/touch-icons/none.png".to_string());
-        //    debug!("R={:?}", &r);
         assert_eq!(r.get_status(), 404);
     }
 
@@ -171,18 +155,6 @@ mod httpfetcher_t {
     #[test]
     fn test_remote_kodansha() {
         let r = prep_fetcher().request_url_bin("https://kodansha.us/favicon.ico".to_string());
-        // dbg!(&r);
         assert_eq!(r.get_status(), 200);
     }
-
-    /*
-        //  cargo test  web::httpfetcher::httpfetcher_t::test_remote_redirect --lib -- --exact --nocapture
-        #[test]
-        fn test_remote_redirect() {
-            // setup();
-            let r = prep_fetcher().request_url_bin("https://report24.news/favicon.ico".to_string());
-            // dbg!(&r);
-            assert_eq!(r.get_status(), 302);
-        }
-    */
 }

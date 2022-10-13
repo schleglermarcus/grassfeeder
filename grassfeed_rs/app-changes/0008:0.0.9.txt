@@ -1,10 +1,8 @@
 Mon, 10 Oct 2022 00:15:00 +0000
+* Aggregate Messages on Folder Selection
+* Browser Display :  wrap over   title
 
-- Aggregate Messages on Folder Selection
 
-
-- Browser Display :  wrap over   title
-- Browser: enable theme related colors
 - Browser: Modify  Font size
 - Browser: add Zoom Control
 
@@ -15,3 +13,6 @@ Mon, 10 Oct 2022 00:15:00 +0000
 - Updating the tree: speed up the gtk part
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
+
+
+- Browser: enable theme related colors

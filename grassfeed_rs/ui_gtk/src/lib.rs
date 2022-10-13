@@ -70,7 +70,7 @@ pub enum IntCommands {
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;
-pub type WebViewType = Option<Box<dyn Fn(&WebContext) -> WebView>>;
+pub type CreateWebViewFnType = Option<Box<dyn Fn(&WebContext) -> WebView>>;
 
 pub trait GtkObjects {
     fn get_window(&self) -> Option<Window>;
@@ -143,7 +143,7 @@ pub trait GtkObjects {
         browser_clear_cache: bool,
     );
 
-    fn set_create_webview_fn(&mut self, cb_fn: WebViewType);
+    fn set_create_webview_fn(&mut self, cb_fn: CreateWebViewFnType);
 
     fn set_searchentry(&mut self, idx: u8, e: &gtk::SearchEntry);
     fn get_searchentry(&self, idx: u8) -> Option<&gtk::SearchEntry>;
