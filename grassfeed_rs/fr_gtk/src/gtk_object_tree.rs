@@ -52,7 +52,7 @@ use webkit2gtk::WebView;
 use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
 
-const TOOLBAR_ICON_SIZE: i32 = 24;
+const TOOLBAR_ICON_SIZE: i32 = 32;
 const TOOLBAR_BORDER_WIDTH: u32 = 0;
 const TOOLBAR_MARGIN: i32 = 0;
 const RATIO_BROWSER_FONTSIZE_PERCENT: u32 = 140;
@@ -155,8 +155,13 @@ impl GtkGuiBuilder for GtkObjectTree {
 
         let menubar = create_menubar(gui_event_sender.clone(), gtk_obj_a.clone(), mode_debug);
         box_2_h.pack_start(&menubar, false, false, 0);
-        create_toolbar(gui_event_sender.clone(), gtk_obj_a.clone(), &box_2_h);
+        create_toolbar(
+            gui_event_sender.clone(),
+            gtk_obj_a.clone(),
+            &box_2_h.clone(),
+        );
         box_2_h.set_spacing(-1);
+        create_browser_toolbar(gui_event_sender.clone(), &box_2_h);
 
         let paned_1 = Paned::new(Orientation::Horizontal);
         paned_1.set_size_request(100, -1);
@@ -509,6 +514,16 @@ pub fn create_menubar(
                 .clone();
             opml_export_dialog.show();
         });
+
+        let m_settings = MenuItem::with_label(&t!("M_SETTINGS"));
+        m_settings.set_widget_name("M_SETTINGS");
+        menu_file.add(&m_settings);
+        let se = g_ev_se.clone();
+        m_settings.connect_activate(move |_m| {
+            se.send(GuiEvents::MenuActivate(_m.widget_name().to_string()))
+                .unwrap();
+        });
+
         let m_file_quit = MenuItem::with_label(&t!("M_FILE_QUIT"));
         m_file_quit.set_widget_name("M_FILE_QUIT");
         menu_file.add(&m_file_quit);
@@ -518,15 +533,15 @@ pub fn create_menubar(
                 .unwrap();
         });
     }
-    {
+    if false {
         let m_item = MenuItem::with_label(&t!("M_OPTIONS"));
         m_item.set_widget_name("M_OPTIONS");
         menubar.append(&m_item);
-        let menu_file = Menu::new();
-        m_item.set_submenu(Some(&menu_file));
+        let menu_sub = Menu::new();
+        m_item.set_submenu(Some(&menu_sub));
         let m_settings = MenuItem::with_label(&t!("M_SETTINGS"));
         m_settings.set_widget_name("M_SETTINGS");
-        menu_file.add(&m_settings);
+        menu_sub.add(&m_settings);
         let se = g_ev_se.clone();
         m_settings.connect_activate(move |_m| {
             se.send(GuiEvents::MenuActivate(_m.widget_name().to_string()))
@@ -705,6 +720,69 @@ pub fn create_toolbar(
         let mut ret = (*gtk_obj_a).write().unwrap();
         ret.set_searchentry(SEARCH_ENTRY_0, &searchentry);
     }
+}
+
+pub fn create_browser_toolbar(g_ev_se: Sender<GuiEvents>, containing_box: &gtk::Box) {
+    let toolbar = Toolbar::new();
+    toolbar.set_height_request(16);
+    toolbar.set_icon_size(IconSize::SmallToolbar);
+    toolbar.set_margin(TOOLBAR_MARGIN);
+    toolbar.set_border_width(TOOLBAR_BORDER_WIDTH);
+    {
+        let image = Image::new();
+        process_string_to_image(
+            gen_icons::ICON_36_ZOOM_IN,
+            &image,
+            &String::default(),
+            TOOLBAR_ICON_SIZE,
+        );
+        let but: ToolButton = ToolButtonBuilder::new()
+            .icon_widget(&image)
+            .tooltip_text(&t!("TB_BROWSER_ZOOM_IN"))
+            .build();
+        toolbar.insert(&but, -1);
+        let esw = EvSenderWrapper(g_ev_se.clone());
+        but.connect_clicked(move |_b| {
+            esw.sendw(GuiEvents::ToolBarButton("browser-zoom-in".to_string()));
+        });
+    }
+    {
+        let image = Image::new();
+        process_string_to_image(
+            gen_icons::ICON_40_ZOOM_FIT_BEST,
+            &image,
+            &String::default(),
+            TOOLBAR_ICON_SIZE,
+        );
+        let but: ToolButton = ToolButtonBuilder::new()
+            .icon_widget(&image)
+            .tooltip_text(&t!("TB_BROWSER_ZOOM_DEFAULT"))
+            .build();
+        toolbar.insert(&but, -1);
+        let esw = EvSenderWrapper(g_ev_se.clone());
+        but.connect_clicked(move |_b| {
+            esw.sendw(GuiEvents::ToolBarButton("browser-zoom-default".to_string()));
+        });
+    }
+    {
+        let image = Image::new();
+        process_string_to_image(
+            gen_icons::ICON_38_ZOOM_OUT,
+            &image,
+            &String::default(),
+            TOOLBAR_ICON_SIZE,
+        );
+        let but: ToolButton = ToolButtonBuilder::new()
+            .icon_widget(&image)
+            .tooltip_text(&t!("TB_BROWSER_ZOOM_OUT"))
+            .build();
+        toolbar.insert(&but, -1);
+        let esw = EvSenderWrapper(g_ev_se.clone());
+        but.connect_clicked(move |_b| {
+            esw.sendw(GuiEvents::ToolBarButton("browser-zoom-out".to_string()));
+        });
+    }
+    containing_box.pack_end(&toolbar, false, false, 0);
 }
 
 pub fn create_buttonbox(_g_ev_se: Sender<GuiEvents>) -> ButtonBox {

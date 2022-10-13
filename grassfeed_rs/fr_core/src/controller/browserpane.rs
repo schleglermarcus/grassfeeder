@@ -22,6 +22,9 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 
+const BROWSER_ZOOM_LIMIT_UPPER: u32 = 300;
+const BROWSER_ZOOM_LIMIT_LOWER: u32 = 20;
+
 pub trait IBrowserPane {
     fn switch_browsertab_content(
         &self,
@@ -34,6 +37,15 @@ pub trait IBrowserPane {
     fn set_conf_browser_bg(&mut self, c: u32);
     fn get_last_selected_link(&self) -> String;
     fn display_short_help(&self);
+    fn set_browser_zoom(&self, cmd: BrowserZoomCommand);
+}
+
+#[derive(Debug)]
+pub enum BrowserZoomCommand {
+    None,
+    ZoomIn,
+    ZoomOut,
+    ZoomDefault,
 }
 
 pub struct BrowserPane {
@@ -46,6 +58,7 @@ pub struct BrowserPane {
     gui_val_store: UIAdapterValueStoreType,
     config: Config,
     last_selected_link_text: RefCell<String>,
+    last_zoom_level_percent: RefCell<u32>,
 }
 
 impl BrowserPane {
@@ -64,6 +77,7 @@ impl BrowserPane {
             messagesrepo_r: (*ac).get_rc::<MessagesRepo>().unwrap(),
             feedcontents_w: Weak::new(),
             subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
+            last_zoom_level_percent: RefCell::new(100),
         }
     }
 
@@ -244,6 +258,27 @@ impl IBrowserPane for BrowserPane {
             String::default(),
         );
         self.set_browser_contents_plain(t!("M_SHORTHELP_TEXT"));
+    }
+
+    fn set_browser_zoom(&self, cmd: BrowserZoomCommand) {
+        let cur_zoom: u32 = *self.last_zoom_level_percent.borrow();
+        let mut new_zoom: u32 = 100;
+        match cmd {
+            BrowserZoomCommand::ZoomIn => new_zoom = cur_zoom * 110 / 100,
+            BrowserZoomCommand::ZoomOut => new_zoom = cur_zoom * 90 / 100,
+            _ => (),
+        }
+        new_zoom = std::cmp::min(new_zoom, BROWSER_ZOOM_LIMIT_UPPER);
+        new_zoom = std::cmp::max(new_zoom, BROWSER_ZOOM_LIMIT_LOWER);
+        self.last_zoom_level_percent.replace(new_zoom);
+        if new_zoom != cur_zoom {
+            // trace!("ZOOM:   {} -> {}", cur_zoom, new_zoom);
+            (*self.gui_val_store)
+                .write()
+                .unwrap()
+                .set_gui_property(PropDef::BrowserZoomPercent, new_zoom.to_string());
+            (*self.gui_updater).borrow().update_web_view(0);
+        }
     }
 }
 

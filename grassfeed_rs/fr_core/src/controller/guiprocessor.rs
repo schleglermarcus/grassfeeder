@@ -1,5 +1,6 @@
 use crate::config::configmanager::ConfigManager;
 use crate::controller::browserpane;
+use crate::controller::browserpane::BrowserZoomCommand;
 use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
@@ -293,10 +294,27 @@ impl GuiProcessor {
                             .borrow_mut()
                             .addjob(SJob::ScheduleFetchAllFeeds);
                     }
+                    "browser-zoom-in" => {
+                        (*self.browserpane_r)
+                            .borrow()
+                            .set_browser_zoom(BrowserZoomCommand::ZoomIn);
+                    }
+                    "browser-zoom-out" => {
+                        (*self.browserpane_r)
+                            .borrow()
+                            .set_browser_zoom(BrowserZoomCommand::ZoomOut);
+                    }
+                    "browser-zoom-default" => {
+                        (*self.browserpane_r)
+                            .borrow()
+                            .set_browser_zoom(BrowserZoomCommand::ZoomDefault);
+                    }
                     "toolbutton-troubleshoot1" => {
                         debug!("toolbutton-troubleshoot1");
                     }
-                    _ => (),
+                    _ => {
+                        warn!("unknown ToolBarButton {} ", id);
+                    }
                 },
                 GuiEvents::ToolBarToggle(ref id, active) => match id.as_str() {
                     "special1" => {

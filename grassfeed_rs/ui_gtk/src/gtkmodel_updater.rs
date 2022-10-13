@@ -412,17 +412,18 @@ impl GtkModelUpdaterInt {
         }
         if let Some(webview) = g_o.get_web_view() {
             let store = (self.m_v_store).read().unwrap();
-            let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
-            let bright: f64 = bright_int as f64 / 255.0;
-            let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
-            webview.set_background_color(&c_bg);
-
             let o_wv_t = store.get_web_view_text(webviewtext_index);
             if let Some(text) = o_wv_t {
                 if webview.is_loading() {
                     webview.stop_loading();
                     std::thread::sleep(std::time::Duration::from_millis(3));
                 }
+                let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
+                let bright: f64 = bright_int as f64 / 255.0;
+                let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
+                webview.set_background_color(&c_bg);
+                let browser_zoom_pc = store.get_gui_int_or(PropDef::BrowserZoomPercent, 99);
+                webview.set_zoom_level(browser_zoom_pc as f64 / 100.0);
                 webview.load_html(&text, None);
             }
         }

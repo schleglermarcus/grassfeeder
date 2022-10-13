@@ -193,10 +193,7 @@ pub struct GtkObjectsImpl {
     pub web_view: RefCell<Option<WebView>>,
     create_webcontext_fn: WebContentType,
     create_webview_fn: CreateWebViewFnType,
-
-    // #[deprecated]
     browser_config: CreateBrowserConfig,
-
     pub searchentries: Vec<SearchEntry>,
 }
 
