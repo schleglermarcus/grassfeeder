@@ -47,7 +47,7 @@ pub enum GuiEvents {
     AppWasAlreadyRunning,
     WinDelete,
     WindowSizeChanged(i32, i32),
-	WindowThemeChanged(String),
+    WindowThemeChanged(String),
     MenuFileQuit,
     MenuActivate(String),
     ButtonClicked(String),
@@ -209,6 +209,7 @@ pub trait UIUpdaterAdapter {
     fn update_window_icon(&self);
     fn update_web_view(&self, nr: u8);
     fn update_web_view_plain(&self, nr: u8);
+    fn web_view_remove(&self, fontsizemanual: Option<u8>);
 
     fn clipboard_set_text(&self, s: String);
 }

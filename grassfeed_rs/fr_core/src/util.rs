@@ -143,8 +143,11 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     let mut ret = inp;
     // ret = ret.replace(&['(', ')', '\"', '\n', '\'', '\"'][..], "");
     ret = ret.replace(&['\"', '\n', '\'', '\"'][..], "");
-    ret = ret.replace("&#38;", " & ");
+    ret = ret.replace("&#38;", "&");
+    ret = ret.replace("&#038;", "&");
+    ret = ret.replace("&#x27;", "\'");
     ret = ret.replace("&gt;", ">");
+    ret = ret.replace("&amp;", " & ");
     ret = ret.replace("&#038;", " & ");
     ret = ret.replace("&#128;", "€");
     ret = ret.replace("&#147;", "›");

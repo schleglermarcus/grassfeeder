@@ -1,12 +1,12 @@
 use crate::gtk::prelude::ContainerExt;
 use crate::gtk::prelude::WidgetExt;
 use crate::runner_internal::GtkRunnerInternal;
+use crate::CreateWebViewFnType;
 use crate::DialogDataDistributor;
 use crate::GtkBuilderType;
 use crate::GtkObjects;
 use crate::IntCommands;
 use crate::WebContentType;
-use crate::CreateWebViewFnType;
 use flume::Receiver;
 use flume::Sender;
 use gtk::prelude::BoxExt;
@@ -193,7 +193,10 @@ pub struct GtkObjectsImpl {
     pub web_view: RefCell<Option<WebView>>,
     create_webcontext_fn: WebContentType,
     create_webview_fn: CreateWebViewFnType,
+
+    // #[deprecated]
     browser_config: CreateBrowserConfig,
+
     pub searchentries: Vec<SearchEntry>,
 }
 
@@ -210,6 +213,7 @@ impl GtkObjectsImpl {
             }
         }
         if self.web_view.borrow().is_none() {
+             trace!("checkOrCreate fs_man={:?}", self.browser_config.font_size_manual);
             if self.create_webview_fn.is_none() {
                 warn!("cannot create WebView, no create function here!");
                 return;
@@ -220,8 +224,12 @@ impl GtkObjectsImpl {
                 return;
             }
             let dest_box = o_dest_box.unwrap();
+
             if let Some(create_fn) = &self.create_webview_fn {
-                let w_view = (create_fn)(self.web_context.borrow().as_ref().unwrap());
+                let w_view = (create_fn)(
+                    self.web_context.borrow().as_ref().unwrap(),
+                    self.browser_config.font_size_manual,
+                );
                 dest_box.pack_start(&w_view, true, true, 0);
                 w_view.show();
                 self.web_view.borrow_mut().replace(w_view);
@@ -330,7 +338,8 @@ impl GtkObjects for GtkObjectsImpl {
         self.web_view.borrow().clone()
     }
 
-    fn set_web_view(&mut self, o_wv: Option<WebView>) {
+    fn set_web_view(&mut self, o_wv: Option<WebView>, font_size_man: Option<u8>) {
+        self.browser_config.font_size_manual = font_size_man;
         match o_wv {
             None => {
                 debug!("runner: removing webView");
@@ -342,7 +351,9 @@ impl GtkObjects for GtkObjectsImpl {
                     return;
                 }
                 let dest_box = o_dest_box.unwrap();
-                dest_box.remove(self.web_view.borrow().as_ref().unwrap());
+                if self.web_view.borrow().is_some() {
+                    dest_box.remove(self.web_view.borrow().as_ref().unwrap());
+                }
                 self.web_view = RefCell::new(None);
             }
             Some(wv) => {
@@ -504,16 +515,21 @@ impl GtkObjects for GtkObjectsImpl {
         browser_folder: &str,
         a_box_index: u8,
         browser_clear_cache: bool,
+        font_size_man: Option<u8>,
     ) {
         self.create_webcontext_fn = cb_fn;
         self.browser_config = CreateBrowserConfig {
             browser_dir: browser_folder.to_string(),
             attach_box_index: a_box_index,
             startup_clear_cache: browser_clear_cache,
+            font_size_manual: font_size_man,
         };
     }
 
-    fn set_create_webview_fn(&mut self, cb_fn: Option<Box<dyn Fn(&WebContext) -> WebView>>) {
+    fn set_create_webview_fn(
+        &mut self,
+        cb_fn: Option<Box<dyn Fn(&WebContext, Option<u8>) -> WebView>>,
+    ) {
         self.create_webview_fn = cb_fn;
     }
 
@@ -539,6 +555,7 @@ pub struct CreateBrowserConfig {
     pub attach_box_index: u8,
     pub browser_dir: String,
     pub startup_clear_cache: bool,
+    pub font_size_manual: Option<u8>,
 }
 
 struct ReceiverWrapperImpl(Receiver<GuiEvents>);
@@ -689,5 +706,9 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
 
     fn clipboard_set_text(&self, s: String) {
         self.send_to_int(&IntCommands::ClipBoardSetText(s));
+    }
+
+    fn web_view_remove(&self, fs_man: Option<u8>) {
+        self.send_to_int(&IntCommands::WebViewRemove(fs_man));
     }
 } //

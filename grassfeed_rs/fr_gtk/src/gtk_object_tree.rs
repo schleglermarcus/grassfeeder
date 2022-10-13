@@ -1,5 +1,4 @@
 use crate::dialogs::create_dialogs;
-use crate::gtk::traits::SettingsExt;
 use crate::load_css::TAB_MARKER_HEIGHT;
 use crate::messagelist::create_listview;
 use crate::util::process_string_to_image;
@@ -8,7 +7,6 @@ use crate::util::EvSenderWrapper;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
 use gdk::EventButton;
-use gdk::RGBA;
 use gtk::builders::ToggleToolButtonBuilder;
 use gtk::builders::ToolButtonBuilder;
 use gtk::pango::WrapMode;
@@ -17,7 +15,6 @@ use gtk::Adjustment;
 use gtk::Align;
 use gtk::Button;
 use gtk::ButtonBox;
-use gtk::CellRendererText;
 use gtk::Container;
 use gtk::Dialog;
 use gtk::IconSize;
@@ -58,6 +55,7 @@ use webkit2gtk::WebsiteDataManager;
 const TOOLBAR_ICON_SIZE: i32 = 24;
 const TOOLBAR_BORDER_WIDTH: u32 = 0;
 const TOOLBAR_MARGIN: i32 = 0;
+const RATIO_BROWSER_FONTSIZE_PERCENT: u32 = 140;
 
 thread_local!(
     pub static GLOB_CACHE: RefCell<GuiCacheValues> = RefCell::new(GuiCacheValues::default());
@@ -70,23 +68,7 @@ pub struct GuiCacheValues {
     pub col0w: i32,
     window_width: i32,
     window_height: i32,
-    // theme_color_foreground: RGBA,
 }
-
-/*
-impl Default for GuiCacheValues {
-    fn default() -> GuiCacheValues {
-        GuiCacheValues {
-            pane0x: 0,
-            pane1x: 0,
-            col0w: 0,
-            window_width: 0,
-            window_height: 0,
-             theme_color_foreground: RGBA::new(0.0, 0.0, 0.0, 0.0),
-        }
-    }
-}
-*/
 
 #[derive(Default)]
 pub struct GtkObjectTree {
@@ -105,16 +87,17 @@ impl GtkGuiBuilder for GtkObjectTree {
         const FRAME_SHRINK: bool = true; // can this child be made smaller than its requisition.
         const NONE_ADJ: Option<&Adjustment> = None;
         let window: gtk::Window = (*gtk_obj_a).read().unwrap().get_window().unwrap();
-
-
-        if let Some(screen) = window.screen() {
-            if let Some(settings) = gtk::Settings::for_screen(&screen) {
-                if let Some(gstring) = settings.gtk_theme_name() {
-                    let s: String = gstring.to_string();
-                    let _r = gui_event_sender.send(GuiEvents::WindowThemeChanged(s));
+        /*
+                if let Some(screen) = window.screen() {
+                    if let Some(settings) = gtk::Settings::for_screen(&screen) {
+                        if let Some(gstring) = settings.gtk_theme_name() {
+                            let s: String = gstring.to_string();
+                            let _r = gui_event_sender.send(GuiEvents::WindowThemeChanged(s));
+                        }
+                    }
                 }
-            }
-        }
+        */
+
         let esw = EvSenderWrapper(gui_event_sender.clone());
         crate::load_css::load_css();
         window.connect_size_allocate(move |_win, rectangle| {
@@ -266,32 +249,6 @@ impl GtkGuiBuilder for GtkObjectTree {
 }
 
 impl GtkObjectTree {
-    /*
-        fn guess_colors(&self, gtk_obj_a: GtkObjectsType) {
-            if let Some(win) = (*gtk_obj_a).read().unwrap().get_window() {
-                let stylecontext = win.style_context();
-                debug!(                "STYLE: normal:{:?}   ",                stylecontext.color(gtk::StateFlags::NORMAL)            );
-                let val: glib::Value =
-                    stylecontext.style_property_for_state("background-color", gtk::StateFlags::NORMAL);
-                // let o_valget: Result<gdk_pixbuf::Colorspace, _> = val.get();	// Err(ValueTypeMismatchError { actual: GdkRGBA, requested: GdkColorspace }
-                debug!("TYPE:  {:?} {:?}", val.type_(), val.value_type());
-                // let dg_rgba = gdk_sys::GdkRGBA {            red: 0.0,            green: 0.0,            blue: 0.0,            alpha: 0.0,        };
-                // let transf = val.transform::<gdk_sys::GdkRGBA>();
-                // let transf = val.transform_with_type( glib::Type::STRING );	// "Can't transform value of type 'GdkRGBA' into 'gchararray'",
-                // debug!("VARIANT:  {:?}", val.transform_with_type(glib::Type::ENUM));
-                // let o_valget: Result<gdk_sys::GdkRGBA, _> = val.get();
-                // let v_rgba = val.transform::<gdk_sys::GdkRGBA>();
-                // let rgba1 = gtk::gdk::RGBA::from(val);
-                // gdk_sys::GdkRGBA::from(val);
-                // gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5)
-                let crt = CellRendererText::new();
-                debug!("CRT:  {:?} {:?}", crt.background_rgba(), 0);
-                //  #383838
-                // rgb(56, 56, 56)
-            }
-        }
-    */
-
     fn get_int(&self, name: PropDef, defaul: usize) -> usize {
         if self.initvalues.is_empty() {
             error!("GtkObjectTree: gui_values not present.   {:?}", &name);
@@ -331,7 +288,7 @@ impl GtkObjectTree {
     fn create_content_tabs_2(&self, gtk_obj_a: GtkObjectsType) -> Container {
         let box1_v = gtk::Box::new(Orientation::Vertical, 0);
 
-        let label_entry_link = Label::new(Some("feed-url"));
+        let label_entry_link = Label::new(Some("-"));
         label_entry_link.set_halign(Align::Start);
         label_entry_link.set_wrap(true);
         box1_v.pack_start(&label_entry_link, false, false, 0);
@@ -370,6 +327,22 @@ impl GtkObjectTree {
             .get(&PropDef::BrowserDir)
             .cloned()
             .unwrap_or_default();
+
+        let fontsize_manual_enable_s = self
+            .initvalues
+            .get(&PropDef::GuiFontSizeManualEnable)
+            .cloned()
+            .unwrap_or_default();
+
+        let mut o_fontsize_man: Option<u8> = None;
+        let fontsize_manual_enable = fontsize_manual_enable_s.parse().unwrap();
+        if fontsize_manual_enable {
+            if let Some(fsm_s) = self.initvalues.get(&PropDef::GuiFontSizeManual) {
+                let fontsizemanual: u8 = fsm_s.parse().unwrap();
+                o_fontsize_man = Some(fontsizemanual);
+            }
+        }
+
         let clear_cache: bool = self.get_bool(PropDef::BrowserClearCache);
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
@@ -385,6 +358,7 @@ impl GtkObjectTree {
                 &browserdir,
                 BOX_CONTAINER_4_BROWSER,
                 clear_cache,
+                o_fontsize_man,
             );
             ret.set_create_webview_fn(Some(Box::new(create_webview)));
         }
@@ -417,24 +391,13 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
     wconte
 }
 
-
 // Later2:  Set font size
-pub fn create_webview(w_context: &WebContext) -> WebView {
+pub fn create_webview(w_context: &WebContext, manual_fontsize: Option<u8>) -> WebView {
     let webview1: WebView = WebView::with_context(w_context);
     webview1.set_widget_name("webview_0");
-    webview1.set_border_width(4);
-
-/*  TODO
-	let store = (self.m_v_store).read().unwrap();
-	let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
-	let bright: f64 = bright_int as f64 / 255.0;
-	let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
-	webview.set_background_color(&c_bg);
-*/
-
+    webview1.set_border_width(1);
     webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
-    let webview_settings = webkit2gtk::SettingsBuilder::new()
-        //.default_font_size(10)		// later
+    let mut wvs_b = webkit2gtk::SettingsBuilder::new()
         .enable_java(false)
         .enable_media_capabilities(false)
         .enable_javascript_markup(false)
@@ -442,8 +405,14 @@ pub fn create_webview(w_context: &WebContext) -> WebView {
         .enable_developer_extras(false)
         .enable_smooth_scrolling(true)
         .enable_webgl(false)
-        .enable_xss_auditor(false)
-        .build();
+        .enable_xss_auditor(false);
+    if let Some(fontsize) = manual_fontsize {
+        let adapted_size: u32 = RATIO_BROWSER_FONTSIZE_PERCENT * fontsize as u32 / 100;
+        debug!("MANUAL fontsize re-calculated: {}", adapted_size);
+
+        wvs_b = wvs_b.default_font_size(adapted_size);
+    }
+    let webview_settings = wvs_b.build();
     webview1.set_settings(&webview_settings);
     // webview1.connect_web_process_crashed(|wv: &WebView| {        warn!("WebView Crashed! going back ...");        true     });
     // webview1.connect_estimated_load_progress_notify(|_wv: &WebView| {         trace!(            "estimated_load_progress_notify: {}",            wv.estimated_load_progress()        );    });

@@ -170,13 +170,16 @@ impl GtkRunnerInternal {
                     IntCommands::UpdateWindowIcon => upd_int.update_window_icon(),
                     IntCommands::UpdateWebView(_i) => {
                         if !upd_int.update_web_view() {
-                            (gtk_objects_a).write().unwrap().set_web_view(None);
+                            (gtk_objects_a).write().unwrap().set_web_view(None, None);
                         }
                     } // only one view
                     IntCommands::UpdateWebViewPlain(_i) => upd_int.update_web_view_plain(),
                     IntCommands::ClipBoardSetText(ref s) => {
                         gtk::Clipboard::get(&gtk::gdk::SELECTION_CLIPBOARD).set_text(s);
                     }
+                    IntCommands::WebViewRemove(fs_man) => {
+                        (gtk_objects_a).write().unwrap().set_web_view(None, fs_man);
+                    } // only one view
 
                     _ => {
                         warn!("GTKS other cmd {:?}", command);

@@ -311,7 +311,6 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
         }
     }
     fn get_gui_bool(&self, name: PropDef) -> bool {
-        // match
         self.properties
             .get(&name)
             .map(|s| s.parse::<bool>().unwrap_or(false))

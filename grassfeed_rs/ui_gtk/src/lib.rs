@@ -1,15 +1,15 @@
 #[macro_use]
 extern crate log;
-extern crate gtk;
 extern crate gdk_sys;
+extern crate gtk;
 
 pub mod dialogdatadistributor;
 pub mod gtkmodel_updater;
 pub mod gtkrunner;
 pub mod iconloader;
+pub mod keyboard_codes;
 pub mod runner_internal;
 pub mod ui_value_adapter;
-pub mod keyboard_codes;
 
 use crate::dialogdatadistributor::DialogDataDistributor;
 use crate::gtkrunner::CreateBrowserConfig;
@@ -51,6 +51,7 @@ pub enum IntCommands {
     UpdateTextView(u8),
     UpdateWebView(u8),
     UpdateWebViewPlain(u8),
+
     UpdateLabel(u8),
     UpdateLabelMarkup(u8),
     UpdateDialog(u8),
@@ -67,10 +68,14 @@ pub enum IntCommands {
     UpdateWindowTitle,
     UpdateWindowIcon,
     ClipBoardSetText(String),
+	// font size manual
+	WebViewRemove( Option<u8>),
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;
-pub type CreateWebViewFnType = Option<Box<dyn Fn(&WebContext) -> WebView>>;
+
+///  WebContext,   FontSizeManual
+pub type CreateWebViewFnType = Option<Box<dyn Fn(&WebContext, Option<u8>) -> WebView>>;
 
 pub trait GtkObjects {
     fn get_window(&self) -> Option<Window>;
@@ -97,13 +102,12 @@ pub trait GtkObjects {
     fn set_text_view(&mut self, list_index: u8, tv: &gtk::TextView);
 
     fn get_web_view(&self) -> Option<WebView>;
-    fn set_web_view(&mut self, wv: Option<WebView>);
+    fn set_web_view(&mut self, wv: Option<WebView>, font_size_man: Option<u8> );
 
     fn get_web_context(&self) -> Option<WebContext>;
     fn set_web_context(&mut self, wc: Option<WebContext>);
 
     fn get_text_entry(&self, idx: u8) -> Option<&gtk::Entry>;
-    // fn add_text_entry(&mut self, e: &gtk::Entry);
     fn set_text_entry(&mut self, idx: u8, e: &gtk::Entry);
 
     fn get_buttons(&self) -> Vec<gtk::Button>;
@@ -141,6 +145,7 @@ pub trait GtkObjects {
         browser_dir: &str,
         a_box_index: u8,
         browser_clear_cache: bool,
+        font_size_man: Option<u8>,
     );
 
     fn set_create_webview_fn(&mut self, cb_fn: CreateWebViewFnType);

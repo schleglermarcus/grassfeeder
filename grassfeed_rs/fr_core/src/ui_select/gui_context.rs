@@ -62,23 +62,41 @@ impl GuiContext {
     }
 
     pub fn set_conf_fontsize_manual_enable(&self, e: bool) {
+        (*self.configmanager_r)
+            .borrow()
+            .set_val(&PropDef::GuiFontSizeManualEnable.to_string(), e.to_string());
         (*self.values_store_adapter)
             .write()
             .unwrap()
             .set_gui_property(PropDef::GuiFontSizeManualEnable, e.to_string());
-        (*self.configmanager_r)
-            .borrow()
-            .set_val(&PropDef::GuiFontSizeManualEnable.to_string(), e.to_string());
+        self.send_config_to_browser();
     }
 
     pub fn set_conf_fontsize_manual(&self, s: i32) {
+        (*self.configmanager_r)
+            .borrow()
+            .set_val(&PropDef::GuiFontSizeManual.to_string(), s.to_string());
         (*self.values_store_adapter)
             .write()
             .unwrap()
             .set_gui_property(PropDef::GuiFontSizeManual, s.to_string());
-        (*self.configmanager_r)
+        self.send_config_to_browser();
+    }
+
+    fn send_config_to_browser(&self) {
+        let mut o_fs_man: Option<u8> = None;
+        if (*self.configmanager_r)
             .borrow()
-            .set_val(&PropDef::GuiFontSizeManual.to_string(), s.to_string());
+            .get_val_bool(&PropDef::GuiFontSizeManualEnable.to_string())
+        {
+            let fs_man: u8 = (*self.configmanager_r)
+                .borrow()
+                .get_val_int(&PropDef::GuiFontSizeManual.to_string())
+                .unwrap() as u8;
+            o_fs_man = Some(fs_man);
+        }
+        debug!("removing webview! {:?}", o_fs_man );
+        (*self.updater_adapter).borrow().web_view_remove(o_fs_man);
     }
 
     pub fn set_window_title(&mut self, current_title: String) {

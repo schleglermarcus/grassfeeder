@@ -395,19 +395,10 @@ impl GtkModelUpdaterInt {
         let webviewtext_index = 0;
         let g_o = (*self.g_o_a).read().unwrap();
         if let Some(webview) = g_o.get_web_view() {
-            // let store = (self.m_v_store).read().unwrap();
             if webview.is_loading() {
                 webview.stop_loading();
                 std::thread::sleep(std::time::Duration::from_millis(3));
             }
-            /*
-                        else {
-                            let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
-                            let bright: f64 = bright_int as f64 / 255.0;
-                            let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
-                            webview.set_background_color(&c_bg);
-                        }
-            */
             if webview.is_loading() {
                 let isresponsive = webview.is_web_process_responsive();
                 if !isresponsive {
