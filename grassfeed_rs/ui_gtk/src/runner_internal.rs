@@ -179,7 +179,9 @@ impl GtkRunnerInternal {
                     }
                     IntCommands::WebViewRemove(fs_man) => {
                         (gtk_objects_a).write().unwrap().set_web_view(None, fs_man);
-                    } // only one view
+                    }
+                    IntCommands::MemoryConserve(act) =>
+                        upd_int.memory_conserve(act),
 
                     _ => {
                         warn!("GTKS other cmd {:?}", command);

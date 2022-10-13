@@ -142,6 +142,7 @@ pub trait ISourceTreeController {
     fn update_cached_paths(&self);
 
     fn invalidate_read_unread(&self, subs_id: isize);
+	fn memory_conserve(&self, act: bool);
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -1650,6 +1651,19 @@ impl ISourceTreeController for SourceTreeController {
         self.statemap.borrow_mut().clear_num_all_unread(subs_id);
         self.addjob(SJob::ScanEmptyUnread);
     }
+
+	fn memory_conserve(&self, act: bool){
+		if act {
+			self.statemap.borrow_mut().clear();
+		}
+		else {
+			debug!("Tree Restore  .... ");
+			self.addjob(SJob::ScanEmptyUnread);
+		    self.addjob(SJob::UpdateTreePaths);
+		}
+
+	}
+
 } // impl ISourceTreeController
 
 impl TimerReceiver for SourceTreeController {

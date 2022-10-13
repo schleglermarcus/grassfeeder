@@ -375,6 +375,25 @@ impl GuiProcessor {
                 GuiEvents::WindowThemeChanged(ref theme_name) => {
                     (*self.gui_context_r).borrow().set_theme_name(&theme_name);
                 }
+                GuiEvents::WindowIconified(is_icon) => {
+                    (*self.gui_val_store)
+                        .write()
+                        .unwrap()
+                        .memory_conserve(is_icon);
+                    (*self.gui_updater).borrow().memory_conserve(is_icon);
+                    (*self.feedsources_r).borrow().memory_conserve(is_icon);
+                    (*self.feedcontents_r).borrow().memory_conserve(is_icon);
+
+                    if is_icon {
+                    } else {
+                        debug!("IS_ICONified {}", is_icon);
+                        (*self.feedsources_r)
+                            .borrow_mut()
+                            .addjob(SJob::FillSourcesTree);
+                    }
+
+                    // (*self.gui_context_r).borrow().set_theme_name(&theme_name);
+                }
 
                 _ => {
                     warn!("other GuiEvents: {:?}", &ev);
@@ -999,7 +1018,6 @@ impl Buildable for GuiProcessor {
     type Output = GuiProcessor;
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         let mut gp = GuiProcessor::new(_appcontext);
-        // gp.statusbar_items.mem_usage_peakrss_bytes = -1;
         gp.statusbar_items.mem_usage_vmrss_bytes = -1;
         gp
     }
@@ -1015,6 +1033,7 @@ impl TimerReceiver for GuiProcessor {
             }
             TimerEvent::Timer1s => {
                 self.update_memory_stats();
+                // trace!(                    "MEM:  {}",                    self.statusbar_items.mem_usage_vmrss_bytes / 1024 / 1024                );
             }
             TimerEvent::Startup => {
                 self.process_jobs();

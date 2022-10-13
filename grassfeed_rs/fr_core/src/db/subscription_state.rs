@@ -41,6 +41,8 @@ pub trait ISubscriptionState {
     fn get_length(&self) -> usize;
 
     fn dump(&self);
+
+    fn clear(&mut self);
 }
 
 #[derive(Default)]
@@ -191,6 +193,10 @@ impl ISubscriptionState for SubscriptionState {
             .iter()
             .for_each(|(k, v)| debug!("SSD {} {:?}", k, v));
         // debug!("subscription_state::dump() {:#?}", self.statemap);
+    }
+
+    fn clear(&mut self) {
+        self.statemap.clear();
     }
 }
 

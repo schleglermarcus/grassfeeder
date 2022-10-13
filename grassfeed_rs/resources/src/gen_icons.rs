@@ -1,5 +1,5 @@
 // generated files, do not change
-// #  cargo test --test  generate_icons 
+// #  cargo run --example icons 
 
 
 #[allow(dead_code)]

@@ -113,6 +113,7 @@ pub trait IFeedContents {
 
     fn process_kb_delete(&self);
     fn set_read_complete_subscription(&mut self, source_repo_id: isize);
+    fn memory_conserve(&self, act: bool);
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
@@ -606,18 +607,13 @@ impl IFeedContents for FeedContents {
     fn update_message_list(&self, subscription_id: isize) {
         let (old_subs_id, _num_msg, mut isfolder) = *self.current_subscription.borrow();
         if subscription_id != old_subs_id {
-            //:1
             if let Some(feedsources) = self.feedsources_w.upgrade() {
-                // borrow problem
                 if let Some(subs_e) = (*feedsources).borrow().get_current_selected_fse() {
                     isfolder = subs_e.0.is_folder;
                 }
             }
             self.current_subscription
                 .replace((subscription_id, -1, isfolder));
-
-            // debug!(                "update_message_list: id: {:?}",                *self.current_subscription.borrow()            );
-
             self.fill_state_map(&Vec::default());
         }
         self.addjob(CJob::UpdateMessageList);
@@ -857,6 +853,18 @@ impl IFeedContents for FeedContents {
     fn process_kb_delete(&self) {
         let del_ids = self.list_selected_ids.read().unwrap();
         self.delete_messages(&del_ids);
+    }
+
+    fn memory_conserve(&self, act: bool) {
+        if act {
+            self.msg_state.write().unwrap().clear();
+        } else {
+            debug!("List Restore  .... ");
+
+			self.fill_state_map(&Vec::default());
+            self.addjob(CJob::UpdateMessageList);
+			self.addjob(CJob::ListSetCursorToPolicy);
+        }
     }
 
     // impl IFeedContents

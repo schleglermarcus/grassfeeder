@@ -48,6 +48,7 @@ pub enum GuiEvents {
     WinDelete,
     WindowSizeChanged(i32, i32),
     WindowThemeChanged(String),
+    WindowIconified(bool),
     MenuFileQuit,
     MenuActivate(String),
     ButtonClicked(String),
@@ -92,6 +93,9 @@ pub enum GuiEvents {
 }
 
 pub trait UIAdapterValueStore {
+
+	fn memory_conserve(&mut self, active : bool);
+
     fn set_text_entry(&mut self, index: u8, newtext: String);
     fn get_text_entry(&self, index: u8) -> Option<String>;
 
@@ -212,6 +216,7 @@ pub trait UIUpdaterAdapter {
     fn web_view_remove(&self, fontsizemanual: Option<u8>);
 
     fn clipboard_set_text(&self, s: String);
+	fn memory_conserve(&self, act: bool);
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]

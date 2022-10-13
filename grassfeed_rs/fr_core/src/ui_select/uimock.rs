@@ -82,6 +82,8 @@ struct AdValSto {
 impl AdValSto {}
 
 impl UIAdapterValueStore for AdValSto {
+    fn memory_conserve(&mut self, _ac: bool) {}
+
     fn set_text_entry(&mut self, _index: u8, nt: String) {
         self.text_entry_text = nt;
     }
@@ -243,6 +245,8 @@ impl UIUpdaterAdapter for UpdAda {
     fn update_web_view_plain(&self, _nr: u8) {}
     fn clipboard_set_text(&self, _s: String) {}
     fn web_view_remove(&self, _fs_man: Option<u8>) {}
+
+    fn memory_conserve(&self, _act: bool) {}
 }
 
 struct MockRunner {

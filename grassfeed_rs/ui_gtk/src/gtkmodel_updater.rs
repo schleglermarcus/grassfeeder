@@ -422,9 +422,9 @@ impl GtkModelUpdaterInt {
                 let bright: f64 = bright_int as f64 / 255.0;
                 let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
                 webview.set_background_color(&c_bg);
-                let browser_zoom_pc = store.get_gui_int_or(PropDef::BrowserZoomPercent, 99);
-                webview.set_zoom_level(browser_zoom_pc as f64 / 100.0);
                 webview.load_html(&text, None);
+                let browser_zoom_pc = store.get_gui_int_or(PropDef::BrowserZoomPercent, 100);
+                webview.set_zoom_level(browser_zoom_pc as f64 / 100.0);
             }
         }
         true
@@ -611,5 +611,14 @@ impl GtkModelUpdaterInt {
                 }
             }
         }
+    }
+
+    pub fn memory_conserve(&self, active: bool) {
+        if active {
+            debug!("UPDATER:  conserv!");
+            self.pixbufcache.borrow_mut().clear();
+            (*self.g_o_a).write().unwrap().set_web_view(None, None);
+        }
+        (self.m_v_store).write().unwrap().memory_conserve(active);
     }
 }

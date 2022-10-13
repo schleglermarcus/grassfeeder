@@ -70,6 +70,7 @@ pub enum IntCommands {
     ClipBoardSetText(String),
 	// font size manual
 	WebViewRemove( Option<u8>),
+	MemoryConserve(bool),
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;

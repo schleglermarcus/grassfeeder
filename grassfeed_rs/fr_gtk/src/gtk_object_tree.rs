@@ -68,6 +68,7 @@ pub struct GuiCacheValues {
     pub col0w: i32,
     window_width: i32,
     window_height: i32,
+    window_is_iconified: bool,
 }
 
 #[derive(Default)]
@@ -87,16 +88,37 @@ impl GtkGuiBuilder for GtkObjectTree {
         const FRAME_SHRINK: bool = true; // can this child be made smaller than its requisition.
         const NONE_ADJ: Option<&Adjustment> = None;
         let window: gtk::Window = (*gtk_obj_a).read().unwrap().get_window().unwrap();
-        /*
-                if let Some(screen) = window.screen() {
-                    if let Some(settings) = gtk::Settings::for_screen(&screen) {
-                        if let Some(gstring) = settings.gtk_theme_name() {
-                            let s: String = gstring.to_string();
-                            let _r = gui_event_sender.send(GuiEvents::WindowThemeChanged(s));
-                        }
-                    }
+
+        window.connect_show(|_w| {
+            debug!("window: show");
+        });
+        window.connect_hide(|_w| {
+            debug!("window: hide");
+        });
+        window.connect_focus(|_w, direction| {
+            debug!("window: focus {:?}", direction);
+            gtk::Inhibit(false)
+        });
+        window.connect_focus_visible_notify(|_w| {
+            debug!("window: focus_visible ");
+        });
+        // window.connect_is_active_notify(|w: &gtk::Window| {            trace!(                "w: is_active vis:{}  active:{}",                w.is_visible(),                w.is_active()            );        });
+        let esw = EvSenderWrapper(gui_event_sender.clone());
+        window.connect_window_state_event(
+            move |_w: &gtk::Window, ev_win_st: &gdk::EventWindowState| {
+                let is_icon =
+                    (ev_win_st.new_window_state().bits() & gdk::WindowState::ICONIFIED.bits()) > 0;
+                let last_iconified = GLOB_CACHE.with(|glob| (*glob.borrow()).window_is_iconified);
+                if is_icon != last_iconified {
+                    // debug!("W state    Icon:{}", is_icon);
+                    GLOB_CACHE.with(|glob| {
+                        (*glob.borrow_mut()).window_is_iconified = is_icon;
+                    });
+                    esw.sendw(GuiEvents::WindowIconified(is_icon));
                 }
-        */
+                gtk::Inhibit(false)
+            },
+        );
 
         let esw = EvSenderWrapper(gui_event_sender.clone());
         crate::load_css::load_css();
@@ -340,13 +362,16 @@ impl GtkObjectTree {
             .unwrap_or_default();
 
         let mut o_fontsize_man: Option<u8> = None;
-        let fontsize_manual_enable = fontsize_manual_enable_s.parse().unwrap();
-        if fontsize_manual_enable {
-            if let Some(fsm_s) = self.initvalues.get(&PropDef::GuiFontSizeManual) {
-                let fontsizemanual: u8 = fsm_s.parse().unwrap();
-                o_fontsize_man = Some(fontsizemanual);
+
+        if let Ok(fs_man_en) = fontsize_manual_enable_s.parse() {
+            if fs_man_en {
+                if let Some(fsm_s) = self.initvalues.get(&PropDef::GuiFontSizeManual) {
+                    let fontsizemanual: u8 = fsm_s.parse().unwrap();
+                    o_fontsize_man = Some(fontsizemanual);
+                }
             }
         }
+        // let fontsize_manual_enable = fontsize_manual_enable_s.parse().unwrap();
 
         let clear_cache: bool = self.get_bool(PropDef::BrowserClearCache);
         {

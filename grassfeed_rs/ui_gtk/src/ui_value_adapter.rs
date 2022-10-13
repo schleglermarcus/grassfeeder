@@ -106,6 +106,12 @@ impl ModelValueStoreImpl {
 }
 
 impl UIAdapterValueStore for ModelValueStoreImpl {
+    fn memory_conserve(&mut self, active: bool) {
+        trace!("CONSERV: {}", active);
+        // self.gui_tree_root.children.clear();	// Later
+        self.gui_list.clear();
+    }
+
     fn set_text_entry(&mut self, idx: u8, newtext: String) {
         if (self.gui_text_entry_content.len() as u8) <= idx {
             self.gui_text_entry_content

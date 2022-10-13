@@ -210,7 +210,10 @@ impl GtkObjectsImpl {
             }
         }
         if self.web_view.borrow().is_none() {
-             trace!("checkOrCreate fs_man={:?}", self.browser_config.font_size_manual);
+            trace!(
+                "checkOrCreate fs_man={:?}",
+                self.browser_config.font_size_manual
+            );
             if self.create_webview_fn.is_none() {
                 warn!("cannot create WebView, no create function here!");
                 return;
@@ -320,7 +323,6 @@ impl GtkObjects for GtkObjectsImpl {
     fn get_text_view(&self, index: u8) -> Option<&gtk::TextView> {
         self.text_views.get(index as usize)
     }
-    // fn add_text_view(&mut self, tv: &gtk::TextView) {        self.text_views.push(tv.clone());    }
 
     fn set_text_view(&mut self, list_index: u8, tv: &gtk::TextView) {
         if self.text_views.len() < list_index as usize + 1 {
@@ -377,8 +379,6 @@ impl GtkObjects for GtkObjectsImpl {
     fn get_text_entry(&self, index: u8) -> Option<&Entry> {
         self.text_entries.get(index as usize)
     }
-
-    // fn add_text_entry(&mut self, e: &gtk::Entry) {        self.text_entries.push(e.clone());    }
 
     fn set_text_entry(&mut self, idx: u8, e: &gtk::Entry) {
         if self.text_entries.len() < idx as usize + 1 {
@@ -707,5 +707,9 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
 
     fn web_view_remove(&self, fs_man: Option<u8>) {
         self.send_to_int(&IntCommands::WebViewRemove(fs_man));
+    }
+
+    fn memory_conserve(&self, act: bool) {
+        self.send_to_int(&IntCommands::MemoryConserve(act));
     }
 } //

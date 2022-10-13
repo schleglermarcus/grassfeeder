@@ -18,7 +18,10 @@ pub fn file_exists(filename: &String) -> bool {
 
 //  escape ampersand as &amp;
 pub fn string_escape_url(unescaped: String) -> String {
-    unescaped.replace('&', "&amp;")
+    let mut s = unescaped.replace('&', "&amp;");
+    s = s.replace('<', "&lt;");
+    s = s.replace('>', "&gt;");
+    s
 }
 
 pub fn string_is_http_url(s: &str) -> bool {
@@ -145,6 +148,7 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace(&['\"', '\n', '\'', '\"'][..], "");
     ret = ret.replace("&#38;", "&");
     ret = ret.replace("&#038;", "&");
+    ret = ret.replace("&#039;", "\"");
     ret = ret.replace("&#x27;", "\'");
     ret = ret.replace("&gt;", ">");
     ret = ret.replace("&amp;", " & ");
@@ -172,8 +176,8 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#8221;", "\"");
     ret = ret.replace("&#8216;", "\'");
     ret = ret.replace("&#8217;", "\'");
-	ret = ret.replace("&#8230;", " ... ");
-	ret = ret.replace("&#8242;", "\'");
+    ret = ret.replace("&#8230;", " ... ");
+    ret = ret.replace("&#8242;", "\'");
     ret = ret.replace("&#x8211;", " - ");
     ret = ret.replace("&quot;", "\"");
     ret.trim().to_string()
