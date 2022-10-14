@@ -17,7 +17,7 @@ use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::icons::icon_analyser;
-use fr_core::downloader::icons::IconKind;
+use fr_core::util::IconKind;
 use fr_core::timer::build_timer;
 use fr_core::timer::ITimer;
 use fr_core::ui_select::uimock::UIMock;

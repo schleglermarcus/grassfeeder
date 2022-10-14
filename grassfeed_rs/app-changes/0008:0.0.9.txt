@@ -4,12 +4,9 @@ Mon, 10 Oct 2022 00:15:00 +0000
 * Browser: Modify  Font size
 * Browser: Add Zoom Control
 * React on Minimize, try memory usage reduction
+* Scale down big icons  before going into database.
+* Bugfix: Subscriptions Sanitize Folder shall have only folder icon
+* Subscriptions Sanitize: untangle too deep nesting
 
 
-- Scale down icons before going into database.
-     Example  lisahaven.news       http://feeds.feedburner.com/TechmemeRideHome
-
-
-- Updating the tree: speed up the gtk part
-- Subscriptions Sanitize:  Folder shall have only folder icon
-- Subscriptions Sanitize:  test and clean with recursive folders
+- Bug: selected item in list jumps after minimize-restore

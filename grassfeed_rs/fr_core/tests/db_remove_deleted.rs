@@ -16,6 +16,38 @@ use fr_core::util::timestamp_now;
 use fr_core::util::StepResult;
 use std::collections::HashSet;
 
+/*
+//  #[ignore]
+#[test]
+fn cleanup_with_recursive_folder() {
+    setup();
+    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
+    let subsrepo = SubscriptionRepo::new_inmem(); // new("");
+    subsrepo.scrub_all_subscriptions();
+    let msgrepo1 = MessagesRepo::new_in_mem();
+    // let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
+    msgrepo1.get_ctx().create_table();
+
+    let mut se = SubscriptionEntry::default();
+    se.is_folder = true;
+    se.display_name = "folder1".to_string();
+    assert!(subsrepo.store_entry(&se).is_ok()); // id 1
+    se.display_name = "folder2".to_string();
+    se.parent_subs_id = 1;
+    assert!(subsrepo.store_entry(&se).is_ok()); // id 2
+    se.display_name = "folder3".to_string();
+    se.parent_subs_id = 0;
+    assert!(subsrepo.store_entry(&se).is_ok()); // id 3
+
+    let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
+    let iconrepo = IconRepo::new("");
+    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5);
+
+    subsrepo1.debug_dump_tree("::");
+}
+*/
+
 // #[ignore]
 #[test]
 fn cleanup_message_doublettes() {
@@ -119,7 +151,7 @@ fn db_cleanup_remove_deleted() {
     assert_eq!(all_entries.len(), 309);
 }
 
-//  #[ignore]
+// #[ignore]
 #[test]
 fn t_db_cleanup_1() {
     setup();
@@ -139,11 +171,9 @@ fn t_db_cleanup_1() {
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
     assert_eq!(parent_ids_to_correct.len(), 1);
-    assert!(subsrepo1
-        .get_by_index(1)
-        .unwrap()
-        .display_name
-        .starts_with("unnamed"));
+    let sub1 = subsrepo1.get_by_index(1).unwrap();
+    // debug!("SUB1 {:?}", sub1);
+    assert!(sub1.display_name.starts_with("folder1"));
     assert!(subsrepo1.get_by_index(2).unwrap().display_name.len() < 10);
     assert!(!subsrepo1.get_by_index(2).unwrap().expanded);
     // msgrepo2        .get_all_messages()        .iter()        .for_each(|m| debug!("MSG {}", m));
@@ -154,6 +184,7 @@ fn t_db_cleanup_1() {
 fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo) {
     let mut se = SubscriptionEntry::default();
     se.is_folder = true;
+    se.display_name = "folder1".to_string();
     assert!(subsrepo.store_entry(&se).is_ok()); // id 1
     se.is_folder = false;
     se.parent_subs_id = 1;

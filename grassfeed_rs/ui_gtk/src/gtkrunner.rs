@@ -341,7 +341,6 @@ impl GtkObjects for GtkObjectsImpl {
         self.browser_config.font_size_manual = font_size_man;
         match o_wv {
             None => {
-                debug!("runner: removing webView");
                 let o_dest_box = self
                     .boxes
                     .get(self.browser_config.attach_box_index as usize);

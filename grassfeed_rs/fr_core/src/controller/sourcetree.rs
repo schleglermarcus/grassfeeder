@@ -142,7 +142,7 @@ pub trait ISourceTreeController {
     fn update_cached_paths(&self);
 
     fn invalidate_read_unread(&self, subs_id: isize);
-	fn memory_conserve(&self, act: bool);
+    fn memory_conserve(&self, act: bool);
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -666,8 +666,6 @@ impl SourceTreeController {
             let now_seconds = timestamp_now();
             let time_outdated = now_seconds - (fse.updated_icon + ICON_RELOAD_TIME_S);
             if time_outdated > 0 || fse.icon_id < ICON_LIST.len() {
-                // let now_minus_outdated = now_seconds - time_outdated;
-                // trace!(                    "check_icon: id:{}  icon_id:{}     now-OutDated: {}s   {}h   icon_updated:{}",                    fs_id,                    fse.icon_id,                    now_minus_outdated,                    (now_minus_outdated as f32 / 3600.0),            crate::util::        db_time_to_display(fse.updated_icon)                );
                 (*self.downloader_r)
                     .borrow()
                     .load_icon(fse.subs_id, fse.url, fse.icon_id);
@@ -823,7 +821,6 @@ impl SourceTreeController {
 
     pub fn process_newsource_edit(&mut self) {
         if self.new_source.state == NewSourceState::UrlChanged {
-            // trace!("process_newsource_edit:  {:?}  ", self.new_source);
             if self.new_source.edit_url.starts_with("http") {
                 self.new_source.state = NewSourceState::Requesting;
                 let dd: Vec<AValue> = vec![
@@ -1020,7 +1017,6 @@ impl SourceTreeController {
         if before {
             return;
         }
-        // info!("SUBS:   existed DB :  {} ", before);
         {
             let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
             self.add_new_subscription_at_parent(
@@ -1165,8 +1161,6 @@ impl ISourceTreeController for SourceTreeController {
         if let Some(st) = self.statemap.borrow().get_state(src_repo_id) {
             is_folder = st.is_folder();
         }
-        // if let Some(entry) = (*self.subscriptionrepo_r)            .borrow()            .get_by_index(src_repo_id)        {            is_folder = entry.is_folder;        }
-
         if is_folder {
             let child_fse: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
                 .borrow()
@@ -1181,9 +1175,7 @@ impl ISourceTreeController for SourceTreeController {
                             .borrow_mut()
                             .set_read_complete_subscription(fse.subs_id as isize);
                     }
-                    self.statemap
-                        .borrow_mut() .clear_num_all_unread(fse.subs_id);
-
+                    self.statemap.borrow_mut().clear_num_all_unread(fse.subs_id);
                 });
             self.addjob(SJob::ScanEmptyUnread);
             if let Some(feedcontents) = self.feedcontents_w.upgrade() {
@@ -1623,7 +1615,6 @@ impl ISourceTreeController for SourceTreeController {
         let mut opmlreader = OpmlReader::new(self.subscriptionrepo_r.clone());
         match opmlreader.read_from_file(filename) {
             Ok(_) => {
-                // debug!("import-opml read ok  -> {}", new_folder_id);
                 opmlreader.transfer_to_db(new_folder_id);
                 self.addjob(SJob::UpdateTreePaths);
             }
@@ -1652,18 +1643,14 @@ impl ISourceTreeController for SourceTreeController {
         self.addjob(SJob::ScanEmptyUnread);
     }
 
-	fn memory_conserve(&self, act: bool){
-		if act {
-			self.statemap.borrow_mut().clear();
-		}
-		else {
-			debug!("Tree Restore  .... ");
-			self.addjob(SJob::ScanEmptyUnread);
-		    self.addjob(SJob::UpdateTreePaths);
-		}
-
-	}
-
+    fn memory_conserve(&self, _act: bool) {
+        // if act {
+        //     self.statemap.borrow_mut().clear();
+        // } else {
+        //     self.addjob(SJob::ScanEmptyUnread);
+        //     self.addjob(SJob::UpdateTreePaths);
+        // }
+    }
 } // impl ISourceTreeController
 
 impl TimerReceiver for SourceTreeController {
@@ -1803,10 +1790,5 @@ impl Default for NewSourceState {
     }
 }
 
-#[cfg(test)]
-mod t {
-
-    // use super::*;
-    // use std::cell::RefCell;
-    // use std::rc::Rc;
-}
+// #[cfg(test)]
+// mod t {     use super::*;  }

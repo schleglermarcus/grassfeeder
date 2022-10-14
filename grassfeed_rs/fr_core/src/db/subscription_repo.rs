@@ -20,10 +20,6 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
-
-/// Later:  sanity for recursion
-//  const MAX_PATH_DEPTH: usize = 30;
-
 pub const FILENAME_JSON: &str = "subscription_list.json";
 
 pub const CONV_TO: &dyn Fn(String) -> Option<SubscriptionEntry> = &json_to_subscription_entry;

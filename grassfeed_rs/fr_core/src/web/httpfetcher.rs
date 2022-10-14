@@ -4,7 +4,7 @@ use std::io::Read;
 use ureq::ErrorKind;
 
 const MAX_BUFFER_LENGTH: u64 = 1000000;
-const NO_CONTENTLENGTH_BUFFER_SIZE: u64 = 50000;
+const NO_CONTENTLENGTH_BUFFER_SIZE: u64 = 1000000;
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections
 pub struct HttpFetcher {}

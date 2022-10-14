@@ -18,6 +18,9 @@ use std::borrow::Borrow;
 use std::collections::HashSet;
 use std::sync::Mutex;
 
+/// Later:  sanity for recursion
+pub const MAX_PATH_DEPTH: usize = 30;
+
 pub struct CleanerInner {
     pub cjob_sender: Sender<CJob>,
     pub sourcetree_job_sender: Sender<SJob>,
@@ -210,12 +213,44 @@ impl Step<CleanerInner> for CollapseSubscriptions {
             inner.subscriptionrepo.update_expanded(collapse_ids, false);
             inner.need_update_subscriptions = true;
         }
-        StepResult::Continue(Box::new(CheckIconAvailable(inner)))
+        StepResult::Continue(Box::new(CorrectIconsOfFolders(inner)))
     }
 }
 
-pub struct CheckIconAvailable(pub CleanerInner);
-impl Step<CleanerInner> for CheckIconAvailable {
+pub struct CorrectIconsOfFolders(pub CleanerInner);
+impl Step<CleanerInner> for CorrectIconsOfFolders {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let mut inner = self.0;
+        let all_folders: Vec<SubscriptionEntry> = inner
+            .subscriptionrepo
+            .get_all_entries()
+            .into_iter()
+            .filter(|fse| fse.is_folder)
+            .collect();
+        let mut reset_icon_subs_ids: Vec<i32> = all_folders
+            .iter()
+            .filter_map(|se| {
+                if se.icon_id != gen_icons::IDX_08_GNOME_FOLDER_48 {
+                    Some(se.subs_id as i32)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<i32>>();
+        reset_icon_subs_ids.sort();
+        if !reset_icon_subs_ids.is_empty() {
+            debug!("CorrectIconsOfFolders: {:?}", reset_icon_subs_ids);
+            inner
+                .subscriptionrepo
+                .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_08_GNOME_FOLDER_48);
+            inner.need_update_subscriptions = true;
+        }
+        StepResult::Continue(Box::new(CorrectIconsOnSubscriptions(inner)))
+    }
+}
+
+pub struct CorrectIconsOnSubscriptions(pub CleanerInner);
+impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         let all_folders: Vec<SubscriptionEntry> = inner
@@ -235,14 +270,10 @@ impl Step<CleanerInner> for CheckIconAvailable {
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
             }
-            // let icon = o_icon.unwrap();            trace!(                "icon there subsID {}  {} :  #{} ",                se.subs_id,                se.icon_id,                icon.icon.len()            );
         }
         reset_icon_subs_ids.sort();
         if !reset_icon_subs_ids.is_empty() {
-            debug!(
-                "CheckIconAvailable:  reset-icon folders: {:?}",
-                reset_icon_subs_ids
-            );
+            debug!("CorrectIconsOnSubscriptions : {:?}", reset_icon_subs_ids);
             inner
                 .subscriptionrepo
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_05_RSS_FEEDS_GREY_64_D);
@@ -461,6 +492,13 @@ pub fn check_layer(
             subs_active_parents,
         );
     });
+    if localpath.len() == MAX_PATH_DEPTH {
+        warn!(
+            "Subscriptions nested too deep: {} back to top level.",
+            parent_subs_id
+        );
+        subs_repo.update_parent_and_folder_position(parent_subs_id as isize, 0, 0);
+    }
 }
 
 /// straightens the folder_pos

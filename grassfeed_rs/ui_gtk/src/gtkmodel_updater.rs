@@ -216,10 +216,8 @@ impl GtkModelUpdaterInt {
                 &path, &path_cn, gti
             );
         }
-
         let elapsed_fin = now.elapsed().as_millis();
-        if elapsed_fin > 50 {
-            // later:  reduce icon size before going into database
+        if elapsed_fin > 40 {
             debug!(
                 "update_tree_model_single({} {:?}) TOO LONG {:?} times:{} {} ",
                 index, path, &gti.a_values[1], elapsed_3, elapsed_fin
@@ -615,7 +613,6 @@ impl GtkModelUpdaterInt {
 
     pub fn memory_conserve(&self, active: bool) {
         if active {
-            debug!("UPDATER:  conserv!");
             self.pixbufcache.borrow_mut().clear();
             (*self.g_o_a).write().unwrap().set_web_view(None, None);
         }

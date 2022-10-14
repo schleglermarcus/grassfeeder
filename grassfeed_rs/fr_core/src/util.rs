@@ -77,14 +77,53 @@ pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Result
     }
 }
 
-pub fn downscale_png(bytes_png: &[u8], resize_w_h: u32) -> Result<Vec<u8>, String> {
+#[derive(Debug, PartialEq, Clone)]
+pub enum IconKind {
+    None,
+    TooSmall,
+    Ico,
+    Png,
+    Bmp,
+    Jpg,
+    Svg,
+    Webp,
+    UnknownType, // all analyses done
+}
+
+impl Default for IconKind {
+    fn default() -> Self {
+        IconKind::None
+    }
+}
+
+pub fn downscale_image(
+    img_bytes: &[u8],
+    img_type: &IconKind,
+    resize_w_h: u32,
+) -> Result<Vec<u8>, String> {
     let buffersize = 1000000;
-    let r = image::load_from_memory_with_format(bytes_png, ImageFormat::Png);
+    let img_fo: ImageFormat = match img_type {
+        IconKind::Png => ImageFormat::Png,
+        IconKind::Jpg => ImageFormat::Jpeg,
+        IconKind::Webp => ImageFormat::WebP,
+        IconKind::Ico => ImageFormat::Ico,
+        IconKind::Bmp => ImageFormat::Bmp,
+        _ =>{
+			warn!("DOWNSCALE: {:?} ", &img_type);
+		ImageFormat::Ico
+		} ,
+    };
+    let r = image::load_from_memory_with_format(img_bytes, img_fo);
     if let Err(e) = r {
         return Err(format!("downscale_png:1: {:?}", e));
     }
     let mut dynimg = r.unwrap();
     dynimg = dynimg.thumbnail(resize_w_h, resize_w_h);
+    let mut colortype: image::ColorType = dynimg.color();
+    if !is_small_colortype(&colortype) {
+        colortype = image::ColorType::Rgba8;
+    }
+
     let outbuf: Vec<u8> = Vec::with_capacity(buffersize);
     let mut cursor = Cursor::new(outbuf);
     let rw = image::write_buffer_with_format(
@@ -92,12 +131,22 @@ pub fn downscale_png(bytes_png: &[u8], resize_w_h: u32) -> Result<Vec<u8>, Strin
         dynimg.as_bytes(),
         dynimg.width(),
         dynimg.height(),
-        dynimg.color(),
+        colortype,
         ImageFormat::Png,
     );
     match rw {
         Err(e) => Err(format!("downscale_png:2 {:?}", e)),
         Ok(_written) => Ok(cursor.get_ref().clone()),
+    }
+}
+
+pub fn is_small_colortype(ct: &image::ColorType) -> bool {
+    match ct {
+        image::ColorType::L8
+        | image::ColorType::La8
+        | image::ColorType::Rgb8
+        | image::ColorType::Rgba8 => true,
+        _ => false,
     }
 }
 

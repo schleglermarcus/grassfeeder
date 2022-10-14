@@ -100,7 +100,6 @@ impl IconRepo {
             .read()
             .unwrap()
             .values()
-            // .map(|e| e.clone())
             .cloned()
             .collect::<Vec<IconEntry>>();
         values.sort_by(|a, b| a.icon_id.cmp(&b.icon_id));
@@ -242,7 +241,6 @@ fn icon_entry_to_json(input: &IconEntry) -> Option<String> {
 #[allow(dead_code)]
 fn icon_entry_to_txt(input: &IconEntry) -> Option<String> {
     match bincode::serialize(input) {
-        //         Ok(encoded) => Some(compress(&encoded)),
         Ok(encoded) => Some(compress(String::from_utf8(encoded).unwrap().as_str())),
         Err(er) => {
             error!("bincode_serizalize {:?} \n {:?}", er, &input.icon_id);

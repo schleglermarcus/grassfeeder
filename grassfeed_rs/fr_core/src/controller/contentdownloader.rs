@@ -346,6 +346,7 @@ impl IDownloader for Downloader {
             feed_download_text: String::default(),
             subscriptionrepo: subscription_repo,
             erro_repo: errors_rep,
+            image_icon_kind: Default::default(),
         };
         self.add_to_queue(DLJob::Icon(dl_inner));
     }
@@ -369,7 +370,6 @@ impl IDownloader for Downloader {
     }
 
     fn cleanup_db(&self) {
-        // let subs_repo =            SubscriptionRepo::by_existing_list((*self.subscriptionrepo_r).borrow().get_list());
         let msg_keep_count: i32 = (*self.configmanager_r)
             .borrow()
             .get_val_int(FeedContents::CONF_MSG_KEEP_COUNT)
@@ -381,7 +381,6 @@ impl IDownloader for Downloader {
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
         let iconrepo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
-
         let cleaner_i = CleanerInner::new(
             self.contentlist_job_sender.as_ref().unwrap().clone(),
             self.source_c_sender.as_ref().unwrap().clone(),

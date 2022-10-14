@@ -375,19 +375,18 @@ impl GuiProcessor {
                 GuiEvents::WindowThemeChanged(ref theme_name) => {
                     (*self.gui_context_r).borrow().set_theme_name(&theme_name);
                 }
-                GuiEvents::WindowIconified(is_icon) => {
+                GuiEvents::WindowIconified(is_minimized) => {
+                    (*self.feedsources_r)
+                        .borrow_mut()
+                        .memory_conserve(is_minimized);
+                    (*self.feedcontents_r)
+                        .borrow()
+                        .memory_conserve(is_minimized);
                     (*self.gui_val_store)
                         .write()
                         .unwrap()
-                        .memory_conserve(is_icon);
-                    (*self.gui_updater).borrow().memory_conserve(is_icon);
-                    (*self.feedsources_r).borrow().memory_conserve(is_icon);
-                    (*self.feedcontents_r).borrow().memory_conserve(is_icon);
-                    if !is_icon {
-                        (*self.feedsources_r)
-                            .borrow_mut()
-                            .addjob(SJob::FillSourcesTree);
-                    }
+                        .memory_conserve(is_minimized);
+                    (*self.gui_updater).borrow().memory_conserve(is_minimized);
                 }
 
                 _ => {

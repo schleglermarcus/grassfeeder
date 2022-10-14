@@ -88,20 +88,10 @@ impl GtkGuiBuilder for GtkObjectTree {
         const FRAME_SHRINK: bool = true; // can this child be made smaller than its requisition.
         const NONE_ADJ: Option<&Adjustment> = None;
         let window: gtk::Window = (*gtk_obj_a).read().unwrap().get_window().unwrap();
-
-        window.connect_show(|_w| {
-            debug!("window: show");
-        });
-        window.connect_hide(|_w| {
-            debug!("window: hide");
-        });
-        window.connect_focus(|_w, direction| {
-            debug!("window: focus {:?}", direction);
-            gtk::Inhibit(false)
-        });
-        window.connect_focus_visible_notify(|_w| {
-            debug!("window: focus_visible ");
-        });
+        // window.connect_show(|_w| {            debug!("window: show");        });
+        // window.connect_hide(|_w| {            debug!("window: hide");        });
+        // window.connect_focus(|_w, direction| {            debug!("window: focus {:?}", direction);            gtk::Inhibit(false)        });
+        // window.connect_focus_visible_notify(|_w| {            debug!("window: focus_visible ");        });
         let esw = EvSenderWrapper(gui_event_sender.clone());
         window.connect_window_state_event(
             move |_w: &gtk::Window, ev_win_st: &gdk::EventWindowState| {
@@ -137,7 +127,6 @@ impl GtkGuiBuilder for GtkObjectTree {
                 esw.sendw(GuiEvents::WindowSizeChanged(n_w, n_h));
             }
         });
-
 
         create_dialogs(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
 

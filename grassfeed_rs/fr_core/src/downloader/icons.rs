@@ -6,8 +6,8 @@ use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::downloader::util;
 use crate::downloader::util::workaround_https_declaration;
-use crate::util::convert_webp_to_png;
-use crate::util::downscale_png;
+use crate::util::downscale_image;
+use crate::util::IconKind;
 use crate::util::Step;
 use crate::util::StepResult;
 use crate::web::WebFetcherType;
@@ -15,6 +15,7 @@ use flume::Sender;
 use jpeg_decoder;
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;
+pub const ICON_SIZE_LIMIT_BYTES: usize = 10000;
 
 pub struct IconInner {
     pub fs_repo_id: isize,
@@ -30,6 +31,7 @@ pub struct IconInner {
     pub feed_download_text: String,
     pub subscriptionrepo: SubscriptionRepo,
     pub erro_repo: ErrorRepo,
+    pub image_icon_kind: IconKind,
 }
 
 impl std::fmt::Debug for IconInner {
@@ -173,7 +175,15 @@ impl Step<IconInner> for IconDownload {
             }
             _ => {
                 inner.download_error_happened = true;
-                // trace!(                    "IconDownload: {} {} '{}'  =>  {} {} {} -> STOP",                    inner.fs_repo_id,                    inner.feed_url,                    inner.icon_url,                    r.get_status(),                    r.get_kind(),                    r.error_description                );
+                debug!(
+                    "IconDownload: {} {} '{}'  =>  {} {} {} -> STOP",
+                    inner.fs_repo_id,
+                    inner.feed_url,
+                    inner.icon_url,
+                    r.get_status(),
+                    r.get_kind(),
+                    r.error_description
+                );
                 inner.erro_repo.add_error(
                     inner.fs_repo_id,
                     r.get_status() as isize,
@@ -189,20 +199,18 @@ impl Step<IconInner> for IconDownload {
 pub struct IconCheckIsImage(pub IconInner);
 impl Step<IconInner> for IconCheckIsImage {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
-        let inner: IconInner = self.0;
+        let mut inner: IconInner = self.0;
         let an_res = icon_analyser(&inner.icon_bytes);
-        if an_res.kind == IconKind::Webp {
-            return StepResult::Continue(Box::new(IconWebpToPng(inner)));
-        }
-        if an_res.width_orig > ICON_CONVERT_TO_WIDTH || an_res.height_orig > ICON_CONVERT_TO_WIDTH {
-            if an_res.kind == IconKind::Png {
-                return StepResult::Continue(Box::new(IconPngDownscale(inner)));
-            } else {
-                warn!(
-                    "IconCheckIsImage:2:  {}x{} {:?} {} ",
-                    an_res.width_orig, an_res.height_orig, an_res.kind, inner.icon_url,
-                );
-            }
+        inner.image_icon_kind = an_res.kind.clone();
+        // if an_res.kind == IconKind::Webp {            return StepResult::Continue(Box::new(IconWebpToPng(inner)));        }
+
+        if an_res.width_orig > ICON_CONVERT_TO_WIDTH
+            || an_res.height_orig > ICON_CONVERT_TO_WIDTH
+            || inner.icon_bytes.len() > ICON_SIZE_LIMIT_BYTES
+            || an_res.kind == IconKind::Webp
+        {
+            // trace!(                "IconCheckIsImage: downscale  {}x{} {:?} {} ",                an_res.width_orig,                an_res.height_orig,                an_res.kind,                inner.icon_url,            );
+            return StepResult::Continue(Box::new(IconDownscale(inner)));
         }
 
         if an_res.kind == IconKind::UnknownType || an_res.kind == IconKind::TooSmall {
@@ -220,10 +228,12 @@ impl Step<IconInner> for IconCheckIsImage {
     }
 }
 
+/*
 pub struct IconWebpToPng(pub IconInner);
 impl Step<IconInner> for IconWebpToPng {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
+        let size_before = inner.icon_bytes.len();
         let r = convert_webp_to_png(&inner.icon_bytes, Some(ICON_CONVERT_TO_WIDTH));
         if r.is_err() {
             inner.erro_repo.add_error(
@@ -235,17 +245,34 @@ impl Step<IconInner> for IconWebpToPng {
             return StepResult::Stop(inner);
         }
         inner.icon_bytes = r.unwrap();
+        trace!(
+            "deprecated:  sizes: {}->{}",
+            size_before,
+            inner.icon_bytes.len()
+        );
         StepResult::Continue(Box::new(IconStore(inner)))
     }
 }
+*/
 
-pub struct IconPngDownscale(pub IconInner);
-impl Step<IconInner> for IconPngDownscale {
+pub struct IconDownscale(pub IconInner);
+impl Step<IconInner> for IconDownscale {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        let r = downscale_png(&inner.icon_bytes, ICON_CONVERT_TO_WIDTH);
+        // let size_before = inner.icon_bytes.len();
+        let r = downscale_image(
+            &inner.icon_bytes,
+            &inner.image_icon_kind,
+            ICON_CONVERT_TO_WIDTH,
+        );
         if r.is_err() {
-            let msg = format!("png-downscale:{} {:?}", inner.icon_url, r.err());
+            let msg = format!(
+                "downscale:{:?} {} {} {:?}",
+                &inner.image_icon_kind,
+                inner.feed_url,
+                inner.icon_url,
+                r.err()
+            );
             warn!("{msg}");
             inner
                 .erro_repo
@@ -253,6 +280,7 @@ impl Step<IconInner> for IconPngDownscale {
             return StepResult::Stop(inner);
         }
         inner.icon_bytes = r.unwrap();
+        // trace!(            "Down-Sizes:{:?} {}->{}  {}",			inner.image_icon_kind,            size_before,            inner.icon_bytes.len(),            inner.feed_url,        );
         StepResult::Continue(Box::new(IconStore(inner)))
     }
 }
@@ -264,12 +292,12 @@ impl Step<IconInner> for IconStore {
         if inner.icon_bytes.len() < 10 {
             panic!("icon_too_small!");
         }
-        if inner.icon_bytes.len() > 4000 {
-            debug!(
-                "IconStore: {} {} \tlen={}",
+        if inner.icon_bytes.len() > 10000 {
+            warn!(
+                "IconStore: {} {} \t  Size {} kB",
                 inner.icon_url,
                 inner.feed_url,
-                inner.icon_bytes.len()
+                inner.icon_bytes.len() / 1024
             );
         }
         let comp_st = util::compress_vec_to_string(&inner.icon_bytes);
@@ -396,25 +424,6 @@ pub fn blob_is_icon(vec_u8: &Vec<u8>) -> (usize, String) {
     }
 
     (is_icon_result, msg)
-}
-
-#[derive(Debug, PartialEq)]
-pub enum IconKind {
-    None,
-    TooSmall,
-    Ico,
-    Png,
-    Bmp,
-    Jpg,
-    Svg,
-    Webp,
-    UnknownType, // all analyses done
-}
-
-impl Default for IconKind {
-    fn default() -> Self {
-        IconKind::None
-    }
 }
 
 #[derive(Debug, Default)]

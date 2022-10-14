@@ -43,6 +43,7 @@ fn icon_too_big() {
         feed_download_text: String::default(),
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
+        image_icon_kind: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     assert!(!last.download_error_happened);
@@ -84,6 +85,7 @@ fn icon_dl_naturalnews() {
         feed_download_text: String::default(),
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
+        image_icon_kind: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     assert!(!last.download_error_happened);
@@ -113,6 +115,7 @@ fn icon_download_heise() {
         feed_download_text: String::default(),
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
+        image_icon_kind: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     assert!(!last.download_error_happened);
@@ -152,6 +155,7 @@ fn t_iconcheck_isimage() {
         feed_download_text: String::default(),
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
+        image_icon_kind: Default::default(),
     };
     let ic = IconCheckIsImage(dl_inner);
     let r: StepResult<IconInner> = Box::new(ic).step();
@@ -180,6 +184,7 @@ fn icon_lupocatt() {
         feed_download_text: String::default(),
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
+        image_icon_kind: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     assert!(!last.download_error_happened);
@@ -209,6 +214,7 @@ fn icon_simple_chaosradio() {
         feed_download_text: String::default(),
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
+        image_icon_kind: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     assert!(!last.download_error_happened);
@@ -240,6 +246,7 @@ fn icon_simple_seoulnews() {
         feed_download_text: String::default(),
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
+        image_icon_kind: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     assert!(!last.download_error_happened);
@@ -285,8 +292,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            // logger_config::QuietFlags::Downloader as u64,
-            0,
+            logger_config::QuietFlags::Downloader as u64,
+            //  0,
         );
     });
 }
