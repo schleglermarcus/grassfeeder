@@ -6,8 +6,6 @@ Mon, 10 Oct 2022 00:15:00 +0000
 * React on Minimize, try memory usage reduction
 
 
-- Startup, create gui:  delayed creation of dialogs
-
 - Graphics:  scale down icons before going into database.
      Example  lisahaven.news       http://feeds.feedburner.com/TechmemeRideHome
 
@@ -15,6 +13,3 @@ Mon, 10 Oct 2022 00:15:00 +0000
 - Updating the tree: speed up the gtk part
 - Subscriptions Sanitize:  Folder shall have only folder icon
 - Subscriptions Sanitize:  test and clean with recursive folders
-
-
-- Browser: enable theme related colors
