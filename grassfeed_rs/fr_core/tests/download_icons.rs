@@ -53,7 +53,7 @@ fn icon_too_big() {
 }
 
 //  unstable, sometimes does not deliver a sound feed.   (XmlReader(Parser { e: EndEventMismatch { expected: "guid", found: "title" } })
-#[ignore]
+// #[ignore]
 #[test]
 #[allow(dead_code)]
 fn icon_dl_naturalnews() {
@@ -91,7 +91,7 @@ fn icon_dl_naturalnews() {
     assert_eq!(all_e.len(), 1);
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn icon_download_heise() {
     setup();
@@ -121,7 +121,7 @@ fn icon_download_heise() {
     assert_eq!(stc_job_r.recv(), Ok(SJob::SetIconId(1, 10)));
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn t_host_for_url() {
     setup();
@@ -130,7 +130,7 @@ fn t_host_for_url() {
     assert_eq!(hostname.unwrap(), "www.youtube.com".to_string());
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn t_iconcheck_isimage() {
     setup();
@@ -158,7 +158,7 @@ fn t_iconcheck_isimage() {
     assert!(matches!(r, StepResult::Stop(..)));
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn icon_lupocatt() {
     setup();
@@ -187,7 +187,7 @@ fn icon_lupocatt() {
     assert_eq!(all_e.len(), 1);
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn icon_simple_chaosradio() {
     setup();
@@ -217,7 +217,7 @@ fn icon_simple_chaosradio() {
 }
 
 // The Feed cannot be parsed  -> unstable
-#[ignore]
+// #[ignore]
 #[test]
 fn icon_simple_seoulnews() {
     setup();
@@ -247,7 +247,7 @@ fn icon_simple_seoulnews() {
     assert_eq!(all_e.len(), 1);
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_retrieve_homepages() {
     setup();

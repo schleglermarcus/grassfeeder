@@ -77,6 +77,30 @@ pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Result
     }
 }
 
+pub fn downscale_png(bytes_png: &[u8], resize_w_h: u32) -> Result<Vec<u8>, String> {
+    let buffersize = 1000000;
+    let r = image::load_from_memory_with_format(bytes_png, ImageFormat::Png);
+    if let Err(e) = r {
+        return Err(format!("downscale_png:1: {:?}", e));
+    }
+    let mut dynimg = r.unwrap();
+    dynimg = dynimg.thumbnail(resize_w_h, resize_w_h);
+    let outbuf: Vec<u8> = Vec::with_capacity(buffersize);
+    let mut cursor = Cursor::new(outbuf);
+    let rw = image::write_buffer_with_format(
+        &mut cursor,
+        dynimg.as_bytes(),
+        dynimg.width(),
+        dynimg.height(),
+        dynimg.color(),
+        ImageFormat::Png,
+    );
+    match rw {
+        Err(e) => Err(format!("downscale_png:2 {:?}", e)),
+        Ok(_written) => Ok(cursor.get_ref().clone()),
+    }
+}
+
 pub fn string_truncate(mut input: String, length: usize) -> String {
     if input.len() > length {
         let slice = input.as_str();

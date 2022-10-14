@@ -16,7 +16,8 @@ use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
-use fr_core::downloader::icons::blob_is_icon;
+use fr_core::downloader::icons::icon_analyser;
+use fr_core::downloader::icons::IconKind;
 use fr_core::timer::build_timer;
 use fr_core::timer::ITimer;
 use fr_core::ui_select::uimock::UIMock;
@@ -98,9 +99,8 @@ fn test_heise_svg() {
     let r = web_fetcher.request_url_bin(
         "https://www.heise.de/icons/ho/touch-icons/safari-pinned-tab.svg".to_string(),
     );
-    let (ii, _msg) = blob_is_icon(&r.content_bin);
-    // trace!(        "#content_bin={} #content={}   msg={}",        r.content_bin.len(),        r.content.len(),        msg    );
-    assert_eq!(ii, 0);
+    let an_res = icon_analyser(&r.content_bin);
+    assert_eq!(an_res.kind, IconKind::Svg);
 }
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_remote_redirect --lib -- --exact --nocapture"
@@ -110,9 +110,8 @@ fn test_remote_redirect() {
     setup();
     let web_fetcher = HttpFetcher {};
     let r = web_fetcher.request_url_bin("https://kodansha.us/favicon.ico".to_string());
-    // debug!(        "#content_bin={} #content={}",        r.content_bin.len(),       r.content.len()    );
-    let (is_icon, _msg) = blob_is_icon(&r.content_bin);
-    assert_eq!(is_icon, 0);
+    let an_res = icon_analyser(&r.content_bin);
+    assert_eq!(an_res.kind, IconKind::Ico);
 }
 
 // ----------------------------

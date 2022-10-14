@@ -102,7 +102,6 @@ impl GtkGuiBuilder for GtkObjectTree {
         window.connect_focus_visible_notify(|_w| {
             debug!("window: focus_visible ");
         });
-        // window.connect_is_active_notify(|w: &gtk::Window| {            trace!(                "w: is_active vis:{}  active:{}",                w.is_visible(),                w.is_active()            );        });
         let esw = EvSenderWrapper(gui_event_sender.clone());
         window.connect_window_state_event(
             move |_w: &gtk::Window, ev_win_st: &gdk::EventWindowState| {
@@ -110,7 +109,6 @@ impl GtkGuiBuilder for GtkObjectTree {
                     (ev_win_st.new_window_state().bits() & gdk::WindowState::ICONIFIED.bits()) > 0;
                 let last_iconified = GLOB_CACHE.with(|glob| (*glob.borrow()).window_is_iconified);
                 if is_icon != last_iconified {
-                    // debug!("W state    Icon:{}", is_icon);
                     GLOB_CACHE.with(|glob| {
                         (*glob.borrow_mut()).window_is_iconified = is_icon;
                     });

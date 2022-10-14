@@ -7,17 +7,13 @@ grassfeeder (0.0.9) unstable; urgency=low
   * React on Minimize, try memory usage reduction
   
   
-  
-  - Graphics:  scale down icons before going into database.
+  - Scale down icons before going into database.
        Example  lisahaven.news       http://feeds.feedburner.com/TechmemeRideHome
   
   
   - Updating the tree: speed up the gtk part
   - Subscriptions Sanitize:  Folder shall have only folder icon
   - Subscriptions Sanitize:  test and clean with recursive folders
-  
-  
-  - Browser: enable theme related colors
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 10 Oct 2022 00:15:00 +0000
 

@@ -124,6 +124,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
     let url_relay = format!("{}/relay_rd.rss", addr); // very big
 
+    let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
     let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
     let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder2);
     let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), folder2);
@@ -142,14 +143,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder3,
         false,
     );
-    if false {
+    if true {
         let src = [
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
-
-			("http://lisahaven.news/feed/", "lisa_haven"), // Icon too big !!
-
+            ("http://lisahaven.news/feed/", "lisa_haven"), // Icon too big !!
             (
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",
@@ -158,9 +157,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "https://afternarcissisticabuse.wordpress.com/feed/",
                 "afternarc",
             ),
-			("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
+            ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
+            ("https://www.asue.de/rss/gesamt.xml", "asue-no-pubdate"),
+            ("https://www.neweurope.eu/category/world/feed/", "neweurope"),
         ];
-        let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
@@ -170,7 +170,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    if false {
+    if true {
         let src = [
             ("http://henrymakow.com/index.xml", "makow"),
             ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
@@ -184,9 +184,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),
-            ("https://www.asue.de/rss/gesamt.xml", "asue-no-pubdate"),
             ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
-            ("https://www.neweurope.eu/category/world/feed/", "neweurope"),
             ("https://www.headlinesoftoday.com/feed", "headlinesof"),
             ("https://insidexpress.com/feed/", "insidexpress"),
             ("https://linuxnews.de/feed/", "linuxnews"),
@@ -231,12 +229,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
-                folder3,
+                folder2,
                 false,
             );
         });
     }
-    if false {
+    if true {
         let src = [
             (
                 "http://feeds.feedburner.com/RichardHerringLSTPodcast",

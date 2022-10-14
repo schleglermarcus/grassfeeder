@@ -383,16 +383,11 @@ impl GuiProcessor {
                     (*self.gui_updater).borrow().memory_conserve(is_icon);
                     (*self.feedsources_r).borrow().memory_conserve(is_icon);
                     (*self.feedcontents_r).borrow().memory_conserve(is_icon);
-
-                    if is_icon {
-                    } else {
-                        debug!("IS_ICONified {}", is_icon);
+                    if !is_icon {
                         (*self.feedsources_r)
                             .borrow_mut()
                             .addjob(SJob::FillSourcesTree);
                     }
-
-                    // (*self.gui_context_r).borrow().set_theme_name(&theme_name);
                 }
 
                 _ => {

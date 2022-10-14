@@ -6,7 +6,7 @@ Mon, 10 Oct 2022 00:15:00 +0000
 * React on Minimize, try memory usage reduction
 
 
-- Graphics:  scale down icons before going into database.
+- Scale down icons before going into database.
      Example  lisahaven.news       http://feeds.feedburner.com/TechmemeRideHome
 
 
