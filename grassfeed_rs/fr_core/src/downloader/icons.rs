@@ -13,7 +13,7 @@ use crate::web::WebFetcherType;
 use flume::Sender;
 use jpeg_decoder;
 
-pub const ICON_CONVERT_TO_WIDTH: u32 = 32;
+pub const ICON_CONVERT_TO_WIDTH: u32 = 64;
 
 pub struct IconInner {
     pub fs_repo_id: isize,
@@ -193,7 +193,13 @@ impl Step<IconInner> for IconCheckIsImage {
         if IsIconResult::IsWebp as usize == blob_is_icon {
             return StepResult::Continue(Box::new(IconWebpToPng(inner)));
         } else if blob_is_icon != 0 {
-            // debug!(                "IconCheckIsImage: url={} length={} #feed_dl_text={}  Reason={}",                inner.icon_url,                inner.icon_bytes.len(),                inner.feed_download_text.len(),                msg            );
+            trace!(
+                "IconCheckIsImage: url={} length={} #feed_dl_text={}  Reason={}",
+                inner.icon_url,
+                inner.icon_bytes.len(),
+                inner.feed_download_text.len(),
+                msg
+            );
             inner.erro_repo.add_error(
                 inner.fs_repo_id,
                 inner.icon_bytes.len() as isize,
@@ -286,7 +292,7 @@ pub enum IsIconResult {
 
 ///  Checks if this byte array is an icon
 /// https://docs.rs/png_pong/latest/png_pong/struct.Decoder.html
-pub fn blob_is_icon(vec_u8: &Vec<u8> /*, debug_msg: String*/) -> (usize, String) {
+pub fn blob_is_icon(vec_u8: &Vec<u8>) -> (usize, String) {
     let mut msg: String = String::default();
     let mut is_icon_result = 0;
     if vec_u8.len() < 10 {
@@ -314,16 +320,6 @@ pub fn blob_is_icon(vec_u8: &Vec<u8> /*, debug_msg: String*/) -> (usize, String)
             msg = format!("{} not_png: {}", msg, e);
         }
     }
-    match tinybmp::RawBmp::from_slice(vec_u8) {
-        Ok(_decoder) => {
-            return (0, msg);
-        }
-        Err(e) => {
-            is_icon_result |= IsIconResult::NotBmp as usize;
-
-            msg = format!("{} not_bmp: {:?}", msg, e);
-        }
-    }
     let cursor = std::io::Cursor::new(vec_u8);
     let mut decoder = jpeg_decoder::Decoder::new(cursor);
     match decoder.decode() {
@@ -335,6 +331,7 @@ pub fn blob_is_icon(vec_u8: &Vec<u8> /*, debug_msg: String*/) -> (usize, String)
             msg = format!("{} not_jpg: {}", msg, e);
         }
     }
+
     match usvg::Tree::from_data(vec_u8, &usvg::Options::default().to_ref()) {
         Ok(_rtree) => {
             return (0, msg);
@@ -353,15 +350,211 @@ pub fn blob_is_icon(vec_u8: &Vec<u8> /*, debug_msg: String*/) -> (usize, String)
             msg = format!("{} not_webp: {}", msg, e);
         }
     }
+
+    match tinybmp::RawBmp::from_slice(vec_u8) {
+        Ok(_decoder) => {
+            return (0, msg);
+        }
+        Err(e) => {
+            is_icon_result |= IsIconResult::NotBmp as usize;
+
+            msg = format!("{} not_bmp: {:?}", msg, e);
+        }
+    }
+
     (is_icon_result, msg)
 }
 
+#[derive(Debug, PartialEq)]
+pub enum IconKind {
+    None,
+    TooSmall,
+    Ico,
+    Png,
+    Bmp,
+    Jpg,
+    Svg,
+    Webp,
+    UnknownType, // all analyses done
+}
+
+impl Default for IconKind {
+    fn default() -> Self {
+        IconKind::None
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct IconAnalyseResult {
+    kind: IconKind,
+    width_orig: u32,
+    heigth_orig: u32,
+    message: String,
+    _rescaled_png: Vec<u8>,
+}
+
+impl IconAnalyseResult {
+    pub fn new(k: IconKind) -> IconAnalyseResult {
+        IconAnalyseResult {
+            kind: k,
+
+            ..Default::default()
+        }
+    }
+    pub fn with_msg(k: IconKind, msg: String) -> IconAnalyseResult {
+        IconAnalyseResult {
+            kind: k,
+            message: msg,
+            ..Default::default()
+        }
+    }
+}
+
+pub fn icon_analyser(vec_u8: &Vec<u8>) -> IconAnalyseResult {
+    let analysers: [Box<dyn InvestigateOne>; 5] = [
+        Box::new(BySize {}),
+        Box::new(InvJpg {}),
+        Box::new(InvIco {}),
+        Box::new(InvPng {}),
+        Box::new(InvSvg {}),
+    ];
+    let mut msgs: Vec<String> = Vec::default();
+    for a in analysers {
+        let r: IconAnalyseResult = a.investigate(vec_u8);
+        if r.kind != IconKind::None {
+            return r;
+        }
+        msgs.push(r.message);
+    }
+    IconAnalyseResult::with_msg(IconKind::UnknownType, msgs.join(" "))
+}
+
+trait InvestigateOne {
+    fn investigate(&self, blob: &Vec<u8>) -> IconAnalyseResult;
+}
+
+struct BySize {}
+impl InvestigateOne for BySize {
+    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+        let mut r = IconAnalyseResult::default();
+        if vec_u8.len() < 10 {
+            r.kind = IconKind::TooSmall;
+            r.message = format!("too small, length:{} ", vec_u8.len());
+        }
+        r
+    }
+}
+
+struct InvIco {}
+impl InvestigateOne for InvIco {
+    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+        let mut r = IconAnalyseResult::default();
+        match ico::IconDir::read(std::io::Cursor::new(vec_u8)) {
+            Ok(decoder) => {
+                r.kind = IconKind::Ico;
+                if let Some(entry) = decoder.entries().first() {
+                    r.width_orig = entry.width();
+                    r.heigth_orig = entry.height();
+                }
+            }
+            Err(e) => {
+                r.message = format!("not_ico: {}", e);
+            }
+        }
+        r
+    }
+}
+
+struct InvPng {}
+impl InvestigateOne for InvPng {
+    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+        let mut r = IconAnalyseResult::default();
+        let cursor = std::io::Cursor::new(vec_u8.clone()); //  TODO  use  https://lib.rs/crates/png   retrieve sizes !!
+        match png_pong::Decoder::new(cursor) {
+            Ok(_decoder) => {
+                r.kind = IconKind::Png;
+                // if let Some(Ok(step)) = decoder.into_iter().next() {
+                //     let pr: png_pong::PngRaster = step.raster;
+                //     pr.into().width();
+                //     let png_pong::Step { raster, delay } = decoder.into_iter().next().unwrap();
+                // }
+            }
+            Err(e) => {
+                r.message = format!("not_png: {}", e);
+            }
+        }
+
+        r
+    }
+}
+
+struct InvJpg {}
+impl InvestigateOne for InvJpg {
+    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+        let mut r = IconAnalyseResult::default();
+        let cursor = std::io::Cursor::new(vec_u8);
+        let mut decoder = jpeg_decoder::Decoder::new(cursor);
+        match decoder.decode() {
+            Ok(_pixels) => {
+                r.kind = IconKind::Ico;
+            }
+            Err(e) => {
+                r.message = format!("not_jpg: {}", e);
+            }
+        }
+        r
+    }
+}
+struct InvSvg {}
+impl InvestigateOne for InvSvg {
+    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+        let mut r = IconAnalyseResult::default();
+        match usvg::Tree::from_data(vec_u8, &usvg::Options::default().to_ref()) {
+            Ok(_rtree) => {
+                r.kind = IconKind::Svg;
+            }
+            Err(e) => {
+                r.message = format!("not_svg: {}", e);
+            }
+        }
+        r
+    }
+}
+
 #[cfg(test)]
-mod t_icons {
+mod t_ {
     use super::*;
     use crate::web::mockfilefetcher;
 
-    //RUST_BACKTRACE=1 cargo watch -s "cargo test   controller::contentdownloader::downloader_test::test_is_icon  --lib -- --exact --nocapture "
+    //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::icons::t_::t_analyze_icon  --lib -- --exact --nocapture "
+    #[test]
+    fn t_analyze_icon() {
+        let set: [(&str, IconKind); 8] = [
+            ("tests/data/favicon.ico", IconKind::Ico), //
+            (
+                "tests/data/feeds_seoulnews_favicon.ico",
+                IconKind::UnknownType,
+            ),
+            ("tests/data/icon_651.ico", IconKind::Png), // müsste png sein
+            ("tests/data/report24-favicon.ico", IconKind::Ico), // TODO: ist jpg
+            ("tests/data/naturalnews_favicon.ico", IconKind::Ico),
+            ("tests/data/heise-safari-pinned-tab.svg", IconKind::Svg),
+            ("tests/data/gorillavsbear_townsquare.ico", IconKind::Ico), // MS Windows icon resource - 3 icons, 48x48, 32 bits/pixel, 48x48, 32 bits/pixel
+            ("tests/data/LHNN-Logo-Main-Color-1.png", IconKind::Png),
+        ];
+        set.iter().for_each(|(s, e_kind)| {
+            let blob = mockfilefetcher::file_to_bin(s).unwrap();
+            let r = icon_analyser(&blob);
+            println!(
+                "TEST  {} \t {:?}\t{}  {}x{} \n",
+                s, r.kind, r.message, r.width_orig, r.heigth_orig
+            );
+            assert_eq!(r.kind, *e_kind);
+        });
+    }
+
+    //RUST_BACKTRACE=1 cargo watch -s "cargo test   downloader::t_::test_is_icon  --lib -- --exact --nocapture "
+    #[ignore]
     #[test]
     fn test_is_icon() {
         let set: [(&str, usize); 7] = [

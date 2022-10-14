@@ -21,7 +21,39 @@ use std::sync::Arc;
 
 const ERRORS_FOLDER: &str = "../target/download_icons";
 
+// #[ignore]
+#[test]
+fn icon_too_big() {
+    setup();
+    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let subscr_r = SubscriptionRepo::new_inmem();
+    let erro_rep = ErrorRepo::new(ERRORS_FOLDER);
+    erro_rep.startup_read();
+    let icon_inner = IconInner {
+        fs_repo_id: 1,
+        feed_url: "http://lisahaven.news/feed/".to_string(),
+        iconrepo: IconRepo::new(""),
+        web_fetcher: Arc::new(Box::new(HttpFetcher {})),
+        download_error_happened: false,
+        icon_url: String::default(),
+        icon_bytes: Vec::default(),
+        fs_icon_id_old: 0,
+        sourcetree_job_sender: stc_job_s,
+        feed_homepage: String::default(),
+        feed_download_text: String::default(),
+        subscriptionrepo: subscr_r,
+        erro_repo: erro_rep,
+    };
+    let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
+    assert!(!last.download_error_happened);
+    let all_e = last.iconrepo.get_all_entries();
+    assert_eq!(all_e.len(), 1);
+    let icon0 = all_e.get(0).unwrap();
+    debug!(" size: {}", icon0.icon.len());
+}
+
 //  unstable, sometimes does not deliver a sound feed.   (XmlReader(Parser { e: EndEventMismatch { expected: "guid", found: "title" } })
+#[ignore]
 #[test]
 #[allow(dead_code)]
 fn icon_dl_naturalnews() {
@@ -59,7 +91,7 @@ fn icon_dl_naturalnews() {
     assert_eq!(all_e.len(), 1);
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn icon_download_heise() {
     setup();
@@ -89,7 +121,7 @@ fn icon_download_heise() {
     assert_eq!(stc_job_r.recv(), Ok(SJob::SetIconId(1, 10)));
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn t_host_for_url() {
     setup();
@@ -98,7 +130,7 @@ fn t_host_for_url() {
     assert_eq!(hostname.unwrap(), "www.youtube.com".to_string());
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn t_iconcheck_isimage() {
     setup();
@@ -126,7 +158,7 @@ fn t_iconcheck_isimage() {
     assert!(matches!(r, StepResult::Stop(..)));
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn icon_lupocatt() {
     setup();
@@ -155,7 +187,7 @@ fn icon_lupocatt() {
     assert_eq!(all_e.len(), 1);
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn icon_simple_chaosradio() {
     setup();
@@ -185,9 +217,8 @@ fn icon_simple_chaosradio() {
 }
 
 // The Feed cannot be parsed  -> unstable
-// #[ignore]
+#[ignore]
 #[test]
-// #[allow(dead_code)]
 fn icon_simple_seoulnews() {
     setup();
     let icon_repo = IconRepo::new("");
@@ -216,7 +247,7 @@ fn icon_simple_seoulnews() {
     assert_eq!(all_e.len(), 1);
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_retrieve_homepages() {
     setup();
@@ -254,7 +285,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            logger_config::QuietFlags::Downloader as u64, // 0,
+            // logger_config::QuietFlags::Downloader as u64,
+            0,
         );
     });
 }

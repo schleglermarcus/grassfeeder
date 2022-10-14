@@ -7,7 +7,6 @@ grassfeeder (0.0.9) unstable; urgency=low
   * React on Minimize, try memory usage reduction
   
   
-  - Startup, create gui:  delayed creation of dialogs
   
   - Graphics:  scale down icons before going into database.
        Example  lisahaven.news       http://feeds.feedburner.com/TechmemeRideHome

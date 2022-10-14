@@ -36,6 +36,10 @@ Perhaps:
 - RSS-Content damaged with    http://n8waechter.info/feed/
 - look at Snap/Flatpak   https://linuxhint.com/snap_vs_flatpak_vs_appimage/
 
+No more
+- startup:  delayed creation of dialogs not good, they need to be present for the menu
+- Browser  enable theme related colors  -->  1. We can't get the theme background color  2. We cannot set the browser foreground color 
+
 
 -----
 

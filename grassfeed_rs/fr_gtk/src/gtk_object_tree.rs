@@ -139,7 +139,10 @@ impl GtkGuiBuilder for GtkObjectTree {
                 esw.sendw(GuiEvents::WindowSizeChanged(n_w, n_h));
             }
         });
+
+
         create_dialogs(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
+
         let drag_state = Rc::new(RwLock::new(DragState::default()));
 
         let box_top = gtk::Box::new(Orientation::Vertical, 0);

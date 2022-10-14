@@ -147,6 +147,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_r_foto.as_str(), "fotograf"),
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
+
+			("http://lisahaven.news/feed/", "lisa_haven"), // Icon too big !!
+
             (
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",
@@ -172,7 +175,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("http://henrymakow.com/index.xml", "makow"),
             ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
             ("http://thehighersidechats.com/feed/", "higherside-300"),
-            ("http://lisahaven.news/feed/", "lisa_haven"), // Icon too big !!
             ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
