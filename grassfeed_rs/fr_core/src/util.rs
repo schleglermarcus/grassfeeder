@@ -77,7 +77,7 @@ pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Result
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Eq)]
 pub enum IconKind {
     None,
     TooSmall,
@@ -108,10 +108,10 @@ pub fn downscale_image(
         IconKind::Webp => ImageFormat::WebP,
         IconKind::Ico => ImageFormat::Ico,
         IconKind::Bmp => ImageFormat::Bmp,
-        _ =>{
-			warn!("DOWNSCALE: {:?} ", &img_type);
-		ImageFormat::Ico
-		} ,
+        _ => {
+            warn!("downscale: unhandled format {:?} ", &img_type);
+            ImageFormat::Ico
+        }
     };
     let r = image::load_from_memory_with_format(img_bytes, img_fo);
     if let Err(e) = r {
@@ -123,7 +123,6 @@ pub fn downscale_image(
     if !is_small_colortype(&colortype) {
         colortype = image::ColorType::Rgba8;
     }
-
     let outbuf: Vec<u8> = Vec::with_capacity(buffersize);
     let mut cursor = Cursor::new(outbuf);
     let rw = image::write_buffer_with_format(
@@ -140,6 +139,7 @@ pub fn downscale_image(
     }
 }
 
+#[allow(clippy::match_like_matches_macro)]
 pub fn is_small_colortype(ct: &image::ColorType) -> bool {
     match ct {
         image::ColorType::L8

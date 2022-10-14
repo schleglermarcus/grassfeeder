@@ -167,11 +167,7 @@ impl GtkGuiBuilder for GtkObjectTree {
 
         let menubar = create_menubar(gui_event_sender.clone(), gtk_obj_a.clone(), mode_debug);
         box_2_h.pack_start(&menubar, false, false, 0);
-        create_toolbar(
-            gui_event_sender.clone(),
-            gtk_obj_a.clone(),
-            &box_2_h.clone(),
-        );
+        create_toolbar(gui_event_sender.clone(), gtk_obj_a.clone(), &box_2_h);
         box_2_h.set_spacing(-1);
         create_browser_toolbar(gui_event_sender.clone(), &box_2_h);
 
@@ -792,7 +788,7 @@ pub fn create_browser_toolbar(g_ev_se: Sender<GuiEvents>, containing_box: &gtk::
             .tooltip_text(&t!("TB_BROWSER_ZOOM_OUT"))
             .build();
         toolbar.insert(&but, -1);
-        let esw = EvSenderWrapper(g_ev_se.clone());
+        let esw = EvSenderWrapper(g_ev_se);
         but.connect_clicked(move |_b| {
             esw.sendw(GuiEvents::ToolBarButton("browser-zoom-out".to_string()));
         });

@@ -3,6 +3,7 @@ mod logger_config;
 use fr_core::controller::contentdownloader::Downloader;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::errors_repo::ErrorRepo;
+use fr_core::db::icon_repo::IconEntry;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
@@ -50,22 +51,58 @@ fn icon_too_big() {
     let all_e = last.iconrepo.get_all_entries();
     assert_eq!(all_e.len(), 1);
     let icon0 = all_e.get(0).unwrap();
-    debug!(" size: {}", icon0.icon.len());
+    assert!(icon0.icon.len() < 10000);
+}
+
+// #[ignore]
+#[test]
+fn multiple_icons_location() {
+    setup();
+    let urls: [(String, String); 5] = [
+        (
+            "http://chaosradio.ccc.de/chaosradio-complete.rss".to_string(),
+            "http://chaosradio.ccc.de".to_string(),
+        ),
+        (
+            "https://www.naturalnews.com/rss.xml".to_string(),
+            "https://www.naturalnews.com/".to_string(),
+        ),
+        (
+            "https://www.heise.de/rss/heise-atom.xml".to_string(),
+            "https://www.heise.de/".to_string(),
+        ),
+        (
+            "https://lupocattivoblog.com/feed/".to_string(),
+            "https://lupocattivoblog.com/".to_string(),
+        ),
+        (
+            "http://feeds.seoulnews.net/rss/3f5c98640a497b43".to_string(),
+            "http://www.seoulnews.net".to_string(),
+        ),
+    ];
+    for u_h in urls {
+        let (ie_list, err_happened) = download_icon_one_url(&u_h.0, &u_h.1);
+        if ie_list.len() != 1 || err_happened {
+            debug!("downloaded: {}  Icons:{}", &u_h.0, ie_list.len());
+        }
+        assert_eq!(ie_list.len(), 1);
+        assert!(!err_happened);
+    }
 }
 
 //  unstable, sometimes does not deliver a sound feed.   (XmlReader(Parser { e: EndEventMismatch { expected: "guid", found: "title" } })
 // #[ignore]
-#[test]
-#[allow(dead_code)]
-fn icon_dl_naturalnews() {
+// #[test]
+
+fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry>, bool) {
     setup();
-    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let subscr_r = SubscriptionRepo::new_inmem();
     subscr_r.scrub_all_subscriptions();
     let se = SubscriptionEntry {
         subs_id: 1,
-        url: "https://www.naturalnews.com/rss.xml".to_string(),
-        website_url: "https://www.naturalnews.com/".to_string(),
+        url: feed_url.clone(),
+        website_url: homepage.clone(),
         ..Default::default()
     };
     let _r = subscr_r.store_entry(&se);
@@ -73,7 +110,7 @@ fn icon_dl_naturalnews() {
     erro_rep.startup_read();
     let icon_inner = IconInner {
         fs_repo_id: 1,
-        feed_url: "https://www.naturalnews.com/rss.xml".to_string(),
+        feed_url: feed_url.clone(),
         iconrepo: IconRepo::new(""),
         web_fetcher: Arc::new(Box::new(HttpFetcher {})),
         download_error_happened: false,
@@ -88,13 +125,22 @@ fn icon_dl_naturalnews() {
         image_icon_kind: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
-    assert!(!last.download_error_happened);
-    let all_e = last.iconrepo.get_all_entries();
-    assert_eq!(all_e.len(), 1);
+    // assert!(!last.download_error_happened);
+    // let all_e = last.iconrepo.get_all_entries();
+    // assert_eq!(all_e.len(), 1);
+    assert_eq!(stc_job_r.recv(), Ok(SJob::SetIconId(1, 10)));
+    (
+        last.iconrepo.get_all_entries(),
+        last.download_error_happened,
+    )
 }
 
+/*
+
+
 // #[ignore]
-#[test]
+// #[test]
+#[allow(dead_code)]
 fn icon_download_heise() {
     setup();
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
@@ -124,46 +170,12 @@ fn icon_download_heise() {
     assert_eq!(stc_job_r.recv(), Ok(SJob::SetIconId(1, 10)));
 }
 
-// #[ignore]
-#[test]
-fn t_host_for_url() {
-    setup();
-    let url = "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg";
-    let hostname = Downloader::host_from_url(&url.to_string());
-    assert_eq!(hostname.unwrap(), "www.youtube.com".to_string());
-}
+
+
 
 // #[ignore]
-#[test]
-fn t_iconcheck_isimage() {
-    setup();
-    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-    let subscr_r = SubscriptionRepo::new_inmem();
-    let erro_rep = ErrorRepo::new(ERRORS_FOLDER);
-    erro_rep.startup_read();
-    let dl_inner = IconInner {
-        fs_repo_id: 5,
-        feed_url: "http://feeds.seoulnews.net/rss/3f5c98640a497b43".to_string(),
-        icon_url: String::default(),
-        iconrepo: IconRepo::new(""),
-        web_fetcher: get_file_fetcher(),
-        download_error_happened: false,
-        icon_bytes: Vec::default(),
-        fs_icon_id_old: -1,
-        sourcetree_job_sender: stc_job_s,
-        feed_homepage: String::default(),
-        feed_download_text: String::default(),
-        subscriptionrepo: subscr_r,
-        erro_repo: erro_rep,
-        image_icon_kind: Default::default(),
-    };
-    let ic = IconCheckIsImage(dl_inner);
-    let r: StepResult<IconInner> = Box::new(ic).step();
-    assert!(matches!(r, StepResult::Stop(..)));
-}
-
-// #[ignore]
-#[test]
+// #[test]
+#[allow(dead_code)]
 fn icon_lupocatt() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
@@ -193,7 +205,8 @@ fn icon_lupocatt() {
 }
 
 // #[ignore]
-#[test]
+// #[test]
+#[allow(dead_code)]
 fn icon_simple_chaosradio() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
@@ -222,9 +235,11 @@ fn icon_simple_chaosradio() {
     assert_eq!(all_e.len(), 1);
 }
 
+
 // The Feed cannot be parsed  -> unstable
 // #[ignore]
-#[test]
+// #[test]
+#[allow(dead_code)]
 fn icon_simple_seoulnews() {
     setup();
     let icon_repo = IconRepo::new("");
@@ -254,6 +269,37 @@ fn icon_simple_seoulnews() {
     assert_eq!(all_e.len(), 1);
 }
 
+*/
+
+// #[ignore]
+#[test]
+fn stop_on_nonexistent() {
+    setup(); // This test issues a stop signal upon a nonexistant icon
+    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let subscr_r = SubscriptionRepo::new_inmem();
+    let erro_rep = ErrorRepo::new(ERRORS_FOLDER);
+    erro_rep.startup_read();
+    let dl_inner = IconInner {
+        fs_repo_id: 5,
+        feed_url: "http://localhorst/none.xml".to_string(),
+        icon_url: String::default(),
+        iconrepo: IconRepo::new(""),
+        web_fetcher: get_file_fetcher(),
+        download_error_happened: false,
+        icon_bytes: Vec::default(),
+        fs_icon_id_old: -1,
+        sourcetree_job_sender: stc_job_s,
+        feed_homepage: String::default(),
+        feed_download_text: String::default(),
+        subscriptionrepo: subscr_r,
+        erro_repo: erro_rep,
+        image_icon_kind: Default::default(),
+    };
+    let ic = IconCheckIsImage(dl_inner);
+    let r: StepResult<IconInner> = Box::new(ic).step();
+    assert!(matches!(r, StepResult::Stop(..)));
+}
+
 // #[ignore]
 #[test]
 fn test_retrieve_homepages() {
@@ -275,6 +321,15 @@ fn test_retrieve_homepages() {
     });
 }
 
+//  #[ignore]
+#[test]
+fn t_host_for_url() {
+    setup();
+    let url = "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg";
+    let hostname = Downloader::host_from_url(&url.to_string());
+    assert_eq!(hostname.unwrap(), "www.youtube.com".to_string());
+}
+
 fn get_file_fetcher() -> WebFetcherType {
     Arc::new(Box::new(FileFetcher::new(
         "../fr_core/tests/data/".to_string(),
@@ -292,8 +347,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            logger_config::QuietFlags::Downloader as u64,
-            //  0,
+            // logger_config::QuietFlags::Downloader as u64,
+            0,
         );
     });
 }

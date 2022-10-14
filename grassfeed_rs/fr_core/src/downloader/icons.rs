@@ -158,6 +158,7 @@ impl Step<IconInner> for IconFallbackSimple {
         let mut inner = self.0;
         if inner.icon_url.is_empty() {
             inner.icon_url = util::feed_url_to_icon_url(inner.feed_url.clone());
+            debug!("IconFallbackSimple: url={} ", inner.icon_url);
         }
         StepResult::Continue(Box::new(IconDownload(inner)))
     }
@@ -452,7 +453,7 @@ impl IconAnalyseResult {
     }
 }
 
-pub fn icon_analyser(vec_u8: &Vec<u8>) -> IconAnalyseResult {
+pub fn icon_analyser(vec_u8: &[u8]) -> IconAnalyseResult {
     let analysers: [Box<dyn InvestigateOne>; 7] = [
         Box::new(BySize {}),
         Box::new(InvJpg {}),
@@ -474,12 +475,12 @@ pub fn icon_analyser(vec_u8: &Vec<u8>) -> IconAnalyseResult {
 }
 
 trait InvestigateOne {
-    fn investigate(&self, blob: &Vec<u8>) -> IconAnalyseResult;
+    fn investigate(&self, blob: &[u8]) -> IconAnalyseResult;
 }
 
 struct BySize {}
 impl InvestigateOne for BySize {
-    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+    fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         if vec_u8.len() < 10 {
             r.kind = IconKind::TooSmall;
@@ -491,7 +492,7 @@ impl InvestigateOne for BySize {
 
 struct InvIco {}
 impl InvestigateOne for InvIco {
-    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+    fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         match ico::IconDir::read(std::io::Cursor::new(vec_u8)) {
             Ok(decoder) => {
@@ -511,9 +512,9 @@ impl InvestigateOne for InvIco {
 
 struct InvPng {}
 impl InvestigateOne for InvPng {
-    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+    fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
-        let cursor = std::io::Cursor::new(vec_u8.clone());
+        let cursor = std::io::Cursor::new(vec_u8);
         let decoder = png::Decoder::new(cursor);
         match decoder.read_info() {
             Ok(mut reader) => {
@@ -534,7 +535,7 @@ impl InvestigateOne for InvPng {
 
 struct InvJpg {}
 impl InvestigateOne for InvJpg {
-    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+    fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         let cursor = std::io::Cursor::new(vec_u8);
         let mut decoder = jpeg_decoder::Decoder::new(cursor);
@@ -552,7 +553,7 @@ impl InvestigateOne for InvJpg {
 
 struct InvSvg {}
 impl InvestigateOne for InvSvg {
-    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+    fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         match usvg::Tree::from_data(vec_u8, &usvg::Options::default().to_ref()) {
             Ok(_rtree) => {
@@ -568,7 +569,7 @@ impl InvestigateOne for InvSvg {
 
 struct InvWebp {}
 impl InvestigateOne for InvWebp {
-    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+    fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         match libwebp_image::webp_load_from_memory(vec_u8) {
             Ok(_rtree) => {
@@ -584,7 +585,7 @@ impl InvestigateOne for InvWebp {
 
 struct InvBmp {}
 impl InvestigateOne for InvBmp {
-    fn investigate(&self, vec_u8: &Vec<u8>) -> IconAnalyseResult {
+    fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         match tinybmp::RawBmp::from_slice(vec_u8) {
             Ok(_decoder) => {

@@ -967,11 +967,9 @@ impl SourceTreeController {
                 self.statemap.borrow().get_length()
             );
         }
-
         None
     }
 
-    // TODO : catch exceeding depth
     pub fn update_paths_rec(
         &self,
         localpath: &[u16],

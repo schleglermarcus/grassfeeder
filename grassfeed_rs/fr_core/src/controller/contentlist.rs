@@ -45,7 +45,6 @@ use webbrowser;
 
 const JOBQUEUE_SIZE: usize = 100;
 
-// #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CJob {
     /// content_id, newtitle
@@ -439,6 +438,9 @@ impl IFeedContents for FeedContents {
         }
         for job in job_list {
             let now = std::time::Instant::now();
+
+            trace!("CJOB: {:?}", &job);
+
             match job {
                 CJob::DbUpdateTitle(content_id, ref title) => {
                     (*self.messagesrepo_r)
@@ -860,10 +862,9 @@ impl IFeedContents for FeedContents {
             self.msg_state.write().unwrap().clear();
         } else {
             debug!("List Restore  .... ");
-
-			self.fill_state_map(&Vec::default());
-            self.addjob(CJob::UpdateMessageList);
-			self.addjob(CJob::ListSetCursorToPolicy);
+            self.fill_state_map(&Vec::default());
+            // self.addjob(CJob::UpdateMessageList);
+            self.addjob(CJob::ListSetCursorToPolicy);
         }
     }
 

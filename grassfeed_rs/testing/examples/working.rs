@@ -131,21 +131,31 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
     if true {
         let src = [
+
+		(url_feedburner.as_str(), "feedburner"),
+		(url_insi.as_str(), "newsinsideout_com"),
+		(url_r_foto.as_str(), "fotograf"),
+
             // No Icon
+			("https://www.neweurope.eu/category/world/feed/", "neweurope"),
+/*
             ("https://www.asue.de/rss/gesamt.xml", "asue-no-pubdate,  "), // https://www.asue.de/sites/default/files/favicon.ico
-            ("https://www.neweurope.eu/category/world/feed/", "neweurope"),
             ("https://www.ft.com/news-feed?format=rss", "financialtimes"),
             ("https://www.relay.fm/query/feed", "relay_query"),
-            ("https://www.mtb-karlsruhe.de/?q=rss.xml", "mbtka - icon gone"),
-            ("https://nicheaddictgeneral.com/blogs/akah-ra.atom", "nicheadd icon gone"),
-
-
-			("https://exopolitics.blogs.com/newsinsideout/atom.xml", "exopoli icon wrong"),
-			("https://www.fromrome.info/feed/", "fromrome icon wrong"),
-
-
-
-            // Icon too big
+            (
+                "https://www.mtb-karlsruhe.de/?q=rss.xml",
+                "mbtka - icon gone",
+            ),
+            (
+                "https://nicheaddictgeneral.com/blogs/akah-ra.atom",
+                "nicheadd icon gone",
+            ),
+            (
+                "https://exopolitics.blogs.com/newsinsideout/atom.xml",
+                "exopoli icon wrong",
+            ),
+            ("https://www.fromrome.info/feed/", "fromrome icon wrong"),
+*/
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -176,9 +186,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             false,
         );
         let src = [
-            (url_feedburner.as_str(), "feedburner"),
-            (url_insi.as_str(), "newsinsideout_com"),
-            (url_r_foto.as_str(), "fotograf"),
             ("http://n8waechter.info/feed/", "n8waechter  no-icon "),
             ("https://opposition24.com/feed/", "opposition"),
             ("http://lisahaven.news/feed/", "lisa_haven"), // original icon too big, scaled down.
