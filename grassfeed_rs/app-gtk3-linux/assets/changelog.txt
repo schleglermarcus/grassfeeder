@@ -8,8 +8,7 @@ grassfeeder (0.0.9) unstable; urgency=low
   * Scale down big icons  before going into database.
   * Bugfix: Subscriptions Sanitize Folder shall have only folder icon
   * Subscriptions Sanitize: untangle too deep nesting
-  
-  - Bug: selected item in list jumps after minimize-restore
+  * Bugfix: selected item in list jumps after minimize-restore
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 10 Oct 2022 00:15:00 +0000
 

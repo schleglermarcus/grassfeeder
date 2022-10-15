@@ -112,7 +112,7 @@ pub trait IFeedContents {
 
     fn process_kb_delete(&self);
     fn set_read_complete_subscription(&mut self, source_repo_id: isize);
-    fn memory_conserve(&self, act: bool);
+    fn memory_conserve(&mut self, act: bool);
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
@@ -133,6 +133,7 @@ pub struct FeedContents {
 
     ///  subscription-id, number-of-lines, is_folder
     current_subscription: RefCell<(isize, isize, bool)>,
+    currently_minimized: bool,
 }
 
 impl FeedContents {
@@ -157,14 +158,13 @@ impl FeedContents {
             job_queue_receiver: q_r,
             job_queue_sender: q_s,
             feedsources_w: Weak::new(),
-            // last_activated_subscription_id: RefCell::new(-1),
             config: Config::default(),
-            // list_fontsize: 0,
             list_selected_ids: RwLock::new(Vec::default()),
             messagesrepo_r: msg_r,
             msg_state: Default::default(),
             msg_filter: None,
             current_subscription: RefCell::new((-1, -1, false)),
+            currently_minimized: false,
         }
     }
 
@@ -230,7 +230,7 @@ impl FeedContents {
         if isfolder {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
                 if let Some((_subs_e, children)) =
-                    (*feedsources).borrow().get_current_selected_fse()
+                    (*feedsources).borrow().get_current_selected_subscription()
                 {
                     for c_id in children {
                         self.addjob(CJob::RequestUnreadAllCount(c_id as isize));
@@ -259,12 +259,13 @@ impl FeedContents {
             2 => {
                 let mut last_selected_msg_id: isize = -1; // Last Selected
                 if let Some(feedsources) = self.feedsources_w.upgrade() {
-                    if let Some(subs_e) = (*feedsources).borrow().get_current_selected_fse() {
+                    if let Some(subs_e) =
+                        (*feedsources).borrow().get_current_selected_subscription()
+                    {
                         last_selected_msg_id = subs_e.0.last_selected_msg;
                     }
                 }
-                debug!("to-policy:  last-id:{}", last_selected_msg_id);
-
+                // trace!(                    "to-policy: FS-last-id:{}    list_selected_ids={:?}",                    last_selected_msg_id,                    self.list_selected_ids.read().unwrap()                );
                 if last_selected_msg_id > 0 {
                     (*self.gui_updater).borrow().list_set_cursor(
                         TREEVIEW1,
@@ -349,7 +350,7 @@ impl FeedContents {
         if isfolder {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
                 if let Some((_subs_e, child_subs)) =
-                    (*feedsources).borrow().get_current_selected_fse()
+                    (*feedsources).borrow().get_current_selected_subscription()
                 {
                     child_ids = child_subs;
                 }
@@ -595,9 +596,7 @@ impl IFeedContents for FeedContents {
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_all(src_repo_id, true);
-
         let (subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
-
         if subs_id == src_repo_id {
             self.update_message_list(src_repo_id);
             self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
@@ -608,7 +607,7 @@ impl IFeedContents for FeedContents {
         let (old_subs_id, _num_msg, mut isfolder) = *self.current_subscription.borrow();
         if subscription_id != old_subs_id {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
-                if let Some(subs_e) = (*feedsources).borrow().get_current_selected_fse() {
+                if let Some(subs_e) = (*feedsources).borrow().get_current_selected_subscription() {
                     isfolder = subs_e.0.is_folder;
                 }
             }
@@ -855,13 +854,22 @@ impl IFeedContents for FeedContents {
         self.delete_messages(&del_ids);
     }
 
-    fn memory_conserve(&self, act: bool) {
-        trace!("conserv {} selected:{:?}", act, self.list_selected_ids.read().unwrap());
+    fn memory_conserve(&mut self, act: bool) {
+        /*
+                let mut last_selected_msg_id = -1;
+                if let Some(feedsources) = self.feedsources_w.upgrade() {
+                    if let Some(subs_e) = (*feedsources).borrow().get_current_selected_subscription() {
+                        last_selected_msg_id = subs_e.0.last_selected_msg;
+                    }
+                }
+                 trace!(            "memory_conserve {} selected:{:?}   last_selected_msg_id={}",            act,            self.list_selected_ids.read().unwrap(),            last_selected_msg_id        );
+        */
+
+        self.currently_minimized = act;
         if act {
             self.msg_state.write().unwrap().clear();
         } else {
             self.fill_state_map(&Vec::default());
-            // self.addjob(CJob::UpdateMessageList);
             self.addjob(CJob::ListSetCursorToPolicy);
         }
     }
@@ -899,7 +907,8 @@ impl StartupWithAppContext for FeedContents {
         let feedcontents_r = ac.get_rc::<FeedContents>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();
-            t.register(&TimerEvent::Timer100ms, feedcontents_r);
+            t.register(&TimerEvent::Timer100ms, feedcontents_r.clone());
+            t.register(&TimerEvent::Timer10s, feedcontents_r);
         }
 
         if let Some(s) = (*self.configmanager_r)
@@ -915,7 +924,11 @@ impl StartupWithAppContext for FeedContents {
 
 impl TimerReceiver for FeedContents {
     fn trigger(&mut self, event: &TimerEvent) {
-        if event == &TimerEvent::Timer100ms {
+        if self.currently_minimized {
+            if event == &TimerEvent::Timer10s {
+                self.process_jobs();
+            }
+        } else if event == &TimerEvent::Timer100ms {
             self.process_jobs();
         }
     }

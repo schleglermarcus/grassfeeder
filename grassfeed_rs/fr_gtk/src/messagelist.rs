@@ -169,13 +169,7 @@ pub fn create_listview(
                 .get::<u32>()
                 .unwrap() as i32;
         }
-        // let mut sort_col_id = -1;
-        // if let Some(ref tvc) = o_tree_view_column {
-        //     sort_col_id = tvc.sort_column_id();
-        // }
-        if list_pos >= 0 && repo_id > 0
-        //  && sort_col_id != LIST0_COL_ISREAD   // solved by inhibit on button_press_event
-        {
+        if list_pos >= 0 && repo_id > 0 {
             esw.sendw(GuiEvents::ListRowActivated(0, list_pos, repo_id));
         }
     });

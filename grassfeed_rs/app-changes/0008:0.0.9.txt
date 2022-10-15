@@ -1,4 +1,4 @@
-Mon, 10 Oct 2022 00:15:00 +0000
+Sun, 16 Oct 2022 00:01:00 +0000
 * Aggregate Messages on Folder Selection
 * Browser Display :  wrap over   title
 * Browser: Modify  Font size
@@ -7,6 +7,4 @@ Mon, 10 Oct 2022 00:15:00 +0000
 * Scale down big icons  before going into database.
 * Bugfix: Subscriptions Sanitize Folder shall have only folder icon
 * Subscriptions Sanitize: untangle too deep nesting
-
-
-- Bug: selected item in list jumps after minimize-restore
+* Bugfix: selected item in list jumps after minimize-restore

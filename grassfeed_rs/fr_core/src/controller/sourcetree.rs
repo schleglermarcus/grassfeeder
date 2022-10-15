@@ -136,13 +136,15 @@ pub trait ISourceTreeController {
 
     fn mark_as_read(&self, src_repo_id: isize);
 
-    fn get_current_selected_fse(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
+    fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry>;
     /// writes the path array into the cached subscription list
     fn update_cached_paths(&self);
 
     fn invalidate_read_unread(&self, subs_id: isize);
-    fn memory_conserve(&self, act: bool);
+    fn memory_conserve(&mut self, act: bool);
+
+    fn set_selected_message_id(&mut self, subs_id: isize, msg_id: isize);
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -162,7 +164,7 @@ pub struct SourceTreeController {
     config: Config,
     feedsource_delete_id: Option<usize>,
     current_edit_fse: Option<SubscriptionEntry>,
-    // current_selected_fse: Option<SubscriptionEntry>,
+
     current_new_folder_parent_id: Option<isize>,
     new_source: NewSourceTempData,
     tree_fontsize: u32,
@@ -173,6 +175,7 @@ pub struct SourceTreeController {
 
     //  Subscription,  Non-Folder-Child-IDs
     current_selected_subscription: Option<(SubscriptionEntry, Vec<i32>)>,
+    currently_minimized: bool,
 }
 
 impl SourceTreeController {
@@ -235,6 +238,7 @@ impl SourceTreeController {
             need_check_fs_paths: RefCell::new(true),
             statemap: RefCell::new(SubscriptionState::default()),
             erro_repo_r: err_rep,
+            currently_minimized: false,
         }
     }
 
@@ -343,9 +347,11 @@ impl SourceTreeController {
                     self.set_selected_feedsource(src_repo_id)
                 }
                 SJob::UpdateLastSelectedMessageId(fs_id, fc_id) => {
+                    // trace!(                        "processing UpdateLastSelectedMessageId {} {}  ",                        fs_id,                        fc_id                    );
                     (*self.subscriptionrepo_r)
                         .borrow()
                         .update_last_selected(fs_id, fc_id); // later: this  takes a long time sometimes
+                    self.set_selected_message_id(fs_id, fc_id);
                 }
                 SJob::ScanEmptyUnread => {
                     let unread_ids = self.statemap.borrow().scan_num_all_unread();
@@ -1338,7 +1344,7 @@ impl ISourceTreeController for SourceTreeController {
         self.statemap
             .borrow_mut()
             .clear_num_all_unread(source_repo_id);
-        if let Some((fse, _list)) = &self.current_selected_subscription {
+        if let Some((fse, _list)) = &self.get_current_selected_subscription() {
             if fse.subs_id == source_repo_id {
                 if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                     (*feedcontents).borrow().update_message_list(fse.subs_id);
@@ -1604,7 +1610,25 @@ impl ISourceTreeController for SourceTreeController {
                     .map(|fse| fse.subs_id as i32)
                     .collect::<Vec<i32>>();
             }
+            debug!("set_selected : {}", fse.subs_id);
             self.current_selected_subscription = Some((fse, child_ids));
+        }
+    }
+
+    fn set_selected_message_id(&mut self, subs_id: isize, msg_id: isize) {
+        if self.current_selected_subscription.is_none() {
+            return;
+        }
+        if let Some((mut fse, childs)) = self.current_selected_subscription.take() {
+            if subs_id == fse.subs_id {
+                fse.last_selected_msg = msg_id;
+            } else {
+                debug!(
+                    "cannot set_selected_message_id() old subs_id:{} != {}",
+                    fse.subs_id, subs_id
+                );
+            }
+            self.current_selected_subscription.replace((fse, childs));
         }
     }
 
@@ -1624,7 +1648,7 @@ impl ISourceTreeController for SourceTreeController {
         self.addjob(SJob::FillSourcesTree);
     }
 
-    fn get_current_selected_fse(&self) -> Option<(SubscriptionEntry, Vec<i32>)> {
+    fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)> {
         self.current_selected_subscription.clone()
     }
 
@@ -1641,32 +1665,36 @@ impl ISourceTreeController for SourceTreeController {
         self.addjob(SJob::ScanEmptyUnread);
     }
 
-    fn memory_conserve(&self, _act: bool) {
-        // if act {
-        //     self.statemap.borrow_mut().clear();
-        // } else {
-        //     self.addjob(SJob::ScanEmptyUnread);
-        //     self.addjob(SJob::UpdateTreePaths);
-        // }
+    fn memory_conserve(&mut self, act: bool) {
+        self.currently_minimized = act;
     }
 } // impl ISourceTreeController
 
 impl TimerReceiver for SourceTreeController {
     fn trigger(&mut self, event: &TimerEvent) {
-        match event {
-            TimerEvent::Timer100ms => {}
-            TimerEvent::Timer200ms => {
+        if self.currently_minimized {
+            if event == &TimerEvent::Timer10s {
                 self.process_jobs();
                 self.process_fetch_scheduled();
-            }
-            TimerEvent::Timer1s => {
                 self.process_newsource_edit();
                 self.check_paths();
-            }
-            TimerEvent::Timer10s => {
                 self.check_feed_update_times();
             }
-            _ => (),
+        } else {
+            match event {
+                TimerEvent::Timer200ms => {
+                    self.process_jobs();
+                    self.process_fetch_scheduled();
+                }
+                TimerEvent::Timer1s => {
+                    self.process_newsource_edit();
+                    self.check_paths();
+                }
+                TimerEvent::Timer10s => {
+                    self.check_feed_update_times();
+                }
+                _ => (),
+            }
         }
     }
 }
@@ -1686,8 +1714,8 @@ impl StartupWithAppContext for SourceTreeController {
         let f_so_r = ac.get_rc::<SourceTreeController>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();
-            t.register(&TimerEvent::Timer200ms, f_so_r.clone());
             t.register(&TimerEvent::Timer100ms, f_so_r.clone());
+            t.register(&TimerEvent::Timer200ms, f_so_r.clone());
             t.register(&TimerEvent::Timer1s, f_so_r.clone());
             t.register(&TimerEvent::Timer10s, f_so_r);
         }

@@ -143,12 +143,11 @@ impl Step<IconInner> for IconAnalyzeHomepage {
         match r.status {
             200 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
                 Ok(icon_url) => {
-                    // trace!("IAHP status:{}  icon_urL={}", r.status, icon_url);
                     inner.icon_url = icon_url;
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 }
                 Err(e_descr) => {
-                    debug!("IAHP:1 {:?}", &e_descr);
+                    //  trace!("IAHP:1 {:?}", &e_descr);
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         r.status as isize,

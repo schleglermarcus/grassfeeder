@@ -42,11 +42,10 @@ pub fn retrieve_homepage_from_feed_text(
         }
         // trace!(            "   rel={:?}  href={}  type={:?}",            &f_link.rel,            &f_link.href,            &f_link.media_type        );
         feed_homepage = Some(f_link.href);
-        // if !f_link.href.contains(dbg_feed_url) {            trace!("={}={}=", f_link.href, dbg_feed_url);        }
     }
-    if feed_homepage.is_some() {
-        return Ok((feed_homepage.unwrap(), feed_title.unwrap_or_default()));
-    }
+    if let Some(f_h) = feed_homepage {
+        return Ok((f_h, feed_title.unwrap_or_default()));
+    };
     Err(format!("no link for HP found  {} ", &dbg_feed_url))
 }
 
@@ -116,9 +115,8 @@ pub fn extract_icon_from_homepage(
             icon_href = format!("{}{}", homepage_host, icon_href);
         }
         return Ok(icon_href);
-    } else {
-        return Err("no rel_icon  on page  found".to_string());
     }
+    Err("no rel_icon  on page  found".to_string())
 }
 
 pub fn feed_url_to_main_url(f_u: String) -> String {

@@ -95,7 +95,6 @@ impl GuiContext {
                 .unwrap() as u8;
             o_fs_man = Some(fs_man);
         }
-        debug!("removing webview! {:?}", o_fs_man );
         (*self.updater_adapter).borrow().web_view_remove(o_fs_man);
     }
 

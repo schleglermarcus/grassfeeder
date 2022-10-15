@@ -93,6 +93,7 @@ pub struct GuiProcessor {
     statusbar_items: StatusBarItems,
     focus_by_tab: FocusByTab,
     erro_repo_r: Rc<RefCell<ErrorRepo>>,
+    currently_minimized: bool,
 }
 
 impl GuiProcessor {
@@ -123,6 +124,7 @@ impl GuiProcessor {
             statusbar_items: StatusBarItems::default(),
             focus_by_tab: FocusByTab::None,
             erro_repo_r: err_rep,
+            currently_minimized: false,
         }
     }
 
@@ -373,20 +375,21 @@ impl GuiProcessor {
                         .set_messages_filter(newtext);
                 }
                 GuiEvents::WindowThemeChanged(ref theme_name) => {
-                    (*self.gui_context_r).borrow().set_theme_name(  theme_name);
+                    (*self.gui_context_r).borrow().set_theme_name(theme_name);
                 }
                 GuiEvents::WindowIconified(is_minimized) => {
                     (*self.feedsources_r)
                         .borrow_mut()
                         .memory_conserve(is_minimized);
                     (*self.feedcontents_r)
-                        .borrow()
+                        .borrow_mut()
                         .memory_conserve(is_minimized);
                     (*self.gui_val_store)
                         .write()
                         .unwrap()
                         .memory_conserve(is_minimized);
                     (*self.gui_updater).borrow().memory_conserve(is_minimized);
+                    self.currently_minimized = is_minimized;
                 }
 
                 _ => {
@@ -711,7 +714,9 @@ impl GuiProcessor {
         let mut last_fetch_time: i64 = 0;
         let mut feed_src_link = String::default();
         let mut is_folder: bool = false;
-        let o_fse = (*self.feedsources_r).borrow().get_current_selected_fse();
+        let o_fse = (*self.feedsources_r)
+            .borrow()
+            .get_current_selected_subscription();
         if let Some((fse, _)) = o_fse {
             repo_id_new = fse.subs_id;
             last_fetch_time = fse.updated_int;
@@ -875,7 +880,9 @@ impl GuiProcessor {
     fn process_key_press(&mut self, keycode: isize, _o_char: Option<char>) {
         let mut new_focus_by_tab = self.focus_by_tab.clone();
         let kc: KeyCodes = ui_select::from_gdk_sys(keycode);
-        let subscription_id: isize = match (*self.feedsources_r).borrow().get_current_selected_fse()
+        let subscription_id: isize = match (*self.feedsources_r)
+            .borrow()
+            .get_current_selected_subscription()
         {
             Some((subs_e, _)) => subs_e.subs_id,
             None => -1,
@@ -1019,21 +1026,34 @@ impl Buildable for GuiProcessor {
 
 impl TimerReceiver for GuiProcessor {
     fn trigger(&mut self, event: &TimerEvent) {
-        match event {
-            TimerEvent::Timer100ms => {
-                self.process_event();
-                self.process_jobs();
-                self.update_status_bar();
+        if self.currently_minimized {
+            match event {
+                TimerEvent::Timer1s => {
+                    self.process_event();
+                }
+                TimerEvent::Timer10s => {
+                    self.update_memory_stats();
+                    self.process_jobs();
+                    self.update_status_bar();
+                }
+                _ => (),
             }
-            TimerEvent::Timer1s => {
-                self.update_memory_stats();
-                // trace!(                    "MEM:  {}",                    self.statusbar_items.mem_usage_vmrss_bytes / 1024 / 1024                );
+        } else {
+            match event {
+                TimerEvent::Timer100ms => {
+                    self.process_event();
+                    self.process_jobs();
+                    self.update_status_bar();
+                }
+                TimerEvent::Timer1s => {
+                    self.update_memory_stats();
+                }
+                TimerEvent::Startup => {
+                    self.process_jobs();
+                    self.startup_dialogs();
+                }
+                _ => (),
             }
-            TimerEvent::Startup => {
-                self.process_jobs();
-                self.startup_dialogs();
-            }
-            _ => (),
         }
     }
 }
@@ -1045,7 +1065,7 @@ impl StartupWithAppContext for GuiProcessor {
             let mut t = (*self.timer_r).borrow_mut();
             t.register(&TimerEvent::Timer100ms, gp_r.clone());
             t.register(&TimerEvent::Timer1s, gp_r.clone());
-            // t.register(&TimerEvent::Timer10s, gp_r.clone());
+            t.register(&TimerEvent::Timer10s, gp_r.clone());
             t.register(&TimerEvent::Startup, gp_r);
             self.timer_sender = Some((*t).get_ctrl_sender());
         }

@@ -210,10 +210,6 @@ impl GtkObjectsImpl {
             }
         }
         if self.web_view.borrow().is_none() {
-            trace!(
-                "checkOrCreate fs_man={:?}",
-                self.browser_config.font_size_manual
-            );
             if self.create_webview_fn.is_none() {
                 warn!("cannot create WebView, no create function here!");
                 return;
