@@ -131,31 +131,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
     if true {
         let src = [
-
-		(url_feedburner.as_str(), "feedburner"),
-		(url_insi.as_str(), "newsinsideout_com"),
-		(url_r_foto.as_str(), "fotograf"),
-
-            // No Icon
-			("https://www.neweurope.eu/category/world/feed/", "neweurope"),
-/*
-            ("https://www.asue.de/rss/gesamt.xml", "asue-no-pubdate,  "), // https://www.asue.de/sites/default/files/favicon.ico
-            ("https://www.ft.com/news-feed?format=rss", "financialtimes"),
-            ("https://www.relay.fm/query/feed", "relay_query"),
-            (
-                "https://www.mtb-karlsruhe.de/?q=rss.xml",
-                "mbtka - icon gone",
-            ),
-            (
-                "https://nicheaddictgeneral.com/blogs/akah-ra.atom",
-                "nicheadd icon gone",
-            ),
-            (
-                "https://exopolitics.blogs.com/newsinsideout/atom.xml",
-                "exopoli icon wrong",
-            ),
-            ("https://www.fromrome.info/feed/", "fromrome icon wrong"),
-*/
+            (url_feedburner.as_str(), "feedburner"),
+            (url_insi.as_str(), "newsinsideout_com"),
+            (url_r_foto.as_str(), "fotograf"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -166,7 +144,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    if false {
+    if true {
         feedsources.add_new_subscription_at_parent(
             url_nn_aug,
             "NN-aug".to_string(),
@@ -186,6 +164,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             false,
         );
         let src = [
+            ("https://www.fromrome.info/feed/", "fromrome icon okl"),
+            ("https://www.relay.fm/query/feed", "relay_query icon ok"),
+            ("https://www.mtb-karlsruhe.de/?q=rss.xml", "mb_ka icon ok"),
             ("http://n8waechter.info/feed/", "n8waechter  no-icon "),
             ("https://opposition24.com/feed/", "opposition"),
             ("http://lisahaven.news/feed/", "lisa_haven"), // original icon too big, scaled down.
@@ -197,7 +178,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
             ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
-            ("http://www.nachdenkseiten.de/?feed=atom", "nachdenk"),
             ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),
@@ -245,8 +225,36 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    if false {
+    if true {
         let src = [
+            (
+                "http://chaosradio.ccc.de/chaosradio-complete.rss",
+                "chaosradio-267 icon ok",
+            ),
+            (
+                "http://www.nachdenkseiten.de/?feed=atom",
+                "nachdenk icon ok",
+            ),
+            (
+                "http://www.ka-news.de/storage/rss/rss/karlsruhe.xml",
+                "ka-news icon ok",
+            ),
+            (
+                "https://www.asue.de/rss/gesamt.xml",
+                "asue-no-pubdate icon ok  ",
+            ),
+            (
+                "https://exopolitics.blogs.com/newsinsideout/atom.xml",
+                "exopoli no icon",
+            ),
+            (
+                "https://www.ft.com/news-feed?format=rss",
+                "financialtimes icon ok",
+            ),
+            (
+                "https://www.neweurope.eu/category/world/feed/",
+                "neweurope icon ok",
+            ),
             (
                 "http://feeds.feedburner.com/TechmemeRideHome",
                 "techmeme big-icon 4,7MB  !! ",
@@ -280,6 +288,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "obs_uganda ",
             ),
             (
+                "https://nicheaddictgeneral.com/blogs/akah-ra.atom",
+                "nicheaddict no-icon",
+            ),
+            (
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",
             ),
@@ -290,10 +302,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (
                 "http://feeds.feedburner.com/RichardHerringLSTPodcast",
                 "RichardHerring-560",
-            ),
-            (
-                "http://chaosradio.ccc.de/chaosradio-complete.rss",
-                "chaosradio-267",
             ),
             (
                 "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
@@ -342,10 +350,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (
                 "http://rss.cnn.com/rss/edition_entertainment.rs",
                 "cnn_entertain",
-            ),
-            (
-                "http://www.ka-news.de/storage/rss/rss/karlsruhe.xml",
-                "ka-news",
             ),
             (
                 "https://www.youtube.com/feeds/videos.xml?channel_id=UCFjOi1ZpZVErr8EYxg8t1dQ",

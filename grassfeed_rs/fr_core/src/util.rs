@@ -85,6 +85,7 @@ pub enum IconKind {
     Png,
     Bmp,
     Jpg,
+    Gif,
     Svg,
     Webp,
     UnknownType, // all analyses done
@@ -401,16 +402,6 @@ mod t {
         assert_eq!(buf.len(), size);
     }
 
-    /*
-        #[test]
-        fn t_fetch_http_to_bin() {
-            let (_buf, size) = fetch_http_to_bin(
-                String::from("https://w3-mediapool.hm.edu/mediapool/media/_technik/img/_technik_1/favicon.jpg"),
-                10000,
-            );
-            assert_eq!(size, 1837);
-        }
-    */
 
     // ---
 

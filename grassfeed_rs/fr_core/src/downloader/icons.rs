@@ -18,7 +18,7 @@ pub const ICON_CONVERT_TO_WIDTH: u32 = 48;
 pub const ICON_SIZE_LIMIT_BYTES: usize = 10000;
 
 pub struct IconInner {
-    pub fs_repo_id: isize,
+    pub subs_id: isize,
     pub fs_icon_id_old: isize,
     pub feed_url: String,
     pub icon_url: String,
@@ -37,7 +37,7 @@ pub struct IconInner {
 impl std::fmt::Debug for IconInner {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("")
-            .field("repo_id", &self.fs_repo_id)
+            .field("subs_id", &self.subs_id)
             .field("feed", &self.feed_url)
             .finish()
     }
@@ -45,7 +45,7 @@ impl std::fmt::Debug for IconInner {
 
 impl PartialEq for IconInner {
     fn eq(&self, other: &Self) -> bool {
-        self.fs_repo_id == other.fs_repo_id
+        self.subs_id == other.subs_id
     }
 }
 
@@ -59,7 +59,12 @@ impl IconLoadStart {
 impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.fs_repo_id) {
+        if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
+            trace!(
+                "IconLoadStart: db-HP:{}   prev-iconurl:{}",
+                subs_e.website_url,
+                inner.icon_url
+            );
             if !subs_e.website_url.is_empty() {
                 inner.feed_homepage = subs_e.website_url;
                 return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
@@ -79,8 +84,9 @@ impl Step<IconInner> for FeedTextDownload {
                 inner.feed_download_text = result.content;
             }
             _ => {
+                warn!("FeedTextDownload ERR {}", &result.error_description);
                 inner.erro_repo.add_error(
-                    inner.fs_repo_id,
+                    inner.subs_id,
                     result.status as isize,
                     inner.feed_url.clone(),
                     result.error_description,
@@ -97,11 +103,20 @@ impl Step<IconInner> for HomepageDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let dl_text = workaround_https_declaration(inner.feed_download_text.clone());
-        if let (Some(homepage), Some(_feed_title)) =
+        if let Ok((homepage, _feed_title)) =
             util::retrieve_homepage_from_feed_text(dl_text.as_bytes(), &inner.feed_url)
         {
-            inner.feed_homepage = homepage;
+            if homepage != inner.feed_url {
+                // debug!("setting inner.homepage!  {}", homepage);
+                inner.feed_homepage = homepage;
+            } else {
+                let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
+                trace!("found_HP==feed-url :-/ ALT-HP={}", alt_hp);
+                inner.feed_homepage = alt_hp;
+            }
             return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
+        } else {
+            debug!("got no HP  from feed text!  Feed-URL: {}", &inner.feed_url);
         }
         StepResult::Continue(Box::new(IconFallbackSimple(inner)))
     }
@@ -111,15 +126,16 @@ struct CompareHomepageToDB(IconInner);
 impl Step<IconInner> for CompareHomepageToDB {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let inner: IconInner = self.0;
-
-        if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.fs_repo_id) {
+        if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
             if !inner.feed_homepage.is_empty() && inner.feed_homepage != subs_e.website_url {
+                debug!("update-homepage!  {}", inner.feed_homepage);
+
                 inner
                     .subscriptionrepo
-                    .update_homepage(inner.fs_repo_id, &inner.feed_homepage);
+                    .update_homepage(inner.subs_id, &inner.feed_homepage);
             }
         } else {
-            debug!("no subscription in db for {}", inner.fs_repo_id);
+            debug!("no subscription in db for {}", inner.subs_id);
         }
         StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)))
     }
@@ -130,22 +146,43 @@ impl Step<IconInner> for IconAnalyzeHomepage {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let r = (*inner.web_fetcher).request_url(inner.feed_homepage.clone());
+        trace!(
+            " analyze ... HP={}  status={}",
+            inner.feed_homepage,
+            r.status
+        );
         match r.status {
-            200 => {
-                if let Some(icon_url) =
-                    util::extract_icon_from_homepage(r.content, &inner.feed_homepage)
-                {
+            200 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
+                Ok(icon_url) => {
+                    // trace!("IAHP status:{}  icon_urL={}", r.status, icon_url);
                     inner.icon_url = icon_url;
                     return StepResult::Continue(Box::new(IconDownload(inner)));
-                };
-            }
+                }
+                Err(e_descr) => {
+                    debug!("IAHP:1 {:?}", &e_descr);
+                    inner.erro_repo.add_error(
+                        inner.subs_id,
+                        r.status as isize,
+                        inner.feed_homepage.clone(),
+                        e_descr,
+                    );
+                }
+            },
             _ => {
+                debug!("IAHP:2 {:?}", &r.error_description);
                 inner.erro_repo.add_error(
-                    inner.fs_repo_id,
+                    inner.subs_id,
                     r.status as isize,
                     inner.feed_homepage.clone(),
                     r.error_description,
                 );
+                let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
+                debug!("IAHP:3   alternate HP {:?}", alt_hp);
+
+                if inner.feed_homepage != alt_hp {
+                    inner.feed_homepage = alt_hp;
+                    return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
+                }
             }
         }
         StepResult::Continue(Box::new(IconFallbackSimple(inner)))
@@ -178,7 +215,7 @@ impl Step<IconInner> for IconDownload {
                 inner.download_error_happened = true;
                 debug!(
                     "IconDownload: {} {} '{}'  =>  {} {} {} -> STOP",
-                    inner.fs_repo_id,
+                    inner.subs_id,
                     inner.feed_url,
                     inner.icon_url,
                     r.get_status(),
@@ -186,7 +223,7 @@ impl Step<IconInner> for IconDownload {
                     r.error_description
                 );
                 inner.erro_repo.add_error(
-                    inner.fs_repo_id,
+                    inner.subs_id,
                     r.get_status() as isize,
                     inner.icon_url.clone(),
                     format!("kind:{}   {}", r.get_kind(), r.error_description),
@@ -210,51 +247,35 @@ impl Step<IconInner> for IconCheckIsImage {
             || inner.icon_bytes.len() > ICON_SIZE_LIMIT_BYTES
             || an_res.kind == IconKind::Webp
         {
-            // trace!(                "IconCheckIsImage: downscale  {}x{} {:?} {} ",                an_res.width_orig,                an_res.height_orig,                an_res.kind,                inner.icon_url,            );
+            trace!(
+                "IconCheckIsImage: going to downscale  {}x{} {:?} {} ",
+                an_res.width_orig,
+                an_res.height_orig,
+                an_res.kind,
+                inner.icon_url,
+            );
             return StepResult::Continue(Box::new(IconDownscale(inner)));
         }
 
         if an_res.kind == IconKind::UnknownType || an_res.kind == IconKind::TooSmall {
-            // trace!(                "IconCheckIsImage: url={} length={} #feed_dl_text={}  Reason={}",                inner.icon_url,                inner.icon_bytes.len(),               inner.feed_download_text.len(),                an_res.message            );
+            trace!(
+                "IconCheckIsImage: url={} length={} #feed_dl_text={}  Reason={}",
+                inner.icon_url,
+                inner.icon_bytes.len(),
+                inner.feed_download_text.len(),
+                an_res.message
+            );
             inner.erro_repo.add_error(
-                inner.fs_repo_id,
+                inner.subs_id,
                 inner.icon_bytes.len() as isize,
                 inner.icon_url.clone(),
                 an_res.message,
             );
             return StepResult::Stop(inner);
         }
-
         StepResult::Continue(Box::new(IconStore(inner)))
     }
 }
-
-/*
-pub struct IconWebpToPng(pub IconInner);
-impl Step<IconInner> for IconWebpToPng {
-    fn step(self: Box<Self>) -> StepResult<IconInner> {
-        let mut inner: IconInner = self.0;
-        let size_before = inner.icon_bytes.len();
-        let r = convert_webp_to_png(&inner.icon_bytes, Some(ICON_CONVERT_TO_WIDTH));
-        if r.is_err() {
-            inner.erro_repo.add_error(
-                inner.fs_repo_id,
-                0,
-                inner.icon_url.clone(),
-                format!("convert-webp-to-png {} {:?}", inner.icon_url, r.err()),
-            );
-            return StepResult::Stop(inner);
-        }
-        inner.icon_bytes = r.unwrap();
-        trace!(
-            "deprecated:  sizes: {}->{}",
-            size_before,
-            inner.icon_bytes.len()
-        );
-        StepResult::Continue(Box::new(IconStore(inner)))
-    }
-}
-*/
 
 pub struct IconDownscale(pub IconInner);
 impl Step<IconInner> for IconDownscale {
@@ -277,7 +298,7 @@ impl Step<IconInner> for IconDownscale {
             warn!("{msg}");
             inner
                 .erro_repo
-                .add_error(inner.fs_repo_id, 0, inner.icon_url.clone(), msg);
+                .add_error(inner.subs_id, 0, inner.icon_url.clone(), msg);
             return StepResult::Stop(inner);
         }
         inner.icon_bytes = r.unwrap();
@@ -312,7 +333,7 @@ impl Step<IconInner> for IconStore {
                 Ok(entry) => {
                     let _r = inner
                         .sourcetree_job_sender
-                        .send(SJob::SetIconId(inner.fs_repo_id, entry.icon_id));
+                        .send(SJob::SetIconId(inner.subs_id, entry.icon_id));
                 }
                 Err(e) => {
                     error!("Storing Icon from {}  failed {:?}", inner.icon_url, e);
@@ -323,7 +344,7 @@ impl Step<IconInner> for IconStore {
             if existing_id != inner.fs_icon_id_old {
                 let _r = inner
                     .sourcetree_job_sender
-                    .send(SJob::SetIconId(inner.fs_repo_id, existing_icons[0].icon_id));
+                    .send(SJob::SetIconId(inner.subs_id, existing_icons[0].icon_id));
             }
         }
         StepResult::Stop(inner)
@@ -454,14 +475,15 @@ impl IconAnalyseResult {
 }
 
 pub fn icon_analyser(vec_u8: &[u8]) -> IconAnalyseResult {
-    let analysers: [Box<dyn InvestigateOne>; 7] = [
+    let analysers: [Box<dyn InvestigateOne>; 8] = [
         Box::new(BySize {}),
         Box::new(InvJpg {}),
         Box::new(InvIco {}),
         Box::new(InvPng {}),
-        Box::new(InvSvg {}),
+        Box::new(InvGif {}),
         Box::new(InvWebp {}),
         Box::new(InvBmp {}),
+        Box::new(InvSvg {}),
     ];
     let mut msgs: Vec<String> = Vec::default();
     for a in analysers {
@@ -541,10 +563,31 @@ impl InvestigateOne for InvJpg {
         let mut decoder = jpeg_decoder::Decoder::new(cursor);
         match decoder.decode() {
             Ok(_pixels) => {
-                r.kind = IconKind::Ico;
+                r.kind = IconKind::Jpg;
             }
             Err(e) => {
                 r.message = format!("not_jpg: {}", e);
+            }
+        }
+        r
+    }
+}
+
+struct InvGif {}
+impl InvestigateOne for InvGif {
+    fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
+        let mut r = IconAnalyseResult::default();
+        let cursor = std::io::Cursor::new(vec_u8);
+        let decoder = gif::DecodeOptions::new();
+        match decoder.read_info(cursor) {
+            Ok(mut decod2) => {
+                let o_nextframe = decod2.read_next_frame();
+                if o_nextframe.is_ok() {
+                    r.kind = IconKind::Gif;
+                }
+            }
+            Err(e) => {
+                r.message = format!("not_gif: {}", e);
             }
         }
         r
@@ -606,7 +649,7 @@ mod t_ {
 
     //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::icons::t_::t_analyze_icon  --lib -- --exact --nocapture "
     #[test]
-    fn t_analyze_icon() {
+    fn analyze_icon_local() {
         let set: [(&str, IconKind); 8] = [
             ("tests/data/favicon.ico", IconKind::Ico),          //
             ("tests/data/icon_651.ico", IconKind::Png),         //
@@ -627,26 +670,4 @@ mod t_ {
             assert_eq!(r.kind, *e_kind);
         });
     }
-
-    /*
-        #[allow(dead_code)]
-        fn test_is_icon() {
-            let set: [(&str, usize); 7] = [
-                ("tests/data/feeds_seoulnews_favicon.ico", 126),
-                ("tests/data/favicon.ico", 0),
-                ("tests/data/icon_651.ico", 0),
-                ("tests/data/report24-favicon.ico", 0),
-                ("tests/data/naturalnews_favicon.ico", 0),
-                ("tests/data/heise-safari-pinned-tab.svg", 0),
-                ("tests/data/gorillavsbear_townsquare.ico", 0),
-            ];
-            set.iter().for_each(|(s, expected)| {
-                let blob = mockfilefetcher::file_to_bin(s).unwrap();
-                let (r, _msg) = blob_is_icon(&blob);
-                println!("IS_ICON: {} {} {}", &s, r, _msg);
-                assert_eq!(r, *expected);
-            });
-        }
-
-    */
 }

@@ -4,24 +4,20 @@ use std::collections::HashMap;
 use tl::HTMLTag;
 use tl::Node;
 use url::Url;
-
 // using   html_parser::Dom;   for extract_icon_from_homepage() creates a stack overflow
 
-/// returns homepage-url, feed-title
+/// returns Result <   ( homepage-url, feed-title ) , error-text >
 pub fn retrieve_homepage_from_feed_text(
     input: &[u8],
     dbg_feed_url: &str,
-) -> (Option<String>, Option<String>) {
+) -> Result<(String, String), String> {
     let r = parser::parse(input);
     if r.is_err() {
-        debug!("Parsing: {:?} {:?}", &dbg_feed_url, r.err());
-        return (None, None);
+        return Err(format!("Parsing: {:?} {:?}", &dbg_feed_url, r.err()));
     }
     let feed = r.unwrap();
     if feed.title.is_none() {
-        //  trace!("c:title empty for {}", &dbg_feed_url);
-        // Later: into error log
-        return (None, None);
+        return Err(format!("c:title empty for {}", &dbg_feed_url));
     }
     #[allow(unused_assignments)]
     let mut feed_title: Option<String> = None;
@@ -37,22 +33,37 @@ pub fn retrieve_homepage_from_feed_text(
             if rel == "hub" {
                 continue;
             }
+            if rel == "self" {
+                continue;
+            }
+            if rel == "first" {
+                continue;
+            }
         }
-        // trace!(            "   rel={:?}  href={}  type={:?}",            &f_link.rel,            &f_link.href,            &f_link.media_type        );
-        if f_link.href.contains("feed") {
-            continue;
-        }
+        trace!(
+            "   rel={:?}  href={}  type={:?}",
+            &f_link.rel,
+            &f_link.href,
+            &f_link.media_type
+        );
         feed_homepage = Some(f_link.href);
+        // if !f_link.href.contains(dbg_feed_url) {            trace!("={}={}=", f_link.href, dbg_feed_url);        }
     }
-    (feed_homepage, feed_title)
+    if feed_homepage.is_some() {
+        return Ok((feed_homepage.unwrap(), feed_title.unwrap_or_default()));
+    }
+    Err(format!("no link for HP found  {} ", &dbg_feed_url))
 }
 
-pub fn extract_icon_from_homepage(hp_content: String, homepage_url: &String) -> Option<String> {
+/// return   Result < icon-url , error-message  >
+pub fn extract_icon_from_homepage(
+    hp_content: String,
+    homepage_url: &String,
+) -> Result<String, String> {
     let dom: tl::VDom = match tl::parse(&hp_content, tl::ParserOptions::default()) {
         Ok(d) => d,
         Err(e) => {
-            debug!("parsing homepage: {:?}", e);
-            return None;
+            return Err(format!("XI: parsing homepage: {:?}", e));
         }
     };
     let link_tags: Vec<&HTMLTag> = dom
@@ -68,6 +79,8 @@ pub fn extract_icon_from_homepage(hp_content: String, homepage_url: &String) -> 
         })
         .collect();
 
+    // link_tags.iter().for_each(|lt| debug!("LT:{:?}", lt));
+
     let icon_list: Vec<String> = link_tags
         .iter()
         .map(|t| {
@@ -82,14 +95,16 @@ pub fn extract_icon_from_homepage(hp_content: String, homepage_url: &String) -> 
         .filter(|attrmap| attrmap.get("rel").is_some())
         .filter(|attrmap| {
             if let Some(typ_e) = attrmap.get("type") {
-                typ_e.contains("icon")
+                typ_e.contains("icon") || typ_e.starts_with("image/")
             } else {
                 true
             }
         })
+        // .inspect(|at_m| debug!("AM2:{:?}", at_m))
         .filter(|attrmap| attrmap.get("rel").unwrap().contains("icon"))
         .filter_map(|attrmap| attrmap.get("href").cloned())
         .collect();
+    // trace!("iconlist={:?}", icon_list);
     if !icon_list.is_empty() {
         let mut icon_href: String = icon_list.get(0).unwrap().clone();
         if icon_href.starts_with("//") {
@@ -103,19 +118,35 @@ pub fn extract_icon_from_homepage(hp_content: String, homepage_url: &String) -> 
                         homepage_host =
                             format!("{}://{}", parsed.scheme(), parsed.host_str().unwrap(),);
                     }
-                    Err(e) => debug!(
-                        "extract_icon_from_homepage({})   ERR:{:?}",
-                        &homepage_url, e
-                    ),
+                    Err(e) => debug!("XI:2:  ({})   ERR:{:?}", &homepage_url, e),
                 }
             }
             icon_href = format!("{}{}", homepage_host, icon_href);
         }
-        return Some(icon_href);
+        return Ok(icon_href);
+    } else {
+        return Err("no rel_icon  on page  found".to_string());
     }
-    //  else {        trace!("no rel_icon  on page {} found", homepage_url);    }
-    // later: into error log
-    None
+}
+
+pub fn feed_url_to_main_url(f_u: String) -> String {
+    match Url::parse(&f_u) {
+        Ok(parsed) => {
+            let port_st = match parsed.port() {
+                Some(p) => format!(":{}", p),
+                None => String::default(),
+            };
+            let icon_url = format!(
+                "{}://{}{}",
+                parsed.scheme(),
+                parsed.host_str().unwrap(),
+                port_st
+            );
+            return icon_url;
+        }
+        Err(e) => warn!("invalid url: {}  {:?}", &f_u, e),
+    }
+    String::default()
 }
 
 pub fn feed_url_to_icon_url(f_u: String) -> String {

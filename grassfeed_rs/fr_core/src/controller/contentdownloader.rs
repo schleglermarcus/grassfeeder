@@ -105,7 +105,7 @@ impl DLKind for DLJob {
         match self {
             DLJob::None => -1,
             DLJob::Feed(inner) => inner.fs_repo_id,
-            DLJob::Icon(inner) => inner.fs_repo_id,
+            DLJob::Icon(inner) => inner.subs_id,
             DLJob::ComprehensiveFeed(_) => -2,
             DLJob::CleanDatabase(_) => -3,
         }
@@ -333,7 +333,7 @@ impl IDownloader for Downloader {
         );
         let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
         let dl_inner = IconInner {
-            fs_repo_id: fs_id,
+            subs_id: fs_id,
             feed_url: fs_url,
             icon_url: String::default(),
             iconrepo: icon_repo,

@@ -2,6 +2,32 @@ use fr_core::downloader::util::extract_icon_from_homepage;
 
 // #[ignore]
 #[test]
+fn test_extract_icon_fromrome() {
+    setup();
+    let f = "../fr_core/tests/data/fromrome.html";
+    let page = std::fs::read_to_string(f).unwrap();
+    let r = extract_icon_from_homepage(page, &"https://www.neweurope.eu/".to_string());
+    assert_eq!(
+        r,
+        Ok("https://www.fromrome.info/wp-content/uploads/2019/10/cropped-header.jpg".to_string())
+    );
+}
+
+#[ignore]
+#[test]
+fn test_extract_icon_neweurop() {
+    setup();
+    let f = "../fr_core/tests/data/neweurope.html";
+    let page = std::fs::read_to_string(f).unwrap();
+    let r = extract_icon_from_homepage(page, &"https://www.neweurope.eu/".to_string());
+    assert_eq!(
+        r,
+        Ok("https://www.neweurope.eu/wp-content/uploads/2019/07/NE-16.jpg".to_string())
+    );
+}
+
+#[ignore]
+#[test]
 fn test_extract_icon_relay_rd() {
     setup();
     let f = "../fr_core/tests/data/relay_rd.html";
@@ -9,14 +35,14 @@ fn test_extract_icon_relay_rd() {
     let r = extract_icon_from_homepage(page, &"https://www.relay.fm/rd".to_string());
     assert_eq!(
         r,
-        Some(
+        Ok(
             "https://www.relay.fm/assets/favicon-fd28d8fa5c60ac2860b452a36991933e905f82f1349c4a5ad171dd0586b2b331.ico"
                 .to_string()
         )
     );
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_extract_icon_terrahertz() {
     setup();
@@ -25,24 +51,24 @@ fn test_extract_icon_terrahertz() {
     let r = extract_icon_from_homepage(page, &String::default());
     assert_eq!(
         r,
-        Some(
+        Ok(
             "https://terraherz.wpcomstaging.com/wp-content/uploads/gwpf_icon/favicon.png"
                 .to_string()
         )
     );
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_extract_icon_kolkata() {
     setup();
     let f = "../fr_core/tests/data/kolkata_tv.html";
     let page = std::fs::read_to_string(f).unwrap();
     let r = extract_icon_from_homepage(page, &String::default());
-    assert_eq!(r, Some("https://s14410312.in1.wpsitepreview.link/wp-content/themes/KolkataTv/assets/images/scroll-fav.png".to_string()));
+    assert_eq!(r, Ok("https://s14410312.in1.wpsitepreview.link/wp-content/themes/KolkataTv/assets/images/scroll-fav.png".to_string()));
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_extract_icon_seoul() {
     setup();
@@ -51,11 +77,11 @@ fn test_extract_icon_seoul() {
     let r = extract_icon_from_homepage(page, &String::default());
     assert_eq!(
         r,
-        Some("https://static.themainstreammedia.com/web/newsnet/favicons/favicon.ico".to_string())
+        Ok("https://static.themainstreammedia.com/web/newsnet/favicons/favicon.ico".to_string())
     );
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_extract_icon_nn() {
     setup();
@@ -64,7 +90,7 @@ fn test_extract_icon_nn() {
     let r = extract_icon_from_homepage(page, &String::default());
     assert_eq!(
         r,
-        Some(
+        Ok(
             "https://www.naturalnews.com/wp-content/themes/naturalnews-child/images/favicon.ico"
                 .to_string()
         )
@@ -74,7 +100,6 @@ fn test_extract_icon_nn() {
 // ------------------------------------
 
 mod logger_config;
-
 #[allow(unused_imports)]
 #[macro_use]
 extern crate log;

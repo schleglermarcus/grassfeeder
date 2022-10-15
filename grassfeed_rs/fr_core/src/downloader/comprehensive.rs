@@ -78,12 +78,14 @@ impl Step<ComprehensiveInner> for ParseFeedString {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let mut inner: ComprehensiveInner = self.0;
 
-        if let (Some(homepage), Some(feed_title)) = util::retrieve_homepage_from_feed_text(
+        if let Ok((homepage, feed_title)) = util::retrieve_homepage_from_feed_text(
             inner.url_download_text.as_bytes(),
             &inner.feed_url_edit,
         ) {
             inner.feed_homepage = homepage;
-            inner.feed_title = feed_title;
+            if !feed_title.is_empty() {
+                inner.feed_title = feed_title;
+            }
         }
         if !inner.feed_homepage.is_empty() {
             StepResult::Continue(Box::new(ComprAnalyzeHomepage(inner)))
@@ -100,14 +102,14 @@ impl Step<ComprehensiveInner> for ComprAnalyzeHomepage {
         // debug!("ComprAnalyzeHomepage: {}   icon_url={}", &inner.feed_homepage   , inner.icon_url );
         let r = (*inner.web_fetcher).request_url(inner.feed_homepage.clone());
         match r.status {
-            200 => {
-                if let Some(icon_url) =
-                    util::extract_icon_from_homepage(r.content, &inner.feed_homepage)
-                {
-                    // trace!("extracted from page: {}", &icon_url);
+            200 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
+                Ok(icon_url) => {
                     inner.icon_url = icon_url;
-                };
-            }
+                }
+                Err(descr) => {
+                    debug!("XI: {} {}", inner.feed_homepage, descr);
+                }
+            },
             _ => {
                 debug!(
                     "compr: downloading homepage: {:?} {}",

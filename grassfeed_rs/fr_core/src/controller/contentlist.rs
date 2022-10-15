@@ -439,7 +439,7 @@ impl IFeedContents for FeedContents {
         for job in job_list {
             let now = std::time::Instant::now();
 
-            trace!("CJOB: {:?}", &job);
+            // trace!("CJOB: {:?}", &job);
 
             match job {
                 CJob::DbUpdateTitle(content_id, ref title) => {
