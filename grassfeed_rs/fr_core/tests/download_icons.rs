@@ -79,15 +79,9 @@ fn multiple_icons_location() {
         //     "http://chaosradio.ccc.de".to_string(),        ),
     ];
     for u_h in urls {
-        let now = std::time::Instant::now();
+        // let now = std::time::Instant::now();
         let (ie_list, err_happened) = download_icon_one_url(&u_h.0, &u_h.1);
-        trace!(
-            "downloaded: {}  Icons:{}  err:{}  time:{}",
-            &u_h.0,
-            ie_list.len(),
-            err_happened,
-            now.elapsed().as_millis()
-        );
+        // trace!(            "downloaded: {}  Icons:{}  err:{}  time:{}",            &u_h.0,            ie_list.len(),            err_happened,            now.elapsed().as_millis()        );
         assert_eq!(ie_list.len(), 1);
         assert!(!err_happened);
     }
@@ -137,7 +131,7 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry
     )
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn icon_too_big() {
     setup();
@@ -169,7 +163,7 @@ fn icon_too_big() {
     assert!(icon0.icon.len() < 10000);
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn stop_on_nonexistent() {
     setup(); // This test issues a stop signal upon a nonexistant icon
@@ -198,7 +192,7 @@ fn stop_on_nonexistent() {
     assert!(matches!(r, StepResult::Stop(..)));
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_retrieve_homepages() {
     setup();
@@ -240,7 +234,7 @@ fn test_retrieve_homepages() {
     });
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn t_host_for_url() {
     setup();
@@ -266,8 +260,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            // logger_config::QuietFlags::Downloader as u64,
-            0,
+            logger_config::QuietFlags::Downloader as u64,
+            // 0,
         );
     });
 }

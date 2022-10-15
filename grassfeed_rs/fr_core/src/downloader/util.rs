@@ -40,12 +40,7 @@ pub fn retrieve_homepage_from_feed_text(
                 continue;
             }
         }
-        trace!(
-            "   rel={:?}  href={}  type={:?}",
-            &f_link.rel,
-            &f_link.href,
-            &f_link.media_type
-        );
+        // trace!(            "   rel={:?}  href={}  type={:?}",            &f_link.rel,            &f_link.href,            &f_link.media_type        );
         feed_homepage = Some(f_link.href);
         // if !f_link.href.contains(dbg_feed_url) {            trace!("={}={}=", f_link.href, dbg_feed_url);        }
     }
@@ -78,9 +73,6 @@ pub fn extract_icon_from_homepage(
             t_name == "link"
         })
         .collect();
-
-    // link_tags.iter().for_each(|lt| debug!("LT:{:?}", lt));
-
     let icon_list: Vec<String> = link_tags
         .iter()
         .map(|t| {

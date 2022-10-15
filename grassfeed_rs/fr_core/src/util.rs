@@ -218,7 +218,6 @@ pub fn filter_by_iso8859_1(input: &str) -> (String, bool) {
 ///  https://www.w3schools.com/charsets/ref_html_entities_a.asp
 pub fn remove_invalid_chars_from_input(inp: String) -> String {
     let mut ret = inp;
-    // ret = ret.replace(&['(', ')', '\"', '\n', '\'', '\"'][..], "");
     ret = ret.replace(&['\"', '\n', '\'', '\"'][..], "");
     ret = ret.replace("&#38;", "&");
     ret = ret.replace("&#038;", "&");
@@ -369,9 +368,6 @@ mod t {
         assert_eq!(short, String::from("Japan 無料ダウンロード"));
     }
 
-    /*
-    20:17:47 [ERROR] fetching https://www.chip.de/fec/assets/favicon/favicon-32x32.png?v=01 => Transport(Transport { kind: Dns, message: Some("resolve dns name 'www.chip.de:443'"), url: Some(Url { scheme: "https", cannot_be_a_base: false, username: "", password: None, host: Some(Domain("www.chip.de")), port: None, path: "/fec/assets/favicon/favicon-32x32.png", query: Some("v=01"), fragment: None }), source: Some(Custom { kind: Uncategorized, error: "failed to lookup address information: Name or service not known" }) })
-    */
 
     #[test]
     fn fetch_infowars() {
@@ -381,6 +377,10 @@ mod t {
         assert!([0, 1150].contains(&size));
     }
 
+
+	/*
+    20:17:47 [ERROR] fetching https://www.chip.de/fec/assets/favicon/favicon-32x32.png?v=01 => Transport(Transport { kind: Dns, message: Some("resolve dns name 'www.chip.de:443'"), url: Some(Url { scheme: "https", cannot_be_a_base: false, username: "", password: None, host: Some(Domain("www.chip.de")), port: None, path: "/fec/assets/favicon/favicon-32x32.png", query: Some("v=01"), fragment: None }), source: Some(Custom { kind: Uncategorized, error: "failed to lookup address information: Name or service not known" }) })
+    */
     #[test]
     fn fetch_chip() {
         let (_buf, size) = fetch_http_to_bin(

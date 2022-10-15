@@ -60,11 +60,7 @@ impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
-            trace!(
-                "IconLoadStart: db-HP:{}   prev-iconurl:{}",
-                subs_e.website_url,
-                inner.icon_url
-            );
+            // trace!(                "IconLoadStart: db-HP:{}   prev-iconurl:{}",                subs_e.website_url,                inner.icon_url            );
             if !subs_e.website_url.is_empty() {
                 inner.feed_homepage = subs_e.website_url;
                 return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
@@ -84,7 +80,7 @@ impl Step<IconInner> for FeedTextDownload {
                 inner.feed_download_text = result.content;
             }
             _ => {
-                warn!("FeedTextDownload ERR {}", &result.error_description);
+                // warn!("FeedTextDownload ERR {}", &result.error_description);
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     result.status as isize,
@@ -107,7 +103,6 @@ impl Step<IconInner> for HomepageDownload {
             util::retrieve_homepage_from_feed_text(dl_text.as_bytes(), &inner.feed_url)
         {
             if homepage != inner.feed_url {
-                // debug!("setting inner.homepage!  {}", homepage);
                 inner.feed_homepage = homepage;
             } else {
                 let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
@@ -116,7 +111,7 @@ impl Step<IconInner> for HomepageDownload {
             }
             return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
         } else {
-            debug!("got no HP  from feed text!  Feed-URL: {}", &inner.feed_url);
+            trace!("got no HP  from feed text!  Feed-URL: {}", &inner.feed_url);
         }
         StepResult::Continue(Box::new(IconFallbackSimple(inner)))
     }
@@ -128,8 +123,7 @@ impl Step<IconInner> for CompareHomepageToDB {
         let inner: IconInner = self.0;
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
             if !inner.feed_homepage.is_empty() && inner.feed_homepage != subs_e.website_url {
-                debug!("update-homepage!  {}", inner.feed_homepage);
-
+                // trace!("update-homepage!  {}", inner.feed_homepage);
                 inner
                     .subscriptionrepo
                     .update_homepage(inner.subs_id, &inner.feed_homepage);
@@ -146,11 +140,6 @@ impl Step<IconInner> for IconAnalyzeHomepage {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let r = (*inner.web_fetcher).request_url(inner.feed_homepage.clone());
-        trace!(
-            " analyze ... HP={}  status={}",
-            inner.feed_homepage,
-            r.status
-        );
         match r.status {
             200 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
                 Ok(icon_url) => {
@@ -169,16 +158,18 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                 }
             },
             _ => {
-                debug!("IAHP:2 {:?}", &r.error_description);
+                let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
+                trace!(
+                    "IAHP:3  {:?} alternate HP {:?}",
+                    &r.error_description,
+                    alt_hp
+                );
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     r.status as isize,
                     inner.feed_homepage.clone(),
                     r.error_description,
                 );
-                let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
-                debug!("IAHP:3   alternate HP {:?}", alt_hp);
-
                 if inner.feed_homepage != alt_hp {
                     inner.feed_homepage = alt_hp;
                     return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
@@ -195,7 +186,7 @@ impl Step<IconInner> for IconFallbackSimple {
         let mut inner = self.0;
         if inner.icon_url.is_empty() {
             inner.icon_url = util::feed_url_to_icon_url(inner.feed_url.clone());
-            debug!("IconFallbackSimple: url={} ", inner.icon_url);
+            // trace!("IconFallbackSimple: url={} ", inner.icon_url);
         }
         StepResult::Continue(Box::new(IconDownload(inner)))
     }
@@ -213,15 +204,7 @@ impl Step<IconInner> for IconDownload {
             }
             _ => {
                 inner.download_error_happened = true;
-                debug!(
-                    "IconDownload: {} {} '{}'  =>  {} {} {} -> STOP",
-                    inner.subs_id,
-                    inner.feed_url,
-                    inner.icon_url,
-                    r.get_status(),
-                    r.get_kind(),
-                    r.error_description
-                );
+                // trace!(                    "IconDownload: {} {} '{}'  =>  {} {} {} -> STOP",                    inner.subs_id,                    inner.feed_url,                    inner.icon_url,                    r.get_status(),                    r.get_kind(),                    r.error_description                );
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     r.get_status() as isize,
@@ -240,31 +223,17 @@ impl Step<IconInner> for IconCheckIsImage {
         let mut inner: IconInner = self.0;
         let an_res = icon_analyser(&inner.icon_bytes);
         inner.image_icon_kind = an_res.kind.clone();
-        // if an_res.kind == IconKind::Webp {            return StepResult::Continue(Box::new(IconWebpToPng(inner)));        }
-
         if an_res.width_orig > ICON_CONVERT_TO_WIDTH
             || an_res.height_orig > ICON_CONVERT_TO_WIDTH
             || inner.icon_bytes.len() > ICON_SIZE_LIMIT_BYTES
             || an_res.kind == IconKind::Webp
         {
-            trace!(
-                "IconCheckIsImage: going to downscale  {}x{} {:?} {} ",
-                an_res.width_orig,
-                an_res.height_orig,
-                an_res.kind,
-                inner.icon_url,
-            );
+            // trace!(                "IconCheckIsImage: going to downscale  {}x{} {:?} {} ",                an_res.width_orig,                an_res.height_orig,                an_res.kind,                inner.icon_url,            );
             return StepResult::Continue(Box::new(IconDownscale(inner)));
         }
 
         if an_res.kind == IconKind::UnknownType || an_res.kind == IconKind::TooSmall {
-            trace!(
-                "IconCheckIsImage: url={} length={} #feed_dl_text={}  Reason={}",
-                inner.icon_url,
-                inner.icon_bytes.len(),
-                inner.feed_download_text.len(),
-                an_res.message
-            );
+            // trace!(                "IconCheckIsImage: url={} length={} #feed_dl_text={}  Reason={}",                inner.icon_url,                inner.icon_bytes.len(),                inner.feed_download_text.len(),                an_res.message            );
             inner.erro_repo.add_error(
                 inner.subs_id,
                 inner.icon_bytes.len() as isize,
@@ -281,7 +250,6 @@ pub struct IconDownscale(pub IconInner);
 impl Step<IconInner> for IconDownscale {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        // let size_before = inner.icon_bytes.len();
         let r = downscale_image(
             &inner.icon_bytes,
             &inner.image_icon_kind,
@@ -295,14 +263,13 @@ impl Step<IconInner> for IconDownscale {
                 inner.icon_url,
                 r.err()
             );
-            warn!("{msg}");
+            trace!("{msg}");
             inner
                 .erro_repo
                 .add_error(inner.subs_id, 0, inner.icon_url.clone(), msg);
             return StepResult::Stop(inner);
         }
         inner.icon_bytes = r.unwrap();
-        // trace!(            "Down-Sizes:{:?} {}->{}  {}",			inner.image_icon_kind,            size_before,            inner.icon_bytes.len(),            inner.feed_url,        );
         StepResult::Continue(Box::new(IconStore(inner)))
     }
 }
@@ -315,7 +282,7 @@ impl Step<IconInner> for IconStore {
             panic!("icon_too_small!");
         }
         if inner.icon_bytes.len() > 10000 {
-            warn!(
+            debug!(
                 "IconStore: {} {} \t  Size {} kB",
                 inner.icon_url,
                 inner.feed_url,
@@ -647,13 +614,13 @@ mod t_ {
     use super::*;
     use crate::web::mockfilefetcher;
 
-    //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::icons::t_::t_analyze_icon  --lib -- --exact --nocapture "
+    //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::icons::t_::analyze_icon_local  --lib -- --exact --nocapture "
     #[test]
     fn analyze_icon_local() {
         let set: [(&str, IconKind); 8] = [
             ("tests/data/favicon.ico", IconKind::Ico),          //
             ("tests/data/icon_651.ico", IconKind::Png),         //
-            ("tests/data/report24-favicon.ico", IconKind::Ico), // is jpg
+            ("tests/data/report24-favicon.ico", IconKind::Jpg), // is jpg
             ("tests/data/naturalnews_favicon.ico", IconKind::Ico),
             ("tests/data/heise-safari-pinned-tab.svg", IconKind::Svg),
             ("tests/data/gorillavsbear_townsquare.ico", IconKind::Ico), // MS Windows icon resource - 3 icons, 48x48, 32 bits/pixel, 48x48, 32 bits/pixel
@@ -666,7 +633,7 @@ mod t_ {
         set.iter().for_each(|(s, e_kind)| {
             let blob = mockfilefetcher::file_to_bin(s).unwrap();
             let r = icon_analyser(&blob);
-            // println!(                "TEST  {} \t {:?}\t{}  {}x{} ",                s, r.kind, r.message, r.width_orig, r.heigth_orig            );
+            // println!(                "TEST  {} \t {:?}\t{}  {}x{} ",                s, r.kind, r.message, r.width_orig, r.height_orig           );
             assert_eq!(r.kind, *e_kind);
         });
     }

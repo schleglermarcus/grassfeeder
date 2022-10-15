@@ -219,11 +219,7 @@ pub fn create_listview(
             .get::<u32>()
             .unwrap() as i32;
         let list_pos = t_path.indices()[0];
-        trace!(
-            "row_activated, double click repoid: {} {}",
-            repo_id,
-            list_pos
-        );
+        // trace!(            "row_activated, double click repoid: {} {}",            repo_id,            list_pos        );
         esw.sendw(GuiEvents::ListRowDoubleClicked(0, list_pos, repo_id));
     });
 

@@ -263,6 +263,8 @@ impl FeedContents {
                         last_selected_msg_id = subs_e.0.last_selected_msg;
                     }
                 }
+                debug!("to-policy:  last-id:{}", last_selected_msg_id);
+
                 if last_selected_msg_id > 0 {
                     (*self.gui_updater).borrow().list_set_cursor(
                         TREEVIEW1,
@@ -567,16 +569,12 @@ impl IFeedContents for FeedContents {
             .iter()
             .for_each(|subs_id| self.addjob(CJob::RequestUnreadAllCount(*subs_id)));
 
-        // for subs_id in subscr_ids {        }
-
         if !is_unread_ids.is_empty() {
             (*self.messagesrepo_r)
                 .borrow_mut()
                 .update_is_read_many(&is_unread_ids, true);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
         }
-
-        // if !subscr_ids.is_empty() || !is_unread_ids.is_empty() {}
 
         self.addjob(CJob::UpdateContentListSome(list_pos_dbid));
         if let Some(feedsources) = self.feedsources_w.upgrade() {
@@ -858,10 +856,10 @@ impl IFeedContents for FeedContents {
     }
 
     fn memory_conserve(&self, act: bool) {
+        trace!("conserv {} selected:{:?}", act, self.list_selected_ids.read().unwrap());
         if act {
             self.msg_state.write().unwrap().clear();
         } else {
-            debug!("List Restore  .... ");
             self.fill_state_map(&Vec::default());
             // self.addjob(CJob::UpdateMessageList);
             self.addjob(CJob::ListSetCursorToPolicy);

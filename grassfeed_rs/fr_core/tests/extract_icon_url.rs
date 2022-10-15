@@ -13,7 +13,7 @@ fn test_extract_icon_fromrome() {
     );
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_extract_icon_neweurop() {
     setup();
@@ -26,7 +26,7 @@ fn test_extract_icon_neweurop() {
     );
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_extract_icon_relay_rd() {
     setup();
@@ -42,7 +42,7 @@ fn test_extract_icon_relay_rd() {
     );
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_extract_icon_terrahertz() {
     setup();
@@ -58,7 +58,7 @@ fn test_extract_icon_terrahertz() {
     );
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_extract_icon_kolkata() {
     setup();
@@ -68,7 +68,7 @@ fn test_extract_icon_kolkata() {
     assert_eq!(r, Ok("https://s14410312.in1.wpsitepreview.link/wp-content/themes/KolkataTv/assets/images/scroll-fav.png".to_string()));
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_extract_icon_seoul() {
     setup();
@@ -81,7 +81,7 @@ fn test_extract_icon_seoul() {
     );
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_extract_icon_nn() {
     setup();

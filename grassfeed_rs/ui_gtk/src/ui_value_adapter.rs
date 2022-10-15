@@ -108,7 +108,6 @@ impl ModelValueStoreImpl {
 impl UIAdapterValueStore for ModelValueStoreImpl {
     fn memory_conserve(&mut self, active: bool) {
         if active {
-            trace!("CONSERV: {}", active);
             self.gui_list.clear();
         }
     }

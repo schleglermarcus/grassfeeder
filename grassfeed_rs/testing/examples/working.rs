@@ -122,7 +122,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     // let url_relay = format!("{}/relay_rd.rss", addr); // very big
 
     let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
-    let f_noicons = feedsources.add_new_folder_at_parent("no_icons".to_string(), 0);
+    let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
     let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder1);
     let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), folder1);
 
@@ -139,12 +139,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
-                f_noicons,
+                folder2,
                 false,
             );
         });
     }
-    if true {
+    if false {
         feedsources.add_new_subscription_at_parent(
             url_nn_aug,
             "NN-aug".to_string(),
@@ -164,6 +164,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             false,
         );
         let src = [
+            ("https://m4rw3r.github.io/atom.xml", "marwer no icon"),
             ("https://www.fromrome.info/feed/", "fromrome icon okl"),
             ("https://www.relay.fm/query/feed", "relay_query icon ok"),
             ("https://www.mtb-karlsruhe.de/?q=rss.xml", "mb_ka icon ok"),
@@ -225,7 +226,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    if true {
+    if false {
         let src = [
             (
                 "http://chaosradio.ccc.de/chaosradio-complete.rss",
