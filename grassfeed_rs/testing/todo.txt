@@ -1,19 +1,19 @@
 To Do List
 
-
-- Message List: set scroll position to upper edge from Cursor
 - Application Icon into Systray
   https://docs.rs/crate/libappindicator/0.7.1/source/examples/hello.rs
-- implement focus policy: before last unread
-
+- Message List: implement focus policy: before last unread
+- Message List: set scroll position to upper edge from Cursor
 - Opml export formatted / pretty
 - import opml: see if we can get the web main url from  the outline
 - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
+
+
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 - Reduce Size of Binary:
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
+
 - DragAndDrop for Websites into Tree
-- Keybard configuration in settings
 - Marking of Messages, Favorites
 
 
@@ -29,6 +29,7 @@ Later:
 
 
 Perhaps:
+- Keybard configuration in settings
 - Updating Sources:  prioritize by tree position, expanded flag
 - Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
 - Feed-Import with progress bar ?
@@ -36,6 +37,8 @@ Perhaps:
 - Grouping of feeds by folders ?
 - RSS-Content damaged with    http://n8waechter.info/feed/
 - look at Snap/Flatpak   https://linuxhint.com/snap_vs_flatpak_vs_appimage/
+
+
 
 No more
 - startup:  delayed creation of dialogs not good, they need to be present for the menu
@@ -52,7 +55,7 @@ No more
     git checkout main
     git merge origin/v0_0_3
     git push origin main
-		cd grassfeed_rs/app-gtk3-linux/ ; ./docker-stage2.sh
+    cd grassfeed_rs/app-gtk3-linux/ ; ./docker-stage2.sh
 
 
 * Put the work folder back to main

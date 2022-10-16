@@ -1,0 +1,10 @@
+Sun, 16 Oct 2022 00:01:00 +0000
+
+
+- Application Icon into Systray
+  https://docs.rs/crate/libappindicator/0.7.1/source/examples/hello.rs
+- Message List: implement focus policy: before last unread
+- Message List: set scroll position to upper edge from Cursor
+- Opml export formatted / pretty
+- import opml: see if we can get the web main url from  the outline
+- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)

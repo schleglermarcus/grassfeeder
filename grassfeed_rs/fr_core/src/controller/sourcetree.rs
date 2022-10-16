@@ -1610,7 +1610,6 @@ impl ISourceTreeController for SourceTreeController {
                     .map(|fse| fse.subs_id as i32)
                     .collect::<Vec<i32>>();
             }
-            debug!("set_selected : {}", fse.subs_id);
             self.current_selected_subscription = Some((fse, child_ids));
         }
     }
