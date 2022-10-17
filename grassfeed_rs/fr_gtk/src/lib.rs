@@ -18,5 +18,6 @@ pub mod load_css;
 pub mod messagelist;
 pub mod treeview2;
 pub mod util;
+pub mod systray_icon;
 
 i18n!("../resources/locales");

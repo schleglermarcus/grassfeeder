@@ -90,6 +90,7 @@ pub enum GuiEvents {
     KeyPressed(isize, Option<char>),
     /// index, new-text
     SearchEntryTextChanged(u8, String),
+	Indicator(String)
 }
 
 pub trait UIAdapterValueStore {

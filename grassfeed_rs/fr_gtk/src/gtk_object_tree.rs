@@ -1,6 +1,7 @@
 use crate::dialogs::create_dialogs;
 use crate::load_css::TAB_MARKER_HEIGHT;
 use crate::messagelist::create_listview;
+use crate::systray_icon::create_status_icon;
 use crate::util::process_string_to_image;
 use crate::util::DragState;
 use crate::util::EvSenderWrapper;
@@ -257,7 +258,17 @@ impl GtkGuiBuilder for GtkObjectTree {
             ret.set_scrolledwindow(SCROLLEDWINDOW_0, &scrolledwindow_0);
             ret.set_scrolledwindow(SCROLLEDWINDOW_1, &scrolledwindow_1);
         }
-        connect_keyboard(gui_event_sender, gtk_obj_a.clone());
+        connect_keyboard(gui_event_sender.clone(), gtk_obj_a.clone());
+
+        // let  	app_url = // self.get (PropDef::AppUrl);
+
+        let app_url: String = self
+            .initvalues
+            .get(&PropDef::AppUrl)
+            .cloned()
+            .unwrap_or("some.app.url".to_string());
+        // mvs.get_gui_property_or(PropDef::AppUrl, "some.app.url".to_string())
+        create_status_icon(gui_event_sender, app_url);
     }
 }
 

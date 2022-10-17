@@ -18,6 +18,7 @@ use gtk::ApplicationWindow;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use std::collections::HashSet;
+use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicU8;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
@@ -114,7 +115,13 @@ impl GtkRunnerInternal {
         let gtk_objects_a = gtk_objects.clone();
         let m_v_st_a = model_value_store.clone();
         let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects);
+        let is_minimized: AtomicBool = AtomicBool::new(false);
+
         glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
+            let prev_count = INTERVAL_COUNTER.fetch_add(1, Ordering::Relaxed);
+            if is_minimized.load(Ordering::Relaxed) && (prev_count & 15 != 0) {
+                return glib::Continue(true);
+            }
             let mut rec_set: HashSet<IntCommands> = HashSet::new();
             while let Ok(command) = g_com_rec.try_recv() {
                 rec_set.insert(command);
@@ -123,7 +130,7 @@ impl GtkRunnerInternal {
             rec_list.sort();
             for command in rec_list {
                 let now = Instant::now();
-                // trace!("  INT: {:?} ", &command );
+                // trace!("  INT: #{}   ", prev_count);
                 match *command {
                     IntCommands::START => {
                         error!("glib loop: unexpected START ");
@@ -180,8 +187,10 @@ impl GtkRunnerInternal {
                     IntCommands::WebViewRemove(fs_man) => {
                         (gtk_objects_a).write().unwrap().set_web_view(None, fs_man);
                     }
-                    IntCommands::MemoryConserve(act) =>
-                        upd_int.memory_conserve(act),
+                    IntCommands::MemoryConserve(act) => {
+                        is_minimized.store(act, Ordering::Relaxed);
+                        upd_int.memory_conserve(act);
+                    }
 
                     _ => {
                         warn!("GTKS other cmd {:?}", command);
@@ -192,7 +201,6 @@ impl GtkRunnerInternal {
                     warn!("R_INT: {:?} took {:?}", &command, elapsed_ms);
                 }
             }
-            let prev_count = INTERVAL_COUNTER.fetch_add(1, Ordering::Relaxed);
             if prev_count & 1 == 0 {
                 if let Some((cr_spinner, tv_col)) = (*gtk_objects_a).read().unwrap().get_spinner_w()
                 {
