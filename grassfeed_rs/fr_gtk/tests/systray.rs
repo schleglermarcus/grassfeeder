@@ -40,6 +40,7 @@ fn create_tray2() {
     m.show_all();
 }
 
+#[ignore]
 #[test]
 fn libapp1() {
     setup();

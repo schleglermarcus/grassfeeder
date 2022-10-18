@@ -16,9 +16,13 @@ pub trait GuiRunner {
     fn start(&self);
     fn stop(&mut self);
     fn get_ui_updater(&self) -> Rc<RefCell<dyn UIUpdaterAdapter>>;
+
     fn get_event_receiver(&self) -> Rc<dyn ReceiverWrapper>;
-    fn get_event_sender(&self) -> Arc<dyn SenderWrapper + Send + Sync + 'static>;
+
+    fn get_event_sender(&self) -> UiSenderWrapperType;
 }
+
+pub type UiSenderWrapperType = Arc<dyn UISenderWrapper + Send + Sync + 'static>;
 
 // may not be  "Send"
 pub trait GuiObjects {}
@@ -36,7 +40,7 @@ pub trait ReceiverWrapper {
     fn get_len(&self) -> usize;
 }
 
-pub trait SenderWrapper {
+pub trait UISenderWrapper {
     fn send(&self, ev: GuiEvents);
 }
 
@@ -90,12 +94,17 @@ pub enum GuiEvents {
     KeyPressed(isize, Option<char>),
     /// index, new-text
     SearchEntryTextChanged(u8, String),
-	Indicator(String)
+    Indicator(String),
+}
+
+impl Default for GuiEvents {
+    fn default() -> GuiEvents {
+        GuiEvents::None
+    }
 }
 
 pub trait UIAdapterValueStore {
-
-	fn memory_conserve(&mut self, active : bool);
+    fn memory_conserve(&mut self, active: bool);
 
     fn set_text_entry(&mut self, index: u8, newtext: String);
     fn get_text_entry(&self, index: u8) -> Option<String>;
@@ -217,7 +226,9 @@ pub trait UIUpdaterAdapter {
     fn web_view_remove(&self, fontsizemanual: Option<u8>);
 
     fn clipboard_set_text(&self, s: String);
-	fn memory_conserve(&self, act: bool);
+    fn memory_conserve(&self, act: bool);
+
+    fn update_systray_indicator(&self, enable: bool);
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]

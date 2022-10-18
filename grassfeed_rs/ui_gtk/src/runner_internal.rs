@@ -17,6 +17,7 @@ use gio::ApplicationFlags;
 use gtk::ApplicationWindow;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
+use gui_layer::abstract_ui::UiSenderWrapperType;
 use std::collections::HashSet;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicU8;
@@ -84,11 +85,6 @@ impl GtkRunnerInternal {
             (*obj_c).write().unwrap().set_window(window);
             (*builder_c).build_gtk(ev_se.clone(), obj_c2.clone(), &mut dd);
             (*obj_c).write().unwrap().set_dddist(dd);
-
-			// debug!("create_systray_icon_3");
-            // let _indicator = create_systray_icon_3();
-
-
             window.show_all();
         });
         true
@@ -116,10 +112,11 @@ impl GtkRunnerInternal {
         g_com_rec: Receiver<IntCommands>,
         gtk_objects: GtkObjectsType,
         model_value_store: UIAdapterValueStoreType,
+        ev_se_w: UiSenderWrapperType,
     ) {
         let gtk_objects_a = gtk_objects.clone();
         let m_v_st_a = model_value_store.clone();
-        let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects);
+        let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects, ev_se_w);
         let is_minimized: AtomicBool = AtomicBool::new(false);
         glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
             let prev_count = INTERVAL_COUNTER.fetch_add(1, Ordering::Relaxed);
@@ -195,7 +192,9 @@ impl GtkRunnerInternal {
                         is_minimized.store(act, Ordering::Relaxed);
                         upd_int.memory_conserve(act);
                     }
-
+                    IntCommands::TrayIconEnable(act) => {
+                        upd_int.update_tray_icon(act);
+                    }
                     _ => {
                         warn!("GTKS other cmd {:?}", command);
                     }
@@ -247,6 +246,7 @@ fn build_window(
     window
 }
 
+/*
 use gtk::prelude::GtkMenuItemExt;
 use gtk::prelude::MenuShellExt;
 use libappindicator::AppIndicator;
@@ -272,37 +272,8 @@ pub fn create_systray_icon_3() -> AppIndicator {
         debug!("application-quit");
     });
     menu.append(&mi2);
-	menu.show_all();
+    menu.show_all();
     indicator.set_menu(&mut menu);
     indicator
-}
-
-/*
-fn create_tray_4() {
-    debug!("TRAY4: {}  {}", ICON_PATH, ICON2);
-    let mut indicator = AppIndicator::new("libappindicator test application", "");
-    indicator.set_status(AppIndicatorStatus::Active);
-    indicator.set_icon_theme_path(ICON_PATH);
-    indicator.set_icon(ICON2);
-    let mut m = gtk::Menu::new();
-    let mi = gtk::CheckMenuItem::with_label("Tray4 Menu!");
-    mi.connect_activate(|_| {
-        debug!("Tray4   activate  ->  quit");
-    });
-
-    mi.connect_hide(|_m| debug!("MENU hide!"));
-    mi.connect_focus(|_m, _n| {
-        debug!("MENU focus!");
-        gtk::Inhibit(false)
-    });
-
-    mi.connect_draw(|_m, _n| {
-        debug!("MENU draw!");
-        gtk::Inhibit(false)
-    });
-
-    m.append(&mi);
-    indicator.set_menu(&mut m);
-    m.show_all();
 }
 */

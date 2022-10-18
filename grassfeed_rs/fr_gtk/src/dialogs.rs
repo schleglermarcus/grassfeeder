@@ -402,7 +402,7 @@ fn create_subscription_edit_dialog(
     let label2 = Label::new(Some(&t!("D_NEW_SUBSCRIPTION_URL")));
     grid1.attach(&label2, 0, line, 1, 1);
     let entry2 = Entry::new();
-	entry1.set_hexpand(true);
+    entry1.set_hexpand(true);
     entry1.set_vexpand(false);
     entry2.set_activates_default(true);
     entry2.set_max_length(MAX_LENGTH_NEW_SOURCE_URL);
@@ -704,7 +704,7 @@ fn create_settings_dialog(
     let spinb_fontsize_manual = SpinButton::with_range(FONTSIZE_MIN, FONTSIZE_MAX, 1.0);
     let scale_bright = Scale::with_range(Orientation::Horizontal, 0.0, 255.0, 1.0);
     let sw_browser_cache_clear = Switch::new();
-
+    let sw_enable_systray = Switch::new();
     {
         let grid1 = Grid::new();
         grid1.set_vexpand(true);
@@ -772,13 +772,13 @@ fn create_settings_dialog(
         let label2_1 = Label::new(Some(&t!("D_SETTINGS_SHOW_MESSAGE_COUNT")));
         grid2.attach(&label2_1, 0, line, 1, 1);
         grid2.attach(&sw_display_feedcount, 1, line, 1, 1);
-        line += 1;
 
+        line += 1;
         let label2_2 = Label::new(Some(&t!("D_SETTINGS_MESSAGES_KEEP_COUNT")));
         grid2.attach(&label2_2, 0, line, 1, 1);
         grid2.attach(&spinb_msg_keep_count, 1, line, 1, 1);
-        line += 1;
 
+        line += 1;
         let label2_3 = Label::new(Some(&t!("D_SETTINGS_MANUAL_FONT_SIZE")));
         grid2.attach(&label2_3, 0, line, 1, 1);
         let spinb_fontsize_manual_c = spinb_fontsize_manual.clone();
@@ -794,15 +794,23 @@ fn create_settings_dialog(
             1,
             1,
         );
+
         line += 1;
         let label2_4 = Label::new(Some(&t!("D_SETTINGS_BROWSER_BACKGROUND_BRIGHTNESS")));
         grid2.attach(&label2_4, 0, line, 1, 1);
         grid2.attach(&scale_bright, 1, line, 1, 1);
-        line += 1;
 
+        line += 1;
         let label2_5 = Label::new(Some(&t!("D_SETTINGS_BROWSER_CACHE_CLEAR")));
         grid2.attach(&label2_5, 0, line, 1, 1);
         grid2.attach(&sw_browser_cache_clear, 1, line, 1, 1);
+
+        line += 1;
+        let label2_5 = Label::new(Some(&t!("D_SETTINGS_SYSTRAY_ICON_ENABLE")));
+        grid2.attach(&label2_5, 0, line, 1, 1);
+        grid2.attach(&sw_enable_systray, 1, line, 1, 1);
+
+
     }
     let ev_se = g_ev_se;
     let sw_subs_update_onstart_c = sw_subs_update_onstart.clone();
@@ -817,6 +825,8 @@ fn create_settings_dialog(
     let scale_bright_c = scale_bright.clone();
     let sw_subs_db_cleanup_c = sw_subs_db_cleanup.clone();
     let sw_browser_cache_clear_c = sw_browser_cache_clear.clone();
+    let sw_enable_systray_c = sw_enable_systray.clone();
+
     dialog.connect_response(move |dialog, rt| {
         match rt {
             ResponseType::Ok => {
@@ -841,6 +851,7 @@ fn create_settings_dialog(
                 av.push(AValue::AU32(scale_bright_c.value() as u32)); // 9 : Browser BG
                 av.push(AValue::ABOOL(sw_browser_cache_clear_c.state())); // 10 : browser cache cleanup
                 av.push(AValue::ABOOL(sw_subs_db_cleanup_c.state())); // 11 : DB cleanup
+                av.push(AValue::ABOOL(sw_enable_systray_c.state())); // 12 : Systray Icon
                 let _r = ev_se.send(GuiEvents::DialogData("settings".to_string(), av));
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {
@@ -881,6 +892,7 @@ fn create_settings_dialog(
         scale_bright.set_value(browser_bg as f64);
         sw_browser_cache_clear.set_state(dialogdata.get(10).unwrap().boo()); // 10 : browser cache cleanup
         sw_subs_db_cleanup.set_state(dialogdata.get(11).unwrap().boo()); // 11 : DB cleanup
+        sw_enable_systray.set_state(dialogdata.get(12).unwrap().boo()); // 11 : Systray Enable
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_SETTINGS, &dialog);

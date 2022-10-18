@@ -17,13 +17,14 @@ pub enum PropDef {
     BrowserDir,
     BrowserBackgroundLevel,
     BrowserClearCache,
-	BrowserZoomPercent,
+    BrowserZoomPercent,
     AppRcsVersion,
     AppModeDebug,
+    SystrayEnable,
 }
 
 #[allow(dead_code)]
-pub const PROPDEF_ARRAY: [PropDef; 17] = [
+pub const PROPDEF_ARRAY: [PropDef; 18] = [
     PropDef::GuiWindowWidth,
     PropDef::GuiWindowHeight,
     PropDef::GuiWindowTitle,
@@ -41,6 +42,7 @@ pub const PROPDEF_ARRAY: [PropDef; 17] = [
     PropDef::BrowserZoomPercent,
     PropDef::AppRcsVersion,
     PropDef::AppModeDebug,
+	PropDef::SystrayEnable,
 ];
 
 impl FromStr for PropDef {

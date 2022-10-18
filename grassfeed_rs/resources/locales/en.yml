@@ -25,6 +25,9 @@ en:
   SUBSC_DEFAULT_FOLDER1: Examples
   SUBSC_DEFAULT_FOLDER2: Tech
 
+  SYSTRAY_CMD_QUIT: "Quit"
+  SYSTRAY_CMD_SHOW_WINDOW: "Show / hide the application"
+
   MSGLIST_TOP_TITLE: "Title"
   MSGLIST_TOP_DATE: "Date"
 
@@ -90,6 +93,8 @@ en:
   D_SETTINGS_FOCUS_POLICY_BEFORE_UNREAD: "Before Oldest Unread Message"
   D_SETTINGS_DATABASES_CLEAN_ONSTART: "Clean up databases on start"
   D_SETTINGS_BROWSER_CACHE_CLEAR: "Clear browser cache"
+  D_SETTINGS_SYSTRAY_ICON_ENABLE: "Show Systray Icon"
+
 
   D_IMPORT_OPML_SELECT_FILE: "Select Opml file"
   D_STORE_OPML_SELECT_FILE: "Name Opml file"

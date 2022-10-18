@@ -392,6 +392,20 @@ impl GuiProcessor {
                     self.currently_minimized = is_minimized;
                 }
 
+                GuiEvents::Indicator(ref cmd) => match cmd.as_str() {
+                    "app-quit" => {
+                        self.addjob(Job::StopApplication);
+                    }
+                    "show-window" => {
+                        info!("Icon -> show-window! ");
+
+                        //						(*self.gui_updater).borrow().window_is_iconified();
+                    }
+
+                    _ => {
+                        warn!("unknown indicator event");
+                    }
+                },
                 _ => {
                     warn!("other GuiEvents: {:?}", &ev);
                 }
@@ -432,6 +446,9 @@ impl GuiProcessor {
                         .unwrap()
                         .set_window_icon(gen_icons::ICON_04_GRASS_CUT_2.to_string());
                     (*self.gui_updater).borrow().update_window_icon();
+                    (*self.gui_updater)
+                        .borrow()
+                        .update_systray_indicator(self.is_systray_enabled());
                 }
                 Job::StopApplication => {
                     match self
@@ -467,6 +484,9 @@ impl GuiProcessor {
                 Job::NotifyConfigChanged => {
                     (*self.feedcontents_r).borrow_mut().notify_config_update();
                     (*self.feedsources_r).borrow_mut().notify_config_update();
+                    (*self.gui_updater)
+                        .borrow()
+                        .update_systray_indicator(self.is_systray_enabled());
                 }
                 Job::DownloaderJobStarted(threadnr, kind) => {
                     self.statusbar_items.downloader_kind_new[threadnr as usize] = kind;
@@ -620,6 +640,12 @@ impl GuiProcessor {
                     contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
                     payload.get(11).unwrap().boo().to_string(),
                 );
+
+                let systray_e = payload.get(12).unwrap().boo();
+                (self.configmanager_r).borrow().set_val(
+                    &PropDef::SystrayEnable.to_string(),
+                    systray_e.to_string(), // 12 : enable systray
+                );
                 self.addjob(Job::NotifyConfigChanged);
             }
             _ => {
@@ -677,6 +703,10 @@ impl GuiProcessor {
         let databases_cleanup = (self.configmanager_r)
             .borrow()
             .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP);
+        let systray_enable = self.is_systray_enabled();
+
+        //  (*self.gui_val_store)            .read()            .unwrap()            .get_gui_property_or(PropDef::SystrayEnable, "false".to_string())            .parse::<bool>()            .unwrap();
+
         let dd: Vec<AValue> = vec![
             AValue::ABOOL(sources_conf.feeds_fetch_at_start), // 0 : FetchFeedsOnStart
             AValue::AU32(sources_conf.feeds_fetch_interval),  // 1 UpdateFeeds Cardinal
@@ -690,6 +720,7 @@ impl GuiProcessor {
             AValue::AU32(browser_conf.browser_bg as u32),         // 9 : Browser_BG
             AValue::ABOOL(browser_cache_clear),                   // 10 : Browser Cache Cleanup
             AValue::ABOOL(databases_cleanup),                     // 11 : Cleanup-on-start
+            AValue::ABOOL(systray_enable),                        // 12 : Systray enable
         ];
         (*self.gui_val_store)
             .write()
@@ -697,6 +728,12 @@ impl GuiProcessor {
             .set_dialog_data(DIALOG_SETTINGS, &dd);
         (*self.gui_updater).borrow().update_dialog(DIALOG_SETTINGS);
         (*self.gui_updater).borrow().show_dialog(DIALOG_SETTINGS);
+    }
+
+    pub fn is_systray_enabled(&self) -> bool {
+        (*self.configmanager_r)
+            .borrow()
+            .get_val_bool(&PropDef::SystrayEnable.to_string())
     }
 
     pub fn get_job_sender(&self) -> Sender<Job> {

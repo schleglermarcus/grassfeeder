@@ -6,10 +6,10 @@ use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::abstract_ui::GuiRunner;
 use gui_layer::abstract_ui::GuiTreeItem;
 use gui_layer::abstract_ui::ReceiverWrapper;
-use gui_layer::abstract_ui::SenderWrapper;
 use gui_layer::abstract_ui::TreeRowExpand;
 use gui_layer::abstract_ui::UIAdapterValueStore;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
+use gui_layer::abstract_ui::UISenderWrapper;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::PropDef;
@@ -30,7 +30,7 @@ pub struct UIMock {
     upd_ada: Rc<RefCell<UpdAda>>,
     pub gui_runner: Rc<RefCell<dyn GuiRunner>>,
     pub event_receiver: Rc<dyn ReceiverWrapper>,
-    pub event_sender: Arc<dyn SenderWrapper>,
+    pub event_sender: Arc<dyn UISenderWrapper>,
 }
 
 #[allow(dead_code)]
@@ -197,10 +197,10 @@ impl UIAdapterValueStore for AdValSto {
 // #[derive(Default)]
 struct UpdAda {
     ada_val_sto_a: UIAdapterValueStoreType,
-    r_event_sender: Arc<dyn SenderWrapper>,
+    r_event_sender: Arc<dyn UISenderWrapper>,
 }
 impl UpdAda {
-    fn new(sto: UIAdapterValueStoreType, r_se: Arc<dyn SenderWrapper>) -> Self {
+    fn new(sto: UIAdapterValueStoreType, r_se: Arc<dyn UISenderWrapper>) -> Self {
         UpdAda {
             ada_val_sto_a: sto,
             r_event_sender: r_se,
@@ -247,18 +247,19 @@ impl UIUpdaterAdapter for UpdAda {
     fn web_view_remove(&self, _fs_man: Option<u8>) {}
 
     fn memory_conserve(&self, _act: bool) {}
+    fn update_systray_indicator(&self, _enable: bool) {}
 }
 
 struct MockRunner {
     up_ad: Rc<RefCell<UpdAda>>,
     event_receiver: Rc<dyn ReceiverWrapper>,
-    event_sender: Arc<dyn SenderWrapper + Send + Sync + 'static>,
+    event_sender: Arc<dyn UISenderWrapper + Send + Sync + 'static>,
 }
 impl MockRunner {
     fn new(
         up_ada: Rc<RefCell<UpdAda>>,
         r_ev_re: Rc<dyn ReceiverWrapper>,
-        r_ev_se: Arc<dyn SenderWrapper + Send + Sync + 'static>,
+        r_ev_se: Arc<dyn UISenderWrapper + Send + Sync + 'static>,
     ) -> Self {
         MockRunner {
             up_ad: up_ada,
@@ -274,7 +275,7 @@ impl GuiRunner for MockRunner {
     fn get_event_receiver(&self) -> Rc<dyn ReceiverWrapper> {
         self.event_receiver.clone()
     }
-    fn get_event_sender(&self) -> Arc<dyn SenderWrapper + Send + Sync + 'static> {
+    fn get_event_sender(&self) -> Arc<dyn UISenderWrapper + Send + Sync + 'static> {
         self.event_sender.clone()
     }
     fn get_ui_updater(&self) -> Rc<RefCell<dyn UIUpdaterAdapter>> {
@@ -312,7 +313,7 @@ impl ReceiverWrapper for ReceiverWrapperImpl {
 }
 
 struct SenderWrapperImpl(Sender<GuiEvents>);
-impl SenderWrapper for SenderWrapperImpl {
+impl UISenderWrapper for SenderWrapperImpl {
     fn send(&self, ev: GuiEvents) {
         let _r = self.0.send(ev);
     }

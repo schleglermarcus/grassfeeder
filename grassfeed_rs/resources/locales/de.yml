@@ -25,6 +25,9 @@ de:
   SUBSC_DEFAULT_FOLDER1: Beispiele
   SUBSC_DEFAULT_FOLDER2: Technik
 
+  SYSTRAY_CMD_QUIT: "Beenden"
+  SYSTRAY_CMD_SHOW_WINDOW: "Fenster anzeigen / verstecken"
+
   MSGLIST_TOP_TITLE: "Titel"
   MSGLIST_TOP_DATE: "Datum"
 
@@ -89,6 +92,7 @@ de:
   D_SETTINGS_FOCUS_POLICY_BEFORE_UNREAD: "Vor letzter ungelesener"
   D_SETTINGS_DATABASES_CLEAN_ONSTART: "Datenbanken beim Start aufräumen"
   D_SETTINGS_BROWSER_CACHE_CLEAR: "Browser Zwischenspeicher löschen"
+  D_SETTINGS_SYSTRAY_ICON_ENABLE: "Icon im Info-Bereich anzeigen"
 
   D_IMPORT_OPML_SELECT_FILE: Opml Datei auswählen
   D_STORE_OPML_SELECT_FILE: Opml Datei bestimmen

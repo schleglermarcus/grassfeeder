@@ -1,6 +1,7 @@
 use crate::gtk::prelude::ContainerExt;
 use crate::gtk::prelude::WidgetExt;
 use crate::runner_internal::GtkRunnerInternal;
+use crate::CreateSystrayFnType;
 use crate::CreateWebViewFnType;
 use crate::DialogDataDistributor;
 use crate::GtkBuilderType;
@@ -29,10 +30,11 @@ use gtk::Window;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::abstract_ui::GuiRunner;
 use gui_layer::abstract_ui::ReceiverWrapper;
-use gui_layer::abstract_ui::SenderWrapper;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
+use gui_layer::abstract_ui::UISenderWrapper;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
+use gui_layer::abstract_ui::UiSenderWrapperType;
 use gui_layer::gui_values::PropDef;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -82,6 +84,7 @@ impl GuiRunner for GtkRunner {
         let co_re2 = self.gui_command_receiver.clone();
         let co_se2 = self.gui_command_sender.clone();
         let builder_c = self.gtk_builder.clone();
+        let ev_se_wc = self.get_event_sender();
         let win_title;
         let win_width;
         let win_height;
@@ -112,6 +115,7 @@ impl GuiRunner for GtkRunner {
                     co_re2.clone(),
                     runner_i.gtk_objects.clone(),
                     m_v_st_c,
+                    ev_se_wc,
                 );
                 if let Ok(cmd) = co_re2.recv() {
                     if cmd == IntCommands::START {
@@ -159,7 +163,7 @@ impl GuiRunner for GtkRunner {
         Rc::new(ReceiverWrapperImpl(self.gui_event_receiver.clone()))
     }
 
-    fn get_event_sender(&self) -> Arc<dyn SenderWrapper + Send + Sync + 'static> {
+    fn get_event_sender(&self) -> Arc<dyn UISenderWrapper + Send + Sync + 'static> {
         Arc::new(SenderWrapperImpl(self.gui_event_sender.clone()))
     }
 
@@ -196,6 +200,7 @@ pub struct GtkObjectsImpl {
     browser_config: CreateBrowserConfig,
     pub searchentries: Vec<SearchEntry>,
     pub indicator: Option<libappindicator::AppIndicator>,
+    create_systray_fn: CreateSystrayFnType,
 }
 
 impl GtkObjectsImpl {
@@ -233,6 +238,9 @@ impl GtkObjectsImpl {
             }
         }
     }
+
+
+    // impl GtkObjectsImpl
 }
 
 /// may not be Send
@@ -542,8 +550,38 @@ impl GtkObjects for GtkObjectsImpl {
         self.searchentries[idx as usize] = p.clone();
     }
 
-    fn set_indicator(&mut self, i: libappindicator::AppIndicator) {
-        self.indicator = Some(i);
+    fn set_indicator(&mut self, i: Option<libappindicator::AppIndicator>) {
+        self.indicator = i;
+    }
+
+    fn get_indicator(&self) -> Option<&libappindicator::AppIndicator> {
+        self.indicator.as_ref()
+    }
+
+    /// TODO
+    fn set_create_systray_fn(
+        &mut self,
+        systray_fn: Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>,
+        // _ev_se : Sender<GuiEvents>
+    ) {
+        self.create_systray_fn = Some(systray_fn);
+    }
+
+    fn get_create_systray_fn(
+        &self,
+    ) -> Option<&Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>> {
+        if self.create_systray_fn.is_none() {
+            return None;
+        }
+        Some(self.create_systray_fn.as_ref().unwrap())
+    }
+
+    fn set_gui_event_sender(&mut self, _ev_se: flume::Sender<GuiEvents>) {
+        unimplemented!() // TODO
+    }
+
+    fn get_gui_event_sender(&self) -> flume::Sender<GuiEvents> {
+        unimplemented!()
     }
 }
 
@@ -585,7 +623,7 @@ impl ReceiverWrapper for ReceiverWrapperImpl {
 }
 
 struct SenderWrapperImpl(Sender<GuiEvents>);
-impl SenderWrapper for SenderWrapperImpl {
+impl UISenderWrapper for SenderWrapperImpl {
     fn send(&self, ev: GuiEvents) {
         let _r = self.0.send(ev);
     }
@@ -712,4 +750,9 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     fn memory_conserve(&self, act: bool) {
         self.send_to_int(&IntCommands::MemoryConserve(act));
     }
+
+    fn update_systray_indicator(&self, enable: bool) {
+        self.send_to_int(&IntCommands::TrayIconEnable(enable));
+    }
+	
 } //

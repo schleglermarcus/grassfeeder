@@ -22,6 +22,7 @@ use std::sync::Arc;
 use std::sync::RwLock;
 use webkit2gtk::WebContext;
 use webkit2gtk::WebView;
+use gui_layer::abstract_ui::UiSenderWrapperType;
 
 pub type GtkObjectsType = Arc<RwLock<dyn GtkObjects>>;
 pub type GtkBuilderType = Arc<Box<dyn GtkGuiBuilder + Send + Sync + 'static>>;
@@ -71,12 +72,16 @@ pub enum IntCommands {
     // font size manual
     WebViewRemove(Option<u8>),
     MemoryConserve(bool),
+    TrayIconEnable(bool),
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;
 
 ///  WebContext,   FontSizeManual
 pub type CreateWebViewFnType = Option<Box<dyn Fn(&WebContext, Option<u8>) -> WebView>>;
+
+pub type CreateSystrayFnType =
+    Option<Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>>;
 
 pub trait GtkObjects {
     fn get_window(&self) -> Option<Window>;
@@ -154,7 +159,23 @@ pub trait GtkObjects {
     fn set_searchentry(&mut self, idx: u8, e: &gtk::SearchEntry);
     fn get_searchentry(&self, idx: u8) -> Option<&gtk::SearchEntry>;
 
-    fn set_indicator(&mut self, i: libappindicator::AppIndicator);
+    fn set_indicator(&mut self, i: Option<libappindicator::AppIndicator>);
+    fn get_indicator(&self) -> Option<&libappindicator::AppIndicator>;
+
+    fn set_create_systray_fn(
+        &mut self,
+        cb_fn: Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>,
+		// ev_se_w : UiSenderWrapperType,
+
+    );
+
+    fn get_create_systray_fn(
+        &self,
+    ) -> Option<&Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>>;
+
+	fn set_gui_event_sender(&mut self, ev_se : flume::Sender<GuiEvents>);
+	fn get_gui_event_sender(& self ) -> flume:: Sender<GuiEvents>;
+
 }
 
 #[derive(Clone, Debug)]

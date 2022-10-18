@@ -9,7 +9,7 @@ use context::Buildable;
 use context::StartupWithAppContext;
 use gui_layer::abstract_ui::GuiRunner;
 use gui_layer::abstract_ui::ReceiverWrapper;
-use gui_layer::abstract_ui::SenderWrapper;
+use gui_layer::abstract_ui::UISenderWrapper;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::gui_values::PropDef;
@@ -39,7 +39,7 @@ impl GuiContext {
     pub fn get_receiver_wrapper(&self) -> Rc<dyn ReceiverWrapper> {
         (*self.gui_runner).borrow().get_event_receiver()
     }
-    pub fn get_sender_wrapper(&self) -> Arc<dyn SenderWrapper + Send + Sync + 'static> {
+    pub fn get_sender_wrapper(&self) -> Arc<dyn UISenderWrapper + Send + Sync + 'static> {
         (*self.gui_runner).borrow().get_event_sender()
     }
 
