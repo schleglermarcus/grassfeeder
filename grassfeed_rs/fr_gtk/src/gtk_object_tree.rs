@@ -1,7 +1,7 @@
 use crate::dialogs::create_dialogs;
+use crate::gtk::prelude::WidgetExt;
 use crate::load_css::TAB_MARKER_HEIGHT;
 use crate::messagelist::create_listview;
-use crate::systray_icon::create_status_icon;
 use crate::util::process_string_to_image;
 use crate::util::DragState;
 use crate::util::EvSenderWrapper;
@@ -11,6 +11,8 @@ use gdk::EventButton;
 use gtk::builders::ToggleToolButtonBuilder;
 use gtk::builders::ToolButtonBuilder;
 use gtk::pango::WrapMode;
+use gtk::prelude::GtkMenuItemExt;
+use gtk::prelude::MenuShellExt;
 use gtk::prelude::*;
 use gtk::Adjustment;
 use gtk::Align;
@@ -35,6 +37,8 @@ use gtk::ToolButton;
 use gtk::Toolbar;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::gui_values::PropDef;
+use libappindicator::AppIndicator;
+use libappindicator::AppIndicatorStatus;
 use resources::gen_icons;
 use resources::id::*;
 use rust_i18n::t;
@@ -53,10 +57,13 @@ use webkit2gtk::WebView;
 use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
 
-const TOOLBAR_ICON_SIZE: i32 = 32;
+const TOOLBAR_ICON_SIZE: i32 = 28;
 const TOOLBAR_BORDER_WIDTH: u32 = 0;
 const TOOLBAR_MARGIN: i32 = 0;
 const RATIO_BROWSER_FONTSIZE_PERCENT: u32 = 140;
+
+pub const ICON_PATH: &str = "/usr/share/pixmaps/grassfeeder/";
+pub const ICON2: &str = "grassfeeder-indicator2";
 
 thread_local!(
     pub static GLOB_CACHE: RefCell<GuiCacheValues> = RefCell::new(GuiCacheValues::default());
@@ -249,6 +256,14 @@ impl GtkGuiBuilder for GtkObjectTree {
         let label_st3 = Label::new(Some("___"));
         label_st3.set_width_request(10);
         box3_status.add(&label_st3);
+
+        let app_url: String = self
+            .initvalues
+            .get(&PropDef::AppUrl)
+            .cloned()
+            .unwrap_or("some.app.url".to_string());
+        let systray_indicator = create_systray_icon_3(gui_event_sender.clone(), app_url);
+
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
             ret.set_label(LABEL_STATUS_1, &label_st1);
@@ -257,19 +272,36 @@ impl GtkGuiBuilder for GtkObjectTree {
             ret.set_paned(PANED_1_LEFT, &paned_1);
             ret.set_scrolledwindow(SCROLLEDWINDOW_0, &scrolledwindow_0);
             ret.set_scrolledwindow(SCROLLEDWINDOW_1, &scrolledwindow_1);
+            ret.set_indicator(systray_indicator);
         }
         connect_keyboard(gui_event_sender.clone(), gtk_obj_a.clone());
-
-        // let  	app_url = // self.get (PropDef::AppUrl);
-
-        let app_url: String = self
-            .initvalues
-            .get(&PropDef::AppUrl)
-            .cloned()
-            .unwrap_or("some.app.url".to_string());
-        // mvs.get_gui_property_or(PropDef::AppUrl, "some.app.url".to_string())
-        create_status_icon(gui_event_sender, app_url);
     }
+}
+
+pub fn create_systray_icon_3(g_ev_se: Sender<GuiEvents>, app_url: String) -> AppIndicator {
+    debug!("TRAY3: {}  {}", ICON_PATH, ICON2);
+    let mut indicator = AppIndicator::new(app_url.as_str(), "");
+    indicator.set_icon_theme_path(ICON_PATH);
+    indicator.set_icon(ICON2);
+    indicator.set_status(AppIndicatorStatus::Active);
+    let mut menu = gtk::Menu::new();
+    let mi1 = gtk::MenuItem::with_label("TODO  Show Window ");
+    let esw = EvSenderWrapper(g_ev_se.clone());
+    mi1.connect_activate(move |_| {
+        debug!("window-restore");
+        esw.sendw(GuiEvents::Indicator("show-window".to_string()));
+    });
+    menu.append(&mi1);
+    let mi2 = gtk::MenuItem::with_label("TODO  Quit ");
+    let esw = EvSenderWrapper(g_ev_se);
+    mi2.connect_activate(move |_| {
+        debug!("application-quit");
+        esw.sendw(GuiEvents::Indicator("app-quit".to_string()));
+    });
+    menu.append(&mi2);
+    menu.show_all();
+    indicator.set_menu(&mut menu);
+    indicator
 }
 
 impl GtkObjectTree {
@@ -457,7 +489,6 @@ fn connect_keyboard(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
     }
     let win = o_win.unwrap();
     let esw = EvSenderWrapper(g_ev_se);
-
     win.connect_key_press_event(move |_win, key| {
         let mut entry_has_focus: bool = false;
         if let Some(searchentry) = (*gtk_obj_a).read().unwrap().get_searchentry(SEARCH_ENTRY_0) {
@@ -731,6 +762,9 @@ pub fn create_toolbar(
     let searchentry: SearchEntry = SearchEntry::new();
     containing_box.add(&searchentry);
     searchentry.set_tooltip_text(Some(&t!("TB_FILTER_1")));
+    searchentry.set_height_request(12);
+    searchentry.set_vexpand(false);
+
     let esw = EvSenderWrapper(g_ev_se);
     searchentry.connect_changed(move |se: &SearchEntry| {
         esw.sendw(GuiEvents::SearchEntryTextChanged(

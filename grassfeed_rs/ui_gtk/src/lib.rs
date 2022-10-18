@@ -68,9 +68,9 @@ pub enum IntCommands {
     UpdateWindowTitle,
     UpdateWindowIcon,
     ClipBoardSetText(String),
-	// font size manual
-	WebViewRemove( Option<u8>),
-	MemoryConserve(bool),
+    // font size manual
+    WebViewRemove(Option<u8>),
+    MemoryConserve(bool),
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;
@@ -103,7 +103,7 @@ pub trait GtkObjects {
     fn set_text_view(&mut self, list_index: u8, tv: &gtk::TextView);
 
     fn get_web_view(&self) -> Option<WebView>;
-    fn set_web_view(&mut self, wv: Option<WebView>, font_size_man: Option<u8> );
+    fn set_web_view(&mut self, wv: Option<WebView>, font_size_man: Option<u8>);
 
     fn get_web_context(&self) -> Option<WebContext>;
     fn set_web_context(&mut self, wc: Option<WebContext>);
@@ -153,6 +153,8 @@ pub trait GtkObjects {
 
     fn set_searchentry(&mut self, idx: u8, e: &gtk::SearchEntry);
     fn get_searchentry(&self, idx: u8) -> Option<&gtk::SearchEntry>;
+
+    fn set_indicator(&mut self, i: libappindicator::AppIndicator);
 }
 
 #[derive(Clone, Debug)]

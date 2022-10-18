@@ -195,6 +195,7 @@ pub struct GtkObjectsImpl {
     create_webview_fn: CreateWebViewFnType,
     browser_config: CreateBrowserConfig,
     pub searchentries: Vec<SearchEntry>,
+    pub indicator: Option<libappindicator::AppIndicator>,
 }
 
 impl GtkObjectsImpl {
@@ -539,6 +540,10 @@ impl GtkObjects for GtkObjectsImpl {
                 .resize(idx as usize + 1, SearchEntry::default());
         }
         self.searchentries[idx as usize] = p.clone();
+    }
+
+    fn set_indicator(&mut self, i: libappindicator::AppIndicator) {
+        self.indicator = Some(i);
     }
 }
 

@@ -84,6 +84,11 @@ impl GtkRunnerInternal {
             (*obj_c).write().unwrap().set_window(window);
             (*builder_c).build_gtk(ev_se.clone(), obj_c2.clone(), &mut dd);
             (*obj_c).write().unwrap().set_dddist(dd);
+
+			// debug!("create_systray_icon_3");
+            // let _indicator = create_systray_icon_3();
+
+
             window.show_all();
         });
         true
@@ -116,7 +121,6 @@ impl GtkRunnerInternal {
         let m_v_st_a = model_value_store.clone();
         let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects);
         let is_minimized: AtomicBool = AtomicBool::new(false);
-
         glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
             let prev_count = INTERVAL_COUNTER.fetch_add(1, Ordering::Relaxed);
             if is_minimized.load(Ordering::Relaxed) && (prev_count & 15 != 0) {
@@ -242,3 +246,63 @@ fn build_window(
     });
     window
 }
+
+use gtk::prelude::GtkMenuItemExt;
+use gtk::prelude::MenuShellExt;
+use libappindicator::AppIndicator;
+use libappindicator::AppIndicatorStatus;
+pub const ICON_PATH: &str = "/usr/share/pixmaps/grassfeeder/";
+pub const ICON2: &str = "grassfeeder-indicator2"; // grassfeeder-indicator2.png
+
+pub fn create_systray_icon_3() -> AppIndicator {
+    debug!("INDI: {}  {}", ICON_PATH, ICON2);
+    let mut indicator = AppIndicator::new("xxx.grassfeed.rs", "");
+    indicator.set_icon_theme_path(ICON_PATH);
+    indicator.set_icon(ICON2);
+    indicator.set_status(AppIndicatorStatus::Active);
+    let mut menu = gtk::Menu::new();
+    let mi1 = gtk::MenuItem::with_label("TODO  Show Window ");
+
+    mi1.connect_activate(move |_| {
+        debug!("window-restore");
+    });
+    menu.append(&mi1);
+    let mi2 = gtk::MenuItem::with_label("TODO  Quit ");
+    mi2.connect_activate(move |_| {
+        debug!("application-quit");
+    });
+    menu.append(&mi2);
+	menu.show_all();
+    indicator.set_menu(&mut menu);
+    indicator
+}
+
+/*
+fn create_tray_4() {
+    debug!("TRAY4: {}  {}", ICON_PATH, ICON2);
+    let mut indicator = AppIndicator::new("libappindicator test application", "");
+    indicator.set_status(AppIndicatorStatus::Active);
+    indicator.set_icon_theme_path(ICON_PATH);
+    indicator.set_icon(ICON2);
+    let mut m = gtk::Menu::new();
+    let mi = gtk::CheckMenuItem::with_label("Tray4 Menu!");
+    mi.connect_activate(|_| {
+        debug!("Tray4   activate  ->  quit");
+    });
+
+    mi.connect_hide(|_m| debug!("MENU hide!"));
+    mi.connect_focus(|_m, _n| {
+        debug!("MENU focus!");
+        gtk::Inhibit(false)
+    });
+
+    mi.connect_draw(|_m, _n| {
+        debug!("MENU draw!");
+        gtk::Inhibit(false)
+    });
+
+    m.append(&mi);
+    indicator.set_menu(&mut m);
+    m.show_all();
+}
+*/

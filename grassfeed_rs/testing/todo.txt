@@ -22,6 +22,7 @@ Later:
 - GTK4: block multiple instances
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal
 	https://docs.gtk.org/gio/method.Application.run.html
+- Systray Icon integration
 
 - Windows  Build, Gui
   https://github.com/gabdube/native-windows-gui/tree/master/showcase

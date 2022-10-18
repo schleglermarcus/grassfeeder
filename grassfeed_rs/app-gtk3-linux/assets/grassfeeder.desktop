@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Grassfeeder RSS Reader
 Exec=grassfeeder
-Icon=/usr/share/pixmaps/grassfeeder/grassfeeder.png
+Icon=/usr/share/pixmaps/grassfeeder/grassfeeder.xpm
 Type=Application
 Categories=Network;
