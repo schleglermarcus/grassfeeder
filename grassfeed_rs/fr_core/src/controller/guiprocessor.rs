@@ -397,7 +397,10 @@ impl GuiProcessor {
                         self.addjob(Job::StopApplication);
                     }
                     "show-window" => {
-                        info!("Icon -> show-window! ");
+                        info!(
+                            "Icon -> show-window!  cur-min {} ",
+                            self.currently_minimized
+                        );
 
                         //						(*self.gui_updater).borrow().window_is_iconified();
                     }

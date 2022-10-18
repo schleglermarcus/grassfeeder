@@ -3,6 +3,9 @@ extern crate gtk;
 #[macro_use]
 extern crate log;
 extern crate itertools; // for key codes // background color
+extern crate libappindicator;
+
+// extern crate appindicator3;
 
 
 // pub extern crate gdk_pixbuf;

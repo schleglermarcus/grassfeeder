@@ -264,24 +264,9 @@ impl GtkGuiBuilder for GtkObjectTree {
             ret.set_scrolledwindow(SCROLLEDWINDOW_0, &scrolledwindow_0);
             ret.set_scrolledwindow(SCROLLEDWINDOW_1, &scrolledwindow_1);
 
-            ret.set_create_systray_fn(Box::new(create_systray_icon_3) );
+            ret.set_create_systray_fn(Box::new(create_systray_icon_3));
         }
         connect_keyboard(gui_event_sender.clone(), gtk_obj_a.clone());
-        /*
-                let systray_enable: bool = self.get_bool(PropDef::SystrayEnable);
-                debug!("GO:  enable systray {}", systray_enable);
-                if systray_enable {
-                    let app_url: String = self
-                        .initvalues
-                        .get(&PropDef::AppUrl)
-                        .cloned()
-                        .unwrap_or("some.app.url".to_string());
-                    let systray_indicator = create_systray_icon_3(gui_event_sender.clone(), app_url);
-                    let mut ret = (*gtk_obj_a).write().unwrap();
-                    ret.set_indicator(Some(systray_indicator));
-                }
-
-        */
     }
 }
 

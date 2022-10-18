@@ -239,7 +239,6 @@ impl GtkObjectsImpl {
         }
     }
 
-
     // impl GtkObjectsImpl
 }
 
@@ -558,6 +557,10 @@ impl GtkObjects for GtkObjectsImpl {
         self.indicator.as_ref()
     }
 
+    fn get_indicator_mut(&mut self) -> Option<&mut libappindicator::AppIndicator> {
+        self.indicator.as_mut()
+    }
+
     /// TODO
     fn set_create_systray_fn(
         &mut self,
@@ -754,5 +757,8 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     fn update_systray_indicator(&self, enable: bool) {
         self.send_to_int(&IntCommands::TrayIconEnable(enable));
     }
-	
+
+    fn update_window_minimized(&self, mini: bool) {
+        self.send_to_int(&&IntCommands::UpdateWindowMinimized(mini));
+    }
 } //

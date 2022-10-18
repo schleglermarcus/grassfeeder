@@ -18,6 +18,7 @@ use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UISenderWrapper;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::PropDef;
+use libappindicator::AppIndicatorStatus;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;
@@ -619,6 +620,33 @@ impl GtkModelUpdaterInt {
         }
     }
 
+    pub fn update_tray_icon(&self, enable: bool) {
+        let indicator_present;
+        {
+            let g_o = (*self.g_o_a).read().unwrap();
+            indicator_present = g_o.get_indicator().is_some();
+        }
+        // trace!(            "updateTray pres:{}-> EN:{}  -> CR:{}",            indicator_present,            enable,            do_create_systray        );
+        if !indicator_present && enable {
+            let store = (self.m_v_store).read().unwrap();
+            let app_url = store.get_gui_property_or(PropDef::AppUrl, "no-app-url".to_string());
+            let mut g_o = (*self.g_o_a).write().unwrap();
+            if let Some(create_fn) = g_o.get_create_systray_fn() {
+                let ind = (*create_fn)(self.ev_sender_w.clone(), app_url);
+                g_o.set_indicator(Some(ind));
+            }
+        }
+        let mut g_o = (*self.g_o_a).write().unwrap();
+        if let Some(indica) = g_o.get_indicator_mut() {
+            let new_status = if enable {
+                AppIndicatorStatus::Active
+            } else {
+                AppIndicatorStatus::Passive
+            };
+            indica.set_status(new_status);
+        }
+    }
+
     pub fn memory_conserve(&self, active: bool) {
         if active {
             self.pixbufcache.borrow_mut().clear();
@@ -627,38 +655,13 @@ impl GtkModelUpdaterInt {
         (self.m_v_store).write().unwrap().memory_conserve(active);
     }
 
-    pub fn update_tray_icon(&self, enable: bool) {
-        let mut do_create_systray: bool = false;
-        let mut do_remove_systray: bool = false;
-        let indicator_present; //  : bool = false;
-        {
-            let g_o = (*self.g_o_a).read().unwrap();
-            indicator_present = g_o.get_indicator().is_some();
-        }
-        debug!("updateTray pres:{}-> EN:{}", indicator_present, enable);
-        if indicator_present {
-            if !enable {
-                do_remove_systray = true;
+    pub fn update_window_minimized(&self, minimized: bool) {
+        if let Some(window) = (*self.g_o_a).read().unwrap().get_window() {
+            if minimized {
+                window.iconify();
+            } else {
+                window.deiconify();
             }
-        } else {
-            if enable {
-                do_create_systray = true;
-            }
-        }
-        if do_create_systray {
-            let store = (self.m_v_store).read().unwrap();
-            let app_url = store.get_gui_property_or(PropDef::AppUrl, "no-app-url".to_string());
-            let mut g_o = (*self.g_o_a).write().unwrap();
-
-            if let Some(create_fn) = g_o.get_create_systray_fn() {
-                debug!("SWITCH trayicon ON !! ");
-                let ind = (*create_fn)(self.ev_sender_w.clone(), app_url);
-                g_o.set_indicator(Some(ind));
-            }
-        }
-        if do_remove_systray {
-            info!("SWITCH trayicon off");
-            (*self.g_o_a).write().unwrap().set_indicator(None);
         }
     }
 }

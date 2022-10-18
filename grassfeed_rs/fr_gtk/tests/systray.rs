@@ -18,8 +18,6 @@ fn create_tray2() {
     let mi = gtk::CheckMenuItem::with_label("Hello Rust!");
     mi.connect_activate(|_| {
         debug!("activate  ->  quit");
-
-        // gtk::main_quit();
     });
 
     mi.connect_hide(|_m| debug!("MENU hide!"));
@@ -28,12 +26,10 @@ fn create_tray2() {
         gtk::Inhibit(false)
     });
 
-	mi.connect_draw(|_m, _n| {
+    mi.connect_draw(|_m, _n| {
         debug!("MENU draw!");
         gtk::Inhibit(false)
     });
-
-
 
     m.append(&mi);
     indicator.set_menu(&mut m);

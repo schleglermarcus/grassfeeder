@@ -195,6 +195,10 @@ impl GtkRunnerInternal {
                     IntCommands::TrayIconEnable(act) => {
                         upd_int.update_tray_icon(act);
                     }
+                    IntCommands::UpdateWindowMinimized(mini) => {
+                        upd_int.update_window_minimized(mini)
+                    }
+
                     _ => {
                         warn!("GTKS other cmd {:?}", command);
                     }
@@ -245,35 +249,3 @@ fn build_window(
     });
     window
 }
-
-/*
-use gtk::prelude::GtkMenuItemExt;
-use gtk::prelude::MenuShellExt;
-use libappindicator::AppIndicator;
-use libappindicator::AppIndicatorStatus;
-pub const ICON_PATH: &str = "/usr/share/pixmaps/grassfeeder/";
-pub const ICON2: &str = "grassfeeder-indicator2"; // grassfeeder-indicator2.png
-
-pub fn create_systray_icon_3() -> AppIndicator {
-    debug!("INDI: {}  {}", ICON_PATH, ICON2);
-    let mut indicator = AppIndicator::new("xxx.grassfeed.rs", "");
-    indicator.set_icon_theme_path(ICON_PATH);
-    indicator.set_icon(ICON2);
-    indicator.set_status(AppIndicatorStatus::Active);
-    let mut menu = gtk::Menu::new();
-    let mi1 = gtk::MenuItem::with_label("TODO  Show Window ");
-
-    mi1.connect_activate(move |_| {
-        debug!("window-restore");
-    });
-    menu.append(&mi1);
-    let mi2 = gtk::MenuItem::with_label("TODO  Quit ");
-    mi2.connect_activate(move |_| {
-        debug!("application-quit");
-    });
-    menu.append(&mi2);
-    menu.show_all();
-    indicator.set_menu(&mut menu);
-    indicator
-}
-*/
