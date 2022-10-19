@@ -19,15 +19,21 @@ pub fn create_systray_icon_3(g_ev_se: UiSenderWrapperType, app_url: String) -> A
     let mi1 = gtk::MenuItem::with_label(&t!("SYSTRAY_CMD_SHOW_WINDOW"));
     let se_w1 = g_ev_se.clone(); //  EvSenderWrapper(g_ev_se.clone());
     mi1.connect_activate(move |_| {
-        debug!("window-restore");
-        se_w1.send(GuiEvents::Indicator("show-window".to_string()));
+        let ev1 = gdk::Event::new(gdk::EventType::ButtonPress);
+
+        let ev_time = ev1.time();
+        info!("TRAY:  time={}  cur={}", ev_time, gtk::current_event_time());
+
+        se_w1.send(GuiEvents::Indicator("show-window".to_string(), ev_time));
     });
     menu.append(&mi1);
     let mi2 = gtk::MenuItem::with_label(&t!("SYSTRAY_CMD_QUIT"));
     let se_w2 = g_ev_se.clone();
     mi2.connect_activate(move |_| {
-        debug!("application-quit");
-        se_w2.send(GuiEvents::Indicator("app-quit".to_string()));
+        se_w2.send(GuiEvents::Indicator(
+            "app-quit".to_string(),
+            gtk::current_event_time(),
+        ));
     });
     menu.append(&mi2);
     menu.show_all();
@@ -35,7 +41,6 @@ pub fn create_systray_icon_3(g_ev_se: UiSenderWrapperType, app_url: String) -> A
         debug!("menu: focus! {:?}", dir);
         gtk::Inhibit(false)
     });
-    // menu.connect_show(|_m| {         debug!("menu: show !  works on startup. ");     });
     menu.connect_window_notify(|_m| {
         debug!("menu: win_notif ! ");
     });

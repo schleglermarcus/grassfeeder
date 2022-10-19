@@ -73,7 +73,7 @@ pub enum IntCommands {
     WebViewRemove(Option<u8>),
     MemoryConserve(bool),
     TrayIconEnable(bool),
-	UpdateWindowMinimized(bool),
+	UpdateWindowMinimized(bool, u32 ),
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;

@@ -655,12 +655,31 @@ impl GtkModelUpdaterInt {
         (self.m_v_store).write().unwrap().memory_conserve(active);
     }
 
-    pub fn update_window_minimized(&self, minimized: bool) {
+    pub fn update_window_minimized(&self, minimized: bool, _ev_time: u32) {
         if let Some(window) = (*self.g_o_a).read().unwrap().get_window() {
             if minimized {
+                trace!("UPD:  iconify ... ");
                 window.iconify();
             } else {
+                trace!("UPD:  DE-iconify ... {}    N ", _ev_time);
                 window.deiconify();
+                trace!("UPD: maximize ");
+                window.maximize(); // needed
+                trace!("UPD: unmaximize ");
+                window.unmaximize();
+
+                trace!("UPD: present_with ");
+                window.present_with_time(0); // needed
+                trace!("UPD: activate_default ");
+                window.activate_default();
+                trace!("UPD: show()   N ");
+                window.show();
+                trace!("UPD: set_position( CENTER ) ");
+                window.set_position(gtk::WindowPosition::Center);
+                trace!("UPD: emit_grab_focus ");
+                window.emit_grab_focus();
+                trace!("UPD: emit_activate_focus ");
+                window.emit_activate_focus();
             }
         }
     }

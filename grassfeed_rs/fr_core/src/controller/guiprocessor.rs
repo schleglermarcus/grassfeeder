@@ -378,6 +378,8 @@ impl GuiProcessor {
                     (*self.gui_context_r).borrow().set_theme_name(theme_name);
                 }
                 GuiEvents::WindowIconified(is_minimized) => {
+                    self.currently_minimized = is_minimized;
+                    debug!("EV -> IsMini:   {} ", self.currently_minimized);
                     (*self.feedsources_r)
                         .borrow_mut()
                         .memory_conserve(is_minimized);
@@ -389,18 +391,21 @@ impl GuiProcessor {
                         .unwrap()
                         .memory_conserve(is_minimized);
                     (*self.gui_updater).borrow().memory_conserve(is_minimized);
-                    self.currently_minimized = is_minimized;
                 }
 
-                GuiEvents::Indicator(ref cmd) => match cmd.as_str() {
+                GuiEvents::Indicator(ref cmd, gtktime) => match cmd.as_str() {
                     "app-quit" => {
                         self.addjob(Job::StopApplication);
                     }
                     "show-window" => {
-                        info!(
-                            "Icon -> show-window!  cur-min {} ",
-                            self.currently_minimized
+                        debug!(
+                            "Indicator -> show-window!  cur-min {}  time:{}",
+                            self.currently_minimized, gtktime
                         );
+
+                        (*self.gui_updater)
+                            .borrow()
+                            .update_window_minimized(!self.currently_minimized, gtktime);
 
                         //						(*self.gui_updater).borrow().window_is_iconified();
                     }

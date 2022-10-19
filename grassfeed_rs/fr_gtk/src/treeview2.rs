@@ -141,7 +141,6 @@ pub fn create_treeview(
         let treeview: gtk::TreeView = p_tv.clone().dynamic_cast::<gtk::TreeView>().unwrap();
         if let Some((Some(t_path), _o_tvc, _x, _y)) = treeview.path_at_pos(posx as i32, posy as i32)
         {
-            //            if let Some(t_path) = o_tp {
             if let Some(t_model) = treeview.model() {
                 let t_iter = t_model.iter(&t_path).unwrap();
                 source_repo_id = t_model
@@ -149,7 +148,6 @@ pub fn create_treeview(
                     .get::<u32>()
                     .unwrap() as i32;
             }
-            //            }
         }
         if ev_but.button() == MOUSE_BUTTON_RIGHT {
             show_context_menu_source(ev_but.button(), source_repo_id, ev_se_3.clone());
@@ -176,6 +174,7 @@ pub fn create_treeview(
     let drag_s2 = drag_state.clone();
     treeview1.connect_drag_begin(move |_t_view, _drag_context| {
         let (o_t_path, _) = _t_view.cursor();
+
         if let Some(t_path) = o_t_path {
             // debug!("drag_begin  {:?}", t_path.indices());
             (*drag_s2).write().unwrap().drag_start_path = Some(t_path);

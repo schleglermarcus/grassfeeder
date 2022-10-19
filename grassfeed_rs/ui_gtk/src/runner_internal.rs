@@ -120,7 +120,7 @@ impl GtkRunnerInternal {
         let is_minimized: AtomicBool = AtomicBool::new(false);
         glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
             let prev_count = INTERVAL_COUNTER.fetch_add(1, Ordering::Relaxed);
-            if is_minimized.load(Ordering::Relaxed) && (prev_count & 15 != 0) {
+            if is_minimized.load(Ordering::Relaxed) && (prev_count & 7 != 0) {
                 return glib::Continue(true);
             }
             let mut rec_set: HashSet<IntCommands> = HashSet::new();
@@ -195,8 +195,8 @@ impl GtkRunnerInternal {
                     IntCommands::TrayIconEnable(act) => {
                         upd_int.update_tray_icon(act);
                     }
-                    IntCommands::UpdateWindowMinimized(mini) => {
-                        upd_int.update_window_minimized(mini)
+                    IntCommands::UpdateWindowMinimized(mini, ev_time) => {
+                        upd_int.update_window_minimized(mini, ev_time)
                     }
 
                     _ => {

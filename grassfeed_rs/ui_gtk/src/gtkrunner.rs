@@ -758,7 +758,7 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
         self.send_to_int(&IntCommands::TrayIconEnable(enable));
     }
 
-    fn update_window_minimized(&self, mini: bool) {
-        self.send_to_int(&&IntCommands::UpdateWindowMinimized(mini));
+    fn update_window_minimized(&self, mini: bool, ev_time: u32) {
+        self.send_to_int(&&IntCommands::UpdateWindowMinimized(mini, ev_time ));
     }
 } //
