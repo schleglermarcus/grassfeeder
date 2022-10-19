@@ -9,22 +9,18 @@ pub fn create_systray_icon_3(g_ev_se: UiSenderWrapperType, app_url: String) -> A
     use gtk::prelude::GtkMenuItemExt;
     use gtk::prelude::MenuShellExt;
     use gui_layer::abstract_ui::GuiEvents;
-
-    trace!("TRAY3: {}  {}", ICON_PATH, ICON2);
+    // trace!("TRAY3: {}  {}", ICON_PATH, ICON2);
     let mut indicator = AppIndicator::new(app_url.as_str(), "");
     indicator.set_icon_theme_path(ICON_PATH);
     indicator.set_icon(ICON2);
-    // indicator.set_status(AppIndicatorStatus::Attention);
     let mut menu = gtk::Menu::new();
     let mi1 = gtk::MenuItem::with_label(&t!("SYSTRAY_CMD_SHOW_WINDOW"));
     let se_w1 = g_ev_se.clone(); //  EvSenderWrapper(g_ev_se.clone());
     mi1.connect_activate(move |_| {
-        let ev1 = gdk::Event::new(gdk::EventType::ButtonPress);
-
-        let ev_time = ev1.time();
-        info!("TRAY:  time={}  cur={}", ev_time, gtk::current_event_time());
-
-        se_w1.send(GuiEvents::Indicator("show-window".to_string(), ev_time));
+        se_w1.send(GuiEvents::Indicator(
+            "show-window".to_string(),
+            gtk::current_event_time(),
+        ));
     });
     menu.append(&mi1);
     let mi2 = gtk::MenuItem::with_label(&t!("SYSTRAY_CMD_QUIT"));

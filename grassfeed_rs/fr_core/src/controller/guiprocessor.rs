@@ -398,18 +398,11 @@ impl GuiProcessor {
                         self.addjob(Job::StopApplication);
                     }
                     "show-window" => {
-                        debug!(
-                            "Indicator -> show-window!  cur-min {}  time:{}",
-                            self.currently_minimized, gtktime
-                        );
-
+                        // debug!(                            "Indicator -> show-window!  cur-min {}  time:{}",                            self.currently_minimized, gtktime                        );
                         (*self.gui_updater)
                             .borrow()
                             .update_window_minimized(!self.currently_minimized, gtktime);
-
-                        //						(*self.gui_updater).borrow().window_is_iconified();
                     }
-
                     _ => {
                         warn!("unknown indicator event");
                     }
