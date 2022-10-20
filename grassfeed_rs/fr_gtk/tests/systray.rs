@@ -13,7 +13,7 @@ use std::sync::Arc;
 pub const ICON_PATH: &str = "/usr/share/pixmaps/grassfeeder/";
 pub const ICON2: &str = "grassfeeder-indicator2"; // grassfeeder-indicator2.png
 
-//  #[ignore]
+#[ignore]
 #[test]
 fn libapp1() {
     setup();
@@ -30,8 +30,6 @@ fn libapp1() {
             .default_height(200)
             .title("Hello, World!")
             .build();
-        // let win: gtk::Window = appwin.downcast().unwrap();
-        // let is_mini: Arc<bool> = Arc::new(false);
         let is_minimized: Arc<AtomicBool> = Arc::new(AtomicBool::new(false));
 
         let is_mini_c = is_minimized.clone();
@@ -53,13 +51,7 @@ fn libapp1() {
         indicator.set_icon(ICON2);
         let mut m = gtk::Menu::new();
         let mi = gtk::MenuItem::with_label("Show/Hide");
-
-        // if let Some(win_c) = appwin.downcast_ref::<gdk::Window>() {
-        //     debug!("downcast okay!");
-        // }
-
         let win_c = appwin.clone();
-
         let act1 = gio::SimpleAction::new("sub_another", None);
         win_c.add_action(&act1);
         act1.connect_activate(|_act, _variant| {
@@ -84,10 +76,7 @@ fn libapp1() {
 
         appwin.show_all();
     });
-
-    debug!("libapp1 app.run() ...");
     application.run();
-    debug!("run() done ");
 }
 
 // ------------------------------------

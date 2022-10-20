@@ -265,7 +265,6 @@ impl FeedContents {
                         last_selected_msg_id = subs_e.0.last_selected_msg;
                     }
                 }
-                // trace!(                    "to-policy: FS-last-id:{}    list_selected_ids={:?}",                    last_selected_msg_id,                    self.list_selected_ids.read().unwrap()                );
                 if last_selected_msg_id > 0 {
                     (*self.gui_updater).borrow().list_set_cursor(
                         TREEVIEW1,
@@ -282,11 +281,11 @@ impl FeedContents {
                     self.config.list_sort_column,
                     self.config.list_sort_order_up
                 );
-                let (highest_ts_repo_id, _highest_created_timestamp) = self
-                    .msg_state
-                    .read()
-                    .unwrap()
-                    .get_highest_created_timestamp();
+                let (highest_ts_repo_id, _highest_created_timestamp, _earliest_id, _earliest_ts) =
+                    self.msg_state
+                        .read()
+                        .unwrap()
+                        .find_latest_earliest_created_timestamp();
 
                 if highest_ts_repo_id > 0 {
                     (*self.gui_updater).borrow().list_set_cursor(
@@ -297,7 +296,14 @@ impl FeedContents {
                 }
             }
             4 => {
-                info!("Later:  Before oldest unread {} {}", fp, fp_name);
+                let o_before_earliest_unread_id =
+                    self.msg_state.read().unwrap().find_before_earliest_unread();
+                // trace!(                    "BeforeOldestUnread {} `{}` earliest:{:?} ",                    fp, fp_name, o_before_earliest_unread_id                );
+                if let Some(id) = o_before_earliest_unread_id {
+                    (*self.gui_updater)
+                        .borrow()
+                        .list_set_cursor(TREEVIEW1, id, LIST0_COL_MSG_ID);
+                }
             }
             _ => (),
         }

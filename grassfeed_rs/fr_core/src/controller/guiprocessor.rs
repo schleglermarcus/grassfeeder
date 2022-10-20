@@ -379,6 +379,7 @@ impl GuiProcessor {
                 }
                 GuiEvents::WindowIconified(is_minimized) => {
                     self.currently_minimized = is_minimized;
+                    debug!("EV WindowIconified   {} ", is_minimized);
                     (*self.feedsources_r)
                         .borrow_mut()
                         .memory_conserve(is_minimized);
@@ -397,10 +398,15 @@ impl GuiProcessor {
                         self.addjob(Job::StopApplication);
                     }
                     "show-window" => {
-                        // debug!(                            "Indicator -> show-window!  cur-min {}  time:{}",                            self.currently_minimized, gtktime                        );
+                        debug!(
+                            "Indicator -> show-window!  cur-min {}  time:{}",
+                            self.currently_minimized, gtktime
+                        );
+
+                        self.currently_minimized = !self.currently_minimized;
                         (*self.gui_updater)
                             .borrow()
-                            .update_window_minimized(!self.currently_minimized, gtktime);
+                            .update_window_minimized(self.currently_minimized, gtktime);
                     }
                     _ => {
                         warn!("unknown indicator event");
@@ -929,8 +935,6 @@ impl GuiProcessor {
             KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.prev(),
             KeyCodes::Key_a => {
                 if subscription_id > 0 {
-                    // (*self.feedcontents_r).borrow_mut().set_read_all();
-                    debug!("key:a {}", subscription_id);
                     (*self.feedsources_r).borrow().mark_as_read(subscription_id);
                 }
             }

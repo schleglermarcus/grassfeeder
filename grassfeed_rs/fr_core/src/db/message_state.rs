@@ -96,18 +96,30 @@ impl MessageStateMap {
         None
     }
 
-    // msg-id,  timestamp
-    pub fn get_highest_created_timestamp(&self) -> (isize, i64) {
+    ///  Message with the latest Timestemp.
+    ///  Returns    Latest-msg-id,  Latest-timestamp,  Earliest-msg-id, earliest-Timestamp
+    pub fn find_latest_earliest_created_timestamp(&self) -> (isize, i64, isize, i64) {
         let mut highest_created_timestamp: i64 = 0; // Most Recent
         let mut highest_ts_repo_id: isize = -1;
+        let mut earliest_created_timestamp: i64 = i64::MAX; // least recent
+        let mut earliest_ts_repo_id: isize = -1;
         self.msgmap.iter().for_each(|(fc_id, fc_state)| {
             if fc_state.msg_created_timestamp > highest_created_timestamp {
                 highest_created_timestamp = fc_state.msg_created_timestamp;
                 highest_ts_repo_id = *fc_id;
-            }
+            };
+            if fc_state.msg_created_timestamp < earliest_created_timestamp {
+                // println!(                    " ID{}     CMP:  {} < {}",                    fc_state.msg_id, fc_state.msg_created_timestamp, earliest_created_timestamp                );
+                earliest_created_timestamp = fc_state.msg_created_timestamp;
+                earliest_ts_repo_id = *fc_id;
+            };
         });
-        // debug!(            "mostRecent={} {}",            highest_ts_repo_id, highest_created_timestamp        );
-        (highest_ts_repo_id, highest_created_timestamp)
+        (
+            highest_ts_repo_id,
+            highest_created_timestamp,
+            earliest_ts_repo_id,
+            earliest_created_timestamp,
+        )
     }
 
     pub fn contains(&self, msg_id: isize) -> bool {
@@ -177,6 +189,24 @@ impl MessageStateMap {
             Some(vals[new_index as usize].msg_id)
         }
     }
+
+    /// Searches the message before the oldest unread
+    ///  message-id,  seek-to:  true:higher timestamps, false: lower_timestamps
+    pub fn find_before_earliest_unread(&self) -> Option<isize> {
+        if self.msgmap.is_empty() {
+            return None;
+        }
+        let mut vals: Vec<MessageState> = self.msgmap.values().cloned().collect();
+        vals.sort_by(|a, b| a.msg_created_timestamp.cmp(&b.msg_created_timestamp));
+        let mut new_index: isize = 0;
+        while new_index < vals.len() as isize && vals[new_index as usize].is_read_copy {
+            new_index += 1;
+        }
+        if new_index > 0 as isize {
+            return Some(vals[(new_index - 1) as usize].msg_id);
+        }
+        None
+    }
 }
 
 #[cfg(test)]
@@ -204,7 +234,7 @@ pub mod t {
     }
 
     //cargo watch -s "cargo test db::message_state::t::t_find_unread_message_simple --lib -- --exact --nocapture"
-    #[ignore]
+    // #[ignore]
     #[test]
     fn t_find_unread_message_simple() {
         let mut msm = MessageStateMap::default();
@@ -224,4 +254,27 @@ pub mod t {
         assert_eq!(msm.find_unread_message(1, false), None);
         assert_eq!(msm.find_unread_message(1, true), None);
     }
+
+    //cargo watch -s "cargo test db::message_state::t::t_find_before_last_unread  --lib -- --exact --nocapture"
+    #[test]
+    fn t_find_before_last_unread() {
+        let mut msm = MessageStateMap::default();
+        let lim = 7;
+        for a in 0..lim {
+            msm.insert(
+                a + 1,
+                (a < 2) || (a > 3 && a < 5),
+                a + 100,
+                (a as i64) * 10000000,
+                String::default(),
+                0,
+            );
+        }
+        // msm.dump();
+        let o_last_read = msm.find_before_earliest_unread();
+        // println!("  o_last_read={:?}", o_last_read);
+        assert_eq!(o_last_read, Some(2));
+    }
+
+    //
 }

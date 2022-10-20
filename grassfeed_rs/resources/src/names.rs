@@ -10,9 +10,9 @@ pub enum FetchUpdaterIntervalNames {
 pub const FOCUS_POLICY_NAMES: [&str; 5] = [
     "",
     "None",
-    "Last Selected Message",
-    "Most Recent Message",
-    "Before Oldest Unread Message",
+    "LastSelectedMessage",
+    "MostRecentMessage",
+    "BeforeOldestUnreadMessage",
 ];
 
 pub fn resolve(name: &str, list_iter: Iter<'_, &str>) -> i32 {

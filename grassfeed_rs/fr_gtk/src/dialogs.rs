@@ -41,10 +41,8 @@ use ui_gtk::GtkObjectsType;
 
 const FONTSIZE_MIN: f64 = 5.0;
 const FONTSIZE_MAX: f64 = 18.0;
-
 const MAX_LENGTH_NEW_SOURCE_NAME: i32 = 50;
 const MAX_LENGTH_NEW_SOURCE_URL: i32 = 200;
-
 const GRID_SPACING: u32 = 5;
 
 pub fn create_dialogs(
@@ -747,8 +745,7 @@ fn create_settings_dialog(
         cbt_focuspolicy.append_text(&get_focus_policy_name(1));
         cbt_focuspolicy.append_text(&get_focus_policy_name(2));
         cbt_focuspolicy.append_text(&get_focus_policy_name(3));
-        //  LATER                cbt_focuspolicy.append_text(FOCUS_POLICY_NAMES[4]);
-
+        cbt_focuspolicy.append_text(&get_focus_policy_name(4));
         cbt_focuspolicy.set_id_column(0);
         grid1.attach(&cbt_focuspolicy, 1, line, 1, 1);
         line += 1;
@@ -809,8 +806,6 @@ fn create_settings_dialog(
         let label2_5 = Label::new(Some(&t!("D_SETTINGS_SYSTRAY_ICON_ENABLE")));
         grid2.attach(&label2_5, 0, line, 1, 1);
         grid2.attach(&sw_enable_systray, 1, line, 1, 1);
-
-
     }
     let ev_se = g_ev_se;
     let sw_subs_update_onstart_c = sw_subs_update_onstart.clone();

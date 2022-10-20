@@ -1,11 +1,11 @@
 Sun, 16 Oct 2022 00:01:00 +0000
 * Reduced timer loop use on minimized
-
-- Application Icon into Systray
-
-
+* Application Icon into Systray
 
 - Message List: implement focus policy: before last unread
+
+
+
 - Message List: set scroll position to upper edge from Cursor
 - Opml export formatted / pretty
 - import opml: see if we can get the web main url from  the outline
