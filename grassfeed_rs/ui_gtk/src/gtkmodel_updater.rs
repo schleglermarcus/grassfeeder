@@ -666,65 +666,66 @@ impl GtkModelUpdaterInt {
                     s_height = store.get_gui_int_or(PropDef::GuiWindowHeight, 100);
                 }
                 let (width, height) = window.size();
-
-                wprop("Min-B", &window);
+                // wprop("Min-B", &window);
 
                 if width != s_width as i32 || height != s_height as i32 {
                     let mut store = (self.m_v_store).write().unwrap();
                     store.set_gui_property(PropDef::GuiWindowWidth, width.to_string());
                     store.set_gui_property(PropDef::GuiWindowHeight, height.to_string());
                 }
-
-                debug!(
-                    "UPD:  iconify ... direct: {}x{}   prop:{}x{}",
-                    width, height, s_width, s_height
-                );
+                // debug!(                    "UPD:  iconify ... direct: {}x{}   prop:{}x{}",                    width, height, s_width, s_height                );
                 window.iconify();
 
-                wprop("Min-post", &window);
+                // wprop("Min-post", &window);
             } else {
-                wprop("Big-B", &window);
+                // wprop("Big-B", &window);
 
-                trace!("UPD:  DE-iconify ... {}    N ", _ev_time);
+                // let _a = window.is_active();
+                // let _a = window.is_visible();
+
+                let _a = window.is_realized();
+                let _a = window.is_maximized();
+                let _a = window.is_resizable();
+
+                window.present();
                 window.deiconify();
 
-                let store = (self.m_v_store).read().unwrap();
-                let s_width = store.get_gui_int_or(PropDef::GuiWindowWidth, 200);
-                let s_height = store.get_gui_int_or(PropDef::GuiWindowHeight, 100);
-                trace!("UPD:  resize  {}x{}    N ", s_width, s_height);
-                window.resize(s_width as i32, s_height as i32);
-
-                // trace!("UPD: maximize ");
-                // window.maximize(); // needed
-                // trace!("UPD: unmaximize ");
-                // window.unmaximize();
-                trace!("UPD: present_with ");
-                window.present_with_time(0); // needed
-
-                trace!("UPD: activate_default ");
-                window.activate_default();
-                trace!("UPD: show()   N ");
-                window.show(); // needed
-				trace!("UPD: set_position( CENTER ) ");
-                window.set_position(gtk::WindowPosition::Center); // needed
-                // trace!("UPD: emit_grab_focus ");
-                // window.emit_grab_focus();
-                // trace!("UPD: emit_activate_focus ");
-                // window.emit_activate_focus();
-
-                // trace!("UPD: set_urgency ");
-                // window.set_urgency_hint(true);
-				trace!("UPD:  DE-iconify ... {}    N ", _ev_time);
-                window.deiconify();
-				std::thread::sleep(std::time::Duration::from_millis(10));
-				trace!("UPD:  DE-iconify ... {}    N ", _ev_time);
-                window.deiconify();
-				std::thread::sleep(std::time::Duration::from_millis(10));
-				trace!("UPD:  DE-iconify ... {}    N ", _ev_time);
-                window.deiconify();
-
-
-                wprop("Big-post", &window);
+                /*
+                                trace!("UPD:  DE-iconify ... {}    N ", _ev_time);
+                                window.deiconify();
+                                let store = (self.m_v_store).read().unwrap();
+                                let s_width = store.get_gui_int_or(PropDef::GuiWindowWidth, 200);
+                                let s_height = store.get_gui_int_or(PropDef::GuiWindowHeight, 100);
+                                trace!("UPD:  resize  {}x{}    N ", s_width, s_height);
+                                window.resize(s_width as i32, s_height as i32);
+                                // trace!("UPD: maximize ");
+                                // window.maximize(); // needed
+                                // trace!("UPD: unmaximize ");
+                                // window.unmaximize();
+                                trace!("UPD: present_with ");
+                                window.present_with_time(0); // needed
+                                trace!("UPD: activate_default ");
+                                window.activate_default();
+                                trace!("UPD: show()   N ");
+                                window.show(); // needed
+                                trace!("UPD: set_position( CENTER ) ");
+                                window.set_position(gtk::WindowPosition::Center); // needed
+                                // trace!("UPD: emit_grab_focus ");
+                                // window.emit_grab_focus();
+                                // trace!("UPD: emit_activate_focus ");
+                                // window.emit_activate_focus();
+                                // trace!("UPD: set_urgency ");
+                                // window.set_urgency_hint(true);
+                                trace!("UPD:  DE-iconify ... {}    N ", _ev_time);
+                                window.deiconify();
+                                std::thread::sleep(std::time::Duration::from_millis(10));
+                                trace!("UPD:  DE-iconify ... {}    N ", _ev_time);
+                                window.deiconify();
+                                std::thread::sleep(std::time::Duration::from_millis(10));
+                                trace!("UPD:  DE-iconify ... {}    N ", _ev_time);
+                                window.deiconify();
+                */
+                // wprop("Big-post", &window);
             }
         }
     }
@@ -739,6 +740,5 @@ fn wprop(id: &str, w: &gtk::Window) {
         w.is_realized(),
         w.is_maximized(),
         w.is_resizable()
-
     );
 }

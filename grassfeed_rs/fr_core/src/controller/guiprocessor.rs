@@ -379,7 +379,6 @@ impl GuiProcessor {
                 }
                 GuiEvents::WindowIconified(is_minimized) => {
                     self.currently_minimized = is_minimized;
-                    debug!("EV -> IsMini:   {} ", self.currently_minimized);
                     (*self.feedsources_r)
                         .borrow_mut()
                         .memory_conserve(is_minimized);
