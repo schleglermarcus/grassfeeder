@@ -956,9 +956,6 @@ impl GuiProcessor {
             KeyCodes::Space => {
                 if self.focus_by_tab == FocusByTab::FocusMessages {
                     (*self.feedcontents_r).borrow().launch_browser();
-
-                    // (*self.feedcontents_r)						.borrow()
-                    // .process_list_action(action.clone(), repoid_list_pos.clone());
                 } //  else {                    debug!("space key but unfocused");                }
             }
 

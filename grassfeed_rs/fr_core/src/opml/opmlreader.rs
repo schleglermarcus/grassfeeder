@@ -111,6 +111,7 @@ impl OpmlReader {
             self.subscription_repo.clone(),
         );
     }
+
     /// recursive
     pub fn feedsource_to_outline(
         outline: &mut Outline,
@@ -127,7 +128,6 @@ impl OpmlReader {
         }
     }
 
-    // https://github.com/bbqsrc/xml-pretty/blob/main/src/main.rs
     pub fn write_to_file(&mut self, filename: String) -> Result<(), Box<dyn std::error::Error>> {
         let mut opml = OPML::default();
         opml.body.outlines = self.root_outline.outlines.clone();
@@ -154,9 +154,7 @@ impl OpmlReader {
             indent_text_nodes: false,
         };
         let formatted = doc.to_string_pretty_with_config(&conf);
-
         file.write(formatted.as_bytes())?;
-
         Ok(())
     }
 }

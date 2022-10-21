@@ -79,6 +79,13 @@ impl MessageStateMap {
         false
     }
 
+    pub fn get_gui_pos(&self, msg_id: isize) -> u32 {
+        if let Some(st) = self.msgmap.get(&msg_id) {
+            return st.gui_list_position as u32;
+        }
+        0
+    }
+
     pub fn get_title(&self, msg_id: isize) -> Option<String> {
         if let Some(st) = self.msgmap.get(&msg_id) {
             return Some(st.title_d.clone());
@@ -109,7 +116,6 @@ impl MessageStateMap {
                 highest_ts_repo_id = *fc_id;
             };
             if fc_state.msg_created_timestamp < earliest_created_timestamp {
-                // println!(                    " ID{}     CMP:  {} < {}",                    fc_state.msg_id, fc_state.msg_created_timestamp, earliest_created_timestamp                );
                 earliest_created_timestamp = fc_state.msg_created_timestamp;
                 earliest_ts_repo_id = *fc_id;
             };

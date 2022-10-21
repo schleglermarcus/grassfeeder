@@ -227,8 +227,17 @@ impl Step<IconInner> for IconCheckIsImage {
             || inner.icon_bytes.len() > ICON_SIZE_LIMIT_BYTES
             || an_res.kind == IconKind::Webp
         {
-            // trace!(                "IconCheckIsImage: going to downscale  {}x{} {:?} {} ",                an_res.width_orig,                an_res.height_orig,                an_res.kind,                inner.icon_url,            );
-            return StepResult::Continue(Box::new(IconDownscale(inner)));
+            if an_res.kind != IconKind::UnknownType {
+                trace!(
+                    "IconCheckIsImage: going to downscale  {}x{} {:?} {} len={}",
+                    an_res.width_orig,
+                    an_res.height_orig,
+                    an_res.kind,
+                    inner.icon_url,
+                    inner.icon_bytes.len()
+                );
+                return StepResult::Continue(Box::new(IconDownscale(inner)));
+            }
         }
 
         if an_res.kind == IconKind::UnknownType || an_res.kind == IconKind::TooSmall {

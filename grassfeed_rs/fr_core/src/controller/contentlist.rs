@@ -113,8 +113,7 @@ pub trait IFeedContents {
     fn process_kb_delete(&self);
     fn set_read_complete_subscription(&mut self, source_repo_id: isize);
     fn memory_conserve(&mut self, act: bool);
-	fn launch_browser(&self) ;
-
+    fn launch_browser(&self);
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
@@ -792,9 +791,18 @@ impl IFeedContents for FeedContents {
     fn launch_browser(&self) {
         let id_list = self.list_selected_ids.read().unwrap();
         debug!("launch_browser: {:?}", &id_list);
-        id_list
-            .iter()
-            .for_each(|dbid| self.addjob(CJob::StartWebBrowser(*dbid)));
+        let mut listpos_id: Vec<(u32, u32)> = Vec::default();
+        id_list.iter().for_each(|dbid| {
+            self.msg_state
+                .write()
+                .unwrap()
+                .set_read_many(&[*dbid as i32], true);
+            (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[*dbid as i32], true);
+            self.addjob(CJob::StartWebBrowser(*dbid));
+            let gui_pos = self.msg_state.read().unwrap().get_gui_pos(*dbid as isize);
+            listpos_id.push((gui_pos as u32, *dbid as u32));
+        });
+        self.addjob(CJob::UpdateContentListSome(listpos_id));
     }
 
     fn get_msg_content_author_categories(

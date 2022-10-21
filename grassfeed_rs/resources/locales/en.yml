@@ -105,4 +105,5 @@ en:
     a           Mark all messages of that subscription as read \n
     s           Jump to previous unread message \n
     x           Jump to next unread message \n
+    Space       Start browser with multiple messages \n
     "
