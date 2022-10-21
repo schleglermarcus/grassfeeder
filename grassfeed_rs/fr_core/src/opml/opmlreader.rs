@@ -1,6 +1,7 @@
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
+use crate::util::db_time_to_display;
 use crate::util::remove_invalid_chars_from_input;
 use crate::util::timestamp_now;
 use context::appcontext::AppContext;
@@ -14,7 +15,10 @@ use resources::gen_icons;
 use std::cell::RefCell;
 use std::fs::File;
 use std::io::ErrorKind;
+use std::io::Write;
 use std::rc::Rc;
+use xmlem::display;
+use xmlem::Document;
 
 const EXPORT_TITLE: &str = "GrassFeeder Export";
 
@@ -99,7 +103,8 @@ impl OpmlReader {
             subs_id: 0,
             ..Default::default()
         };
-        self.root_outline.title = Some(EXPORT_TITLE.to_string());
+        let title = format!("{} {}", EXPORT_TITLE, db_time_to_display(timestamp_now()));
+        self.root_outline.title = Some(title);
         OpmlReader::feedsource_to_outline(
             &mut self.root_outline,
             &fse,
@@ -122,6 +127,7 @@ impl OpmlReader {
         }
     }
 
+    // https://github.com/bbqsrc/xml-pretty/blob/main/src/main.rs
     pub fn write_to_file(&mut self, filename: String) -> Result<(), Box<dyn std::error::Error>> {
         let mut opml = OPML::default();
         opml.body.outlines = self.root_outline.outlines.clone();
@@ -137,7 +143,20 @@ impl OpmlReader {
             }
         }
         let mut file = File::create(filename)?;
-        opml.to_writer(&mut file)?;
+        let unformatted = opml.to_string()?;
+        let cursor = std::io::Cursor::new(unformatted.as_bytes());
+        let doc = Document::from_reader(cursor)?;
+        let conf = display::Config {
+            is_pretty: true,
+            indent: 2,
+            max_line_length: 1000,
+            entity_mode: display::EntityMode::Standard,
+            indent_text_nodes: false,
+        };
+        let formatted = doc.to_string_pretty_with_config(&conf);
+
+        file.write(formatted.as_bytes())?;
+
         Ok(())
     }
 }
@@ -223,6 +242,22 @@ impl StartupWithAppContext for OpmlReader {}
 mod t_ {
     use super::*;
 
+    //RUST_BACKTRACE=1 cargo watch -s "cargo test  opml::opmlreader::t_::opml_import_with_homepages  --lib -- --exact --nocapture"
+    #[test]
+    fn opml_import_with_homepages() {
+        setup();
+        let fsrr = Rc::new(RefCell::new(SubscriptionRepo::new_inmem()));
+        (*fsrr).borrow().scrub_all_subscriptions();
+        let mut opmlreader = OpmlReader::new(fsrr.clone());
+        let r = opmlreader.read_from_file(String::from("../testing/tests/opml/ShawnBlanc.opml")); // reader_wp.opml
+        assert!(r.is_ok());
+        opmlreader.transfer_to_db(0);
+        let all = (*fsrr).borrow().get_all_entries();
+        assert_eq!(all.len(), 22);
+        let e1 = all.get(1).unwrap();
+        assert_eq!(e1.website_url, "http://thefightspot.com".to_string());
+    }
+
     //RUST_BACKTRACE=1 cargo watch -s "cargo test  opml::opmlreader::t_::opml_import_w_folders  --lib -- --exact --nocapture"
     #[test]
     fn opml_import_w_folders() {
@@ -230,11 +265,10 @@ mod t_ {
         let fsrr = Rc::new(RefCell::new(SubscriptionRepo::new_inmem()));
         (*fsrr).borrow().scrub_all_subscriptions();
         let mut opmlreader = OpmlReader::new(fsrr.clone());
-        let r = opmlreader.read_from_file(String::from("../testing/tests/opml/reader_wp.opml"));
+        let r = opmlreader.read_from_file(String::from("../testing/tests/opml/reader_wp.opml")); //
         assert!(r.is_ok());
         opmlreader.transfer_to_db(0);
         let all = (*fsrr).borrow().get_all_entries();
-        println!("all={:?}", all);
         let e0 = all.get(0).unwrap();
         assert!(e0.is_folder);
         assert_eq!(all.len(), 24);
@@ -268,6 +302,7 @@ mod t_ {
         assert_eq!(e2.is_folder, false);
     }
 
+    //cargo watch -s "cargo test  opml::opmlreader::t_::opml_write  --lib -- --exact --nocapture"
     // #[ignore]
     #[test]
     fn opml_write() {
@@ -283,8 +318,8 @@ mod t_ {
         let mut opmlreader = OpmlReader::new(fsrr.clone());
         opmlreader.transfer_from_db();
         let _r = opmlreader.write_to_file(String::from(dest_filename));
-        let written_lenght = std::fs::metadata(dest_filename).unwrap().len();
-        assert_eq!(written_lenght, 602);
+        let written_length = std::fs::metadata(dest_filename).unwrap().len();
+        assert_eq!(written_length, 693);
     }
 
     #[allow(dead_code)]

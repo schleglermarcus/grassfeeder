@@ -169,9 +169,7 @@ impl GtkGuiBuilder for GtkObjectTree {
             }
             gtk::Inhibit(false)
         });
-
         let mode_debug = self.get_bool(PropDef::AppModeDebug);
-
         let p2p = self.get_int(PropDef::GuiPane2Pos, 120) as i32;
         paned_top.set_position(p2p);
         let box_2_h = gtk::Box::new(Orientation::Horizontal, 0);
@@ -483,6 +481,9 @@ fn connect_keyboard(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
             // debug!("! SUPER_MASK   Win-Left- ");
         } else {
             esw.sendw(GuiEvents::KeyPressed(*keyval as isize, keyval.to_unicode()));
+            if (*keyval) as i32 == gdk_sys::GDK_KEY_space {
+                return Inhibit(true); // don't process space, but all other keys
+            }
         }
         Inhibit(false)
     });
@@ -685,7 +686,6 @@ pub fn create_toolbar(
             esw.sendw(GuiEvents::ToolBarButton("reload-feeds-all".to_string()));
         });
     }
-
     if false {
         let image = Image::new();
         process_string_to_image(
@@ -716,8 +716,6 @@ pub fn create_toolbar(
                 sw.is_active(),
             ));
         });
-    }
-    if false {
         let ttb2: ToggleToolButton = ToggleToolButtonBuilder::new().label("Special2").build();
         toolbar.insert(&ttb2, -1);
         let esw = EvSenderWrapper(g_ev_se.clone());

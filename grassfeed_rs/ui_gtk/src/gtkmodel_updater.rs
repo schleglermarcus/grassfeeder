@@ -23,8 +23,8 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;
 use std::sync::Arc;
-use std::time::Instant;
 use webkit2gtk::WebViewExt;
+// use std::time::Instant;
 
 pub struct GtkModelUpdaterInt {
     m_v_store: UIAdapterValueStoreType,
@@ -191,7 +191,7 @@ impl GtkModelUpdaterInt {
 
     //  replaces a single line of the tree
     pub fn update_tree_model_single(&self, index: u8, path: Vec<u16>) {
-        let now = Instant::now();
+        // let now = Instant::now();
         let max_columns;
         let tree_store: TreeStore;
         {
@@ -215,9 +215,7 @@ impl GtkModelUpdaterInt {
         let path_cn = format!("{:?}", path)
             .replace(&['[', ']', ' '], "")
             .replace(',', ":");
-        let mut elapsed_3: u128 = 0;
         if let Some(iter) = tree_store.iter_from_string(&path_cn) {
-            elapsed_3 = now.elapsed().as_millis();
             self.treestore_set_row(&tree_store, gti, &iter, max_columns);
         } else {
             error!(
@@ -225,18 +223,14 @@ impl GtkModelUpdaterInt {
                 &path, &path_cn, gti
             );
         }
-        let elapsed_fin = now.elapsed().as_millis();
-        if elapsed_fin > 40 {
-            debug!(
-                "update_tree_model_single({} {:?}) TOO LONG {:?} times:{} {} ",
-                index, path, &gti.a_values[1], elapsed_3, elapsed_fin
-            );
-        }
+        // let elapsed_fin = now.elapsed().as_millis();
+        // if elapsed_fin > 40 {            debug!(                "update_tree_model_single({} {:?}) TOO LONG {:?} times:{} {} ",                index, path, &gti.a_values[1], elapsed_3, elapsed_fin            );        }
     }
 
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
     ///  Needs the same index for   ListStore  as for TreeView
     pub fn update_list_model(&self, list_index: u8) {
+        // let now = Instant::now();
         let g_o = (*self.g_o_a).read().unwrap();
         let o_list_store = g_o.get_list_store(list_index as usize);
         if o_list_store.is_none() {
@@ -259,6 +253,7 @@ impl GtkModelUpdaterInt {
             list_store.set_unsorted();
         }
         list_store.clear();
+        // let mut num_lines = 0;
         for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
             let append_iter = list_store.insert(-1);
             if row.len() < maxcols as usize {
@@ -270,11 +265,14 @@ impl GtkModelUpdaterInt {
                 continue;
             }
             Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbufcache);
+            // num_lines += 1;
         }
-        list_view.set_model(Some(list_store));
         if let Some((sort_col, sort_type)) = o_last_sort_column_id {
             list_store.set_sort_column_id(sort_col, sort_type);
         }
+        list_view.set_model(Some(list_store));
+        // let elapsed = now.elapsed().as_millis();
+        // if elapsed > 100 {            debug!(                "update_list_model took {:?}ms #lines:{} ",                elapsed, num_lines            );        }
     }
 
     fn put_into_store(

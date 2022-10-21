@@ -113,6 +113,8 @@ pub trait IFeedContents {
     fn process_kb_delete(&self);
     fn set_read_complete_subscription(&mut self, source_repo_id: isize);
     fn memory_conserve(&mut self, act: bool);
+	fn launch_browser(&self) ;
+
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
@@ -448,7 +450,7 @@ impl IFeedContents for FeedContents {
         for job in job_list {
             let now = std::time::Instant::now();
 
-            // trace!("CJOB: {:?}", &job);
+            // debug!("CJOB: {:?}", &job);
 
             match job {
                 CJob::DbUpdateTitle(content_id, ref title) => {
@@ -595,7 +597,10 @@ impl IFeedContents for FeedContents {
                 (*feedsources).borrow().addjob(SJob::ScanEmptyUnread);
             }
         }
-        self.set_selected_content_ids(vec![*last_content_id]);
+
+        debug!("no call of set_selected {}", last_content_id);
+        //  this shall only be called from outside.   Problem:  Select the list only
+        //         self.set_selected_content_ids(vec![*last_content_id]);
     }
 
     fn set_read_complete_subscription(&mut self, src_repo_id: isize) {
@@ -719,6 +724,7 @@ impl IFeedContents for FeedContents {
     }
 
     fn set_selected_content_ids(&self, list: Vec<i32>) {
+        debug!("set_selected_content_ids: {:?}", &list);
         let mut l = self.list_selected_ids.write().unwrap();
         l.clear();
         let mut mutable = list;
@@ -779,6 +785,14 @@ impl IFeedContents for FeedContents {
 
     fn start_web_browser(&self, db_ids: Vec<i32>) {
         db_ids
+            .iter()
+            .for_each(|dbid| self.addjob(CJob::StartWebBrowser(*dbid)));
+    }
+
+    fn launch_browser(&self) {
+        let id_list = self.list_selected_ids.read().unwrap();
+        debug!("launch_browser: {:?}", &id_list);
+        id_list
             .iter()
             .for_each(|dbid| self.addjob(CJob::StartWebBrowser(*dbid)));
     }

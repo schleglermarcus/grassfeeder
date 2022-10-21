@@ -142,6 +142,7 @@ impl GuiProcessor {
         }
         let mut list_row_activated_map: HashMap<i32, i32> = HashMap::default();
         for ev in ev_set {
+            // trace!("GP: ev={:?} ", &ev);
             let now = Instant::now();
             match ev {
                 GuiEvents::None => {}
@@ -586,7 +587,6 @@ impl GuiProcessor {
                             warn!("Writing {} : {:?}", s, e);
                         }
                     }
-                    debug!("export-opml :2   {:?}", &s);
                 }
             }
             "feedsource-delete" => {
@@ -597,7 +597,6 @@ impl GuiProcessor {
                 self.feedsources_r.borrow_mut().feedsource_move_to_trash();
             }
             "subscription-edit-ok" => {
-                debug!(" DialogData subscription-edit-ok  {:?}", &payload);
                 self.feedsources_r
                     .borrow_mut()
                     .end_feedsource_edit_dialog(&payload);
@@ -793,7 +792,6 @@ impl GuiProcessor {
             num_msg_unread = n_u;
             if n_a != self.statusbar_items.num_msg_all || n_u != self.statusbar_items.num_msg_unread
             {
-                // trace!(                    "STATUS :   {}  unread/all ={}/{}",                   repo_id_new, num_msg_unread, num_msg_all                );
                 need_update2 = true;
             }
         }
@@ -955,6 +953,15 @@ impl GuiProcessor {
                     debug!("delete key but unfocused");
                 }
             }
+            KeyCodes::Space => {
+                if self.focus_by_tab == FocusByTab::FocusMessages {
+                    (*self.feedcontents_r).borrow().launch_browser();
+
+                    // (*self.feedcontents_r)						.borrow()
+                    // .process_list_action(action.clone(), repoid_list_pos.clone());
+                } //  else {                    debug!("space key but unfocused");                }
+            }
+
             _ => {
                 // trace!("key-pressed: other {} {:?} {:?}", keycode, _o_char, kc);
             }

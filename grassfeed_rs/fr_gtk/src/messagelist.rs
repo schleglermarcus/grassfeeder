@@ -169,6 +169,7 @@ pub fn create_listview(
                 .get::<u32>()
                 .unwrap() as i32;
         }
+		// trace!("LIST cursor_changed {}  {:?}  ", list_pos, repo_id);
         if list_pos >= 0 && repo_id > 0 {
             esw.sendw(GuiEvents::ListRowActivated(0, list_pos, repo_id));
         }
@@ -195,7 +196,7 @@ pub fn create_listview(
                     None
                 })
                 .collect::<Vec<i32>>();
-            // trace!("LIST changed multiple   #rows={}  {:?}  ", n_rows, &id_list);
+            trace!("LIST changed multiple   #rows={}  {:?}  ", n_rows, &id_list);
             esw.sendw(GuiEvents::ListSelected(0, id_list));
         });
 
