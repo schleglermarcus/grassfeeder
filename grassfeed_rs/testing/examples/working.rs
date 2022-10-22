@@ -134,10 +134,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
-            (
-                "https://exopolitics.blogs.com/newsinsideout/atom.xml",
-                "exopoli no icon",
-            ),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -232,6 +228,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            (
+                "https://exopolitics.blogs.com/newsinsideout/atom.xml",
+                "exopoli no icon",
+            ),
             (
                 "http://chaosradio.ccc.de/chaosradio-complete.rss",
                 "chaosradio-267 icon ok",

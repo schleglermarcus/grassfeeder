@@ -172,11 +172,7 @@ pub trait GtkObjects {
 
     fn get_create_systray_fn(
         &self,
-    // ) -> Option<&Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>>;
-    ) -> Option<& dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>;
-
-    fn set_gui_event_sender(&mut self, ev_se: flume::Sender<GuiEvents>);
-    fn get_gui_event_sender(&self) -> flume::Sender<GuiEvents>;
+    ) -> Option<&dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>;
 }
 
 #[derive(Clone, Debug)]

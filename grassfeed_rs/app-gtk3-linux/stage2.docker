@@ -8,12 +8,6 @@ FROM grassfeeder:stage1
 #ENV user="$(whoami)"
 #RUN usermod -a -G fuse $user
 
-# Alle einzeln prüfen ob man die braucht
-# RUN apt install -y
-##   apt-get install libayatana-indicator3-dev    libayatana-appindicator3-dev libayatana-appindicator3-dev  libappindicator3-0.1-cil-dev  libayatana-appindicator3-0.1-cil-dev
-##     apt-get install
-
-
 WORKDIR /usr/src/
 COPY target/gf.tar.gz /usr/src/
 RUN cat gf.tar.gz |gzip -d |tar x

@@ -1,9 +1,9 @@
 Sun, 16 Oct 2022 00:01:00 +0000
 * Application Icon for Systray
 * Message List, new focus policy: before last unread
-* Reduced timer loop use on minimized
-* Importing opml: adding website url
+* Reduced timer generated load when minimized
+* Importing opml: adding homepage address
 * Keyboard: Space -> open in browser
 * Opml export in pretty format
+* Bugfix: List update - sorted after reconnecting the view
 * Bugfix: tried to downscale an icon when there is none
-* Bugfix: List update - sorting after reconnecting the view

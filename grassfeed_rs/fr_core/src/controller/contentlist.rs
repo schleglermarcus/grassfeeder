@@ -448,9 +448,7 @@ impl IFeedContents for FeedContents {
         }
         for job in job_list {
             let now = std::time::Instant::now();
-
             // debug!("CJOB: {:?}", &job);
-
             match job {
                 CJob::DbUpdateTitle(content_id, ref title) => {
                     (*self.messagesrepo_r)

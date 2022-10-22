@@ -570,21 +570,9 @@ impl GtkObjects for GtkObjectsImpl {
 
     fn get_create_systray_fn(
         &self,
-    // ) -> Option<& Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>> {
-    ) -> Option<&  dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator > {
+    ) -> Option<&dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator> {
         self.create_systray_fn.as_ref()?;
-        // if self.create_systray_fn.is_none() {
-        //     return None;
-        // }
         Some(self.create_systray_fn.as_ref().unwrap())
-    }
-
-    fn set_gui_event_sender(&mut self, _ev_se: flume::Sender<GuiEvents>) {
-        unimplemented!() // TODO
-    }
-
-    fn get_gui_event_sender(&self) -> flume::Sender<GuiEvents> {
-        unimplemented!()
     }
 }
 
