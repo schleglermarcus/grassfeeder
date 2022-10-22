@@ -9,7 +9,7 @@ grassfeeder (0.1.0) unstable; urgency=low
   * Bugfix: List update - sorted after reconnecting the view
   * Bugfix: tried to downscale an icon when there is none
 
- -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sat, 22 Oct 2022 00:18:00 +0000
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sun, 23 Oct 2022 00:00:00 +0000
 
 grassfeeder (0.0.9) unstable; urgency=low
 
