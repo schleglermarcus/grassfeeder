@@ -4,15 +4,15 @@ To Do List
 
 
 
-
 - DragAndDrop for Websites into Tree
 - Zip the test files
-- Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 - Reduce Size of Binary:
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
+- Browser Loading display
+
 - Marking of Messages, Favorites
 - Message List: set scroll position to upper edge from Cursor
-- Browser Loading display
+- Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 
 
 

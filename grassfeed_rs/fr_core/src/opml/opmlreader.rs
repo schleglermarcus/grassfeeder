@@ -154,7 +154,7 @@ impl OpmlReader {
             indent_text_nodes: false,
         };
         let formatted = doc.to_string_pretty_with_config(&conf);
-        file.write(formatted.as_bytes())?;
+        let _r = file.write(formatted.as_bytes())?;
         Ok(())
     }
 }

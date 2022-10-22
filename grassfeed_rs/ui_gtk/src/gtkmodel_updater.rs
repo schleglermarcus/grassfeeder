@@ -24,7 +24,6 @@ use std::collections::HashMap;
 use std::convert::From;
 use std::sync::Arc;
 use webkit2gtk::WebViewExt;
-// use std::time::Instant;
 
 pub struct GtkModelUpdaterInt {
     m_v_store: UIAdapterValueStoreType,
@@ -230,7 +229,7 @@ impl GtkModelUpdaterInt {
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
     ///  Needs the same index for   ListStore  as for TreeView
     pub fn update_list_model(&self, list_index: u8) {
-        // let now = Instant::now();
+        let now = std::time::Instant::now();
         let g_o = (*self.g_o_a).read().unwrap();
         let o_list_store = g_o.get_list_store(list_index as usize);
         if o_list_store.is_none() {
@@ -238,7 +237,6 @@ impl GtkModelUpdaterInt {
             return;
         }
         let list_store: &ListStore = o_list_store.unwrap();
-
         let o_list_view = g_o.get_tree_view(list_index as usize);
         if o_list_view.is_none() {
             error!("update_list_model: tree_view {} not found", list_index);
@@ -253,7 +251,7 @@ impl GtkModelUpdaterInt {
             list_store.set_unsorted();
         }
         list_store.clear();
-        // let mut num_lines = 0;
+        let mut num_lines = 0;
         for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
             let append_iter = list_store.insert(-1);
             if row.len() < maxcols as usize {
@@ -265,14 +263,20 @@ impl GtkModelUpdaterInt {
                 continue;
             }
             Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbufcache);
-            // num_lines += 1;
+            num_lines += 1;
         }
         if let Some((sort_col, sort_type)) = o_last_sort_column_id {
             list_store.set_sort_column_id(sort_col, sort_type);
         }
         list_view.set_model(Some(list_store));
-        // let elapsed = now.elapsed().as_millis();
-        // if elapsed > 100 {            debug!(                "update_list_model took {:?}ms #lines:{} ",                elapsed, num_lines            );        }
+        let elapsed = now.elapsed().as_millis();
+        if elapsed > 100 {
+            trace!(
+                "update_list_model took {:?}ms #lines:{} ",
+                elapsed,
+                num_lines
+            );
+        }
     }
 
     fn put_into_store(
@@ -510,34 +514,43 @@ impl GtkModelUpdaterInt {
     }
 
     //  unavailable db-id:   remove focus.
+    //  Tried to:  disconnect, reconnect ->  cursor is gone
     pub fn list_set_cursor(&self, idx: u8, db_id: isize, column: u8) {
+        let now = std::time::Instant::now();
         let g_o = (*self.g_o_a).read().unwrap();
-        let mut matching_path: Option<TreePath> = None;
-        if let Some(treestore) = g_o.get_list_store(idx as usize) {
-            if let Some(iter) = treestore.iter_first() {
-                loop {
-                    let val = treestore.value(&iter, column as i32);
-                    if let Ok(iter_db_id) = val.get::<u32>() {
-                        if iter_db_id as isize == db_id {
-                            matching_path = treestore.path(&iter);
-                        }
-                    }
-                    if !treestore.iter_next(&iter) {
-                        break;
-                    }
-                }
-            }
-            if let Some(treeview) = g_o.get_tree_view(idx as usize) {
-                if let Some(t_path) = matching_path {
-                    let focus_column: Option<&TreeViewColumn> = None;
-
-                    (*treeview).set_cursor(&t_path, focus_column, false);
-                }
-            } else {
-                warn!("list_set_cursor: no treeview!");
-            }
-        } else {
+        let o_treestore = g_o.get_list_store(idx as usize);
+        if o_treestore.is_none() {
             warn!("list_set_cursor: no treestore idx={} ", idx);
+            return;
+        }
+        let treestore = o_treestore.unwrap();
+        let o_treeview = g_o.get_tree_view(idx as usize);
+        if o_treeview.is_none() {
+            warn!("list_set_cursor: no treeview!");
+            return;
+        }
+        let treeview = o_treeview.unwrap();
+        let mut matching_path: Option<TreePath> = None;
+        if let Some(iter) = treestore.iter_first() {
+            loop {
+                let val = treestore.value(&iter, column as i32);
+                if let Ok(iter_db_id) = val.get::<u32>() {
+                    if iter_db_id as isize == db_id {
+                        matching_path = treestore.path(&iter);
+                    }
+                }
+                if !treestore.iter_next(&iter) {
+                    break;
+                }
+            }
+        }
+        if let Some(t_path) = matching_path {
+            let focus_column: Option<&TreeViewColumn> = None;
+            (*treeview).set_cursor(&t_path, focus_column, false);
+        }
+        let elapsed = now.elapsed().as_millis();
+        if elapsed > 30 {
+            debug!("list_set_cursor({})  {} ms ", db_id, elapsed);
         }
     }
 
@@ -658,36 +671,17 @@ impl GtkModelUpdaterInt {
             if minimized {
                 window.hide();
             } else {
-                // let _a = window.is_realized();
-                trace!("win show .... ");
                 window.show();
                 let _r = window.is_resizable();
-                trace!("win visible1 true {}", _r);
+                // trace!("win visible1 true {}", _r);
                 window.set_visible(true);
                 std::thread::sleep(std::time::Duration::from_millis(10));
-
                 window.present();
                 std::thread::sleep(std::time::Duration::from_millis(10));
                 window.deiconify();
-
-                trace!("win visible2 true ");
                 std::thread::sleep(std::time::Duration::from_millis(10));
                 window.set_visible(true);
             }
         }
     }
 } // GtkModelUpdaterInt
-
-/*
-fn wprop(id: &str, w: &gtk::Window) {
-    debug!(
-        "{} active:{}   vis:{} realized:{}  maximized:{}, resizable:{}",
-        id,
-        w.is_active(),
-        w.is_visible(),
-        w.is_realized(),
-        w.is_maximized(),
-        w.is_resizable()
-    );
-}
-*/

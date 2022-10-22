@@ -596,8 +596,6 @@ impl IFeedContents for FeedContents {
                 (*feedsources).borrow().addjob(SJob::ScanEmptyUnread);
             }
         }
-
-        debug!("no call of set_selected {}", last_content_id);
         //  this shall only be called from outside.   Problem:  Select the list only
         //         self.set_selected_content_ids(vec![*last_content_id]);
     }
@@ -723,7 +721,6 @@ impl IFeedContents for FeedContents {
     }
 
     fn set_selected_content_ids(&self, list: Vec<i32>) {
-        debug!("set_selected_content_ids: {:?}", &list);
         let mut l = self.list_selected_ids.write().unwrap();
         l.clear();
         let mut mutable = list;

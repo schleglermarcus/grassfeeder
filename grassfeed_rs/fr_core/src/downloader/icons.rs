@@ -222,24 +222,14 @@ impl Step<IconInner> for IconCheckIsImage {
         let mut inner: IconInner = self.0;
         let an_res = icon_analyser(&inner.icon_bytes);
         inner.image_icon_kind = an_res.kind.clone();
-        if an_res.width_orig > ICON_CONVERT_TO_WIDTH
+        if (an_res.width_orig > ICON_CONVERT_TO_WIDTH
             || an_res.height_orig > ICON_CONVERT_TO_WIDTH
             || inner.icon_bytes.len() > ICON_SIZE_LIMIT_BYTES
-            || an_res.kind == IconKind::Webp
+            || an_res.kind == IconKind::Webp)
+            && an_res.kind != IconKind::UnknownType
         {
-            if an_res.kind != IconKind::UnknownType {
-                trace!(
-                    "IconCheckIsImage: going to downscale  {}x{} {:?} {} len={}",
-                    an_res.width_orig,
-                    an_res.height_orig,
-                    an_res.kind,
-                    inner.icon_url,
-                    inner.icon_bytes.len()
-                );
-                return StepResult::Continue(Box::new(IconDownscale(inner)));
-            }
+            return StepResult::Continue(Box::new(IconDownscale(inner)));
         }
-
         if an_res.kind == IconKind::UnknownType || an_res.kind == IconKind::TooSmall {
             // trace!(                "IconCheckIsImage: url={} length={} #feed_dl_text={}  Reason={}",                inner.icon_url,                inner.icon_bytes.len(),                inner.feed_download_text.len(),                an_res.message            );
             inner.erro_repo.add_error(

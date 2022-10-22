@@ -269,7 +269,7 @@ impl GtkGuiBuilder for GtkObjectTree {
 
             ret.set_create_systray_fn(Box::new(create_systray_icon_3));
         }
-        connect_keyboard(gui_event_sender.clone(), gtk_obj_a.clone());
+        connect_keyboard(gui_event_sender, gtk_obj_a.clone());
     }
 }
 

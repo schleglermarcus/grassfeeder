@@ -1,22 +1,13 @@
 grassfeeder (0.1.0) unstable; urgency=low
 
+  * Application Icon for Systray
+  * Message List, new focus policy: before last unread
   * Reduced timer loop use on minimized
-  * Application Icon into Systray
-  * Message List: implement focus policy: before last unread
-  * Bugfix: List update - sorting after before reconnecting the view
   * Importing opml: adding website url
+  * Keyboard: Space -> open in browser
   * Opml export in pretty format
-  
-  
-  
-  - Keyboard: Space -> open in browser
-  
-  
-  - Message List: set scroll position to upper edge from Cursor
-  
-  
-  - Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
-  --   e::downloader::icons	downscale:UnknownType https://exopolitics.blogs.com/exopolitics/rss.xml https://exopolitics.blogs.com/favicon.ico Some("downscale_png:1: Decoding(DecodingError { format: Exact(Ico), underlying: Some(IcoEntryTooManyPlanesOrHotspot) })")
+  * Bugfix: tried to downscale an icon when there is none
+  * Bugfix: List update - sorting after reconnecting the view
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sun, 16 Oct 2022 00:01:00 +0000
 

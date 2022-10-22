@@ -237,7 +237,6 @@ impl GuiProcessor {
                 GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) => {
                     match command.as_str() {
                         "feedsource-delete-dialog" => {
-                            debug!("feedsource-delete-dialog {:?}", src_repo_id);
                             (*self.feedsources_r)
                                 .borrow_mut()
                                 .start_delete_dialog(src_repo_id as isize);
@@ -380,7 +379,6 @@ impl GuiProcessor {
                 }
                 GuiEvents::WindowIconified(is_minimized) => {
                     self.currently_minimized = is_minimized;
-                    debug!("EV WindowIconified   {} ", is_minimized);
                     (*self.feedsources_r)
                         .borrow_mut()
                         .memory_conserve(is_minimized);
@@ -590,10 +588,6 @@ impl GuiProcessor {
                 }
             }
             "feedsource-delete" => {
-                debug!(
-                    "feedsource-delete -> feedsource_move_to_trash()  {:?}",
-                    &payload
-                );
                 self.feedsources_r.borrow_mut().feedsource_move_to_trash();
             }
             "subscription-edit-ok" => {
@@ -709,9 +703,6 @@ impl GuiProcessor {
             .borrow()
             .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP);
         let systray_enable = self.is_systray_enabled();
-
-        //  (*self.gui_val_store)            .read()            .unwrap()            .get_gui_property_or(PropDef::SystrayEnable, "false".to_string())            .parse::<bool>()            .unwrap();
-
         let dd: Vec<AValue> = vec![
             AValue::ABOOL(sources_conf.feeds_fetch_at_start), // 0 : FetchFeedsOnStart
             AValue::AU32(sources_conf.feeds_fetch_interval),  // 1 UpdateFeeds Cardinal
@@ -795,7 +786,6 @@ impl GuiProcessor {
                 need_update2 = true;
             }
         }
-
         if repo_id_new > 0 {
             if num_msg_all != self.statusbar_items.num_msg_all {
                 self.statusbar_items.num_msg_all = num_msg_all;

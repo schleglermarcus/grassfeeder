@@ -1,12 +1,9 @@
 Sun, 16 Oct 2022 00:01:00 +0000
+* Application Icon for Systray
+* Message List, new focus policy: before last unread
 * Reduced timer loop use on minimized
-* Application Icon into Systray
-* Message List: implement focus policy: before last unread
-* Bugfix: List update - sorting after before reconnecting the view
 * Importing opml: adding website url
-* Opml export in pretty format
 * Keyboard: Space -> open in browser
+* Opml export in pretty format
 * Bugfix: tried to downscale an icon when there is none
-
-
-- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
+* Bugfix: List update - sorting after reconnecting the view

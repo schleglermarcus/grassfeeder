@@ -73,7 +73,7 @@ pub enum IntCommands {
     WebViewRemove(Option<u8>),
     MemoryConserve(bool),
     TrayIconEnable(bool),
-	UpdateWindowMinimized(bool, u32 ),
+    UpdateWindowMinimized(bool, u32),
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;
@@ -83,6 +83,7 @@ pub type CreateWebViewFnType = Option<Box<dyn Fn(&WebContext, Option<u8>) -> Web
 
 pub type CreateSystrayFnType =
     Option<Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>>;
+// Option< &'a dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>;
 
 pub trait GtkObjects {
     fn get_window(&self) -> Option<Window>;
@@ -164,16 +165,15 @@ pub trait GtkObjects {
     fn get_indicator(&self) -> Option<&libappindicator::AppIndicator>;
     fn get_indicator_mut(&mut self) -> Option<&mut libappindicator::AppIndicator>;
 
-
     fn set_create_systray_fn(
         &mut self,
         cb_fn: Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>,
-        // ev_se_w : UiSenderWrapperType,
     );
 
     fn get_create_systray_fn(
         &self,
-    ) -> Option<&Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>>;
+    // ) -> Option<&Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>>;
+    ) -> Option<& dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>;
 
     fn set_gui_event_sender(&mut self, ev_se: flume::Sender<GuiEvents>);
     fn get_gui_event_sender(&self) -> flume::Sender<GuiEvents>;

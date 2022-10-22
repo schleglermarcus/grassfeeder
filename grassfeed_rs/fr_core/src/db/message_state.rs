@@ -208,7 +208,7 @@ impl MessageStateMap {
         while new_index < vals.len() as isize && vals[new_index as usize].is_read_copy {
             new_index += 1;
         }
-        if new_index > 0 as isize {
+        if new_index > 0_isize {
             return Some(vals[(new_index - 1) as usize].msg_id);
         }
         None

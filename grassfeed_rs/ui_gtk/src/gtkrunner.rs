@@ -561,21 +561,21 @@ impl GtkObjects for GtkObjectsImpl {
         self.indicator.as_mut()
     }
 
-    /// TODO
     fn set_create_systray_fn(
         &mut self,
         systray_fn: Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>,
-        // _ev_se : Sender<GuiEvents>
     ) {
         self.create_systray_fn = Some(systray_fn);
     }
 
     fn get_create_systray_fn(
         &self,
-    ) -> Option<&Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>> {
-        if self.create_systray_fn.is_none() {
-            return None;
-        }
+    // ) -> Option<& Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>> {
+    ) -> Option<&  dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator > {
+        self.create_systray_fn.as_ref()?;
+        // if self.create_systray_fn.is_none() {
+        //     return None;
+        // }
         Some(self.create_systray_fn.as_ref().unwrap())
     }
 
@@ -759,6 +759,6 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     }
 
     fn update_window_minimized(&self, mini: bool, ev_time: u32) {
-        self.send_to_int(&&IntCommands::UpdateWindowMinimized(mini, ev_time ));
+        self.send_to_int(&IntCommands::UpdateWindowMinimized(mini, ev_time));
     }
 } //

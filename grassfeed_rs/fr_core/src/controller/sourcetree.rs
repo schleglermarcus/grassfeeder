@@ -951,15 +951,13 @@ impl SourceTreeController {
     }
 
     fn check_paths(&self) {
+		// let now = Instant::now();
         if *self.need_check_fs_paths.borrow() {
-            let now = Instant::now();
             self.update_cached_paths();
             self.need_check_fs_paths.replace(false);
-            let elapsed_ms = now.elapsed().as_millis();
-            if elapsed_ms > 20 {
-                debug!("check_paths took {} ms", elapsed_ms);
-            }
         }
+		// let elapsed_ms = now.elapsed().as_millis();
+		// if elapsed_ms > 20 {                debug!("check_paths took {} ms", elapsed_ms);            }
     }
 
     pub fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {
