@@ -47,4 +47,7 @@ default-locale = "en"
 
 
 [package.metadata.appimage]
-# assets = ["images", "sounds"]
+assets = ["assets/usr"] 
+
+    
+## assets = ["assets", "sounds"]
