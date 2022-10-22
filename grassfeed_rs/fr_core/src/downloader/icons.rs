@@ -158,11 +158,7 @@ impl Step<IconInner> for IconAnalyzeHomepage {
             },
             _ => {
                 let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
-                trace!(
-                    "IAHP:3  {:?} alternate HP {:?}",
-                    &r.error_description,
-                    alt_hp
-                );
+                // trace!(                    "IAHP:3  {:?} alternate HP {:?}",                    &r.error_description,                    alt_hp                );
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     r.status as isize,
