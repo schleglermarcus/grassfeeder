@@ -658,14 +658,14 @@ pub fn create_toolbar(
             .tooltip_text(&t!("TB_ADD_FEED"))
             .build();
         toolbar.insert(&but, -1);
-        let new_feedsource_dialog: Dialog = (*gtk_obj_a)
+        let new_subscription_dialog: Dialog = (*gtk_obj_a)
             .read()
             .unwrap()
-            .get_dialog(DIALOG_NEW_FEED_SOURCE)
+            .get_dialog(DIALOG_NEW_SUBSCRIPTION)
             .unwrap()
             .clone();
         but.connect_clicked(move |_b| {
-            new_feedsource_dialog.show_all();
+            new_subscription_dialog.show_all();
         });
     }
     {
@@ -686,7 +686,7 @@ pub fn create_toolbar(
             esw.sendw(GuiEvents::ToolBarButton("reload-feeds-all".to_string()));
         });
     }
-    if false {
+    if true {
         let image = Image::new();
         process_string_to_image(
             gen_icons::ICON_34_DATA_XP2,

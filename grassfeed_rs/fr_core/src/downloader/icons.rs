@@ -331,6 +331,7 @@ pub enum IsIconResult {
     IsWebp = 128,
 }
 
+/*
 ///  Checks if this byte array is an icon
 /// https://docs.rs/png_pong/latest/png_pong/struct.Decoder.html
 #[deprecated]
@@ -352,19 +353,6 @@ pub fn blob_is_icon(vec_u8: &Vec<u8>) -> (usize, String) {
             msg = format!("{} not_ico: {}", msg, e);
         }
     }
-
-    /*
-        let cursor = std::io::Cursor::new(vec_u8.clone());
-        match png_pong::Decoder::new(cursor) {
-            Ok(_decoder) => {
-                return (0, msg);
-            }
-            Err(e) => {
-                is_icon_result |= IsIconResult::NotPng as usize;
-                msg = format!("{} not_png: {}", msg, e);
-            }
-        }
-    */
     let cursor = std::io::Cursor::new(vec_u8);
     let mut decoder = jpeg_decoder::Decoder::new(cursor);
     match decoder.decode() {
@@ -394,7 +382,6 @@ pub fn blob_is_icon(vec_u8: &Vec<u8>) -> (usize, String) {
             msg = format!("{} not_webp: {}", msg, e);
         }
     }
-
     match tinybmp::RawBmp::from_slice(vec_u8) {
         Ok(_decoder) => {
             return (0, msg);
@@ -408,6 +395,7 @@ pub fn blob_is_icon(vec_u8: &Vec<u8>) -> (usize, String) {
 
     (is_icon_result, msg)
 }
+*/
 
 #[derive(Debug, Default)]
 pub struct IconAnalyseResult {
@@ -415,7 +403,6 @@ pub struct IconAnalyseResult {
     width_orig: u32,
     height_orig: u32,
     pub message: String,
-    // _rescaled_png: Vec<u8>,
 }
 
 impl IconAnalyseResult {

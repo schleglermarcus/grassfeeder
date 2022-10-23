@@ -171,3 +171,55 @@ pub fn workaround_https_declaration(wrong: String) -> String {
         "http://www.w3.org/2005/Atom",
     )
 }
+
+pub fn extract_feed_from_homepage(hp_content: String) -> Result<String, String> {
+    let dom: tl::VDom = match tl::parse(&hp_content, tl::ParserOptions::default()) {
+        Ok(d) => d,
+        Err(e) => {
+            return Err(format!("XF: parsing homepage: {:?}", e));
+        }
+    };
+    let link_tags: Vec<&HTMLTag> = dom
+        .nodes()
+        .iter()
+        .filter_map(|n| match n {
+            Node::Tag(htmltag) => Some(htmltag),
+            _ => None,
+        })
+        .filter(|htmltag| {
+            let t_name = htmltag.name().as_utf8_str().into_owned();
+            t_name == "link"
+        })
+        .collect();
+    let feed_list: Vec<String> = link_tags
+        .iter()
+        .map(|t| {
+            let attrmap: HashMap<String, String> = t
+                .attributes()
+                .iter()
+                .filter(|(_k, v)| v.is_some())
+                .map(|(k, v)| (k.into_owned(), v.clone().unwrap().into_owned()))
+                .collect();
+            attrmap
+        })
+        .filter(|attrmap| attrmap.get("rel").is_some())
+        .filter(|attrmap| {
+            if let Some(typ_e) = attrmap.get("type") {
+                typ_e.contains("rss") || typ_e.contains("atom")
+            } else {
+                false
+            }
+        })
+        .inspect(|at_m| debug!("PF0:{:?}", at_m))
+        .filter(|attrmap| !attrmap.get("href").unwrap().contains("comments"))
+        .filter_map(|attrmap| attrmap.get("href").cloned())
+        .collect();
+    // trace!("feed_list={:#?}", feed_list);
+    if feed_list.is_empty() {
+        return Err(String::default());
+    } else {
+        return Ok(feed_list.first().unwrap().clone());
+    }
+}
+
+//

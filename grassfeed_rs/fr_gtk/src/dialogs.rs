@@ -154,7 +154,7 @@ pub fn create_new_subscription_dialog(
     gtk_obj_a: GtkObjectsType,
     ddd: &mut DialogDataDistributor,
 ) {
-    let width = 400;
+    let width = 600;
     let icon_size = 24;
     let dialog = Dialog::with_buttons::<Window>(
         Some(&t!("D_NEW_SUBSCRIPTION_TITLE")),
@@ -238,12 +238,12 @@ pub fn create_new_subscription_dialog(
         dia.hide();
         gtk::Inhibit(true)
     });
-    let ent1_c = entry_url.clone();
+    // let ent1_c = entry_url.clone();
     let ent2_c = entry_name.clone();
     let label3_c = label3.clone();
     dialog.connect_show(move |dialog| {
-        trace!("new_source: show, later: evaluate clipboard ");
-        ent1_c.set_text("");
+        debug!("Later: check if we launch this dialog  from controller  or from gui ");
+        // ent1_c.set_text("");
         ent2_c.set_text("");
         label3_c.set_text("");
         dialog.set_response_sensitive(ResponseType::Ok, false);
@@ -252,7 +252,8 @@ pub fn create_new_subscription_dialog(
     let image_icon_c = image_icon;
     let label3_c = label3;
     let spinner_c = spinner;
-    ddd.set_dialog_distribute(DIALOG_NEW_FEED_SOURCE, move |dialogdata| {
+    let ent1_c = entry_url.clone();
+    ddd.set_dialog_distribute(DIALOG_NEW_SUBSCRIPTION, move |dialogdata| {
         if dialogdata.len() < 2 {
             error!(
                 "create_new_subscription_dialog: dialog data too short:{}",
@@ -272,10 +273,13 @@ pub fn create_new_subscription_dialog(
                 image_icon_c.set_pixbuf(new_image.pixbuf().as_ref());
             }
         }
+        if let Some(s) = dialogdata.get(4).unwrap().str() {
+            ent1_c.set_text(&s); // 4: feed-url
+        }
         spinner_c.set_active(dialogdata.get(3).unwrap().boo());
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
-    ret.set_dialog(DIALOG_NEW_FEED_SOURCE, &dialog);
+    ret.set_dialog(DIALOG_NEW_SUBSCRIPTION, &dialog);
     ret.set_text_entry(TEXTENTRY_NEWSOURCE_URL, &entry_url);
     ret.set_text_entry(TEXTENTRY_NEWSOURCE_E2, &entry_name);
 }

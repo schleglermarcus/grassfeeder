@@ -834,14 +834,15 @@ impl SourceTreeController {
                     AValue::None,        // 1:homepage
                     AValue::None,        // 2: icon_str
                     AValue::ABOOL(true), // 3 :spinner
+					AValue::None,        // 4: feed url
                 ];
                 (*self.gui_val_store)
                     .write()
                     .unwrap()
-                    .set_dialog_data(DIALOG_NEW_FEED_SOURCE, &dd);
+                    .set_dialog_data(DIALOG_NEW_SUBSCRIPTION, &dd);
                 (*self.gui_updater)
                     .borrow()
-                    .update_dialog(DIALOG_NEW_FEED_SOURCE);
+                    .update_dialog(DIALOG_NEW_SUBSCRIPTION);
                 (*self.downloader_r)
                     .borrow()
                     .new_feedsource_request(&self.new_source.edit_url);
@@ -874,14 +875,15 @@ impl SourceTreeController {
             AValue::ASTR(self.new_source.feed_homepage.clone()),
             AValue::ASTR(icon_str), // 2: icon_str
             AValue::ABOOL(false),   // 3: spinner
+			AValue::None , // 4: feed-url
         ];
         (*self.gui_val_store)
             .write()
             .unwrap()
-            .set_dialog_data(DIALOG_NEW_FEED_SOURCE, &dd);
+            .set_dialog_data(DIALOG_NEW_SUBSCRIPTION, &dd);
         (*self.gui_updater)
             .borrow()
-            .update_dialog(DIALOG_NEW_FEED_SOURCE);
+            .update_dialog(DIALOG_NEW_SUBSCRIPTION);
     }
 
     fn check_feed_update_times(&mut self) {

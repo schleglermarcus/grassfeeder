@@ -1,12 +1,14 @@
 use fr_core::downloader::util::extract_icon_from_homepage;
 
+//  TODO:  store homepage texts static, no more remote
+
 // #[ignore]
 #[test]
 fn test_extract_icon_fromrome() {
     setup();
     let f = "../fr_core/tests/data/fromrome.html";
     let page = std::fs::read_to_string(f).unwrap();
-    let r = extract_icon_from_homepage(page, &"https://www.neweurope.eu/".to_string());
+    let r = extract_icon_from_homepage(page, &"https://www.fromrome.info/".to_string());
     assert_eq!(
         r,
         Ok("https://www.fromrome.info/wp-content/uploads/2019/10/cropped-header.jpg".to_string())

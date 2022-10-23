@@ -265,7 +265,7 @@ impl GuiProcessor {
                         "new-subscription-dialog" => {
                             (*self.feedsources_r).borrow_mut().start_new_fol_sub_dialog(
                                 src_repo_id as isize,
-                                DIALOG_NEW_FEED_SOURCE,
+                                DIALOG_NEW_SUBSCRIPTION,
                             );
                         }
                         _ => {
@@ -312,7 +312,8 @@ impl GuiProcessor {
                             .set_browser_zoom(BrowserZoomCommand::ZoomDefault);
                     }
                     "toolbutton-troubleshoot1" => {
-                        debug!("toolbutton-troubleshoot1");
+                        trace!("toolbutton-troubleshoot1");
+                        self.start_dragdrop_new_subscription_dialog("https://www.neopresse.com/politik/bundesregierung-will-klima-hilfen-fuer-aermere-laender/".to_string()) ;
                     }
                     _ => {
                         warn!("unknown ToolBarButton {} ", id);
@@ -909,6 +910,29 @@ impl GuiProcessor {
 
     fn start_about_dialog(&mut self) {
         (*self.gui_updater).borrow().show_dialog(DIALOG_ABOUT);
+    }
+
+    fn start_dragdrop_new_subscription_dialog(&mut self, dragged_url: String) {
+
+		let dd: Vec<AValue> = vec![
+			AValue::None,        // 0:display
+			AValue::None,        // 1:homepage
+			AValue::None,        // 2: icon_str
+			AValue::ABOOL(true), // 3 :spinner
+			AValue::ASTR(dragged_url),        // 4: feed url
+		];
+
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_dialog_data(DIALOG_NEW_SUBSCRIPTION, &dd);
+        (*self.gui_updater)
+            .borrow()
+            .update_dialog(DIALOG_NEW_SUBSCRIPTION);
+
+        (*self.gui_updater)
+            .borrow()
+            .show_dialog(DIALOG_NEW_SUBSCRIPTION);
     }
 
     ///  for key codes look at selec.rs                           gdk_sys::GDK_KEY_Escape => KeyCodes::Escape,
