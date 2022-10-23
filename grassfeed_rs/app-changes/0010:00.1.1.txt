@@ -1,0 +1,8 @@
+Sat, 22 Oct 2022 00:18:00 +0000
+
+- DragAndDrop for Websites into Tree
+
+- Zip the test files
+- Reduce Size of Binary:
+  https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
+- Browser Loading display

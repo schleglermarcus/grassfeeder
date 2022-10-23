@@ -27,6 +27,7 @@ use std::sync::RwLock;
 use ui_gtk::GtkObjectsType;
 
 const TREEVIEW_NAME: &str = "TREEVIEW1";
+// const DRAG_TARGET_NAME: &str = "text/html";
 
 pub fn create_tree_store() -> (TreeStore, usize) {
     let tree_store_types: &[Type] = &[
@@ -242,7 +243,7 @@ pub fn create_treeview(
         }
     });
 
-    let esw = EvSenderWrapper(g_ev_se);
+    let esw = EvSenderWrapper(g_ev_se.clone());
     treeview1.connect_row_collapsed(move |t_view, t_iter, _t_path| {
         if let Some(model) = t_view.model() {
             let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
@@ -259,6 +260,26 @@ pub fn create_treeview(
             ret.set_spinner_w((cellrenderer_spinner, col1));
         }
     }
+
+    let targets = vec![
+        gtk::TargetEntry::new("STRING", gtk::TargetFlags::OTHER_APP, 0),
+        gtk::TargetEntry::new("text/plain", gtk::TargetFlags::OTHER_APP, 0),
+        // gtk::TargetEntry::new("text/uri-list", gtk::TargetFlags::OTHER_APP, 0),
+        gtk::TargetEntry::new("text/html", gtk::TargetFlags::OTHER_APP, 0),
+    ];
+
+    treeview1.drag_dest_set(gtk::DestDefaults::ALL, &targets, gdk::DragAction::LINK); //  gdk::DragAction::COPY
+
+    let esw = EvSenderWrapper(g_ev_se);
+    treeview1.connect_drag_data_received(
+        move |_tv, _dragcontext, _x, _y, selectiondata, _info, _timestamp| {
+            if let Some(gstri) = selectiondata.text() {
+                // debug!("DDR: SEL.text {:?} ", gstri.to_string());
+                esw.sendw(GuiEvents::DragDropUrlReceived(gstri.to_string()));
+            }
+        },
+    );
+
     treeview1
 }
 

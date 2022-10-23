@@ -411,6 +411,10 @@ impl GuiProcessor {
                         warn!("unknown indicator event");
                     }
                 },
+                GuiEvents::DragDropUrlReceived(ref url) => {
+                    debug!("DDR: {}", &url);
+                }
+
                 _ => {
                     warn!("other GuiEvents: {:?}", &ev);
                 }

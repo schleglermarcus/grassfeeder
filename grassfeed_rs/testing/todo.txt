@@ -1,14 +1,7 @@
 To Do List
-- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
 
 
 
-
-- DragAndDrop for Websites into Tree
-- Zip the test files
-- Reduce Size of Binary:
-  https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
-- Browser Loading display
 
 - Marking of Messages, Favorites
 - Message List: set scroll position to upper edge from Cursor
@@ -108,8 +101,7 @@ https://distrowatch.com/table.php?distribution=mint
 #sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
 #sudo chmod +x /usr/local/bin/appimagetool
 
-
-
+# ./grassfeeder.AppImage --appimage-extract
 
 
 
