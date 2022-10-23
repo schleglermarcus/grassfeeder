@@ -5,10 +5,6 @@ extern crate log;
 extern crate itertools; // for key codes // background color
 extern crate libappindicator;
 
-// extern crate appindicator3;
-
-
-// pub extern crate gdk_pixbuf;
 pub extern crate gdk_sys;
 
 #[macro_use]
@@ -19,8 +15,8 @@ pub mod dialogs;
 pub mod gtk_object_tree;
 pub mod load_css;
 pub mod messagelist;
+pub mod systray_icon;
 pub mod treeview2;
 pub mod util;
-pub mod systray_icon;
 
 i18n!("../resources/locales");

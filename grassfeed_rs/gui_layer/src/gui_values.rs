@@ -42,7 +42,7 @@ pub const PROPDEF_ARRAY: [PropDef; 18] = [
     PropDef::BrowserZoomPercent,
     PropDef::AppRcsVersion,
     PropDef::AppModeDebug,
-	PropDef::SystrayEnable,
+    PropDef::SystrayEnable,
 ];
 
 impl FromStr for PropDef {

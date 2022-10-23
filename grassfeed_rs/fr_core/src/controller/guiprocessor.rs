@@ -16,6 +16,7 @@ use crate::db::icon_repo::IconRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::db::subscription_state::SubsMapEntry;
+use crate::downloader::util::extract_feed_from_website;
 use crate::opml::opmlreader::OpmlReader;
 use crate::timer::ITimer;
 use crate::timer::Timer;
@@ -47,6 +48,7 @@ use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::collections::VecDeque;
 use std::rc::Rc;
 use std::time::Instant;
 
@@ -72,6 +74,7 @@ pub enum Job {
 
 const JOBQUEUE_SIZE: usize = 100;
 const TREE_PANE1_MIN_WIDTH: i32 = 100;
+const BOTTOM_MSG_SHOW_TIME_S: u8 = 10;
 
 #[allow(dead_code)]
 pub struct GuiProcessor {
@@ -313,7 +316,7 @@ impl GuiProcessor {
                     }
                     "toolbutton-troubleshoot1" => {
                         trace!("toolbutton-troubleshoot1");
-                        self.start_dragdrop_new_subscription_dialog("https://www.neopresse.com/politik/bundesregierung-will-klima-hilfen-fuer-aermere-laender/".to_string()) ;
+                        self.start_dragdrop_new_subscription_dialog("https://unix.stackexchange.com/questions/457584/gtk3-change-text-color-in-a-label-raspberry-pi".to_string()) ;
                     }
                     _ => {
                         warn!("unknown ToolBarButton {} ", id);
@@ -413,7 +416,7 @@ impl GuiProcessor {
                     }
                 },
                 GuiEvents::DragDropUrlReceived(ref url) => {
-                    debug!("DDR: {}", &url);
+                    self.start_dragdrop_new_subscription_dialog(url.to_string());
                 }
 
                 _ => {
@@ -815,19 +818,32 @@ impl GuiProcessor {
             self.statusbar_items.selected_msg_url = last_msg_url;
             need_update2 = true;
         }
-        let longtext = if self.statusbar_items.selected_msg_url.is_empty() {
+        let timestamp_now: i64 = timestamp_now();
+        let mut longtext = if self.statusbar_items.selected_msg_url.is_empty() {
             string_escape_url(feed_src_link)
         } else {
             string_escape_url(self.statusbar_items.selected_msg_url.clone())
         };
+        if let Some((ts, msg)) = &self.statusbar_items.bottom_notice_current {
+            if timestamp_now > ts + BOTTOM_MSG_SHOW_TIME_S as i64 {
+                self.statusbar_items.bottom_notice_current = None;
+            } else {
+                longtext = format!("<span foreground=\"#CC6666\">{}</span>", msg.to_string());
+            }
+            need_update2 = true;
+        } else {
+            if let Some(n_msg) = self.statusbar_items.bottom_notices.pop_front() {
+                self.statusbar_items.bottom_notice_current = Some((timestamp_now, n_msg));
+                need_update2 = true;
+            }
+        }
         let mut block_vertical: char = ' ';
         if !is_folder && repo_id_new != self.statusbar_items.selected_repo_id {
             self.statusbar_items.selected_repo_id = repo_id_new;
             // time-to next feed update
             let fs_conf = self.feedsources_r.borrow().get_config();
             let interval_s = fs_conf.get_interval_seconds();
-            let now = timestamp_now();
-            let elapsed: i64 = std::cmp::min(now - (last_fetch_time as i64), interval_s);
+            let elapsed: i64 = std::cmp::min(timestamp_now - (last_fetch_time as i64), interval_s);
             let div_idx = if interval_s == 0 {
                 0
             } else {
@@ -913,15 +929,34 @@ impl GuiProcessor {
     }
 
     fn start_dragdrop_new_subscription_dialog(&mut self, dragged_url: String) {
+        // debug!("start_dragdrop_new_subscription_dialog {}", &dragged_url);
+        let r = (*self.downloader_r).borrow().download_direct(&dragged_url);
+        if r.is_err() {
+            let emsg = format!("http-requesting: {:?} {:?}", r.err(), &dragged_url);
+            warn!("{} ", &emsg);
+            self.statusbar_items.bottom_notices.push_back(emsg);
+            return;
+        }
+        let hp_text = r.unwrap();
+        debug!("HP length {}", hp_text.len());
+        let r = extract_feed_from_website(&hp_text, &dragged_url);
+        if r.is_err() {
+            let emsg = format!("Parsing page: {:?} {:?}", r.err().unwrap(), &dragged_url);
+            warn!("2:{} ", &emsg);
+            self.statusbar_items.bottom_notices.push_back(emsg);
+            debug!("#notices: {} ", self.statusbar_items.bottom_notices.len());
 
-		let dd: Vec<AValue> = vec![
-			AValue::None,        // 0:display
-			AValue::None,        // 1:homepage
-			AValue::None,        // 2: icon_str
-			AValue::ABOOL(true), // 3 :spinner
-			AValue::ASTR(dragged_url),        // 4: feed url
-		];
+            return;
+        }
 
+        let feed_url = r.unwrap();
+        let dd: Vec<AValue> = vec![
+            AValue::None,           // 0:display
+            AValue::None,           // 1:homepage
+            AValue::None,           // 2: icon_str
+            AValue::ABOOL(true),    // 3 :spinner
+            AValue::ASTR(feed_url), // 4: feed url
+        ];
         (*self.gui_val_store)
             .write()
             .unwrap()
@@ -1165,6 +1200,9 @@ struct StatusBarItems {
     /// proc//status/VmRSS  Resident set size, estimation of the current physical memory used by the application
     mem_usage_vmrss_bytes: isize,
     mode_debug: bool,
+    bottom_notices: VecDeque<String>,
+    //  start-of-display  time,  current message
+    bottom_notice_current: Option<(i64, String)>,
 }
 
 #[derive(Clone, Debug, PartialEq)]

@@ -175,4 +175,8 @@ impl IDownloader for DownloaderDummy {
     fn get_kind_list(&self) -> Vec<u8> {
         unimplemented!()
     }
+
+    fn download_direct(&self, _url: &String) -> Result<String, String> {
+        unimplemented!()
+    }
 }

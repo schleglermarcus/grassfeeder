@@ -62,6 +62,7 @@ pub trait IDownloader {
     fn load_icon(&self, fs_id: isize, fs_url: String, old_icon_id: usize);
     fn cleanup_db(&self);
     fn get_queue_size(&self) -> usize;
+    fn download_direct(&self, url: &String) -> Result<String, String>;
 }
 
 #[derive(Debug, PartialEq)]
@@ -422,6 +423,24 @@ impl IDownloader for Downloader {
 
     fn get_queue_size(&self) -> usize {
         (*self.job_queue).read().unwrap().len()
+    }
+
+    fn download_direct(&self, url: &String) -> Result<String, String> {
+        let r = (*self.web_fetcher).request_url(url.clone());
+        match r.status {
+            200 => {
+                return Ok(r.content);
+            }
+            _ => {
+                (*self.erro_repo).borrow().add_error(
+                    -1,
+                    r.status as isize,
+                    url.clone(),
+                    r.error_description.clone(),
+                );
+                return Err(r.error_description);
+            }
+        }
     }
 }
 

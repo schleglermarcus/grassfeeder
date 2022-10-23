@@ -248,8 +248,7 @@ impl UIUpdaterAdapter for UpdAda {
 
     fn memory_conserve(&self, _act: bool) {}
     fn update_systray_indicator(&self, _enable: bool) {}
-	fn update_window_minimized(&self, _mini: bool, _ev_time : u32) {}
-
+    fn update_window_minimized(&self, _mini: bool, _ev_time: u32) {}
 }
 
 struct MockRunner {

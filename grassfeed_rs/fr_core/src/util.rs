@@ -368,7 +368,6 @@ mod t {
         assert_eq!(short, String::from("Japan 無料ダウンロード"));
     }
 
-
     #[test]
     fn fetch_infowars() {
         let (_buf, size) =
@@ -377,9 +376,8 @@ mod t {
         assert!([0, 1150].contains(&size));
     }
 
-
-	/*
-    20:17:47 [ERROR] fetching https://www.chip.de/fec/assets/favicon/favicon-32x32.png?v=01 => Transport(Transport { kind: Dns, message: Some("resolve dns name 'www.chip.de:443'"), url: Some(Url { scheme: "https", cannot_be_a_base: false, username: "", password: None, host: Some(Domain("www.chip.de")), port: None, path: "/fec/assets/favicon/favicon-32x32.png", query: Some("v=01"), fragment: None }), source: Some(Custom { kind: Uncategorized, error: "failed to lookup address information: Name or service not known" }) })
+    /*
+    Transport(Transport { kind: Dns, message: Some("resolve dns name 'www.chip.de:443'"), service not known" }) })
     */
     #[test]
     fn fetch_chip() {
@@ -401,7 +399,6 @@ mod t {
         assert_eq!(size, 0);
         assert_eq!(buf.len(), size);
     }
-
 
     // ---
 

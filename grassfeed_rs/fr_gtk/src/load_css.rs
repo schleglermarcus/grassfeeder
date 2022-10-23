@@ -38,19 +38,6 @@ pub fn load_css() {
             error!("Failed to load CSS: {}  \n{}", e, style);
         }
     };
-
-/*
-    let wp = gtk::WidgetPath::new();
-
-    let val = provider.style_property(
-        &wp,
-        gtk::StateFlags::NORMAL,
-        glib::ParamSpecString::new("background-color", "", "", None, glib::ParamFlags::READABLE),
-    );
-    debug!("PROV: VAL={:?}", val);
-*/
-
-
     gtk::StyleContext::add_provider_for_screen(
         &gdk::Screen::default().expect("Error initializing gtk css provider."),
         &provider,

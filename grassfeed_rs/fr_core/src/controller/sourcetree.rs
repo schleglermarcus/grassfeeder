@@ -834,7 +834,7 @@ impl SourceTreeController {
                     AValue::None,        // 1:homepage
                     AValue::None,        // 2: icon_str
                     AValue::ABOOL(true), // 3 :spinner
-					AValue::None,        // 4: feed url
+                    AValue::None,        // 4: feed url
                 ];
                 (*self.gui_val_store)
                     .write()
@@ -875,7 +875,7 @@ impl SourceTreeController {
             AValue::ASTR(self.new_source.feed_homepage.clone()),
             AValue::ASTR(icon_str), // 2: icon_str
             AValue::ABOOL(false),   // 3: spinner
-			AValue::None , // 4: feed-url
+            AValue::None,           // 4: feed-url
         ];
         (*self.gui_val_store)
             .write()
@@ -953,13 +953,13 @@ impl SourceTreeController {
     }
 
     fn check_paths(&self) {
-		// let now = Instant::now();
+        // let now = Instant::now();
         if *self.need_check_fs_paths.borrow() {
             self.update_cached_paths();
             self.need_check_fs_paths.replace(false);
         }
-		// let elapsed_ms = now.elapsed().as_millis();
-		// if elapsed_ms > 20 {                debug!("check_paths took {} ms", elapsed_ms);            }
+        // let elapsed_ms = now.elapsed().as_millis();
+        // if elapsed_ms > 20 {                debug!("check_paths took {} ms", elapsed_ms);            }
     }
 
     pub fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {
