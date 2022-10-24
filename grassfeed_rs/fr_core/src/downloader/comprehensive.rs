@@ -83,10 +83,14 @@ impl Step<ComprehensiveInner> for ParseFeedString {
             &inner.feed_url_edit,
         ) {
             inner.feed_homepage = homepage;
+
+			debug!("COMPR: HP={}", inner.feed_homepage );
             if !feed_title.is_empty() {
+				debug!("COMPR: title={}", &feed_title );
                 inner.feed_title = feed_title;
             }
         }
+		debug!("COMPR2:  HP={}", inner.feed_homepage );
         if !inner.feed_homepage.is_empty() {
             StepResult::Continue(Box::new(ComprAnalyzeHomepage(inner)))
         } else {
@@ -172,8 +176,6 @@ impl Step<ComprehensiveInner> for ComprStoreIcon {
         let comp_st = util::compress_vec_to_string(&inner.icon_bytes);
         let existing_icons: Vec<IconEntry> = inner.iconrepo.get_by_icon(comp_st.clone());
         if existing_icons.is_empty() {
-            // let mut ie = IconEntry::default();
-            // ie.icon = comp_st;
             let ie = IconEntry {
                 icon: comp_st,
                 ..Default::default()
@@ -197,10 +199,7 @@ pub struct ComprFinal(ComprehensiveInner);
 impl Step<ComprehensiveInner> for ComprFinal {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let inner: ComprehensiveInner = self.0;
-        trace!(
-            "DL: sending job  NewFeedSourceEdit  icon_id={}",
-            inner.icon_id
-        );
+        // trace!(            "DL: sending job  NewFeedSourceEdit  icon_id={}",            inner.icon_id        );
         let _r = inner.sourcetree_job_sender.send(SJob::NewFeedSourceEdit(
             inner.feed_url_edit.clone(),
             inner.feed_title.clone(),

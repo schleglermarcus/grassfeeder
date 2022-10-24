@@ -274,7 +274,7 @@ pub fn create_new_subscription_dialog(
             }
         }
         let spinner_act = dialogdata.get(3).unwrap().boo();
-        debug!("Spinner active: {} ", spinner_act);
+        trace!("Spinner active: {} ", spinner_act);
         spinner_c.set_active(spinner_act);
         if spinner_act {
             spinner_c.start();

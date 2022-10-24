@@ -2,6 +2,7 @@ use crate::controller::guiprocessor::Job;
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorRepo;
 use crate::downloader::util::extract_feed_from_website;
+use crate::downloader::util::go_to_homepage;
 use crate::util::Step;
 use crate::util::StepResult;
 use crate::web::WebFetcherType;
@@ -17,6 +18,8 @@ pub struct DragInner {
     pub found_homepage: String,
     pub error_message: String,
     pub erro_repo: ErrorRepo,
+    pub testing_base_url: String,
+    pub feed_display_title: String,
 }
 
 impl DragInner {
@@ -37,6 +40,8 @@ impl DragInner {
             found_feed_url: Default::default(),
             found_homepage: Default::default(),
             error_message: Default::default(),
+            testing_base_url: Default::default(),
+            feed_display_title: Default::default(),
         }
     }
 }
@@ -63,24 +68,19 @@ impl BrowserEvalStart {
 impl Step<DragInner> for BrowserEvalStart {
     fn step(self: Box<Self>) -> StepResult<DragInner> {
         let mut inner: DragInner = self.0;
-
         let result = (*inner.web_fetcher).request_url(inner.dragged_url.clone());
-        match result.status {
-            200 => {
-                inner.dragged_url_content = result.content;
-            }
-            _ => {
-                inner.error_message = format!("BrowserEvalStart {}", &result.error_description);
-                inner.erro_repo.add_error(
-                    -1,
-                    result.status as isize,
-                    inner.dragged_url.clone(),
-                    result.error_description,
-                );
-                return StepResult::Continue(Box::new(Notify(inner)));
-            }
+        if result.status == 200 {
+            inner.dragged_url_content = result.content;
+            return StepResult::Continue(Box::new(ParseWebpage(inner)));
         }
-        StepResult::Continue(Box::new(ParseWebpage(inner)))
+        inner.error_message = format!("{} {}", result.status, &result.error_description);
+        inner.erro_repo.add_error(
+            -1,
+            result.status as isize,
+            inner.dragged_url.clone(),
+            result.error_description,
+        );
+        StepResult::Continue(Box::new(CompleteRelativeUrl(inner)))
     }
 }
 
@@ -88,18 +88,14 @@ struct ParseWebpage(DragInner);
 impl Step<DragInner> for ParseWebpage {
     fn step(self: Box<Self>) -> StepResult<DragInner> {
         let mut inner: DragInner = self.0;
-        // let mut feed_url = String::default();
-        // let mut extr_err = String::default();
-        // let mut parse_err = String::default();
-        let extr_r = extract_feed_from_website(&inner.dragged_url_content, &inner.dragged_url);
-
+        let extr_r = extract_feed_from_website(&inner.dragged_url_content);
         if extr_r.is_err() {
             inner.error_message = extr_r.err().unwrap();
             return StepResult::Continue(Box::new(CheckContentIsFeed(inner)));
         }
         inner.found_feed_url = extr_r.unwrap();
-        debug!("ParseWebpage OK {:?}", &inner.found_feed_url);
-        StepResult::Continue(Box::new(Notify(inner)))
+        // trace!("ParseWebpage OK {:?}", &inner.found_feed_url);
+        StepResult::Continue(Box::new(CompleteRelativeUrl(inner)))
     }
 }
 
@@ -107,15 +103,22 @@ struct CheckContentIsFeed(DragInner);
 impl Step<DragInner> for CheckContentIsFeed {
     fn step(self: Box<Self>) -> StepResult<DragInner> {
         let mut inner: DragInner = self.0;
-
         let parse_r = feed_rs::parser::parse(inner.dragged_url_content.as_bytes());
         if parse_r.is_err() {
             inner.error_message += &parse_r.err().unwrap().to_string();
-            return StepResult::Continue(Box::new(CheckContentIsFeed(inner)));
+            return StepResult::Continue(Box::new(AnalyzeContentSloppy(inner)));
+        }
+        let parsed = parse_r.unwrap();
+        if let Some(t_t) = parsed.title {
+            inner.feed_display_title = t_t.content.clone();
         }
         inner.found_feed_url = inner.dragged_url.clone();
-        debug!("CheckContentIsFeed OK {:?}", &inner.found_feed_url);
-        StepResult::Continue(Box::new(Notify(inner)))
+        trace!(
+            "CheckContentIsFeed OK {:?}  title:{}",
+            &inner.found_feed_url,
+            inner.feed_display_title
+        );
+        StepResult::Continue(Box::new(CompleteRelativeUrl(inner)))
     }
 }
 
@@ -123,11 +126,31 @@ struct AnalyzeContentSloppy(DragInner);
 impl Step<DragInner> for AnalyzeContentSloppy {
     fn step(self: Box<Self>) -> StepResult<DragInner> {
         let mut inner: DragInner = self.0;
-
         let extracted: Vec<String> = extract_feed_urls_sloppy(&inner.dragged_url_content);
         if !extracted.is_empty() {
-            debug!("FOUND: {:?}", extracted);
+            debug!("feed adresses found by sloppy:   {:?}", extracted);
             inner.found_feed_url = extracted.first().unwrap().clone();
+        }
+        StepResult::Continue(Box::new(CompleteRelativeUrl(inner)))
+    }
+}
+
+struct CompleteRelativeUrl(DragInner);
+impl Step<DragInner> for CompleteRelativeUrl {
+    fn step(self: Box<Self>) -> StepResult<DragInner> {
+        let mut inner: DragInner = self.0;
+        let mut drag_url = inner.dragged_url.clone();
+        if !drag_url.starts_with("http") {
+            drag_url = inner.testing_base_url.clone();
+            // debug!(                "CompleteRelativeUrl ....testing case : {}  found: {}  ",                drag_url, inner.found_feed_url            );
+        }
+        if !inner.found_feed_url.is_empty() && !inner.found_feed_url.starts_with("http") {
+            let o_homepage_addr = go_to_homepage(&drag_url);
+            if let Some(base_url) = o_homepage_addr {
+                inner.found_feed_url = format!("{}{}", base_url, inner.found_feed_url);
+                trace!("CompleteRelativeUrl modified  {} ", inner.found_feed_url);
+            }
+            // else {                warn!("no HP found!");            }
         }
         StepResult::Continue(Box::new(Notify(inner)))
     }
@@ -137,11 +160,23 @@ struct Notify(DragInner);
 impl Step<DragInner> for Notify {
     fn step(self: Box<Self>) -> StepResult<DragInner> {
         let inner: DragInner = self.0;
+        debug!("Notify:{}:", &inner.found_feed_url);
+
         let _r = inner.sourcetree_job_sender.send(SJob::DragUrlEvaluated(
             inner.dragged_url.clone(),
             inner.found_feed_url.clone(),
             inner.error_message.clone(),
+            inner.feed_display_title.clone(),
         ));
+
+        if inner.found_feed_url.is_empty() {
+            let _r = inner
+                .guiproc_job_sender
+                .send(Job::AddBottomDisplayErrorMessage(
+                    inner.error_message.clone(),
+                ));
+        }
+
         StepResult::Stop(inner)
     }
 }
@@ -173,7 +208,9 @@ pub fn extract_feed_urls_sloppy(pagetext: &String) -> Vec<String> {
                 let mut split_r = assignm.split("=");
                 let _left = split_r.next();
                 if let Some(r) = split_r.next() {
-                    found_feed_urls.push(r.to_string());
+                    let mut probe_url = r.to_string();
+                    probe_url = probe_url.replace(&['\"'], "");
+                    found_feed_urls.push(probe_url);
                 }
             }
         }

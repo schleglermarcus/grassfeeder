@@ -23,6 +23,9 @@ pub fn retrieve_homepage_from_feed_text(
     let mut feed_title: Option<String> = None;
     let mut feed_homepage: Option<String> = None;
     feed_title = Some(feed.title.unwrap().content);
+
+    trace!("   feed_title ={:?} ", feed_title);
+
     for f_link in feed.links {
         if let Some(ref mtype) = f_link.media_type {
             if mtype == "application/rss+xml" {
@@ -173,7 +176,9 @@ pub fn workaround_https_declaration(wrong: String) -> String {
 }
 
 // via parser
-pub fn extract_feed_from_website(page_content: &String, page_url: &str) -> Result<String, String> {
+pub fn extract_feed_from_website(
+    page_content: &String, /* , page_url: &str*/
+) -> Result<String, String> {
     let dom: tl::VDom = match tl::parse(&page_content, tl::ParserOptions::default()) {
         Ok(d) => d,
         Err(e) => {
@@ -192,8 +197,7 @@ pub fn extract_feed_from_website(page_content: &String, page_url: &str) -> Resul
             t_name == "link"
         })
         .collect();
-    // trace!("link_tags={:?}", link_tags);
-    let feed_list: Vec<String> = link_tags
+    let feeds_list: Vec<String> = link_tags
         .iter()
         // .inspect(|at_m| debug!("PF0:{:?}", at_m))
         .map(|t| {
@@ -218,17 +222,18 @@ pub fn extract_feed_from_website(page_content: &String, page_url: &str) -> Resul
         .filter(|attrmap| !attrmap.get("href").unwrap().contains("comments"))
         .filter_map(|attrmap| attrmap.get("href").cloned())
         .collect();
-    trace!("feed_list={:#?}", feed_list);
-    if feed_list.is_empty() {
-        return Err("no feed url found".to_string());
+    // trace!("feed_list={:#?}", feeds_list);
+    if feeds_list.is_empty() {
+        return Err("No feed-url found. ".to_string());
     }
-
-    let mut feed_url = feed_list.first().unwrap().clone();
-    if feed_url.starts_with("/") {
-        if let Some(base_url) = go_to_homepage(&page_url.to_string()) {
-            feed_url = format!("{}{}", base_url, feed_url);
+    let feed_url = feeds_list.first().unwrap().clone();
+    /*
+        if feed_url.starts_with("/") {
+            if let Some(base_url) = go_to_homepage(&page_url.to_string()) {
+                feed_url = format!("{}{}", base_url, feed_url);
+            }
         }
-    }
+    */
     return Ok(feed_url);
 }
 

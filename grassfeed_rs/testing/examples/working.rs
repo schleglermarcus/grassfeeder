@@ -135,18 +135,11 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
             (
-                "https://observer.ug/headlinenews?format=feed&type=rss",
-                "obs_uganda ",
-            ),
-            (
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",
             ),
             ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
-            ("https://insidexpress.com/feed/", "insidexpress"),
-            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
-			("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
-			
+            ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -177,6 +170,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             false,
         );
         let src = [
+            ("https://insidexpress.com/feed/", "insidexpress"),
+            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
             ("http://thehighersidechats.com/feed/", "higherside-300"),
             ("https://m4rw3r.github.io/atom.xml", "marwer no icon"),
             ("https://www.fromrome.info/feed/", "fromrome icon okl"),
@@ -237,6 +232,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            (
+                "https://observer.ug/headlinenews?format=feed&type=rss",
+                "obs_uganda ",
+            ),
             (
                 "https://exopolitics.blogs.com/newsinsideout/atom.xml",
                 "exopoli no icon",

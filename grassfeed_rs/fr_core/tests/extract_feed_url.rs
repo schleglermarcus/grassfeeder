@@ -4,7 +4,6 @@ use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::downloader::browserdrag::extract_feed_urls_sloppy;
 use fr_core::downloader::browserdrag::BrowserEvalStart;
 use fr_core::downloader::browserdrag::DragInner;
-use fr_core::downloader::util::extract_feed_from_website;
 use fr_core::util::StepResult;
 use fr_core::web::mockfilefetcher::FileFetcher;
 use fr_core::web::WebFetcherType;
@@ -13,13 +12,74 @@ use std::sync::Arc;
 use xmlparser::Token;
 use xmlparser::Tokenizer;
 
-// use fr_core::web::httpfetcher::HttpFetcher;
+/* NO Title found:
+	https://www.opendesktop.org/p/1293160
+
+    https://exopolitics.blogs.com/newsinsideout/2020/08/jesus-christ-as-ascended-master-sponsored-valiant-thors-mission-from-venus-meeting-ike-russian-leaders-to-prevent-earth-nu.html
+    https://www.linuxcompatible.org/
+
+	http://xbustyx.xxxlog.co/feed/
+
+*/
+/*
+
+LATER:
+  https://www.reddit.com/r/Fotografie/  -> https://www.reddit.com/r/Fotografie.rss
+
+
+*/
 
 const HTML_BASE: &str = "../fr_core/tests/websites/";
+const ERR_REPO_BASE: &str = "../target/";
 
-// "hp_neopr.html",
-//     "https://www.neopresse.com/politik/teile-der-afd-fordern-atomwaffen-fuer-deutschland/",
-//    ,
+// #[ignore]
+#[test]
+fn t_extract_url() {
+    setup();
+
+    let (stc_job_s, _stc_job_r) = flume::unbounded::<SJob>();
+    let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(HTML_BASE.to_string())));
+    let (gp_sender, _gp_rec) = flume::bounded::<Job>(2);
+
+    let pairs: [(&str, &str, &str); 4] = [
+	(
+		"hp_neopr.html",
+		"https://www.neopresse.com/politik/teile-der-afd-fordern-atomwaffen-fuer-deutschland/",
+		"https://www.neopresse.com/feed/",
+	),
+	(
+		"pleiteticker.html",
+		"https://pleiteticker.de/dkg-chef-gass-warnt-vor-winter-der-krankenhaus-insolvenzen/",
+		"https://pleiteticker.de/feed/",
+	),
+	(
+	 "stackexchange.html",
+	 "https://unix.stackexchange.com/questions/457584/gtk3-change-text-color-in-a-label-raspberry-pi",
+	 "https://unix.stackexchange.com/feeds/question/457584"
+	),
+	(
+        "naturalnews-page.html",
+        "https://www.naturalnews.com/2022-10-22-boston-university-new-covid-kills-80-percent.html",
+        "https://www.naturalnews.com/rss.xml",
+    )];
+    for (filename, request_page, url) in pairs {
+        let erro_rep = ErrorRepo::new(&ERR_REPO_BASE.to_string());
+        erro_rep.startup_read();
+        let mut drag_i = DragInner::new(
+            filename.to_string(),
+            stc_job_s.clone(),
+            fetcher.clone(),
+            erro_rep,
+            gp_sender.clone(),
+        );
+        drag_i.testing_base_url = request_page.to_string();
+        let last = StepResult::start(Box::new(BrowserEvalStart::new(drag_i)));
+        // debug!("EX:3   '{}'  {} ", last.found_feed_url, last.error_message);
+        assert_eq!(last.found_feed_url, url.to_string());
+    }
+}
+
+#[ignore]
 #[test]
 fn stateful_download() {
     setup();
@@ -46,56 +106,9 @@ fn stateful_download() {
     );
 }
 
-
-/* TODO Feed URL not recognized
-
-   https://www.naturalnews.com/2022-10-22-boston-university-new-covid-kills-80-percent.html
-
-   https://observer.ug/news/headlines/75580-uganda-land-commission-fails-to-locate-files-of-police-land-in-naguru
-
-   Download error:
-   https://insidexpress.com/lifestyle/netflix-bosses-branded-sadistic-and-wicked-for-recreating-princess-dianas-final-hours-for-the-crown/
-
-*/
-/* NO Title found:
-    http://xbustyx.xxxlog.co/feed/
-    https://exopolitics.blogs.com/newsinsideout/2020/08/jesus-christ-as-ascended-master-sponsored-valiant-thors-mission-from-venus-meeting-ike-russian-leaders-to-prevent-earth-nu.html
-    https://www.opendesktop.org/p/1293160
-    https://www.linuxcompatible.org/
-
-
-*/
-/*
-
-LATER:
-  https://www.reddit.com/r/Fotografie/  -> https://www.reddit.com/r/Fotografie.rss
-
-
-*/
+// -------------------------------
 
 #[ignore]
-#[test]
-fn extract_url_work() {
-    setup();
-    let pairs: [(&str, &str, &str); 1] = [(
-        "naturalnews-page.html",
-        "https://www.naturalnews.com/2022-10-22-boston-university-new-covid-kills-80-percent.html",
-        "xxxx",
-    )];
-    for (file, req_page, url) in pairs {
-        let fname = format!("{}{}", HTML_BASE, file);
-        let o_page = std::fs::read_to_string(fname.clone());
-        if o_page.is_err() {
-            error!("{}  {:?}", &fname, &o_page.err());
-            continue;
-        }
-        let page = o_page.unwrap();
-        let r = extract_feed_from_website(&page, &req_page);
-        debug!("{:?}", r);
-        assert_eq!(r, Ok(url.to_string()));
-    }
-}
-
 #[test]
 fn analyse_nn_sloppy() {
     setup();
@@ -107,60 +120,19 @@ fn analyse_nn_sloppy() {
     // debug!("URLS {:?}", found_feed_urls);
 }
 
-/*
-// returns the grepped Feed urls
-fn extract_feed_urls_sloppy(pagetext: &String) -> Vec<String> {
-    let mut found_feed_urls: Vec<String> = Vec::default();
-    for line in pagetext.lines() {
-        let trimmed = line.trim().to_string();
-        if !trimmed.contains("<link") {
-            continue;
-        }
-        if !trimmed.contains("rss") {
-            continue;
-        }
-        let parts = trimmed.split(" ");
-        let parts_vec = parts
-            .into_iter()
-            .map(|p| p.to_string())
-            .collect::<Vec<String>>();
-        let e_first_href = parts_vec.iter().enumerate().find_map(|(n, p)| {
-            if p.starts_with("href") {
-                return Some(n);
-            }
-            None
-        });
-        if let Some(ind) = e_first_href {
-            if let Some(assignm) = parts_vec.get(ind) {
-                let mut split_r = assignm.split("=");
-                let _left = split_r.next();
-                if let Some(r) = split_r.next() {
-                    found_feed_urls.push(r.to_string());
-                }
-            }
-        }
-    }
-    found_feed_urls
-}
-*/
-
 #[derive(Default, Debug, Clone)]
 struct Element {
     name: String,
     attributes: HashMap<String, String>,
-    // extra_text: String,
 }
 
-impl Element {
-    // pub fn new(name_: String) -> Self {        Element {            name: name_,            ..Default::default()        }    }
-}
+// impl Element {     pub fn new(name_: String) -> Self {        Element {            name: name_,            ..Default::default()        }    }}
 
 impl std::fmt::Display for Element {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let attrs = if self.attributes.is_empty() {
             String::default()
         } else {
-            // self.attributes                .iter()                .map(|(k, v)| format!("{}={}", k, v))                .collect::<Vec<String>>()                .join(",")
             format!("{:?}", self.attributes)
         };
         write!(f, "E: {} {:?}", self.name, attrs)
@@ -299,37 +271,6 @@ fn analyse_nn_with_html_parser() {
             .collect::<Vec<&Element>>();
 
         //  for e in &element_list {            debug!("{}", e);        }
-    }
-}
-
-#[ignore]
-#[test]
-fn extract_feed_urls_ok() {
-    setup();
-    let pairs: [(&str, &str, &str); 3] = [
-        (
-            "hp_neopr.html",
-            "https://www.neopresse.com/politik/teile-der-afd-fordern-atomwaffen-fuer-deutschland/",
-            "https://www.neopresse.com/feed/",
-        ),
-        (
-            "pleiteticker.html",
-            "https://pleiteticker.de/dkg-chef-gass-warnt-vor-winter-der-krankenhaus-insolvenzen/",
-            "https://pleiteticker.de/feed/",
-        ),
-		(
-		 "stackexchange.html",
-		 "https://unix.stackexchange.com/questions/457584/gtk3-change-text-color-in-a-label-raspberry-pi",
-		 "https://unix.stackexchange.com/feeds/question/457584"
-	    ),
-
-    ];
-
-    for (file, req_page, url) in pairs {
-        let fname = format!("{}{}", HTML_BASE, file);
-        let page = std::fs::read_to_string(fname).unwrap();
-        let r = extract_feed_from_website(&page, &req_page);
-        assert_eq!(r, Ok(url.to_string()));
     }
 }
 

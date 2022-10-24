@@ -16,7 +16,6 @@ use crate::db::icon_repo::IconRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::db::subscription_state::SubsMapEntry;
-use crate::downloader::util::extract_feed_from_website;
 use crate::opml::opmlreader::OpmlReader;
 use crate::timer::ITimer;
 use crate::timer::Timer;
@@ -939,6 +938,7 @@ impl GuiProcessor {
         (*self.gui_updater).borrow().show_dialog(DIALOG_ABOUT);
     }
 
+/*
     #[deprecated]
     fn start_dragdrop_new_subscription_dialog(&mut self, dragged_url: String) {
         let r = (*self.downloader_r).borrow().download_direct(&dragged_url);
@@ -997,6 +997,7 @@ impl GuiProcessor {
             .borrow()
             .show_dialog(DIALOG_NEW_SUBSCRIPTION);
     }
+*/
 
     ///  for key codes look at selec.rs                           gdk_sys::GDK_KEY_Escape => KeyCodes::Escape,
     fn process_key_press(&mut self, keycode: isize, _o_char: Option<char>) {

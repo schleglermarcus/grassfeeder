@@ -89,8 +89,8 @@ pub enum SJob {
     NotifyTreeReadCount(isize, isize, isize),
     ScanEmptyUnread,
     EmptyTreeCreateDefaultSubscriptions,
-    ///  Drag-String   Feed-Url   Error-Message
-    DragUrlEvaluated(String, String, String),
+    ///  Drag-String   Feed-Url   Error-Message,   Home-Page-Title
+    DragUrlEvaluated(String, String, String, String),
 }
 
 // #[automock]
@@ -373,12 +373,27 @@ impl SourceTreeController {
                 SJob::EmptyTreeCreateDefaultSubscriptions => {
                     self.empty_create_default_subscriptions()
                 }
-                SJob::DragUrlEvaluated(ref _drag_string, ref feed_url, ref err_msg) => {
-                    debug!("DragUrlEvaluated : {} {}", feed_url, err_msg);
-                    if err_msg.is_empty() {
+                SJob::DragUrlEvaluated(
+                    ref drag_string,
+                    ref feed_url,
+                    ref err_msg,
+                    ref hp_title,
+                ) => {
+                    if !err_msg.is_empty() {
+                        debug!(
+                            "DragUrlEvaluated: {}  url:{}:   ERR  {} ",
+                            drag_string, feed_url, err_msg,
+                        );
+                    }
+                    let av_ti = if hp_title.is_empty() {
+                        AValue::None
+                    } else {
+                        AValue::ASTR(hp_title.clone())
+                    };
+                    if !feed_url.is_empty() {
                         let dd: Vec<AValue> = vec![
                             AValue::None,                   // 0:display
-                            AValue::None,                   // 1:homepage
+                            av_ti,                          // 1: homepage
                             AValue::None,                   // 2: icon_str
                             AValue::ABOOL(true),            // 3 :spinner
                             AValue::ASTR(feed_url.clone()), // 4: feed url
@@ -902,10 +917,7 @@ impl SourceTreeController {
             AValue::ABOOL(false),   // 3: spinner
             AValue::None,           // 4: feed-url
         ];
-        trace!(
-            "process_newsource_request_done  {}",
-            self.new_source.feed_homepage.clone()
-        );
+        // trace!(            "process_newsource_request_done  {}",            self.new_source.feed_homepage.clone()        );
         (*self.gui_val_store)
             .write()
             .unwrap()
