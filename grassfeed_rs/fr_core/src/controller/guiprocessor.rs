@@ -70,6 +70,7 @@ pub enum Job {
     /// thread-nr, job-kind, elapsed_ms , job-description
     DownloaderJobFinished(isize, u8, u8, u32, String),
     CheckFocusMarker(u8),
+    AddBottomDisplayErrorMessage(String),
 }
 
 const JOBQUEUE_SIZE: usize = 100;
@@ -320,8 +321,7 @@ impl GuiProcessor {
                             .set_browser_zoom(BrowserZoomCommand::ZoomDefault);
                     }
                     "toolbutton-troubleshoot1" => {
-                        trace!("toolbutton-troubleshoot1");
-                        self.start_dragdrop_new_subscription_dialog("https://unix.stackexchange.com/questions/457584/gtk3-change-text-color-in-a-label-raspberry-pi".to_string()) ;
+                        debug!("toolbutton-troubleshoot1");
                     }
                     _ => {
                         warn!("unknown ToolBarButton {} ", id);
@@ -421,7 +421,7 @@ impl GuiProcessor {
                     }
                 },
                 GuiEvents::DragDropUrlReceived(ref url) => {
-                    self.start_dragdrop_new_subscription_dialog(url.to_string());
+                    (*self.downloader_r).borrow().browser_drag_request(url);
                 }
                 _ => {
                     warn!("other GuiEvents: {:?}", &ev);
@@ -528,6 +528,10 @@ impl GuiProcessor {
                         self.switch_focus_marker(false);
                     }
                 }
+                Job::AddBottomDisplayErrorMessage(msg) => {
+                    self.statusbar_items.bottom_notices.push_back(msg);
+                }
+
                 _ => {
                     warn!("other job! {:?}", &job);
                 }
@@ -935,6 +939,7 @@ impl GuiProcessor {
         (*self.gui_updater).borrow().show_dialog(DIALOG_ABOUT);
     }
 
+    #[deprecated]
     fn start_dragdrop_new_subscription_dialog(&mut self, dragged_url: String) {
         let r = (*self.downloader_r).borrow().download_direct(&dragged_url);
         if r.is_err() {
@@ -1131,6 +1136,7 @@ pub fn dl_char_for_kind(kind: u8) -> char {
         2 => char::from_u32(0x2662).unwrap(), // icon : diamond sign
         3 => char::from_u32(0x21d3).unwrap(), // feed-comprehensive : double arrow
         4 => char::from_u32(0x26c1).unwrap(), // DatabaseCleanup : database icon
+        5 => char::from_u32(0x21d3).unwrap(), // Drag Url eval : double arrow
         _ => '_',
     };
     nc

@@ -1,7 +1,51 @@
-// use tl::HTMLTag;
+use fr_core::controller::guiprocessor::Job;
+use fr_core::controller::sourcetree::SJob;
+use fr_core::db::errors_repo::ErrorRepo;
+use fr_core::downloader::browserdrag::extract_feed_urls_sloppy;
+use fr_core::downloader::browserdrag::BrowserEvalStart;
+use fr_core::downloader::browserdrag::DragInner;
 use fr_core::downloader::util::extract_feed_from_website;
-use tl::Node;
+use fr_core::util::StepResult;
+use fr_core::web::mockfilefetcher::FileFetcher;
+use fr_core::web::WebFetcherType;
+use std::collections::HashMap;
+use std::sync::Arc;
+use xmlparser::Token;
+use xmlparser::Tokenizer;
+
+// use fr_core::web::httpfetcher::HttpFetcher;
+
 const HTML_BASE: &str = "../fr_core/tests/websites/";
+
+// "hp_neopr.html",
+//     "https://www.neopresse.com/politik/teile-der-afd-fordern-atomwaffen-fuer-deutschland/",
+//    ,
+#[test]
+fn stateful_download() {
+    setup();
+    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let erro_rep = ErrorRepo::new(&String::default());
+    // let web_fetch: WebFetcherType = Arc::new(Box::new(HttpFetcher {}));
+    let web_fetch: WebFetcherType = Arc::new(Box::new(FileFetcher::new(
+        "../fr_core/tests/websites/".to_string(),
+    )));
+    let (gp_sender, _gp_rec) = flume::bounded::<Job>(2);
+    let drag_i = DragInner::new(
+        "hp_neopr.html".to_string(),
+        stc_job_s.clone(),
+        web_fetch.clone(),
+        erro_rep,
+        gp_sender,
+    );
+
+    let last = StepResult::start(Box::new(BrowserEvalStart::new(drag_i)));
+    debug!(" DL  {:?}", last.found_feed_url);
+    assert_eq!(
+        last.found_feed_url,
+        "https://www.neopresse.com/feed/".to_string()
+    );
+}
+
 
 /* TODO Feed URL not recognized
 
@@ -52,50 +96,209 @@ fn extract_url_work() {
     }
 }
 
-
+#[test]
+fn analyse_nn_sloppy() {
+    setup();
+    let fname = format!("{}{}", HTML_BASE, "naturalnews-page.html");
+    let o_page = std::fs::read_to_string(fname.clone());
+    let pagetext = o_page.unwrap();
+    let found_feed_urls = extract_feed_urls_sloppy(&pagetext);
+    assert_eq!(found_feed_urls.len(), 3);
+    // debug!("URLS {:?}", found_feed_urls);
+}
 
 /*
+// returns the grepped Feed urls
+fn extract_feed_urls_sloppy(pagetext: &String) -> Vec<String> {
+    let mut found_feed_urls: Vec<String> = Vec::default();
+    for line in pagetext.lines() {
+        let trimmed = line.trim().to_string();
+        if !trimmed.contains("<link") {
+            continue;
+        }
+        if !trimmed.contains("rss") {
+            continue;
+        }
+        let parts = trimmed.split(" ");
+        let parts_vec = parts
+            .into_iter()
+            .map(|p| p.to_string())
+            .collect::<Vec<String>>();
+        let e_first_href = parts_vec.iter().enumerate().find_map(|(n, p)| {
+            if p.starts_with("href") {
+                return Some(n);
+            }
+            None
+        });
+        if let Some(ind) = e_first_href {
+            if let Some(assignm) = parts_vec.get(ind) {
+                let mut split_r = assignm.split("=");
+                let _left = split_r.next();
+                if let Some(r) = split_r.next() {
+                    found_feed_urls.push(r.to_string());
+                }
+            }
+        }
+    }
+    found_feed_urls
+}
+*/
 
-TODO:  other parser
+#[derive(Default, Debug, Clone)]
+struct Element {
+    name: String,
+    attributes: HashMap<String, String>,
+    // extra_text: String,
+}
+
+impl Element {
+    // pub fn new(name_: String) -> Self {        Element {            name: name_,            ..Default::default()        }    }
+}
+
+impl std::fmt::Display for Element {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let attrs = if self.attributes.is_empty() {
+            String::default()
+        } else {
+            // self.attributes                .iter()                .map(|(k, v)| format!("{}={}", k, v))                .collect::<Vec<String>>()                .join(",")
+            format!("{:?}", self.attributes)
+        };
+        write!(f, "E: {} {:?}", self.name, attrs)
+    }
+}
+
+/*
+The link is after an invalid comment signature.
+Parsers are confused with that.
 
 https://github.com/untitaker/html5gum
 https://github.com/cloudflare/lol-html
 https://github.com/servo/html5ever
-
-
-
 */
 #[ignore]
 #[test]
-fn analye_nn() {
+fn analyse_nn_with_html_parser() {
     setup();
     let fname = format!("{}{}", HTML_BASE, "naturalnews-page.html");
     let o_page = std::fs::read_to_string(fname.clone());
-    let page = o_page.unwrap();
-    let dom: tl::VDom = match tl::parse(&page, tl::ParserOptions::default()) {
-        Ok(d) => d,
-        Err(e) => {
-            error!("parsing page: {:?}", e);
-            return;
+    let pagetext = o_page.unwrap();
+    let mut tokens: Vec<Token> = Vec::default();
+    for token_r in Tokenizer::from(pagetext.as_str()) {
+        match token_r {
+            Ok(t) => tokens.push(t),
+            Err(e) => debug!("tokenizer_error {:?}", e),
         }
-    };
-
-    for node in dom.nodes() {
-        match node {
-            Node::Tag(_htmltag) => {
-                // trace!(" {:?}", htmltag);
+    }
+    let mut element_list: Vec<Element> = Vec::default();
+    let mut current_element = Element::default();
+    for token in tokens {
+        match token {
+            Token::Declaration {
+                version,
+                encoding,
+                standalone,
+                span: _span,
+            } => {
+                debug!(
+                    "Declaration: {:?} {:?} {:?} ",
+                    version, encoding, standalone
+                );
             }
-            Node::Raw(raw) => {
-                let s = String::from_utf8_lossy(&raw.as_bytes());
-                let trimmed = s.trim().to_string();
+            Token::ProcessingInstruction {
+                target,
+                content,
+                span: _span,
+            } => {
+                debug!("ProcessingInstruction: {:?} {:?}  ", target, content);
+            }
+            Token::DtdStart {
+                name,
+                external_id,
+                span: _span,
+            } => {
+                debug!("DtdStart: {:?} {:?}  ", name, external_id);
+            }
+            Token::EmptyDtd {
+                name,
+                external_id,
+                span: _span,
+            } => {
+                trace!("EmptyDtd: {:?} {:?} ", name, external_id);
+            }
+            Token::Attribute {
+                prefix: _p,
+                local,
+                value,
+                span: _s,
+            } => {
+                current_element
+                    .attributes
+                    .insert(local.to_string(), value.to_string());
+                //  trace!("Attribute: {:?}={:?}  ", local.to_string(), value,);
+            }
+            Token::ElementStart {
+                prefix: _p,
+                local,
+                span: _s,
+            } => {
+                // trace!("ElementStart local:{:?}  ", local.to_string(),);
+                current_element.name = local.to_string();
+                current_element.attributes.clear();
+            }
+            Token::ElementEnd { end: _e, span: _s } => {
+                //  trace!("ElementEnd: {}   ", current_element);
+                element_list.push(current_element.clone());
+                current_element.name = String::default();
+                current_element.attributes.clear();
+            }
+            Token::Text { text } => {
+                let trimmed = text.trim().to_string();
                 if !trimmed.is_empty() {
-                    // trace!("RAW {:?}", trimmed);
+                    // trace!("Text: {:?} ", text);
                 }
             }
-            Node::Comment(co) => {
-                trace!("COMM {:?}", co);
-            } // _ => None,
+            Token::Cdata {
+                text: _text,
+                span: _s,
+            } => {
+                trace!("Cdata: {:?}  ", _text);
+            }
+            Token::Comment {
+                text: _text,
+                span: _s,
+            } => {
+                trace!("Comment: {:?}  ", _text);
+            }
+
+            _ => {
+                warn!("OTHER: {:?}", token);
+            }
         }
+
+        let _filtered: Vec<&Element> = element_list
+            .iter()
+            .filter(|e| e.name == "link".to_string())
+            .filter(|e| {
+                if let Some(a_type) = e.attributes.get("type") {
+                    if a_type.contains("rss") {
+                        return true;
+                    }
+                }
+                false
+            })
+            .inspect(|e| debug!("I0: {:?}", e.attributes))
+            .filter(|e| {
+                if let Some(a_rel) = e.attributes.get("rel") {
+                    if a_rel.as_str() == "alternate" {
+                        return true;
+                    }
+                }
+                false
+            })
+            .inspect(|e| debug!("I1: {:?}", e.attributes))
+            .collect::<Vec<&Element>>();
+
+        //  for e in &element_list {            debug!("{}", e);        }
     }
 }
 

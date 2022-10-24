@@ -89,6 +89,8 @@ pub enum SJob {
     NotifyTreeReadCount(isize, isize, isize),
     ScanEmptyUnread,
     EmptyTreeCreateDefaultSubscriptions,
+    ///  Drag-String   Feed-Url   Error-Message
+    DragUrlEvaluated(String, String, String),
 }
 
 // #[automock]
@@ -370,6 +372,29 @@ impl SourceTreeController {
                 }
                 SJob::EmptyTreeCreateDefaultSubscriptions => {
                     self.empty_create_default_subscriptions()
+                }
+                SJob::DragUrlEvaluated(ref _drag_string, ref feed_url, ref err_msg) => {
+                    debug!("DragUrlEvaluated : {} {}", feed_url, err_msg);
+                    if err_msg.is_empty() {
+                        let dd: Vec<AValue> = vec![
+                            AValue::None,                   // 0:display
+                            AValue::None,                   // 1:homepage
+                            AValue::None,                   // 2: icon_str
+                            AValue::ABOOL(true),            // 3 :spinner
+                            AValue::ASTR(feed_url.clone()), // 4: feed url
+                        ];
+                        (*self.gui_val_store)
+                            .write()
+                            .unwrap()
+                            .set_dialog_data(DIALOG_NEW_SUBSCRIPTION, &dd);
+                        (*self.gui_updater)
+                            .borrow()
+                            .update_dialog(DIALOG_NEW_SUBSCRIPTION);
+
+                        (*self.gui_updater)
+                            .borrow()
+                            .show_dialog(DIALOG_NEW_SUBSCRIPTION);
+                    }
                 }
             }
             if self.config.mode_debug {
@@ -877,7 +902,10 @@ impl SourceTreeController {
             AValue::ABOOL(false),   // 3: spinner
             AValue::None,           // 4: feed-url
         ];
-		trace!("process_newsource_request_done  {}", self.new_source.feed_homepage.clone() );
+        trace!(
+            "process_newsource_request_done  {}",
+            self.new_source.feed_homepage.clone()
+        );
         (*self.gui_val_store)
             .write()
             .unwrap()

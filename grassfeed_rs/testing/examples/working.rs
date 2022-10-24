@@ -142,9 +142,11 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",
             ),
-			("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
+            ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
             ("https://insidexpress.com/feed/", "insidexpress"),
             ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
+			("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
+			
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -175,7 +177,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             false,
         );
         let src = [
-		("http://thehighersidechats.com/feed/", "higherside-300"),
+            ("http://thehighersidechats.com/feed/", "higherside-300"),
             ("https://m4rw3r.github.io/atom.xml", "marwer no icon"),
             ("https://www.fromrome.info/feed/", "fromrome icon okl"),
             ("https://www.relay.fm/query/feed", "relay_query icon ok"),
@@ -188,7 +190,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
-            ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
             ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),

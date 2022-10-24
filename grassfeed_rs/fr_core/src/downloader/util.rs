@@ -172,6 +172,7 @@ pub fn workaround_https_declaration(wrong: String) -> String {
     )
 }
 
+// via parser
 pub fn extract_feed_from_website(page_content: &String, page_url: &str) -> Result<String, String> {
     let dom: tl::VDom = match tl::parse(&page_content, tl::ParserOptions::default()) {
         Ok(d) => d,
@@ -179,7 +180,6 @@ pub fn extract_feed_from_website(page_content: &String, page_url: &str) -> Resul
             return Err(format!("XF: parsing homepage: {:?}", e));
         }
     };
-
     let link_tags: Vec<&HTMLTag> = dom
         .nodes()
         .iter()
@@ -193,10 +193,9 @@ pub fn extract_feed_from_website(page_content: &String, page_url: &str) -> Resul
         })
         .collect();
     // trace!("link_tags={:?}", link_tags);
-
     let feed_list: Vec<String> = link_tags
         .iter()
-        .inspect(|at_m| debug!("PF0:{:?}", at_m))
+        // .inspect(|at_m| debug!("PF0:{:?}", at_m))
         .map(|t| {
             let attrmap: HashMap<String, String> = t
                 .attributes()
@@ -207,7 +206,7 @@ pub fn extract_feed_from_website(page_content: &String, page_url: &str) -> Resul
             attrmap
         })
         .filter(|attrmap| attrmap.get("rel").is_some())
-        .inspect(|at_m| debug!("PF1:{:?}", at_m))
+        // .inspect(|at_m| debug!("PF1:{:?}", at_m))
         .filter(|attrmap| {
             if let Some(typ_e) = attrmap.get("type") {
                 typ_e.contains("rss") || typ_e.contains("atom")
@@ -215,7 +214,7 @@ pub fn extract_feed_from_website(page_content: &String, page_url: &str) -> Resul
                 false
             }
         })
-        .inspect(|at_m| debug!("PF2:{:?}", at_m))
+        // .inspect(|at_m| debug!("PF2:{:?}", at_m))
         .filter(|attrmap| !attrmap.get("href").unwrap().contains("comments"))
         .filter_map(|attrmap| attrmap.get("href").cloned())
         .collect();

@@ -46,6 +46,7 @@ proc-status = ">=0.1.1"
 png = ">=0.17.6"
 gif = ">=0.11.4"
 xmlem = ">=0.1.8"
+xmlparser = ">=0.13.5"
 
 [dev-dependencies]
 rand = "0.8.5"
