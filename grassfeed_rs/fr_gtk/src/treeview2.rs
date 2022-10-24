@@ -131,6 +131,9 @@ pub fn create_treeview(
                 }
                 let indices = treepath.indices_with_depth();
                 let ind_u16: Vec<u16> = indices.iter().map(|v| *v as u16).collect::<Vec<u16>>();
+				
+				trace!("TreeRowActivated : {} {:?}",repo_id ,ind_u16);
+
                 esw.sendw(GuiEvents::TreeRowActivated(0, ind_u16, repo_id));
             }
         }

@@ -686,7 +686,7 @@ pub fn create_toolbar(
             esw.sendw(GuiEvents::ToolBarButton("reload-feeds-all".to_string()));
         });
     }
-    if true {
+    if false {
         let image = Image::new();
         process_string_to_image(
             gen_icons::ICON_34_DATA_XP2,

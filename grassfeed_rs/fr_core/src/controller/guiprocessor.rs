@@ -182,7 +182,12 @@ impl GuiProcessor {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
                         .set_selected_feedsource(subs_id as isize);
-                    // trace!(                        "GP:TreeRowActivated{} #q:{} {:?} ",                        subs_id,                        (*self.downloader_r).borrow().get_queue_size(),                        _path                    );
+                    trace!(
+                        "GP:TreeRowActivated{} #q:{} {:?} ",
+                        subs_id,
+                        (*self.downloader_r).borrow().get_queue_size(),
+                        _path
+                    );
                     (*self.feedcontents_r)
                         .borrow()
                         .update_message_list(subs_id as isize);
@@ -418,7 +423,6 @@ impl GuiProcessor {
                 GuiEvents::DragDropUrlReceived(ref url) => {
                     self.start_dragdrop_new_subscription_dialog(url.to_string());
                 }
-
                 _ => {
                     warn!("other GuiEvents: {:?}", &ev);
                 }
@@ -828,7 +832,10 @@ impl GuiProcessor {
             if timestamp_now > ts + BOTTOM_MSG_SHOW_TIME_S as i64 {
                 self.statusbar_items.bottom_notice_current = None;
             } else {
-                longtext = format!("<span foreground=\"#CC6666\">{}</span>", msg.to_string());
+                longtext = format!(
+                    "<span foreground=\"#CC6666\">{}</span>",
+                    string_escape_url(msg.to_string())
+                );
             }
             need_update2 = true;
         } else {
@@ -929,27 +936,43 @@ impl GuiProcessor {
     }
 
     fn start_dragdrop_new_subscription_dialog(&mut self, dragged_url: String) {
-        // debug!("start_dragdrop_new_subscription_dialog {}", &dragged_url);
         let r = (*self.downloader_r).borrow().download_direct(&dragged_url);
         if r.is_err() {
-            let emsg = format!("http-requesting: {:?} {:?}", r.err(), &dragged_url);
+            let emsg = format!("http-requesting: {:?} {:?}", r.err().unwrap(), &dragged_url);
             warn!("{} ", &emsg);
             self.statusbar_items.bottom_notices.push_back(emsg);
             return;
         }
         let hp_text = r.unwrap();
-        debug!("HP length {}", hp_text.len());
-        let r = extract_feed_from_website(&hp_text, &dragged_url);
-        if r.is_err() {
-            let emsg = format!("Parsing page: {:?} {:?}", r.err().unwrap(), &dragged_url);
-            warn!("2:{} ", &emsg);
-            self.statusbar_items.bottom_notices.push_back(emsg);
-            debug!("#notices: {} ", self.statusbar_items.bottom_notices.len());
-
-            return;
+        let mut feed_url = String::default();
+        let mut extr_err = String::default();
+        let mut parse_err = String::default();
+        let extr_r = extract_feed_from_website(&hp_text, &dragged_url);
+        if extr_r.is_err() {
+            extr_err = extr_r.err().unwrap();
+            let parse_r = feed_rs::parser::parse(hp_text.as_bytes());
+            if parse_r.is_err() {
+                parse_err = parse_r.err().unwrap().to_string();
+            } else {
+                feed_url = dragged_url.clone();
+            }
+        } else {
+            feed_url = extr_r.unwrap();
         }
 
-        let feed_url = r.unwrap();
+        if feed_url.is_empty() {
+            let emsg = format!(
+                "Parsing page: {:?} {:?} {:?}",
+                extr_err, parse_err, &dragged_url
+            );
+            warn!("2:{} ", &emsg);
+            self.statusbar_items.bottom_notices.push_back(emsg);
+            return;
+        }
+        debug!(
+            "start_dragdrop_new_subscription_dialog  feed_url={}",
+            feed_url,
+        );
         let dd: Vec<AValue> = vec![
             AValue::None,           // 0:display
             AValue::None,           // 1:homepage

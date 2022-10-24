@@ -877,6 +877,7 @@ impl SourceTreeController {
             AValue::ABOOL(false),   // 3: spinner
             AValue::None,           // 4: feed-url
         ];
+		trace!("process_newsource_request_done  {}", self.new_source.feed_homepage.clone() );
         (*self.gui_val_store)
             .write()
             .unwrap()

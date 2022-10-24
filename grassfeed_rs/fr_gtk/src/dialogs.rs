@@ -149,6 +149,7 @@ pub fn create_new_folder_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObject
     ret.set_dialog(DIALOG_NEW_FOLDER, &dialog);
 }
 
+// TODO launch this dialog  from controller !!
 pub fn create_new_subscription_dialog(
     g_ev_se: Sender<GuiEvents>,
     gtk_obj_a: GtkObjectsType,
@@ -242,7 +243,6 @@ pub fn create_new_subscription_dialog(
     let ent2_c = entry_name.clone();
     let label3_c = label3.clone();
     dialog.connect_show(move |dialog| {
-        debug!("Later: check if we launch this dialog  from controller  or from gui ");
         // ent1_c.set_text("");
         ent2_c.set_text("");
         label3_c.set_text("");
@@ -273,10 +273,17 @@ pub fn create_new_subscription_dialog(
                 image_icon_c.set_pixbuf(new_image.pixbuf().as_ref());
             }
         }
+        let spinner_act = dialogdata.get(3).unwrap().boo();
+        debug!("Spinner active: {} ", spinner_act);
+        spinner_c.set_active(spinner_act);
+        if spinner_act {
+            spinner_c.start();
+        } else {
+            spinner_c.stop();
+        }
         if let Some(s) = dialogdata.get(4).unwrap().str() {
             ent1_c.set_text(&s); // 4: feed-url
         }
-        spinner_c.set_active(dialogdata.get(3).unwrap().boo());
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_NEW_SUBSCRIPTION, &dialog);
