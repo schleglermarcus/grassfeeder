@@ -35,6 +35,7 @@ use resources::gen_icons;
 use resources::gen_icons::*;
 use resources::id::*;
 use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
+use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::iconloader::IconLoader;
 use ui_gtk::GtkObjectsType;
@@ -90,20 +91,34 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType) {
 }
 
 fn grid_attach_icon(grid: &Grid, icon_str: &str, index: i32, y_base: i32, columns: i32) {
-    let image = prepare_icon(icon_str, 48);
+    let image = prepare_icon(icon_str, 48).unwrap();
     image.set_tooltip_text(Some(&format!("{}", index)));
     let y: i32 = index as i32 / columns + y_base;
     let x: i32 = index as i32 % columns;
     grid.attach(&image, x, y, 1, 1);
 }
 
-fn prepare_icon(icon_str: &str, rescale_size: i32) -> Image {
+fn prepare_icon(icon_str: &str, rescale_size: i32) -> Result<Image, String> {
+    if icon_str.len() > ICON_SIZE_LIMIT_BYTES {
+        return Err(format!(
+            "Icon too large:  {} > {}",
+            icon_str.len(),
+            ICON_SIZE_LIMIT_BYTES
+        ));
+    }
     let buf = IconLoader::decompress_string_to_vec(icon_str);
-    let pb: Pixbuf = IconLoader::vec_to_pixbuf(&buf).unwrap();
-    let pb_scaled = pb
-        .scale_simple(rescale_size, rescale_size, InterpType::Bilinear)
-        .unwrap();
-    Image::from_pixbuf(Some(&pb_scaled))
+    match IconLoader::vec_to_pixbuf(&buf) {
+        Ok(pb) => {
+            let pb_scaled = pb
+                .scale_simple(rescale_size, rescale_size, InterpType::Bilinear)
+                .unwrap();
+            Ok(Image::from_pixbuf(Some(&pb_scaled)))
+        }
+        Err(e) => {
+            // error!("{:?}  length:{:?}", e, icon_str.len());
+            Err(e.to_string())
+        }
+    }
 }
 
 pub fn create_new_folder_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
@@ -156,7 +171,7 @@ pub fn create_new_subscription_dialog(
     ddd: &mut DialogDataDistributor,
 ) {
     let width = 600;
-    let icon_size = 24;
+    let icon_size_pixel = 24;
     let dialog = Dialog::with_buttons::<Window>(
         Some(&t!("D_NEW_SUBSCRIPTION_TITLE")),
         (*gtk_obj_a).read().unwrap().get_window().as_ref(),
@@ -193,10 +208,14 @@ pub fn create_new_subscription_dialog(
     let box3h = gtk::Box::new(Orientation::Horizontal, 1);
     let label3 = Label::new(None);
     box3h.pack_start(&label3, true, true, 1);
-    let image_icon = prepare_icon(
+
+    let mut image_icon = Image::new();
+    if let Ok(image_icon_prep) = prepare_icon(
         gen_icons::ICON_LIST[gen_icons::IDX_03_IDX_TRANSPARENT_48],
-        icon_size,
-    );
+        icon_size_pixel,
+    ) {
+        image_icon = image_icon_prep;
+    }
     box3h.pack_end(&image_icon, false, false, 0);
     box1v.pack_start(&box3h, false, false, 1);
     let ev_se = g_ev_se.clone();
@@ -269,8 +288,12 @@ pub fn create_new_subscription_dialog(
         }
         if let Some(s) = dialogdata.get(2).unwrap().str() {
             if !s.is_empty() {
-                let new_image = prepare_icon(&s, icon_size); // icon_str
-                image_icon_c.set_pixbuf(new_image.pixbuf().as_ref());
+                match prepare_icon(&s, icon_size_pixel) {
+                    Ok(image_icon) => image_icon_c.set_pixbuf(image_icon.pixbuf().as_ref()),
+                    Err(e) => {
+                        warn!("Cannot display the icon: {} ", e);
+                    }
+                }
             }
         }
         let spinner_act = dialogdata.get(3).unwrap().boo();

@@ -4,28 +4,43 @@ use std::collections::HashMap;
 use tl::HTMLTag;
 use tl::Node;
 use url::Url;
-// using   html_parser::Dom;   for extract_icon_from_homepage() creates a stack overflow
 
-/// returns Result <   ( homepage-url, feed-title ) , error-text >
+/// returns      homepage-url, feed-title,  error-text
 pub fn retrieve_homepage_from_feed_text(
     input: &[u8],
     dbg_feed_url: &str,
-) -> Result<(String, String), String> {
+) -> (String, String, String) {
     let r = parser::parse(input);
     if r.is_err() {
-        return Err(format!("Parsing: {:?} {:?}", &dbg_feed_url, r.err()));
+        return (
+            String::default(),
+            String::default(),
+            format!("Parsing: {:?} {:?}", &dbg_feed_url, r.err()),
+        );
     }
     let feed = r.unwrap();
-    if feed.title.is_none() {
-        return Err(format!("c:title empty for {}", &dbg_feed_url));
+
+    trace!(
+        "feed_title ={:?} {:?} ID={:?}  links={:?} ",
+        feed.title,
+        feed.description,
+        feed.id,
+        feed.links
+    );
+    trace!("entries: {:?}  ", feed.entries);
+
+    if feed.title.is_none() && feed.description.is_none() {
+        return (
+            String::default(),
+            String::default(),
+            format!("c:title and description empty for {}", &dbg_feed_url),
+        );
     }
+
     #[allow(unused_assignments)]
     let mut feed_title: Option<String> = None;
     let mut feed_homepage: Option<String> = None;
     feed_title = Some(feed.title.unwrap().content);
-
-    trace!("   feed_title ={:?} ", feed_title);
-
     for f_link in feed.links {
         if let Some(ref mtype) = f_link.media_type {
             if mtype == "application/rss+xml" {
@@ -47,9 +62,14 @@ pub fn retrieve_homepage_from_feed_text(
         feed_homepage = Some(f_link.href);
     }
     if let Some(f_h) = feed_homepage {
-        return Ok((f_h, feed_title.unwrap_or_default()));
+        return (f_h, feed_title.unwrap_or_default(), String::default());
     };
-    Err(format!("no link for HP found  {} ", &dbg_feed_url))
+
+    (
+        String::default(),
+        feed_title.unwrap_or_default(),
+        String::default(), // format!("no link for HP found  {} ", &dbg_feed_url),
+    )
 }
 
 /// return   Result < icon-url , error-message  >
@@ -199,7 +219,6 @@ pub fn extract_feed_from_website(
         .collect();
     let feeds_list: Vec<String> = link_tags
         .iter()
-        // .inspect(|at_m| debug!("PF0:{:?}", at_m))
         .map(|t| {
             let attrmap: HashMap<String, String> = t
                 .attributes()
@@ -227,13 +246,6 @@ pub fn extract_feed_from_website(
         return Err("No feed-url found. ".to_string());
     }
     let feed_url = feeds_list.first().unwrap().clone();
-    /*
-        if feed_url.starts_with("/") {
-            if let Some(base_url) = go_to_homepage(&page_url.to_string()) {
-                feed_url = format!("{}{}", base_url, feed_url);
-            }
-        }
-    */
     return Ok(feed_url);
 }
 
@@ -250,3 +262,4 @@ pub fn go_to_homepage(long_url: &String) -> Option<String> {
 }
 
 //
+// using   html_parser::Dom;   for extract_icon_from_homepage() creates a stack overflow

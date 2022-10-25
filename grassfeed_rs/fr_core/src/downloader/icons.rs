@@ -13,9 +13,10 @@ use crate::util::StepResult;
 use crate::web::WebFetcherType;
 use flume::Sender;
 use jpeg_decoder;
+use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;
-pub const ICON_SIZE_LIMIT_BYTES: usize = 10000;
+//  pub const ICON_SIZE_LIMIT_BYTES: usize = 10000;
 
 pub struct IconInner {
     pub subs_id: isize,
@@ -99,9 +100,9 @@ impl Step<IconInner> for HomepageDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let dl_text = workaround_https_declaration(inner.feed_download_text.clone());
-        if let Ok((homepage, _feed_title)) =
-            util::retrieve_homepage_from_feed_text(dl_text.as_bytes(), &inner.feed_url)
-        {
+        let (homepage, _feed_title, errtext) =
+            util::retrieve_homepage_from_feed_text(dl_text.as_bytes(), &inner.feed_url);
+        if !homepage.is_empty() {
             if homepage != inner.feed_url {
                 inner.feed_homepage = homepage;
             } else {
@@ -111,7 +112,11 @@ impl Step<IconInner> for HomepageDownload {
             }
             return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
         } else {
-            trace!("got no HP  from feed text!  Feed-URL: {}", &inner.feed_url);
+            trace!(
+                "got no HP  from feed text!  Feed-URL: {}   {}",
+                &inner.feed_url,
+                errtext
+            );
         }
         StepResult::Continue(Box::new(IconFallbackSimple(inner)))
     }

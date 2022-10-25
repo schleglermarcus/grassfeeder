@@ -1,232 +1,234 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="https://www.w3.org/2005/Atom" xmlns:dc="https://purl.org/dc/elements/1.1/" xml:lang="en">
-  <title type="html">Linux Compatible</title>
-  <subtitle type="html">Daily Linux news, information, hardware/software compatibility lists and tips and tricks.</subtitle>
-  <link rel="self" type="application/atom+xml" href="https://www.linuxcompatible.org/news/atom.xml"/>
-  <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org"/>
-  <id>https://www.linuxcompatible.org</id>
-  <logo>https://www.linuxcompatible.org/data/themes/linuxcompatible/images/logo.png</logo>
-  <icon>https://www.linuxcompatible.org/data/themes/linuxcompatible/images/favicon.ico</icon>
-  <updated>Tue, 06 Sep 2022 16:55:00 +0000</updated>
-  <generator>Contentteller CMS System 3.0.25.2269, https://www.contentteller.com</generator>
-  <entry>
-    <title type="html">KDE Plasma 5.25.5 released</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/kde-plasma-5255-released/"/>
-    <published>2022-09-06T16:55:00+00:00</published>
-    <updated>2022-09-06T16:55:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/kde-plasma-5255-released/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">KDE Plasma 5.25.5 has been released.Plasma 5.25.5 Today KDE releases a bugfix update to KDE Plasma 5, versioned 5.25.5. Plasma 5.25 was released in June 2022 with many feature refinements and new modules to complete the desktop experience. This release adds a month's worth of new translations and fixes from KDE's c ...</summary>
-  </entry>
-  <entry>
-    <title type="html">Samba 4.17.0rc5 released</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/samba-4170rc5-released/"/>
-    <published>2022-09-06T14:51:00+00:00</published>
-    <updated>2022-09-06T14:51:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/samba-4170rc5-released/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">Samba 4.17.0rc5 has been released for testing.Announce: Samba 4.17.0rc5 Available for Download This is the fifth release candidate of Samba 4.17.This is *not* intended for production environments and is designed for testing purposes only.Please report any defects via the Samba bug reporting system athttps://bugzill ...</summary>
-  </entry>
-  <entry>
-    <title type="html">chown Command in Linux - Complete Guide</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/chown-command-in-linux-complete-guide/"/>
-    <published>2022-09-06T14:36:00+00:00</published>
-    <updated>2022-09-06T14:36:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/chown-command-in-linux-complete-guide/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">Linux Stans showing you how to use the chown command in Linux.chown Command in Linux - Complete Guide A complete, beginner-friendly guide on how to use the chown command in Linux along with specific examples and FAQs.chown Command in Linux - Complete Guide</summary>
-  </entry>
-  <entry>
-    <title type="html">Linux PAM Tutorial</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/linux-pam-tutorial/"/>
-    <published>2022-09-06T14:34:00+00:00</published>
-    <updated>2022-09-06T14:34:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/linux-pam-tutorial/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">Linux Hint published a Linux PAM tutorial.Linux PAM Tutorial A guide on using the high-level API known as PAM in Linux for dynamic authentication support using many secure systems that are user-friendly and dependable. Linux PAM Tutorial</summary>
-  </entry>
-  <entry>
-    <title type="html">GIT Compare Two Branches</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/git-compare-two-branches/"/>
-    <published>2022-09-06T14:33:00+00:00</published>
-    <updated>2022-09-06T14:33:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/git-compare-two-branches/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">Linux Hint published a tutorial showing you how to compare two GIT branches.GIT Compare Two Branches This covered ways of comparing branches on Git to see their difference in commits, HEAD, and files. Git is an excellent and easy-to-use version control system. GIT Compare Two Branches</summary>
-  </entry>
-  <entry>
-    <title type="html">How To Install PlayOnLinux on Linux Mint 21</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-playonlinux-on-linux-mint-21/"/>
-    <published>2022-09-06T14:30:00+00:00</published>
-    <updated>2022-09-06T14:30:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/how-to-install-playonlinux-on-linux-mint-21/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">idroot published a tutorial about installing PlayOnLinux on Linux Mint 21.How To Install PlayOnLinux on Linux Mint 21 In this tutorial, we will show you how to install PlayOnLinux on Linux Mint 21. For those of you who didn’t know, PlayOnLinux is an open-source gaming framework (software) based on Wine, that allows ...</summary>
-  </entry>
-  <entry>
-    <title type="html">Salix Xfce 15.0 released</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/salix-xfce-150-released/"/>
-    <published>2022-09-06T08:06:00+00:00</published>
-    <updated>2022-09-06T08:06:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/salix-xfce-150-released/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">A new version of Salix, a Slackware based Linux distribution with Xfce 4.16 as their main desktop environment has been released. Salix Xfce 15.0 is released! It has been a long journey. Salix 15.0 is finally here! With so much time since our stable release, the changelog is huge and a lot of things have changed! On ...</summary>
-  </entry>
-  <entry>
-    <title type="html">How to install the Gitea git repository on Ubuntu Server 22.04</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-the-gitea-git-repository-on-ubuntu-server-2204/"/>
-    <published>2022-09-06T08:01:00+00:00</published>
-    <updated>2022-09-06T08:01:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/how-to-install-the-gitea-git-repository-on-ubuntu-server-2204/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">TechRepublic published a tutorial about installing Gitea git repository on Ubuntu Server 22.04.How to install the Gitea git repository on Ubuntu Server 22.04 Jack Wallen shows you how to install the user-friendly local Git repository Gitea on Ubuntu Server 22.04.How to install the Gitea git repository on Ubuntu Ser ...</summary>
-  </entry>
-  <entry>
-    <title type="html">How To Install MySQL 8 on Amazon Linux 2</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-mysql-8-on-amazon-linux-2/"/>
-    <published>2022-09-06T07:58:00+00:00</published>
-    <updated>2022-09-06T07:58:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/how-to-install-mysql-8-on-amazon-linux-2/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">Tecadmin published a tutorial about installing MySQL 8 on Amazon Linux 2.How To Install MySQL 8 on Amazon Linux 2 MySQL is a very popular open-source relational database management system that can run on Linux, Windows, and Mac OS. It’s typically used as the back-end database for web applications, though it can als ...</summary>
-  </entry>
-  <entry>
-    <title type="html">How to Monitor Website and Application with Uptime Kuma</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-monitor-website-and-application-with-uptime-kuma/"/>
-    <published>2022-09-06T07:57:00+00:00</published>
-    <updated>2022-09-06T07:57:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/how-to-monitor-website-and-application-with-uptime-kuma/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">TecMint showing you how to monitor website and application with Uptime Kuma.How to Monitor Website and Application with Uptime Kuma In this guide, you will learn how to install Uptime Kuma self-hosted monitoring tool and how you can monitor websites using the tool in Linux.How to Monitor Website and Application wit ...</summary>
-  </entry>
-  <entry>
-    <title type="html">How to Install a Kubernetes Cluster with Kubeadm on Rocky Linux</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-a-kubernetes-cluster-with-kubeadm-on-rocky-linux/"/>
-    <published>2022-09-06T07:57:00+00:00</published>
-    <updated>2022-09-06T07:57:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/how-to-install-a-kubernetes-cluster-with-kubeadm-on-rocky-linux/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">Howtoforge published How to Install a Kubernetes Cluster with Kubeadm on Rocky LinuxHow to Install a Kubernetes Cluster with Kubeadm on Rocky Linux Kubernetes or k8s is an open-source platform for container orchestration that automates deployments, management, and scaling of containerized applications. Kubernetes i ...</summary>
-  </entry>
-  <entry>
-    <title type="html">How to Change the Screen Resolution in Ubuntu</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-change-the-screen-resolution-in-ubuntu/"/>
-    <published>2022-09-06T07:55:00+00:00</published>
-    <updated>2022-09-06T07:55:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/how-to-change-the-screen-resolution-in-ubuntu/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">Make Tech Easier published a tutorial about changing the screen resolution in Ubuntu if your desktop to get stuck on the wrong resolution.How to Change the Screen Resolution in Ubuntu Although it’s a rare problem, it’s possible for your desktop to get stuck on the wrong resolution. This could happen because, for ex ...</summary>
-  </entry>
-  <entry>
-    <title type="html">How To Install CMake on Fedora 36</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-cmake-on-fedora-36/"/>
-    <published>2022-09-06T07:52:00+00:00</published>
-    <updated>2022-09-06T07:52:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/how-to-install-cmake-on-fedora-36/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">idroot published a tutorial about installing CMake on Fedora 36.How To Install CMake on Fedora 36 In this tutorial, we will show you how to install CMake on Fedora 36. For those of you who didn’t know, CMake is a multi-platform software designed for automated compilation on various operating systems. How To Install ...</summary>
-  </entry>
-  <entry>
-    <title type="html">How To Install WildFly on Ubuntu 22.04 LTS</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-wildfly-on-ubuntu-2204-lts/"/>
-    <published>2022-09-06T07:50:00+00:00</published>
-    <updated>2022-09-06T07:50:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/how-to-install-wildfly-on-ubuntu-2204-lts/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">idroot published a tutorial about installing WildFly on Ubuntu 22.04 LTS.How To Install WildFly on Ubuntu 22.04 LTS In this tutorial, we will show you how to install WildFly on Ubuntu 22.04 LTS. For those of you who didn’t know, WildFly is a powerful, modular, and lightweight application server that helps you build ...</summary>
-  </entry>
-  <entry>
-    <title type="html">How to Securely Delete Files Using Shred Command in Debian 11</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-securely-delete-files-using-shred-command-in-debian-11/"/>
-    <published>2022-09-06T07:49:00+00:00</published>
-    <updated>2022-09-06T07:49:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/how-to-securely-delete-files-using-shred-command-in-debian-11/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">Vitux published a tutorial about using the Shred command in Debian 11.How to Securely Delete Files Using Shred Command in Debian 11 If you have a file with sensitive information, it may not be enough to simply delete it with the rm command or press the Delete key. Deleting a file with the rm command usually only re ...</summary>
-  </entry>
-  <entry>
-    <title type="html">How to install Streamlit on Ubuntu 22.04</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-streamlit-on-ubuntu-2204/"/>
-    <published>2022-09-06T07:43:00+00:00</published>
-    <updated>2022-09-06T07:43:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/how-to-install-streamlit-on-ubuntu-2204/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">NextGenTips published a tutorial about installing Streamlit on Ubuntu 22.04.How to install Streamlit on Ubuntu 22.04 In this tutorial, we are going to learn how to install Streamlit on Ubuntu 22.04 Streamlit is an open-source Python library that makes it easy to create and share beautiful, custom web apps for machi ...</summary>
-  </entry>
-  <entry>
-    <title type="html">XanMod Linux Kernel 5.19.7 released</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/xanmod-linux-kernel-5197-released/"/>
-    <published>2022-09-06T06:54:00+00:00</published>
-    <updated>2022-09-06T06:54:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/xanmod-linux-kernel-5197-released/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">A new XanMod Linux Kernel based on the new Linux Kernel 5.19.7 has been released. XanMod is a general-purpose Linux kernel distribution with custom settings and new features. The real-time version is recommended for critical runtime applications such as Linux gaming eSports, streaming, live productions and ultra-lo ...</summary>
-  </entry>
-  <entry>
-    <title type="html">XanMod Linux Kernel 5.15.65 released</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/xanmod-linux-kernel-51565-released/"/>
-    <published>2022-09-06T06:52:00+00:00</published>
-    <updated>2022-09-06T06:52:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/xanmod-linux-kernel-51565-released/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">A new XanMod Linux Kernel based on the new Linux Kernel 5.15.65 has been released. XanMod is a general-purpose Linux kernel distribution with custom settings and new features. The real-time version is recommended for critical runtime applications such as Linux gaming eSports, streaming, live productions and ultra-l ...</summary>
-  </entry>
-  <entry>
-    <title type="html">KIOXIA XG8 SSD Review and more</title>
-    <link rel="alternate" type="text/html" href="https://www.ntcompatible.com/story/kioxia-xg8-ssd-review-and-more/"/>
-    <published>2022-09-06T06:20:00+00:00</published>
-    <updated>2022-09-06T06:20:00+00:00</updated>
-    <id>https://www.ntcompatible.com/story/kioxia-xg8-ssd-review-and-more/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">Here a roundup of today's reviews and articles: Audio: YULONG DA-ART Aurora Desktop DAC/Preamp/Amplifier Review Casing: Asus Prime AP201 Review Computers: Lenovo Slim 7 Pro X review: A feature-laden Yoga alternative for creators that costs less than you might think Cooling: Thermaltake Swafan 12 RGB Radiator Fan Re ...</summary>
-  </entry>
-  <entry>
-    <title type="html">ELA-674-1 mediawiki security update</title>
-    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/ela6741-mediawiki-security-update/"/>
-    <published>2022-09-06T05:33:00+00:00</published>
-    <updated>2022-09-06T05:33:00+00:00</updated>
-    <id>https://www.linuxcompatible.org/story/ela6741-mediawiki-security-update/</id>
-    <author>
-      <name>Philipp Esselbach</name>
-    </author>
-    <summary type="html">A mediawiki security update has been released for Debian GNU/Linux 9 Extended LTS to address several security vulnerabilities. ELA-674-1 mediawiki security updatePackage	mediawiki Version	1:1.27.7-1+deb9u12 (stretch) Related CVEs	CVE-2022-28201 CVE-2022-28202 CVE-2022-34911 CVE-2022-34912Several security vulnerabil ...</summary>
-  </entry>
+<feed xmlns="https://www.w3.org/2005/Atom"
+ xmlns:dc="https://purl.org/dc/elements/1.1/"
+ xml:lang="en">
+    <title type="html">Linux Compatible</title>
+    <subtitle type="html">Daily Linux news, information, hardware/software compatibility lists and tips and tricks.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://www.linuxcompatible.org/atom.xml" />
+    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org" />
+    <id>https://www.linuxcompatible.org</id>
+    <logo>https://www.linuxcompatible.org/data/themes/linuxcompatible/images/logo.png</logo>
+    <icon>https://www.linuxcompatible.org/data/themes/linuxcompatible/images/favicon.ico</icon>
+    <updated>Tue, 25 Oct 2022 08:56:00 +0000</updated>
+    <generator>Contentteller CMS System 3.0.25.2269, https://www.contentteller.com</generator>
+    <entry>
+	    <title type="html">Tails 5.6 released</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/tails-56-released/" />
+	    <published>2022-10-25T08:56:00+00:00</published>
+	    <updated>2022-10-25T08:56:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/tails-56-released/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">A new version of Tails has been released. Tails is a portable operating system that protects against surveillance and censorship.Tails 5.6 is out Changes and updates Update Tor Browser to 11.5.5. Update the Linux kernel to 5.10.149. This should improve the support for newer hardware: graphics, Wi-Fi, and so on. Fix ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">How to Use the scp (Secure Copy) Command to Transfer Files</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-use-the-scp-secure-copy-command-to-transfer-files/" />
+	    <published>2022-10-25T08:12:00+00:00</published>
+	    <updated>2022-10-25T08:12:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/how-to-use-the-scp-secure-copy-command-to-transfer-files/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Linux Hint published a tutorial about how to use the scp (Secure Copy) command to transfer files.How to Use the scp (Secure Copy) Command to Transfer Files This explains how to use the scp (Secure Copy) command to transfer files between computers.The scp command is available on all Linux, Unix, and Windows systems. ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">How to Install KVM on Linux Mint 21?</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-kvm-on-linux-mint-21/" />
+	    <published>2022-10-25T08:09:00+00:00</published>
+	    <updated>2022-10-25T08:09:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/how-to-install-kvm-on-linux-mint-21/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Linux Hint published a tutorial about installing KVM on Linux Mint 21.How to Install KVM on Linux Mint 21? KVM is a virtualization solution that helps create Virtual Machines just like VMware or VirtualBox. This article explains KVM installation on Linux Mint. How to Install KVM on Linux Mint 21?</summary>
+	</entry>
+    <entry>
+	    <title type="html">ELA-709-1 libbluray bugfix update</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/ela7091-libbluray-bugfix-update/" />
+	    <published>2022-10-25T08:05:00+00:00</published>
+	    <updated>2022-10-25T08:05:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/ela7091-libbluray-bugfix-update/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">A libbluray bugfix update has been released for both Debian GNU/Linux 8 and 9 Extended LTS to address an issue that broke BD-J support. ELA-709-1 libbluray bugfix updatePackage	libbluray Version	1:0.6.2-1+deb8u1 (jessie), 1:0.9.3-3+deb9u1 (stretch)The latest Java security updates introduced a change that broke libb ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">DLA 3159-1: libbluray bugfix update</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/dla-31591-libbluray-bugfix-update/" />
+	    <published>2022-10-25T08:05:00+00:00</published>
+	    <updated>2022-10-25T08:05:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/dla-31591-libbluray-bugfix-update/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">A libbluray bugfix update has been released for both Debian GNU/Linux 10 to address an issue that broke BD-J support. DLA 3159-1: libbluray bugfix update- - Debian LTS Advisory DLA-3159-1debian-lts@lists.debian.orghttps://www.debian.org/lts/security/ Emilio Pozuelo Monfort October 25, 2022 https://wiki.debian.org/L ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">Fedora Linux 37 RC 1.4 released</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/fedora-linux-37-rc-14-released/" />
+	    <published>2022-10-25T07:30:00+00:00</published>
+	    <updated>2022-10-25T07:30:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/fedora-linux-37-rc-14-released/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">A new release candidate for Fedora Linux 37 is now available for download from the kojipkgs.fedoraproject.org website. This is an unsupported, unofficial image that may become the final release image at one point. The final release of Fedora 37 is now scheduled for November 1, 2022.Fedora Linux 37 RC 1.4 Released*  ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">GE-Proton7-38 released</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/geproton738-released/" />
+	    <published>2022-10-25T07:25:00+00:00</published>
+	    <updated>2022-10-25T07:25:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/geproton738-released/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Thomas Crider has released a new version of GE-Proton with fixes for Uncharted: Legacy of Thieves, Persona 5 Royal, Overwatch 2, and updated components. GE-Proton is a fork of the Wine based Proton compatibility tool for Steam Play.GE-Proton7-38 Released This is my build of Proton with the most recent bleeding-edge ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">How to install and set up Gitlab CE Server on Alma or Rocky Linux 9</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-and-set-up-gitlab-ce-server-on-alma-or-rocky-linux-9/" />
+	    <published>2022-10-25T07:13:00+00:00</published>
+	    <updated>2022-10-25T07:13:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/how-to-install-and-set-up-gitlab-ce-server-on-alma-or-rocky-linux-9/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Citizix published a tutorial about installing and setting up Gitlab CE Server on Alma or Rocky Linux 9.How to install and set up Gitlab CE Server on Alma/Rocky Linux 9 GitLab allows you to host an on-premise Git repository that can be accessed from either your local LAN or (if you have an available public IP addres ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">Azza Legionaire Mid-Tower Chassis Review and more</title>
+	    <link rel="alternate" type="text/html" href="https://www.ntcompatible.com/story/azza-legionaire-midtower-chassis-review-and-more/" />
+	    <published>2022-10-25T06:47:00+00:00</published>
+	    <updated>2022-10-25T06:47:00+00:00</updated>
+	    <id>https://www.ntcompatible.com/story/azza-legionaire-midtower-chassis-review-and-more/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Here a roundup of today's reviews and articles: Casing: Azza Legionaire Mid-Tower Chassis Review, Raijintek Ophion Elite Review CPUs: AMD Ryzen 9 7900X Processor Review, Intel Core i5-13600K CPU Review Displays: MSI Modern MD272QP Review - An usable office or second monitor without many frills?, Yeyian Sigurd 2503  ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">How to enable unattended-upgrades in Ubuntu and Debian Linux</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-enable-unattendedupgrades-in-ubuntu-and-debian-linux/" />
+	    <published>2022-10-25T06:32:00+00:00</published>
+	    <updated>2022-10-25T06:32:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/how-to-enable-unattendedupgrades-in-ubuntu-and-debian-linux/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">TechRepublic showing you how to enable unattended-upgrades in Ubuntu and Debian Linux.How to enable unattended-upgrades in Ubuntu and Debian Linux Jack Wallen shows you how easy it is to enable unattended upgrades for both Ubuntu and Debian Linux so you can be sure to keep ahead of software updates.How to enable un ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">How to Install CMake in Linux</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-cmake-in-linux/" />
+	    <published>2022-10-25T06:30:00+00:00</published>
+	    <updated>2022-10-25T06:30:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/how-to-install-cmake-in-linux/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Make Tech Easier published a tutorial about installing CMake in Linux.How to Install CMake in Linux For many reasons, Linux has always been a programming mainstay, but most PC users are on Windows. This leaves programmers who need to test on the Windows platform with a dilemma: switching between platforms is near i ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">How To Install&amp;nbsp;SFTPGo&amp;nbsp;on Ubuntu 20.04 or 22.04 LTS</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-ubuntu-2004-or-2204-lts-1a/" />
+	    <published>2022-10-25T06:28:00+00:00</published>
+	    <updated>2022-10-25T06:28:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/how-to-ubuntu-2004-or-2204-lts-1a/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Unixcop showing you how to install SFTPGo on Ubuntu 20.04 or 22.04 LTSHow To Install SFTPGo on Ubuntu 20.04 | 22.04 LTS In this article, we will show you how to install SFTPGo on Ubuntu systems. SFTPGo is a fully featured and highly configurable SFTP server with optional HTTP/S, FTP/S and WebDAV support. How To Ins ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">How To Install Franz on Ubuntu 20.04 or 22.04 LTS</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-franz-on-ubuntu-2004-or-2204-lts/" />
+	    <published>2022-10-25T06:27:00+00:00</published>
+	    <updated>2022-10-25T06:27:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/how-to-install-franz-on-ubuntu-2004-or-2204-lts/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Unixcop published a guide showing you how to install Franz on Ubuntu 20.04 or 22.04 LTS.How To Install Franz on Ubuntu 20.04 | 22.04 LTS In this guide, we will show you how to install Franz messaging in Ubuntu systems. Franz is an application was built in order to make it easier for people to manage and organize th ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">How To Install&amp;nbsp;Beekeeper Studio on Ubuntu 20.04 or 22.04 LTS</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-studio-on-ubuntu-2004-or-2204-lts/" />
+	    <published>2022-10-25T06:26:00+00:00</published>
+	    <updated>2022-10-25T06:26:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/how-to-studio-on-ubuntu-2004-or-2204-lts/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Unixcop showing you how to install Beekeeper Studio on Ubuntu 20.04 or 22.04 LTS.How To Install Beekeeper Studio on Ubuntu 20.04 | 22.04 LTS In this article, we will show you how to install Beekeeper Studio on Ubuntu systems. Beekeeper Studio is built with Vue.js, a lovely little web framework that is similar to Re ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">How To Install&amp;nbsp;Texstudio&amp;nbsp;on Ubuntu 20.04 or 22.04 LTS</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-ubuntu-2004-or-2204-lts/" />
+	    <published>2022-10-25T06:25:00+00:00</published>
+	    <updated>2022-10-25T06:25:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/how-to-ubuntu-2004-or-2204-lts/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Unixcop published a tutorial about installing Texstudio on Ubuntu 20.04 or 22.04 LTS.How To Install Texstudio on Ubuntu 20.04 | 22.04 LTS In this article, we will show you how to install Texstudio on Ubuntu systems. TeXstudio is a cross-platform open-source LaTeX editor. Its features include an interactive spelling ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">How To Install ClipGrab on Ubuntu 20.04 or 22.04 LTS</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/how-to-install-clipgrab-on-ubuntu-2004-or-2204-lts/" />
+	    <published>2022-10-25T06:24:00+00:00</published>
+	    <updated>2022-10-25T06:24:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/how-to-install-clipgrab-on-ubuntu-2004-or-2204-lts/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">Unixcop published a tutorial about installing ClipGrab on Ubuntu 20.04 or 22.04 LTS.How To Install ClipGrab on Ubuntu 20.04 | 22.04 LTS In this guide, we will illustrate how to install ClipGrab on Ubuntu systems. ClipGrab is a donationware video download manager, allowing the download of videos from a variety of we ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">DLA 3157-1: bluez security update</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/dla-31571-bluez-security-update/" />
+	    <published>2022-10-25T06:08:00+00:00</published>
+	    <updated>2022-10-25T06:08:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/dla-31571-bluez-security-update/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">A bluez security update has been released for Debian GNU/Linux 10 to address several vulnerabilities. DLA 3157-1: bluez security update- - Debian LTS Advisory DLA-3157-1debian-lts@lists.debian.orghttps://www.debian.org/lts/security/Sylvain Beucler October 24, 2022 https://wiki.debian.org/LTS - -Package: bluez Versi ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">DLA 3158-1: wkhtmltopdf security update</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/dla-31581-wkhtmltopdf-security-update/" />
+	    <published>2022-10-25T06:08:00+00:00</published>
+	    <updated>2022-10-25T06:08:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/dla-31581-wkhtmltopdf-security-update/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">A wkhtmltopdf security update has been released for Debian GNU/Linux 10 to address an issue where wkhtmltopdf allowed local filesystem access by default. DLA 3158-1: wkhtmltopdf security update- - Debian LTS Advisory DLA-3158-1debian-lts@lists.debian.orghttps://www.debian.org/lts/security/ Emilio Pozuelo Monfort Oc ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">USN-5227-3: Pillow vulnerability</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/usn52273-pillow-vulnerability/" />
+	    <published>2022-10-25T06:05:00+00:00</published>
+	    <updated>2022-10-25T06:05:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/usn52273-pillow-vulnerability/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">A Pillow security update has been released for Ubuntu Linux 18.04 and 20.04 LTS. USN-5227-3: Pillow vulnerabilityUbuntu Security Notice USN-5227-3 October 24, 2022pillow vulnerability A security issue affects these releases of Ubuntu and its derivatives:- Ubuntu 20.04 LTS - Ubuntu 18.04 LTSSummary:An incomplete fix ...</summary>
+	</entry>
+    <entry>
+	    <title type="html">USN-5696-1: MySQL vulnerabilities</title>
+	    <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/usn56961-mysql-vulnerabilities/" />
+	    <published>2022-10-25T06:05:00+00:00</published>
+	    <updated>2022-10-25T06:05:00+00:00</updated>
+	    <id>https://www.linuxcompatible.org/story/usn56961-mysql-vulnerabilities/</id>
+	    <author>
+	       <name>Philipp Esselbach</name>
+	    </author>
+	    <summary type="html">A MySQL security update has been released for Ubuntu Linux 18.04, 20.04 LTS, and 22.04 LTS. USN-5696-1: MySQL vulnerabilitiesUbuntu Security Notice USN-5696-1 October 24, 2022mysql-5.7, mysql-8.0 vulnerabilities A security issue affects these releases of Ubuntu and its derivatives:- Ubuntu 22.04 LTS - Ubuntu 20.04  ...</summary>
+	</entry>
 </feed>

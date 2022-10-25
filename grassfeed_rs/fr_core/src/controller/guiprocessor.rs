@@ -938,67 +938,6 @@ impl GuiProcessor {
         (*self.gui_updater).borrow().show_dialog(DIALOG_ABOUT);
     }
 
-/*
-    #[deprecated]
-    fn start_dragdrop_new_subscription_dialog(&mut self, dragged_url: String) {
-        let r = (*self.downloader_r).borrow().download_direct(&dragged_url);
-        if r.is_err() {
-            let emsg = format!("http-requesting: {:?} {:?}", r.err().unwrap(), &dragged_url);
-            warn!("{} ", &emsg);
-            self.statusbar_items.bottom_notices.push_back(emsg);
-            return;
-        }
-        let hp_text = r.unwrap();
-        let mut feed_url = String::default();
-        let mut extr_err = String::default();
-        let mut parse_err = String::default();
-        let extr_r = extract_feed_from_website(&hp_text, &dragged_url);
-        if extr_r.is_err() {
-            extr_err = extr_r.err().unwrap();
-            let parse_r = feed_rs::parser::parse(hp_text.as_bytes());
-            if parse_r.is_err() {
-                parse_err = parse_r.err().unwrap().to_string();
-            } else {
-                feed_url = dragged_url.clone();
-            }
-        } else {
-            feed_url = extr_r.unwrap();
-        }
-
-        if feed_url.is_empty() {
-            let emsg = format!(
-                "Parsing page: {:?} {:?} {:?}",
-                extr_err, parse_err, &dragged_url
-            );
-            warn!("2:{} ", &emsg);
-            self.statusbar_items.bottom_notices.push_back(emsg);
-            return;
-        }
-        debug!(
-            "start_dragdrop_new_subscription_dialog  feed_url={}",
-            feed_url,
-        );
-        let dd: Vec<AValue> = vec![
-            AValue::None,           // 0:display
-            AValue::None,           // 1:homepage
-            AValue::None,           // 2: icon_str
-            AValue::ABOOL(true),    // 3 :spinner
-            AValue::ASTR(feed_url), // 4: feed url
-        ];
-        (*self.gui_val_store)
-            .write()
-            .unwrap()
-            .set_dialog_data(DIALOG_NEW_SUBSCRIPTION, &dd);
-        (*self.gui_updater)
-            .borrow()
-            .update_dialog(DIALOG_NEW_SUBSCRIPTION);
-
-        (*self.gui_updater)
-            .borrow()
-            .show_dialog(DIALOG_NEW_SUBSCRIPTION);
-    }
-*/
-
     ///  for key codes look at selec.rs                           gdk_sys::GDK_KEY_Escape => KeyCodes::Escape,
     fn process_key_press(&mut self, keycode: isize, _o_char: Option<char>) {
         let mut new_focus_by_tab = self.focus_by_tab.clone();

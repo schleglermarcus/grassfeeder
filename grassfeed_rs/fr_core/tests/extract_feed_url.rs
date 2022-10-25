@@ -13,12 +13,12 @@ use xmlparser::Token;
 use xmlparser::Tokenizer;
 
 /* NO Title found:
-	https://www.opendesktop.org/p/1293160
 
-    https://exopolitics.blogs.com/newsinsideout/2020/08/jesus-christ-as-ascended-master-sponsored-valiant-thors-mission-from-venus-meeting-ike-russian-leaders-to-prevent-earth-nu.html
     https://www.linuxcompatible.org/
+    https://www.linuxcompatible.org/story/how-to-use-the-scp-secure-copy-command-to-transfer-files/
 
-	http://xbustyx.xxxlog.co/feed/
+
+    http://xbustyx.xxxlog.co/feed/
 
 */
 /*
@@ -41,27 +41,23 @@ fn t_extract_url() {
     let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(HTML_BASE.to_string())));
     let (gp_sender, _gp_rec) = flume::bounded::<Job>(2);
 
-    let pairs: [(&str, &str, &str); 4] = [
-	(
+    let pairs: [(&str, &str, &str); 4] = [	(
 		"hp_neopr.html",
 		"https://www.neopresse.com/politik/teile-der-afd-fordern-atomwaffen-fuer-deutschland/",
 		"https://www.neopresse.com/feed/",
-	),
-	(
+	), 	(
 		"pleiteticker.html",
 		"https://pleiteticker.de/dkg-chef-gass-warnt-vor-winter-der-krankenhaus-insolvenzen/",
 		"https://pleiteticker.de/feed/",
-	),
-	(
-	 "stackexchange.html",
-	 "https://unix.stackexchange.com/questions/457584/gtk3-change-text-color-in-a-label-raspberry-pi",
-	 "https://unix.stackexchange.com/feeds/question/457584"
-	),
-	(
+	),	(
+		"stackexchange.html",
+		"https://unix.stackexchange.com/questions/457584/gtk3-change-text-color-in-a-label-raspberry-pi",
+		"https://unix.stackexchange.com/feeds/question/457584"
+	),	(
         "naturalnews-page.html",
         "https://www.naturalnews.com/2022-10-22-boston-university-new-covid-kills-80-percent.html",
         "https://www.naturalnews.com/rss.xml",
-    )];
+    ) 	];
     for (filename, request_page, url) in pairs {
         let erro_rep = ErrorRepo::new(&ERR_REPO_BASE.to_string());
         erro_rep.startup_read();

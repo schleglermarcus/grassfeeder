@@ -52,7 +52,6 @@ impl Step<ComprehensiveInner> for ComprStart {
         let mut inner: ComprehensiveInner = self.0;
         let url = inner.feed_url_edit.clone();
         let result = (*inner.web_fetcher).request_url(url.clone());
-        // trace!("START: {} {:?} icon_urL={}", url, result.status , inner.icon_url);
         match result.status {
             200 => {
                 inner.url_download_text = result.content;
@@ -77,20 +76,17 @@ pub struct ParseFeedString(ComprehensiveInner);
 impl Step<ComprehensiveInner> for ParseFeedString {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let mut inner: ComprehensiveInner = self.0;
-
-        if let Ok((homepage, feed_title)) = util::retrieve_homepage_from_feed_text(
+        let (homepage, feed_title, _err_msg) = util::retrieve_homepage_from_feed_text(
             inner.url_download_text.as_bytes(),
             &inner.feed_url_edit,
-        ) {
+        );
+        if !homepage.is_empty() {
             inner.feed_homepage = homepage;
-
-			debug!("COMPR: HP={}", inner.feed_homepage );
-            if !feed_title.is_empty() {
-				debug!("COMPR: title={}", &feed_title );
-                inner.feed_title = feed_title;
-            }
         }
-		debug!("COMPR2:  HP={}", inner.feed_homepage );
+        if !feed_title.is_empty() {
+            inner.feed_title = feed_title;
+        }
+         trace!("COMPR2:  HP={}  TI={}", inner.feed_homepage,inner.feed_title );
         if !inner.feed_homepage.is_empty() {
             StepResult::Continue(Box::new(ComprAnalyzeHomepage(inner)))
         } else {
@@ -167,10 +163,7 @@ impl Step<ComprehensiveInner> for ComprStoreIcon {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let mut inner: ComprehensiveInner = self.0;
         if inner.icon_bytes.len() < 10 {
-            debug!(
-                "compr: icon too small: {} {}",
-                inner.icon_url, inner.feed_url_edit
-            );
+            debug!(                "compr: icon too small: {} {}",                inner.icon_url, inner.feed_url_edit            );
             return StepResult::Continue(Box::new(ComprFinal(inner)));
         }
         let comp_st = util::compress_vec_to_string(&inner.icon_bytes);

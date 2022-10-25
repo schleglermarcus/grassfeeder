@@ -233,6 +233,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     if false {
         let src = [
             (
+                "https://www.opendesktop.org/content.rdf",
+                "opendesktop big-icon",
+            ),
+            (
                 "https://observer.ug/headlinenews?format=feed&type=rss",
                 "obs_uganda ",
             ),
@@ -271,10 +275,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (
                 "https://www.buzzfeed.com/world.xml",
                 "buzzfeed unknown icon",
-            ),
-            (
-                "https://www.opendesktop.org/content.rdf",
-                "opendesktop big-icon",
             ),
             (
                 "http://www.channelnewsasia.com/rssfeeds/8395884",

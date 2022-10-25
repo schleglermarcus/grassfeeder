@@ -192,17 +192,11 @@ fn stop_on_nonexistent() {
     assert!(matches!(r, StepResult::Stop(..)));
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_retrieve_homepages() {
     setup();
     let files_urls: [(&str, &str); 6] = [
-        /*  TODO
-            (
-                "tests/data/opendesktop-content.rdf",
-                "https://www.opendesktop.org/",
-            ),
-        */
         ("tests/data/chaosradio.xml", "https://chaosradio.de/"),
         (
             "tests/data/nachdenkseiten-atom.xml",
@@ -227,16 +221,27 @@ fn test_retrieve_homepages() {
     ];
     files_urls.iter().for_each(|(f, u)| {
         let buffer: Vec<u8> = file_to_bin(f).unwrap();
-        let retr_result = retrieve_homepage_from_feed_text(&buffer, "test-dl_icon");
-        match retr_result {
-            Ok((hp, _title)) => {
-                assert_eq!(hp, u.to_string());
-            }
-            Err(e_d) => {
-                error!("{} {:?}", f, e_d);
-                assert!(false);
-            }
+        let (hp, title, err_msg) = retrieve_homepage_from_feed_text(&buffer, "test-dl_icon");
+        if hp.is_empty() {
+            error!("{} {:?}", title, err_msg);
         }
+        assert_eq!(hp, u.to_string());
+    });
+}
+
+#[ignore]
+#[test]
+fn test_retrieve_titles() {
+    setup();
+    let files_urls: [(&str, &str); 1] = [("tests/data/linuxcomp_notitle.xml", "Linux Compatible")];
+    files_urls.iter().for_each(|(f, u)| {
+        let buffer: Vec<u8> = file_to_bin(f).unwrap();
+        let (_hp, title, err_msg) =
+            retrieve_homepage_from_feed_text(&buffer, f);
+        if title.is_empty() {
+            error!("{} {:?}", title, err_msg);
+        }
+        assert_eq!(title, u.to_string());
     });
 }
 
