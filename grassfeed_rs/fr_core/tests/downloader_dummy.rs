@@ -37,10 +37,10 @@ impl IDownloader for DownloaderDummy {
     fn get_queue_size(&self) -> usize {
         unimplemented!()
     }
-    fn download_direct(&self, _url: &String) -> Result<String, String> {
-        unimplemented!()
-    }
-	fn browser_drag_request(&self, _dragged_url: &String) {
+
+    // fn download_direct(&self, _url: &String) -> Result<String, String> {        unimplemented!()    }
+
+	fn browser_drag_request(&self, _dragged_url: &str) {
 		unimplemented!()
 	}
 

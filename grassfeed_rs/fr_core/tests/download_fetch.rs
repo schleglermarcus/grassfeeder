@@ -116,7 +116,7 @@ fn download_with_create_date() {
 
 fn get_file_fetcher() -> WebFetcherType {
     Arc::new(Box::new(FileFetcher::new(
-        "../fr_core/tests/data/".to_string(),
+        "../fr_core/tests/feeds/".to_string(),
     )))
 }
 

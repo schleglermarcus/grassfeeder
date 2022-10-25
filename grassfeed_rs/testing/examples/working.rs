@@ -134,6 +134,15 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
+            (
+                "http://antifeministsite.blogspot.com/feeds/posts/default",
+                "antife",
+            ),
+            ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
+            (
+                "https://allworldnews24hours6.blogspot.com/feeds/posts/default",
+                "allworld24",
+            ),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -200,7 +209,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://kolkatatv.org/feed/", "kolkatatv"),
             ("https://lupocattivoblog.com/feed/", "lupocat"),
             ("http://www.wissensmanufaktur.net/rss.xml", "wissensm"),
-            ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
             ("http://newsinsideout.com/feed/", "newsinsideout"),
             ("https://sciencefiles.org/feed/", "science"),
             ("http://www.watergate.tv/feed/", "watergate"),
@@ -327,10 +335,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (
                 "https://www.newscentric.com.ng/feeds/posts/default?alt=rss",
                 "ncentric",
-            ),
-            (
-                "https://allworldnews24hours6.blogspot.com/feeds/posts/default",
-                "allworld24",
             ),
             (
                 "https://www.newsrust.com/feeds/posts/default?alt=rss",

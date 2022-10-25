@@ -86,7 +86,7 @@ impl Step<ComprehensiveInner> for ParseFeedString {
         if !feed_title.is_empty() {
             inner.feed_title = feed_title;
         }
-         trace!("COMPR2:  HP={}  TI={}", inner.feed_homepage,inner.feed_title );
+        // trace!("COMPR2:  HP={}  TI={}", inner.feed_homepage,inner.feed_title );
         if !inner.feed_homepage.is_empty() {
             StepResult::Continue(Box::new(ComprAnalyzeHomepage(inner)))
         } else {
@@ -112,7 +112,7 @@ impl Step<ComprehensiveInner> for ComprAnalyzeHomepage {
             },
             _ => {
                 debug!(
-                    "compr: downloading homepage: {:?} {}",
+                    "ComprAnalyzeHomepage: {:?} {}",
                     r.status, r.error_description
                 );
             }
@@ -163,7 +163,10 @@ impl Step<ComprehensiveInner> for ComprStoreIcon {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let mut inner: ComprehensiveInner = self.0;
         if inner.icon_bytes.len() < 10 {
-            debug!(                "compr: icon too small: {} {}",                inner.icon_url, inner.feed_url_edit            );
+            debug!(
+                "compr: icon too small: {} {}",
+                inner.icon_url, inner.feed_url_edit
+            );
             return StepResult::Continue(Box::new(ComprFinal(inner)));
         }
         let comp_st = util::compress_vec_to_string(&inner.icon_bytes);

@@ -65,10 +65,10 @@ pub trait IDownloader {
     fn cleanup_db(&self);
     fn get_queue_size(&self) -> usize;
 
-    fn browser_drag_request(&self, dragged_url: &String);
+    fn browser_drag_request(&self, dragged_url: &str);
 
-    #[deprecated]
-    fn download_direct(&self, url: &String) -> Result<String, String>;
+    // #[deprecated]
+    // fn download_direct(&self, url: &String) -> Result<String, String>;
 }
 
 #[derive(Debug, PartialEq)]
@@ -437,29 +437,31 @@ impl IDownloader for Downloader {
         (*self.job_queue).read().unwrap().len()
     }
 
-    fn download_direct(&self, url: &String) -> Result<String, String> {
-        let r = (*self.web_fetcher).request_url(url.clone());
-        match r.status {
-            200 => {
-                return Ok(r.content);
-            }
-            _ => {
-                (*self.erro_repo).borrow().add_error(
-                    -1,
-                    r.status as isize,
-                    url.clone(),
-                    r.error_description.clone(),
-                );
-                return Err(r.error_description);
+    /*
+        fn download_direct(&self, url: &String) -> Result<String, String> {
+            let r = (*self.web_fetcher).request_url(url.clone());
+            match r.status {
+                200 => {
+                    return Ok(r.content);
+                }
+                _ => {
+                    (*self.erro_repo).borrow().add_error(
+                        -1,
+                        r.status as isize,
+                        url.clone(),
+                        r.error_description.clone(),
+                    );
+                    return Err(r.error_description);
+                }
             }
         }
-    }
+    */
 
-    fn browser_drag_request(&self, dragged_url: &String) {
+    fn browser_drag_request(&self, dragged_url: &str) {
         let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
         let gp_sender: Sender<Job> = self.gp_job_sender.as_ref().unwrap().clone();
         let drag_i = DragInner::new(
-            dragged_url.clone(),
+            dragged_url.to_string(),
             self.source_c_sender.as_ref().unwrap().clone(),
             self.web_fetcher.clone(),
             errors_rep,

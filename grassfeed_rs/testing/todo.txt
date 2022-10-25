@@ -1,11 +1,21 @@
 To Do List
 
 
-
-
 - Marking of Messages, Favorites
 - Message List: set scroll position to upper edge from Cursor
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
+
+Drag extra care:
+	- https://www.netjstech.com/
+	- https://www.extremnews.com/
+	- https://menprovement.com/
+	- https://therationalmale.com/2021/06/25/sizzle-amp-steak/
+	- https://www.bitchute.com/video/ovTONsjus1wC/
+	- Dragging the same element 2x
+
+
+
+
 
 
 
@@ -19,6 +29,11 @@ Later:
   https://github.com/gabdube/native-windows-gui/tree/master/showcase
   https://www.ebbflow.io/blog/vending-win
 	https://gtk-rs.org/gtk4-rs/git/book/installation_windows.html
+
+
+
+
+
 
 
 Perhaps:

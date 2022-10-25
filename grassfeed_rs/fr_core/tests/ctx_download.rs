@@ -22,14 +22,19 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 
+const BASE_PATH: &str = "../fr_core/tests/feeds/";
+
+// fn get_file_fetcher() -> WebFetcherType {}
+
 #[test]
 fn comprehensive_feed_download() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(BASE_PATH.to_string())));
     let comp_inner = ComprehensiveInner {
         feed_url_edit: "gui_proc_rss2_v1.rss".to_string(),
         iconrepo: IconRepo::new(""),
-        web_fetcher: get_file_fetcher(),
+        web_fetcher: fetcher,
         download_error_happened: false,
         icon_url: String::default(),
         icon_bytes: Vec::default(),
@@ -48,12 +53,13 @@ fn comprehensive_feed_download() {
     assert_eq!(all_e.len(), 1);
 }
 
+// #[ignore]
 #[test]
 fn downloader_load_message_into_db() {
     setup();
     let (content_q_s, _content_q_r) = flume::bounded::<CJob>(9);
     let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(
-        "../fr_core/tests/data/".to_string(),
+        "../fr_core/tests/feeds/".to_string(),
     )));
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let (gp_s, _gp_r) = flume::bounded::<Job>(9);
@@ -114,13 +120,7 @@ fn chrono_broken_timestamp() {
     );
 }
 
-fn get_file_fetcher() -> WebFetcherType {
-    Arc::new(Box::new(FileFetcher::new(
-        "../fr_core/tests/data/".to_string(),
-    )))
-}
-
-#[allow(dead_code)]
+/*
 fn prepare_feedsource_dummy() -> Rc<RefCell<dyn ISubscriptionRepo>> {
     let mut fse = SubscriptionEntry::from_new_url(
         "feed1-display".to_string(),
@@ -133,6 +133,9 @@ fn prepare_feedsource_dummy() -> Rc<RefCell<dyn ISubscriptionRepo>> {
     let r_fsource: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(subscription_repo));
     r_fsource
 }
+*/
+
+
 
 // ------------------------------------
 
@@ -145,8 +148,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            (logger_config::QuietFlags::Downloader as u64)
-                | (logger_config::QuietFlags::Controller as u64),
+            //             (logger_config::QuietFlags::Downloader as u64)                | (logger_config::QuietFlags::Controller as u64),
+            0,
         );
     });
 }

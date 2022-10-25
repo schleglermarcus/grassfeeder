@@ -841,11 +841,9 @@ impl GuiProcessor {
                 );
             }
             need_update2 = true;
-        } else {
-            if let Some(n_msg) = self.statusbar_items.bottom_notices.pop_front() {
-                self.statusbar_items.bottom_notice_current = Some((timestamp_now, n_msg));
-                need_update2 = true;
-            }
+        } else if let Some(n_msg) = self.statusbar_items.bottom_notices.pop_front() {
+            self.statusbar_items.bottom_notice_current = Some((timestamp_now, n_msg));
+            need_update2 = true;
         }
         let mut block_vertical: char = ' ';
         if !is_folder && repo_id_new != self.statusbar_items.selected_repo_id {

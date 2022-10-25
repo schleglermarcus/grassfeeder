@@ -3,6 +3,15 @@ grassfeeder (00.1.1) unstable; urgency=low
   
   - DragAndDrop for Websites into Tree
   
+  
+  - Bug:  Evaluating blogger.com   feeds - wrong element as link recognized
+  		http://antifeministsite.blogspot.com/feeds/posts/default
+  		https://fachanwalt-fuer-it-recht.blogspot.com/feeds/posts/default
+  		http://ka-radler.blogspot.com/feeds/posts/default?alt=rss
+      http://rundfunkbeitrag.blogspot.com/feeds/posts/default?alt=rss
+  
+  
+  
   - Zip the test files
   - Reduce Size of Binary:
     https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html

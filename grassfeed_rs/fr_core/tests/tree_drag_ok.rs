@@ -170,7 +170,6 @@ fn drag_under_feed() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_some_tree();
     let (fsc, _r_fsource) = prepare_source_tree_controller(fs_list);
-    // r_fsource.borrow().debug_dump_tree("\nONS1");
     match fsc.drag_calc_positions(&vec![1], &vec![0, 0, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             // fsc.drag_move(from_entry, to_parent_id, to_folderpos);
@@ -179,8 +178,7 @@ fn drag_under_feed() {
                 from_entry, to_parent_id, to_folderpos
             );
         }
-        Err(_e) => { // trace!("{:?}", e) ;
-        }
+        Err(_e) => {}
     }
 }
 
@@ -192,8 +190,6 @@ fn drag_folder_on_other_folder() {
     //  drag the first entry onto second
     match fsc.drag_calc_positions(&vec![0], &vec![1, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
-            // assert_eq!(to_parent_id, 0);
-            // assert_eq!(to_folderpos, 1);
             fsc.drag_move(from_entry, to_parent_id, to_folderpos);
         }
         Err(e) => {
@@ -214,14 +210,11 @@ fn reject_folder_onto_child() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_some_tree();
     let (fsc, _r_fsource) = prepare_source_tree_controller(fs_list);
-    // r_fsource.borrow().debug_dump_tree("SUP1");
     match fsc.drag_calc_positions(&vec![0], &vec![0, 1]) {
         Ok((_from_entry, _to_parent_id, _to_folderpos)) => {
             assert!(false);
         }
-        Err(ref _e) => {
-            //             trace!("{:?}", e);
-        }
+        Err(ref _e) => {}
     }
 }
 
@@ -232,7 +225,6 @@ fn drag_entry_below_last() {
     let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
     match fsc.drag_calc_positions(&vec![0], &vec![3]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
-            // debug!("  to_pa:{}   to_fp:{}", to_parent_id, to_folderpos);
             fsc.drag_move(from_entry, to_parent_id, to_folderpos);
         }
         Err(e) => {
@@ -259,9 +251,7 @@ fn drag_entry_on_other_entry() {
                 from_entry, to_parent_id, to_folderpos
             );
         }
-        Err(_e) => {
-            //            trace!("{:?}", e);
-        }
+        Err(_e) => {}
     }
 }
 

@@ -1279,7 +1279,7 @@ mod feedcontents_test {
     // #[ignore]
     #[test]
     fn parse_convert_entry_file1() {
-        let rss_str = fs::read_to_string("tests/data/gui_proc_rss2_v1.rss").unwrap();
+        let rss_str = fs::read_to_string("tests/feeds/gui_proc_rss2_v1.rss").unwrap();
         let feeds = parser::parse(rss_str.as_bytes()).unwrap();
         let first_entry = feeds.entries.get(0).unwrap();
         let fce: MessageRow = contentlist::message_from_modelentry(&first_entry).0;

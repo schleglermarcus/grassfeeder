@@ -10,8 +10,6 @@ pub fn retrieve_homepage_from_feed_text(
     input: &[u8],
     dbg_feed_url: &str,
 ) -> (String, String, String) {
-    // let ftext_str = String::from_utf8_lossy(&input);
-    // let declaration_replaced = workaround_https_declaration(ftext_str.to_string());
     let r = parser::parse(input);
     if r.is_err() {
         return (
@@ -65,11 +63,10 @@ pub fn retrieve_homepage_from_feed_text(
     if let Some(f_h) = feed_homepage {
         return (f_h, feed_title.unwrap_or_default(), String::default());
     };
-
     (
         String::default(),
         feed_title.unwrap_or_default(),
-        String::default(), // format!("no link for HP found  {} ", &dbg_feed_url),
+        String::default(),
     )
 }
 

@@ -12,8 +12,6 @@ use std::sync::Arc;
 use xmlparser::Token;
 use xmlparser::Tokenizer;
 
-
-
 const HTML_BASE: &str = "../fr_core/tests/websites/";
 const ERR_REPO_BASE: &str = "../target/";
 
@@ -106,8 +104,6 @@ struct Element {
     name: String,
     attributes: HashMap<String, String>,
 }
-
-// impl Element {     pub fn new(name_: String) -> Self {        Element {            name: name_,            ..Default::default()        }    }}
 
 impl std::fmt::Display for Element {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
