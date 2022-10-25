@@ -21,7 +21,7 @@ pub fn retrieve_homepage_from_feed_text(
     let mut feed = r.unwrap();
 
     if feed.title.is_none() && feed.description.is_none() {
-        let ftext_str = String::from_utf8_lossy(&input);
+        let ftext_str = String::from_utf8_lossy(input);
         let declaration_replaced = workaround_https_declaration(ftext_str.to_string());
         if let Ok(f) = parser::parse(declaration_replaced.as_bytes()) {
             feed = f;
@@ -194,10 +194,8 @@ pub fn workaround_https_declaration(wrong: String) -> String {
 }
 
 // via parser
-pub fn extract_feed_from_website(
-    page_content: &String, /* , page_url: &str*/
-) -> Result<String, String> {
-    let dom: tl::VDom = match tl::parse(&page_content, tl::ParserOptions::default()) {
+pub fn extract_feed_from_website(page_content: &str) -> Result<String, String> {
+    let dom: tl::VDom = match tl::parse(page_content, tl::ParserOptions::default()) {
         Ok(d) => d,
         Err(e) => {
             return Err(format!("XF: parsing homepage: {:?}", e));
@@ -244,12 +242,12 @@ pub fn extract_feed_from_website(
         return Err("No feed-url found. ".to_string());
     }
     let feed_url = feeds_list.first().unwrap().clone();
-    return Ok(feed_url);
+    Ok(feed_url)
 }
 
 // extracts only the domain part of the site, no trailing slash
-pub fn go_to_homepage(long_url: &String) -> Option<String> {
-    match Url::parse(&long_url) {
+pub fn go_to_homepage(long_url: &str) -> Option<String> {
+    match Url::parse(long_url) {
         Ok(parsed) => Some(format!(
             "{}://{}",
             parsed.scheme(),

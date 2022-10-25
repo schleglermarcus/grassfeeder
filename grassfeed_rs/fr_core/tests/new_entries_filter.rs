@@ -18,6 +18,19 @@ use fr_core::util;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+#[test]
+fn parse_blogger() {
+    setup();
+    let rss_txt = std::fs::read_to_string("tests/feeds/blogger-pirates.xml").unwrap();
+    let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
+        feed_text_to_entries(rss_txt, 6, "some-url".to_string());
+    let e0: &MessageRow = new_list.get(0).unwrap();
+    assert_eq!(
+        e0.link.as_str(),
+        "http://stopthepirates.blogspot.com/2021/07/traffic-court-procedure-basics.html"
+    );
+}
+
 // #[ignore]
 #[test]
 fn parse_linuxcompati() {

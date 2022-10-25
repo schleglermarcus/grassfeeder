@@ -58,13 +58,12 @@ fn t_extract_url() {
     }
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn stateful_download() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let erro_rep = ErrorRepo::new(&String::default());
-    // let web_fetch: WebFetcherType = Arc::new(Box::new(HttpFetcher {}));
     let web_fetch: WebFetcherType = Arc::new(Box::new(FileFetcher::new(
         "../fr_core/tests/websites/".to_string(),
     )));
@@ -76,18 +75,15 @@ fn stateful_download() {
         erro_rep,
         gp_sender,
     );
-
     let last = StepResult::start(Box::new(BrowserEvalStart::new(drag_i)));
-    debug!(" DL  {:?}", last.found_feed_url);
+    // debug!(" DL  {:?}", last.found_feed_url);
     assert_eq!(
         last.found_feed_url,
         "https://www.neopresse.com/feed/".to_string()
     );
 }
 
-// -------------------------------
-
-#[ignore]
+// #[ignore]
 #[test]
 fn analyse_nn_sloppy() {
     setup();
@@ -98,6 +94,8 @@ fn analyse_nn_sloppy() {
     assert_eq!(found_feed_urls.len(), 3);
     // debug!("URLS {:?}", found_feed_urls);
 }
+
+// -------------------------------
 
 #[derive(Default, Debug, Clone)]
 struct Element {
@@ -262,6 +260,9 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_fern_logger(0);
+        let _r = logger_config::setup_fern_logger(
+            logger_config::QuietFlags::Downloader as u64,
+            // 0
+        );
     });
 }

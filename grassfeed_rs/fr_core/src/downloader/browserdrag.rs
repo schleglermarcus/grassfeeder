@@ -110,7 +110,7 @@ impl Step<DragInner> for CheckContentIsFeed {
         }
         let parsed = parse_r.unwrap();
         if let Some(t_t) = parsed.title {
-            inner.feed_display_title = t_t.content.clone();
+            inner.feed_display_title = t_t.content;
         }
         inner.found_feed_url = inner.dragged_url.clone();
         trace!(
@@ -182,7 +182,7 @@ impl Step<DragInner> for Notify {
 }
 
 // returns the grepped Feed urls
-pub fn extract_feed_urls_sloppy(pagetext: &String) -> Vec<String> {
+pub fn extract_feed_urls_sloppy(pagetext: &str) -> Vec<String> {
     let mut found_feed_urls: Vec<String> = Vec::default();
     for line in pagetext.lines() {
         let trimmed = line.trim().to_string();
@@ -192,7 +192,7 @@ pub fn extract_feed_urls_sloppy(pagetext: &String) -> Vec<String> {
         if !trimmed.contains("rss") {
             continue;
         }
-        let parts = trimmed.split(" ");
+        let parts = trimmed.split(' ');
         let parts_vec = parts
             .into_iter()
             .map(|p| p.to_string())
@@ -205,7 +205,7 @@ pub fn extract_feed_urls_sloppy(pagetext: &String) -> Vec<String> {
         });
         if let Some(ind) = e_first_href {
             if let Some(assignm) = parts_vec.get(ind) {
-                let mut split_r = assignm.split("=");
+                let mut split_r = assignm.split('=');
                 let _left = split_r.next();
                 if let Some(r) = split_r.next() {
                     let mut probe_url = r.to_string();

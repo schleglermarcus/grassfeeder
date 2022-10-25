@@ -148,8 +148,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            //             (logger_config::QuietFlags::Downloader as u64)                | (logger_config::QuietFlags::Controller as u64),
-            0,
+                         (logger_config::QuietFlags::Downloader as u64)                | (logger_config::QuietFlags::Controller as u64),
+            // 0,
         );
     });
 }

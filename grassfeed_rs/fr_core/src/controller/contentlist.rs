@@ -981,8 +981,20 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     msg.entry_src_date = published_ts;
     msg.fetch_date = crate::util::timestamp_now();
     msg.message_id = -1;
-    if !me.links.is_empty() {
-        msg.link = me.links.get(0).unwrap().href.clone();
+    let linklist = me
+        .links
+        .iter()
+        .filter(|ml| {
+            if let Some(typ) = &ml.media_type {
+                if typ.contains("xml") {
+                    return false;
+                }
+            }
+            true
+        })
+        .collect::<Vec<&feed_rs::model::Link>>();
+    if let Some(link_) = linklist.first() {
+        msg.link = link_.href.clone();
     }
     if let Some(summary) = me.summary.clone() {
         if !summary.content.is_empty() {
