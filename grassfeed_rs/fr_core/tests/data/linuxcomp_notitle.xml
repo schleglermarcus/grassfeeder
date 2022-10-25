@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="https://www.w3.org/2005/Atom" xmlns:dc="https://purl.org/dc/elements/1.1/" xml:lang="en">
+
+
+
+
+<feed  xmlns="https://www.w3.org/2005/Atom" >
+
+	<!--  xmlns:dc="https://purl.org/dc/elements/1.1/"    xml:lang="en"  -->
+
+
   <title type="html">Linux Compatible</title>
+
+	<!--
   <subtitle type="html">Daily Linux news, information, hardware/software compatibility lists and tips and tricks.</subtitle>
   <link rel="self" type="application/atom+xml" href="https://www.linuxcompatible.org/atom.xml"/>
   <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org"/>
@@ -9,6 +19,9 @@
   <icon>https://www.linuxcompatible.org/data/themes/linuxcompatible/images/favicon.ico</icon>
   <updated>Tue, 25 Oct 2022 08:56:00 +0000</updated>
   <generator>Contentteller CMS System 3.0.25.2269, https://www.contentteller.com</generator>
+-->
+
+<!--
   <entry>
     <title type="html">Tails 5.6 released</title>
     <link rel="alternate" type="text/html" href="https://www.linuxcompatible.org/story/tails-56-released/"/>
@@ -20,4 +33,6 @@
     </author>
     <summary type="html">A new version of Tails has been released. Tails is a portable operating system that protects against surveillance and censorship.Tails 5.6 is out Changes and updates Update Tor Browser to 11.5.5. Update the Linux kernel to 5.10.149. This should improve the support for newer hardware: graphics, Wi-Fi, and so on. Fix ...</summary>
   </entry>
+-->
+
 </feed>

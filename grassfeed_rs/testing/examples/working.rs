@@ -134,12 +134,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
-            (
-                "https://www.linuxcompatible.org/news/atom.xml",
-                "linuxcompatible",
-            ),
-            ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
-            ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -170,6 +164,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             false,
         );
         let src = [
+            ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
+            ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
             ("https://insidexpress.com/feed/", "insidexpress"),
             ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
             ("http://thehighersidechats.com/feed/", "higherside-300"),
@@ -232,6 +228,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            (
+                "https://www.linuxcompatible.org/news/atom.xml",
+                "linuxcompatible",
+            ),
             (
                 "https://www.opendesktop.org/content.rdf",
                 "opendesktop big-icon",

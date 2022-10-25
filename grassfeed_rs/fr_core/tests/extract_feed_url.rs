@@ -12,22 +12,7 @@ use std::sync::Arc;
 use xmlparser::Token;
 use xmlparser::Tokenizer;
 
-/* NO Title found:
 
-    https://www.linuxcompatible.org/
-    https://www.linuxcompatible.org/story/how-to-use-the-scp-secure-copy-command-to-transfer-files/
-
-
-    http://xbustyx.xxxlog.co/feed/
-
-*/
-/*
-
-LATER:
-  https://www.reddit.com/r/Fotografie/  -> https://www.reddit.com/r/Fotografie.rss
-
-
-*/
 
 const HTML_BASE: &str = "../fr_core/tests/websites/";
 const ERR_REPO_BASE: &str = "../target/";

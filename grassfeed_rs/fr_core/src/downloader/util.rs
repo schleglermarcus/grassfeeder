@@ -10,6 +10,8 @@ pub fn retrieve_homepage_from_feed_text(
     input: &[u8],
     dbg_feed_url: &str,
 ) -> (String, String, String) {
+    // let ftext_str = String::from_utf8_lossy(&input);
+    // let declaration_replaced = workaround_https_declaration(ftext_str.to_string());
     let r = parser::parse(input);
     if r.is_err() {
         return (
@@ -18,16 +20,15 @@ pub fn retrieve_homepage_from_feed_text(
             format!("Parsing: {:?} {:?}", &dbg_feed_url, r.err()),
         );
     }
-    let feed = r.unwrap();
+    let mut feed = r.unwrap();
 
-    trace!(
-        "feed_title ={:?} {:?} ID={:?}  links={:?} ",
-        feed.title,
-        feed.description,
-        feed.id,
-        feed.links
-    );
-    trace!("entries: {:?}  ", feed.entries);
+    if feed.title.is_none() && feed.description.is_none() {
+        let ftext_str = String::from_utf8_lossy(&input);
+        let declaration_replaced = workaround_https_declaration(ftext_str.to_string());
+        if let Ok(f) = parser::parse(declaration_replaced.as_bytes()) {
+            feed = f;
+        }
+    }
 
     if feed.title.is_none() && feed.description.is_none() {
         return (
