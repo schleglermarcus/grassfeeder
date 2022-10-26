@@ -11,10 +11,6 @@ use regex::Regex;
 // use fr_core::db::message::decompress;
 // use fr_core::util::db_time_to_display_nonnull;
 
-
-
-
-
 //  Maybe later:
 //  The file contains an invalid  single  &  as title.   The parse does not like that and returns  no title.
 #[allow(dead_code)]

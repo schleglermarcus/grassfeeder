@@ -18,8 +18,23 @@ use fr_core::util;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+// #[ignore]
 #[test]
-fn parse_blogger() {
+fn parse_blogger_af() {
+    setup();
+    let rss_txt = std::fs::read_to_string("tests/feeds/blogger-af.xml").unwrap();
+    let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
+        feed_text_to_entries(rss_txt, 6, "some-url".to_string());
+    let e0: &MessageRow = new_list.get(0).unwrap();
+    assert_eq!(
+        e0.link.as_str(),
+        "http://antifeministsite.blogspot.com/2022/09/husband-murdered-because-of-rotten-wife.html"
+    );
+}
+
+// #[ignore]
+#[test]
+fn parse_blogger_pirat() {
     setup();
     let rss_txt = std::fs::read_to_string("tests/feeds/blogger-pirates.xml").unwrap();
     let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =

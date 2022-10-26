@@ -878,16 +878,6 @@ impl IFeedContents for FeedContents {
     }
 
     fn memory_conserve(&mut self, act: bool) {
-        /*
-                let mut last_selected_msg_id = -1;
-                if let Some(feedsources) = self.feedsources_w.upgrade() {
-                    if let Some(subs_e) = (*feedsources).borrow().get_current_selected_subscription() {
-                        last_selected_msg_id = subs_e.0.last_selected_msg;
-                    }
-                }
-                 trace!(            "memory_conserve {} selected:{:?}   last_selected_msg_id={}",            act,            self.list_selected_ids.read().unwrap(),            last_selected_msg_id        );
-        */
-
         self.currently_minimized = act;
         if act {
             self.msg_state.write().unwrap().clear();
@@ -984,9 +974,18 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     let linklist = me
         .links
         .iter()
+        // .inspect(|ml| debug!("ML: {:?} {:?}", ml.rel, ml.href))
         .filter(|ml| {
             if let Some(typ) = &ml.media_type {
                 if typ.contains("xml") {
+                    return false;
+                }
+            }
+            true
+        })
+        .filter(|ml| {
+            if let Some(rel) = &ml.rel {
+                if rel.contains("replies") {
                     return false;
                 }
             }

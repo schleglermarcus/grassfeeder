@@ -134,15 +134,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
-            (
-                "http://antifeministsite.blogspot.com/feeds/posts/default",
-                "antife",
-            ),
             ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
-            (
-                "https://allworldnews24hours6.blogspot.com/feeds/posts/default",
-                "allworld24",
-            ),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -236,6 +228,14 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            (
+                "http://antifeministsite.blogspot.com/feeds/posts/default",
+                "antife",
+            ),
+            (
+                "https://allworldnews24hours6.blogspot.com/feeds/posts/default",
+                "allworld24",
+            ),
             (
                 "https://www.linuxcompatible.org/news/atom.xml",
                 "linuxcompatible",
