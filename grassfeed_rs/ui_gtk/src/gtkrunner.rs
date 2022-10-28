@@ -201,6 +201,7 @@ pub struct GtkObjectsImpl {
     pub searchentries: Vec<SearchEntry>,
     pub indicator: Option<libappindicator::AppIndicator>,
     create_systray_fn: CreateSystrayFnType,
+    gui_event_sender: Option<Sender<GuiEvents>>,
 }
 
 impl GtkObjectsImpl {
@@ -227,14 +228,19 @@ impl GtkObjectsImpl {
             }
             let dest_box = o_dest_box.unwrap();
 
-            if let Some(create_fn) = &self.create_webview_fn {
-                let w_view = (create_fn)(
-                    self.web_context.borrow().as_ref().unwrap(),
-                    self.browser_config.font_size_manual,
-                );
-                dest_box.pack_start(&w_view, true, true, 0);
-                w_view.show();
-                self.web_view.borrow_mut().replace(w_view);
+            if let Some(ev_se) = &self.gui_event_sender {
+                if let Some(create_fn) = &self.create_webview_fn {
+                    let w_view = (create_fn)(
+                        self.web_context.borrow().as_ref().unwrap(),
+                        self.browser_config.font_size_manual,
+                        ev_se.clone(),
+                    );
+                    dest_box.pack_start(&w_view, true, true, 0);
+                    w_view.show();
+                    self.web_view.borrow_mut().replace(w_view);
+                }
+            } else {
+                error!("gtkrunner:  event sender not here !! ");
             }
         }
     }
@@ -528,7 +534,7 @@ impl GtkObjects for GtkObjectsImpl {
 
     fn set_create_webview_fn(
         &mut self,
-        cb_fn: Option<Box<dyn Fn(&WebContext, Option<u8>) -> WebView>>,
+        cb_fn: Option<Box<dyn Fn(&WebContext, Option<u8>, Sender<GuiEvents>) -> WebView>>,
     ) {
         self.create_webview_fn = cb_fn;
     }
@@ -573,6 +579,13 @@ impl GtkObjects for GtkObjectsImpl {
     ) -> Option<&dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator> {
         self.create_systray_fn.as_ref()?;
         Some(self.create_systray_fn.as_ref().unwrap())
+    }
+
+    fn set_gui_event_sender(&mut self, ev_se: Sender<GuiEvents>) {
+        self.gui_event_sender = Some(ev_se);
+    }
+    fn fet_gui_event_sender(&mut self) -> Option<Sender<GuiEvents>> {
+        self.gui_event_sender.clone()
     }
 }
 

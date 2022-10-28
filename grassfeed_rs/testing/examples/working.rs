@@ -134,7 +134,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
-            ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
+			("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -165,6 +165,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             false,
         );
         let src = [
+            ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
             ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
             ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
             ("https://insidexpress.com/feed/", "insidexpress"),
@@ -174,7 +175,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://www.fromrome.info/feed/", "fromrome icon okl"),
             ("https://www.relay.fm/query/feed", "relay_query icon ok"),
             ("https://www.mtb-karlsruhe.de/?q=rss.xml", "mb_ka icon ok"),
-            ("http://n8waechter.info/feed/", "n8waechter  no-icon "),
             ("https://opposition24.com/feed/", "opposition"),
             ("http://lisahaven.news/feed/", "lisa_haven"), // original icon too big, scaled down.
             ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403

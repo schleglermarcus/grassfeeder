@@ -36,6 +36,7 @@ use gtk::ShadowType;
 use gtk::ToggleToolButton;
 use gtk::ToolButton;
 use gtk::Toolbar;
+use gui_layer::abstract_ui::BrowserEventType;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
@@ -98,11 +99,6 @@ impl GtkGuiBuilder for GtkObjectTree {
         // window.connect_show(|_w| {            debug!("window: show");        });
         // window.connect_hide(|_w| {            debug!("window: hide");        });
         // window.connect_focus_visible_notify(|_w| {            debug!("window: focus_visible ");        });
-        window.connect_focus(|_w, direction| {
-            debug!("window: focus dir={:?}", direction);
-            gtk::Inhibit(false)
-        });
-
         let esw = EvSenderWrapper(gui_event_sender.clone());
         window.connect_window_state_event(
             move |_w: &gtk::Window, ev_win_st: &gdk::EventWindowState| {
@@ -119,7 +115,6 @@ impl GtkGuiBuilder for GtkObjectTree {
                 gtk::Inhibit(false)
             },
         );
-
         let esw = EvSenderWrapper(gui_event_sender.clone());
         crate::load_css::load_css();
         window.connect_size_allocate(move |_win, rectangle| {
@@ -141,21 +136,16 @@ impl GtkGuiBuilder for GtkObjectTree {
         });
 
         create_dialogs(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
-
         let drag_state = Rc::new(RwLock::new(DragState::default()));
-
         let box_top = gtk::Box::new(Orientation::Vertical, 0);
         box_top.set_widget_name("box_top");
         window.add(&box_top);
-
         let paned_top = Paned::new(Orientation::Horizontal);
         paned_top.set_wide_handle(true);
         paned_top.set_widget_name("paned_top");
         box_top.add(&paned_top);
-
         let box_1_v = gtk::Box::new(Orientation::Vertical, 0);
         box_1_v.set_widget_name("box_1_v");
-
         paned_top.pack1(&box_1_v, false, false);
         paned_top.set_size_request(20, -1);
         let esw = EvSenderWrapper(gui_event_sender.clone());
@@ -358,9 +348,7 @@ impl GtkObjectTree {
             .get(&PropDef::GuiFontSizeManualEnable)
             .cloned()
             .unwrap_or_default();
-
         let mut o_fontsize_man: Option<u8> = None;
-
         if let Ok(fs_man_en) = fontsize_manual_enable_s.parse() {
             if fs_man_en {
                 if let Some(fsm_s) = self.initvalues.get(&PropDef::GuiFontSizeManual) {
@@ -369,8 +357,6 @@ impl GtkObjectTree {
                 }
             }
         }
-        // let fontsize_manual_enable = fontsize_manual_enable_s.parse().unwrap();
-
         let clear_cache: bool = self.get_bool(PropDef::BrowserClearCache);
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
@@ -419,8 +405,11 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
     wconte
 }
 
-// Later2:  Set font size
-pub fn create_webview(w_context: &WebContext, manual_fontsize: Option<u8>) -> WebView {
+pub fn create_webview(
+    w_context: &WebContext,
+    manual_fontsize: Option<u8>,
+    ev_se: Sender<GuiEvents>,
+) -> WebView {
     let webview1: WebView = WebView::with_context(w_context);
     webview1.set_widget_name("webview_0");
     webview1.set_border_width(1);
@@ -436,15 +425,26 @@ pub fn create_webview(w_context: &WebContext, manual_fontsize: Option<u8>) -> We
         .enable_xss_auditor(false);
     if let Some(fontsize) = manual_fontsize {
         let adapted_size: u32 = RATIO_BROWSER_FONTSIZE_PERCENT * fontsize as u32 / 100;
-        debug!("MANUAL fontsize re-calculated: {}", adapted_size);
-
         wvs_b = wvs_b.default_font_size(adapted_size);
     }
     let webview_settings = wvs_b.build();
     webview1.set_settings(&webview_settings);
     // webview1.connect_web_process_crashed(|wv: &WebView| {        warn!("WebView Crashed! going back ...");        true     });
-    // webview1.connect_estimated_load_progress_notify(|_wv: &WebView| {         trace!(            "estimated_load_progress_notify: {}",            wv.estimated_load_progress()        );    });
-    // webview1.connect_is_loading_notify(|_wv: &WebView| {         trace!("is_loading_notify: {}", wv.is_loading());    });
+
+    let esw = EvSenderWrapper(ev_se.clone());
+    webview1.connect_estimated_load_progress_notify(move |wv: &WebView| {
+        let progress = (wv.estimated_load_progress() * 256.0) as i32;
+        esw.sendw(GuiEvents::BrowserEvent(
+            BrowserEventType::LoadingProgress,
+            progress,
+        ));
+    });
+    // let esw = EvSenderWrapper(ev_se.clone());
+    // webview1.connect_is_loading_notify(move |wv: &WebView| {        esw.sendw(GuiEvents::BrowserEvent(            BrowserEventType::IsLoadingNotify,            if wv.is_loading() { 1 } else { 0 },        ));    });
+    webview1.connect_ready_to_show(|_wv: &WebView| {
+        trace!("ready_to_show: {}", 0);
+    });
+
     webview1
 }
 

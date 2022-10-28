@@ -83,6 +83,7 @@ impl GtkRunnerInternal {
             let window: &gtk::Window = appwindow.upcast_ref::<gtk::Window>();
             let mut dd = DialogDataDistributor::default();
             (*obj_c).write().unwrap().set_window(window);
+			(*obj_c).write().unwrap().set_gui_event_sender(ev_se.clone());
             (*builder_c).build_gtk(ev_se.clone(), obj_c2.clone(), &mut dd);
             (*obj_c).write().unwrap().set_dddist(dd);
             window.show_all();
