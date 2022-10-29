@@ -1,3 +1,5 @@
+mod unzipper;
+
 use fr_core::controller::guiprocessor::Job;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::errors_repo::ErrorRepo;
@@ -12,16 +14,29 @@ use std::sync::Arc;
 use xmlparser::Token;
 use xmlparser::Tokenizer;
 
-const HTML_BASE: &str = "../fr_core/tests/websites/";
+// const HTML_BASE: &str = "../fr_core/tests/websites/";
 const ERR_REPO_BASE: &str = "../target/";
+
+const TD_BASE: &str = "../target/";
+const TD_SRC: &str = "../fr_core/tests/zips/";
+
+fn unzip_some() {
+    for n in ["websites.zip", "feeds.zip"] {
+        assert!(unzipper::unzip_one(&format!("{}{}", TD_SRC, n), TD_BASE).is_ok());
+    }
+}
 
 // #[ignore]
 #[test]
 fn t_extract_url() {
     setup();
 
+    unzip_some();
+
+    let html_base = format!("{}websites/", TD_BASE);
+
     let (stc_job_s, _stc_job_r) = flume::unbounded::<SJob>();
-    let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(HTML_BASE.to_string())));
+    let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(html_base)));
     let (gp_sender, _gp_rec) = flume::bounded::<Job>(2);
 
     let pairs: [(&str, &str, &str); 4] = [	(
@@ -64,9 +79,8 @@ fn stateful_download() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let erro_rep = ErrorRepo::new(&String::default());
-    let web_fetch: WebFetcherType = Arc::new(Box::new(FileFetcher::new(
-        "../fr_core/tests/websites/".to_string(),
-    )));
+    let html_base = format!("{}websites/", TD_BASE);
+    let web_fetch: WebFetcherType = Arc::new(Box::new(FileFetcher::new(html_base))); // "../fr_core/tests/websites/".to_string(),
     let (gp_sender, _gp_rec) = flume::bounded::<Job>(2);
     let drag_i = DragInner::new(
         "hp_neopr.html".to_string(),
@@ -87,7 +101,8 @@ fn stateful_download() {
 #[test]
 fn analyse_nn_sloppy() {
     setup();
-    let fname = format!("{}{}", HTML_BASE, "naturalnews-page.html");
+
+    let fname = format!("{}{}", TD_BASE, "websites/naturalnews-page.html");
     let o_page = std::fs::read_to_string(fname.clone());
     let pagetext = o_page.unwrap();
     let found_feed_urls = extract_feed_urls_sloppy(&pagetext);
@@ -126,7 +141,7 @@ https://github.com/servo/html5ever
 #[test]
 fn analyse_nn_with_html_parser() {
     setup();
-    let fname = format!("{}{}", HTML_BASE, "naturalnews-page.html");
+    let fname = format!("{}{}", TD_BASE, "websites/naturalnews-page.html");
     let o_page = std::fs::read_to_string(fname.clone());
     let pagetext = o_page.unwrap();
     let mut tokens: Vec<Token> = Vec::default();
