@@ -3,20 +3,4 @@ Sat, 22 Oct 2022 00:18:00 +0000
 * Bug: parsed blogger.com - wrong element recognized as link
 * Browser Progress display
 
-
-- Appimage Hub Deploy
-  https://github.com/AppImage/appimage.github.io
-  https://docs.appimage.org/reference/best-practices.html
-
-  https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
-
-Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
-without the installation of additional packages. Targeting the oldest still-supported LTS
-is to ensure that the AppImage will run not only on the very latest, but also on
-older target systems, such as enterprise distributions (not limited to Ubuntu)
-
-
-
-
-
 - Zip the test files
