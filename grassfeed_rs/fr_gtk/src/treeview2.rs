@@ -262,24 +262,25 @@ pub fn create_treeview(
         }
     }
 
+	/*
+
     let targets = vec![
         gtk::TargetEntry::new("STRING", gtk::TargetFlags::OTHER_APP, 0),
         gtk::TargetEntry::new("text/plain", gtk::TargetFlags::OTHER_APP, 0),
-        // gtk::TargetEntry::new("text/uri-list", gtk::TargetFlags::OTHER_APP, 0),
         gtk::TargetEntry::new("text/html", gtk::TargetFlags::OTHER_APP, 0),
     ];
-
-    treeview1.drag_dest_set(gtk::DestDefaults::ALL, &targets, gdk::DragAction::LINK); //  gdk::DragAction::COPY
-
+    treeview1.drag_dest_set(gtk::DestDefaults::ALL, &targets, gdk::DragAction::LINK);
     let esw = EvSenderWrapper(g_ev_se);
     treeview1.connect_drag_data_received(
         move |_tv, _dragcontext, _x, _y, selectiondata, _info, _timestamp| {
             if let Some(gstri) = selectiondata.text() {
-                // debug!("DDR: SEL.text {:?} ", gstri.to_string());
+                debug!("DDR: SEL.text {:?} ", gstri.to_string());
                 esw.sendw(GuiEvents::DragDropUrlReceived(gstri.to_string()));
             }
         },
     );
+*/
+
 
     treeview1
 }
