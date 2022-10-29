@@ -2,11 +2,7 @@ grassfeeder (00.1.1) unstable; urgency=low
 
   * DragAndDrop for Websites on Subscription Area
   * Bug: parsed blogger.com - wrong element recognized as link
-  
-  - Reduce Size of Binary:
-    https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
-  	
-  - Browser Loading display
+  * Browser Progress display
   
   - Zip the test files
 

@@ -251,7 +251,6 @@ pub fn create_treeview(
             esw.sendw(GuiEvents::TreeCollapsed(0, repo_id));
         }
     });
-    // treeview1.connect_focus(move |_t_view, directiontype| {        debug!("treeview:  focus {:?}", directiontype);        gtk::Inhibit(false)    });
     {
         let mut ret = (*gtk_obj_a).write().unwrap();
         ret.set_tree_store(TREEVIEW0, &tree_store);
@@ -261,27 +260,6 @@ pub fn create_treeview(
             ret.set_spinner_w((cellrenderer_spinner, col1));
         }
     }
-
-	/*
-
-    let targets = vec![
-        gtk::TargetEntry::new("STRING", gtk::TargetFlags::OTHER_APP, 0),
-        gtk::TargetEntry::new("text/plain", gtk::TargetFlags::OTHER_APP, 0),
-        gtk::TargetEntry::new("text/html", gtk::TargetFlags::OTHER_APP, 0),
-    ];
-    treeview1.drag_dest_set(gtk::DestDefaults::ALL, &targets, gdk::DragAction::LINK);
-    let esw = EvSenderWrapper(g_ev_se);
-    treeview1.connect_drag_data_received(
-        move |_tv, _dragcontext, _x, _y, selectiondata, _info, _timestamp| {
-            if let Some(gstri) = selectiondata.text() {
-                debug!("DDR: SEL.text {:?} ", gstri.to_string());
-                esw.sendw(GuiEvents::DragDropUrlReceived(gstri.to_string()));
-            }
-        },
-    );
-*/
-
-
     treeview1
 }
 

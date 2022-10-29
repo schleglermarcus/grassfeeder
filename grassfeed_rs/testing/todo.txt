@@ -1,9 +1,21 @@
 To Do List
 
-
 - Marking of Messages, Favorites
 - Message List: set scroll position to upper edge from Cursor
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
+
+
+
+
+- Appimage Hub Deploy
+  https://github.com/AppImage/appimage.github.io
+  https://docs.appimage.org/reference/best-practices.html
+  https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
+	Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
+	without the installation of additional packages.
+
+
+
 
 Drag extra care:
 	- https://www.netjstech.com/
