@@ -1196,9 +1196,7 @@ mod feedcontents_test {
     use crate::controller::contentlist;
     use crate::db::message::MessageRow;
     use crate::util::db_time_to_display_nonnull;
-    use crate::TD_BASE;
     use feed_rs::parser;
-    use std::fs;
 
     // #[ignore]
     #[test]
@@ -1286,17 +1284,6 @@ mod feedcontents_test {
             fce.enclosure_url,
             "https://static.kino.de/rama-dama-1990-film-rcm1200x0u.jpg"
         );
-    }
-
-    // #[ignore]
-    #[test]
-    fn parse_convert_entry_file1() {
-        let filename = format!("{}feeds/gui_proc_rss2_v1.rss", TD_BASE); // "../target/td/feeds/gui_proc_rss2_v1.rss"
-        let rss_str = fs::read_to_string(filename).unwrap();
-        let feeds = parser::parse(rss_str.as_bytes()).unwrap();
-        let first_entry = feeds.entries.get(0).unwrap();
-        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry).0;
-        assert_eq!(fce.content_text, "Today: Lorem ipsum dolor sit amet");
     }
 
     #[test]

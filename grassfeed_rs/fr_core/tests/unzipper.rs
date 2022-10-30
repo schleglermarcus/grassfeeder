@@ -7,16 +7,18 @@ use zip::result::ZipError;
 pub const TD_BASE: &str = "../target/td/";
 pub const TD_SRC: &str = "../fr_core/tests/zips/";
 
-pub fn unzip_some() {
+pub fn unzip_some() -> bool {
     if Path::new(TD_BASE).is_dir() {
         // debug!("unzip_some: destination exists already, quit. {} ", TD_BASE);
-        return;
+        return false;
     }
-    for n in ["websites.zip", "feeds.zip"] {
+    for n in ["websites.zip", "feeds.zip", "icons.zip"] {
         let r = unzip_one(&format!("{}{}", TD_SRC, n), TD_BASE);
-
-        assert!(r.is_ok());
+        if !r.is_ok() {
+            return false;
+        }
     }
+    true
 }
 
 pub fn unzip_one(src_file: &str, out_dir: &str) -> Result<(), Box<dyn std::error::Error>> {

@@ -430,8 +430,7 @@ pub fn create_webview(
     let webview_settings = wvs_b.build();
     webview1.set_settings(&webview_settings);
     // webview1.connect_web_process_crashed(|wv: &WebView| {        warn!("WebView Crashed! going back ...");        true     });
-
-    let esw = EvSenderWrapper(ev_se.clone());
+    let esw = EvSenderWrapper(ev_se);
     webview1.connect_estimated_load_progress_notify(move |wv: &WebView| {
         let progress = (wv.estimated_load_progress() * 256.0) as i32;
         esw.sendw(GuiEvents::BrowserEvent(
@@ -439,12 +438,9 @@ pub fn create_webview(
             progress,
         ));
     });
-    // let esw = EvSenderWrapper(ev_se.clone());
-    // webview1.connect_is_loading_notify(move |wv: &WebView| {        esw.sendw(GuiEvents::BrowserEvent(            BrowserEventType::IsLoadingNotify,            if wv.is_loading() { 1 } else { 0 },        ));    });
     webview1.connect_ready_to_show(|_wv: &WebView| {
         trace!("ready_to_show: {}", 0);
     });
-
     webview1
 }
 

@@ -16,7 +16,6 @@ use jpeg_decoder;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;
-//  pub const ICON_SIZE_LIMIT_BYTES: usize = 10000;
 
 pub struct IconInner {
     pub subs_id: isize,
@@ -336,72 +335,6 @@ pub enum IsIconResult {
     IsWebp = 128,
 }
 
-/*
-///  Checks if this byte array is an icon
-/// https://docs.rs/png_pong/latest/png_pong/struct.Decoder.html
-#[deprecated]
-pub fn blob_is_icon(vec_u8: &Vec<u8>) -> (usize, String) {
-    let mut msg: String = String::default();
-    let mut is_icon_result = 0;
-    if vec_u8.len() < 10 {
-        return (
-            IsIconResult::TooSmall as usize,
-            format!("blob: too small:{} ", vec_u8.len()),
-        );
-    }
-    match ico::IconDir::read(std::io::Cursor::new(vec_u8)) {
-        Ok(_decoder) => {
-            return (0, msg);
-        }
-        Err(e) => {
-            is_icon_result |= IsIconResult::NotIco as usize;
-            msg = format!("{} not_ico: {}", msg, e);
-        }
-    }
-    let cursor = std::io::Cursor::new(vec_u8);
-    let mut decoder = jpeg_decoder::Decoder::new(cursor);
-    match decoder.decode() {
-        Ok(_pixels) => {
-            return (0, msg);
-        }
-        Err(e) => {
-            is_icon_result |= IsIconResult::NotJpg as usize;
-            msg = format!("{} not_jpg: {}", msg, e);
-        }
-    }
-    match usvg::Tree::from_data(vec_u8, &usvg::Options::default().to_ref()) {
-        Ok(_rtree) => {
-            return (0, msg);
-        }
-        Err(e) => {
-            is_icon_result |= IsIconResult::NotSvg as usize;
-            msg = format!("{} not_svg: {}", msg, e);
-        }
-    }
-    match libwebp_image::webp_load_from_memory(vec_u8) {
-        Ok(_rtree) => {
-            return (IsIconResult::IsWebp as usize, msg);
-        }
-        Err(e) => {
-            is_icon_result |= IsIconResult::NotWebp as usize;
-            msg = format!("{} not_webp: {}", msg, e);
-        }
-    }
-    match tinybmp::RawBmp::from_slice(vec_u8) {
-        Ok(_decoder) => {
-            return (0, msg);
-        }
-        Err(e) => {
-            is_icon_result |= IsIconResult::NotBmp as usize;
-
-            msg = format!("{} not_bmp: {:?}", msg, e);
-        }
-    }
-
-    (is_icon_result, msg)
-}
-*/
-
 #[derive(Debug, Default)]
 pub struct IconAnalyseResult {
     pub kind: IconKind,
@@ -595,32 +528,4 @@ impl InvestigateOne for InvBmp {
     }
 }
 
-#[cfg(test)]
-mod t_ {
-    use super::*;
-    use crate::web::mockfilefetcher;
-
-    //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::icons::t_::analyze_icon_local  --lib -- --exact --nocapture "
-    #[test]
-    fn analyze_icon_local() {
-        let set: [(&str, IconKind); 8] = [
-            ("../target/td/feeds/favicon.ico", IconKind::Ico),          //
-            ("tests/data/icon_651.ico", IconKind::Png),         //
-            ("tests/data/report24-favicon.ico", IconKind::Jpg), // is jpg
-            ("tests/data/naturalnews_favicon.ico", IconKind::Ico),
-            ("tests/data/heise-safari-pinned-tab.svg", IconKind::Svg),
-            ("tests/data/gorillavsbear_townsquare.ico", IconKind::Ico), // MS Windows icon resource - 3 icons, 48x48, 32 bits/pixel, 48x48, 32 bits/pixel
-            ("tests/data/LHNN-Logo-Main-Color-1.png", IconKind::Png),
-            (
-                "tests/data/feeds_seoulnews_favicon.ico",
-                IconKind::UnknownType,
-            ),
-        ];
-        set.iter().for_each(|(s, e_kind)| {
-            let blob = mockfilefetcher::file_to_bin(s).unwrap();
-            let r = icon_analyser(&blob);
-            // println!(                "TEST  {} \t {:?}\t{}  {}x{} ",                s, r.kind, r.message, r.width_orig, r.height_orig           );
-            assert_eq!(r.kind, *e_kind);
-        });
-    }
-}
+//  #[cfg(test)]mod t_ {    use super::*;}

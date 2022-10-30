@@ -22,7 +22,6 @@ use fr_core::timer::ITimer;
 use fr_core::ui_select::uimock::UIMock;
 use fr_core::util::IconKind;
 use fr_core::web::httpfetcher::HttpFetcher;
-use fr_core::web::mockfilefetcher::file_to_bin;
 use fr_core::web::IHttpRequester;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -91,14 +90,6 @@ fn update_folder_pos() {
     assert_eq!(result.get(2).unwrap().folder_position, 33);
 }
 
-// #[ignore]
-#[test]
-fn test_asue_ico() {
-    setup();
-    let r = file_to_bin("tests/data/asue-favico.ico");
-    let an_res = icon_analyser(&r.unwrap());
-    assert_eq!(an_res.kind, IconKind::Ico);
-}
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_heise_svg  --lib -- --exact --nocapture"
 // #[ignore]

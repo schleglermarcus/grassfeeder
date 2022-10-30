@@ -244,7 +244,7 @@ pub fn create_treeview(
         }
     });
 
-    let esw = EvSenderWrapper(g_ev_se.clone());
+    let esw = EvSenderWrapper(g_ev_se);
     treeview1.connect_row_collapsed(move |t_view, t_iter, _t_path| {
         if let Some(model) = t_view.model() {
             let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;

@@ -437,26 +437,6 @@ impl IDownloader for Downloader {
         (*self.job_queue).read().unwrap().len()
     }
 
-    /*
-        fn download_direct(&self, url: &String) -> Result<String, String> {
-            let r = (*self.web_fetcher).request_url(url.clone());
-            match r.status {
-                200 => {
-                    return Ok(r.content);
-                }
-                _ => {
-                    (*self.erro_repo).borrow().add_error(
-                        -1,
-                        r.status as isize,
-                        url.clone(),
-                        r.error_description.clone(),
-                    );
-                    return Err(r.error_description);
-                }
-            }
-        }
-    */
-
     fn browser_drag_request(&self, dragged_url: &str) {
         let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
         let gp_sender: Sender<Job> = self.gp_job_sender.as_ref().unwrap().clone();
@@ -516,14 +496,12 @@ impl TimerReceiver for Downloader {
 #[derive(Clone, Debug)]
 pub struct Config {
     pub num_downloader_threads: u8,
-    // pub cleanup_databases: bool,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
             num_downloader_threads: 1,
-            // cleanup_databases: false,
         }
     }
 }

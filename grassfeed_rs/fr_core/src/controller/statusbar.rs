@@ -196,8 +196,13 @@ impl StatusBar {
             need_update1 = true;
         }
         let downloader_busy = (self.r_downloader).borrow().get_kind_list();
-        for a in 0..(DOWNLOADER_MAX_NUM_THREADS as usize) {
-            if self.downloader_kind[a] > 0 && downloader_busy[a] == 0 {
+        // for a in 0..(DOWNLOADER_MAX_NUM_THREADS as usize) {
+        for (a, busy) in downloader_busy
+            .iter()
+            .enumerate()
+            .take(DOWNLOADER_MAX_NUM_THREADS as usize)
+        {
+            if self.downloader_kind[a] > 0 && *busy == 0 {
                 self.downloader_kind_new[a] = 0;
                 need_update1 = true;
             }
@@ -262,7 +267,8 @@ impl StatusBar {
                 .update_label_markup(LABEL_STATUS_2);
         }
         if need_update3 {
-            let b_loading = self.get_vertical_block_char(self.browser_loading_progress as usize, 256);
+            let b_loading =
+                self.get_vertical_block_char(self.browser_loading_progress as usize, 256);
             (*self.gui_val_store)
                 .write()
                 .unwrap()

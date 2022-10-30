@@ -215,7 +215,7 @@ fn test_retrieve_homepages() {
             "https://www.gorillavsbear.net/",
         ),
         (
-            "tests/data/arstechnica_feed.rss",
+            "../target/td/feeds/arstechnica_feed.rss",
             "https://arstechnica.com/",
         ),
     ];

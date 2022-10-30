@@ -1,6 +1,5 @@
 //  cargo watch -s "cargo test  --test tree_drag_ok -- --test-threads 1 "
 mod downloader_dummy;
-mod logger_config;
 mod tree_drag_common;
 
 use crate::tree_drag_common::dataset_simple_trio;
@@ -268,6 +267,9 @@ fn check_paths_simple() {
 
 // ------------------------------------
 
+mod unzipper;
+
+mod logger_config;
 #[allow(unused_imports)]
 #[macro_use]
 extern crate log;
@@ -278,4 +280,6 @@ fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(logger_config::QuietFlags::Controller as u64);
     });
+
+    unzipper::unzip_some();
 }

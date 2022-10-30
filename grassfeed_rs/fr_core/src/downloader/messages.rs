@@ -273,6 +273,7 @@ pub fn strange_datetime_recover(
 mod t_ {
     use super::*;
     use crate::db::message::MessageRow;
+	// use crate::TD_BASE;
 
     //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::t_strange_datetime_recover    --lib -- --exact --nocapture "
     #[test]
@@ -323,14 +324,4 @@ mod t_ {
         );
     }
 
-    //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_:feed_text_to_entries_local  --lib -- --exact --nocapture "
-    #[test]
-    fn feed_text_to_entries_local() {
-        let filename = "tests/feeds/gui_proc_rss2_v1.rss";
-        let contents = std::fs::read_to_string(filename).unwrap();
-        let (new_list, ts_created, _err): (Vec<MessageRow>, i64, String) =
-            feed_text_to_entries(contents.clone(), 5, "some-url".to_string());
-        assert_eq!(new_list.len(), 2);
-        assert_eq!(ts_created, 1636573888);
-    }
 }

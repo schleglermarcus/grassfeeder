@@ -3,25 +3,11 @@ mod logger_config;
 mod tree_drag_common;
 
 use chrono::DateTime;
-use feed_rs::parser;
-use fr_core::controller::contentlist;
 use fr_core::db::message::MessageRow;
 use fr_core::downloader::messages::feed_text_to_entries;
 use regex::Regex;
-// use fr_core::db::message::decompress;
-// use fr_core::util::db_time_to_display_nonnull;
 
-//  Maybe later:
-//  The file contains an invalid  single  &  as title.   The parse does not like that and returns  no title.
-#[allow(dead_code)]
-fn parse_with_ampersand() {
-    let rss_str = std::fs::read_to_string("../testing/tests/fr_htdocs/dieneuewelle.xml").unwrap();
-    let feeds = parser::parse(rss_str.as_bytes()).unwrap();
-    let entry2 = feeds.entries.get(2).unwrap();
-    let msg2: MessageRow = contentlist::message_from_modelentry(&entry2).0;
-    assert!(msg2.title.starts_with("Borderlands-"));
-}
-
+/*
 // #[test]
 #[allow(dead_code)]
 fn parse_naturalnews_aug() {
@@ -29,9 +15,10 @@ fn parse_naturalnews_aug() {
         std::fs::read_to_string("../testing/tests/fr_htdocs/naturalnews_aug.xml").unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let entry0 = feeds.entries.get(0).unwrap();
-    let msg0: MessageRow = contentlist::message_from_modelentry(&entry0).0;
+    let msg0: MessageRow = contentlist ::message_from_modelentry(&entry0).0;
     println!("title={}=", msg0.title);
 }
+*/
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::dl_entries_breakingnews    --lib -- --exact --nocapture "
 /// Timestamp delivered   from    https://feeds.breakingnews.ie/bnworld

@@ -424,12 +424,11 @@ impl GuiProcessor {
                 GuiEvents::DragDropUrlReceived(ref url) => {
                     (*self.downloader_r).borrow().browser_drag_request(url);
                 }
-                GuiEvents::BrowserEvent(ref ev_type, value) => match &ev_type {
-                    BrowserEventType::LoadingProgress => {
-                        self.statusbar.browser_loading_progress = value as u8
+                GuiEvents::BrowserEvent(ref ev_type, value) => {
+                    if ev_type == &BrowserEventType::LoadingProgress {
+                        self.statusbar.browser_loading_progress = value as u8;
                     }
-                    _ => (),
-                },
+                }
                 _ => {
                     warn!("other GuiEvents: {:?}", &ev);
                 }
@@ -911,7 +910,7 @@ impl TimerReceiver for GuiProcessor {
             match event {
                 TimerEvent::Timer1s => {
                     self.process_event();
-					self.process_jobs();
+                    self.process_jobs();
                 }
                 TimerEvent::Timer10s => {
                     self.statusbar.update();

@@ -55,7 +55,6 @@ Perhaps:
 - Feed-Import with progress bar ?
 - Do extra recognition  to process   invalid feed titles  containg  &     :      dieneuewelle.xml
 - Grouping of feeds by folders ?
-- RSS-Content damaged with    http://n8waechter.info/feed/
 
 - Reduce Size of Binary:
   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
