@@ -1,5 +1,3 @@
-mod logger_config;
-
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::icon_repo::IconRepo;
@@ -14,6 +12,7 @@ use fr_core::downloader::db_clean::CleanerInner;
 use fr_core::downloader::db_clean::CleanerStart;
 use fr_core::util::timestamp_now;
 use fr_core::util::StepResult;
+use fr_core::TD_BASE;
 use std::collections::HashSet;
 
 // #[ignore]
@@ -93,7 +92,8 @@ fn clean_phase1(subs_repo: &SubscriptionRepo) {
 #[test]
 fn db_cleanup_remove_deleted() {
     setup();
-    let db_problem_json = "../fr_core/tests/data/san_subs_list_dmg1.json";
+    // let db_problem_json = "../fr_core/tests/data/san_subs_list_dmg1.json";
+    let db_problem_json = format!("{}websites/san_subs_list_dmg1.json", TD_BASE);
     let subsrepo = SubscriptionRepo::new_inmem();
     subsrepo.scrub_all_subscriptions();
     let lines = std::fs::read_to_string(db_problem_json.to_string()).unwrap();
@@ -197,6 +197,9 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
 
 // ------------------------------------
 
+mod logger_config;
+mod unzipper;
+
 #[allow(unused_imports)]
 #[macro_use]
 extern crate log;
@@ -209,5 +212,6 @@ fn setup() {
             // 0,
             logger_config::QuietFlags::Downloader as u64,
         );
+        unzipper::unzip_some();
     });
 }

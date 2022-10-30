@@ -3,29 +3,18 @@ mod logger_config;
 mod tree_drag_common;
 
 use chrono::DateTime;
-use fr_core::db::message::MessageRow;
-use fr_core::downloader::messages::feed_text_to_entries;
 use regex::Regex;
 
 /*
-// #[test]
-#[allow(dead_code)]
-fn parse_naturalnews_aug() {
-    let rss_str =
-        std::fs::read_to_string("../testing/tests/fr_htdocs/naturalnews_aug.xml").unwrap();
-    let feeds = parser::parse(rss_str.as_bytes()).unwrap();
-    let entry0 = feeds.entries.get(0).unwrap();
-    let msg0: MessageRow = contentlist ::message_from_modelentry(&entry0).0;
-    println!("title={}=", msg0.title);
-}
-*/
+use fr_core::db::message::MessageRow;
+use fr_core::downloader::messages::feed_text_to_entries;
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::dl_entries_breakingnews    --lib -- --exact --nocapture "
 /// Timestamp delivered   from    https://feeds.breakingnews.ie/bnworld
 /// https://www.w3.org/Protocols/rfc822/#z28
 // #[ignore]
-// #[test]
-#[allow(dead_code)]
+#[test]
+//  #[allow(dead_code)]
 fn dl_entries_breakingnews_cmp() {
     setup();
     let filenames = [
@@ -43,6 +32,7 @@ fn dl_entries_breakingnews_cmp() {
         assert!(pubdate > 0);
     }
 }
+*/
 
 // #[test]
 #[allow(dead_code)]

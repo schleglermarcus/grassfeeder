@@ -1,5 +1,3 @@
-mod logger_config;
-
 use fr_core::controller::contentdownloader::Downloader;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::errors_repo::ErrorRepo;
@@ -11,16 +9,76 @@ use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::icons::IconCheckIsImage;
 use fr_core::downloader::icons::IconInner;
 use fr_core::downloader::icons::IconLoadStart;
+use fr_core::downloader::util::extract_icon_from_homepage;
 use fr_core::downloader::util::retrieve_homepage_from_feed_text;
+use fr_core::util::convert_webp_to_png;
 use fr_core::util::Step;
 use fr_core::util::StepResult;
 use fr_core::web::httpfetcher::HttpFetcher;
 use fr_core::web::mockfilefetcher::file_to_bin;
 use fr_core::web::mockfilefetcher::FileFetcher;
 use fr_core::web::WebFetcherType;
+use fr_core::TD_BASE;
+use std::io::Write;
 use std::sync::Arc;
 
 const ERRORS_FOLDER: &str = "../target/download_icons";
+
+// #[ignore]
+#[test]
+fn test_extract_icon_neweurop() {
+    setup();
+    let filename = format!("{}websites/neweurope.html", TD_BASE);
+    // let f = "../fr_core/tests/data/neweurope.html";
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &"https://www.neweurope.eu/".to_string());
+    assert_eq!(
+        r,
+        Ok("https://www.neweurope.eu/wp-content/uploads/2019/07/NE-16.jpg".to_string())
+    );
+}
+
+// #[ignore]
+#[test]
+fn test_extract_icon_nn() {
+    setup();
+    let filename = format!("{}websites/naturalnews_com.html", TD_BASE);
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &String::default());
+    assert_eq!(
+        r,
+        Ok(
+            "https://www.naturalnews.com/wp-content/themes/naturalnews-child/images/favicon.ico"
+                .to_string()
+        )
+    );
+}
+
+#[test]
+fn image_webp_to_png() {
+    setup();
+    let filename = format!("{}icons/lupoca.webp", TD_BASE);
+    let file_out = "../target/lupoca.png";
+    let webpdata: Vec<u8> = fr_core::web::mockfilefetcher::file_to_bin(&filename).unwrap();
+    let outdata = convert_webp_to_png(&webpdata, Some(20)).unwrap();
+    let mut file = std::fs::File::create(file_out).unwrap();
+    let w_r = file.write_all(&outdata);
+    assert!(w_r.is_ok());
+    assert!(outdata.len() >= 1151 && outdata.len() <= 1152);
+    //         debug!("{} bytes written {:?}", outdata.len(), w_r);
+}
+
+// #[ignore]
+#[test]
+fn test_extract_icon_kolkata() {
+    setup();
+    // let f = "../fr_core/tests/data/kolkata_tv.html";
+    let filename = format!("{}websites/{}", TD_BASE, "kolkata_tv.html");
+
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &String::default());
+    assert_eq!(r, Ok("https://s14410312.in1.wpsitepreview.link/wp-content/themes/KolkataTv/assets/images/scroll-fav.png".to_string()));
+}
 
 // #[ignore]
 #[test]
@@ -75,8 +133,6 @@ fn multiple_icons_location() {
             "http://feeds.seoulnews.net/rss/3f5c98640a497b43".to_string(),
             "http://www.seoulnews.net".to_string(),
         ),
-        // (            "http://chaosradio.ccc.de/chaosradio-complete.rss".to_string(),
-        //     "http://chaosradio.ccc.de".to_string(),        ),
     ];
     for u_h in urls {
         // let now = std::time::Instant::now();
@@ -88,9 +144,6 @@ fn multiple_icons_location() {
 }
 
 //  unstable, sometimes does not deliver a sound feed.   (XmlReader(Parser { e: EndEventMismatch { expected: "guid", found: "title" } })
-// #[ignore]
-// #[test]
-
 fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry>, bool) {
     setup();
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
@@ -197,30 +250,20 @@ fn stop_on_nonexistent() {
 fn test_retrieve_homepages() {
     setup();
     let files_urls: [(&str, &str); 6] = [
-        ("tests/data/chaosradio.xml", "https://chaosradio.de/"),
+        ("chaosradio.xml", "https://chaosradio.de/"),
+        ("nachdenkseiten-atom.xml", "https://www.nachdenkseiten.de/"),
         (
-            "tests/data/nachdenkseiten-atom.xml",
-            "https://www.nachdenkseiten.de/",
-        ),
-        (
-            "tests/data/relay_fm_query_feed.xml",
+            "relay_fm_query_feed.xml",
             "https://relay-fm.relay.fm/query", // inconsistent data: this url is not available on
         ),
-        (
-            "tests/data/ft_com_news_feed.xml",
-            "https://www.ft.com/news-feed",
-        ),
-        (
-            "tests/data/gorillavsbear.rss",
-            "https://www.gorillavsbear.net/",
-        ),
-        (
-            "../target/td/feeds/arstechnica_feed.rss",
-            "https://arstechnica.com/",
-        ),
+        ("ft_com_news_feed.xml", "https://www.ft.com/news-feed"),
+        ("gorillavsbear.rss", "https://www.gorillavsbear.net/"),
+        ("arstechnica_feed.rss", "https://arstechnica.com/"),
     ];
     files_urls.iter().for_each(|(f, u)| {
-        let buffer: Vec<u8> = file_to_bin(f).unwrap();
+        let filename = format!("{}feeds/{}", TD_BASE, f);
+        //  trace!("{}", filename);
+        let buffer: Vec<u8> = file_to_bin(&filename).unwrap();
         let (hp, title, err_msg) = retrieve_homepage_from_feed_text(&buffer, "test-dl_icon");
         if hp.is_empty() {
             error!("{} {:?}", title, err_msg);
@@ -233,14 +276,12 @@ fn test_retrieve_homepages() {
 #[test]
 fn test_retrieve_titles() {
     setup();
-    let files_urls: [(&str, &str); 1] = [(
-        "../target/td/feeds/linuxcomp_notitle.xml",
-        "Linux Compatible",
-    )];
+    let files_urls: [(&str, &str); 1] = [("linuxcomp_notitle.xml", "Linux Compatible")];
     files_urls.iter().for_each(|(f, _expected_title)| {
-        let buffer: Vec<u8> = file_to_bin(f).unwrap();
+        let filename = format!("{}feeds/{}", TD_BASE, f);
+        let buffer: Vec<u8> = file_to_bin(&filename).unwrap();
         let (_hp, title, err_msg) = retrieve_homepage_from_feed_text(&buffer, f);
-        // debug!("{} {} {:?}", _hp, title, err_msg);
+        // debug!("{}  {} {} {:?}", filename, _hp, title, err_msg);
         if title.is_empty() {
             error!("{} {:?}", title, err_msg);
         }
@@ -265,6 +306,9 @@ fn get_file_fetcher() -> WebFetcherType {
 
 // ------------------------------------
 
+mod logger_config;
+mod unzipper;
+
 #[allow(unused_imports)]
 #[macro_use]
 extern crate log;
@@ -277,5 +321,7 @@ fn setup() {
             logger_config::QuietFlags::Downloader as u64,
             //  0,
         );
+        //   unzipper::unzip_some();
+        debug!("UNZIPPED: {}", unzipper::unzip_some());
     });
 }

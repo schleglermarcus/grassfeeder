@@ -1,18 +1,72 @@
 use fr_core::downloader::icons::icon_analyser;
+use fr_core::downloader::util::extract_icon_from_homepage;
 use fr_core::util::IconKind;
 use fr_core::web::mockfilefetcher;
 use fr_core::TD_BASE;
 
-/*
 // #[ignore]
 #[test]
-fn test_asue_ico() {
+fn test_extract_icon_fromrome() {
     setup();
-    let r = file_to_bin("tests/data/asue-favico.ico");
-    let an_res = icon_analyser(&r.unwrap());
-    assert_eq!(an_res.kind, IconKind::Ico);
+    // let f = "../fr_core/tests/data/fromrome.html";
+	let filename = format!("{}websites/fromrome.html", TD_BASE);
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &"https://www.fromrome.info/".to_string());
+    assert_eq!(
+        r,
+        Ok("https://www.fromrome.info/wp-content/uploads/2019/10/cropped-header.jpg".to_string())
+    );
 }
-*/
+
+
+// #[ignore]
+#[test]
+fn test_extract_icon_seoul() {
+    setup();
+    // let f = "../fr_core/tests/data/www.seoulnews.net.html";
+	let filename = format!("{}websites/www.seoulnews.net.html", TD_BASE);
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &String::default());
+    assert_eq!(
+        r,
+        Ok("https://static.themainstreammedia.com/web/newsnet/favicons/favicon.ico".to_string())
+    );
+}
+
+
+// #[ignore]
+#[test]
+fn test_extract_icon_terrahertz() {
+    setup();
+    // let f = "../fr_core/tests/data/terraherz_wpstaging.html";
+    let filename = format!("{}websites/terraherz_wpstaging.html", TD_BASE);
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &String::default());
+    assert_eq!(
+        r,
+        Ok(
+            "https://terraherz.wpcomstaging.com/wp-content/uploads/gwpf_icon/favicon.png"
+                .to_string()
+        )
+    );
+}
+
+// #[ignore]
+#[test]
+fn test_extract_icon_relay_rd() {
+    setup();
+    // let f = "../fr_core/tests/data/relay_rd.html";
+    let filename = format!("{}websites/relay_rd.html", TD_BASE);
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &"https://www.relay.fm/rd".to_string());
+    assert_eq!(
+        r,
+        Ok(
+            "https://www.relay.fm/assets/favicon-fd28d8fa5c60ac2860b452a36991933e905f82f1349c4a5ad171dd0586b2b331.ico"
+                .to_string()
+        )
+    );
+}
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::icons::t_::analyze_icon_local  --lib -- --exact --nocapture "
 #[test]
@@ -58,7 +112,7 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(logger_config::QuietFlags::Controller as u64);
+        //   unzipper::unzip_some();
+        debug!("UNZIPPED: {}", unzipper::unzip_some());
     });
-    //   unzipper::unzip_some();
-    debug!("UNZIPPED: {}", unzipper::unzip_some());
 }

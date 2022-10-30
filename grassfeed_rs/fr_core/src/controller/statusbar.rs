@@ -182,21 +182,11 @@ impl StatusBar {
             let fs_conf = self.r_subscriptions_controller.borrow().get_config();
             let interval_s = fs_conf.get_interval_seconds();
             let elapsed: i64 = std::cmp::min(timestamp_now - (last_fetch_time as i64), interval_s);
-            /*
-                        let div_idx = if interval_s == 0 {
-                            0
-                        } else {
-                            (elapsed * (8_i64)) / interval_s
-                        };
-                        block_vertical = char::from_u32(VERTICAL_RISING_BAR[div_idx as usize]).unwrap();
-            */
             block_vertical = self.get_vertical_block_char(elapsed as usize, interval_s as usize);
-
             need_update2 = true;
             need_update1 = true;
         }
         let downloader_busy = (self.r_downloader).borrow().get_kind_list();
-        // for a in 0..(DOWNLOADER_MAX_NUM_THREADS as usize) {
         for (a, busy) in downloader_busy
             .iter()
             .enumerate()
@@ -211,18 +201,15 @@ impl StatusBar {
                 need_update1 = true;
             }
         }
-
         let new_qsize = (*self.r_downloader).borrow().get_queue_size();
         if new_qsize != self.num_dl_queue_length {
             self.num_dl_queue_length = new_qsize;
             need_update1 = true;
         }
-
         if self.browser_loading_progress != self.browser_loading_progress_int {
             self.browser_loading_progress_int = self.browser_loading_progress;
             need_update3 = true;
         }
-
         if need_update1 {
             let mut downloader_display: String = String::default();
             for a in 0..(self.num_downloader_threads as usize) {

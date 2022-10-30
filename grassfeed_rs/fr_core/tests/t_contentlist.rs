@@ -106,13 +106,12 @@ fn test_new_entries_filter() {
     }
 }
 
-
-
 // #[ignore]
 #[test]
 fn parse_wissensmanufaktur() {
     setup();
-    let rss_str: String = std::fs::read_to_string("../target/td/feeds/wissensmanufaktur_rss.xml").unwrap();
+    let rss_str: String =
+        std::fs::read_to_string("../target/td/feeds/wissensmanufaktur_rss.xml").unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let mut fce_list: Vec<MessageRow> = feeds
         .entries
@@ -131,7 +130,8 @@ fn parse_wissensmanufaktur() {
 #[test]
 fn parse_youtube() {
     setup();
-    let rss_str: String = std::fs::read_to_string("../target/td/feeds/suspiciousobservers.xml").unwrap();
+    let filename = format!("{}feeds/suspiciousobservers.xml", TD_BASE);
+    let rss_str: String = std::fs::read_to_string(filename).unwrap(); // "../target/td/feeds/suspiciousobservers.xml"
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let mut fce_list: Vec<MessageRow> = feeds
         .entries
@@ -148,9 +148,6 @@ fn parse_youtube() {
 fn parse_convert_entry_file1() {
     setup();
     let filename = format!("{}feeds/gui_proc_rss2_v1.rss", TD_BASE);
-
-    debug!("filename = {}", filename);
-
     let rss_str = std::fs::read_to_string(filename).unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let first_entry = feeds.entries.get(0).unwrap();
@@ -193,7 +190,7 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(logger_config::QuietFlags::Controller as u64);
+        //   unzipper::unzip_some();
+        debug!("UNZIPPED: {}", unzipper::unzip_some());
     });
-    //   unzipper::unzip_some();
-    debug!("UNZIPPED: {}", unzipper::unzip_some());
 }

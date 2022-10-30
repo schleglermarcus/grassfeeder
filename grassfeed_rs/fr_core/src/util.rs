@@ -289,21 +289,9 @@ mod t {
     use super::*;
     use crate::util::fetch_http_to_bin;
     use crate::util::remove_invalid_chars_from_input;
-    use std::fs::File;
-    use std::io::Write;
+    // use std::fs::File;
+    // use std::io::Write;
 
-    #[test]
-    fn image_webp_to_png() {
-        let file_in = "../fr_core/tests/data/lupoca.webp";
-        let file_out = "../target/lupoca.png";
-        let webpdata: Vec<u8> = crate::web::mockfilefetcher::file_to_bin(file_in).unwrap();
-        let outdata = convert_webp_to_png(&webpdata, Some(20)).unwrap();
-        let mut file = File::create(file_out).unwrap();
-        let w_r = file.write_all(&outdata);
-        assert!(w_r.is_ok());
-        assert!(outdata.len() >= 1151 && outdata.len() <= 1152);
-        //         debug!("{} bytes written {:?}", outdata.len(), w_r);
-    }
 
     //cargo watch -s "cargo    test  util::util_fetch_test::sanitize_input   --lib  -- --exact "
     #[test]
