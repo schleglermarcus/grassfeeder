@@ -233,7 +233,10 @@ fn test_retrieve_homepages() {
 #[test]
 fn test_retrieve_titles() {
     setup();
-    let files_urls: [(&str, &str); 1] = [("tests/feeds/linuxcomp_notitle.xml", "Linux Compatible")];
+    let files_urls: [(&str, &str); 1] = [(
+        "../target/td/feeds/linuxcomp_notitle.xml",
+        "Linux Compatible",
+    )];
     files_urls.iter().for_each(|(f, _expected_title)| {
         let buffer: Vec<u8> = file_to_bin(f).unwrap();
         let (_hp, title, err_msg) = retrieve_homepage_from_feed_text(&buffer, f);

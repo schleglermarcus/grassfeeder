@@ -604,7 +604,7 @@ mod t_ {
     #[test]
     fn analyze_icon_local() {
         let set: [(&str, IconKind); 8] = [
-            ("tests/feeds/favicon.ico", IconKind::Ico),          //
+            ("../target/td/feeds/favicon.ico", IconKind::Ico),          //
             ("tests/data/icon_651.ico", IconKind::Png),         //
             ("tests/data/report24-favicon.ico", IconKind::Jpg), // is jpg
             ("tests/data/naturalnews_favicon.ico", IconKind::Ico),

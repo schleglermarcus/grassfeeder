@@ -1,17 +1,23 @@
 use std::fs;
 use std::io;
+use std::path::Path;
 use std::path::PathBuf;
 use zip::result::ZipError;
 
-// const ZIPS_DIR: &str = "../fr_core/tests/zips/";
-// const UNPACK_DIR: &str = "../target/";
-// #[test]
-// fn unzip_1() {
-//     setup();
-//     let f1 = format!("{}websites.zip", ZIPS_DIR);
-//     let r = unzip_one(&f1, UNPACK_DIR);
-// }
-//
+pub const TD_BASE: &str = "../target/td/";
+pub const TD_SRC: &str = "../fr_core/tests/zips/";
+
+pub fn unzip_some() {
+    if Path::new(TD_BASE).is_dir() {
+        // debug!("unzip_some: destination exists already, quit. {} ", TD_BASE);
+        return;
+    }
+    for n in ["websites.zip", "feeds.zip"] {
+        let r = unzip_one(&format!("{}{}", TD_SRC, n), TD_BASE);
+
+        assert!(r.is_ok());
+    }
+}
 
 pub fn unzip_one(src_file: &str, out_dir: &str) -> Result<(), Box<dyn std::error::Error>> {
     let src_path = std::path::Path::new(&src_file);
@@ -44,6 +50,16 @@ pub fn unzip_one(src_file: &str, out_dir: &str) -> Result<(), Box<dyn std::error
 pub fn io_to_boxed(e: ZipError) -> Box<dyn std::error::Error> {
     Box::new(e)
 }
+
+// const ZIPS_DIR: &str = "../fr_core/tests/zips/";
+// const UNPACK_DIR: &str = "../target/";
+// #[test]
+// fn unzip_1() {
+//     setup();
+//     let f1 = format!("{}websites.zip", ZIPS_DIR);
+//     let r = unzip_one(&f1, UNPACK_DIR);
+// }
+//
 
 /*
 // ------------------------------------

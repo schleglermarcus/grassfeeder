@@ -22,7 +22,7 @@ use std::rc::Rc;
 #[test]
 fn parse_blogger_af() {
     setup();
-    let rss_txt = std::fs::read_to_string("tests/feeds/blogger-af.xml").unwrap();
+    let rss_txt = std::fs::read_to_string("../target/td/feeds/blogger-af.xml").unwrap();
     let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
         feed_text_to_entries(rss_txt, 6, "some-url".to_string());
     let e0: &MessageRow = new_list.get(0).unwrap();
@@ -36,7 +36,7 @@ fn parse_blogger_af() {
 #[test]
 fn parse_blogger_pirat() {
     setup();
-    let rss_txt = std::fs::read_to_string("tests/feeds/blogger-pirates.xml").unwrap();
+    let rss_txt = std::fs::read_to_string("../target/td/feeds/blogger-pirates.xml").unwrap();
     let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
         feed_text_to_entries(rss_txt, 6, "some-url".to_string());
     let e0: &MessageRow = new_list.get(0).unwrap();
@@ -50,7 +50,7 @@ fn parse_blogger_pirat() {
 #[test]
 fn parse_linuxcompati() {
     setup();
-    let rss_str: String = std::fs::read_to_string("tests/feeds/linuxcomp_notitle.xml").unwrap();
+    let rss_str: String = std::fs::read_to_string("../target/td/feeds/linuxcomp_notitle.xml").unwrap();
     let feed_result = parser::parse(workaround_https_declaration(rss_str).as_bytes());
     if feed_result.is_err() {
         warn!("Err={:?}", feed_result.err());
@@ -158,7 +158,7 @@ fn test_new_entries_filter() {
 // #[ignore]
 #[test]
 fn test_feed_text_to_entries() {
-    let filename = "tests/feeds/gui_proc_rss2_v1.rss";
+    let filename = "../target/td/feeds/gui_proc_rss2_v1.rss";
     let contents = std::fs::read_to_string(filename).unwrap();
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
@@ -175,7 +175,7 @@ fn test_feed_text_to_entries() {
 #[test]
 fn parse_wissensmanufaktur() {
     setup();
-    let rss_str: String = std::fs::read_to_string("tests/feeds/wissensmanufaktur_rss.xml").unwrap();
+    let rss_str: String = std::fs::read_to_string("../target/td/feeds/wissensmanufaktur_rss.xml").unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let mut fce_list: Vec<MessageRow> = feeds
         .entries
@@ -194,7 +194,7 @@ fn parse_wissensmanufaktur() {
 #[test]
 fn parse_youtube() {
     setup();
-    let rss_str: String = std::fs::read_to_string("tests/feeds/suspiciousobservers.xml").unwrap();
+    let rss_str: String = std::fs::read_to_string("../target/td/feeds/suspiciousobservers.xml").unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let mut fce_list: Vec<MessageRow> = feeds
         .entries

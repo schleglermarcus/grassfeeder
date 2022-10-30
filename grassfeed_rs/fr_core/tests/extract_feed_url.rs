@@ -1,5 +1,6 @@
 mod unzipper;
 
+use crate::unzipper::TD_BASE;
 use fr_core::controller::guiprocessor::Job;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::errors_repo::ErrorRepo;
@@ -17,6 +18,7 @@ use xmlparser::Tokenizer;
 // const HTML_BASE: &str = "../fr_core/tests/websites/";
 const ERR_REPO_BASE: &str = "../target/";
 
+/*
 const TD_BASE: &str = "../target/";
 const TD_SRC: &str = "../fr_core/tests/zips/";
 
@@ -25,16 +27,13 @@ fn unzip_some() {
         assert!(unzipper::unzip_one(&format!("{}{}", TD_SRC, n), TD_BASE).is_ok());
     }
 }
+*/
 
 // #[ignore]
 #[test]
 fn t_extract_url() {
     setup();
-
-    unzip_some();
-
     let html_base = format!("{}websites/", TD_BASE);
-
     let (stc_job_s, _stc_job_r) = flume::unbounded::<SJob>();
     let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(html_base)));
     let (gp_sender, _gp_rec) = flume::bounded::<Job>(2);
@@ -101,7 +100,6 @@ fn stateful_download() {
 #[test]
 fn analyse_nn_sloppy() {
     setup();
-
     let fname = format!("{}{}", TD_BASE, "websites/naturalnews-page.html");
     let o_page = std::fs::read_to_string(fname.clone());
     let pagetext = o_page.unwrap();
@@ -279,5 +277,6 @@ fn setup() {
             logger_config::QuietFlags::Downloader as u64,
             // 0
         );
+        unzipper::unzip_some();
     });
 }
