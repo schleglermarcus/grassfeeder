@@ -24,3 +24,5 @@ pub mod util;
 pub mod web;
 
 i18n!("../resources/locales");
+
+pub const TD_BASE: &str = "../target/td/";

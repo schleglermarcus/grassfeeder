@@ -15,7 +15,7 @@ pub const TREE0_COL_TOOLTIP: i32 = 8;
 
 pub const DIALOG_ICONS: u8 = 0;
 pub const DIALOG_NEW_FOLDER: u8 = 1;
-pub const DIALOG_NEW_FEED_SOURCE: u8 = 2;
+pub const DIALOG_NEW_SUBSCRIPTION: u8 = 2;
 pub const DIALOG_FS_DELETE: u8 = 3;
 pub const DIALOG_FS_EDIT: u8 = 4;
 pub const DIALOG_FOLDER_EDIT: u8 = 5;

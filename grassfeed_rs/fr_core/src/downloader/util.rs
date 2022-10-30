@@ -4,21 +4,38 @@ use std::collections::HashMap;
 use tl::HTMLTag;
 use tl::Node;
 use url::Url;
-// using   html_parser::Dom;   for extract_icon_from_homepage() creates a stack overflow
 
-/// returns Result <   ( homepage-url, feed-title ) , error-text >
+/// returns      homepage-url, feed-title,  error-text
 pub fn retrieve_homepage_from_feed_text(
     input: &[u8],
     dbg_feed_url: &str,
-) -> Result<(String, String), String> {
+) -> (String, String, String) {
     let r = parser::parse(input);
     if r.is_err() {
-        return Err(format!("Parsing: {:?} {:?}", &dbg_feed_url, r.err()));
+        return (
+            String::default(),
+            String::default(),
+            format!("Parsing: {:?} {:?}", &dbg_feed_url, r.err()),
+        );
     }
-    let feed = r.unwrap();
-    if feed.title.is_none() {
-        return Err(format!("c:title empty for {}", &dbg_feed_url));
+    let mut feed = r.unwrap();
+
+    if feed.title.is_none() && feed.description.is_none() {
+        let ftext_str = String::from_utf8_lossy(input);
+        let declaration_replaced = workaround_https_declaration(ftext_str.to_string());
+        if let Ok(f) = parser::parse(declaration_replaced.as_bytes()) {
+            feed = f;
+        }
     }
+
+    if feed.title.is_none() && feed.description.is_none() {
+        return (
+            String::default(),
+            String::default(),
+            format!("c:title and description empty for {}", &dbg_feed_url),
+        );
+    }
+
     #[allow(unused_assignments)]
     let mut feed_title: Option<String> = None;
     let mut feed_homepage: Option<String> = None;
@@ -44,9 +61,13 @@ pub fn retrieve_homepage_from_feed_text(
         feed_homepage = Some(f_link.href);
     }
     if let Some(f_h) = feed_homepage {
-        return Ok((f_h, feed_title.unwrap_or_default()));
+        return (f_h, feed_title.unwrap_or_default(), String::default());
     };
-    Err(format!("no link for HP found  {} ", &dbg_feed_url))
+    (
+        String::default(),
+        feed_title.unwrap_or_default(),
+        String::default(),
+    )
 }
 
 /// return   Result < icon-url , error-message  >
@@ -171,3 +192,70 @@ pub fn workaround_https_declaration(wrong: String) -> String {
         "http://www.w3.org/2005/Atom",
     )
 }
+
+// via parser
+pub fn extract_feed_from_website(page_content: &str) -> Result<String, String> {
+    let dom: tl::VDom = match tl::parse(page_content, tl::ParserOptions::default()) {
+        Ok(d) => d,
+        Err(e) => {
+            return Err(format!("XF: parsing homepage: {:?}", e));
+        }
+    };
+    let link_tags: Vec<&HTMLTag> = dom
+        .nodes()
+        .iter()
+        .filter_map(|n| match n {
+            Node::Tag(htmltag) => Some(htmltag),
+            _ => None,
+        })
+        .filter(|htmltag| {
+            let t_name = htmltag.name().as_utf8_str().into_owned();
+            t_name == "link"
+        })
+        .collect();
+    let feeds_list: Vec<String> = link_tags
+        .iter()
+        .map(|t| {
+            let attrmap: HashMap<String, String> = t
+                .attributes()
+                .iter()
+                .filter(|(_k, v)| v.is_some())
+                .map(|(k, v)| (k.into_owned(), v.clone().unwrap().into_owned()))
+                .collect();
+            attrmap
+        })
+        .filter(|attrmap| attrmap.get("rel").is_some())
+        // .inspect(|at_m| debug!("PF1:{:?}", at_m))
+        .filter(|attrmap| {
+            if let Some(typ_e) = attrmap.get("type") {
+                typ_e.contains("rss") || typ_e.contains("atom")
+            } else {
+                false
+            }
+        })
+        // .inspect(|at_m| debug!("PF2:{:?}", at_m))
+        .filter(|attrmap| !attrmap.get("href").unwrap().contains("comments"))
+        .filter_map(|attrmap| attrmap.get("href").cloned())
+        .collect();
+    // trace!("feed_list={:#?}", feeds_list);
+    if feeds_list.is_empty() {
+        return Err("No feed-url found. ".to_string());
+    }
+    let feed_url = feeds_list.first().unwrap().clone();
+    Ok(feed_url)
+}
+
+// extracts only the domain part of the site, no trailing slash
+pub fn go_to_homepage(long_url: &str) -> Option<String> {
+    match Url::parse(long_url) {
+        Ok(parsed) => Some(format!(
+            "{}://{}",
+            parsed.scheme(),
+            parsed.host_str().unwrap()
+        )),
+        Err(_e) => None,
+    }
+}
+
+//
+// using   html_parser::Dom;   for extract_icon_from_homepage() creates a stack overflow

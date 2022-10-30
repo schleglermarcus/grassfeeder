@@ -29,6 +29,10 @@ base64 = "^0.13.0"
 once_cell = ">=1.12.0"
 rust-i18n = ">=0.6.1"
 
+[dev-dependencies]
+rand = "0.8.5"
+rusqlite = { version = "0.27.0", features = ["bundled"] }
+
 
 [package.metadata.i18n]
 available-locales = ["en", "de"]

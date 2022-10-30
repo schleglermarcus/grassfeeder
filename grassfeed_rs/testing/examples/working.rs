@@ -134,6 +134,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
+			("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -164,27 +165,27 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             false,
         );
         let src = [
+            ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
+            ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
+            ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
+            ("https://insidexpress.com/feed/", "insidexpress"),
+            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
+            ("http://thehighersidechats.com/feed/", "higherside-300"),
             ("https://m4rw3r.github.io/atom.xml", "marwer no icon"),
             ("https://www.fromrome.info/feed/", "fromrome icon okl"),
             ("https://www.relay.fm/query/feed", "relay_query icon ok"),
             ("https://www.mtb-karlsruhe.de/?q=rss.xml", "mb_ka icon ok"),
-            ("http://n8waechter.info/feed/", "n8waechter  no-icon "),
             ("https://opposition24.com/feed/", "opposition"),
             ("http://lisahaven.news/feed/", "lisa_haven"), // original icon too big, scaled down.
             ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
             ("http://henrymakow.com/index.xml", "makow"),
             ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
-            ("http://thehighersidechats.com/feed/", "higherside-300"),
-            ("https://www.naturalnews.com/rss.xml", "naturalnews.com"),
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
-            ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),
             ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),
-            ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
             ("https://www.headlinesoftoday.com/feed", "headlinesof"),
-            ("https://insidexpress.com/feed/", "insidexpress"),
             ("https://linuxnews.de/feed/", "linuxnews"),
             ("https://linuxnews.de/comments/feed/", "linuxnews-comm"),
             ("https://www.linuxtoday.com/feed/", "linuxtoday"),
@@ -200,7 +201,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://kolkatatv.org/feed/", "kolkatatv"),
             ("https://lupocattivoblog.com/feed/", "lupocat"),
             ("http://www.wissensmanufaktur.net/rss.xml", "wissensm"),
-            ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
             ("http://newsinsideout.com/feed/", "newsinsideout"),
             ("https://sciencefiles.org/feed/", "science"),
             ("http://www.watergate.tv/feed/", "watergate"),
@@ -228,6 +228,26 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            (
+                "http://antifeministsite.blogspot.com/feeds/posts/default",
+                "antife",
+            ),
+            (
+                "https://allworldnews24hours6.blogspot.com/feeds/posts/default",
+                "allworld24",
+            ),
+            (
+                "https://www.linuxcompatible.org/news/atom.xml",
+                "linuxcompatible",
+            ),
+            (
+                "https://www.opendesktop.org/content.rdf",
+                "opendesktop big-icon",
+            ),
+            (
+                "https://observer.ug/headlinenews?format=feed&type=rss",
+                "obs_uganda ",
+            ),
             (
                 "https://exopolitics.blogs.com/newsinsideout/atom.xml",
                 "exopoli no icon",
@@ -258,15 +278,11 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ),
             (
                 "http://feeds.feedburner.com/TechmemeRideHome",
-                "techmeme big-icon 4,7MB  !! ",
+                "techmeme-NoLinksInMessages Big-Icon 4,7MB !! ",
             ),
             (
                 "https://www.buzzfeed.com/world.xml",
                 "buzzfeed unknown icon",
-            ),
-            (
-                "https://www.opendesktop.org/content.rdf",
-                "opendesktop big-icon",
             ),
             (
                 "http://www.channelnewsasia.com/rssfeeds/8395884",
@@ -285,16 +301,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "gorilla-mp3 big-icon",
             ),
             (
-                "https://observer.ug/headlinenews?format=feed&type=rss",
-                "obs_uganda ",
-            ),
-            (
                 "https://nicheaddictgeneral.com/blogs/akah-ra.atom",
                 "nicheaddict no-icon",
-            ),
-            (
-                "https://www.linuxcompatible.org/news/atom.xml",
-                "linuxcompatible",
             ),
             (
                 "https://afternarcissisticabuse.wordpress.com/feed/",
@@ -307,10 +315,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (
                 "https://www.youtube.com/feeds/videos.xml?channel_id=UC7nMSUJjOr7_TEo95Koudbg",
                 "youtube",
-            ),
-            (
-                "https://www.linuxcompatible.org/news/atom.xml",
-                "linuxcompatible",
             ),
             (
                 "https://packages.gentoo.org/packages/added.atom",
@@ -333,16 +337,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "ncentric",
             ),
             (
-                "https://allworldnews24hours6.blogspot.com/feeds/posts/default",
-                "allworld24",
-            ),
-            (
                 "https://www.newsrust.com/feeds/posts/default?alt=rss",
                 "newsrust",
             ),
             (
                 "https://www.euronews.com/rss?level=theme&name=news",
-                "euronews",
+                "euronews2",
             ),
             (
                 "http://www.marketwatch.com/rss/realtimeheadlines",

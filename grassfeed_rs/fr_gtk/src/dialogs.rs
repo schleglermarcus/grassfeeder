@@ -35,6 +35,7 @@ use resources::gen_icons;
 use resources::gen_icons::*;
 use resources::id::*;
 use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
+use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::iconloader::IconLoader;
 use ui_gtk::GtkObjectsType;
@@ -90,20 +91,34 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType) {
 }
 
 fn grid_attach_icon(grid: &Grid, icon_str: &str, index: i32, y_base: i32, columns: i32) {
-    let image = prepare_icon(icon_str, 48);
+    let image = prepare_icon(icon_str, 48).unwrap();
     image.set_tooltip_text(Some(&format!("{}", index)));
     let y: i32 = index as i32 / columns + y_base;
     let x: i32 = index as i32 % columns;
     grid.attach(&image, x, y, 1, 1);
 }
 
-fn prepare_icon(icon_str: &str, rescale_size: i32) -> Image {
+fn prepare_icon(icon_str: &str, rescale_size: i32) -> Result<Image, String> {
+    if icon_str.len() > ICON_SIZE_LIMIT_BYTES {
+        return Err(format!(
+            "Icon too large:  {} > {}",
+            icon_str.len(),
+            ICON_SIZE_LIMIT_BYTES
+        ));
+    }
     let buf = IconLoader::decompress_string_to_vec(icon_str);
-    let pb: Pixbuf = IconLoader::vec_to_pixbuf(&buf).unwrap();
-    let pb_scaled = pb
-        .scale_simple(rescale_size, rescale_size, InterpType::Bilinear)
-        .unwrap();
-    Image::from_pixbuf(Some(&pb_scaled))
+    match IconLoader::vec_to_pixbuf(&buf) {
+        Ok(pb) => {
+            let pb_scaled = pb
+                .scale_simple(rescale_size, rescale_size, InterpType::Bilinear)
+                .unwrap();
+            Ok(Image::from_pixbuf(Some(&pb_scaled)))
+        }
+        Err(e) => {
+            // error!("{:?}  length:{:?}", e, icon_str.len());
+            Err(e.to_string())
+        }
+    }
 }
 
 pub fn create_new_folder_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {
@@ -125,11 +140,7 @@ pub fn create_new_folder_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObject
         match rt {
             ResponseType::Ok => {
                 let e_text: String = ent_c.text().as_str().to_string();
-                // let mut payload: Vec<AValue> = Vec::default();
-                // payload.push(AValue::ASTR(e_text));
-
                 let payload = vec![AValue::ASTR(e_text)];
-
                 let _r = g_ev_se.send(GuiEvents::DialogData("new-folder".to_string(), payload));
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {
@@ -149,13 +160,14 @@ pub fn create_new_folder_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObject
     ret.set_dialog(DIALOG_NEW_FOLDER, &dialog);
 }
 
+// Later:  launch this dialog  from controller
 pub fn create_new_subscription_dialog(
     g_ev_se: Sender<GuiEvents>,
     gtk_obj_a: GtkObjectsType,
     ddd: &mut DialogDataDistributor,
 ) {
-    let width = 400;
-    let icon_size = 24;
+    let width = 600;
+    let icon_size_pixel = 24;
     let dialog = Dialog::with_buttons::<Window>(
         Some(&t!("D_NEW_SUBSCRIPTION_TITLE")),
         (*gtk_obj_a).read().unwrap().get_window().as_ref(),
@@ -192,10 +204,14 @@ pub fn create_new_subscription_dialog(
     let box3h = gtk::Box::new(Orientation::Horizontal, 1);
     let label3 = Label::new(None);
     box3h.pack_start(&label3, true, true, 1);
-    let image_icon = prepare_icon(
+
+    let mut image_icon = Image::new();
+    if let Ok(image_icon_prep) = prepare_icon(
         gen_icons::ICON_LIST[gen_icons::IDX_03_IDX_TRANSPARENT_48],
-        icon_size,
-    );
+        icon_size_pixel,
+    ) {
+        image_icon = image_icon_prep;
+    }
     box3h.pack_end(&image_icon, false, false, 0);
     box1v.pack_start(&box3h, false, false, 1);
     let ev_se = g_ev_se.clone();
@@ -238,12 +254,11 @@ pub fn create_new_subscription_dialog(
         dia.hide();
         gtk::Inhibit(true)
     });
-    let ent1_c = entry_url.clone();
+    // let ent1_c = entry_url.clone();
     let ent2_c = entry_name.clone();
     let label3_c = label3.clone();
     dialog.connect_show(move |dialog| {
-        trace!("new_source: show, later: evaluate clipboard ");
-        ent1_c.set_text("");
+        // ent1_c.set_text("");
         ent2_c.set_text("");
         label3_c.set_text("");
         dialog.set_response_sensitive(ResponseType::Ok, false);
@@ -252,7 +267,8 @@ pub fn create_new_subscription_dialog(
     let image_icon_c = image_icon;
     let label3_c = label3;
     let spinner_c = spinner;
-    ddd.set_dialog_distribute(DIALOG_NEW_FEED_SOURCE, move |dialogdata| {
+    let ent1_c = entry_url.clone();
+    ddd.set_dialog_distribute(DIALOG_NEW_SUBSCRIPTION, move |dialogdata| {
         if dialogdata.len() < 2 {
             error!(
                 "create_new_subscription_dialog: dialog data too short:{}",
@@ -268,14 +284,28 @@ pub fn create_new_subscription_dialog(
         }
         if let Some(s) = dialogdata.get(2).unwrap().str() {
             if !s.is_empty() {
-                let new_image = prepare_icon(&s, icon_size); // icon_str
-                image_icon_c.set_pixbuf(new_image.pixbuf().as_ref());
+                match prepare_icon(&s, icon_size_pixel) {
+                    Ok(image_icon) => image_icon_c.set_pixbuf(image_icon.pixbuf().as_ref()),
+                    Err(e) => {
+                        warn!("Cannot display the icon: {} ", e);
+                    }
+                }
             }
         }
-        spinner_c.set_active(dialogdata.get(3).unwrap().boo());
+        let spinner_act = dialogdata.get(3).unwrap().boo();
+        trace!("Spinner active: {} ", spinner_act);
+        spinner_c.set_active(spinner_act);
+        if spinner_act {
+            spinner_c.start();
+        } else {
+            spinner_c.stop();
+        }
+        if let Some(s) = dialogdata.get(4).unwrap().str() {
+            ent1_c.set_text(&s); // 4: feed-url
+        }
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
-    ret.set_dialog(DIALOG_NEW_FEED_SOURCE, &dialog);
+    ret.set_dialog(DIALOG_NEW_SUBSCRIPTION, &dialog);
     ret.set_text_entry(TEXTENTRY_NEWSOURCE_URL, &entry_url);
     ret.set_text_entry(TEXTENTRY_NEWSOURCE_E2, &entry_name);
 }

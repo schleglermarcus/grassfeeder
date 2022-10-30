@@ -10,20 +10,18 @@ use crate::controller::contentlist::ListMoveCommand;
 use crate::controller::sourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
+use crate::controller::statusbar::StatusBar;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
-use crate::db::subscription_state::SubsMapEntry;
 use crate::opml::opmlreader::OpmlReader;
 use crate::timer::ITimer;
 use crate::timer::Timer;
 use crate::timer::TimerJob;
 use crate::ui_select::gui_context::GuiContext;
 use crate::ui_select::select::ui_select;
-use crate::util::string_escape_url;
-use crate::util::timestamp_now;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
@@ -33,6 +31,7 @@ use context::TimerReceiver;
 use flume::Receiver;
 use flume::Sender;
 use gui_layer::abstract_ui::AValue;
+use gui_layer::abstract_ui::BrowserEventType;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::abstract_ui::GuiRunner;
 use gui_layer::abstract_ui::KeyCodes;
@@ -43,7 +42,6 @@ use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
 use resources::id::DIALOG_ABOUT;
 use resources::id::*;
-use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -68,6 +66,7 @@ pub enum Job {
     /// thread-nr, job-kind, elapsed_ms , job-description
     DownloaderJobFinished(isize, u8, u8, u32, String),
     CheckFocusMarker(u8),
+    AddBottomDisplayErrorMessage(String),
 }
 
 const JOBQUEUE_SIZE: usize = 100;
@@ -90,7 +89,7 @@ pub struct GuiProcessor {
     browserpane_r: Rc<RefCell<dyn IBrowserPane>>,
     subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
     iconrepo_r: Rc<RefCell<IconRepo>>,
-    statusbar_items: StatusBarItems,
+    statusbar: StatusBar,
     focus_by_tab: FocusByTab,
     erro_repo_r: Rc<RefCell<ErrorRepo>>,
     currently_minimized: bool,
@@ -105,13 +104,24 @@ impl GuiProcessor {
         let guirunner = (*guicontex_r).borrow().get_gui_runner();
         let dl_r = (*ac).get_rc::<contentdownloader::Downloader>().unwrap();
         let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
+
+        let status_bar = StatusBar::new(
+            (*ac).get_rc::<SourceTreeController>().unwrap(),
+            dl_r.clone(),
+            u_a.clone(),
+            (*ac).get_rc::<FeedContents>().unwrap(),
+            (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
+            v_s_a.clone(),
+        );
+
         GuiProcessor {
             subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
             configmanager_r: (*ac).get_rc::<ConfigManager>().unwrap(),
             feedsources_r: (*ac).get_rc::<SourceTreeController>().unwrap(),
-            feedcontents_r: (*ac).get_rc::<FeedContents>().unwrap(), // YY
+            feedcontents_r: (*ac).get_rc::<FeedContents>().unwrap(),
             iconrepo_r: (*ac).get_rc::<IconRepo>().unwrap(),
             timer_r: (*ac).get_rc::<Timer>().unwrap(),
+            browserpane_r: (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
             job_queue_sender: q_s,
             job_queue_receiver: q_r,
             timer_sender: None,
@@ -120,11 +130,11 @@ impl GuiProcessor {
             gui_runner: guirunner,
             downloader_r: dl_r,
             gui_context_r: guicontex_r,
-            browserpane_r: (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
-            statusbar_items: StatusBarItems::default(),
+            // statusbar_items: StatusBarItems::default(),
             focus_by_tab: FocusByTab::None,
             erro_repo_r: err_rep,
             currently_minimized: false,
+            statusbar: status_bar,
         }
     }
 
@@ -265,7 +275,7 @@ impl GuiProcessor {
                         "new-subscription-dialog" => {
                             (*self.feedsources_r).borrow_mut().start_new_fol_sub_dialog(
                                 src_repo_id as isize,
-                                DIALOG_NEW_FEED_SOURCE,
+                                DIALOG_NEW_SUBSCRIPTION,
                             );
                         }
                         _ => {
@@ -411,6 +421,14 @@ impl GuiProcessor {
                         warn!("unknown indicator event");
                     }
                 },
+                GuiEvents::DragDropUrlReceived(ref url) => {
+                    (*self.downloader_r).borrow().browser_drag_request(url);
+                }
+                GuiEvents::BrowserEvent(ref ev_type, value) => {
+                    if ev_type == &BrowserEventType::LoadingProgress {
+                        self.statusbar.browser_loading_progress = value as u8;
+                    }
+                }
                 _ => {
                     warn!("other GuiEvents: {:?}", &ev);
                 }
@@ -494,7 +512,7 @@ impl GuiProcessor {
                         .update_systray_indicator(self.is_systray_enabled());
                 }
                 Job::DownloaderJobStarted(threadnr, kind) => {
-                    self.statusbar_items.downloader_kind_new[threadnr as usize] = kind;
+                    self.statusbar.downloader_kind_new[threadnr as usize] = kind;
                 }
                 Job::DownloaderJobFinished(subs_id, threadnr, _kind, elapsed_ms, description) => {
                     if elapsed_ms > 5000 && subs_id > 0 {
@@ -507,7 +525,7 @@ impl GuiProcessor {
                         );
                     }
 
-                    self.statusbar_items.downloader_kind_new[threadnr as usize] = 0;
+                    self.statusbar.downloader_kind_new[threadnr as usize] = 0;
                 }
                 Job::CheckFocusMarker(num) => {
                     if num > 0 {
@@ -516,6 +534,10 @@ impl GuiProcessor {
                         self.switch_focus_marker(false);
                     }
                 }
+                Job::AddBottomDisplayErrorMessage(msg) => {
+                    self.statusbar.bottom_notices.push_back(msg);
+                }
+
                 _ => {
                     warn!("other job! {:?}", &job);
                 }
@@ -736,173 +758,6 @@ impl GuiProcessor {
         self.job_queue_sender.clone()
     }
 
-    #[allow(clippy::needless_range_loop)] // handle this later
-    fn update_status_bar(&mut self) {
-        const VERTICAL_RISING_BAR: [u32; 10] = [
-            ' ' as u32, '_' as u32, 0x2581, 0x2582, 0x2583, 0x2584, 0x2585, 0x2586, 0x2587, 0x2588,
-        ];
-        let mut need_update1: bool = false;
-        let mut need_update2: bool = false;
-        let repo_id_new: isize;
-        let mut last_fetch_time: i64 = 0;
-        let mut feed_src_link = String::default();
-        let mut is_folder: bool = false;
-        let o_fse = (*self.feedsources_r)
-            .borrow()
-            .get_current_selected_subscription();
-        if let Some((fse, _)) = o_fse {
-            repo_id_new = fse.subs_id;
-            last_fetch_time = fse.updated_int;
-            feed_src_link = fse.url.clone();
-            self.statusbar_items.num_downloader_threads = (*self.downloader_r)
-                .borrow()
-                .get_config()
-                .num_downloader_threads;
-            is_folder = fse.is_folder;
-        } else {
-            repo_id_new = -1;
-        }
-        let content_ids = (*self.feedcontents_r).borrow().get_selected_content_ids();
-        let mut selected_msg_id = -1;
-        if !content_ids.is_empty() {
-            selected_msg_id = *content_ids.first().unwrap();
-        }
-        let mut num_msg_all = self.statusbar_items.num_msg_all;
-        let mut num_msg_unread = self.statusbar_items.num_msg_unread;
-        let subs_state: SubsMapEntry = (*self.feedsources_r)
-            .borrow()
-            .get_state(repo_id_new)
-            .unwrap_or_default();
-        if selected_msg_id != self.statusbar_items.selected_msg_id
-            || repo_id_new != self.statusbar_items.selected_repo_id
-        {
-            self.statusbar_items.selected_msg_id = selected_msg_id;
-        }
-        if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
-            num_msg_all = n_a;
-            num_msg_unread = n_u;
-            if n_a != self.statusbar_items.num_msg_all || n_u != self.statusbar_items.num_msg_unread
-            {
-                need_update2 = true;
-            }
-        }
-        if repo_id_new > 0 {
-            if num_msg_all != self.statusbar_items.num_msg_all {
-                self.statusbar_items.num_msg_all = num_msg_all;
-                need_update1 = true;
-            }
-            if num_msg_unread != self.statusbar_items.num_msg_unread {
-                self.statusbar_items.num_msg_unread = num_msg_unread;
-                need_update1 = true;
-            }
-
-            if self.statusbar_items.last_fetch_time != last_fetch_time {
-                self.statusbar_items.last_fetch_time = last_fetch_time;
-                need_update2 = true;
-            }
-        }
-        let last_msg_url = if selected_msg_id < 0 {
-            String::default()
-        } else {
-            (self.browserpane_r).borrow().get_last_selected_link()
-        };
-        if self.statusbar_items.selected_msg_url != last_msg_url {
-            self.statusbar_items.selected_msg_url = last_msg_url;
-            need_update2 = true;
-        }
-        let longtext = if self.statusbar_items.selected_msg_url.is_empty() {
-            string_escape_url(feed_src_link)
-        } else {
-            string_escape_url(self.statusbar_items.selected_msg_url.clone())
-        };
-        let mut block_vertical: char = ' ';
-        if !is_folder && repo_id_new != self.statusbar_items.selected_repo_id {
-            self.statusbar_items.selected_repo_id = repo_id_new;
-            // time-to next feed update
-            let fs_conf = self.feedsources_r.borrow().get_config();
-            let interval_s = fs_conf.get_interval_seconds();
-            let now = timestamp_now();
-            let elapsed: i64 = std::cmp::min(now - (last_fetch_time as i64), interval_s);
-            let div_idx = if interval_s == 0 {
-                0
-            } else {
-                (elapsed * (8_i64)) / interval_s
-            };
-            block_vertical = char::from_u32(VERTICAL_RISING_BAR[div_idx as usize]).unwrap();
-            need_update2 = true;
-            need_update1 = true;
-        }
-        let downloader_busy = (self.downloader_r).borrow().get_kind_list();
-        for a in 0..(DOWNLOADER_MAX_NUM_THREADS as usize) {
-            if self.statusbar_items.downloader_kind[a] > 0 && downloader_busy[a] == 0 {
-                self.statusbar_items.downloader_kind_new[a] = 0;
-                need_update1 = true;
-            }
-            if self.statusbar_items.downloader_kind[a]
-                != self.statusbar_items.downloader_kind_new[a]
-            {
-                self.statusbar_items.downloader_kind[a] =
-                    self.statusbar_items.downloader_kind_new[a];
-                need_update1 = true;
-            }
-        }
-
-        let new_qsize = (*self.downloader_r).borrow().get_queue_size();
-        if new_qsize != self.statusbar_items.num_dl_queue_length {
-            self.statusbar_items.num_dl_queue_length = new_qsize;
-            need_update1 = true;
-        }
-        if need_update1 {
-            let mut downloader_display: String = String::default();
-            for a in 0..(self.statusbar_items.num_downloader_threads as usize) {
-                let nc = dl_char_for_kind(self.statusbar_items.downloader_kind[a] as u8);
-                downloader_display.push(nc);
-            }
-            let unread_all = format!(
-                "{:5} / {:5}",
-                self.statusbar_items.num_msg_unread, self.statusbar_items.num_msg_all
-            );
-            let memdisplay = if self.statusbar_items.mode_debug {
-                format!(
-                    "  {}MB ",
-                    self.statusbar_items.mem_usage_vmrss_bytes / 1048576,
-                )
-            } else {
-                String::default()
-            };
-            let msg1 = format!(
-                "<tt>\u{25df}{}\u{25de} {}    \u{2595}{}\u{258F} {}</tt>",
-                downloader_display, unread_all, block_vertical, memdisplay,
-            );
-            (*self.gui_val_store)
-                .write()
-                .unwrap()
-                .set_label_text(LABEL_STATUS_1, msg1);
-            let msg1tooltip = if self.statusbar_items.num_dl_queue_length > 0 {
-                format!("Queue: {}", self.statusbar_items.num_dl_queue_length)
-            } else {
-                String::default()
-            };
-            (*self.gui_val_store)
-                .write()
-                .unwrap()
-                .set_label_tooltip(LABEL_STATUS_1, msg1tooltip);
-
-            (*self.gui_updater)
-                .borrow()
-                .update_label_markup(LABEL_STATUS_1);
-        }
-        if need_update2 {
-            (*self.gui_val_store)
-                .write()
-                .unwrap()
-                .set_label_text(LABEL_STATUS_2, longtext);
-            (*self.gui_updater)
-                .borrow()
-                .update_label_markup(LABEL_STATUS_2);
-        }
-    }
-
     fn start_about_dialog(&mut self) {
         (*self.gui_updater).borrow().show_dialog(DIALOG_ABOUT);
     }
@@ -1021,17 +876,6 @@ impl GuiProcessor {
         (*self.gui_updater).borrow().update_dialog(DIALOG_ABOUT);
     }
 
-    // Mem usage in kb: current=105983, peak=118747411
-    // Htop:  103M    SHR: 73580m   0,7% mem
-    // top:	Res:106MB   SHR:78MB
-    // estimation of the current physical memory used by the application, in bytes. 			Comes from proc//status/VmRSS
-    pub fn update_memory_stats(&mut self) {
-        if let Ok(mem) = proc_status::mem_usage() {
-            self.statusbar_items.mem_usage_vmrss_bytes =
-                (self.statusbar_items.mem_usage_vmrss_bytes + mem.current as isize) / 2;
-        }
-    }
-
     // GuiProcessor
 }
 
@@ -1045,6 +889,7 @@ pub fn dl_char_for_kind(kind: u8) -> char {
         2 => char::from_u32(0x2662).unwrap(), // icon : diamond sign
         3 => char::from_u32(0x21d3).unwrap(), // feed-comprehensive : double arrow
         4 => char::from_u32(0x26c1).unwrap(), // DatabaseCleanup : database icon
+        5 => char::from_u32(0x21d3).unwrap(), // Drag Url eval : double arrow
         _ => '_',
     };
     nc
@@ -1054,7 +899,7 @@ impl Buildable for GuiProcessor {
     type Output = GuiProcessor;
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         let mut gp = GuiProcessor::new(_appcontext);
-        gp.statusbar_items.mem_usage_vmrss_bytes = -1;
+        gp.statusbar.mem_usage_vmrss_bytes = -1;
         gp
     }
 }
@@ -1065,11 +910,10 @@ impl TimerReceiver for GuiProcessor {
             match event {
                 TimerEvent::Timer1s => {
                     self.process_event();
+                    self.process_jobs();
                 }
                 TimerEvent::Timer10s => {
-                    self.update_memory_stats();
-                    self.process_jobs();
-                    self.update_status_bar();
+                    self.statusbar.update();
                 }
                 _ => (),
             }
@@ -1078,10 +922,10 @@ impl TimerReceiver for GuiProcessor {
                 TimerEvent::Timer100ms => {
                     self.process_event();
                     self.process_jobs();
-                    self.update_status_bar();
+                    self.statusbar.update();
                 }
                 TimerEvent::Timer1s => {
-                    self.update_memory_stats();
+                    self.statusbar.update_memory_stats();
                 }
                 TimerEvent::Startup => {
                     self.process_jobs();
@@ -1106,7 +950,7 @@ impl StartupWithAppContext for GuiProcessor {
         }
         self.addjob(Job::StartApplication);
         self.addjob(Job::NotifyConfigChanged);
-        self.statusbar_items.num_downloader_threads = (*self.downloader_r)
+        self.statusbar.num_downloader_threads = (*self.downloader_r)
             .borrow()
             .get_config()
             .num_downloader_threads;
@@ -1116,27 +960,10 @@ impl StartupWithAppContext for GuiProcessor {
             .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
         {
             if let Ok(b) = s.parse::<bool>() {
-                self.statusbar_items.mode_debug = b;
+                self.statusbar.mode_debug = b;
             }
         }
     }
-}
-
-#[derive(Default)]
-struct StatusBarItems {
-    downloader_kind: [u8; DOWNLOADER_MAX_NUM_THREADS as usize],
-    downloader_kind_new: [u8; DOWNLOADER_MAX_NUM_THREADS as usize],
-    num_msg_all: isize,
-    num_msg_unread: isize,
-    last_fetch_time: i64,
-    selected_repo_id: isize,
-    num_downloader_threads: u8,
-    num_dl_queue_length: usize,
-    selected_msg_id: i32,
-    selected_msg_url: String,
-    /// proc//status/VmRSS  Resident set size, estimation of the current physical memory used by the application
-    mem_usage_vmrss_bytes: isize,
-    mode_debug: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]

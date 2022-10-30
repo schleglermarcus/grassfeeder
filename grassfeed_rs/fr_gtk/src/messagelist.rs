@@ -169,7 +169,7 @@ pub fn create_listview(
                 .get::<u32>()
                 .unwrap() as i32;
         }
-		// trace!("LIST cursor_changed {}  {:?}  ", list_pos, repo_id);
+        // trace!("LIST cursor_changed {}  {:?}  ", list_pos, repo_id);
         if list_pos >= 0 && repo_id > 0 {
             esw.sendw(GuiEvents::ListRowActivated(0, list_pos, repo_id));
         }
@@ -284,6 +284,22 @@ pub fn create_listview(
             gtk::Inhibit(false) // do propagate
         },
     );
+    let targets = vec![
+        gtk::TargetEntry::new("STRING", gtk::TargetFlags::OTHER_APP, 0),
+        gtk::TargetEntry::new("text/plain", gtk::TargetFlags::OTHER_APP, 0),
+        gtk::TargetEntry::new("text/html", gtk::TargetFlags::OTHER_APP, 0),
+    ];
+    content_tree_view.drag_dest_set(gtk::DestDefaults::ALL, &targets, gdk::DragAction::LINK);
+    let esw = EvSenderWrapper(g_ev_se.clone());
+    content_tree_view.connect_drag_data_received(
+        move |_tv, _dragcontext, _x, _y, selectiondata, _info, _timestamp| {
+            if let Some(gstri) = selectiondata.text() {
+                debug!("DDR: SEL.text {:?} ", gstri.to_string());
+                esw.sendw(GuiEvents::DragDropUrlReceived(gstri.to_string()));
+            }
+        },
+    );
+
     match sort_column {
         1 => set_sort_indicator(&title_column, sort_column, sort_ascending),
         2 => set_sort_indicator(&date_column, sort_column, sort_ascending),

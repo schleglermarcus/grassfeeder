@@ -89,6 +89,8 @@ pub enum SJob {
     NotifyTreeReadCount(isize, isize, isize),
     ScanEmptyUnread,
     EmptyTreeCreateDefaultSubscriptions,
+    ///  Drag-String   Feed-Url   Error-Message,   Home-Page-Title
+    DragUrlEvaluated(String, String, String, String),
 }
 
 // #[automock]
@@ -370,6 +372,44 @@ impl SourceTreeController {
                 }
                 SJob::EmptyTreeCreateDefaultSubscriptions => {
                     self.empty_create_default_subscriptions()
+                }
+                SJob::DragUrlEvaluated(
+                    ref drag_string,
+                    ref feed_url,
+                    ref err_msg,
+                    ref hp_title,
+                ) => {
+                    if !err_msg.is_empty() {
+                        debug!(
+                            "DragUrlEvaluated: {}  url:{}:   ERR  {} ",
+                            drag_string, feed_url, err_msg,
+                        );
+                    }
+                    let av_ti = if hp_title.is_empty() {
+                        AValue::None
+                    } else {
+                        AValue::ASTR(hp_title.clone())
+                    };
+                    if !feed_url.is_empty() {
+                        let dd: Vec<AValue> = vec![
+                            AValue::None,                   // 0:display
+                            av_ti,                          // 1: homepage
+                            AValue::None,                   // 2: icon_str
+                            AValue::ABOOL(true),            // 3 :spinner
+                            AValue::ASTR(feed_url.clone()), // 4: feed url
+                        ];
+                        (*self.gui_val_store)
+                            .write()
+                            .unwrap()
+                            .set_dialog_data(DIALOG_NEW_SUBSCRIPTION, &dd);
+                        (*self.gui_updater)
+                            .borrow()
+                            .update_dialog(DIALOG_NEW_SUBSCRIPTION);
+
+                        (*self.gui_updater)
+                            .borrow()
+                            .show_dialog(DIALOG_NEW_SUBSCRIPTION);
+                    }
                 }
             }
             if self.config.mode_debug {
@@ -834,14 +874,15 @@ impl SourceTreeController {
                     AValue::None,        // 1:homepage
                     AValue::None,        // 2: icon_str
                     AValue::ABOOL(true), // 3 :spinner
+                    AValue::None,        // 4: feed url
                 ];
                 (*self.gui_val_store)
                     .write()
                     .unwrap()
-                    .set_dialog_data(DIALOG_NEW_FEED_SOURCE, &dd);
+                    .set_dialog_data(DIALOG_NEW_SUBSCRIPTION, &dd);
                 (*self.gui_updater)
                     .borrow()
-                    .update_dialog(DIALOG_NEW_FEED_SOURCE);
+                    .update_dialog(DIALOG_NEW_SUBSCRIPTION);
                 (*self.downloader_r)
                     .borrow()
                     .new_feedsource_request(&self.new_source.edit_url);
@@ -874,14 +915,16 @@ impl SourceTreeController {
             AValue::ASTR(self.new_source.feed_homepage.clone()),
             AValue::ASTR(icon_str), // 2: icon_str
             AValue::ABOOL(false),   // 3: spinner
+            AValue::None,           // 4: feed-url
         ];
+        // trace!(            "process_newsource_request_done  {}",            self.new_source.feed_homepage.clone()        );
         (*self.gui_val_store)
             .write()
             .unwrap()
-            .set_dialog_data(DIALOG_NEW_FEED_SOURCE, &dd);
+            .set_dialog_data(DIALOG_NEW_SUBSCRIPTION, &dd);
         (*self.gui_updater)
             .borrow()
-            .update_dialog(DIALOG_NEW_FEED_SOURCE);
+            .update_dialog(DIALOG_NEW_SUBSCRIPTION);
     }
 
     fn check_feed_update_times(&mut self) {
@@ -951,13 +994,13 @@ impl SourceTreeController {
     }
 
     fn check_paths(&self) {
-		// let now = Instant::now();
+        // let now = Instant::now();
         if *self.need_check_fs_paths.borrow() {
             self.update_cached_paths();
             self.need_check_fs_paths.replace(false);
         }
-		// let elapsed_ms = now.elapsed().as_millis();
-		// if elapsed_ms > 20 {                debug!("check_paths took {} ms", elapsed_ms);            }
+        // let elapsed_ms = now.elapsed().as_millis();
+        // if elapsed_ms > 20 {                debug!("check_paths took {} ms", elapsed_ms);            }
     }
 
     pub fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {

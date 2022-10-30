@@ -289,21 +289,9 @@ mod t {
     use super::*;
     use crate::util::fetch_http_to_bin;
     use crate::util::remove_invalid_chars_from_input;
-    use std::fs::File;
-    use std::io::Write;
+    // use std::fs::File;
+    // use std::io::Write;
 
-    #[test]
-    fn image_webp_to_png() {
-        let file_in = "../fr_core/tests/data/lupoca.webp";
-        let file_out = "../target/lupoca.png";
-        let webpdata: Vec<u8> = crate::web::mockfilefetcher::file_to_bin(file_in).unwrap();
-        let outdata = convert_webp_to_png(&webpdata, Some(20)).unwrap();
-        let mut file = File::create(file_out).unwrap();
-        let w_r = file.write_all(&outdata);
-        assert!(w_r.is_ok());
-        assert!(outdata.len() >= 1151 && outdata.len() <= 1152);
-        //         debug!("{} bytes written {:?}", outdata.len(), w_r);
-    }
 
     //cargo watch -s "cargo    test  util::util_fetch_test::sanitize_input   --lib  -- --exact "
     #[test]
@@ -368,7 +356,6 @@ mod t {
         assert_eq!(short, String::from("Japan 無料ダウンロード"));
     }
 
-
     #[test]
     fn fetch_infowars() {
         let (_buf, size) =
@@ -377,9 +364,8 @@ mod t {
         assert!([0, 1150].contains(&size));
     }
 
-
-	/*
-    20:17:47 [ERROR] fetching https://www.chip.de/fec/assets/favicon/favicon-32x32.png?v=01 => Transport(Transport { kind: Dns, message: Some("resolve dns name 'www.chip.de:443'"), url: Some(Url { scheme: "https", cannot_be_a_base: false, username: "", password: None, host: Some(Domain("www.chip.de")), port: None, path: "/fec/assets/favicon/favicon-32x32.png", query: Some("v=01"), fragment: None }), source: Some(Custom { kind: Uncategorized, error: "failed to lookup address information: Name or service not known" }) })
+    /*
+    Transport(Transport { kind: Dns, message: Some("resolve dns name 'www.chip.de:443'"), service not known" }) })
     */
     #[test]
     fn fetch_chip() {
@@ -401,7 +387,6 @@ mod t {
         assert_eq!(size, 0);
         assert_eq!(buf.len(), size);
     }
-
 
     // ---
 

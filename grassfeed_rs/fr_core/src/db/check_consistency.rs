@@ -1,5 +1,6 @@
 use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
+use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
@@ -8,9 +9,8 @@ use crate::downloader::db_clean::CleanerInner;
 use crate::downloader::db_clean::CleanerStart;
 use crate::util::file_exists;
 use crate::util::StepResult;
-use crate::db::icon_repo::IconRepo;
 
-pub fn databases_check_manual(config_folder: &str, cache_folder : &str) {
+pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
     let set_undelete: bool = false;
     let subs_fn = SubscriptionRepo::filename(config_folder);
     if !file_exists(&subs_fn) {
@@ -30,7 +30,7 @@ pub fn databases_check_manual(config_folder: &str, cache_folder : &str) {
     let msg_copy = format!("{}.copy", msg_fn);
     std::fs::copy(&msg_fn, msg_copy).unwrap();
     let msgrepo1 = MessagesRepo::by_filename(&msg_fn);
-	let iconrepo = IconRepo::new(cache_folder);
+    let iconrepo = IconRepo::new(cache_folder);
     let all_messages = msgrepo1.get_all_messages();
     debug!("Messages  {}  #{}", &msg_fn, &all_messages.len());
     if set_undelete {

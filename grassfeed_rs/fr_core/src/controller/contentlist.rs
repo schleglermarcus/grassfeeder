@@ -878,16 +878,6 @@ impl IFeedContents for FeedContents {
     }
 
     fn memory_conserve(&mut self, act: bool) {
-        /*
-                let mut last_selected_msg_id = -1;
-                if let Some(feedsources) = self.feedsources_w.upgrade() {
-                    if let Some(subs_e) = (*feedsources).borrow().get_current_selected_subscription() {
-                        last_selected_msg_id = subs_e.0.last_selected_msg;
-                    }
-                }
-                 trace!(            "memory_conserve {} selected:{:?}   last_selected_msg_id={}",            act,            self.list_selected_ids.read().unwrap(),            last_selected_msg_id        );
-        */
-
         self.currently_minimized = act;
         if act {
             self.msg_state.write().unwrap().clear();
@@ -981,8 +971,29 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     msg.entry_src_date = published_ts;
     msg.fetch_date = crate::util::timestamp_now();
     msg.message_id = -1;
-    if !me.links.is_empty() {
-        msg.link = me.links.get(0).unwrap().href.clone();
+    let linklist = me
+        .links
+        .iter()
+        // .inspect(|ml| debug!("ML: {:?} {:?}", ml.rel, ml.href))
+        .filter(|ml| {
+            if let Some(typ) = &ml.media_type {
+                if typ.contains("xml") {
+                    return false;
+                }
+            }
+            true
+        })
+        .filter(|ml| {
+            if let Some(rel) = &ml.rel {
+                if rel.contains("replies") {
+                    return false;
+                }
+            }
+            true
+        })
+        .collect::<Vec<&feed_rs::model::Link>>();
+    if let Some(link_) = linklist.first() {
+        msg.link = link_.href.clone();
     }
     if let Some(summary) = me.summary.clone() {
         if !summary.content.is_empty() {
@@ -1186,7 +1197,6 @@ mod feedcontents_test {
     use crate::db::message::MessageRow;
     use crate::util::db_time_to_display_nonnull;
     use feed_rs::parser;
-    use std::fs;
 
     // #[ignore]
     #[test]
@@ -1274,16 +1284,6 @@ mod feedcontents_test {
             fce.enclosure_url,
             "https://static.kino.de/rama-dama-1990-film-rcm1200x0u.jpg"
         );
-    }
-
-    // #[ignore]
-    #[test]
-    fn parse_convert_entry_file1() {
-        let rss_str = fs::read_to_string("tests/data/gui_proc_rss2_v1.rss").unwrap();
-        let feeds = parser::parse(rss_str.as_bytes()).unwrap();
-        let first_entry = feeds.entries.get(0).unwrap();
-        let fce: MessageRow = contentlist::message_from_modelentry(&first_entry).0;
-        assert_eq!(fce.content_text, "Today: Lorem ipsum dolor sit amet");
     }
 
     #[test]

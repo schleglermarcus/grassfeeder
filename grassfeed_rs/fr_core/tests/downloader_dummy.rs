@@ -27,8 +27,6 @@ impl IDownloader for DownloaderDummy {
     fn set_conf_num_threads(&mut self, _: u8) {
         unimplemented!()
     }
-
-    // fn is_dl_busy(&self) -> [u8; DOWNLOADER_MAX_NUM_THREADS] {        [0; DOWNLOADER_MAX_NUM_THREADS]    }
     fn get_kind_list(&self) -> Vec<u8> {
         unimplemented!()
     }
@@ -39,4 +37,11 @@ impl IDownloader for DownloaderDummy {
     fn get_queue_size(&self) -> usize {
         unimplemented!()
     }
+
+    // fn download_direct(&self, _url: &String) -> Result<String, String> {        unimplemented!()    }
+
+	fn browser_drag_request(&self, _dragged_url: &str) {
+		unimplemented!()
+	}
+
 }

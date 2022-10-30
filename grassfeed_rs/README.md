@@ -23,6 +23,14 @@ They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upg
 
 ## Dependencies
 #### Build
+
+##### Ubuntu 18.04
+ - apt-get install  curl git gcc  pkg-config
+ - The package glib-sys-0.15.10  requires  glibc >2.48
+ - \# pkg-config --libs --cflags glib-2.0 "glib-2.0 >= 2.48"
+      Package glib-2.0 was not found in the pkg-config search path.
+ - This ![version](https://distrowatch.com/table.php?distribution=ubuntu) is too old. 
+
 ##### Linux Mint 20 preparation, as user
   - Install rust:  `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 	- `cargo install cargo-deb`
@@ -37,10 +45,7 @@ They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upg
 
 
 
-##### not yet
-* ~~apt-get install libssl-dev~~
-
-
+#
 
 #### Binary
 - libglib2.0-0 (>= 2.33.14)

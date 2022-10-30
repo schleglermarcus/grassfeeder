@@ -52,7 +52,6 @@ impl Step<ComprehensiveInner> for ComprStart {
         let mut inner: ComprehensiveInner = self.0;
         let url = inner.feed_url_edit.clone();
         let result = (*inner.web_fetcher).request_url(url.clone());
-        // trace!("START: {} {:?} icon_urL={}", url, result.status , inner.icon_url);
         match result.status {
             200 => {
                 inner.url_download_text = result.content;
@@ -77,16 +76,17 @@ pub struct ParseFeedString(ComprehensiveInner);
 impl Step<ComprehensiveInner> for ParseFeedString {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let mut inner: ComprehensiveInner = self.0;
-
-        if let Ok((homepage, feed_title)) = util::retrieve_homepage_from_feed_text(
+        let (homepage, feed_title, _err_msg) = util::retrieve_homepage_from_feed_text(
             inner.url_download_text.as_bytes(),
             &inner.feed_url_edit,
-        ) {
+        );
+        if !homepage.is_empty() {
             inner.feed_homepage = homepage;
-            if !feed_title.is_empty() {
-                inner.feed_title = feed_title;
-            }
         }
+        if !feed_title.is_empty() {
+            inner.feed_title = feed_title;
+        }
+        // trace!("COMPR2:  HP={}  TI={}", inner.feed_homepage,inner.feed_title );
         if !inner.feed_homepage.is_empty() {
             StepResult::Continue(Box::new(ComprAnalyzeHomepage(inner)))
         } else {
@@ -112,7 +112,7 @@ impl Step<ComprehensiveInner> for ComprAnalyzeHomepage {
             },
             _ => {
                 debug!(
-                    "compr: downloading homepage: {:?} {}",
+                    "ComprAnalyzeHomepage: {:?} {}",
                     r.status, r.error_description
                 );
             }
@@ -172,8 +172,6 @@ impl Step<ComprehensiveInner> for ComprStoreIcon {
         let comp_st = util::compress_vec_to_string(&inner.icon_bytes);
         let existing_icons: Vec<IconEntry> = inner.iconrepo.get_by_icon(comp_st.clone());
         if existing_icons.is_empty() {
-            // let mut ie = IconEntry::default();
-            // ie.icon = comp_st;
             let ie = IconEntry {
                 icon: comp_st,
                 ..Default::default()
@@ -197,10 +195,7 @@ pub struct ComprFinal(ComprehensiveInner);
 impl Step<ComprehensiveInner> for ComprFinal {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let inner: ComprehensiveInner = self.0;
-        trace!(
-            "DL: sending job  NewFeedSourceEdit  icon_id={}",
-            inner.icon_id
-        );
+        // trace!(            "DL: sending job  NewFeedSourceEdit  icon_id={}",            inner.icon_id        );
         let _r = inner.sourcetree_job_sender.send(SJob::NewFeedSourceEdit(
             inner.feed_url_edit.clone(),
             inner.feed_title.clone(),

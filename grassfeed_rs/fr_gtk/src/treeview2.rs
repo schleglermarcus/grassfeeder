@@ -27,6 +27,7 @@ use std::sync::RwLock;
 use ui_gtk::GtkObjectsType;
 
 const TREEVIEW_NAME: &str = "TREEVIEW1";
+// const DRAG_TARGET_NAME: &str = "text/html";
 
 pub fn create_tree_store() -> (TreeStore, usize) {
     let tree_store_types: &[Type] = &[
@@ -130,6 +131,7 @@ pub fn create_treeview(
                 }
                 let indices = treepath.indices_with_depth();
                 let ind_u16: Vec<u16> = indices.iter().map(|v| *v as u16).collect::<Vec<u16>>();
+                trace!("TreeRowActivated : {} {:?}", repo_id, ind_u16);
                 esw.sendw(GuiEvents::TreeRowActivated(0, ind_u16, repo_id));
             }
         }
@@ -249,7 +251,6 @@ pub fn create_treeview(
             esw.sendw(GuiEvents::TreeCollapsed(0, repo_id));
         }
     });
-    // treeview1.connect_focus(move |_t_view, directiontype| {        debug!("treeview:  focus {:?}", directiontype);        gtk::Inhibit(false)    });
     {
         let mut ret = (*gtk_obj_a).write().unwrap();
         ret.set_tree_store(TREEVIEW0, &tree_store);

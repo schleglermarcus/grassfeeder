@@ -1,4 +1,4 @@
-mod logger_config;
+// mod logger_config;
 
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
@@ -86,7 +86,6 @@ fn create_random_names(num_elements: usize) -> Vec<String> {
 
 // ------------------------------------
 
-#[allow(unused_imports)]
 #[macro_use]
 extern crate log;
 use std::sync::Once;
@@ -94,6 +93,6 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_fern_logger(0);
+        let _r = testing::logger_config_local::setup_logger();
     });
 }

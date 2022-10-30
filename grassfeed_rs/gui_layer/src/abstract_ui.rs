@@ -95,6 +95,10 @@ pub enum GuiEvents {
     /// index, new-text
     SearchEntryTextChanged(u8, String),
     Indicator(String, u32),
+    /// external url dropped
+    DragDropUrlReceived(String),
+    // event type, Some-value
+    BrowserEvent(BrowserEventType, i32),
 }
 
 impl Default for GuiEvents {
@@ -227,8 +231,7 @@ pub trait UIUpdaterAdapter {
     fn clipboard_set_text(&self, s: String);
     fn memory_conserve(&self, act: bool);
     fn update_systray_indicator(&self, enable: bool);
-	fn update_window_minimized(&self, mini: bool, ev_time : u32);
-
+    fn update_window_minimized(&self, mini: bool, ev_time: u32);
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]
@@ -242,6 +245,12 @@ pub enum UIUpdaterMarkWidgetType {
 pub enum WebViewUpdateResult {
     Ok,
     NeedRestartView,
+}
+
+#[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone, Serialize, Deserialize)]
+pub enum BrowserEventType {
+    IsLoadingNotify,
+    LoadingProgress,
 }
 
 //  Values Wrapper as intermediate for  glib::values

@@ -1,4 +1,5 @@
 mod logger_config;
+mod unzipper;
 
 use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::Downloader;
@@ -22,14 +23,18 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 
+// const BASE_PATH: &str = "../fr_core/tests/feeds/";
+
 #[test]
 fn comprehensive_feed_download() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let base_path = format!("{}feeds/", unzipper::TD_BASE);
+    let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(base_path)));
     let comp_inner = ComprehensiveInner {
         feed_url_edit: "gui_proc_rss2_v1.rss".to_string(),
         iconrepo: IconRepo::new(""),
-        web_fetcher: get_file_fetcher(),
+        web_fetcher: fetcher,
         download_error_happened: false,
         icon_url: String::default(),
         icon_bytes: Vec::default(),
@@ -48,13 +53,14 @@ fn comprehensive_feed_download() {
     assert_eq!(all_e.len(), 1);
 }
 
+// #[ignore]
 #[test]
 fn downloader_load_message_into_db() {
     setup();
     let (content_q_s, _content_q_r) = flume::bounded::<CJob>(9);
-    let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(
-        "../fr_core/tests/data/".to_string(),
-    )));
+    let base_path = format!("{}feeds/", unzipper::TD_BASE);
+    let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(base_path)));
+
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let (gp_s, _gp_r) = flume::bounded::<Job>(9);
     let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
@@ -114,13 +120,7 @@ fn chrono_broken_timestamp() {
     );
 }
 
-fn get_file_fetcher() -> WebFetcherType {
-    Arc::new(Box::new(FileFetcher::new(
-        "../fr_core/tests/data/".to_string(),
-    )))
-}
-
-#[allow(dead_code)]
+/*
 fn prepare_feedsource_dummy() -> Rc<RefCell<dyn ISubscriptionRepo>> {
     let mut fse = SubscriptionEntry::from_new_url(
         "feed1-display".to_string(),
@@ -133,6 +133,7 @@ fn prepare_feedsource_dummy() -> Rc<RefCell<dyn ISubscriptionRepo>> {
     let r_fsource: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(subscription_repo));
     r_fsource
 }
+*/
 
 // ------------------------------------
 
@@ -147,6 +148,8 @@ fn setup() {
         let _r = logger_config::setup_fern_logger(
             (logger_config::QuietFlags::Downloader as u64)
                 | (logger_config::QuietFlags::Controller as u64),
+            // 0,
         );
+        unzipper::unzip_some();
     });
 }

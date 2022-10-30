@@ -1,18 +1,33 @@
 To Do List
-- Possible Bug:  Mark-As-Read on Folder fails to process many subscriptions (>30)
-
-
-
-
-- DragAndDrop for Websites into Tree
-- Zip the test files
-- Reduce Size of Binary:
-  https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
-- Browser Loading display
 
 - Marking of Messages, Favorites
 - Message List: set scroll position to upper edge from Cursor
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
+
+
+
+
+- Appimage Hub Deploy
+  https://github.com/AppImage/appimage.github.io
+  https://docs.appimage.org/reference/best-practices.html
+  https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
+	Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
+	without the installation of additional packages.
+
+
+
+
+Drag extra care:
+	- https://www.netjstech.com/
+	- https://www.extremnews.com/
+	- https://menprovement.com/
+	- https://therationalmale.com/2021/06/25/sizzle-amp-steak/
+	- https://www.bitchute.com/video/ovTONsjus1wC/
+	- Dragging the same element 2x
+
+
+
+
 
 
 
@@ -28,6 +43,11 @@ Later:
 	https://gtk-rs.org/gtk4-rs/git/book/installation_windows.html
 
 
+
+
+
+
+
 Perhaps:
 - Keybard configuration in settings
 - Updating Sources:  prioritize by tree position, expanded flag
@@ -35,8 +55,9 @@ Perhaps:
 - Feed-Import with progress bar ?
 - Do extra recognition  to process   invalid feed titles  containg  &     :      dieneuewelle.xml
 - Grouping of feeds by folders ?
-- RSS-Content damaged with    http://n8waechter.info/feed/
-- look at Snap/Flatpak   https://linuxhint.com/snap_vs_flatpak_vs_appimage/
+
+- Reduce Size of Binary:
+  https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
 
 
 
@@ -73,15 +94,17 @@ No more
 
 
 -----
-https://doc.rust-lang.org/cargo/reference/environment-variables.html
+
+Other feed readers:
+https://github.com/martinrotter/rssguard
+https://github.com/AlduinApp/alduin
+https://github.com/hello-efficiency-inc/raven-reader
+
 
 // https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#changelog
 // https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
 // https://docs.rs/chrono/latest/chrono/format/strftime/index.html#specifiers
 //  dpkg-deb -i 	grassfeeder.deb
-
-
-
 https://github.com/marketplace/actions/rust-release-binary
 https://mateuscosta.me/rust-releases-with-github-actions
 https://daniellockyer.com/automated-rust-releases/
@@ -96,17 +119,19 @@ https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 
 
 ------ AppImage
+
+https://github.com/AppImage/appimage.github.io
+
 https://lib.rs/crates/cargo-appimage
-https://appimage-builder.readthedocs.io/en/stable/intro/install.html
 https://docs.appimage.org/packaging-guide/index.html
-https://askubuntu.com/questions/1021420/glibc-2-25-not-found-on-ubuntu-windows-subsystem-for-linux
+
 https://docs.appimage.org/reference/best-practices.html#binaries-compiled-on-old-enough-base-system
+
 https://distrowatch.com/table.php?distribution=mint
 ## The ingredients used in your AppImage should not be built on a more recent base system than the oldest base system your AppImage is intended to run on.
 ## Install appimagetool AppImage
-#sudo apt install -y python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse
-#sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
 #sudo chmod +x /usr/local/bin/appimagetool
+# ./grassfeeder.AppImage --appimage-extract
 
 
 

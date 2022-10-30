@@ -12,6 +12,8 @@ use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
+use crate::downloader::browserdrag::BrowserEvalStart;
+use crate::downloader::browserdrag::DragInner;
 use crate::downloader::comprehensive::ComprStart;
 use crate::downloader::comprehensive::ComprehensiveInner;
 use crate::downloader::db_clean::CleanerInner;
@@ -62,6 +64,11 @@ pub trait IDownloader {
     fn load_icon(&self, fs_id: isize, fs_url: String, old_icon_id: usize);
     fn cleanup_db(&self);
     fn get_queue_size(&self) -> usize;
+
+    fn browser_drag_request(&self, dragged_url: &str);
+
+    // #[deprecated]
+    // fn download_direct(&self, url: &String) -> Result<String, String>;
 }
 
 #[derive(Debug, PartialEq)]
@@ -71,6 +78,7 @@ pub enum DLJob {
     Icon(IconInner),
     ComprehensiveFeed(ComprehensiveInner),
     CleanDatabase(CleanerInner),
+    BrowserDragEvaluation(DragInner),
 }
 
 trait DLKind {
@@ -90,6 +98,7 @@ impl DLKind for DLJob {
             DLJob::Icon(_) => 2,
             DLJob::ComprehensiveFeed(_) => 3,
             DLJob::CleanDatabase(_) => 4,
+            DLJob::BrowserDragEvaluation(_) => 5,
         }
     }
 
@@ -108,6 +117,7 @@ impl DLKind for DLJob {
             DLJob::Icon(inner) => inner.subs_id,
             DLJob::ComprehensiveFeed(_) => -2,
             DLJob::CleanDatabase(_) => -3,
+            DLJob::BrowserDragEvaluation(_) => -4,
         }
     }
 }
@@ -249,6 +259,9 @@ impl Downloader {
             }
             DLJob::CleanDatabase(i) => {
                 let _i = StepResult::start(Box::new(CleanerStart::new(i)));
+            }
+            DLJob::BrowserDragEvaluation(i) => {
+                let _i = StepResult::start(Box::new(BrowserEvalStart::new(i)));
             }
         }
         let elapsedms = now.elapsed().as_millis();
@@ -423,6 +436,19 @@ impl IDownloader for Downloader {
     fn get_queue_size(&self) -> usize {
         (*self.job_queue).read().unwrap().len()
     }
+
+    fn browser_drag_request(&self, dragged_url: &str) {
+        let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
+        let gp_sender: Sender<Job> = self.gp_job_sender.as_ref().unwrap().clone();
+        let drag_i = DragInner::new(
+            dragged_url.to_string(),
+            self.source_c_sender.as_ref().unwrap().clone(),
+            self.web_fetcher.clone(),
+            errors_rep,
+            gp_sender,
+        );
+        self.add_to_queue(DLJob::BrowserDragEvaluation(drag_i));
+    }
 }
 
 impl Buildable for Downloader {
@@ -470,14 +496,12 @@ impl TimerReceiver for Downloader {
 #[derive(Clone, Debug)]
 pub struct Config {
     pub num_downloader_threads: u8,
-    // pub cleanup_databases: bool,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
             num_downloader_threads: 1,
-            // cleanup_databases: false,
         }
     }
 }

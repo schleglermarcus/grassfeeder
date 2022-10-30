@@ -1,5 +1,3 @@
-mod logger_config;
-
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::icon_repo::IconRepo;
@@ -14,39 +12,8 @@ use fr_core::downloader::db_clean::CleanerInner;
 use fr_core::downloader::db_clean::CleanerStart;
 use fr_core::util::timestamp_now;
 use fr_core::util::StepResult;
+use fr_core::TD_BASE;
 use std::collections::HashSet;
-
-/*
-//  #[ignore]
-#[test]
-fn cleanup_with_recursive_folder() {
-    setup();
-    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
-    let subsrepo = SubscriptionRepo::new_inmem(); // new("");
-    subsrepo.scrub_all_subscriptions();
-    let msgrepo1 = MessagesRepo::new_in_mem();
-    // let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
-    msgrepo1.get_ctx().create_table();
-
-    let mut se = SubscriptionEntry::default();
-    se.is_folder = true;
-    se.display_name = "folder1".to_string();
-    assert!(subsrepo.store_entry(&se).is_ok()); // id 1
-    se.display_name = "folder2".to_string();
-    se.parent_subs_id = 1;
-    assert!(subsrepo.store_entry(&se).is_ok()); // id 2
-    se.display_name = "folder3".to_string();
-    se.parent_subs_id = 0;
-    assert!(subsrepo.store_entry(&se).is_ok()); // id 3
-
-    let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
-    let iconrepo = IconRepo::new("");
-    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5);
-
-    subsrepo1.debug_dump_tree("::");
-}
-*/
 
 // #[ignore]
 #[test]
@@ -82,11 +49,8 @@ fn db_cleanup_too_many_messages() {
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5);
-    // cleaner_i.max_messages_per_subscription = 5;
     let _inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let msg1 = msgrepo2.get_by_src_id(5, false);
-    // msg1.iter().for_each(|m| debug!("leftover: {}", m));
-    // debug!("#msg={}", msg1.len());
     assert_eq!(msg1.len(), 5);
 }
 
@@ -128,7 +92,7 @@ fn clean_phase1(subs_repo: &SubscriptionRepo) {
 #[test]
 fn db_cleanup_remove_deleted() {
     setup();
-    let db_problem_json = "../fr_core/tests/data/san_subs_list_dmg1.json";
+    let db_problem_json = format!("{}websites/san_subs_list_dmg1.json", TD_BASE);
     let subsrepo = SubscriptionRepo::new_inmem();
     subsrepo.scrub_all_subscriptions();
     let lines = std::fs::read_to_string(db_problem_json.to_string()).unwrap();
@@ -232,6 +196,9 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
 
 // ------------------------------------
 
+mod logger_config;
+mod unzipper;
+
 #[allow(unused_imports)]
 #[macro_use]
 extern crate log;
@@ -244,5 +211,6 @@ fn setup() {
             // 0,
             logger_config::QuietFlags::Downloader as u64,
         );
+        unzipper::unzip_some();
     });
 }

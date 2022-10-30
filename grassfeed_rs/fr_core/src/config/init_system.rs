@@ -65,6 +65,8 @@ pub fn combine_config_path(path_config: &String) -> String {
 pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, String> {
     check_or_create_folder(&gf_conf.path_config);
     check_or_create_folder(&gf_conf.path_cache);
+
+    debug!(" path_cache={}", &gf_conf.path_cache);
     let mut ret: HashMap<String, String> = HashMap::default();
     ret.insert(
         icon_repo::KEY_FOLDERNAME.to_string(),
@@ -80,7 +82,7 @@ pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, Stri
     );
     ret.insert(
         ConfigManager::CONF_PATH_KEY.to_string(),
-        combine_config_path(&gf_conf.path_config), // format!("{}config.json", &gf_conf.path_config),
+        combine_config_path(&gf_conf.path_config),
     );
     ret.insert(
         ConfigManager::CONF_MODE_DEBUG.to_string(),
@@ -97,7 +99,7 @@ pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, Stri
     );
     ret.insert(
         PropDef::BrowserDir.tostring(),
-        format!("{}/browser", &gf_conf.path_cache),
+        format!("{}browser", &gf_conf.path_cache),
     );
     ret.insert(PropDef::GuiWindowWidth.tostring(), "700".to_string());
     ret.insert(PropDef::GuiWindowHeight.tostring(), "300".to_string());
