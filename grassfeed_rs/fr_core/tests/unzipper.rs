@@ -52,33 +52,3 @@ pub fn unzip_one(src_file: &str, out_dir: &str) -> Result<(), Box<dyn std::error
 pub fn io_to_boxed(e: ZipError) -> Box<dyn std::error::Error> {
     Box::new(e)
 }
-
-// const ZIPS_DIR: &str = "../fr_core/tests/zips/";
-// const UNPACK_DIR: &str = "../target/";
-// #[test]
-// fn unzip_1() {
-//     setup();
-//     let f1 = format!("{}websites.zip", ZIPS_DIR);
-//     let r = unzip_one(&f1, UNPACK_DIR);
-// }
-//
-
-/*
-// ------------------------------------
-
-mod logger_config;
-#[allow(unused_imports)]
-#[macro_use]
-extern crate log;
-use std::sync::Once;
-
-static TEST_SETUP: Once = Once::new();
-fn setup() {
-    TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_fern_logger(
-            logger_config::QuietFlags::Downloader as u64,
-            // 0
-        );
-    });
-}
-*/

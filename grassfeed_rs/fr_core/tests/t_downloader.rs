@@ -3,23 +3,20 @@ use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::downloader::util::extract_icon_from_homepage;
 use fr_core::TD_BASE;
 
-
-
 //RUST_BACKTRACE=1 cargo watch -s "cargo test   downloader::messages::t_:feed_text_to_entries_tages  --lib -- --exact --nocapture "
 // A date entry is not contained here
 #[test]
 fn feed_text_to_entries_tages() {
-	let filename = format!("{}feeds/tagesschau.rdf", TD_BASE);
-	let contents = std::fs::read_to_string(filename).unwrap();
-	let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
-		feed_text_to_entries(contents.clone(), 5, "some-url".to_string());
-	assert_eq!(new_list.len(), 46);
-	assert_eq!(
-		new_list.get(0).unwrap().post_id,
-		"https://www.tagesschau.de/inland/regierungserklaerung-scholz-gipfeltreffen-103.html"
-	);
+    let filename = format!("{}feeds/tagesschau.rdf", TD_BASE);
+    let contents = std::fs::read_to_string(filename).unwrap();
+    let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
+        feed_text_to_entries(contents.clone(), 5, "some-url".to_string());
+    assert_eq!(new_list.len(), 46);
+    assert_eq!(
+        new_list.get(0).unwrap().post_id,
+        "https://www.tagesschau.de/inland/regierungserklaerung-scholz-gipfeltreffen-103.html"
+    );
 }
-
 
 // #[ignore]
 #[test]
@@ -83,6 +80,6 @@ fn setup() {
         let _r = logger_config::setup_fern_logger(
             logger_config::QuietFlags::Config as u64 | logger_config::QuietFlags::Db as u64,
         );
-		unzipper::unzip_some();
+        unzipper::unzip_some();
     });
 }

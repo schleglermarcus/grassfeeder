@@ -92,7 +92,6 @@ fn clean_phase1(subs_repo: &SubscriptionRepo) {
 #[test]
 fn db_cleanup_remove_deleted() {
     setup();
-    // let db_problem_json = "../fr_core/tests/data/san_subs_list_dmg1.json";
     let db_problem_json = format!("{}websites/san_subs_list_dmg1.json", TD_BASE);
     let subsrepo = SubscriptionRepo::new_inmem();
     subsrepo.scrub_all_subscriptions();

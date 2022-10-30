@@ -140,11 +140,7 @@ pub fn create_new_folder_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObject
         match rt {
             ResponseType::Ok => {
                 let e_text: String = ent_c.text().as_str().to_string();
-                // let mut payload: Vec<AValue> = Vec::default();
-                // payload.push(AValue::ASTR(e_text));
-
                 let payload = vec![AValue::ASTR(e_text)];
-
                 let _r = g_ev_se.send(GuiEvents::DialogData("new-folder".to_string(), payload));
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {
@@ -164,7 +160,7 @@ pub fn create_new_folder_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObject
     ret.set_dialog(DIALOG_NEW_FOLDER, &dialog);
 }
 
-// TODO launch this dialog  from controller !!
+// Later:  launch this dialog  from controller
 pub fn create_new_subscription_dialog(
     g_ev_se: Sender<GuiEvents>,
     gtk_obj_a: GtkObjectsType,
