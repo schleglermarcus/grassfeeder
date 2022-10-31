@@ -1,22 +1,25 @@
 ## Installation
 
 
-### Linux Mint 21
-* Fetch the grassfeeder_*_amd64.deb from the releases page
+| OS  | *.deb  | *.AppImage |
+| ---- | ---- | ---- |
+| Linux Mint 21  | &#x2705;  | &#x2705;  | 
+| Linux Mint 20  | &#x274C;  | &#x2705;  | 
+| Ubuntu 20      |           | &#x2705;  | 
+| Ubuntu 18      | &#x274C;  | &#x274C;  | 
+
+
+
+### *.deb
+* Download the grassfeeder_*_amd64.deb from the releases page
 * Either Use the file manager nemo, the "debi" program
 * Or `sudo dpkg -i  grassfeeder_0.0.4_amd64.deb`
 
-### Linux Mint 20
-Version 0.0.4 and down do not work here, since they have no libgdk-pixbuf-2.0-0:amd64
-They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upgrade path.
-###### Mint20  uses
-- "focal" for Ubuntu packages
-- "uma" for Mint packages
-###### Mint21 uses
-- "jammy" for Ubuntu packages
-- "vanessa" for Mint  packages
 
-
+### *.AppImage
+* Download the grassfeeder_*.AppImage from the releases page
+* chmod +x grassfeeder_*.AppImage
+* ./grassfeeder_*.AppImage
 
 
 
@@ -32,6 +35,16 @@ They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upg
  - This ![version](https://distrowatch.com/table.php?distribution=ubuntu) is too old. 
 
 ##### Linux Mint 20 preparation, as user
+
+Version 0.0.4 and down do not work here, since they have no libgdk-pixbuf-2.0-0:amd64
+They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upgrade path.
+###### Mint20  uses
+- "focal" for Ubuntu packages
+- "uma" for Mint packages
+###### Mint21 uses
+- "jammy" for Ubuntu packages
+- "vanessa" for Mint  packages
+
   - Install rust:  `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 	- `cargo install cargo-deb`
 
@@ -54,3 +67,10 @@ They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upg
 - libc6 (>= 2.35)
 - libgdk-pixbuf-2.0-0 (>= 2.22.0)
 - libpango-1.0-0 (>= 1.14.0)
+
+
+
+
+### Linux Mint 20
+
+
