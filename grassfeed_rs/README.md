@@ -32,7 +32,8 @@
  - The package glib-sys-0.15.10  requires  glibc >2.48
  - \# pkg-config --libs --cflags glib-2.0 "glib-2.0 >= 2.48"
       Package glib-2.0 was not found in the pkg-config search path.
- - This ![version](https://distrowatch.com/table.php?distribution=ubuntu) is too old. 
+ - This [version](https://distrowatch.com/table.php?distribution=ubuntu)   is too old. Markup 
+ - This  <a href="https://distrowatch.com/table.php?distribution=ubuntu">version</a>  is too old. html 
 
 ##### Linux Mint 20 preparation, as user
 
