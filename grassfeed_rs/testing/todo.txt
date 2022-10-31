@@ -1,19 +1,9 @@
 To Do List
 
-- Marking of Messages, Favorites
-- Message List: set scroll position to upper edge from Cursor
+
+	- Marking of Messages, Favorites
+
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
-
-
-
-
-- Appimage Hub Deploy
-  https://github.com/AppImage/appimage.github.io
-  https://docs.appimage.org/reference/best-practices.html
-  https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
-	Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
-	without the installation of additional packages.
-
 
 
 
@@ -73,11 +63,11 @@ No more
 
 
 * Merge Branch and build release
-    git checkout main
-    git merge origin/v0_0_3
-    git push origin main
-    cd grassfeed_rs/app-gtk3-linux/ ; ./docker-stage2.sh
-
+  git checkout main
+  git merge origin/v0_0_3
+  git commit
+  git push origin main
+  cd grassfeed_rs/app-gtk3-linux/ ; ./docker-stage2.sh
 
 * Put the work folder back to main
   git checkout main
@@ -85,7 +75,6 @@ No more
 	git status
 
 * Create new Branch
-
 	git branch v0_0_4
 	git checkout v0_0_4
   git push -u origin v0_0_4
