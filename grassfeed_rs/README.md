@@ -3,7 +3,7 @@
 
 | OS  | *.deb  | *.AppImage |
 | ---- | ---- | ---- |
-| Linux Mint 21  | &#x2705;  | &#x2713;  | 
+| Linux Mint 21  | &#x2714;  | &#x2714;  | 
 | Linux Mint 20  | &#x274C;  | &#x2713;  | 
 | Ubuntu 20      |           | &#x2713;  | 
 | Ubuntu 18      | &#x274C;  | &#x274C;  | 
