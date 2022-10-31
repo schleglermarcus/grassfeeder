@@ -16,11 +16,6 @@ Drag extra care:
 	- Dragging the same element 2x
 
 
-
-
-
-
-
 Later:
 - GTK4: block multiple instances
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal

@@ -1,4 +1,4 @@
-use crate::timer::Timer;
+use crate::controller::timer::Timer;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;

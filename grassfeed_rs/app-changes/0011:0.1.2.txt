@@ -1,8 +1,7 @@
 Mon, 30 Oct 2022 00:18:00 +0000
+* Settings Dialog  : switches to even length
 
-- Settings Dialog  : switches to even length
 
-- Message List: set scroll position to upper edge from Cursor
 
 - Appimage Hub Deploy
   https://github.com/AppImage/appimage.github.io
@@ -10,3 +9,17 @@ Mon, 30 Oct 2022 00:18:00 +0000
   https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
 	Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
 	without the installation of additional packages.
+  https://github.com/AppImage/appimage.github.io/compare/master...schleglermarcus:appimage.github.io:patch-1
+
+
+
+https://github.com/AppImage/appimage.github.io/pull/3051
+
+- Message List: set scroll position to upper edge from Cursor
+
+
+- Create rpm  package
+  http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
+	https://lib.rs/crates/cargo-rpm
+	https://lib.rs/crates/cargo-generate-rpm
+	https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/31/Everything/x86_64/iso/

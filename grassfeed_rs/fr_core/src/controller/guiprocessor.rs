@@ -11,15 +11,15 @@ use crate::controller::sourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::statusbar::StatusBar;
+use crate::controller::timer::ITimer;
+use crate::controller::timer::Timer;
+use crate::controller::timer::TimerJob;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::opml::opmlreader::OpmlReader;
-use crate::timer::ITimer;
-use crate::timer::Timer;
-use crate::timer::TimerJob;
 use crate::ui_select::gui_context::GuiContext;
 use crate::ui_select::select::ui_select;
 use context::appcontext::AppContext;
@@ -189,7 +189,12 @@ impl GuiProcessor {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
                         .set_selected_feedsource(subs_id as isize);
-                    // trace!(                        "GP:TreeRowActivated{} #q:{} {:?} ",                        subs_id,                        (*self.downloader_r).borrow().get_queue_size(),                        _path                    );
+                    trace!(
+                        "GP:TreeRowActivated{} #q:{} {:?} ",
+                        subs_id,
+                        (*self.downloader_r).borrow().get_queue_size(),
+                        _path
+                    );
                     (*self.feedcontents_r)
                         .borrow()
                         .update_message_list(subs_id as isize);

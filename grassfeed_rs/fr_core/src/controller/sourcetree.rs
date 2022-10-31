@@ -20,8 +20,8 @@ use crate::db::subscription_state::StatusMask;
 use crate::db::subscription_state::SubsMapEntry;
 use crate::db::subscription_state::SubscriptionState;
 use crate::opml::opmlreader::OpmlReader;
-use crate::timer::ITimer;
-use crate::timer::Timer;
+use crate::controller::timer::ITimer;
+use crate::controller::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util::db_time_to_display_nonnull;
 use crate::util::filter_by_iso8859_1;
@@ -994,13 +994,10 @@ impl SourceTreeController {
     }
 
     fn check_paths(&self) {
-        // let now = Instant::now();
         if *self.need_check_fs_paths.borrow() {
             self.update_cached_paths();
             self.need_check_fs_paths.replace(false);
         }
-        // let elapsed_ms = now.elapsed().as_millis();
-        // if elapsed_ms > 20 {                debug!("check_paths took {} ms", elapsed_ms);            }
     }
 
     pub fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {

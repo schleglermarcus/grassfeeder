@@ -9,7 +9,7 @@ use crate::db::message::MessageRow;
 use crate::db::message_state::MessageStateMap;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
-use crate::timer::Timer;
+use crate::controller::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util::db_time_to_display;
 use crate::util::remove_invalid_chars_from_input;
@@ -251,6 +251,7 @@ impl FeedContents {
         let fp: usize = self.config.focus_policy as usize;
         assert!(fp < FOCUS_POLICY_NAMES.len());
         let fp_name = FOCUS_POLICY_NAMES[fp];
+		trace!("set_cursor_to_policy {}", &fp);
         match fp {
             1 => {
                 (*self.gui_updater)
@@ -620,9 +621,10 @@ impl IFeedContents for FeedContents {
             self.current_subscription
                 .replace((subscription_id, -1, isfolder));
             self.fill_state_map(&Vec::default());
+			
+			self.addjob(CJob::UpdateMessageList);
+	        self.addjob(CJob::ListSetCursorToPolicy);
         }
-        self.addjob(CJob::UpdateMessageList);
-        self.addjob(CJob::ListSetCursorToPolicy);
     }
 
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]) {

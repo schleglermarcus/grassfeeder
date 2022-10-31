@@ -4,7 +4,7 @@ use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
-use crate::timer::Timer;
+use crate::controller::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util;
 use crate::util::string_escape_url;

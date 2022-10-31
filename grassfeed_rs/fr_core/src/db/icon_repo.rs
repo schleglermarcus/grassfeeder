@@ -1,6 +1,6 @@
 use crate::db::message::compress;
 use crate::db::message::decompress;
-use crate::timer::Timer;
+use crate::controller::timer::Timer;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
