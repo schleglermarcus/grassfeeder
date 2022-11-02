@@ -7,9 +7,11 @@
 | Linux Mint 20         | &#x274C;  | &#x2714;  | 
 | Ubuntu 20             | &#x2714;  | &#x2714;  | 
 | Ubuntu 18             | &#x274C;  | &#x274C;  | 
+| OpenSuse 15.1 (2019)  | &#x274C;  | &#x274C;  | 
 | OpenSuse 15.0 (2018)  | &#x274C;  | &#x274C;  | 
 
-
+End of Life: [Ubuntu](https://endoflife.date/ubuntu) [Suse](https://endoflife.date/opensuse)
+<!--   grassfeeder*.AppImage needs at least glibc  2.28 -->
 
 ### *.deb
 * Download the grassfeeder_*_amd64.deb from the releases page
