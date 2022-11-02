@@ -3,10 +3,11 @@
 
 | OS  | *.deb  | *.AppImage |
 | ---- | ---- | ---- |
-| Linux Mint 21  | &#x2714;  | &#x2714;  | 
-| Linux Mint 20  | &#x274C;  | &#x2714;  | 
-| Ubuntu 20      | &#x2714;  | &#x2714;  | 
-| Ubuntu 18      | &#x274C;  | &#x274C;  | 
+| Linux Mint 21         | &#x2714;  | &#x2714;  | 
+| Linux Mint 20         | &#x274C;  | &#x2714;  | 
+| Ubuntu 20             | &#x2714;  | &#x2714;  | 
+| Ubuntu 18             | &#x274C;  | &#x274C;  | 
+| OpenSuse 15.0 (2018)  | &#x274C;  | &#x274C;  | 
 
 
 
