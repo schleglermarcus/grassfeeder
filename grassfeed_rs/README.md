@@ -1,14 +1,14 @@
 ## Installation
 
 
-| OS  | *.deb  | *.AppImage |
-| ---- | ---- | ---- |
-| Linux Mint 21             | &#x2714;  | &#x2714;  | 
-| Linux Mint 20             | &#x274C;  | &#x2714;  | 
-| Ubuntu 20                 | &#x2714;  | &#x2714;  | 
-| Ubuntu 18                 | &#x274C;  | &#x274C;  | 
-| OpenSuse 15.3 (2021-05)   |           | &#x2714;  | 
-| OpenSuse 15.2 (2021-02)   | &#x274C;  | &#x274C;  | 
+| OS  | *.deb  | *.AppImage | *.rpm |
+| ---- | ---- | ---- | ---- |
+| Linux Mint 21             | &#x2714;  | &#x2714;  | -        | 
+| Linux Mint 20             | &#x274C;  | &#x2714;  | -        |
+| Ubuntu 20                 | &#x2714;  | &#x2714;  | -        |
+| Ubuntu 18                 | &#x274C;  | &#x274C;  | -        |
+| OpenSuse 15.3 (2021-05)   | -         | &#x2714;  | &#x274C; | 
+| OpenSuse 15.2 (2021-02)   | -         | &#x274C;  | &#x274C; |
 
 
 End of Life: [Ubuntu](https://endoflife.date/ubuntu) [Suse](https://endoflife.date/opensuse)
