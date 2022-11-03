@@ -793,7 +793,7 @@ impl GuiProcessor {
             }
             KeyCodes::Delete => {
                 if self.focus_by_tab == FocusByTab::FocusMessages {
-                    (*self.feedcontents_r).borrow().process_kb_delete();
+                    (*self.feedcontents_r).borrow().keyboard_delete();
                 } else {
                     debug!("delete key but unfocused");
                 }

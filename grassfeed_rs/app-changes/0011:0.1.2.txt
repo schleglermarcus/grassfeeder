@@ -2,25 +2,24 @@ Mon, 30 Oct 2022 00:18:00 +0000
 * Settings Dialog  : switches to even length
 * Bugfix: don't refresh the list if we are there already
 * Bugfix: crash on font size change
-
-
-- Increase Icon to 128x128
-- für AppImage:  auto_link
-
-
-- Appimage Hub Deploy
-  https://github.com/AppImage/appimage.github.io
-  https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
-	Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
-	without the installation of additional packages.
-  https://github.com/AppImage/appimage.github.io/pull/3051
+* Using auto_link  for AppImage. This inflates the size from 4.3 MB  to 70 MB.
+* Bugfix:  mark-as-read shall update the list
 
 
 
 - Message List: set scroll position to upper edge from Cursor
+- Increase Icon to 128x128
 
 
 - Create rpm  package
 	https://lib.rs/crates/cargo-generate-rpm
 	http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
 	https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/31/Everything/x86_64/iso/
+
+
+- Appimage Hub Deploy
+	  https://github.com/AppImage/appimage.github.io
+	  https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
+		Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
+		without the installation of additional packages.
+	  https://github.com/AppImage/appimage.github.io/pull/3051

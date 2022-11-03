@@ -96,7 +96,7 @@ impl GuiContext {
             {
                 fs_man = i as u8;
             } else {
-                warn!("no GuiFontSizeManual from config!");
+                debug!("send_config_to_browser: no GuiFontSizeManual from config!");
             }
             o_fs_man = Some(fs_man);
         }

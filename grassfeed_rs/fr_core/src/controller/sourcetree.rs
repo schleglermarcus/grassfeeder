@@ -5,6 +5,8 @@ use crate::controller::contentlist::get_font_size_from_config;
 use crate::controller::contentlist::CJob;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
+use crate::controller::timer::ITimer;
+use crate::controller::timer::Timer;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::IMessagesRepo;
@@ -20,8 +22,6 @@ use crate::db::subscription_state::StatusMask;
 use crate::db::subscription_state::SubsMapEntry;
 use crate::db::subscription_state::SubscriptionState;
 use crate::opml::opmlreader::OpmlReader;
-use crate::controller::timer::ITimer;
-use crate::controller::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util::db_time_to_display_nonnull;
 use crate::util::filter_by_iso8859_1;
@@ -1211,7 +1211,7 @@ impl ISourceTreeController for SourceTreeController {
                 .iter()
                 .filter(|fse| !fse.is_folder)
                 .for_each(|fse| {
-                    trace!("mark_as_read{} {}  ", src_repo_id, fse.subs_id);
+                    // trace!("mark_as_read{} {}  ", src_repo_id, fse.subs_id);
                     if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                         (feedcontents)
                             .borrow_mut()
@@ -1227,7 +1227,7 @@ impl ISourceTreeController for SourceTreeController {
             (feedcontents)
                 .borrow_mut()
                 .set_read_complete_subscription(src_repo_id as isize);
-            (*self.gui_updater).borrow().update_list(TREEVIEW1);
+            feedcontents.borrow().addjob(CJob::UpdateMessageList);
         }
     }
 

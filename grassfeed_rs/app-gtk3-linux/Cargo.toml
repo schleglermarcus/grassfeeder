@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.1.2-B3"
+version = "0.1.2-B4"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -48,7 +48,16 @@ default-locale = "en"
 
 [package.metadata.appimage]
 assets = ["assets/usr"]
-
+auto_link = true
+auto_link_exclude_list = [
+    "libc.so*",
+    "libdl.so*",
+    "libpthread.so*",
+		"libwebkit2*",
+		"libicu*",
+		"libjavascript*",
+		"libgtk3*",
+]
 
 
 [package.metadata.generate-rpm]

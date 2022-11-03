@@ -14,7 +14,6 @@ pub mod controller;
 pub mod db;
 pub mod downloader;
 pub mod opml;
-// pub mod timer;
 pub mod ui_select;
 pub mod util;
 pub mod web;

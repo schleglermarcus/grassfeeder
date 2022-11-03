@@ -110,10 +110,12 @@ pub trait IFeedContents {
     fn move_list_cursor(&self, c: ListMoveCommand);
     fn set_messages_filter(&mut self, newtext: &str);
 
-    fn process_kb_delete(&self);
+    /// does not update the message list
     fn set_read_complete_subscription(&mut self, source_repo_id: isize);
+
     fn memory_conserve(&mut self, act: bool);
     fn launch_browser(&self);
+    fn keyboard_delete(&self);
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
@@ -218,7 +220,6 @@ impl FeedContents {
             return;
         }
         let repo_ids: Vec<i32> = repoid_listpos.iter().map(|(r, _p)| *r).collect();
-        // debug!("set_read_many : {} {:?}", is_read, repo_ids);
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_many(&repo_ids, is_read);
@@ -227,7 +228,7 @@ impl FeedContents {
             .unwrap()
             .set_read_many(&repo_ids, is_read);
         let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
-        debug!("set_read_many : subs_id{}  isfolder{} ", subs_id, isfolder);
+        // trace!(            "set_read_many : subs_id{}  isfolder{}    {} {:?} ",            subs_id,            isfolder,            is_read,            repo_ids        );
         if isfolder {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
                 if let Some((_subs_e, children)) =
@@ -251,7 +252,6 @@ impl FeedContents {
         let fp: usize = self.config.focus_policy as usize;
         assert!(fp < FOCUS_POLICY_NAMES.len());
         let fp_name = FOCUS_POLICY_NAMES[fp];
-        trace!("set_cursor_to_policy {}", &fp);
         match fp {
             1 => {
                 (*self.gui_updater)
@@ -595,18 +595,24 @@ impl IFeedContents for FeedContents {
                 (*feedsources).borrow().addjob(SJob::ScanEmptyUnread);
             }
         }
-        //  this shall only be called from outside.   Problem:  Select the list only
-        //         self.set_selected_content_ids(vec![*last_content_id]);
     }
 
     fn set_read_complete_subscription(&mut self, src_repo_id: isize) {
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_all(src_repo_id, true);
-        let (subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
-        if subs_id == src_repo_id {
+        let (current_subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
+//        debug!(            "set_read_complete_subscription: {} != {}",            current_subs_id, src_repo_id        );
+        if current_subs_id == src_repo_id {
             self.update_message_list(src_repo_id);
             self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
+
+            (*self.gui_updater).borrow().update_list(TREEVIEW1);
+        } else {
+            warn!(
+                "set_read_complete_subscription: {} != {}",
+                current_subs_id, src_repo_id
+            );
         }
     }
 
@@ -873,7 +879,7 @@ impl IFeedContents for FeedContents {
         self.addjob(CJob::UpdateMessageList);
     }
 
-    fn process_kb_delete(&self) {
+    fn keyboard_delete(&self) {
         let del_ids = self.list_selected_ids.read().unwrap();
         self.delete_messages(&del_ids);
     }
