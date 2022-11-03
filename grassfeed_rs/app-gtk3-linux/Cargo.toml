@@ -56,7 +56,7 @@ auto_link_exclude_list = [
 		"libwebkit2*",
 		"libicu*",
 		"libjavascript*",
-		"libgtk3*",
+		"libgtk*",
 ]
 
 
@@ -71,5 +71,5 @@ assets = [
     	{ source="../target/release/grassfeeder", dest="/usr/bin/grassfeeder", mode="755" },
     	{ source="assets/grassfeeder.desktop", dest="/usr/share/applications/grassfeeder.desktop", mode="755" },
     	{ source="assets/grassfeeder.xpm",     dest="/usr/share/pixmaps/grassfeeder/grassfeeder.xpm", mode="755" },
-    	{ source="assets/grassfeeder-indicator2.png", dest="/usr/share/pixmaps/grassfeeder/grassfeeder-indicator2.png", mode="755" },
+    	{ source="assets/grassfeeder-logo-128x128-t.png", dest="/usr/share/pixmaps/grassfeeder/grassfeeder.png", mode="755" },
 ]
