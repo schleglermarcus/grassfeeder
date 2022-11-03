@@ -757,6 +757,7 @@ fn create_settings_dialog(
         cbt_timescale.append_text(&get_fetch_updater_interval_name(2));
         cbt_timescale.append_text(&get_fetch_updater_interval_name(3));
         cbt_timescale.set_id_column(0);
+        cbt_timescale.set_halign(Align::Start);
         grid1.attach_next_to(
             &cbt_timescale,
             Some(&spinb_source_update),

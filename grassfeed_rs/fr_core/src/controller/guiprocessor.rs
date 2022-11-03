@@ -189,12 +189,7 @@ impl GuiProcessor {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
                         .set_selected_feedsource(subs_id as isize);
-                    trace!(
-                        "GP:TreeRowActivated{} #q:{} {:?} ",
-                        subs_id,
-                        (*self.downloader_r).borrow().get_queue_size(),
-                        _path
-                    );
+                    // trace!("GP:TreeRowActivated{}  {:?} ", subs_id, _path);
                     (*self.feedcontents_r)
                         .borrow()
                         .update_message_list(subs_id as isize);

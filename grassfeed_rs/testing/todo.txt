@@ -33,6 +33,7 @@ Later:
 
 
 
+
 Perhaps:
 - Keybard configuration in settings
 - Updating Sources:  prioritize by tree position, expanded flag
@@ -101,6 +102,8 @@ https://www.gtk.org/docs/installations/windows/
 Desktop:
 https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 
+Suse Linux download:
+  https://mirrorcache.opensuse.org/download/distribution/leap/15.2/iso/ 
 
 ------ AppImage
 
