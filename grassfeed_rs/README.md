@@ -7,22 +7,32 @@
 | Linux Mint 20             | &#x274C;  | &#x2714;  | -        |
 | Ubuntu 20                 | &#x2714;  | &#x2714;  | -        |
 | Ubuntu 18                 | &#x274C;  | &#x274C;  | -        |
+| OpenSuse 15.5 (2022-09)   | -         | &#x2714;  | &#x274C; | 
+| OpenSuse 15.4 (2021-05)   | -         | &#x2714;  | &#x274C; | 
 | OpenSuse 15.3 (2021-05)   | -         | &#x2714;  | &#x274C; | 
 | OpenSuse 15.2 (2021-02)   | -         | &#x274C;  | &#x274C; |
+| Fedora 33 (2020-10)       | -         |     |     |
+| Fedora 31 (2019-10)       | -         | &#x274C;  |     |
 | Fedora 30 (2019-04)       | -         | &#x274C;  | &#x274C; |
 | Fedora 29 (2018-10)       | -         | &#x274C;  | &#x274C; |
 
 
-End of Life: [Ubuntu](https://endoflife.date/ubuntu) [Suse](https://endoflife.date/opensuse)
-<!-- grassfeeder*.AppImage needs at least glibc-2.29
+End of Life: [Ubuntu](https://endoflife.date/ubuntu) [Suse](https://endoflife.date/opensuse) [Fedora](https://endoflife.date/fedora)
+<!-- 
+     grassfeeder*.AppImage needs at least glibc-2.29
      OpenSuse-15.2 has glibc-2.26
 
      mint21-built   grassfeeder*.rpm  needs at least glibc-2.32
      OpenSuse-15.3  has glibc-2.31
+     OpenSuse-15.4  has glibc-2.31
+     OpenSuse-15.5  has glibc-2.31
      
-     Fedora-29  has glibc-2.28, too old
-     Fedora-30  :   get_is_web_process_responsive  not found -> webkit2gtk too old
-    
+     Fedora-29  has glibc-2.28.9, too old
+     Fedora-30  :  *.AppImage:    web_view_get_is_web_process_responsive  not found -> webkit2gtk too old
+                  *.rpm   needs   glibc-2.32
+     Fedora-31  :  *.AppImage:    web_view_get_is_web_process_responsive  not found -> webkit2gtk too old
+                  *.rpm   needs   glibc-2.32,  only 2.30 is available
+                       
 -->
 
 ### *.deb
