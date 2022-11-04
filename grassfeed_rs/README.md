@@ -20,7 +20,8 @@ End of Life: [Ubuntu](https://endoflife.date/ubuntu) [Suse](https://endoflife.da
      mint21-built   grassfeeder*.rpm  needs at least glibc-2.32
      OpenSuse-15.3  has glibc-2.31
      
-     Fedora-29  has glibc-2.28 
+     Fedora-29  has glibc-2.28, too old
+     Fedora-30  :   get_is_web_process_responsive  not found -> webkit2gtk too old
     
 -->
 
