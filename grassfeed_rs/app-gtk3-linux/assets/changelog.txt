@@ -3,13 +3,11 @@ grassfeeder (0.1.2) unstable; urgency=low
   * Settings Dialog  : switches to even length
   * Bugfix: don't refresh the list if we are there already
   * Bugfix: crash on font size change
-  * Using auto_link  for AppImage. This inflates the size from 4.3 MB  to 70 MB.
+  * Using auto_link  for AppImage. This inflates the size from 4.3 MB  to 25 MB, with some spared libs.
   * Bugfix:  mark-as-read shall update the list
+  * Adding  Icon 128x128 to app-image
+  * Message List: set scroll position to upper edge from Cursor
   
-  
-  
-  - Message List: set scroll position to upper edge from Cursor
-  - Increase Icon to 128x128
   
   
   - Create rpm  package

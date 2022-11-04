@@ -44,6 +44,7 @@ use url::Url;
 use webbrowser;
 
 const JOBQUEUE_SIZE: usize = 100;
+const LIST_SCROLL_POS: i8 = 70; // to 70% of the upper list is visible, the cursor shall go to the lower 30%
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CJob {
@@ -254,9 +255,12 @@ impl FeedContents {
         let fp_name = FOCUS_POLICY_NAMES[fp];
         match fp {
             1 => {
-                (*self.gui_updater)
-                    .borrow()
-                    .list_set_cursor(TREEVIEW1, -1, LIST0_COL_MSG_ID); // None
+                (*self.gui_updater).borrow().list_set_cursor(
+                    TREEVIEW1,
+                    -1,
+                    LIST0_COL_MSG_ID,
+                    LIST_SCROLL_POS,
+                ); // None
             }
             2 => {
                 let mut last_selected_msg_id: isize = -1; // Last Selected
@@ -272,6 +276,7 @@ impl FeedContents {
                         TREEVIEW1,
                         last_selected_msg_id,
                         LIST0_COL_MSG_ID,
+                        LIST_SCROLL_POS,
                     );
                 }
             }
@@ -294,6 +299,7 @@ impl FeedContents {
                         TREEVIEW1,
                         highest_ts_repo_id,
                         LIST0_COL_MSG_ID,
+                        LIST_SCROLL_POS,
                     );
                 }
             }
@@ -302,9 +308,12 @@ impl FeedContents {
                     self.msg_state.read().unwrap().find_before_earliest_unread();
                 // trace!(                    "BeforeOldestUnread {} `{}` earliest:{:?} ",                    fp, fp_name, o_before_earliest_unread_id                );
                 if let Some(id) = o_before_earliest_unread_id {
-                    (*self.gui_updater)
-                        .borrow()
-                        .list_set_cursor(TREEVIEW1, id, LIST0_COL_MSG_ID);
+                    (*self.gui_updater).borrow().list_set_cursor(
+                        TREEVIEW1,
+                        id,
+                        LIST0_COL_MSG_ID,
+                        LIST_SCROLL_POS,
+                    );
                 }
             }
             _ => (),
@@ -602,7 +611,7 @@ impl IFeedContents for FeedContents {
             .borrow_mut()
             .update_is_read_all(src_repo_id, true);
         let (current_subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
-//        debug!(            "set_read_complete_subscription: {} != {}",            current_subs_id, src_repo_id        );
+        //        debug!(            "set_read_complete_subscription: {} != {}",            current_subs_id, src_repo_id        );
         if current_subs_id == src_repo_id {
             self.update_message_list(src_repo_id);
             self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
@@ -863,9 +872,12 @@ impl IFeedContents for FeedContents {
             .unwrap()
             .find_unread_message(first_selected_msg, select_later);
         if let Some(dest_id) = o_dest_subs_id {
-            (*self.gui_updater)
-                .borrow()
-                .list_set_cursor(TREEVIEW1, dest_id, LIST0_COL_MSG_ID);
+            (*self.gui_updater).borrow().list_set_cursor(
+                TREEVIEW1,
+                dest_id,
+                LIST0_COL_MSG_ID,
+                LIST_SCROLL_POS,
+            );
         }
     }
 
