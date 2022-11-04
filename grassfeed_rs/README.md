@@ -9,11 +9,18 @@
 | Ubuntu 18                 | &#x274C;  | &#x274C;  | -        |
 | OpenSuse 15.3 (2021-05)   | -         | &#x2714;  | &#x274C; | 
 | OpenSuse 15.2 (2021-02)   | -         | &#x274C;  | &#x274C; |
+| Fedora 29 (2018-10)       | -         | &#x274C;  | &#x274C; |
 
 
 End of Life: [Ubuntu](https://endoflife.date/ubuntu) [Suse](https://endoflife.date/opensuse)
-<!--   grassfeeder*.AppImage needs at least glibc-2.28 
-    OpenSuse-15.2 has glibc-2.26
+<!-- grassfeeder*.AppImage needs at least glibc-2.29
+     OpenSuse-15.2 has glibc-2.26
+
+     mint21-built   grassfeeder*.rpm  needs at least glibc-2.32
+     OpenSuse-15.3  has glibc-2.31
+     
+     Fedora-29  has glibc-2.28 
+    
 -->
 
 ### *.deb
