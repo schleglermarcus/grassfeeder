@@ -53,7 +53,7 @@ auto_link_exclude_list = [
     "libc.so*",
     "libdl.so*",
     "libpthread.so*",
-		"libwebkit2*",
+#		"libwebkit2*",
 #		"libicu*",
 #		"libjavascript*",
 		"libgtk*",
