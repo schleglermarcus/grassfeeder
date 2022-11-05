@@ -56,7 +56,7 @@ auto_link_exclude_list = [
 #		"libwebkit2*",
 #		"libicu*",
 #		"libjavascript*",
-		"libgtk*",
+# 		"libgtk*",
 ]
 
 
