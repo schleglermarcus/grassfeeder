@@ -5,6 +5,8 @@ use crate::controller::contentlist::get_font_size_from_config;
 use crate::controller::contentlist::CJob;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
+use crate::controller::timer::ITimer;
+use crate::controller::timer::Timer;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::IMessagesRepo;
@@ -20,8 +22,6 @@ use crate::db::subscription_state::StatusMask;
 use crate::db::subscription_state::SubsMapEntry;
 use crate::db::subscription_state::SubscriptionState;
 use crate::opml::opmlreader::OpmlReader;
-use crate::timer::ITimer;
-use crate::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util::db_time_to_display_nonnull;
 use crate::util::filter_by_iso8859_1;
@@ -143,7 +143,7 @@ pub trait ISourceTreeController {
     /// writes the path array into the cached subscription list
     fn update_cached_paths(&self);
 
-    fn invalidate_read_unread(&self, subs_id: isize);
+    fn clear_read_unread(&self, subs_id: isize);
     fn memory_conserve(&mut self, act: bool);
 
     fn set_selected_message_id(&mut self, subs_id: isize, msg_id: isize);
@@ -405,7 +405,6 @@ impl SourceTreeController {
                         (*self.gui_updater)
                             .borrow()
                             .update_dialog(DIALOG_NEW_SUBSCRIPTION);
-
                         (*self.gui_updater)
                             .borrow()
                             .show_dialog(DIALOG_NEW_SUBSCRIPTION);
@@ -994,13 +993,10 @@ impl SourceTreeController {
     }
 
     fn check_paths(&self) {
-        // let now = Instant::now();
         if *self.need_check_fs_paths.borrow() {
             self.update_cached_paths();
             self.need_check_fs_paths.replace(false);
         }
-        // let elapsed_ms = now.elapsed().as_millis();
-        // if elapsed_ms > 20 {                debug!("check_paths took {} ms", elapsed_ms);            }
     }
 
     pub fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {
@@ -1214,7 +1210,7 @@ impl ISourceTreeController for SourceTreeController {
                 .iter()
                 .filter(|fse| !fse.is_folder)
                 .for_each(|fse| {
-                    trace!("mark_as_read{} {}  ", src_repo_id, fse.subs_id);
+                    // trace!("mark_as_read{} {}  ", src_repo_id, fse.subs_id);
                     if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                         (feedcontents)
                             .borrow_mut()
@@ -1230,7 +1226,7 @@ impl ISourceTreeController for SourceTreeController {
             (feedcontents)
                 .borrow_mut()
                 .set_read_complete_subscription(src_repo_id as isize);
-            (*self.gui_updater).borrow().update_list(TREEVIEW1);
+            feedcontents.borrow().addjob(CJob::UpdateMessageList);
         }
     }
 
@@ -1700,7 +1696,7 @@ impl ISourceTreeController for SourceTreeController {
         self.update_paths_rec(&Vec::<u16>::default(), 0, false);
     }
 
-    fn invalidate_read_unread(&self, subs_id: isize) {
+    fn clear_read_unread(&self, subs_id: isize) {
         self.statemap.borrow_mut().clear_num_all_unread(subs_id);
         self.addjob(SJob::ScanEmptyUnread);
     }

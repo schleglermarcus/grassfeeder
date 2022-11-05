@@ -144,9 +144,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 false,
             );
         });
-    }
-    if false {
-        feedsources.add_new_subscription_at_parent(
+		feedsources.add_new_subscription_at_parent(
             url_nn_aug,
             "NN-aug".to_string(),
             folder1,
@@ -164,6 +162,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             folder1,
             false,
         );
+    }
+    if false {
         let src = [
             ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
             ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),

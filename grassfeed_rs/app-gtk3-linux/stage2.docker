@@ -14,17 +14,23 @@ RUN cat gf.tar.gz |gzip -d |tar x
 
 WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
 RUN pwd
-RUN ls -l
 RUN cargo clean
 RUN cargo test --release
 RUN cargo deb
-RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
+RUN cargo generate-rpm
 
-RUN ls -l
-RUN mv grassfeeder*.AppImage  gf.AppImage
-RUN ls -l
+# We build the appimage manually on linux mint 20
+# RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
+
+RUN ls -l  target/generate-rpm/*
+RUN cp target/generate-rpm/a*.rpm  ../target/gf.rpm
+
 
 WORKDIR /usr/src/grassfeed_rs/target
-RUN ls -l debian/*
+RUN ls -l debian/* 
 RUN mv debian/grass*.deb  gf.deb
-RUN ls -l
+
+
+
+#RUN mv grassfeeder*.AppImage  gf.AppImage
+#RUN ls -l

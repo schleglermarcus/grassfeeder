@@ -4,12 +4,12 @@ use crate::controller::browserpane::IBrowserPane;
 use crate::controller::sourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
+use crate::controller::timer::Timer;
 use crate::db::message::decompress;
 use crate::db::message::MessageRow;
 use crate::db::message_state::MessageStateMap;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
-use crate::timer::Timer;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util::db_time_to_display;
 use crate::util::remove_invalid_chars_from_input;
@@ -44,6 +44,7 @@ use url::Url;
 use webbrowser;
 
 const JOBQUEUE_SIZE: usize = 100;
+const LIST_SCROLL_POS: i8 = 70; // to 70% of the upper list is visible, the cursor shall go to the lower 30%
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CJob {
@@ -110,10 +111,12 @@ pub trait IFeedContents {
     fn move_list_cursor(&self, c: ListMoveCommand);
     fn set_messages_filter(&mut self, newtext: &str);
 
-    fn process_kb_delete(&self);
+    /// does not update the message list
     fn set_read_complete_subscription(&mut self, source_repo_id: isize);
+
     fn memory_conserve(&mut self, act: bool);
     fn launch_browser(&self);
+    fn keyboard_delete(&self);
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
@@ -199,7 +202,7 @@ impl FeedContents {
         ))); // 4
         newrow.push(AValue::AU32(fc.message_id as u32)); // 5
         if debug_mode {
-            let isdel = if fc.is_deleted { 1 } else { 0 };
+            let isdel = i32::from(fc.is_deleted); // if { 1 } else { 0 }
             newrow.push(AValue::ASTR(format!(
                 "id{} src{}  D:{} F:{}",
                 fc.message_id,
@@ -218,7 +221,6 @@ impl FeedContents {
             return;
         }
         let repo_ids: Vec<i32> = repoid_listpos.iter().map(|(r, _p)| *r).collect();
-        // debug!("set_read_many : {} {:?}", is_read, repo_ids);
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_many(&repo_ids, is_read);
@@ -227,7 +229,7 @@ impl FeedContents {
             .unwrap()
             .set_read_many(&repo_ids, is_read);
         let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
-        debug!("set_read_many : subs_id{}  isfolder{} ", subs_id, isfolder);
+        // trace!(            "set_read_many : subs_id{}  isfolder{}    {} {:?} ",            subs_id,            isfolder,            is_read,            repo_ids        );
         if isfolder {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
                 if let Some((_subs_e, children)) =
@@ -253,9 +255,12 @@ impl FeedContents {
         let fp_name = FOCUS_POLICY_NAMES[fp];
         match fp {
             1 => {
-                (*self.gui_updater)
-                    .borrow()
-                    .list_set_cursor(TREEVIEW1, -1, LIST0_COL_MSG_ID); // None
+                (*self.gui_updater).borrow().list_set_cursor(
+                    TREEVIEW1,
+                    -1,
+                    LIST0_COL_MSG_ID,
+                    LIST_SCROLL_POS,
+                ); // None
             }
             2 => {
                 let mut last_selected_msg_id: isize = -1; // Last Selected
@@ -271,6 +276,7 @@ impl FeedContents {
                         TREEVIEW1,
                         last_selected_msg_id,
                         LIST0_COL_MSG_ID,
+                        LIST_SCROLL_POS,
                     );
                 }
             }
@@ -293,6 +299,7 @@ impl FeedContents {
                         TREEVIEW1,
                         highest_ts_repo_id,
                         LIST0_COL_MSG_ID,
+                        LIST_SCROLL_POS,
                     );
                 }
             }
@@ -301,9 +308,12 @@ impl FeedContents {
                     self.msg_state.read().unwrap().find_before_earliest_unread();
                 // trace!(                    "BeforeOldestUnread {} `{}` earliest:{:?} ",                    fp, fp_name, o_before_earliest_unread_id                );
                 if let Some(id) = o_before_earliest_unread_id {
-                    (*self.gui_updater)
-                        .borrow()
-                        .list_set_cursor(TREEVIEW1, id, LIST0_COL_MSG_ID);
+                    (*self.gui_updater).borrow().list_set_cursor(
+                        TREEVIEW1,
+                        id,
+                        LIST0_COL_MSG_ID,
+                        LIST_SCROLL_POS,
+                    );
                 }
             }
             _ => (),
@@ -426,7 +436,7 @@ impl FeedContents {
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         self.update_message_list(subs_id);
         if let Some(feedsources) = self.feedsources_w.upgrade() {
-            feedsources.borrow().invalidate_read_unread(subs_id);
+            feedsources.borrow().clear_read_unread(subs_id);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
         }
     }
@@ -594,18 +604,24 @@ impl IFeedContents for FeedContents {
                 (*feedsources).borrow().addjob(SJob::ScanEmptyUnread);
             }
         }
-        //  this shall only be called from outside.   Problem:  Select the list only
-        //         self.set_selected_content_ids(vec![*last_content_id]);
     }
 
     fn set_read_complete_subscription(&mut self, src_repo_id: isize) {
         (*self.messagesrepo_r)
             .borrow_mut()
             .update_is_read_all(src_repo_id, true);
-        let (subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
-        if subs_id == src_repo_id {
+        let (current_subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
+        //        debug!(            "set_read_complete_subscription: {} != {}",            current_subs_id, src_repo_id        );
+        if current_subs_id == src_repo_id {
             self.update_message_list(src_repo_id);
             self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
+
+            (*self.gui_updater).borrow().update_list(TREEVIEW1);
+        } else {
+            warn!(
+                "set_read_complete_subscription: {} != {}",
+                current_subs_id, src_repo_id
+            );
         }
     }
 
@@ -620,9 +636,9 @@ impl IFeedContents for FeedContents {
             self.current_subscription
                 .replace((subscription_id, -1, isfolder));
             self.fill_state_map(&Vec::default());
+            self.addjob(CJob::UpdateMessageList);
+            self.addjob(CJob::ListSetCursorToPolicy);
         }
-        self.addjob(CJob::UpdateMessageList);
-        self.addjob(CJob::ListSetCursorToPolicy);
     }
 
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]) {
@@ -798,6 +814,11 @@ impl IFeedContents for FeedContents {
             listpos_id.push((gui_pos as u32, *dbid as u32));
         });
         self.addjob(CJob::UpdateContentListSome(listpos_id));
+
+        let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
+        if let Some(feedsources) = self.feedsources_w.upgrade() {
+            (*feedsources).borrow().clear_read_unread(subs_id);
+        }
     }
 
     fn get_msg_content_author_categories(
@@ -856,9 +877,12 @@ impl IFeedContents for FeedContents {
             .unwrap()
             .find_unread_message(first_selected_msg, select_later);
         if let Some(dest_id) = o_dest_subs_id {
-            (*self.gui_updater)
-                .borrow()
-                .list_set_cursor(TREEVIEW1, dest_id, LIST0_COL_MSG_ID);
+            (*self.gui_updater).borrow().list_set_cursor(
+                TREEVIEW1,
+                dest_id,
+                LIST0_COL_MSG_ID,
+                LIST_SCROLL_POS,
+            );
         }
     }
 
@@ -872,7 +896,7 @@ impl IFeedContents for FeedContents {
         self.addjob(CJob::UpdateMessageList);
     }
 
-    fn process_kb_delete(&self) {
+    fn keyboard_delete(&self) {
         let del_ids = self.list_selected_ids.read().unwrap();
         self.delete_messages(&del_ids);
     }

@@ -166,8 +166,8 @@ impl GtkRunnerInternal {
                     IntCommands::UpdateLinkButton(i) => upd_int.update_linkbutton(i),
                     IntCommands::ShowDialog(i) => upd_int.show_dialog(i),
                     IntCommands::UpdatePanedPos(i, pos) => upd_int.update_paned_pos(i, pos),
-                    IntCommands::ListSetCursor(i, pos, column) => {
-                        upd_int.list_set_cursor(i, pos, column)
+                    IntCommands::ListSetCursor(i, pos, column, scroll_pos) => {
+                        upd_int.list_set_cursor(i, pos, column, scroll_pos)
                     }
                     IntCommands::WidgetMark(ref typ, i, mark) => {
                         upd_int.widget_mark(typ.clone(), i, mark);

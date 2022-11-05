@@ -104,11 +104,11 @@ impl GtkGuiBuilder for GtkObjectTree {
             move |_w: &gtk::Window, ev_win_st: &gdk::EventWindowState| {
                 let state_bits = ev_win_st.new_window_state().bits();
                 let is_icon = (state_bits & gdk::WindowState::ICONIFIED.bits()) > 0;
-                let last_iconified = GLOB_CACHE.with(|glob| (*glob.borrow()).window_is_iconified);
+                let last_iconified = GLOB_CACHE.with(|glob| glob.borrow().window_is_iconified);
                 if is_icon != last_iconified {
                     // trace!("win-state-bits: {:#06x}   is-icon:{}", state_bits, is_icon);
                     GLOB_CACHE.with(|glob| {
-                        (*glob.borrow_mut()).window_is_iconified = is_icon;
+                        glob.borrow_mut().window_is_iconified = is_icon;
                     });
                     esw.sendw(GuiEvents::WindowIconified(is_icon));
                 }
@@ -120,16 +120,12 @@ impl GtkGuiBuilder for GtkObjectTree {
         window.connect_size_allocate(move |_win, rectangle| {
             let n_w: i32 = (*rectangle).width();
             let n_h: i32 = (*rectangle).height();
-            let (last_w, last_h) = GLOB_CACHE.with(|glob| {
-                (
-                    (*glob.borrow()).window_width,
-                    (*glob.borrow()).window_height,
-                )
-            });
+            let (last_w, last_h) =
+                GLOB_CACHE.with(|glob| (glob.borrow().window_width, glob.borrow().window_height));
             if n_w != last_w || n_h != last_h {
                 GLOB_CACHE.with(|glob| {
-                    (*glob.borrow_mut()).window_width = n_w;
-                    (*glob.borrow_mut()).window_height = n_h;
+                    glob.borrow_mut().window_width = n_w;
+                    glob.borrow_mut().window_height = n_h;
                 });
                 esw.sendw(GuiEvents::WindowSizeChanged(n_w, n_h));
             }
@@ -151,9 +147,9 @@ impl GtkGuiBuilder for GtkObjectTree {
         let esw = EvSenderWrapper(gui_event_sender.clone());
         paned_top.connect_leave_notify_event(move |paned_top: &Paned, _a2| {
             let newpos: i32 = paned_top.position();
-            if newpos != GLOB_CACHE.with(|glob| (*glob.borrow()).pane1x) {
+            if newpos != GLOB_CACHE.with(|glob| glob.borrow().pane1x) {
                 GLOB_CACHE.with(|glob| {
-                    (*glob.borrow_mut()).pane1x = newpos;
+                    glob.borrow_mut().pane1x = newpos;
                 });
                 esw.sendw(GuiEvents::PanedMoved(1, newpos));
             }
@@ -192,9 +188,9 @@ impl GtkGuiBuilder for GtkObjectTree {
         let esw = EvSenderWrapper(gui_event_sender.clone());
         paned_1.connect_position_notify(move |paned| {
             let newpos: i32 = paned.position();
-            if newpos != GLOB_CACHE.with(|glob| (*glob.borrow()).pane0x) {
+            if newpos != GLOB_CACHE.with(|glob| glob.borrow().pane0x) {
                 GLOB_CACHE.with(|glob| {
-                    (*glob.borrow_mut()).pane0x = newpos;
+                    glob.borrow_mut().pane0x = newpos;
                 });
                 esw.sendw(GuiEvents::PanedMoved(0, newpos));
             }

@@ -238,7 +238,7 @@ impl UIUpdaterAdapter for UpdAda {
     fn update_paned_pos(&self, _nr: u8, _pos: i32) {}
     fn widget_mark(&self, _typ: UIUpdaterMarkWidgetType, _sw_idx: u8, _mark: u8) {}
     fn grab_focus(&self, _typ: UIUpdaterMarkWidgetType, _idx: u8) {}
-    fn list_set_cursor(&self, _list_index: u8, _db_id: isize, _column: u8) {}
+    fn list_set_cursor(&self, _list_index: u8, _db_id: isize, _column: u8, _scrollpos: i8) {}
     fn update_window_title(&self) {}
     fn update_window_icon(&self) {}
     fn update_web_view(&self, _nr: u8) {}

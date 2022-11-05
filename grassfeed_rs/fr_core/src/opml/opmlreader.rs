@@ -124,7 +124,7 @@ impl OpmlReader {
             if fse.is_folder {
                 OpmlReader::feedsource_to_outline(&mut outl, &fse, feed_src_repo.clone());
             }
-            (*outline).outlines.push(outl);
+            outline.outlines.push(outl);
         }
     }
 

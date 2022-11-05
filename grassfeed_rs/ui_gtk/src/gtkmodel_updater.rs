@@ -212,7 +212,7 @@ impl GtkModelUpdaterInt {
             gti = &gti.children[*p_index as usize];
         }
         let path_cn = format!("{:?}", path)
-            .replace(&['[', ']', ' '], "")
+            .replace( ['[', ']', ' '], "")
             .replace(',', ":");
         if let Some(iter) = tree_store.iter_from_string(&path_cn) {
             self.treestore_set_row(&tree_store, gti, &iter, max_columns);
@@ -515,7 +515,7 @@ impl GtkModelUpdaterInt {
 
     //  unavailable db-id:   remove focus.
     //  Tried to:  disconnect, reconnect ->  cursor is gone
-    pub fn list_set_cursor(&self, idx: u8, db_id: isize, column: u8) {
+    pub fn list_set_cursor(&self, idx: u8, db_id: isize, column: u8, scroll_pos: i8) {
         let now = std::time::Instant::now();
         let g_o = (*self.g_o_a).read().unwrap();
         let o_treestore = g_o.get_list_store(idx as usize);
@@ -545,8 +545,18 @@ impl GtkModelUpdaterInt {
             }
         }
         if let Some(t_path) = matching_path {
+            // trace!(                "list_set_cursor :  {:?} scroll: {}",                &t_path.indices(),                scroll_pos            );
             let focus_column: Option<&TreeViewColumn> = None;
             (*treeview).set_cursor(&t_path, focus_column, false);
+            if scroll_pos >= 0 {
+                (*treeview).scroll_to_cell(
+                    Some(&t_path),
+                    focus_column,
+                    true,
+                    (scroll_pos as f32) / 100.0,
+                    0.0,
+                );
+            }
         }
         let elapsed = now.elapsed().as_millis();
         if elapsed > 30 {

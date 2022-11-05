@@ -1,4 +1,18 @@
-grassfeeder (00.1.1) unstable; urgency=low
+grassfeeder (0.1.2) unstable; urgency=low
+
+  * Message List: set scroll position to upper edge from Cursor
+  * Settings Dialog  : switches to even length
+  * AppImage: using auto_link  inflates the size from 4.3MB to 25MB, with some spared libs.
+  * Adding default icon 128x128
+  * Create rpm  package
+  * Bugfix: resolved crash on font size change
+  * Bugfix: don't update the list if we are there already
+  * Bugfix: mark-as-read shall update the list
+  * Bugfix: launch multiple messages in browser shall trigger the tree sum display
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sat, 05 Nov 2022 00:22:00 +0000
+
+grassfeeder (0.1.1) unstable; urgency=low
 
   * DragAndDrop for Websites on Subscription Area
   * Bugfix: parsed blogger.com - wrong element recognized as link

@@ -22,7 +22,7 @@ use crate::downloader::icons::IconInner;
 use crate::downloader::icons::IconLoadStart;
 use crate::downloader::messages::FetchInner;
 use crate::downloader::messages::FetchStart;
-use crate::timer::Timer;
+use crate::controller::timer::Timer;
 use crate::util::StepResult;
 use crate::web::httpfetcher::HttpFetcher;
 use crate::web::WebFetcherType;

@@ -59,8 +59,8 @@ pub fn create_dialogs(
     create_folder_edit_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_settings_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_opml_import_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
-    create_opml_export_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
-    create_about_dialog(gui_event_sender, gtk_obj_a.clone(), ddd);
+    create_opml_export_dialog(gui_event_sender, gtk_obj_a.clone());
+    create_about_dialog(gtk_obj_a.clone(), ddd);
 }
 
 fn create_icons_dialog(gtk_obj_a: GtkObjectsType) {
@@ -746,7 +746,7 @@ fn create_settings_dialog(
         let label1 = Label::new(Some(&t!("D_SETTINGS_UPDATE_ON_START")));
         grid1.attach(&label1, 0, line, 1, 1);
         grid1.attach(&sw_subs_update_onstart, 1, line, 1, 1);
-        sw_subs_update_onstart.set_halign(Align::Center);
+        sw_subs_update_onstart.set_halign(Align::Start);
         line += 1;
 
         let label2 = Label::new(Some(&t!("D_SETTINGS_UPDATE_UPDATE_AFTER")));
@@ -757,6 +757,7 @@ fn create_settings_dialog(
         cbt_timescale.append_text(&get_fetch_updater_interval_name(2));
         cbt_timescale.append_text(&get_fetch_updater_interval_name(3));
         cbt_timescale.set_id_column(0);
+        cbt_timescale.set_halign(Align::Start);
         grid1.attach_next_to(
             &cbt_timescale,
             Some(&spinb_source_update),
@@ -783,6 +784,7 @@ fn create_settings_dialog(
         let label3 = Label::new(Some(&t!("D_SETTINGS_DATABASES_CLEAN_ONSTART")));
         grid1.attach(&label3, 0, line, 1, 1);
         grid1.attach(&sw_subs_db_cleanup, 1, line, 1, 1);
+        sw_subs_db_cleanup.set_halign(Align::Start);
         // line += 1;
     }
     let label_nb2 = Label::new(Some(&t!("D_SETTINGS_TAB2")));
@@ -799,6 +801,7 @@ fn create_settings_dialog(
         let label2_1 = Label::new(Some(&t!("D_SETTINGS_SHOW_MESSAGE_COUNT")));
         grid2.attach(&label2_1, 0, line, 1, 1);
         grid2.attach(&sw_display_feedcount, 1, line, 1, 1);
+        sw_display_feedcount.set_halign(Align::Start);
 
         line += 1;
         let label2_2 = Label::new(Some(&t!("D_SETTINGS_MESSAGES_KEEP_COUNT")));
@@ -821,6 +824,7 @@ fn create_settings_dialog(
             1,
             1,
         );
+        sw_fontsize_manual_enable.set_halign(Align::Start);
 
         line += 1;
         let label2_4 = Label::new(Some(&t!("D_SETTINGS_BROWSER_BACKGROUND_BRIGHTNESS")));
@@ -831,11 +835,13 @@ fn create_settings_dialog(
         let label2_5 = Label::new(Some(&t!("D_SETTINGS_BROWSER_CACHE_CLEAR")));
         grid2.attach(&label2_5, 0, line, 1, 1);
         grid2.attach(&sw_browser_cache_clear, 1, line, 1, 1);
+        sw_browser_cache_clear.set_halign(Align::Start);
 
         line += 1;
         let label2_5 = Label::new(Some(&t!("D_SETTINGS_SYSTRAY_ICON_ENABLE")));
         grid2.attach(&label2_5, 0, line, 1, 1);
         grid2.attach(&sw_enable_systray, 1, line, 1, 1);
+        sw_enable_systray.set_halign(Align::Start);
     }
     let ev_se = g_ev_se;
     let sw_subs_update_onstart_c = sw_subs_update_onstart.clone();
@@ -975,11 +981,7 @@ fn create_opml_export_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsTy
     ret.set_dialog(DIALOG_OPML_EXPORT, &dialog.upcast());
 }
 
-fn create_about_dialog(
-    _g_ev_se: Sender<GuiEvents>,
-    gtk_obj_a: GtkObjectsType,
-    ddd: &mut DialogDataDistributor,
-) {
+fn create_about_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributor) {
     let dialog = AboutDialog::new();
     dialog.set_program_name(APP_NAME_CAMEL);
     dialog.set_version(None); // is injected

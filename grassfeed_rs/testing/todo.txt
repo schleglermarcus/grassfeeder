@@ -1,19 +1,23 @@
 To Do List
 
-- Marking of Messages, Favorites
-- Message List: set scroll position to upper edge from Cursor
-- Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
-
-
-
+- Create rpm  package
+    https://lib.rs/crates/cargo-generate-rpm
+    http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
+    https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/31/Everything/x86_64/iso/
 
 - Appimage Hub Deploy
-  https://github.com/AppImage/appimage.github.io
-  https://docs.appimage.org/reference/best-practices.html
-  https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
-	Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
-	without the installation of additional packages.
+      https://github.com/AppImage/appimage.github.io
+      https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
+        Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
+        without the installation of additional packages.
+      https://github.com/AppImage/appimage.github.io/pull/3051
 
+
+
+- BUG:   launch in browser : multiple list items appear !!
+- Marking of Messages, Favorites
+
+- Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 
 
 
@@ -26,11 +30,6 @@ Drag extra care:
 	- Dragging the same element 2x
 
 
-
-
-
-
-
 Later:
 - GTK4: block multiple instances
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal
@@ -41,6 +40,7 @@ Later:
   https://github.com/gabdube/native-windows-gui/tree/master/showcase
   https://www.ebbflow.io/blog/vending-win
 	https://gtk-rs.org/gtk4-rs/git/book/installation_windows.html
+
 
 
 
@@ -73,11 +73,11 @@ No more
 
 
 * Merge Branch and build release
-    git checkout main
-    git merge origin/v0_0_3
-    git push origin main
-    cd grassfeed_rs/app-gtk3-linux/ ; ./docker-stage2.sh
-
+  git checkout main
+  git merge origin/v0_0_3
+  git commit
+  git push origin main
+  cd grassfeed_rs/app-gtk3-linux/ ; ./docker-stage2.sh
 
 * Put the work folder back to main
   git checkout main
@@ -85,7 +85,6 @@ No more
 	git status
 
 * Create new Branch
-
 	git branch v0_0_4
 	git checkout v0_0_4
   git push -u origin v0_0_4
@@ -117,6 +116,8 @@ https://www.gtk.org/docs/installations/windows/
 Desktop:
 https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 
+Suse Linux download:
+  https://mirrorcache.opensuse.org/download/distribution/leap/15.2/iso/ 
 
 ------ AppImage
 

@@ -139,9 +139,9 @@ mod appcontext_test {
     use crate::config::configmanager::ConfigManager;
     use crate::config::init_system::create_system_config;
     use crate::config::init_system::GrassFeederConfig;
-    use crate::timer::ITimer;
-    use crate::timer::Timer;
-    use crate::timer::TimerJob;
+    use crate::controller::timer::ITimer;
+    use crate::controller::timer::Timer;
+    use crate::controller::timer::TimerJob;
     use context::appcontext::AppContext;
     use context::BuildConfig;
     use context::Buildable;

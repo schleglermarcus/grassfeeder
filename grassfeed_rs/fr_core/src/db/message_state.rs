@@ -17,7 +17,7 @@ pub struct MessageState {
 impl std::fmt::Display for MessageState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let ts_crea = crate::util::db_time_to_display(self.msg_created_timestamp);
-        let isread = if self.is_read_copy { 1 } else { 0 };
+        let isread = i32::from(self.is_read_copy); //  if self.is_read_copy { 1 } else { 0 };
         write!(
             f,
             "ID{}  Pos {}  isread {} '{}' created:{}   C_A_C:{:?}  )",

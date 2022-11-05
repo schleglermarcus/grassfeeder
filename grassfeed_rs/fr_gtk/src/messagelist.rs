@@ -95,9 +95,9 @@ pub fn create_listview(
         let esw = EvSenderWrapper(g_ev_se.clone());
         col.connect_width_notify(move |col| {
             let new_width: i32 = col.width();
-            if new_width != GLOB_CACHE.with(|glob| (*glob.borrow()).col0w) {
+            if new_width != GLOB_CACHE.with(|glob| glob.borrow().col0w) {
                 GLOB_CACHE.with(|glob| {
-                    (*glob.borrow_mut()).col0w = new_width;
+                    glob.borrow_mut().col0w = new_width;
                 });
                 esw.sendw(GuiEvents::ColumnWidth(1, new_width));
             }
@@ -280,7 +280,6 @@ pub fn create_listview(
                 );
                 return gtk::Inhibit(true); // do  not propagate
             }
-
             gtk::Inhibit(false) // do propagate
         },
     );

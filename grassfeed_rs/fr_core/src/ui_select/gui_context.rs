@@ -89,10 +89,15 @@ impl GuiContext {
             .borrow()
             .get_val_bool(&PropDef::GuiFontSizeManualEnable.to_string())
         {
-            let fs_man: u8 = (*self.configmanager_r)
+            let mut fs_man: u8 = 10;
+            if let Some(i) = (*self.configmanager_r)
                 .borrow()
                 .get_val_int(&PropDef::GuiFontSizeManual.to_string())
-                .unwrap() as u8;
+            {
+                fs_man = i as u8;
+            } else {
+                debug!("send_config_to_browser: no GuiFontSizeManual from config!");
+            }
             o_fs_man = Some(fs_man);
         }
         (*self.updater_adapter).borrow().web_view_remove(o_fs_man);
