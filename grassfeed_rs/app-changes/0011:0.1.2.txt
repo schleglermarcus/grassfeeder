@@ -8,6 +8,3 @@ Sat, 05 Nov 2022 00:22:00 +0000
 * Bugfix: don't update the list if we are there already
 * Bugfix: mark-as-read shall update the list
 * Bugfix: launch multiple messages in browser shall trigger the tree sum display
-
-
-
