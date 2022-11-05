@@ -143,7 +143,7 @@ pub trait ISourceTreeController {
     /// writes the path array into the cached subscription list
     fn update_cached_paths(&self);
 
-    fn invalidate_read_unread(&self, subs_id: isize);
+    fn clear_read_unread(&self, subs_id: isize);
     fn memory_conserve(&mut self, act: bool);
 
     fn set_selected_message_id(&mut self, subs_id: isize, msg_id: isize);
@@ -405,7 +405,6 @@ impl SourceTreeController {
                         (*self.gui_updater)
                             .borrow()
                             .update_dialog(DIALOG_NEW_SUBSCRIPTION);
-
                         (*self.gui_updater)
                             .borrow()
                             .show_dialog(DIALOG_NEW_SUBSCRIPTION);
@@ -1697,7 +1696,7 @@ impl ISourceTreeController for SourceTreeController {
         self.update_paths_rec(&Vec::<u16>::default(), 0, false);
     }
 
-    fn invalidate_read_unread(&self, subs_id: isize) {
+    fn clear_read_unread(&self, subs_id: isize) {
         self.statemap.borrow_mut().clear_num_all_unread(subs_id);
         self.addjob(SJob::ScanEmptyUnread);
     }

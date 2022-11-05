@@ -59,7 +59,7 @@ pub fn create_dialogs(
     create_folder_edit_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_settings_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_opml_import_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
-    create_opml_export_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
+    create_opml_export_dialog(gui_event_sender, gtk_obj_a.clone());
     create_about_dialog(gtk_obj_a.clone(), ddd);
 }
 

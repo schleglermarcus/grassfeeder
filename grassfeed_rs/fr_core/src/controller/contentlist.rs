@@ -202,7 +202,7 @@ impl FeedContents {
         ))); // 4
         newrow.push(AValue::AU32(fc.message_id as u32)); // 5
         if debug_mode {
-            let isdel = if fc.is_deleted { 1 } else { 0 };
+            let isdel = i32::from(fc.is_deleted); // if { 1 } else { 0 }
             newrow.push(AValue::ASTR(format!(
                 "id{} src{}  D:{} F:{}",
                 fc.message_id,
@@ -436,7 +436,7 @@ impl FeedContents {
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         self.update_message_list(subs_id);
         if let Some(feedsources) = self.feedsources_w.upgrade() {
-            feedsources.borrow().invalidate_read_unread(subs_id);
+            feedsources.borrow().clear_read_unread(subs_id);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
         }
     }
@@ -814,6 +814,11 @@ impl IFeedContents for FeedContents {
             listpos_id.push((gui_pos as u32, *dbid as u32));
         });
         self.addjob(CJob::UpdateContentListSome(listpos_id));
+
+        let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
+        if let Some(feedsources) = self.feedsources_w.upgrade() {
+            (*feedsources).borrow().clear_read_unread(subs_id);
+        }
     }
 
     fn get_msg_content_author_categories(

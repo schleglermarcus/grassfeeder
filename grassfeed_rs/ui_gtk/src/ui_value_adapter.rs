@@ -48,13 +48,9 @@ impl ModelValueStoreImpl {
             }
             add_node = &mut add_node.children[*p_index as usize];
         }
-        if *last_path_pos > (*add_node).children.len() as u16 {
-            error!(
-                "get_tree_add_node_for_path_2 {path:?}  lastpos={} >= children.len:{:?} add_node_values={:?} ",
-                *last_path_pos,
-                (*add_node).children.len(),
-				& (*add_node).a_values
-            );
+        if *last_path_pos > add_node.children.len() as u16 {
+            error!(  "get_tree_add_node_for_path_2 {path:?}  lastpos={} >= children.len:{:?} add_node_values={:?} ",
+                *last_path_pos,                add_node.children.len(),				&add_node.a_values            );
             return None;
         }
         Some((add_node, *last_path_pos))
@@ -71,12 +67,8 @@ impl ModelValueStoreImpl {
             }
             add_node = &add_node.children[*p_index as usize];
         }
-        if *last_path_pos > (*add_node).children.len() as u16 {
-            error!(
-                "BadPath_R4 {:?} last:{:?} ",
-                &path,
-                (*add_node).children.len(),
-            );
+        if *last_path_pos > add_node.children.len() as u16 {
+            error!("BadPath_R4 {:?} last:{:?} ", &path, add_node.children.len(),);
             return None;
         }
         Some(add_node)

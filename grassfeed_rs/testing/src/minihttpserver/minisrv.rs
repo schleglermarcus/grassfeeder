@@ -36,7 +36,7 @@ pub struct MiniHttpServerController {
 
 impl MiniHttpServerController {
     pub fn new(conf: Arc<ServerConfig>) -> MiniHttpServerController {
-        let addr = &(*conf).tcp_address.clone();
+        let addr = &(conf).tcp_address.clone();
         MiniHttpServerController {
             config: conf,
             thread_handle: None,
@@ -101,7 +101,7 @@ struct MiniHttpServer {
 
 impl MiniHttpServer {
     pub fn start(&self) {
-        let r = TcpListener::bind(&&self.config.tcp_address);
+        let r = TcpListener::bind(&self.config.tcp_address);
         if r.is_err() {
             error!(
                 "Cannot bind address {} {:?}",
@@ -498,14 +498,12 @@ pub fn add_file_to_response(
     file_size: u64,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let path_r: &Path = Path::new(path_str);
-
-    let mut f = fs::File::open(&path_r)?;
+    let mut f = fs::File::open(path_r)?;
     let mut buffer = Vec::with_capacity(file_size as usize);
     match f.read_to_end(&mut buffer) {
         Ok(num_read) => {
             response.body = Some(buffer);
             response.headers.content_length = num_read as u64;
-            // debug!("add_file_to_response : {:?}   {:?}  {}/{} bytes",&path,&response.get_body_string(),num_read,file_size);
         }
         Err(e) => {
             error!("add_file_to_response error : {:?}  {:?}", path_r, &e);
@@ -522,13 +520,7 @@ pub fn add_file_to_response(
 
 fn format_response(response: &Response) -> String {
     let mut result: String;
-    // let status_reason = match response.status.canonical_reason() {
-    //     Some(reason) => reason,
-    //     None => "",
-    // };
-
     let status_reason = response.status.canonical_reason().unwrap_or("");
-
     result = format!(
         "{} {} {}\r\n",
         HTTP_VERSION,
@@ -543,7 +535,6 @@ fn format_response(response: &Response) -> String {
     if let Some(content_type) = &response.headers.content_type {
         result = format!("{}content-type: {}\r\n", result, content_type.value());
     }
-    // return result.to_string();
     result
 }
 
@@ -554,9 +545,6 @@ fn response_string_to_bytes(resp_string: String, mut body: Option<Vec<u8>>) -> V
     }
     let bodybytes: Vec<u8> = body.take().unwrap();
     let mut bb_copy: Vec<u8> = vec![0; bodybytes.len()];
-    //    Vec::with_capacity(bodybytes.len());
-    //    bb_copy.resize(bodybytes.len(), 0);
-
     bb_copy.copy_from_slice(&bodybytes);
     bytes.append(&mut b"\n".to_vec());
     bytes.append(&mut bb_copy);

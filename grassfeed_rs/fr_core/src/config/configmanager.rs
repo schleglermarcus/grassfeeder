@@ -103,15 +103,12 @@ impl ConfigManager {
         let bufwriter = BufWriter::new(outfile);
         let formatter = serde_json::ser::PrettyFormatter::with_indent(b"  ");
         let mut serializer = serde_json::Serializer::with_formatter(bufwriter, formatter);
-
-        let writemap: &HashMap<String, String> = &*(*self.user_config).borrow();
-
+        let writemap: &HashMap<String, String> = &(*self.user_config).borrow();
         let r_ser = writemap.serialize(&mut serializer);
         if r_ser.is_err() {
             warn!("serializing into {} => {:?}", filename, r_ser.err());
             return false;
         }
-        // trace!("written {} to {}", &writemap.len(), &filename);
         true
     }
 

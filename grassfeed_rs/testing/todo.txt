@@ -1,7 +1,21 @@
 To Do List
 
+- Create rpm  package
+    https://lib.rs/crates/cargo-generate-rpm
+    http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
+    https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/31/Everything/x86_64/iso/
 
-	- Marking of Messages, Favorites
+- Appimage Hub Deploy
+      https://github.com/AppImage/appimage.github.io
+      https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
+        Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
+        without the installation of additional packages.
+      https://github.com/AppImage/appimage.github.io/pull/3051
+
+
+
+- BUG:   launch in browser : multiple list items appear !!
+- Marking of Messages, Favorites
 
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 

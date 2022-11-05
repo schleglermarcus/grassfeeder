@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.1.2-B5"
+version = "0.1.2-B7"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -39,7 +39,7 @@ assets =[
     ["target/release/grassfeeder", "usr/bin/", "755"],
 		["assets/grassfeeder.desktop", "/usr/share/applications/", "755"],
 		["assets/grassfeeder.xpm",     "/usr/share/pixmaps/grassfeeder/", "755"],
-		["assets/grassfeeder-indicator2.png", "/usr/share/pixmaps/grassfeeder/", "755"],
+		["assets/usr/share/pixmaps/grassfeeder/grassfeeder-indicator2.png", "/usr/share/pixmaps/grassfeeder/", "755"],
 ]
 
 [package.metadata.i18n]

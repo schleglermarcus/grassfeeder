@@ -119,11 +119,11 @@ pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, Stri
 
 pub fn check_or_create_folder(path: &String) {
     let mut dir_exists = false;
-    if let Ok(metadata) = std::fs::metadata(&path) {
+    if let Ok(metadata) = std::fs::metadata(path) {
         dir_exists = metadata.is_dir();
     }
     if !dir_exists {
-        if let Err(e) = std::fs::create_dir_all(&path) {
+        if let Err(e) = std::fs::create_dir_all(path) {
             error!("creating folder {} {:?}", &path, &e);
         }
     }
