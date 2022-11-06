@@ -1,0 +1,33 @@
+# FROM fedora:latest   gives version Fedora 36, which does not contain rust-javascriptcore-rs-devel  .   fedora::rawhide does not contain it either
+FROM fedora:37
+
+RUN cat /etc/redhat-release 
+RUN echo "fastestmirror=1" >>/etc/dnf/dnf.conf
+RUN dnf -y update
+RUN dnf clean all
+
+# for AppImage
+RUN dnf install -y  wget  file python3-pip python3-setuptools patchelf desktop-file-utils  fakeroot strace fuse  rust-gdk-sys+default-devel curl pkgconf  git cmake file gcc make man sudo tar rust-glib-sys-devel 
+RUN dnf install -y  libsoup libsoup-devel rust-webkit2gtk-devel
+##  not found:    libfuse2
+## replaced:    libgdk-pixbuf2.0-dev  -> rust-gdk-sys+default-devel 
+RUN dnf install -y rust-atk-sys+default-devel rust-gdk-sys-devel rust-gdk-pixbuf-sys-devel  webkit2gtk4.0  javascriptcoregtk4.0  webkit2gtk3-jsc-devel   
+# RUN dnf install -y mingw64-gcc mingw64-freetype  mingw64-cairo  mingw64-harfbuzz   mingw64-pango mingw64-poppler mingw64-gtk3 mingw64-winpthreads-static mingw64-glib2-static   mingw32-libsoup   gcc-c++ boost boost-devel   
+
+RUN wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+RUN chmod +x /usr/local/bin/appimagetool
+
+WORKDIR /root
+## seems that rust is already installed by now
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH=/root/.cargo/bin:$PATH
+
+RUN rustc --version
+RUN cargo --version
+
+RUN rustup update stable
+# RUN cargo install cargo-deb
+RUN cargo install cargo-appimage
+RUN cargo install cargo-generate-rpm
+
+

@@ -1,0 +1,32 @@
+FROM grassfeeder:fedora-stage1
+
+RUN dnf install -y  libsoup libsoup-devel webkit2gtk3-devel
+
+RUN dnf  list *soup*
+
+WORKDIR /usr/src/
+COPY target/gf.tar.gz /usr/src/
+RUN cat gf.tar.gz |gzip -d |tar x
+
+WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
+RUN pwd
+# RUN cargo clean
+RUN cargo test --release
+## RUN cargo deb
+RUN cargo generate-rpm
+
+RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
+
+RUN ls -l  target/generate-rpm/*
+RUN cp target/generate-rpm/app*.rpm  ../target/gf.rpm
+
+RUN mv grassfeeder*.AppImage  gf.AppImage
+RUN ls -l
+
+#WORKDIR /usr/src/grassfeed_rs/target
+#RUN ls -l debian/* 
+#RUN mv debian/grass*.deb  gf.deb
+
+
+
+
