@@ -55,7 +55,7 @@ pub enum CJob {
     /// content_id, entry-date
     DbUpdateEntryDate(isize, u64),
     ///  list_position, feed_content_id
-    UpdateContentListSome(Vec<(u32, u32)>),
+    UpdateMessageListSome(Vec<(u32, u32)>),
     /// feed_content_id
     SwitchBrowserTabContent(i32),
     ListSetCursorToPolicy,
@@ -75,8 +75,11 @@ pub trait IFeedContents {
     ///  Map<  repo-id  ,   list-position >
     fn process_list_row_activated(&self, act_dbid_listpos: &HashMap<i32, i32>);
 
+    // check if the old subs_id has changed before
+    fn update_message_list_(&self, subscription_id: isize);
+
     /// Read from db and put into the list view,
-    fn update_message_list(&self, feed_source_id: isize);
+    fn update_messagelist_only(&self /*, feed_source_id: isize*/);
 
     ///  Vec < list_position,   feed_content_id >
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]);
@@ -246,7 +249,7 @@ impl FeedContents {
             .iter()
             .map(|(r, p)| (*p as u32, *r as u32))
             .collect();
-        self.addjob(CJob::UpdateContentListSome(listpos_repoid));
+        self.addjob(CJob::UpdateMessageListSome(listpos_repoid));
     }
 
     fn set_cursor_to_policy(&self) {
@@ -382,8 +385,6 @@ impl FeedContents {
         } else {
             messagelist = (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
         }
-        // let mut messagelist: Vec<MessageRow> =            (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
-
         if num_msg != messagelist.len() as isize {
             self.fill_state_map(&messagelist);
         }
@@ -429,15 +430,18 @@ impl FeedContents {
         });
     }
 
-    fn delete_messages(&self, db_ids: &[i32]) {
+    fn delete_messages(&self, del_ids: &[i32]) {
         (self.messagesrepo_r)
             .borrow()
-            .update_is_deleted_many(db_ids, true);
+            .update_is_deleted_many(del_ids, true);
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
-        self.update_message_list(subs_id);
+        trace!("kb_delete: {:?} {:?}", del_ids, subs_id);
+        self.update_message_list_(subs_id);
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             feedsources.borrow().clear_read_unread(subs_id);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
+            self.addjob(CJob::UpdateMessageList);
+            //  TODO:  set cursor
         }
     }
 } // impl FeedContents
@@ -475,7 +479,7 @@ impl IFeedContents for FeedContents {
                         .borrow()
                         .update_entry_src_date(content_id, newdate as i64);
                 }
-                CJob::UpdateContentListSome(ref vec_pos_db) => {
+                CJob::UpdateMessageListSome(ref vec_pos_db) => {
                     self.update_content_list_some(vec_pos_db);
                     let list_pos: Vec<u32> =
                         vec_pos_db.iter().map(|(lp, _db)| *lp).collect::<Vec<u32>>();
@@ -592,7 +596,7 @@ impl IFeedContents for FeedContents {
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
         }
 
-        self.addjob(CJob::UpdateContentListSome(list_pos_dbid));
+        self.addjob(CJob::UpdateMessageListSome(list_pos_dbid));
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             (*feedsources)
                 .borrow()
@@ -613,9 +617,8 @@ impl IFeedContents for FeedContents {
         let (current_subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
         //        debug!(            "set_read_complete_subscription: {} != {}",            current_subs_id, src_repo_id        );
         if current_subs_id == src_repo_id {
-            self.update_message_list(src_repo_id);
+            self.update_message_list_(src_repo_id);
             self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
-
             (*self.gui_updater).borrow().update_list(TREEVIEW1);
         } else {
             warn!(
@@ -625,7 +628,7 @@ impl IFeedContents for FeedContents {
         }
     }
 
-    fn update_message_list(&self, subscription_id: isize) {
+    fn update_message_list_(&self, subscription_id: isize) {
         let (old_subs_id, _num_msg, mut isfolder) = *self.current_subscription.borrow();
         if subscription_id != old_subs_id {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
@@ -635,10 +638,14 @@ impl IFeedContents for FeedContents {
             }
             self.current_subscription
                 .replace((subscription_id, -1, isfolder));
-            self.fill_state_map(&Vec::default());
-            self.addjob(CJob::UpdateMessageList);
-            self.addjob(CJob::ListSetCursorToPolicy);
+            self.update_messagelist_only();
         }
+    }
+
+    fn update_messagelist_only(&self) {
+        self.fill_state_map(&Vec::default());
+        self.addjob(CJob::UpdateMessageList);
+        self.addjob(CJob::ListSetCursorToPolicy);
     }
 
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]) {
@@ -813,7 +820,7 @@ impl IFeedContents for FeedContents {
             let gui_pos = self.msg_state.read().unwrap().get_gui_pos(*dbid as isize);
             listpos_id.push((gui_pos as u32, *dbid as u32));
         });
-        self.addjob(CJob::UpdateContentListSome(listpos_id));
+        self.addjob(CJob::UpdateMessageListSome(listpos_id));
 
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         if let Some(feedsources) = self.feedsources_w.upgrade() {

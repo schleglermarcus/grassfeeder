@@ -1,6 +1,4 @@
-#docker build -t grassfeeder:stage2 -f app-gtk3-linux/stage2.docker .
-
-FROM grassfeeder:stage1
+FROM grassfeeder:debian-stage1
 
 #RUN apt install -y libfuse2
 #RUN modprobe fuse

@@ -15,10 +15,11 @@ To Do List
 
 
 - BUG:   launch in browser : multiple list items appear !!
-- Marking of Messages, Favorites
-
 - Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
 
+
+
+- Marking of Messages, Favorites
 
 
 Drag extra care:
@@ -35,6 +36,7 @@ Later:
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal
 	https://docs.gtk.org/gio/method.Application.run.html
 - Systray Icon integration
+- Re-create WebView
 
 - Windows  Build, Gui
   https://github.com/gabdube/native-windows-gui/tree/master/showcase
@@ -117,7 +119,7 @@ Desktop:
 https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 
 Suse Linux download:
-  https://mirrorcache.opensuse.org/download/distribution/leap/15.2/iso/ 
+  https://mirrorcache.opensuse.org/download/distribution/leap/15.2/iso/
 
 ------ AppImage
 
