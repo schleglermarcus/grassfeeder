@@ -2,12 +2,31 @@
 
 Probing  grassfeeder-0.1.3-B3
 
-| ? | Fedora 33 (2020-10) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
+| File | Fedora 33 (2020-10) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
 | ---- | ---- | ---- | ---- |
 | grassfeeder-0.1.3-B3-fedora33.rpm       |   |   | |
 | grassfeeder-0.1.3-B3-fedora33.AppImage  |   |   | |
 |   |   |   |   | 
 |   |   |   |   | 
+
+
+
+
+### Fedora 33 
+\# rpm -i  grassfeeder-0.1.3-B3-fedora33.rpm 
+    libatomic.so.1()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libc.so.6(GLIBC_2.32)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libc.so.6(GLIBC_2.33)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libc.so.6(GLIBC_2.34)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libcrypto.so.3()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libffi.so.8()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libicudata.so.71()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libicui18n.so.71()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libicuuc.so.71()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libjpeg.so.62()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libm.so.6(GLIBC_2.35)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libstemmer.so.0()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+
 
 
 ### Remarks
@@ -33,3 +52,6 @@ Probing  grassfeeder-0.1.3-B3
 
 ### End of Life: 
 [Ubuntu](https://endoflife.date/ubuntu) [Suse](https://endoflife.date/opensuse) [Fedora](https://endoflife.date/fedora)
+
+
+
