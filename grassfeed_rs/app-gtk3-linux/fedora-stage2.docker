@@ -10,7 +10,7 @@ RUN cat gf.tar.gz |gzip -d |tar x
 
 WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
 RUN pwd
-# RUN cargo clean
+RUN cargo clean
 RUN cargo test --release
 RUN cargo build --release
 

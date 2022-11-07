@@ -17,8 +17,10 @@ RUN cargo test --release
 RUN cargo deb
 RUN cargo generate-rpm
 
-# We build the appimage manually on linux mint 20
-# RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
+
+RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
+RUN mv grassfeeder*.AppImage  gf.AppImage
+RUN ls -l
 
 RUN ls -l  target/generate-rpm/*
 RUN cp target/generate-rpm/a*.rpm  ../target/gf.rpm
@@ -30,5 +32,3 @@ RUN mv debian/grass*.deb  gf.deb
 
 
 
-#RUN mv grassfeeder*.AppImage  gf.AppImage
-#RUN ls -l

@@ -12,10 +12,10 @@ docker build -t grassfeeder:debian-stage1 -f  debian2.docker .
 
 
 docker cp $(docker create --name tc grassfeeder:debian-stage2):/usr/src/grassfeed_rs/target/gf.deb target/ ; docker rm tc
-mv target/gf.deb  target/grassfeeder-${VERSION}_x86_64.deb
+mv target/gf.deb  target/grassfeeder-${VERSION}-debian11.deb
 
-#docker cp $(docker create --name tc grassfeeder:stage2):/usr/src/grassfeed_rs/app-gtk3-linux/gf.AppImage target/ ; docker rm tc
-#mv target/gf.AppImage  target/grassfeeder-${VERSION}-x86_64.AppImage
+docker cp $(docker create --name tc grassfeeder:stage2)/usr/src/grassfeed_rs/app-gtk3-linux/gf.AppImage target/ ; docker rm tc
+mv target/gf.AppImage  target/grassfeeder-${VERSION}-debian11.AppImage
 
 docker cp $(docker create --name tc grassfeeder:debian-stage2):/usr/src/grassfeed_rs/target/gf.rpm target/ ; docker rm tc
-mv target/gf.rpm  target/grassfeeder-${VERSION}_x86_64.rpm
+mv target/gf.rpm  target/grassfeeder-${VERSION}_debian11.rpm

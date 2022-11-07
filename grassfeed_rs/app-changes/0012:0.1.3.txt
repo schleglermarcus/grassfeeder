@@ -1,15 +1,17 @@
 Sat, 05 Nov 2022 00:22:00 +0000
-- Bug: new message does not show up in list
-
-- Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
+* Unix termination signal handling
+* Bugfix: new message does not show up in list
 
 
 - Create rpm  package
     https://lib.rs/crates/cargo-generate-rpm
     http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
     https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/31/Everything/x86_64/iso/
-        
-https://documentation.suse.com/sles/12-SP4/html/SLES-all/docker-dockerizing-application.html    
+
+https://documentation.suse.com/sles/12-SP4/html/SLES-all/docker-dockerizing-application.html
+https://schoolofsoftware.com/Docker/opensuse
+
+
 
 - Appimage Hub Deploy
       https://github.com/AppImage/appimage.github.io

@@ -1,3 +1,32 @@
+grassfeeder (0.1.3) unstable; urgency=low
+
+  * Unix termination signal handling
+  * Bugfix: new message does not show up in list
+  
+  
+  - Create rpm  package
+      https://lib.rs/crates/cargo-generate-rpm
+      http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
+      https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/31/Everything/x86_64/iso/
+  
+  https://documentation.suse.com/sles/12-SP4/html/SLES-all/docker-dockerizing-application.html
+  https://schoolofsoftware.com/Docker/opensuse
+  
+  
+  
+  - Appimage Hub Deploy
+        https://github.com/AppImage/appimage.github.io
+        https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
+          Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
+          without the installation of additional packages.
+        https://github.com/AppImage/appimage.github.io/pull/3051
+  
+  
+  
+  - BUG:   launch in browser : multiple list items appear !!
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sat, 05 Nov 2022 00:22:00 +0000
+
 grassfeeder (0.1.2) unstable; urgency=low
 
   * Message List: set scroll position to upper edge from Cursor

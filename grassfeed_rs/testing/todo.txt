@@ -14,13 +14,13 @@ To Do List
 
 
 
-- BUG:   launch in browser : multiple list items appear !!
-- Shutdown signal handling  https://docs.rs/signal-hook/latest/signal_hook/
+- BUG:   launch in browser : multiple list items appear
+
+- Use other app-indicator  lib
 
 
 
 - Marking of Messages, Favorites
-
 
 Drag extra care:
 	- https://www.netjstech.com/
@@ -120,6 +120,18 @@ https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 
 Suse Linux download:
   https://mirrorcache.opensuse.org/download/distribution/leap/15.2/iso/
+
+------ Gnome Desktop:
+#  gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
+
+appimage /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_ABI_DT_RELR' not found (required by /tmp/.mount /lib64/libm.so.6)
+
+Samba mount:
+# /etc/fstab:
+//kav/workspacer	/mnt/kav 		cifs 	noauto,rw,user,exec,vers=2.1		0 0
+
+# sudo chmod u+s   /bin/mount /bin/umount   /usr/sbin/mount.cifs
+
 
 ------ AppImage
 
