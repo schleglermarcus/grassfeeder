@@ -8,7 +8,7 @@ mkdir target
 # the output file is used by the docker file
 (cd ../../ ; tar c --exclude=grassfeed_rs/target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >$DIR/target/gf.tar.gz )
 
-docker build -t grassfeeder:debian-stage1 -f  debian2.docker .
+docker build -t grassfeeder:debian-stage2 -f  debian-stage2.docker .
 
 
 docker cp $(docker create --name tc grassfeeder:debian-stage2):/usr/src/grassfeed_rs/target/gf.deb target/ ; docker rm tc
