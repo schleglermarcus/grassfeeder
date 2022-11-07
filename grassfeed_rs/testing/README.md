@@ -12,9 +12,9 @@ Probing  grassfeeder-0.1.3-B3
 
 
 
-### Fedora 33 
+### OpenSuse  15.5
 ```
-\# rpm -i  grassfeeder-0.1.3-B3-fedora33.rpm 
+# rpm -i  grassfeeder-0.1.3-B3-fedora33.rpm 
     libatomic.so.1()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
     libc.so.6(GLIBC_2.32)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
     libc.so.6(GLIBC_2.33)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
@@ -27,6 +27,16 @@ Probing  grassfeeder-0.1.3-B3
     libjpeg.so.62()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
     libm.so.6(GLIBC_2.35)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
     libstemmer.so.0()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    
+    
+    
+# ./grassfeeder-0.1.3-B3-fedora33.AppImage 
+./grassfeeder-0.1.3-B3-fedora33.AppImage: /lib64/libc.so.6: version `GLIBC_2.33' not found (required by ./grassfeeder-0.1.3-B3-fedora33.AppImage)
+./grassfeeder-0.1.3-B3-fedora33.AppImage: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by ./grassfeeder-0.1.3-B3-fedora33.AppImage)
+./grassfeeder-0.1.3-B3-fedora33.AppImage: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./grassfeeder-0.1.3-B3-fedora33.AppImage)
+    
+    
+    
 ```
 
 
