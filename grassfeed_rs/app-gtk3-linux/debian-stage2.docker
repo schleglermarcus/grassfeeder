@@ -17,9 +17,9 @@ RUN cargo test --release
 RUN cargo deb
 RUN cargo generate-rpm
 
-
 RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
 RUN mv grassfeeder*.AppImage  gf.AppImage
+RUN pwd
 RUN ls -l
 
 RUN ls -l  target/generate-rpm/*
@@ -29,6 +29,5 @@ RUN cp target/generate-rpm/a*.rpm  ../target/gf.rpm
 WORKDIR /usr/src/grassfeed_rs/target
 RUN ls -l debian/* 
 RUN mv debian/grass*.deb  gf.deb
-
 
 

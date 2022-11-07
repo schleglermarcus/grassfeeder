@@ -11,11 +11,15 @@ mkdir target
 docker build -t grassfeeder:debian-stage2 -f  debian-stage2.docker .
 
 
+echo "== debian-stage2.2h copying   gf.deb"
+
+docker cp $(docker create --name tc grassfeeder:debian-stage2):/usr/src/grassfeed_rs/app-gtk3-linux/gf.AppImage target/ ; docker rm tc
+mv target/gf.AppImage  target/grassfeeder-${VERSION}-debian11.AppImage
+ls -lh target/ 
+
 docker cp $(docker create --name tc grassfeeder:debian-stage2):/usr/src/grassfeed_rs/target/gf.deb target/ ; docker rm tc
 mv target/gf.deb  target/grassfeeder-${VERSION}-debian11.deb
 
-docker cp $(docker create --name tc grassfeeder:stage2)/usr/src/grassfeed_rs/app-gtk3-linux/gf.AppImage target/ ; docker rm tc
-mv target/gf.AppImage  target/grassfeeder-${VERSION}-debian11.AppImage
 
 docker cp $(docker create --name tc grassfeeder:debian-stage2):/usr/src/grassfeed_rs/target/gf.rpm target/ ; docker rm tc
 mv target/gf.rpm  target/grassfeeder-${VERSION}_debian11.rpm

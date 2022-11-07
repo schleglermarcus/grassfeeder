@@ -3,7 +3,7 @@ To Do List
 - Create rpm  package
     https://lib.rs/crates/cargo-generate-rpm
     http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
-    https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/31/Everything/x86_64/iso/
+    https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/33/
 
 - Appimage Hub Deploy
       https://github.com/AppImage/appimage.github.io
