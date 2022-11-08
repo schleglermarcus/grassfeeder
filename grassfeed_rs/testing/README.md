@@ -5,7 +5,7 @@ Probing  grassfeeder-0.1.3-B3
 | File                                      | Fedora 35 (2021-11) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
 | ---- | ---- | ---- | ---- |
 | grassfeeder-0.1.3-B3-fedora35.rpm         | yes | -   | |
-| grassfeeder-0.1.3-B3-fedora35.AppImage    | yes | -   | |
+| grassfeeder-0.1.3-B3-fedora35.AppImage    | yes | no  | |
 | grassfeeder-0.1.3-B3-debian11.AppImage    |     | no  | |
 | grassfeeder-0.1.3-B3-mint20.AppImage      |     | no  | |  
 
