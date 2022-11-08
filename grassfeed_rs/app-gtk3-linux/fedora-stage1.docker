@@ -1,20 +1,19 @@
-# FROM fedora:latest   gives version Fedora 36, which does not contain rust-javascriptcore-rs-devel  .   fedora::rawhide does not contain it either
-FROM fedora:37
+FROM fedora:35
 
-RUN cat /etc/redhat-release 
+RUN cat /etc/redhat-release
 RUN echo "fastestmirror=1" >>/etc/dnf/dnf.conf
 RUN dnf -y update
 RUN dnf clean all
 
-# for AppImage
-RUN dnf install -y  wget  file python3-pip python3-setuptools patchelf desktop-file-utils  fakeroot strace fuse  rust-gdk-sys+default-devel curl pkgconf  git cmake file  sudo tar rust-glib-sys-devel 
-RUN dnf install -y  libsoup libsoup-devel rust-webkit2gtk-devel
-##  not found:    libfuse2
-## replaced:    libgdk-pixbuf2.0-dev  -> rust-gdk-sys+default-devel 
-RUN dnf install -y rust-atk-sys+default-devel rust-gdk-sys-devel rust-gdk-pixbuf-sys-devel  webkit2gtk4.0  javascriptcoregtk4.0  webkit2gtk3-jsc-devel   
-# RUN dnf install -y mingw64-gcc mingw64-freetype  mingw64-cairo  mingw64-harfbuzz   mingw64-pango mingw64-poppler mingw64-gtk3 mingw64-winpthreads-static mingw64-glib2-static   mingw32-libsoup   gcc-c++ boost boost-devel    gcc make man
 
-RUN wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+## These are not available on Fedora 33:
+RUN dnf install -y  rust-glib-sys-devel  rust-gdk-sys+default-devel   webkit2gtk3-devel  rust-webkit2gtk-devel rust-gdk-sys-devel   rust-gdk-pixbuf-sys-devel    webkit2gtk4.0  javascriptcoregtk4.0
+
+
+RUN dnf install -y webkit2gtk3-jsc-devel cmake  gcc
+RUN dnf install -y wget python3-pip python3-setuptools patchelf desktop-file-utils  fakeroot strace fuse  curl pkgconf  git file  tar libsoup libsoup-devel
+
+RUN wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
 RUN chmod +x /usr/local/bin/appimagetool
 
 WORKDIR /root
@@ -29,5 +28,3 @@ RUN rustup update stable
 # RUN cargo install cargo-deb
 RUN cargo install cargo-appimage
 RUN cargo install cargo-generate-rpm
-
-
