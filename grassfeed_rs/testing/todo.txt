@@ -130,7 +130,7 @@ Samba mount:
 # /etc/fstab:
 //kav/workspacer	/mnt/kav 		cifs 	noauto,rw,user,exec,vers=2.1		0 0
 
-# sudo chmod u+s   /bin/mount /bin/umount   /usr/sbin/mount.cifs
+# sudo chmod u+s   /bin/mount /bin/umount   /usr/sbin/mount.cifs 	/sbin/mount.cifs
 
 
 ------ AppImage

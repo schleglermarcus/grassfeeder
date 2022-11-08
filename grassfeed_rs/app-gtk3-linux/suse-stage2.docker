@@ -1,0 +1,37 @@
+FROM grassfeeder:suse-stage1
+
+RUN zypper --non-interactive  install  gzip  gobject-introspection libglib-2_0-0    glib2-devel  atk  gdk-pixbuf  libgtk-3-0 libatk-1_0-0 atk-devel  gdk-pixbuf-devel
+
+# pkg-config  --libs --cflags gdk-3.0 "gdk-3.0 >= 3.22"`
+
+#   pkg-config --libs --cflags atk "atk >= 2.18"  
+# not found      libglib-2_0-0-64bit  libatk libgtk-3-bin  libatk1.0-dev   rust-atk-sys
+
+# RUN zypper --non-interactive  install rust-gdk-sys rust-glib-sys  webkit2gtk3 webkit2gtk3-soup2  gdk-pixbuf2  libgdk-pixbuf2.0-dev  gcc13  fuse-ts
+
+
+WORKDIR /usr/src/
+COPY target/gf.tar.gz /usr/src/
+RUN cat gf.tar.gz |gzip -d |tar x
+
+WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
+RUN rpm -qa |grep glibc
+
+# RUN cargo clean
+RUN cargo test --release
+RUN cargo build --release
+
+RUN cargo generate-rpm
+RUN ls -l  target/generate-rpm/*
+RUN cp target/generate-rpm/app*.rpm  ../target/gf.rpm
+
+RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
+RUN mv grassfeeder*.AppImage  gf.AppImage
+RUN ls -l
+
+RUN rpm -qa |grep glibc
+
+
+#WORKDIR /usr/src/grassfeed_rs/target
+#RUN ls -l debian/*
+#RUN mv debian/grass*.deb  gf.deb

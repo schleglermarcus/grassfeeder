@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.1.3-B3"
+version = "0.1.3-B4"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -55,16 +55,6 @@ auto_link_exclude_list = [
     "libpthread.so*",
 ]
 
-#target/grassfeeder-0.1.3-B1-x86_64.AppImage: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_ABI_DT_RELR' not found (required by /tmp/.mount_grassfNBwHOk/lib64/libm.so.6)
-#target/grassfeeder-0.1.3-B1-x86_64.AppImage: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.36' not found (required by /tmp/.mount_grassfNBwHOk/lib64/libstdc++.so.6)
-#target/grassfeeder-0.1.3-B1-x86_64.AppImage: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_ABI_DT_RELR' not found (required by /tmp/.mount_grassfNBwHOk/lib64/libresolv.so.2)
-
-# Running the  fedora33 built appimage   on LinuxMint
-# ./grassfeeder-0.1.3-B1-fedora33.AppImage: /lib/x86_64-linux-gnu/libpthread.so.0: version `GLIBC_PRIVATE' not found (required by /tmp/.mount_grassfVHo6KP/lib64/librt.so.1)
-
-# Running the  fedora33 built appimage With libpthread  on LinuxMint
-# ./grassfeeder-0.1.3-B1_1-fedora.AppImage: symbol lookup error: /tmp/.mount_grassf51bSKc/lib64/libpthread.so.0: undefined symbol: _dl_make_stack_executable, version GLIBC_PRIVATE
-
 
 [package.metadata.generate-rpm]
 assets = [
@@ -73,15 +63,16 @@ assets = [
     	{ source="assets/grassfeeder.xpm",     dest="/usr/share/pixmaps/grassfeeder/grassfeeder.xpm", mode="755" },
     	{ source="assets/grassfeeder-logo-128x128-t.png", dest="/usr/share/pixmaps/grassfeeder/grassfeeder.png", mode="755" },
 ]
+
 [package.metadata.generate-rpm.requires]
-alternative = "*"
 libatomic = "*"
-glibc = ">= 2.32"
-libcrypto = "*"
 libffi = "*"
-libicudata = "*"
-libicui18n = "*"
-libicuuc = "*"
 libjpeg = "*"
-libm = "*"
-libstemmer = "*"
+#alternative = "*"
+#glibc = ">= 2.32"
+#libcrypto = "*"
+#libicudata = "*"
+#libicui18n = "*"
+#libicuuc = "*"
+#libm = "*"
+#libstemmer = "*"
