@@ -11,11 +11,10 @@
 | OpenSuse 15.4 (2021-05)   | -         | &#x2714;  | &#x274C; | 
 | OpenSuse 15.3 (2021-05)   | -         | &#x2714;  | &#x274C; | 
 | OpenSuse 15.2 (2021-02)   | -         | &#x274C;  | &#x274C; |
-| Fedora 35 (2021-11)       | -         | &#x214C;  | tbd      |
+| Fedora 35 (2021-11)       | -         | &#x2714;  | tbd      |
 | Fedora 33 (2020-10)       | -         | &#x274C;  |          |
 | Fedora 31 (2019-10)       | -         | &#x274C;  | &#x274C; |
-| Fedora 30 (2019-04)       | -         | &#x274C;  | &#x274C; |
-| Fedora 29 (2018-10)       | -         | no        | no       |
+| Fedora 30 (2019-04)       | -         | no        | no       |
 
 
 End of Life: [Ubuntu](https://endoflife.date/ubuntu) [Suse](https://endoflife.date/opensuse) [Fedora](https://endoflife.date/fedora)

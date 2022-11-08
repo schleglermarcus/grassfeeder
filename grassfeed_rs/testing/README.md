@@ -2,39 +2,25 @@
 
 Probing  grassfeeder-0.1.3-B3
 
-| File | Fedora 33 (2020-10) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
+| File | Fedora 35 (2021-11) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
 | ---- | ---- | ---- | ---- |
-| grassfeeder-0.1.3-B3-fedora33.rpm       | no | no | |
-| grassfeeder-0.1.3-B3-fedora33.AppImage  | yes | no | |
+| grassfeeder-0.1.3-B3-fedora35.rpm       | no | - | |
+| grassfeeder-0.1.3-B3-fedora35.AppImage  | yes | - | |
 |   |   |   |   | 
 
 
-### Fedora 33
+### Fedora 35
 ```
-# rpm -i web_grassfeeder-0.1.3-B3-fedora33.rpm 
+# rpm -i grassfeeder-0.1.3-B3-fedora35.rpm 
+Fehler: Fehlgeschlagene Abhängigkeiten:
     libatomic.so.1()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libc.so.6(GLIBC_2.33)(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libc.so.6(GLIBC_2.34)(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libcloudproviders.so.0()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libcrypto.so.3()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libffi.so.8()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libicudata.so.71()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libicui18n.so.71()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libicuuc.so.71()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libm.so.6(GLIBC_2.35)(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
 
-# ./grassfeeder-0.1.3-B3-fedora33.AppImage 
-./grassfeeder-0.1.3-B3-fedora33.AppImage: /lib64/libc.so.6: version `GLIBC_2.33' not found (required by ./grassfeeder-0.1.3-B3-fedora33.AppImage)
-./grassfeeder-0.1.3-B3-fedora33.AppImage: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./grassfeeder-0.1.3-B3-fedora33.AppImage)
 
 
 On Fedora-33 VM:
 - glibc-2.32-1.fc33.x86_64
 - glibc-devel-2.32-1.fc33.x86_64
 
-
-On Fedora-33 Docker Image (is fedora37 :-( )
-- glibc-2.36-7.fc37.x86_64   
 
 ```
 
