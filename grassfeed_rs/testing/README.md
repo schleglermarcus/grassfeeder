@@ -2,11 +2,12 @@
 
 Probing  grassfeeder-0.1.3-B3
 
-| File | Fedora 35 (2021-11) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
+| File                                      | Fedora 35 (2021-11) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
 | ---- | ---- | ---- | ---- |
-| grassfeeder-0.1.3-B3-fedora35.rpm       | yes | - | |
-| grassfeeder-0.1.3-B3-fedora35.AppImage  | yes | - | |
-| grassfeeder-0.1.3-B3-debian11.AppImage  |   | no  | 
+| grassfeeder-0.1.3-B3-fedora35.rpm         | yes | -   | |
+| grassfeeder-0.1.3-B3-fedora35.AppImage    | yes | -   | |
+| grassfeeder-0.1.3-B3-debian11.AppImage    |     | no  | |
+| grassfeeder-0.1.3-B3-mint20.AppImage      |     | no  | |  
 
 
 ### Fedora 35
@@ -19,6 +20,7 @@ Probing  grassfeeder-0.1.3-B3
 ### OpenSuse 15.5
 ` zypper install libatomic1` 
 
+present:  glibc-2.31     Needed by grassfeeder-0.1.3-B3-fedora35.rpm :  glibc-2.32
 
 
 ### OpenSuse  15.5
@@ -32,6 +34,13 @@ Probing  grassfeeder-0.1.3-B3
     libjpeg.so.62()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
     libstemmer.so.0()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
 
+
+
+# ./grassfeeder-0.1.3-B3-fedora35.AppImage 
+./grassfeeder-0.1.3-B3-fedora35.AppImage: /lib64/libc.so.6: version `GLIBC_2.33' not found (required by ./grassfeeder-0.1.3-B3-fedora35.AppImage)
+./grassfeeder-0.1.3-B3-fedora35.AppImage: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by ./grassfeeder-0.1.3-B3-fedora35.AppImage)
+./grassfeeder-0.1.3-B3-fedora35.AppImage: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./grassfeeder-0.1.3-B3-fedora35.AppImage)
+
     
     
 # ./grassfeeder-0.1.3-B3-debian11.AppImage 
@@ -43,6 +52,10 @@ Bail out! Gtk:ERROR:../../../../gtk/gtkiconhelper.c:494:ensure_surface_for_gicon
 Abgebrochen (Speicherabzug geschrieben)
 
 
+# ./grassfeeder-0.1.3-B3-mint20.AppImage 
+
+(grassfeeder-0.1.3-B3-mint20.AppImage:3831): GLib-GIO-ERROR **: 18:17:38.946: Settings schema 'org.gnome.settings-daemon.plugins.xsettings' does not contain a key named 'antialiasing'
+Trace/Breakpoint ausgelöst (Speicherabzug geschrieben)
 
     
     
