@@ -61,8 +61,14 @@ End of Life: [Ubuntu](https://endoflife.date/ubuntu) [Suse](https://endoflife.da
       Package glib-2.0 was not found in the pkg-config search path.
  - This [version](https://distrowatch.com/table.php?distribution=ubuntu) 18.04 is too old 
 
-##### Linux Mint 20 preparation, as user
+##### Fedora 33 
+Too old,  we need  rust-atk-sys+default-devel, which is only available on  fedora 35 and up
 
+##### Fedora 35 
+... work in progress ...
+
+
+##### Linux Mint 20 preparation, as user
 Version 0.0.4 and down do not work here, since they have no libgdk-pixbuf-2.0-0:amd64
 They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upgrade path.
 ###### Mint20  uses
@@ -71,21 +77,15 @@ They use the old package "libgdk-pixbuf2.0-0:amd64"  and do not have an easy upg
 ###### Mint21 uses
 - "jammy" for Ubuntu packages
 - "vanessa" for Mint  packages
-
   - Install rust:  `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 	- `cargo install cargo-deb`
 
 ##### Linux Mint 20 preparation, as admin
-  - apt-get install git
-  - apt-get install libsoup2.4-dev
-	- apt-get install librust-gdk-sys-dev
-	- apt-get install libjavascriptcoregtk-4.0-dev
-	- apt-get install libwebkit2gtk-4.0-dev
+  - apt-get install git libsoup2.4-dev librust-gdk-sys-dev  libjavascriptcoregtk-4.0-dev  libwebkit2gtk-4.0-dev
 
 
 
 
-#
 
 #### Binary
 - libglib2.0-0 (>= 2.33.14)

@@ -26,6 +26,16 @@ Probing  grassfeeder-0.1.3-B3
 # ./grassfeeder-0.1.3-B3-fedora33.AppImage 
 ./grassfeeder-0.1.3-B3-fedora33.AppImage: /lib64/libc.so.6: version `GLIBC_2.33' not found (required by ./grassfeeder-0.1.3-B3-fedora33.AppImage)
 ./grassfeeder-0.1.3-B3-fedora33.AppImage: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./grassfeeder-0.1.3-B3-fedora33.AppImage)
+
+
+On Fedora-33 VM:
+- glibc-2.32-1.fc33.x86_64
+- glibc-devel-2.32-1.fc33.x86_64
+
+
+On Fedora-33 Docker Image (is fedora37 :-( )
+- glibc-2.36-7.fc37.x86_64   
+
 ```
 
 
