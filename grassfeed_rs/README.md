@@ -40,6 +40,7 @@ End of Life: [Ubuntu](https://endoflife.date/ubuntu) [Suse](https://endoflife.da
 
 ### *.rpm
 Requisite for Fedora 35: `dnf install -y libatomic`
+Requisite for OpenSuse 15.5: `zypper install  libatomic1`
 
 
 ### *.deb

@@ -6,7 +6,7 @@ Probing  grassfeeder-0.1.3-B3
 | ---- | ---- | ---- | ---- |
 | grassfeeder-0.1.3-B3-fedora35.rpm       | yes | - | |
 | grassfeeder-0.1.3-B3-fedora35.AppImage  | yes | - | |
-|   |   |   |   | 
+| grassfeeder-0.1.3-B3-debian11.AppImage  |   | no  | 
 
 
 ### Fedora 35
@@ -14,34 +14,36 @@ Probing  grassfeeder-0.1.3-B3
 ` rpm -i grassfeeder-0.1.3-B3-fedora35.rpm ` 
 
     libatomic.so.1()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    
-` dnf install -y libatomic  &#x2714; `
+` dnf install -y libatomic  `  &#x2714;
+
+### OpenSuse 15.5
+` zypper install libatomic1` 
 
 
 
 ### OpenSuse  15.5
 ```
-# rpm -i  grassfeeder-0.1.3-B3-fedora33.rpm 
-    libatomic.so.1()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+# rpm -i  grassfeeder-0.1.3-B3-fedora35.rpm 
+    error: Failed dependencies:
     libc.so.6(GLIBC_2.32)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
     libc.so.6(GLIBC_2.33)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
     libc.so.6(GLIBC_2.34)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libcrypto.so.3()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libffi.so.8()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libicudata.so.71()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libicui18n.so.71()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libicuuc.so.71()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+    libffi.so.6()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
     libjpeg.so.62()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libm.so.6(GLIBC_2.35)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
     libstemmer.so.0()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
+
     
     
-    
-# ./grassfeeder-0.1.3-B3-fedora33.AppImage 
-./grassfeeder-0.1.3-B3-fedora33.AppImage: /lib64/libc.so.6: version `GLIBC_2.33' not found (required by ./grassfeeder-0.1.3-B3-fedora33.AppImage)
-./grassfeeder-0.1.3-B3-fedora33.AppImage: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by ./grassfeeder-0.1.3-B3-fedora33.AppImage)
-./grassfeeder-0.1.3-B3-fedora33.AppImage: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./grassfeeder-0.1.3-B3-fedora33.AppImage)
-    
+# ./grassfeeder-0.1.3-B3-debian11.AppImage 
+(grassfeeder-0.1.3-B3-debian11.AppImage:3659): Gtk-WARNING **: 18:02:27.691: Could not load a pixbuf from icon theme.
+This may indicate that pixbuf loaders or the mime database could not be found.
+**
+Gtk:ERROR:../../../../gtk/gtkiconhelper.c:494:ensure_surface_for_gicon: assertion failed (error == NULL): Failed to load /usr/share/icons/Adwaita/16x16/status/image-missing.png: Format der Bilddatei unbekannt (gdk-pixbuf-error-quark, 3)
+Bail out! Gtk:ERROR:../../../../gtk/gtkiconhelper.c:494:ensure_surface_for_gicon: assertion failed (error == NULL): Failed to load /usr/share/icons/Adwaita/16x16/status/image-missing.png: Format der Bilddatei unbekannt (gdk-pixbuf-error-quark, 3)
+Abgebrochen (Speicherabzug geschrieben)
+
+
+
     
     
 ```
