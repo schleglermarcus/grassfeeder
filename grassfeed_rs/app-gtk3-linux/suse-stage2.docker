@@ -1,13 +1,20 @@
 FROM grassfeeder:suse-stage1
 
-RUN zypper --non-interactive  install  gzip  gobject-introspection libglib-2_0-0    glib2-devel  atk  gdk-pixbuf  libgtk-3-0 libatk-1_0-0 atk-devel  gdk-pixbuf-devel
+# RUN zypper --non-interactive  install  gzip  gobject-introspection libglib-2_0-0    glib2-devel  atk  gdk-pixbuf  libgtk-3-0 libatk-1_0-0 atk-devel  gdk-pixbuf-devel
 
-# pkg-config  --libs --cflags gdk-3.0 "gdk-3.0 >= 3.22"`
+RUN zypper --non-interactive  install   python3-gobject-Gdk  gtk3-devel libsoup-devel  libsoup2-devel libjavascriptcoregtk-4_0-18  libjavascriptcoregtk-4_1-0  webkit2gtk3-devel  webkit2gtk3-soup2-devel
 
-#   pkg-config --libs --cflags atk "atk >= 2.18"  
-# not found      libglib-2_0-0-64bit  libatk libgtk-3-bin  libatk1.0-dev   rust-atk-sys
 
-# RUN zypper --non-interactive  install rust-gdk-sys rust-glib-sys  webkit2gtk3 webkit2gtk3-soup2  gdk-pixbuf2  libgdk-pixbuf2.0-dev  gcc13  fuse-ts
+
+# pkg-config --libs --cflags javascriptcoregtk-4.0 "javascriptcoregtk-4.0 >= 2.24"
+
+#  dpkg -S  javascriptcoregtk-4.0.pc
+# libjavascriptcoregtk-4.0-dev:amd64: /usr/lib/x86_64-linux-gnu/pkgconfig/javascriptcoregtk-4.0.pc
+
+
+# not found      libglib-2_0-0-64bit  libatk libgtk-3-bin  libatk1.0-dev   rust-atk-sys  webkit2gtk3	 webkit2gtk3-soup2
+
+# RUN zypper --non-interactive  install  rust-glib-sys   webkit2gtk3-soup2  gdk-pixbuf2  libgdk-pixbuf2.0-dev  gcc13  fuse-ts
 
 
 WORKDIR /usr/src/
@@ -15,7 +22,9 @@ COPY target/gf.tar.gz /usr/src/
 RUN cat gf.tar.gz |gzip -d |tar x
 
 WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
-RUN rpm -qa |grep glibc
+RUN rpm -qa |egrep "javascriptcore"
+# RUN zypper search --installed-only javascriptcore
+
 
 # RUN cargo clean
 RUN cargo test --release

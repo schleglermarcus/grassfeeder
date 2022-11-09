@@ -10,15 +10,14 @@ RUN cat /etc/os-release |grep VERSION
 #RUN echo "fastestmirror=1" >>/etc/dnf/dnf.conf
 RUN zypper --non-interactive   up
 
-#DONE:  rust-glib-sys-devel   rust-gdk-sys+default-devel  webkit2gtk3-devel rust-webkit2gtk-devel   rust-gdk-pixbuf-sys-devel  webkit2gtk4
-#not found: webkit2gtk3-jsc-devel 		cmake   fuse
 
 RUN zypper --non-interactive  install  libjavascriptcoregtk-4_1-0  wget   python3-pip python3-setuptools  patchelf desktop-file-utils gcc 
-RUN zypper --non-interactive  install  gzip  gdk-pixbuf   fakeroot strace curl pkgconf git file tar  libsoup 
-RUN zypper --non-interactive  install  gobject-introspection libglib-2_0-0    glib2-devel  atk  gdk-pixbuf  libgtk-3-0 libatk-1_0-0 atk-devel  gdk-pixbuf-devel
+RUN zypper --non-interactive  install  gzip  gdk-pixbuf   fakeroot strace curl pkgconf git file tar  libsoup  gtk3-devel python3-gobject-Gdk  gtk3-devel libsoup-devel  libsoup2-devel
+RUN zypper --non-interactive  install  gobject-introspection libglib-2_0-0 glib2-devel  atk  gdk-pixbuf libgtk-3-0 libatk-1_0-0 atk-devel gdk-pixbuf-devel
 
 #  Problem!
 # RUN zypper --non-interactive  install rust-gdk-sys rust-glib-sys  webkit2gtk3 webkit2gtk3-soup2  gdk-pixbuf2  libgdk-pixbuf2.0-dev  gcc13  fuse-ts
+
 
 
 
