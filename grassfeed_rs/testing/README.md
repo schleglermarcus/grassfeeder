@@ -8,7 +8,8 @@ Probing  grassfeeder-0.1.3-B3
 | grassfeeder-0.1.3-B3-fedora35.AppImage    | yes | no  | |
 | grassfeeder-0.1.3-B3-debian11.AppImage    |     | no  | |
 | grassfeeder-0.1.3-B3-mint20.AppImage      |     | no  | |  
-
+| grassfeeder-0.1.3-B5-suse154.rpm          |     | yes | 
+| grassfeeder-0.1.3-B4-suse154.AppImage     |     | yes |
 
 ### running Fedora 35
 
@@ -18,10 +19,23 @@ Probing  grassfeeder-0.1.3-B3
 ` dnf install -y libatomic  `  
 &#x2714;
 
-### running  OpenSuse 15.5
-` zypper install libatomic1` 
+### running Fedora 33 or older
+     Fedora-29  has glibc-2.28.9, too old
+     Fedora-30  :  *.AppImage:    web_view_get_is_web_process_responsive  not found -> webkit2gtk too old
+                  *.rpm   needs   glibc-2.32
+     Fedora-31  :  *.AppImage:    web_view_get_is_web_process_responsive  not found -> webkit2gtk too old
+                  *.rpm   needs   glibc-2.32,  only 2.30 is available
+     Fedora-33  :  *.AppImage:    web_view_get_is_web_process_responsive  not found -> webkit2gtk too old
+                  *.rpm   needs   glibc-2.33,  only 2.32 is available
+                       
 
-present:  glibc-2.31     Needed by grassfeeder-0.1.3-B3-fedora35.rpm :  glibc-2.32
+
+### running  OpenSuse 15.5
+`zypper install libatomic1  ` 
+
+&#x2714;
+
+
 
 
 ### OpenSuse  15.5
@@ -35,6 +49,9 @@ present:  glibc-2.31     Needed by grassfeeder-0.1.3-B3-fedora35.rpm :  glibc-2.
     libjpeg.so.62()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
     libstemmer.so.0()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
 
+
+-> Present:  glibc-2.31    
+-> Needed by grassfeeder-0.1.3-B3-fedora35.rpm :  glibc-2.32
 
 
 # ./grassfeeder-0.1.3-B3-fedora35.AppImage 
@@ -54,33 +71,22 @@ Abgebrochen (Speicherabzug geschrieben)
 
 
 # ./grassfeeder-0.1.3-B3-mint20.AppImage 
-
 (grassfeeder-0.1.3-B3-mint20.AppImage:3831): GLib-GIO-ERROR **: 18:17:38.946: Settings schema 'org.gnome.settings-daemon.plugins.xsettings' does not contain a key named 'antialiasing'
 Trace/Breakpoint ausgelöst (Speicherabzug geschrieben)
 
     
-    
 ```
 
-
-### Remarks
-
-     grassfeeder*.AppImage needs at least glibc-2.29
-     OpenSuse-15.2 has glibc-2.26
-
-     mint21-built   grassfeeder*.rpm  needs at least glibc-2.32
-     OpenSuse-15.3  has glibc-2.31
-     OpenSuse-15.4  has glibc-2.31
+### OpenSuse  15.4 and older
      OpenSuse-15.5  has glibc-2.31
+     OpenSuse-15.4  has glibc-2.31
+     OpenSuse-15.3  has glibc-2.31
+     OpenSuse-15.2  has glibc-2.26
+
+    grassfeeder-0.1.3-B3-mint20.AppImage needs at least glibc-2.32
+
+
      
-     Fedora-29  has glibc-2.28.9, too old
-     Fedora-30  :  *.AppImage:    web_view_get_is_web_process_responsive  not found -> webkit2gtk too old
-                  *.rpm   needs   glibc-2.32
-     Fedora-31  :  *.AppImage:    web_view_get_is_web_process_responsive  not found -> webkit2gtk too old
-                  *.rpm   needs   glibc-2.32,  only 2.30 is available
-     Fedora-33  :  *.AppImage:    web_view_get_is_web_process_responsive  not found -> webkit2gtk too old
-                  *.rpm   needs   glibc-2.33,  only 2.32 is available
-                       
 
 
 
