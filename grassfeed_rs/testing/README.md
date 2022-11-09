@@ -1,23 +1,28 @@
-## AppImage Tests !
+## AppImage Tests
 
 Probing  grassfeeder-0.1.3-B3
 
 | File                                      | Fedora 35 (2021-11) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
 | ---- | ---- | ---- | ---- |
-| grassfeeder-0.1.3-B3-fedora35.rpm         | yes | -   | |
-| grassfeeder-0.1.3-B3-fedora35.AppImage    | yes | no  | |
-| grassfeeder-0.1.3-B3-debian11.AppImage    |     | no  | |
-| grassfeeder-0.1.3-B3-mint20.AppImage      |     | no  | |  
-| grassfeeder-0.1.3-B5-suse154.rpm          |     | yes | 
-| grassfeeder-0.1.3-B4-suse154.AppImage     |     | yes |
+| grassfeeder-0.1.3-B5-fedora35.rpm         | yes   | -   | |
+| grassfeeder-0.1.3-B5-fedora35.AppImage    | yes   | no  | |
+| grassfeeder-0.1.3-B3-debian11.AppImage    |       | no  | |
+| grassfeeder-0.1.3-B3-mint20.AppImage      |       | no  | |  
+| grassfeeder-0.1.3-B5-suse154.rpm          | yes   | yes | 
+| grassfeeder-0.1.3-B4-suse154.AppImage     | no    | yes |
 
 ### running Fedora 35
 
-` rpm -i grassfeeder-0.1.3-B3-fedora35.rpm ` 
+` rpm -i grassfeeder-0.1.3-B5-fedora35.rpm ` 
 
     libatomic.so.1()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
 ` dnf install -y libatomic  `  
 &#x2714;
+
+
+# ./grassfeeder-0.1.3-B4-suse154.AppImage
+./grassfeeder-0.1.3-B4-suse154.AppImage: /lib64/libpthread.so.0: version `GLIBC_PRIVATE' not found (required by /tmp/.mount_grassf7s2IXB/lib64/librt.so.1)
+
 
 ### running Fedora 33 or older
      Fedora-29  has glibc-2.28.9, too old
