@@ -10,14 +10,15 @@ Probing  grassfeeder-0.1.3-B3
 | grassfeeder-0.1.3-B3-mint20.AppImage      |     | no  | |  
 
 
-### Fedora 35
+### running Fedora 35
 
 ` rpm -i grassfeeder-0.1.3-B3-fedora35.rpm ` 
 
     libatomic.so.1()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
-` dnf install -y libatomic  `  &#x2714;
+` dnf install -y libatomic  `  
+&#x2714;
 
-### OpenSuse 15.5
+### running  OpenSuse 15.5
 ` zypper install libatomic1` 
 
 present:  glibc-2.31     Needed by grassfeeder-0.1.3-B3-fedora35.rpm :  glibc-2.32
