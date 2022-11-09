@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.1.3-B4"
+version = "0.1.3-B5"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -65,9 +65,9 @@ assets = [
 ]
 
 [package.metadata.generate-rpm.requires]
-libatomic = "*"
-libffi = "*"
-libjpeg = "*"
+#   libatomic = "*"     # fedora wants  libatomic,   suse wants  libatomic1
+# libffi = "*"
+# libjpeg = "*"
 #alternative = "*"
 #glibc = ">= 2.32"
 #libcrypto = "*"
