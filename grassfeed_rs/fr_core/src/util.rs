@@ -218,7 +218,7 @@ pub fn filter_by_iso8859_1(input: &str) -> (String, bool) {
 ///  https://www.w3schools.com/charsets/ref_html_entities_a.asp
 pub fn remove_invalid_chars_from_input(inp: String) -> String {
     let mut ret = inp;
-    ret = ret.replace(&['\"', '\n', '\'', '\"'][..], "");
+    ret = ret.replace(&['\"', '\n', '\"'][..], "");
     ret = ret.replace("&#38;", "&");
     ret = ret.replace("&#038;", "&");
     ret = ret.replace("&#039;", "\"");
@@ -234,9 +234,11 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#153;", " - ");
     ret = ret.replace("&#156;", " - ");
     ret = ret.replace("&#157;", " Š ");
+    ret = ret.replace("&#163;", "£");
     ret = ret.replace("&#164;", " ");
     ret = ret.replace("&#166;", " ... ");
     ret = ret.replace("&#190;", "¾");
+    ret = ret.replace("&#194;", "Â");
     ret = ret.replace("&#220;", "Ü");
     ret = ret.replace("&#223;", "ß");
     ret = ret.replace("&#226;", "\"");
@@ -291,7 +293,6 @@ mod t {
     use crate::util::remove_invalid_chars_from_input;
     // use std::fs::File;
     // use std::io::Write;
-
 
     //cargo watch -s "cargo    test  util::util_fetch_test::sanitize_input   --lib  -- --exact "
     #[test]
