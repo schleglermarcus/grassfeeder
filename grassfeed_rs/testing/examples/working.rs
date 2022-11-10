@@ -134,7 +134,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
-			("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
+            ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
@@ -144,7 +144,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 false,
             );
         });
-		feedsources.add_new_subscription_at_parent(
+        feedsources.add_new_subscription_at_parent(
             url_nn_aug,
             "NN-aug".to_string(),
             folder1,

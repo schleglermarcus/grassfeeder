@@ -8,6 +8,8 @@ use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::IDownloader;
 use fr_core::controller::sourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
+use fr_core::controller::timer::build_timer;
+use fr_core::controller::timer::ITimer;
 use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::MessageRow;
@@ -17,8 +19,6 @@ use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::icons::icon_analyser;
-use fr_core::controller::timer::build_timer;
-use fr_core::controller::timer::ITimer;
 use fr_core::ui_select::uimock::UIMock;
 use fr_core::util::IconKind;
 use fr_core::web::httpfetcher::HttpFetcher;
@@ -89,7 +89,6 @@ fn update_folder_pos() {
     assert_eq!(result.get(2).unwrap().parent_subs_id, 22);
     assert_eq!(result.get(2).unwrap().folder_position, 33);
 }
-
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_heise_svg  --lib -- --exact --nocapture"
 // #[ignore]

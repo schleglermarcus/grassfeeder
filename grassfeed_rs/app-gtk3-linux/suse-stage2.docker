@@ -1,0 +1,40 @@
+FROM grassfeeder:suse-stage1
+
+# moved to stage1
+# RUN zypper --non-interactive  install   python3-gobject-Gdk  gtk3-devel libsoup-devel  libsoup2-devel libjavascriptcoregtk-4_0-18  libjavascriptcoregtk-4_1-0  webkit2gtk3-devel  webkit2gtk3-soup2-devel
+
+
+
+# pkg-config --libs --cflags javascriptcoregtk-4.0 "javascriptcoregtk-4.0 >= 2.24"
+#  dpkg -S  javascriptcoregtk-4.0.pc
+# libjavascriptcoregtk-4.0-dev:amd64: /usr/lib/x86_64-linux-gnu/pkgconfig/javascriptcoregtk-4.0.pc
+# not found      libglib-2_0-0-64bit  libatk libgtk-3-bin  libatk1.0-dev   rust-atk-sys  webkit2gtk3	 webkit2gtk3-soup2
+# RUN zypper --non-interactive  install  rust-glib-sys   webkit2gtk3-soup2  gdk-pixbuf2  libgdk-pixbuf2.0-dev  gcc13  fuse-ts
+
+
+WORKDIR /usr/src/
+COPY target/gf.tar.gz /usr/src/
+RUN cat gf.tar.gz |gzip -d |tar x
+
+WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
+RUN rpm -qa |egrep "javascriptcore"
+
+
+RUN cargo clean
+RUN cargo test --release
+RUN cargo build --release
+
+RUN cargo generate-rpm
+RUN ls -l  target/generate-rpm/*
+RUN cp target/generate-rpm/gr*.rpm  ../target/gf.rpm
+
+RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
+RUN mv grassfeeder*.AppImage  gf.AppImage
+RUN ls -l
+
+RUN rpm -qa |grep glibc
+
+
+#WORKDIR /usr/src/grassfeed_rs/target
+#RUN ls -l debian/*
+#RUN mv debian/grass*.deb  gf.deb

@@ -11,6 +11,9 @@ use flume::Sender;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering;
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use std::time::Instant;
@@ -35,16 +38,24 @@ pub struct Timer {
     schedules: [TimerSchedule; TIMER_EVENT_TABLE.len()],
     timer_receiver: Receiver<TimerJob>,
     timer_sender: Sender<TimerJob>,
+    signal_term: Arc<AtomicBool>,
+    signal_int: Arc<AtomicBool>,
 }
 
 impl Timer {}
 
 pub fn build_timer() -> Timer {
     let (t_s, t_r) = flume::bounded::<TimerJob>(TIMER_JOB_QUEUE_SIZE);
+    let sig_term_a = Arc::new(AtomicBool::new(false));
+    let sig_int_a = Arc::new(AtomicBool::new(false));
+    let _r = signal_hook::flag::register(signal_hook::consts::SIGTERM, sig_term_a.clone());
+    let _r = signal_hook::flag::register(signal_hook::consts::SIGINT, sig_term_a.clone());
     Timer {
         schedules: Default::default(),
         timer_sender: t_s,
         timer_receiver: t_r,
+        signal_term: sig_term_a,
+        signal_int: sig_int_a,
     }
 }
 
@@ -78,6 +89,11 @@ impl ITimer for Timer {
                         self.notify_all(&TimerEvent::Shutdown);
                     }
                 }
+            }
+            if self.signal_term.load(Ordering::Relaxed) || self.signal_int.load(Ordering::Relaxed) {
+                info!("got signal TERM or INT: shutdown");
+                keeprunning = false;
+                self.notify_all(&TimerEvent::Shutdown);
             }
         }
     }

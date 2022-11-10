@@ -321,7 +321,6 @@ fn setup() {
             logger_config::QuietFlags::Downloader as u64,
             //  0,
         );
-        //   unzipper::unzip_some();
-        debug!("UNZIPPED: {}", unzipper::unzip_some());
+        unzipper::unzip_some();
     });
 }

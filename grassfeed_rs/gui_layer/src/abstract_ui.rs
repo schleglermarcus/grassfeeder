@@ -222,7 +222,7 @@ pub trait UIUpdaterAdapter {
     fn widget_mark(&self, typ: UIUpdaterMarkWidgetType, sw_idx: u8, mark: u8);
     fn grab_focus(&self, typ: UIUpdaterMarkWidgetType, sw_idx: u8);
     //  list-idx,     db-id: -1 for no cursor,        select column for db-id,     use pane scrolling: 0-100  -1:off
-    fn list_set_cursor(&self, list_index: u8, db_id: isize, column: u8, scroll_pos: i8 );
+    fn list_set_cursor(&self, list_index: u8, db_id: isize, column: u8, scroll_pos: i8);
     fn update_window_title(&self);
     fn update_window_icon(&self);
     fn update_web_view(&self, nr: u8);

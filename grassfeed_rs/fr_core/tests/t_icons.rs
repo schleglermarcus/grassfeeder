@@ -9,7 +9,7 @@ use fr_core::TD_BASE;
 fn test_extract_icon_fromrome() {
     setup();
     // let f = "../fr_core/tests/data/fromrome.html";
-	let filename = format!("{}websites/fromrome.html", TD_BASE);
+    let filename = format!("{}websites/fromrome.html", TD_BASE);
     let page = std::fs::read_to_string(filename).unwrap();
     let r = extract_icon_from_homepage(page, &"https://www.fromrome.info/".to_string());
     assert_eq!(
@@ -18,13 +18,12 @@ fn test_extract_icon_fromrome() {
     );
 }
 
-
 // #[ignore]
 #[test]
 fn test_extract_icon_seoul() {
     setup();
     // let f = "../fr_core/tests/data/www.seoulnews.net.html";
-	let filename = format!("{}websites/www.seoulnews.net.html", TD_BASE);
+    let filename = format!("{}websites/www.seoulnews.net.html", TD_BASE);
     let page = std::fs::read_to_string(filename).unwrap();
     let r = extract_icon_from_homepage(page, &String::default());
     assert_eq!(
@@ -32,7 +31,6 @@ fn test_extract_icon_seoul() {
         Ok("https://static.themainstreammedia.com/web/newsnet/favicons/favicon.ico".to_string())
     );
 }
-
 
 // #[ignore]
 #[test]
@@ -112,7 +110,6 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(logger_config::QuietFlags::Controller as u64);
-        //   unzipper::unzip_some();
-        debug!("UNZIPPED: {}", unzipper::unzip_some());
+        unzipper::unzip_some();
     });
 }

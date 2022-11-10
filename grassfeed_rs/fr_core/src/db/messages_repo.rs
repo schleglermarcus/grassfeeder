@@ -1,8 +1,8 @@
+use crate::controller::timer::Timer;
 use crate::db::message::MessageRow;
 use crate::db::sqlite_context::rusqlite_error_to_boxed;
 use crate::db::sqlite_context::SqliteContext;
 use crate::db::sqlite_context::TableInfo;
-use crate::controller::timer::Timer;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;

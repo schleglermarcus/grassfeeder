@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -52,24 +52,28 @@ auto_link = true
 auto_link_exclude_list = [
     "libc.so*",
     "libdl.so*",
-#     "libpthread.so*",
-#		"libwebkit2*",
-#		"libicu*",
-#		"libjavascript*",
-# 		"libgtk*",
+    "libpthread.so*",
 ]
 
 
 [package.metadata.generate-rpm]
-# assets: # (mandatory) the array of the files to be included in the package
-#        source: the location of that asset in the Rust project. (e.g. target/release/XXX) Wildcard character * is allowed.
-#        dest: the install-destination. (e.g. /usr/bin/XXX) If source contains wildcard character *, it must be a directory, not a file path.
-#        mode: the permissions as octal string. (e.g. 755 to indicate -rwxr-xr-x)
-#        config: set true if it is a configuration file.
-#        doc: set true if it is a document file.
+name = "grassfeeder"
 assets = [
     	{ source="../target/release/grassfeeder", dest="/usr/bin/grassfeeder", mode="755" },
     	{ source="assets/grassfeeder.desktop", dest="/usr/share/applications/grassfeeder.desktop", mode="755" },
     	{ source="assets/grassfeeder.xpm",     dest="/usr/share/pixmaps/grassfeeder/grassfeeder.xpm", mode="755" },
     	{ source="assets/grassfeeder-logo-128x128-t.png", dest="/usr/share/pixmaps/grassfeeder/grassfeeder.png", mode="755" },
 ]
+
+[package.metadata.generate-rpm.requires]
+#   libatomic = "*"     # fedora wants  libatomic,   suse wants  libatomic1
+# libffi = "*"
+# libjpeg = "*"
+#alternative = "*"
+#glibc = ">= 2.32"
+#libcrypto = "*"
+#libicudata = "*"
+#libicui18n = "*"
+#libicuuc = "*"
+#libm = "*"
+#libstemmer = "*"

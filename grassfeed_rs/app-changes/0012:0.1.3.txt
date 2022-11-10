@@ -1,0 +1,8 @@
+Don, 10 Nov 2022 00:22:00 +0000
+* Unix termination signal handling
+* Creating *.rpm:  retaining the appliation name
+* Permitting apostroph in message titles
+* Created rpm package, from debian, Suse, fedora
+* Created AppImage, from debian, Suse, fedora
+* Bugfix: new message does not show up in list
+* Bugfix: Settings Dialog / Font Manual Switch:  height adapted

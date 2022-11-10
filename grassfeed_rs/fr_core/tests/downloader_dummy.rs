@@ -38,10 +38,7 @@ impl IDownloader for DownloaderDummy {
         unimplemented!()
     }
 
-    // fn download_direct(&self, _url: &String) -> Result<String, String> {        unimplemented!()    }
-
-	fn browser_drag_request(&self, _dragged_url: &str) {
-		unimplemented!()
-	}
-
+    fn browser_drag_request(&self, _dragged_url: &str) {
+        unimplemented!()
+    }
 }

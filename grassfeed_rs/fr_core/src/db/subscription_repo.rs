@@ -1,3 +1,4 @@
+use crate::controller::timer::Timer;
 use crate::db::errors_repo;
 use crate::db::sqlite_context::SqliteContext;
 use crate::db::sqlite_context::TableInfo;
@@ -5,7 +6,6 @@ use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_entry::SRC_REPO_ID_DELETED;
 use crate::db::subscription_entry::SRC_REPO_ID_DUMMY;
 use crate::db::subscription_entry::SRC_REPO_ID_MOVING;
-use crate::controller::timer::Timer;
 use crate::util::file_exists;
 use context::appcontext::AppContext;
 use context::BuildConfig;

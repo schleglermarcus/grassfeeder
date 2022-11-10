@@ -1,0 +1,30 @@
+FROM opensuse/leap:15.4
+
+#   opensuse/leap:15.0		# good			Not found opensuse/leap:15.5		
+
+# FROM   registry.suse.com/suse/opensuse:latest
+# FROM registry.suse.com/suse/openSUSE:Leap:15.4:Images/opensuse-leap-image
+# fROM registry.suse.com/suse/sles12sp4
+
+RUN cat /etc/os-release |grep VERSION
+#RUN echo "fastestmirror=1" >>/etc/dnf/dnf.conf
+RUN zypper --non-interactive   up
+
+
+RUN zypper --non-interactive  install  libjavascriptcoregtk-4_1-0  wget   python3-pip python3-setuptools  patchelf desktop-file-utils gcc 
+RUN zypper --non-interactive  install  gzip  gdk-pixbuf   fakeroot strace curl pkgconf git file tar  libsoup  gtk3-devel python3-gobject-Gdk  gtk3-devel libsoup-devel  libsoup2-devel
+RUN zypper --non-interactive  install  gobject-introspection libglib-2_0-0 glib2-devel  atk  gdk-pixbuf libgtk-3-0 libatk-1_0-0 atk-devel gdk-pixbuf-devel
+RUN zypper --non-interactive  install  python3-gobject-Gdk  gtk3-devel libsoup-devel  libsoup2-devel libjavascriptcoregtk-4_0-18  libjavascriptcoregtk-4_1-0  webkit2gtk3-devel  webkit2gtk3-soup2-devel
+
+
+
+RUN wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+RUN chmod +x /usr/local/bin/appimagetool
+WORKDIR /root
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH=/root/.cargo/bin:$PATH
+
+RUN rustup update stable
+#RUN cargo install cargo-deb
+RUN cargo install cargo-appimage
+RUN cargo install cargo-generate-rpm
