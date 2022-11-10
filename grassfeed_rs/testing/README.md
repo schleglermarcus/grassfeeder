@@ -4,25 +4,46 @@ Probing  grassfeeder-0.1.3-B3
 
 | File                                      | Fedora 35 (2021-11) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
 | ---- | ---- | ---- | ---- |
-| grassfeeder-0.1.3-B5-fedora35.rpm         | yes   | no   | |
+| grassfeeder-0.1.3-B5-fedora35.rpm         | yes   | no  | |
 | grassfeeder-0.1.3-B5-fedora35.AppImage    | yes   | no  | |
-| grassfeeder-0.1.3-B7-debian11.AppImage    |       | no  | |
-| grassfeeder-0.1.3-B7-debian11.rpm    |       | no  | |
+| grassfeeder-0.1.3-B5-suse154.rpm          | yes   | yes | |
+| grassfeeder-0.1.3-B4-suse154.AppImage     | no    | yes | |
+| grassfeeder-0.1.3-B7-debian11.AppImage    | no    | no  | |
+| grassfeeder-0.1.3-B7-debian11.rpm         | no    | no  | |
 | grassfeeder-0.1.3-B3-mint20.AppImage      |       | no  | |  
-| grassfeeder-0.1.3-B5-suse154.rpm          | yes   | yes | 
-| grassfeeder-0.1.3-B4-suse154.AppImage     | no    | yes |
 
 ### running Fedora 35
 
-` rpm -i grassfeeder-0.1.3-B5-fedora35.rpm ` 
-
-    libatomic.so.1()(64bit) wird benötigt von app-gtk3-linux-0:0.1.3-B3-1.x86_64
 ` dnf install -y libatomic  `  
-&#x2714;
+` rpm -i grassfeeder-0.1.3-B5-fedora35.rpm `   &#x2714;
+
+```
+
+./grassfeeder-0.1.3-B7-debian11.AppImage 
+./grassfeeder-0.1.3-B7-debian11.AppImage: /lib64/libpthread.so.0: version `GLIBC_PRIVATE' not found (required by /tmp/.mount_grassfAbmqKo/lib/x86_64-linux-gnu/librt.so.1)
+
+[marcus@fedora gfdist]$ rpm -i grassfeeder-0.1.3-B7-debian11.rpm 
+Fehler: Fehlgeschlagene Abhängigkeiten:
+    libbz2.so.1.0()(64bit) wird benötigt von grassfeeder-0:0.1.3-B7-1.x86_64
+    libffi.so.7()(64bit) wird benötigt von grassfeeder-0:0.1.3-B7-1.x86_64
+    libicudata.so.67()(64bit) wird benötigt von grassfeeder-0:0.1.3-B7-1.x86_64
+    libicui18n.so.67()(64bit) wird benötigt von grassfeeder-0:0.1.3-B7-1.x86_64
+    libicuuc.so.67()(64bit) wird benötigt von grassfeeder-0:0.1.3-B7-1.x86_64
+    libmd.so.0()(64bit) wird benötigt von grassfeeder-0:0.1.3-B7-1.x86_64
+    libpcre.so.3()(64bit) wird benötigt von grassfeeder-0:0.1.3-B7-1.x86_64
+    libwebp.so.6()(64bit) wird benötigt von grassfeeder-0:0.1.3-B7-1.x86_64
 
 
 # ./grassfeeder-0.1.3-B4-suse154.AppImage
 ./grassfeeder-0.1.3-B4-suse154.AppImage: /lib64/libpthread.so.0: version `GLIBC_PRIVATE' not found (required by /tmp/.mount_grassf7s2IXB/lib64/librt.so.1)
+
+
+# ./grassfeeder-0.1.3-B3-mint20.AppImage 
+./grassfeeder-0.1.3-B3-mint20.AppImage: /lib64/libpthread.so.0: version `GLIBC_PRIVATE' not found (required by /tmp/.mount_grassflDsXN6/lib/x86_64-linux-gnu/librt.so.1)
+
+
+```
+
 
 
 ### running Fedora 33 or older
