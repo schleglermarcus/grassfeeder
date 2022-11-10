@@ -44,9 +44,23 @@ Requisite for OpenSuse 15.5: `zypper install  libatomic1`
 #### Build
 
 ##### Ubuntu 18.04
- - apt-get install  curl git gcc  pkg-config
- - The package glib-sys-0.15.10  requires  glibc >2.48
+ - apt-get install -y  curl git gcc  pkg-config  libglib2.0-dev  libatk1.0-dev  libgdk-pixbuf2.0-dev   libpango1.0-dev
+ - apt-get install -y  libgdk3.0-cil-dev  libsoup2.4-dev libcairo2-dev libjavascriptcoregtk-4.0-dev  libgtk-3-dev
+ 
+ 
+ - The rust package glib-sys-0.15.10  requires  glibc >2.48
  - \# pkg-config --libs --cflags glib-2.0 "glib-2.0 >= 2.48"
+ ```
+  cargo:warning=`"pkg-config" "--libs" "--cflags" "gtk+-3.0" "gtk+-3.0 >= 3.24.8"` did not exit successfully: exit status: 1
+  error: could not find system library 'gtk+-3.0' required by the 'gtk-sys' crate
+  Requested 'gtk+-3.0 >= 3.24.8' but version of GTK+ is 3.22.30
+ ```
+ 
+ 
+ 
+ 
+ 
+ 
       Package glib-2.0 was not found in the pkg-config search path.
  - This [version](https://distrowatch.com/table.php?distribution=ubuntu) 18.04 is too old 
 
