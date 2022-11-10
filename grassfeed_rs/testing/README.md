@@ -1,6 +1,5 @@
-## AppImage Tests
+## Distribution test matrix: 
 
-Probing  grassfeeder-0.1.3-B3
 
 | File                                      | Fedora 35 (2021-11) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
 | ---- | ---- | ---- | ---- |
@@ -56,8 +55,6 @@ Fehler: Fehlgeschlagene Abhängigkeiten:
 ### running  OpenSuse 15.5
 `zypper install libatomic1  `   &#x2714;
 
-
-### OpenSuse  15.5
  - Present:  glibc-2.31    
  - Needed by grassfeeder-0.1.3-B3-fedora35.rpm :  glibc-2.32
 
@@ -86,8 +83,6 @@ Abgebrochen (Speicherabzug geschrieben)
 Trace/Breakpoint ausgelöst (Speicherabzug geschrieben)
 
 
-# | grassfeeder-0.1.3-B7-debian11.AppImage    |       | no  | |
-
 # rpm -i grassfeeder-0.1.3-B7-debian11.rpm 
 error: Failed dependencies:
     libbz2.so.1.0()(64bit) is needed by grassfeeder-0:0.1.3-B7-1.x86_64
@@ -102,7 +97,7 @@ error: Failed dependencies:
     
 ```
 
-### OpenSuse  15.4 and older
+#### OpenSuse  15.4 and older
      OpenSuse-15.5  has glibc-2.31
      OpenSuse-15.4  has glibc-2.31
      OpenSuse-15.3  has glibc-2.31
