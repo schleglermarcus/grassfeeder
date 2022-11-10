@@ -4,13 +4,13 @@ Probing  grassfeeder-0.1.3-B3
 
 | File                                      | Fedora 35 (2021-11) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
 | ---- | ---- | ---- | ---- |
-| grassfeeder-0.1.3-B5-fedora35.rpm         | yes   | no  | |
-| grassfeeder-0.1.3-B5-fedora35.AppImage    | yes   | no  | |
-| grassfeeder-0.1.3-B5-suse154.rpm          | yes   | yes | |
-| grassfeeder-0.1.3-B4-suse154.AppImage     | no    | yes | |
-| grassfeeder-0.1.3-B7-debian11.AppImage    | no    | no  | |
-| grassfeeder-0.1.3-B7-debian11.rpm         | no    | no  | |
-| grassfeeder-0.1.3-B3-mint20.AppImage      | no    | no  | |  
+| grassfeeder-0.1.3-B5-fedora35.rpm         | yes   | no  | -   |
+| grassfeeder-0.1.3-B5-fedora35.AppImage    | yes   | no  | no  |
+| grassfeeder-0.1.3-B5-suse154.rpm          | yes   | yes | -   |
+| grassfeeder-0.1.3-B4-suse154.AppImage     | no    | yes | no  |
+| grassfeeder-0.1.3-B7-debian11.rpm         | no    | no  | -   |
+| grassfeeder-0.1.3-B7-debian11.AppImage    | no    | no  | yes |
+| grassfeeder-0.1.3-B3-mint20.AppImage      | no    | no  | yes |  
 
 ### running Fedora 35
 
@@ -111,7 +111,19 @@ error: Failed dependencies:
     grassfeeder-0.1.3-B3-mint20.AppImage needs at least glibc-2.32
 
 
-     
+### running Ubuntu20
+```
+#  ./grassfeeder-0.1.3-B5-fedora35.AppImage 
+./grassfeeder-0.1.3-B5-fedora35.AppImage: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.33' not found (required by ./grassfeeder-0.1.3-B5-fedora35.AppImage)
+./grassfeeder-0.1.3-B5-fedora35.AppImage: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found (required by ./grassfeeder-0.1.3-B5-fedora35.AppImage)
+./grassfeeder-0.1.3-B5-fedora35.AppImage: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.34' not found (required by ./grassfeeder-0.1.3-B5-fedora35.AppImage)
+
+# ./grassfeeder-0.1.3-B4-suse154.AppImage 
+./grassfeeder-0.1.3-B4-suse154.AppImage: symbol lookup error: /tmp/.mount_grassfurPRMl/lib64/librt.so.1: undefined symbol: __pthread_attr_copy, version GLIBC_PRIVATE
+
+
+
+```     
 
 
 
