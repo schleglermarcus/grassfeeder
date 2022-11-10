@@ -6,7 +6,8 @@ Probing  grassfeeder-0.1.3-B3
 | ---- | ---- | ---- | ---- |
 | grassfeeder-0.1.3-B5-fedora35.rpm         | yes   | -   | |
 | grassfeeder-0.1.3-B5-fedora35.AppImage    | yes   | no  | |
-| grassfeeder-0.1.3-B3-debian11.AppImage    |       | no  | |
+| grassfeeder-0.1.3-B7-debian11.AppImage    |       | no  | |
+| grassfeeder-0.1.3-B7-debian11.rpm    |       | no  | |
 | grassfeeder-0.1.3-B3-mint20.AppImage      |       | no  | |  
 | grassfeeder-0.1.3-B5-suse154.rpm          | yes   | yes | 
 | grassfeeder-0.1.3-B4-suse154.AppImage     | no    | yes |
@@ -66,8 +67,8 @@ Probing  grassfeeder-0.1.3-B3
 
     
     
-# ./grassfeeder-0.1.3-B3-debian11.AppImage 
-(grassfeeder-0.1.3-B3-debian11.AppImage:3659): Gtk-WARNING **: 18:02:27.691: Could not load a pixbuf from icon theme.
+# ./grassfeeder-0.1.3-B7-debian11.AppImage 
+(grassfeeder-0.1.3-B7-debian11.AppImage:2769): Gtk-WARNING **: 16:08:05.379: Could not load a pixbuf from icon theme.
 This may indicate that pixbuf loaders or the mime database could not be found.
 **
 Gtk:ERROR:../../../../gtk/gtkiconhelper.c:494:ensure_surface_for_gicon: assertion failed (error == NULL): Failed to load /usr/share/icons/Adwaita/16x16/status/image-missing.png: Format der Bilddatei unbekannt (gdk-pixbuf-error-quark, 3)
@@ -78,6 +79,20 @@ Abgebrochen (Speicherabzug geschrieben)
 # ./grassfeeder-0.1.3-B3-mint20.AppImage 
 (grassfeeder-0.1.3-B3-mint20.AppImage:3831): GLib-GIO-ERROR **: 18:17:38.946: Settings schema 'org.gnome.settings-daemon.plugins.xsettings' does not contain a key named 'antialiasing'
 Trace/Breakpoint ausgelöst (Speicherabzug geschrieben)
+
+
+# | grassfeeder-0.1.3-B7-debian11.AppImage    |       | no  | |
+
+# rpm -i grassfeeder-0.1.3-B7-debian11.rpm 
+error: Failed dependencies:
+    libbz2.so.1.0()(64bit) is needed by grassfeeder-0:0.1.3-B7-1.x86_64
+    libicudata.so.67()(64bit) is needed by grassfeeder-0:0.1.3-B7-1.x86_64
+    libicui18n.so.67()(64bit) is needed by grassfeeder-0:0.1.3-B7-1.x86_64
+    libicuuc.so.67()(64bit) is needed by grassfeeder-0:0.1.3-B7-1.x86_64
+    libjpeg.so.62()(64bit) is needed by grassfeeder-0:0.1.3-B7-1.x86_64
+    libmd.so.0()(64bit) is needed by grassfeeder-0:0.1.3-B7-1.x86_64
+    libpcre.so.3()(64bit) is needed by grassfeeder-0:0.1.3-B7-1.x86_64
+    libwebp.so.6()(64bit) is needed by grassfeeder-0:0.1.3-B7-1.x86_64
 
     
 ```
