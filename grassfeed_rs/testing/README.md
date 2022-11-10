@@ -4,7 +4,7 @@ Probing  grassfeeder-0.1.3-B3
 
 | File                                      | Fedora 35 (2021-11) | OpenSuse 15.5 (2022-09) | Ubuntu 20 |
 | ---- | ---- | ---- | ---- |
-| grassfeeder-0.1.3-B5-fedora35.rpm         | yes   | -   | |
+| grassfeeder-0.1.3-B5-fedora35.rpm         | yes   | no   | |
 | grassfeeder-0.1.3-B5-fedora35.AppImage    | yes   | no  | |
 | grassfeeder-0.1.3-B7-debian11.AppImage    |       | no  | |
 | grassfeeder-0.1.3-B7-debian11.rpm    |       | no  | |
@@ -45,26 +45,18 @@ Probing  grassfeeder-0.1.3-B3
 
 
 ### OpenSuse  15.5
+ - Present:  glibc-2.31    
+ - Needed by grassfeeder-0.1.3-B3-fedora35.rpm :  glibc-2.32
+
 ```
-# rpm -i  grassfeeder-0.1.3-B3-fedora35.rpm 
-    error: Failed dependencies:
-    libc.so.6(GLIBC_2.32)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libc.so.6(GLIBC_2.33)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libc.so.6(GLIBC_2.34)(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libffi.so.6()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libjpeg.so.62()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-    libstemmer.so.0()(64bit) is needed by app-gtk3-linux-0:0.1.3-B3-1.x86_64
-
-
--> Present:  glibc-2.31    
--> Needed by grassfeeder-0.1.3-B3-fedora35.rpm :  glibc-2.32
-
-
-# ./grassfeeder-0.1.3-B3-fedora35.AppImage 
-./grassfeeder-0.1.3-B3-fedora35.AppImage: /lib64/libc.so.6: version `GLIBC_2.33' not found (required by ./grassfeeder-0.1.3-B3-fedora35.AppImage)
-./grassfeeder-0.1.3-B3-fedora35.AppImage: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by ./grassfeeder-0.1.3-B3-fedora35.AppImage)
-./grassfeeder-0.1.3-B3-fedora35.AppImage: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./grassfeeder-0.1.3-B3-fedora35.AppImage)
-
+# rpm -i grassfeeder-0.1.3-B5-fedora35.rpm 
+error: Failed dependencies:
+    libc.so.6(GLIBC_2.32)(64bit) is needed by app-gtk3-linux-0:0.1.3-B5-1.x86_64
+    libc.so.6(GLIBC_2.33)(64bit) is needed by app-gtk3-linux-0:0.1.3-B5-1.x86_64
+    libc.so.6(GLIBC_2.34)(64bit) is needed by app-gtk3-linux-0:0.1.3-B5-1.x86_64
+    libffi.so.6()(64bit) is needed by app-gtk3-linux-0:0.1.3-B5-1.x86_64
+    libjpeg.so.62()(64bit) is needed by app-gtk3-linux-0:0.1.3-B5-1.x86_64
+    libstemmer.so.0()(64bit) is needed by app-gtk3-linux-0:0.1.3-B5-1.x86_64
     
     
 # ./grassfeeder-0.1.3-B7-debian11.AppImage 
