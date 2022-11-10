@@ -60,8 +60,8 @@ pub enum IntCommands {
     ShowDialog(u8),
     ///  paned-index , position
     UpdatePanedPos(u8, i32),
-    ///  list_index,   db-id, column,   scroll-pos 
-    ListSetCursor(u8, isize, u8, i8 ),
+    ///  list_index,   db-id, column,   scroll-pos
+    ListSetCursor(u8, isize, u8, i8),
     ///  type, effect marker number, used for renaming its ID, to match CSS definitions
     WidgetMark(UIUpdaterMarkWidgetType, u8, u8),
     ///  Type, index,

@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use resources::parameter::SCAN_EMPTY_UNREAD_GROUP;
+use std::collections::HashMap;
 
 /// on each scan attempt, how many unread-jobs do we create.
 // pub const SCAN_EMPTY_UNREAD_GROUP: u8 = 6;

@@ -209,7 +209,7 @@ pub fn extract_feed_urls_sloppy(pagetext: &str) -> Vec<String> {
                 let _left = split_r.next();
                 if let Some(r) = split_r.next() {
                     let mut probe_url = r.to_string();
-                    probe_url = probe_url.replace( ['\"'], "");
+                    probe_url = probe_url.replace(['\"'], "");
                     found_feed_urls.push(probe_url);
                 }
             }

@@ -212,7 +212,7 @@ impl GtkModelUpdaterInt {
             gti = &gti.children[*p_index as usize];
         }
         let path_cn = format!("{:?}", path)
-            .replace( ['[', ']', ' '], "")
+            .replace(['[', ']', ' '], "")
             .replace(',', ":");
         if let Some(iter) = tree_store.iter_from_string(&path_cn) {
             self.treestore_set_row(&tree_store, gti, &iter, max_columns);

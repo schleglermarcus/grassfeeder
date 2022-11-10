@@ -1,23 +1,8 @@
-Sat, 05 Nov 2022 00:22:00 +0000
+Don, 10 Nov 2022 00:22:00 +0000
 * Unix termination signal handling
-* Bugfix: new message does not show up in list
 * Creating *.rpm:  retaining the appliation name
 * Permitting apostroph in message titles
-
-
-- Create rpm  package
-    https://lib.rs/crates/cargo-generate-rpm
-    http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
-    https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/31/Everything/x86_64/iso/
-
-https://documentation.suse.com/sles/12-SP4/html/SLES-all/docker-dockerizing-application.html
-https://schoolofsoftware.com/Docker/opensuse
-
-
-
-- Appimage Hub Deploy
-      https://github.com/AppImage/appimage.github.io
-      https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
-        Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
-        without the installation of additional packages.
-      https://github.com/AppImage/appimage.github.io/pull/3051
+* Created rpm package, from debian, Suse, fedora
+* Created AppImage, from debian, Suse, fedora
+* Bugfix: new message does not show up in list
+* Bugfix: Settings Dialog / Font Manual Switch:  height adapted

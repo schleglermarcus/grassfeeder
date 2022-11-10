@@ -441,7 +441,7 @@ impl FeedContents {
             feedsources.borrow().clear_read_unread(subs_id);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
             self.addjob(CJob::UpdateMessageList);
-            //  TODO:  set cursor
+            //  Later:  set cursor
         }
     }
 } // impl FeedContents

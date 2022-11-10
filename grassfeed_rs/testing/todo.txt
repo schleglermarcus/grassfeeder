@@ -1,9 +1,5 @@
 To Do List
 
-- Create rpm  package
-    https://lib.rs/crates/cargo-generate-rpm
-    http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html
-    https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/33/
 
 - Appimage Hub Deploy
       https://github.com/AppImage/appimage.github.io
@@ -13,10 +9,13 @@ To Do List
       https://github.com/AppImage/appimage.github.io/pull/3051
 
 
+
+
 - Use different app-indicator  lib
 
-
 - Possible Bug:   launch in browser : multiple list items appear
+
+- After deleting Message, set Cursor to next one
 
 - Marking of Messages, Favorites
 
@@ -113,20 +112,32 @@ https://www.gtk.org/docs/installations/windows/
 Desktop:
 https://nora.codes/tutorial/speedy-desktop-apps-with-gtk-and-rust/
 
-Suse Linux download:
+Linux Iso download:
   https://mirrorcache.opensuse.org/download/distribution/leap/15.2/iso/
+	https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/33/
 
 ------ Gnome Desktop:
-#  gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
 
 appimage /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_ABI_DT_RELR' not found (required by /tmp/.mount /lib64/libm.so.6)
 
+
+
 Samba mount:
+#  apt-get install cifs-utils
+
 # /etc/fstab:
 //kav/workspacer	/mnt/kav 		cifs 	noauto,rw,user,exec,vers=2.1		0 0
 
 # sudo chmod u+s   /bin/mount /bin/umount   /usr/sbin/mount.cifs 	/sbin/mount.cifs
 
+
+# nano ~/.bashrc
+
+gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
+test -s ~/.alias && . ~/.alias || true
+alias l="ls -l --color"
+findmnt /mnt/kav || mount /mnt/kav
+rsync -av  --delete /mnt/kav/gfdist ~/
 
 ------ AppImage
 

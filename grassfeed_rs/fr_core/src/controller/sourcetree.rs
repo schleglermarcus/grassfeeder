@@ -1384,9 +1384,9 @@ impl ISourceTreeController for SourceTreeController {
         if let Some((fse, _list)) = &self.get_current_selected_subscription() {
             if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                 if fse.subs_id == source_repo_id {
-					(*feedcontents).borrow().update_messagelist_only();
+                    (*feedcontents).borrow().update_messagelist_only();
                 } else {
-					(*feedcontents).borrow().update_message_list_(fse.subs_id);
+                    (*feedcontents).borrow().update_message_list_(fse.subs_id);
                 }
             }
         }

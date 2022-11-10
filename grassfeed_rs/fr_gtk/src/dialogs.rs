@@ -825,7 +825,8 @@ fn create_settings_dialog(
             1,
         );
         sw_fontsize_manual_enable.set_halign(Align::Start);
-
+        sw_fontsize_manual_enable.set_valign(Align::Center);
+        sw_fontsize_manual_enable.set_vexpand(false);
         line += 1;
         let label2_4 = Label::new(Some(&t!("D_SETTINGS_BROWSER_BACKGROUND_BRIGHTNESS")));
         grid2.attach(&label2_4, 0, line, 1, 1);

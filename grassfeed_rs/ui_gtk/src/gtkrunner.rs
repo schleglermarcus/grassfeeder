@@ -724,7 +724,9 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     }
 
     fn list_set_cursor(&self, list_index: u8, db_id: isize, column: u8, scroll_pos: i8) {
-        self.send_to_int(&IntCommands::ListSetCursor(list_index, db_id, column, scroll_pos ));
+        self.send_to_int(&IntCommands::ListSetCursor(
+            list_index, db_id, column, scroll_pos,
+        ));
     }
 
     fn widget_mark(&self, typ: UIUpdaterMarkWidgetType, sw_idx: u8, mark: u8) {
