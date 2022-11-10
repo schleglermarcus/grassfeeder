@@ -302,11 +302,7 @@ mod t {
             "h".to_string()
         );
         assert_eq!(
-            remove_invalid_chars_from_input("a\nb\'c".to_string()),
-            "abc".to_string()
-        );
-        assert_eq!(
-            remove_invalid_chars_from_input("&#8220;Science&#8221; no ".to_string()),
+            remove_invalid_chars_from_input("&#8220;Science&#8221;\n no ".to_string()),
             "\"Science\" no".to_string()
         );
         assert_eq!(

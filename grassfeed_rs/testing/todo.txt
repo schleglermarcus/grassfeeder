@@ -13,14 +13,13 @@ To Do List
       https://github.com/AppImage/appimage.github.io/pull/3051
 
 
-
-- BUG:   launch in browser : multiple list items appear
-
-- Use other app-indicator  lib
+- Use different app-indicator  lib
 
 
+- Possible Bug:   launch in browser : multiple list items appear
 
 - Marking of Messages, Favorites
+
 
 Drag extra care:
 	- https://www.netjstech.com/
@@ -42,10 +41,6 @@ Later:
   https://github.com/gabdube/native-windows-gui/tree/master/showcase
   https://www.ebbflow.io/blog/vending-win
 	https://gtk-rs.org/gtk4-rs/git/book/installation_windows.html
-
-
-
-
 
 
 

@@ -2,6 +2,8 @@ grassfeeder (0.1.3) unstable; urgency=low
 
   * Unix termination signal handling
   * Bugfix: new message does not show up in list
+  * Creating *.rpm:  retaining the appliation name
+  * Permitting apostroph in message titles
   
   
   - Create rpm  package
@@ -20,10 +22,6 @@ grassfeeder (0.1.3) unstable; urgency=low
           Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
           without the installation of additional packages.
         https://github.com/AppImage/appimage.github.io/pull/3051
-  
-  
-  
-  - BUG:   launch in browser : multiple list items appear !!
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sat, 05 Nov 2022 00:22:00 +0000
 
