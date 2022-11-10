@@ -10,7 +10,7 @@ Probing  grassfeeder-0.1.3-B3
 | grassfeeder-0.1.3-B4-suse154.AppImage     | no    | yes | |
 | grassfeeder-0.1.3-B7-debian11.AppImage    | no    | no  | |
 | grassfeeder-0.1.3-B7-debian11.rpm         | no    | no  | |
-| grassfeeder-0.1.3-B3-mint20.AppImage      |       | no  | |  
+| grassfeeder-0.1.3-B3-mint20.AppImage      | no    | no  | |  
 
 ### running Fedora 35
 
@@ -40,13 +40,9 @@ Fehler: Fehlgeschlagene Abhängigkeiten:
 
 # ./grassfeeder-0.1.3-B3-mint20.AppImage 
 ./grassfeeder-0.1.3-B3-mint20.AppImage: /lib64/libpthread.so.0: version `GLIBC_PRIVATE' not found (required by /tmp/.mount_grassflDsXN6/lib/x86_64-linux-gnu/librt.so.1)
-
-
 ```
 
-
-
-### running Fedora 33 or older
+#### running Fedora 33 or older
      Fedora-29  has glibc-2.28.9, too old
      Fedora-30  :  *.AppImage:    web_view_get_is_web_process_responsive  not found -> webkit2gtk too old
                   *.rpm   needs   glibc-2.32
@@ -58,11 +54,7 @@ Fehler: Fehlgeschlagene Abhängigkeiten:
 
 
 ### running  OpenSuse 15.5
-`zypper install libatomic1  ` 
-
-&#x2714;
-
-
+`zypper install libatomic1  `   &#x2714;
 
 
 ### OpenSuse  15.5
