@@ -20,11 +20,10 @@ WORKDIR /root
 ## seems that rust is already installed by now
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH=/root/.cargo/bin:$PATH
-
 RUN rustc --version
 RUN cargo --version
-
 RUN rustup update stable
+
 # RUN cargo install cargo-deb
 RUN cargo install cargo-appimage
 RUN cargo install cargo-generate-rpm
