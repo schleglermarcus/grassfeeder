@@ -383,7 +383,7 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
             .base_cache_directory(&b_conf.browser_dir)
             .base_data_directory(&b_conf.browser_dir)
             .disk_cache_directory(&b_conf.browser_dir)
-            .hsts_cache_directory(&b_conf.browser_dir)
+            // .hsts_cache_directory(&b_conf.browser_dir)	// backport
             .indexeddb_directory(&b_conf.browser_dir)
             .local_storage_directory(&b_conf.browser_dir)
             .build();
@@ -413,7 +413,7 @@ pub fn create_webview(
     let mut wvs_b = webkit2gtk::SettingsBuilder::new()
         .enable_java(false)
         .enable_media_capabilities(false)
-        .enable_javascript_markup(false)
+        // .enable_javascript_markup(false)		// backport
         .enable_html5_local_storage(false)
         .enable_developer_extras(false)
         .enable_smooth_scrolling(true)

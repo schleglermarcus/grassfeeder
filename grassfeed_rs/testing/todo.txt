@@ -29,6 +29,9 @@ Drag extra care:
 	- Dragging the same element 2x
 
 
+
+- 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20 
+
 Later:
 - GTK4: block multiple instances
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal

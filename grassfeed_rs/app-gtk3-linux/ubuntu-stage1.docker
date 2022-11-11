@@ -1,16 +1,27 @@
 # NEW but  the package won't work in Mint20
 FROM ubuntu:18.04
 
-run echo "deb     http://ftp-stud.hs-esslingen.de/ubuntu/ bionic main restricted universe "  >/etc/apt/sources.list
-run echo "deb-src http://ftp-stud.hs-esslingen.de/ubuntu/ bionic main restricted universe " >>/etc/apt/sources.list
-
-
-
+#RUN echo "deb     http://ftp-stud.hs-esslingen.de/ubuntu/ bionic main restricted universe "  >/etc/apt/sources.list
+#RUN echo "deb-src http://ftp-stud.hs-esslingen.de/ubuntu/ bionic main restricted universe " >>/etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -y --allow-downgrades perl-base=5.26.1-6
-RUN apt-get install -y  git
-RUN apt-get install -y wget  pkgconf   libsoup2.4.dev
-RUN apt-get install -y  libjavascriptcoregtk-4.0-dev  
+
+#RUN apt install -y zlib1g-dev  
+#RUN apt install -y libpcre3-dev
+#RUN apt install -y libglib2.0-dev
+#RUN apt install -y libharfbuzz-dev
+#RUN apt-cache search libicu-le
+#RUN apt install -y libicu-le-hb-dev
+#RUN apt install -y libicu60
+#RUN apt-get install -y -f  libicu-dev
+#RUN apt-get install -y libxml2-dev
+# RUN apt-cache search libsoup |grep dev
+
+
+# RUN apt-get install -y --allow-downgrades perl-base=5.26.1-6
+RUN apt-get install -y  libsoup2.4-dev   libjavascriptcoregtk-4.0-dev   git wget  pkgconf   
+RUN apt-get install -y curl git gcc  pkg-config  libglib2.0-dev  libatk1.0-dev  libgdk-pixbuf2.0-dev   libpango1.0-dev
+RUN apt-get install -y  libgdk3.0-cil-dev  libsoup2.4-dev libcairo2-dev  libgtk-3-dev   libwebkit2gtk-4.0-dev
+
 
 # Not available:
 # RUN apt install -y librust-glib-sys-dev librust-gdk-sys-dev 
