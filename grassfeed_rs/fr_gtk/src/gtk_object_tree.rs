@@ -52,10 +52,15 @@ use ui_gtk::GtkGuiBuilder;
 use ui_gtk::GtkObjectsType;
 use webkit2gtk::TLSErrorsPolicy;
 use webkit2gtk::WebContext;
-use webkit2gtk::WebContextExt;
 use webkit2gtk::WebView;
-use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
+// use webkit2gtk::WebViewExt;
+// use webkit2gtk::WebContextExt;
+
+
+use webkit2gtk::traits::WebViewExt;
+use webkit2gtk::traits::WebContextExt;
+
 
 const TOOLBAR_ICON_SIZE: i32 = 28;
 const TOOLBAR_BORDER_WIDTH: u32 = 0;

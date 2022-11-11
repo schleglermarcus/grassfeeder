@@ -23,7 +23,10 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;
 use std::sync::Arc;
-use webkit2gtk::WebViewExt;
+// use webkit2gtk::WebViewExt;
+use webkit2gtk::traits::WebViewExt;
+
+
 
 pub struct GtkModelUpdaterInt {
     m_v_store: UIAdapterValueStoreType,
