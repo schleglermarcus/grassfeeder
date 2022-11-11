@@ -8,8 +8,9 @@ WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
 # RUN pwd
 # RUN cargo clean
 RUN cargo test --release
-#RUN cargo deb
-#RUN cargo generate-rpm
+
+RUN cargo tree
+
 
 RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
 RUN mv grassfeeder*.AppImage  gf.AppImage
