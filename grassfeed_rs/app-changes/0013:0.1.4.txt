@@ -1,0 +1,10 @@
+Don, 10 Nov 2022 00:22:00 +0000
+
+- Try backporting gtk to fit ubuntu18 
+
+- Feed Error display sorted by time
+- Error DB: limit entries
+
+
+
+--

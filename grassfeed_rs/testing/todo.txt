@@ -78,7 +78,7 @@ No more
 * Put the work folder back to main
   git checkout main
   git pull
-	git status
+  git status
 
 * Create new Branch
 	git branch v0_0_4

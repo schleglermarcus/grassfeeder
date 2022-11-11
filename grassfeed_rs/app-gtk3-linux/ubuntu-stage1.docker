@@ -1,0 +1,27 @@
+# NEW but  the package won't work in Mint20
+FROM ubuntu:18.04
+
+run echo "deb     http://ftp-stud.hs-esslingen.de/ubuntu/ bionic main restricted universe "  >/etc/apt/sources.list
+run echo "deb-src http://ftp-stud.hs-esslingen.de/ubuntu/ bionic main restricted universe " >>/etc/apt/sources.list
+
+
+
+RUN apt-get update
+RUN apt-get install -y --allow-downgrades perl-base=5.26.1-6
+RUN apt-get install -y  git
+RUN apt-get install -y wget  pkgconf   libsoup2.4.dev
+RUN apt-get install -y  libjavascriptcoregtk-4.0-dev  
+
+# Not available:
+# RUN apt install -y librust-glib-sys-dev librust-gdk-sys-dev 
+#  Paket-Streit:      libatk1.0-dev  libwebkit2gtk-4.0-dev         libsoup2.4-dev
+
+
+RUN cargo install cargo-deb
+RUN cargo install cargo-appimage
+RUN cargo install cargo-generate-rpm
+
+# for AppImage
+RUN apt install -y  file python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse libfuse2
+RUN wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+RUN chmod +x /usr/local/bin/appimagetool
