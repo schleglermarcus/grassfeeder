@@ -1,0 +1,16 @@
+Package: grassfeeder
+Version: 0.1.4~B1
+Architecture: amd64
+Maintainer: Marcus <schlegler_marcus@posteo.de>
+Installed-Size: 7588
+Depends: libc6 (>= 2.35), libglib2.0-0 (>= 2.33.14), libwebkit2gtk-4.0-37 (>= 2.33.1), libpango-1.0-0 (>= 1.14.0), libgtk-3-0 (>= 3.16.2), libgdk-pixbuf-2.0-0 (>= 2.22.0)
+Priority: optional
+Section: utility
+Filename: pool/private/g/grassfeeder/grassfeeder_0.1.4~B1_amd64.deb
+Size: 2835652
+SHA256: f4fd784b048baefacf4862ca9cd83fa9a7fc777857d0b08904d3bceb0c212503
+SHA1: 6c929f2af0bde391aff84a7845968aa06049ca0a
+MD5sum: 2123fe5ff33d27ac90ef431f385b8b72
+Description: Feed Reader Linux-Gtk3 Application
+ Feed Reader Linux-Gtk3 Application
+

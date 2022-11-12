@@ -1,0 +1,19 @@
+Origin: Marcus der Schlegler
+Label: RSS Feed Reader
+Codename: grassfeeder
+Date: Sat, 12 Nov 2022 21:50:32 UTC
+Architectures: amd64
+Components: private
+Description: Apt repository for project GrassFeeder
+MD5Sum:
+ bd6e5d6e14d2ccf92cb077fc74183278 663 private/binary-amd64/Packages
+ 8158c889e4ab66bf6b9aa2e3240089a9 443 private/binary-amd64/Packages.gz
+ 05408c933ca9de6dc57466a332de91c0 143 private/binary-amd64/Release
+SHA1:
+ 78ddb87054d46a76622da85f5d665857a7c2c06e 663 private/binary-amd64/Packages
+ 4873b27b3a7b1ec45d567c788de286b54192eff6 443 private/binary-amd64/Packages.gz
+ 00b6ce9ef227a8de298b971ff2260332a6e3e28d 143 private/binary-amd64/Release
+SHA256:
+ cde9fbe784325026f12ff9209435bd23b477d028199b830077aa1f06b14e8889 663 private/binary-amd64/Packages
+ 2e85dda407b8a09ac1a3c6d6c495a7e155f6eedcbd7747f57948cef64eb743e8 443 private/binary-amd64/Packages.gz
+ 9680d618d6b1eca2a38a91cbb787c96eda1c5c40e29a12fdca0886311298b399 143 private/binary-amd64/Release
