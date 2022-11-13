@@ -1,34 +1,17 @@
 To Do List
 
 
-
-https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
-https://linuxconfig.org/easy-way-to-create-a-debian-package-and-local-package-repository
-https://blog.heckel.io/2015/10/18/how-to-create-debian-package-and-debian-repository/#Create-and-use-a-Debian-repository
-https://copyprogramming.com/tutorial/adding-debian-security-repository-gpg-key
-https://www.jfpossibilities.com/tech_notes/linux/build_a_package_repository/
-
-
-
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
-
 
 - Use different app-indicator  lib
 
-- Possible Bug:   launch in browser : multiple list items appear
 
 - After deleting Message, set Cursor to next one
 
+
+
 - Marking of Messages, Favorites
-
-
-Drag extra care:
-	- https://www.netjstech.com/
-	- https://www.extremnews.com/
-	- https://menprovement.com/
-	- https://therationalmale.com/2021/06/25/sizzle-amp-steak/
-	- https://www.bitchute.com/video/ovTONsjus1wC/
-	- Dragging the same element 2x
+- Possible Bug:   launch in browser : multiple list items appear
 
 
 
@@ -49,7 +32,9 @@ Later:
 - Appimage Deploy https://github.com/AppImage/appimage.github.io
   https://github.com/AppImage/appimage.github.io/pull/3051
 
-
+- Extra Features for Websites feed urls
+	  reddit -> feed url
+		bitchute:   https://www.bitchute.com/feeds/rss/channel/CHANNELNAME
 
 
 
@@ -61,17 +46,20 @@ Perhaps:
 - Do extra recognition  to process   invalid feed titles  containg  &     :      dieneuewelle.xml
 - Grouping of feeds by folders ?
 
-- Reduce Size of Binary:
-  https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
 
 
 
 No more
 - startup:  delayed creation of dialogs not good, they need to be present for the menu
 - Browser  enable theme related colors  -->  1. We can't get the theme background color  2. We cannot set the browser foreground color
+- Drag extra care:
+    www.extremnews.com:address given is broken
+		therationalmale.com  : title in feed is empty
+- Reduce Size of Binary:   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
 
 
------
+
+---------------
 
 * Get the branch and test it:
   git clone -b  v0_0_5  https://github.com/schleglermarcus/grassfeeder gf-v005
@@ -148,15 +136,13 @@ alias l="ls -l --color"
 findmnt /mnt/kav || mount /mnt/kav
 rsync -av  --delete /mnt/kav/gfdist ~/
 
+
+
 ------ AppImage
-
 https://github.com/AppImage/appimage.github.io
-
 https://lib.rs/crates/cargo-appimage
 https://docs.appimage.org/packaging-guide/index.html
-
 https://docs.appimage.org/reference/best-practices.html#binaries-compiled-on-old-enough-base-system
-
 https://distrowatch.com/table.php?distribution=mint
 ## The ingredients used in your AppImage should not be built on a more recent base system than the oldest base system your AppImage is intended to run on.
 ## Install appimagetool AppImage
@@ -165,6 +151,19 @@ https://distrowatch.com/table.php?distribution=mint
 
 
 
+
+------ Debian Package repository
+https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
+https://linuxconfig.org/easy-way-to-create-a-debian-package-and-local-package-repository
+https://blog.heckel.io/2015/10/18/how-to-create-debian-package-and-debian-repository/#Create-and-use-a-Debian-repository
+https://copyprogramming.com/tutorial/adding-debian-security-repository-gpg-key
+https://www.jfpossibilities.com/tech_notes/linux/build_a_package_repository/
+https://linuxconfig.org/easy-way-to-create-a-debian-package-and-local-package-repository
+https://blog.packagecloud.io/how-to-gpg-sign-and-verify-deb-packages-and-apt-repositories/
+https://blog.packagecloud.io/how-to-create-debian-repository-with-reprepro/
+https://www.debian.org/doc/manuals/securing-debian-manual/deb-pack-sign.en.html
+https://unix.stackexchange.com/questions/387053/debian-9-apt-and-gpg-error-inrelease-the-following-signatures-were-inva
+https://debian-handbook.info/browse/stable/sect.package-authentication.html
 
 
 

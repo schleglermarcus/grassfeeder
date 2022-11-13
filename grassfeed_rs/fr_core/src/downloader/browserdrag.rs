@@ -90,7 +90,8 @@ impl Step<DragInner> for ParseWebpage {
         let mut inner: DragInner = self.0;
         let extr_r = extract_feed_from_website(&inner.dragged_url_content);
         if extr_r.is_err() {
-            inner.error_message = extr_r.err().unwrap();
+            let (err_msg, _raw_txt) = extr_r.err().unwrap();
+            inner.error_message = err_msg;
             return StepResult::Continue(Box::new(CheckContentIsFeed(inner)));
         }
         inner.found_feed_url = extr_r.unwrap();
@@ -160,15 +161,12 @@ struct Notify(DragInner);
 impl Step<DragInner> for Notify {
     fn step(self: Box<Self>) -> StepResult<DragInner> {
         let inner: DragInner = self.0;
-        debug!("Notify:{}:", &inner.found_feed_url);
-
         let _r = inner.sourcetree_job_sender.send(SJob::DragUrlEvaluated(
             inner.dragged_url.clone(),
             inner.found_feed_url.clone(),
             inner.error_message.clone(),
             inner.feed_display_title.clone(),
         ));
-
         if inner.found_feed_url.is_empty() {
             let _r = inner
                 .guiproc_job_sender
@@ -176,7 +174,6 @@ impl Step<DragInner> for Notify {
                     inner.error_message.clone(),
                 ));
         }
-
         StepResult::Stop(inner)
     }
 }
@@ -184,14 +181,19 @@ impl Step<DragInner> for Notify {
 // returns the grepped Feed urls
 pub fn extract_feed_urls_sloppy(pagetext: &str) -> Vec<String> {
     let mut found_feed_urls: Vec<String> = Vec::default();
-    for line in pagetext.lines() {
+    let lines_separated = pagetext.replace("<", "\n<");
+    for line in lines_separated.lines() {
         let trimmed = line.trim().to_string();
+        if trimmed.len() < 3 {
+            continue;
+        }
         if !trimmed.contains("<link") {
             continue;
         }
         if !trimmed.contains("rss") {
             continue;
         }
+        // trace!("TRIM:  {}", trimmed);
         let parts = trimmed.split(' ');
         let parts_vec = parts
             .into_iter()
@@ -203,15 +205,19 @@ pub fn extract_feed_urls_sloppy(pagetext: &str) -> Vec<String> {
             }
             None
         });
+
         if let Some(ind) = e_first_href {
             if let Some(assignm) = parts_vec.get(ind) {
+                // trace!("assignm:  {:?}", assignm);
                 let mut split_r = assignm.split('=');
                 let _left = split_r.next();
-                if let Some(r) = split_r.next() {
-                    let mut probe_url = r.to_string();
-                    probe_url = probe_url.replace(['\"'], "");
-                    found_feed_urls.push(probe_url);
-                }
+                let rightpart = split_r
+                    .map(|s| s.to_string())
+                    .collect::<Vec<String>>()
+                    .join("=");
+                // trace!("rightpart:  {:?}", rightpart);
+                let probe_url = rightpart.replace(['\"', '>'], "");
+                found_feed_urls.push(probe_url);
             }
         }
     }
