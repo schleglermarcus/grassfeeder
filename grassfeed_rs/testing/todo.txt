@@ -1,14 +1,16 @@
 To Do List
 
 
-- Appimage Hub Deploy
-      https://github.com/AppImage/appimage.github.io
-      https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
-        Must run on the oldest still-supported Ubuntu LTS release (currently Ubuntu 18.04)
-        without the installation of additional packages.
-      https://github.com/AppImage/appimage.github.io/pull/3051
+
+https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps
+https://linuxconfig.org/easy-way-to-create-a-debian-package-and-local-package-repository
+https://blog.heckel.io/2015/10/18/how-to-create-debian-package-and-debian-repository/#Create-and-use-a-Debian-repository
+https://copyprogramming.com/tutorial/adding-debian-security-repository-gpg-key
+https://www.jfpossibilities.com/tech_notes/linux/build_a_package_repository/
 
 
+
+- Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
 
 
 - Use different app-indicator  lib
@@ -30,9 +32,10 @@ Drag extra care:
 
 
 
-- 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20 
 
 Later:
+- 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20
+
 - GTK4: block multiple instances
 - process both sets of cmd parameters:   application   AND gtk, see runner_internal
 	https://docs.gtk.org/gio/method.Application.run.html
@@ -43,6 +46,9 @@ Later:
   https://github.com/gabdube/native-windows-gui/tree/master/showcase
   https://www.ebbflow.io/blog/vending-win
 	https://gtk-rs.org/gtk4-rs/git/book/installation_windows.html
+- Appimage Deploy https://github.com/AppImage/appimage.github.io
+  https://github.com/AppImage/appimage.github.io/pull/3051
+
 
 
 

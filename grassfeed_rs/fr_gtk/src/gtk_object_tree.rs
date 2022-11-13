@@ -50,17 +50,11 @@ use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::gtkrunner::CreateBrowserConfig;
 use ui_gtk::GtkGuiBuilder;
 use ui_gtk::GtkObjectsType;
-use webkit2gtk::TLSErrorsPolicy;
 use webkit2gtk::WebContext;
+use webkit2gtk::WebContextExt;
 use webkit2gtk::WebView;
+use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
-// use webkit2gtk::WebViewExt;
-// use webkit2gtk::WebContextExt;
-
-
-use webkit2gtk::traits::WebViewExt;
-use webkit2gtk::traits::WebContextExt;
-
 
 const TOOLBAR_ICON_SIZE: i32 = 28;
 const TOOLBAR_BORDER_WIDTH: u32 = 0;
@@ -388,7 +382,7 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
             .base_cache_directory(&b_conf.browser_dir)
             .base_data_directory(&b_conf.browser_dir)
             .disk_cache_directory(&b_conf.browser_dir)
-            // .hsts_cache_directory(&b_conf.browser_dir)	// backport
+            .hsts_cache_directory(&b_conf.browser_dir)
             .indexeddb_directory(&b_conf.browser_dir)
             .local_storage_directory(&b_conf.browser_dir)
             .build();
@@ -399,7 +393,6 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
         wconte = WebContext::default().unwrap();
     }
     wconte.set_spell_checking_enabled(false);
-    wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
     if b_conf.startup_clear_cache {
         wconte.clear_cache();
     }
@@ -418,7 +411,7 @@ pub fn create_webview(
     let mut wvs_b = webkit2gtk::SettingsBuilder::new()
         .enable_java(false)
         .enable_media_capabilities(false)
-        // .enable_javascript_markup(false)		// backport
+        .enable_javascript_markup(false)
         .enable_html5_local_storage(false)
         .enable_developer_extras(false)
         .enable_smooth_scrolling(true)

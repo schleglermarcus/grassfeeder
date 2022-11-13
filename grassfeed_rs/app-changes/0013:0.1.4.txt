@@ -1,10 +1,5 @@
 Don, 10 Nov 2022 00:22:00 +0000
+* Feed Error display sorted by time
 
-- Try backporting gtk to fit ubuntu18 
-
-- Feed Error display sorted by time
+- Create debian archive 
 - Error DB: limit entries
-
-
-
---

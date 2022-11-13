@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--   https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps  --> 
+<component type="desktop-application">
+  <id>github.com.schleglermarcus.grassfeeder</id>
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>LGPL-3</project_license>
+  <name>GrassFeeder</name>
+  <summary>Feed Reader for atom+rss, dragndrop of new websites</summary>
+
+  <description>
+    <p>			This application polls Feeds (Streams of messages) regularly and presents them in a list of events.    </p>
+		<p>			Browser Urls of blogs, news sites etc. can be dropped and create a new subscription    </p>
+		<p>							It reads Atom and several RSS versions    </p>
+		<p>							Message texts are shown via the Gtk Webkit Engine.    </p>
+  </description>
+
+  <launchable type="desktop-id">github.com.schleglermarcus.grassfeeder</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Feed Reader as drop target </caption>
+      <image>https://raw.githubusercontent.com/schleglermarcus/grassfeeder/main/web/v011-c-a1.jpg</image>
+    </screenshot>
+  </screenshots>
+  <url type="homepage">https://github.com/schleglermarcus/grassfeeder</url>
+  <project_group>NETWORK</project_group>
+</component>

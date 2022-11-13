@@ -21,7 +21,6 @@ RUN cp target/generate-rpm/gr*.rpm  ../target/gf.rpm
 
 
 WORKDIR /usr/src/grassfeed_rs/target
-RUN ls -l debian/* 
+RUN ls -l debian/*
 RUN mv debian/grass*.deb  gf.deb
-
-
+RUN lintian gf.deb

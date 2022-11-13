@@ -227,7 +227,7 @@ impl ErrorRepo {
 
     pub fn get_by_subscription(&self, subs_id: isize) -> Vec<ErrorEntry> {
         self.check_stored_are_present();
-        (*self.list_stored)
+        let mut err_list: Vec<ErrorEntry> = (*self.list_stored)
             .read()
             .unwrap()
             .iter()
@@ -239,7 +239,9 @@ impl ErrorRepo {
                 }
             })
             .cloned()
-            .collect()
+            .collect();
+        err_list.sort_by(|a, b| b.date.cmp(&a.date));
+        err_list
     }
 
     pub fn get_last_entry(&self, subs_id: isize) -> Option<ErrorEntry> {

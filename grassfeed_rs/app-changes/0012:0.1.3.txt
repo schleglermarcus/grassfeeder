@@ -1,4 +1,4 @@
-Don, 10 Nov 2022 00:22:00 +0000
+Thu, 10 Nov 2022 00:22:00 +0000
 * Unix termination signal handling
 * Creating *.rpm:  retaining the appliation name
 * Permitting apostroph in message titles

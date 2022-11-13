@@ -8,8 +8,7 @@ edition = "2021"
 gui_layer = { path = "../gui_layer" }
 resources = { path = "../resources" }
 log = "0.4.14"
-# webkit2gtk = {  version = "0.18.0", default-features = false,  features = [ "v2_28"]  }
-webkit2gtk = {  version = "=0.17.1", default-features = false,  features = [ "v2_22"]  } # backport to ubuntu20.
+webkit2gtk = {  version = "0.18.2", default-features = false,  features = [ "v2_36"]  }
 
 flume = "0.10.9"
 gtk = { version = "0.15.5", features = ["v3_22_30"] }	# backport to ubuntu20.    2023-03:  upgrade back to  v3_24_8

@@ -48,7 +48,7 @@ default-locale = "en"
 
 [package.metadata.appimage]
 assets = ["assets/usr"]
-auto_link = true
+auto_link = false
 auto_link_exclude_list = [
     "libc.so*",
     "libdl.so*",
