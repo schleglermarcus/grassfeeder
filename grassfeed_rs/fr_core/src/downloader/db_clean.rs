@@ -168,9 +168,9 @@ impl Step<CleanerInner> for ReSortParentId {
     }
 }
 
+///  Correct all Folder names that are empty
 pub struct CorrectNames(pub CleanerInner);
 impl Step<CleanerInner> for CorrectNames {
-    //  Correct all Folder names that are empty
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner
@@ -334,11 +334,7 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 .filter(|fse| !fse.is_folder)
                 .map(|fse| fse.subs_id)
                 .collect::<Vec<isize>>();
-            debug!(
-                "ReduceTooManyMessages(max={})  #folders:{}",
-                inner.max_messages_per_subscription,
-                subs_ids.len()
-            );
+            // trace!(                "ReduceTooManyMessages(max={})  #folders:{}",                inner.max_messages_per_subscription,                subs_ids.len()            );
             for su_id in &subs_ids {
                 let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id, true);
                 let length_before = msg_per_subscription.len();
@@ -357,7 +353,6 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                             length_before,
                             id_list.len(),
                             db_time_to_display(first_msg.entry_src_date),
-                            // id_list
                         );
                         inner.messgesrepo.update_is_deleted_many(&id_list, true);
                     }

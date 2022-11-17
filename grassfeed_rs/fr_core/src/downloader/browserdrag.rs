@@ -95,7 +95,6 @@ impl Step<DragInner> for ParseWebpage {
             return StepResult::Continue(Box::new(CheckContentIsFeed(inner)));
         }
         inner.found_feed_url = extr_r.unwrap();
-        // trace!("ParseWebpage OK {:?}", &inner.found_feed_url);
         StepResult::Continue(Box::new(CompleteRelativeUrl(inner)))
     }
 }
@@ -114,11 +113,7 @@ impl Step<DragInner> for CheckContentIsFeed {
             inner.feed_display_title = t_t.content;
         }
         inner.found_feed_url = inner.dragged_url.clone();
-        trace!(
-            "CheckContentIsFeed OK {:?}  title:{}",
-            &inner.found_feed_url,
-            inner.feed_display_title
-        );
+        // trace!(            "CheckContentIsFeed OK {:?}  title:{}",            &inner.found_feed_url,            inner.feed_display_title        );
         StepResult::Continue(Box::new(CompleteRelativeUrl(inner)))
     }
 }
@@ -193,7 +188,6 @@ pub fn extract_feed_urls_sloppy(pagetext: &str) -> Vec<String> {
         if !trimmed.contains("rss") {
             continue;
         }
-        // trace!("TRIM:  {}", trimmed);
         let parts = trimmed.split(' ');
         let parts_vec = parts
             .into_iter()
@@ -208,7 +202,6 @@ pub fn extract_feed_urls_sloppy(pagetext: &str) -> Vec<String> {
 
         if let Some(ind) = e_first_href {
             if let Some(assignm) = parts_vec.get(ind) {
-                // trace!("assignm:  {:?}", assignm);
                 let mut split_r = assignm.split('=');
                 let _left = split_r.next();
                 let rightpart = split_r
@@ -223,5 +216,3 @@ pub fn extract_feed_urls_sloppy(pagetext: &str) -> Vec<String> {
     }
     found_feed_urls
 }
-
-// #[cfg(test)]mod t_ {    use super::*; }

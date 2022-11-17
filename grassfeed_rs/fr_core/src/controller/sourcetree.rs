@@ -1703,7 +1703,9 @@ impl ISourceTreeController for SourceTreeController {
     fn memory_conserve(&mut self, act: bool) {
         self.currently_minimized = act;
     }
-} // impl ISourceTreeController
+
+    // impl ISourceTreeController
+}
 
 impl TimerReceiver for SourceTreeController {
     fn trigger(&mut self, event: &TimerEvent) {
@@ -1850,6 +1852,3 @@ impl Default for NewSourceState {
         NewSourceState::None
     }
 }
-
-// #[cfg(test)]
-// mod t {     use super::*;  }

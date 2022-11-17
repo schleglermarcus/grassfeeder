@@ -165,7 +165,6 @@ impl GuiProcessor {
                 }
                 GuiEvents::MenuActivate(ref s) => match s.as_str() {
                     "M_FILE_QUIT" => {
-                        debug!("sending: Job::StopApplication");
                         self.addjob(Job::StopApplication);
                     }
                     "M_SETTINGS" => {
@@ -262,7 +261,6 @@ impl GuiProcessor {
                                 .start_feedsource_edit_dialog(src_repo_id as isize);
                         }
                         "feedsource-mark-as-read" => {
-                            debug!("GP command: {:?}", command);
                             (*self.feedsources_r)
                                 .borrow_mut()
                                 .mark_as_read(src_repo_id as isize);
@@ -407,11 +405,7 @@ impl GuiProcessor {
                         self.addjob(Job::StopApplication);
                     }
                     "show-window" => {
-                        debug!(
-                            "Indicator -> show-window!  cur-min {}  time:{}",
-                            self.currently_minimized, gtktime
-                        );
-
+                        // trace!(                            "Indicator -> show-window!  cur-min {}  time:{}",                            self.currently_minimized, gtktime                        );
                         self.currently_minimized = !self.currently_minimized;
                         (*self.gui_updater)
                             .borrow()
@@ -486,7 +480,6 @@ impl GuiProcessor {
                     (*self.gui_runner).borrow_mut().stop();
                 }
                 Job::SwitchContentList(feed_source_id) => {
-                    //                    debug!(                        "GP: SwitchContentList {}   => update_feed_list_contents ",                        feed_source_id                    );
                     (*self.feedcontents_r)
                         .borrow()
                         .update_message_list_(feed_source_id);
@@ -542,7 +535,6 @@ impl GuiProcessor {
                     warn!("other job! {:?}", &job);
                 }
             }
-            // debug!("GP:  job {:?}   done ", &job);
             let elapsedms = now.elapsed().as_millis();
             if elapsedms > 100 {
                 warn!("JOB {:?} took {:?}ms", &job2, elapsedms);

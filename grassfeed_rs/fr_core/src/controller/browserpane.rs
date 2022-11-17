@@ -138,13 +138,11 @@ impl BrowserPane {
                 .borrow()
                 .update_linkbutton(LINKBUTTON_BROWSER_TITLE);
         }
-
         let linktext = format!(
             "<a href=\"{}\">{}</a>",
             string_escape_url(link_url),
             string_escape_url(link_title)
         );
-
         (*self.gui_val_store)
             .write()
             .unwrap()
@@ -152,7 +150,6 @@ impl BrowserPane {
         (*self.gui_updater)
             .borrow()
             .update_label_markup(LABEL_BROWSER_ENTRY_LINK);
-
         (*self.gui_val_store)
             .write()
             .unwrap()

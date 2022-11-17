@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.1.4-B2"
+version = "0.1.4-B5"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -32,11 +32,12 @@ maintainer = "Marcus <schlegler_marcus@posteo.de>"
 copyright = "2022 <schlegler_marcus@posteo.de>"
 name = "grassfeeder"
 extended-description = "This application polls Feeds (Streams of messages) regularly and presents them in a list of events. Browser Urls of blogs, news sites etc. can be dropped and create a new subscription. It reads Atom and several RSS versions."
-changelog = "assets/changelog.txt"
+# changelog = "assets/changelog.txt"
 section = "web"
 priority = "optional"
 assets =[
     ["target/release/grassfeeder", "usr/bin/", "755"],
+		["assets/changelog.gz", "/usr/share/doc/grassfeeder/", "0644"],
 		["assets/grassfeeder.desktop", "/usr/share/applications/", "0644"],
 		["assets/grassfeeder.xpm",     "/usr/share/pixmaps/grassfeeder/", "0644"],
 		["assets/usr/share/pixmaps/grassfeeder/grassfeeder-indicator2.png", "/usr/share/pixmaps/grassfeeder/", "0644"],
@@ -52,7 +53,7 @@ auto_link = false
 auto_link_exclude_list = [
     "libc.so*",
     "libdl.so*",
-#    "libpthread.so*",
+    "libpthread.so*",
 ]
 
 
