@@ -4,10 +4,11 @@ grassfeeder (0.1.4) unstable; urgency=low
   * Create debian updating repository
   * Improved drag url recognition: www.netjstech.com
   * create gzipped changelog
-  * Bugfix About Dialog reopen fail.
+  * Bugfix about-dialog reopen fail.
+  * add gzipped changelog to *.deb file
+  
   
   - Error DB: limit entries
-  - add gzipped changelog to *.deb file
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sun, 13 Nov 2022 00:22:00 +0000
 

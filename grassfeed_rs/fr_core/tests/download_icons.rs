@@ -29,7 +29,6 @@ const ERRORS_FOLDER: &str = "../target/download_icons";
 fn test_extract_icon_neweurop() {
     setup();
     let filename = format!("{}websites/neweurope.html", TD_BASE);
-    // let f = "../fr_core/tests/data/neweurope.html";
     let page = std::fs::read_to_string(filename).unwrap();
     let r = extract_icon_from_homepage(page, &"https://www.neweurope.eu/".to_string());
     assert_eq!(
@@ -72,9 +71,7 @@ fn image_webp_to_png() {
 #[test]
 fn test_extract_icon_kolkata() {
     setup();
-    // let f = "../fr_core/tests/data/kolkata_tv.html";
     let filename = format!("{}websites/{}", TD_BASE, "kolkata_tv.html");
-
     let page = std::fs::read_to_string(filename).unwrap();
     let r = extract_icon_from_homepage(page, &String::default());
     assert_eq!(r, Ok("https://s14410312.in1.wpsitepreview.link/wp-content/themes/KolkataTv/assets/images/scroll-fav.png".to_string()));

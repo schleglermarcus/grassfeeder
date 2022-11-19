@@ -88,7 +88,7 @@ pub struct MapAndId {
 impl ErrorRepo {
     pub fn new(folder_name_: &str) -> Self {
         ErrorRepo {
-            list_unstored: Default::default(), //  Arc::new(RwLock::new(HashMap::new())),
+            list_unstored: Default::default(),
             folder_name: folder_name_.to_string(),
             unstored_list_count: Default::default(),
             list_stored: Arc::new(RwLock::new(HashMap::new())),
@@ -155,7 +155,7 @@ impl ErrorRepo {
             .collect::<Vec<ErrorEntry>>();
         values.sort_by(|a, b| a.err_id.cmp(&b.err_id));
         let _r = self.check_file();
-        match append_to_file(self.filename(), &values, CONV_FROM) {
+        match append_to_file(&self.filename(), &values, CONV_FROM) {
             Ok(_bytes_written) => {
                 *self.unstored_list_count.write().unwrap() = values.len();
             }
@@ -245,6 +245,7 @@ impl ErrorRepo {
     }
 
     pub fn get_last_entry(&self, subs_id: isize) -> Option<ErrorEntry> {
+        self.check_stored_are_present();
         let mut ret_list: Vec<ErrorEntry> = (*self.list_unstored)
             .read()
             .unwrap()
@@ -277,6 +278,37 @@ impl ErrorRepo {
         }
         ret_list.sort_by(|a, b| a.date.cmp(&b.date));
         ret_list.get(0).cloned()
+    }
+
+    pub fn get_all_stored_entries(&self) -> Vec<ErrorEntry> {
+        self.check_stored_are_present();
+        let ret_list: Vec<ErrorEntry> = (*self.list_stored)
+            .read()
+            .unwrap()
+            .values()
+            .cloned()
+            .collect();
+        ret_list
+    }
+
+    pub fn replace_errors_file(&self, new_errs: Vec<ErrorEntry>) {
+        let filename = self.filename();
+
+        let old_filename = format!("{}.old", filename);
+        let r = std::fs::rename(&filename, &old_filename);
+        if r.is_err() {
+            error!("cannot rename log file: {} -> {}", &filename, &old_filename);
+            return;
+        }
+        self.store_all_to_file(new_errs, &filename);
+    }
+
+    pub fn store_all_to_file(&self, new_errs: Vec<ErrorEntry>, new_filename: &str) {
+        let _r = File::create(&new_filename);
+        let _r = append_to_file(new_filename, new_errs.as_slice(), CONV_FROM);
+        if _r.is_err() {
+            error!("Writing to {} --> {:?}", new_filename, _r.err());
+        }
     }
 }
 
@@ -375,7 +407,7 @@ fn txt_to_error_entry(line: String) -> Option<ErrorEntry> {
 }
 
 fn append_to_file(
-    filename: String,
+    filename: &str,
     input: &[ErrorEntry],
     converter: &dyn Fn(&ErrorEntry) -> Option<String>,
 ) -> std::io::Result<usize> {
@@ -439,11 +471,8 @@ mod t {
         e_repo.store_error(&e1);
         e_repo.check_or_store();
         let next_id = e_repo.next_id();
-
-        println!("next_id={}", next_id);
         assert!(next_id >= 7);
         let subs_list = e_repo.get_by_subscription(13);
-        println!("#subs_list={}", subs_list.len());
         assert!(subs_list.len() >= 1);
     }
 

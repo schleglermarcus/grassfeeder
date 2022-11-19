@@ -64,11 +64,7 @@ pub trait IDownloader {
     fn load_icon(&self, fs_id: isize, fs_url: String, old_icon_id: usize);
     fn cleanup_db(&self);
     fn get_queue_size(&self) -> usize;
-
     fn browser_drag_request(&self, dragged_url: &str);
-
-    // #[deprecated]
-    // fn download_direct(&self, url: &String) -> Result<String, String>;
 }
 
 #[derive(Debug, PartialEq)]
@@ -394,6 +390,7 @@ impl IDownloader for Downloader {
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
         let iconrepo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+        let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
         let cleaner_i = CleanerInner::new(
             self.contentlist_job_sender.as_ref().unwrap().clone(),
             self.source_c_sender.as_ref().unwrap().clone(),
@@ -401,6 +398,7 @@ impl IDownloader for Downloader {
             msgrepo1,
             iconrepo,
             msg_keep_count,
+            errors_rep,
         );
         self.add_to_queue(DLJob::CleanDatabase(cleaner_i));
     }

@@ -3,7 +3,7 @@ Sun, 13 Nov 2022 00:22:00 +0000
 * Create debian updating repository
 * Improved drag url recognition: www.netjstech.com
 * create gzipped changelog
-* Bugfix About Dialog reopen fail.
+* Bugfix about-dialog reopen fail.
 * add gzipped changelog to *.deb file
 
 

@@ -12,7 +12,6 @@ use std::rc::Rc;
 #[test]
 fn feed_text_to_entries_xkcd() {
     setup();
-    // let filename = "tests/data/xkcd_atom.xml";
     let filename = format!("{}feeds/xkcd_atom.xml", TD_BASE);
     let contents = std::fs::read_to_string(filename).unwrap();
     let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
@@ -31,7 +30,6 @@ fn feed_text_to_entries_naturalnews() {
     assert_eq!(new_list.len(), 30);
     assert_eq!(new_list[1].entry_src_date, 1655877600);
     assert_eq!(new_list[2].entry_src_date, 1655877600);
-    // new_list.iter().enumerate().for_each(|(n, le)| {        debug!("{} \t {}", n, decompress(&le.title));    });
     assert_eq!( decompress (&new_list.get(10).unwrap().title),
 	   "White House press secretary ripped for claiming it'll take days to count ballots so many winners won't be immediately known".to_string()   );
 }
@@ -44,7 +42,6 @@ fn t_strange_datetime_recover() {
     let mtext = std::fs::read_to_string(filename).unwrap();
     let (mut new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
         feed_text_to_entries(mtext.clone(), 5, "some-url".to_string());
-    // debug!("prev:   {:?}", new_list[0].entry_src_date);
     let o_msg = strange_datetime_recover(&mut new_list, &mtext);
     assert!(o_msg.is_none());
     assert_eq!(new_list[0].entry_src_date, 1655935140)
