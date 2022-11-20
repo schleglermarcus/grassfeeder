@@ -36,6 +36,7 @@ use resources::gen_icons::*;
 use resources::id::*;
 use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
+use rust_i18n::t;
 use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::iconloader::IconLoader;
 use ui_gtk::GtkObjectsType;
@@ -654,6 +655,13 @@ pub fn get_fetch_updater_interval_name(num: i32) -> String {
 }
 
 pub fn get_fetch_interval(name: String) -> i32 {
+    println!(
+        "M={}   H={}   D={}",
+        t!("D_SETTINGS_INTERVAL_01_MINUTES"),
+        t!("D_SETTINGS_INTERVAL_02_HOURS"),
+        t!("D_SETTINGS_INTERVAL_03_DAYS")
+    );
+
     if t!("D_SETTINGS_INTERVAL_01_MINUTES").cmp(&name) == std::cmp::Ordering::Equal {
         return 1;
     }
@@ -1033,6 +1041,7 @@ mod names_test {
     #[test]
     fn interval() {
         assert_eq!(get_fetch_interval("Hozrs".to_string()), 0);
+        println!("!!! Hours");
         assert_eq!(get_fetch_interval("Hours".to_string()), 2);
     }
 }

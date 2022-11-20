@@ -456,7 +456,7 @@ impl Step<CleanerInner> for CheckErrorLog {
             .filter(|se| !se.isdeleted())
             .map(|se| se.subs_id as isize)
             .collect::<HashSet<isize>>(); // TODO use this later
-        // debug!("USE LATER: parent_ids_active: {:?}", parent_ids_active);
+                                          // debug!("USE LATER: parent_ids_active: {:?}", parent_ids_active);
         inner.error_repo.startup_read();
         let list: Vec<ErrorEntry> = inner.error_repo.get_all_stored_entries();
         let num_errors_before = list.len();
@@ -476,54 +476,6 @@ impl Step<CleanerInner> for CheckErrorLog {
     }
 }
 
-pub fn filter_error_entries(
-    existing: &Vec<ErrorEntry>,
-    subs_ids: Vec<isize>,
-) -> (Vec<ErrorEntry>, String) {
-    let subs_ids_h: HashSet<isize> = if subs_ids.is_empty() {
-        existing.iter().map(|l| l.subs_id).collect()
-    } else {
-        subs_ids.into_iter().collect()
-    };
-    let mut new_errors: Vec<ErrorEntry> = Vec::default();
-    let mut msg = String::default();
-    for subs_id in subs_ids_h {
-        let mut errors: Vec<ErrorEntry> = existing
-            .iter()
-            .filter(|e| e.subs_id == subs_id)
-            .map(|e| e.clone())
-            .collect();
-        let previous_len = errors.len();
-        let min_date: i64 = timestamp_now() - MAX_ERROR_LINE_AGE_S as i64;
-        errors.sort_by(|a, b| a.date.cmp(&b.date));
-        errors = errors
-            .iter()
-            .filter(|e| e.date > min_date)
-            .cloned()
-            .collect::<Vec<ErrorEntry>>();
-        let deleted_by_date = previous_len - errors.len();
-        let mut deleted_by_sum = errors.len() as isize - MAX_ERROR_LINES_PER_SUBSCRIPTION as isize;
-        if deleted_by_sum > 0 {
-            errors = errors
-                .split_at(errors.len() - MAX_ERROR_LINES_PER_SUBSCRIPTION)
-                .0
-                .to_vec();
-        } else {
-            deleted_by_sum = 0;
-        }
-
-        if errors.len() < previous_len {
-            msg.push_str(&format!(
-                "ID{} B{} A{} S{} \t",
-                subs_id, previous_len, deleted_by_date, deleted_by_sum
-            ));
-        }
-        errors.into_iter().for_each(|e| new_errors.push(e));
-    }
-    new_errors.sort_by(|a, b| a.err_id.cmp(&b.err_id));
-    (new_errors, msg)
-}
-
 pub struct Notify(pub CleanerInner);
 impl Step<CleanerInner> for Notify {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
@@ -537,6 +489,53 @@ impl Step<CleanerInner> for Notify {
         // later: refresh message display
         StepResult::Stop(inner)
     }
+}
+
+pub fn filter_error_entries(
+    existing: &[ErrorEntry],
+    subs_ids: Vec<isize>,
+) -> (Vec<ErrorEntry>, String) {
+    let subs_ids_h: HashSet<isize> = if subs_ids.is_empty() {
+        existing.iter().map(|l| l.subs_id).collect()
+    } else {
+        subs_ids.into_iter().collect()
+    };
+    let mut new_errors: Vec<ErrorEntry> = Vec::default();
+    let mut msg = String::default();
+    for subs_id in subs_ids_h {
+        let mut errors: Vec<ErrorEntry> = existing
+            .iter()
+            .filter(|e| e.subs_id == subs_id)
+            .cloned()
+            .collect();
+        let previous_len = errors.len();
+        let min_date: i64 = timestamp_now() - MAX_ERROR_LINE_AGE_S as i64;
+        errors.sort_by(|a, b| a.date.cmp(&b.date));
+        // errors            .iter()            .filter(|e| e.date <= min_date)            .for_each(|e| trace!("too-old: {:?}", e));
+        errors = errors
+            .iter()
+            .filter(|e| e.date > min_date)
+            .cloned()
+            .collect::<Vec<ErrorEntry>>();
+        let deleted_by_date = previous_len - errors.len();
+        let mut deleted_by_sum = errors.len() as isize - MAX_ERROR_LINES_PER_SUBSCRIPTION as isize;
+        if deleted_by_sum > 0 {
+            let (p0, _p1) = errors.split_at(errors.len() - MAX_ERROR_LINES_PER_SUBSCRIPTION);
+            // p1.iter().for_each(|e| trace!("too-many: {:?}", e));
+            errors = p0.to_vec();
+        } else {
+            deleted_by_sum = 0;
+        }
+        if errors.len() < previous_len {
+            msg.push_str(&format!(
+                "ID{} B{} A{} S{} \t",
+                subs_id, previous_len, deleted_by_date, deleted_by_sum
+            ));
+        }
+        errors.into_iter().for_each(|e| new_errors.push(e));
+    }
+    new_errors.sort_by(|a, b| a.err_id.cmp(&b.err_id));
+    (new_errors, msg)
 }
 
 // Walk the Path downwards and find all  parents with   folder-pos not in a row.

@@ -74,7 +74,7 @@ impl ErrorEntry {
 pub struct ErrorRepo {
     ///  ID -> Entry
     list_unstored: Arc<RwLock<MapAndId>>,
-    folder_name: String,
+    // folder_name: String,
     unstored_list_count: RwLock<usize>,
     list_stored: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
 }
@@ -83,13 +83,17 @@ pub struct ErrorRepo {
 pub struct MapAndId {
     map: HashMap<isize, ErrorEntry>,
     highest_id: isize,
+    folder_name: String,
 }
 
 impl ErrorRepo {
     pub fn new(folder_name_: &str) -> Self {
         ErrorRepo {
-            list_unstored: Default::default(),
-            folder_name: folder_name_.to_string(),
+            list_unstored: Arc::new(RwLock::new(MapAndId {
+                map: Default::default(),
+                highest_id: -1,
+                folder_name: folder_name_.to_string(),
+            })),
             unstored_list_count: Default::default(),
             list_stored: Arc::new(RwLock::new(HashMap::new())),
         }
@@ -98,7 +102,6 @@ impl ErrorRepo {
     pub fn by_existing_list(existing: Arc<RwLock<MapAndId>>) -> Self {
         ErrorRepo {
             list_unstored: existing,
-            folder_name: String::default(),
             unstored_list_count: Default::default(),
             list_stored: Arc::new(RwLock::new(HashMap::new())),
         }
@@ -109,19 +112,17 @@ impl ErrorRepo {
     }
 
     fn filename(&self) -> String {
-        let slash = if self.folder_name.ends_with('/') {
-            ""
-        } else {
-            "/"
-        };
-        format!("{}{}{}", self.folder_name, slash, FILENAME)
+        let folder = (*self.list_unstored).read().unwrap().folder_name.clone();
+        let slash = if folder.ends_with('/') { "" } else { "/" };
+        format!("{}{}{}", folder, slash, FILENAME)
     }
 
     /// make sure the file exists
     pub fn check_file(&self) -> std::io::Result<()> {
         let filename = self.filename();
         if !std::path::Path::new(&filename).exists() {
-            std::fs::create_dir_all(&self.folder_name)?;
+            let folder = (*self.list_unstored).read().unwrap().folder_name.clone();
+            std::fs::create_dir_all(&folder)?;
             let _file = File::create(&filename)?;
         }
         Ok(())
@@ -304,7 +305,7 @@ impl ErrorRepo {
     }
 
     pub fn store_all_to_file(&self, new_errs: Vec<ErrorEntry>, new_filename: &str) {
-        let _r = File::create(&new_filename);
+        let _r = File::create(new_filename);
         let _r = append_to_file(new_filename, new_errs.as_slice(), CONV_FROM);
         if _r.is_err() {
             error!("Writing to {} --> {:?}", new_filename, _r.err());
@@ -415,7 +416,7 @@ fn append_to_file(
     let file: File = if std::path::Path::new(&filename).exists() {
         OpenOptions::new().write(true).append(true).open(filename)?
     } else {
-        File::create(&filename)?
+        File::create(filename)?
     };
     let mut buf = BufWriter::new(file);
     input

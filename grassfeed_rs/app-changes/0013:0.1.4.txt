@@ -5,6 +5,7 @@ Sun, 13 Nov 2022 00:22:00 +0000
 * create gzipped changelog
 * Bugfix about-dialog reopen fail.
 * add gzipped changelog to *.deb file
+* Error DB: limit entries by time, subscription
 
 
-- Error DB: limit entries
+- Text Translation, Upstream problem
