@@ -6,4 +6,4 @@
 
 
 2. Add this repository to the sources list, either via   Settings / Package Sourcs, or via   /etc/apt/sources.list.d/additional-repositories.list
-`deb [arch=all signed-by=/usr/share/keyrings/grassfeeder-archive-keyring.gpg] https://raw.githubusercontent.com/schleglermarcus/grassfeeder/debian/ grassfeeder main`
+`deb [arch=amd64 signed-by=/usr/share/keyrings/grassfeeder-archive-keyring.gpg] https://raw.githubusercontent.com/schleglermarcus/grassfeeder/debian/ grassfeeder main`

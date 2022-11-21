@@ -22,4 +22,6 @@ reprepro includedeb grassfeeder $DEBS
 # gpg --digest-algo SHA256 --armor --output Release.gpg --detach-sign Release
 # gpg --digest-algo SHA256 --clearsign --output InRelease Release
 
-
+#  W: Das Laden der konfigurierten Datei »binary/binary-all/Packages« wird übersprungen, 
+# da das Depot »https://raw.githubusercontent.com/schleglermarcus/grassfeeder/main/debian grassfeeder InRelease« 
+# die Architektur »all« nicht unterstützt.
