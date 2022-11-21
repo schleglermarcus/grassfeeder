@@ -82,6 +82,7 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType) {
     dialog.connect_response(move |dialog, rt| {
         match rt {
             ResponseType::Ok => {}
+            ResponseType::DeleteEvent => {}
             _ => warn!("icons_dialog:response unexpected {}", rt),
         }
         dialog.hide();
@@ -270,11 +271,7 @@ pub fn create_new_subscription_dialog(
     let ent1_c = entry_url.clone();
     ddd.set_dialog_distribute(DIALOG_NEW_SUBSCRIPTION, move |dialogdata| {
         if dialogdata.len() < 2 {
-            error!(
-                "create_new_subscription_dialog: dialog data too short:{}",
-                dialogdata.len()
-            );
-            return;
+            return; // empty subscription dialog
         }
         if let Some(s) = dialogdata.get(0).unwrap().str() {
             entry_name_c.set_text(&s); // 0: Display Name
@@ -953,6 +950,10 @@ fn create_opml_import_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsTy
         }
         dialog.hide();
     });
+    dialog.connect_delete_event(|dia, _| {
+        dia.hide();
+        gtk::Inhibit(true)
+    });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_OPML_IMPORT, &dialog.upcast());
 }
@@ -978,6 +979,10 @@ fn create_opml_export_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsTy
         }
         dialog.hide();
     });
+    dialog.connect_delete_event(|dia, _| {
+        dia.hide();
+        gtk::Inhibit(true)
+    });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_OPML_EXPORT, &dialog.upcast());
 }
@@ -1000,9 +1005,14 @@ fn create_about_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
     let pb: Pixbuf = IconLoader::vec_to_pixbuf(&buf).unwrap();
     dialog.set_logo(Some(&pb));
     dialog.set_transient_for((*gtk_obj_a).read().unwrap().get_window().as_ref());
-    dialog.connect_response(move |dialog, response| {
-        if response == ResponseType::Ok {}
+    dialog.connect_response(move |dialog, resp_t| {
+        if resp_t == ResponseType::Ok {}
         dialog.hide();
+    });
+
+    dialog.connect_delete_event(|dia, _| {
+        dia.hide();
+        gtk::Inhibit(true)
     });
     let dia_c = dialog.clone();
     ddd.set_dialog_distribute(DIALOG_ABOUT, move |dialogdata| {

@@ -1,5 +1,6 @@
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::sourcetree::SJob;
+use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::compress;
 use fr_core::db::message::MessageRow;
@@ -25,10 +26,12 @@ fn cleanup_message_doublettes() {
     subsrepo.scrub_all_subscriptions();
     let msgrepo1 = MessagesRepo::new_in_mem();
     let iconrepo = IconRepo::new("");
-
+    let err_repo = ErrorRepo::new("");
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
-    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 1000);
+    let cleaner_i = CleanerInner::new(
+        c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 1000, err_repo,
+    );
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let msg4 = inner.messgesrepo.get_by_src_id(4, false);
     assert_eq!(msg4.len(), 1); // the other 10 are set deleted
@@ -45,10 +48,10 @@ fn db_cleanup_too_many_messages() {
     let msgrepo1 = MessagesRepo::new_in_mem();
     let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
     let iconrepo = IconRepo::new("");
-
+    let err_repo = ErrorRepo::new("");
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
-    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5);
+    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5, err_repo);
     let _inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let msg1 = msgrepo2.get_by_src_id(5, false);
     assert_eq!(msg1.len(), 5);
@@ -128,10 +131,10 @@ fn t_db_cleanup_1() {
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
-
     let iconrepo = IconRepo::new("");
+    let err_repo = ErrorRepo::new("");
 
-    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5);
+    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5, err_repo);
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
     assert_eq!(parent_ids_to_correct.len(), 1);
@@ -208,8 +211,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            // 0,
-            logger_config::QuietFlags::Downloader as u64,
+            0,
+            // logger_config::QuietFlags::Downloader as u64,
         );
         unzipper::unzip_some();
     });

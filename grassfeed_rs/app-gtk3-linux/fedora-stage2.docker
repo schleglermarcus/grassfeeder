@@ -1,13 +1,5 @@
 FROM grassfeeder:fedora-stage1
 
-##  Fedora33  Unable to find a match: rust-gdk-sys+default-devel rust-glib-sys-devel   webkit2gtk3-devel  rust-webkit2gtk-devel
-## replaced:    libgdk-pixbuf2.0-dev  -> rust-gdk-sys+default-devel
-
-
-## This is not available on Fedora 33:
-# RUN dnf install -y  rust-glib-sys-devel  rust-gdk-sys+default-devel   webkit2gtk3-devel  rust-webkit2gtk-devel
-# RUN dnf install -y  rust-gdk-sys-devel   rust-gdk-pixbuf-sys-devel    webkit2gtk4.0  javascriptcoregtk4.0
-
 ##  Grassfeeder needs: rust-atk-sys+default-devel, which is only available on  fedora 35 and up
 
 
@@ -34,6 +26,4 @@ RUN ls -l
 RUN rpm -qa |grep glibc
 
 
-#WORKDIR /usr/src/grassfeed_rs/target
-#RUN ls -l debian/*
-#RUN mv debian/grass*.deb  gf.deb
+

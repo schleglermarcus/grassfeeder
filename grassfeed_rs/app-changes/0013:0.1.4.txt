@@ -1,0 +1,10 @@
+Sun, 13 Nov 2022 00:22:00 +0000
+* Feed Error display sorted by time
+* Create debian updating repository
+* Improved drag url recognition: www.netjstech.com
+* create gzipped changelog
+* Bugfix about-dialog reopen fail.
+* add gzipped changelog to *.deb file
+
+
+- Error DB: limit entries

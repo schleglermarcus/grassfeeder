@@ -3,36 +3,27 @@ mod logger_config;
 mod tree_drag_common;
 
 use chrono::DateTime;
+use fr_core::db::errors_repo::ErrorEntry;
+use fr_core::db::errors_repo::ErrorRepo;
+use fr_core::downloader::db_clean::filter_error_entries;
 use regex::Regex;
 
-/*
-use fr_core::db::message::MessageRow;
-use fr_core::downloader::messages::feed_text_to_entries;
-
-//RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::dl_entries_breakingnews    --lib -- --exact --nocapture "
-/// Timestamp delivered   from    https://feeds.breakingnews.ie/bnworld
-/// https://www.w3.org/Protocols/rfc822/#z28
-// #[ignore]
+#[ignore]
 #[test]
-//  #[allow(dead_code)]
-fn dl_entries_breakingnews_cmp() {
+fn db_errorlist_filter() {
     setup();
-    let filenames = [
-        "tests/data/gui_proc_v2.rss",
-        "tests/data/breakingnewsworld-2.xml",
-    ];
-    for filename in filenames {
-        debug!("FILE={}", filename);
-        let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) = feed_text_to_entries(
-            std::fs::read_to_string(filename).unwrap(),
-            5,
-            "some-url".to_string(),
-        );
-        let pubdate = new_list.get(0).unwrap().entry_src_date;
-        assert!(pubdate > 0);
-    }
+    let err_repo = ErrorRepo::new("../fr_core/tests/data/"); // errors.json.txt
+
+    let err_list: Vec<ErrorEntry> = err_repo.get_all_stored_entries();
+    let (result, msg) = filter_error_entries(&err_list, Vec::default());
+
+    debug!("before:{}   after:{}", err_list.len(), result.len());
+    debug!("{}", msg);
+
+    // let err_repo = ErrorRepo::new("../target/");
+
+    err_repo.store_all_to_file(result, "../target/err_filtered.txt");
 }
-*/
 
 // #[test]
 #[allow(dead_code)]

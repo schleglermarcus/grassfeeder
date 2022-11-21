@@ -1472,16 +1472,13 @@ impl ISourceTreeController for SourceTreeController {
             dd.push(AValue::ASTR(fse.website_url)); // 5
             dd.push(AValue::ASTR(db_time_to_display_nonnull(fse.updated_int))); // 6
             dd.push(AValue::ASTR(db_time_to_display_nonnull(fse.updated_ext))); // 7
-
             let lines: Vec<String> = (*self.erro_repo_r)
                 .borrow()
                 .get_by_subscription(src_repo_id)
                 .iter()
                 .map(|ee| ee.to_line(fse.display_name.clone()))
                 .collect();
-
             let joined = lines.join("\n");
-            // debug!("SUBS_EDIT:  {:?}", &joined);
             dd.push(AValue::ASTR(joined)); // 8
         }
         (*self.gui_val_store)
@@ -1706,7 +1703,9 @@ impl ISourceTreeController for SourceTreeController {
     fn memory_conserve(&mut self, act: bool) {
         self.currently_minimized = act;
     }
-} // impl ISourceTreeController
+
+    // impl ISourceTreeController
+}
 
 impl TimerReceiver for SourceTreeController {
     fn trigger(&mut self, event: &TimerEvent) {
@@ -1853,6 +1852,3 @@ impl Default for NewSourceState {
         NewSourceState::None
     }
 }
-
-// #[cfg(test)]
-// mod t {     use super::*;  }

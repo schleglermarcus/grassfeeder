@@ -50,7 +50,6 @@ use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::gtkrunner::CreateBrowserConfig;
 use ui_gtk::GtkGuiBuilder;
 use ui_gtk::GtkObjectsType;
-use webkit2gtk::TLSErrorsPolicy;
 use webkit2gtk::WebContext;
 use webkit2gtk::WebContextExt;
 use webkit2gtk::WebView;
@@ -394,7 +393,6 @@ pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
         wconte = WebContext::default().unwrap();
     }
     wconte.set_spell_checking_enabled(false);
-    wconte.set_tls_errors_policy(TLSErrorsPolicy::Ignore);
     if b_conf.startup_clear_cache {
         wconte.clear_cache();
     }

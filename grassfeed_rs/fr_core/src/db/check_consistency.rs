@@ -1,5 +1,6 @@
 use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
@@ -31,6 +32,8 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
     std::fs::copy(&msg_fn, msg_copy).unwrap();
     let msgrepo1 = MessagesRepo::by_filename(&msg_fn);
     let iconrepo = IconRepo::new(cache_folder);
+    let err_repo = ErrorRepo::new(cache_folder);
+
     let all_messages = msgrepo1.get_all_messages();
     debug!("Messages  {}  #{}", &msg_fn, &all_messages.len());
     if set_undelete {
@@ -41,7 +44,9 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let (c_q_s, c_q_r) = flume::bounded::<CJob>(9);
 
-    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo1, msgrepo1, iconrepo, 100000);
+    let cleaner_i = CleanerInner::new(
+        c_q_s, stc_job_s, subsrepo1, msgrepo1, iconrepo, 100000, err_repo,
+    );
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
 
     c_q_r.drain().for_each(|cjob| debug!("CJOB: {:?}", cjob));

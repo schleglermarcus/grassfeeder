@@ -15,19 +15,7 @@ use std::sync::Arc;
 use xmlparser::Token;
 use xmlparser::Tokenizer;
 
-// const HTML_BASE: &str = "../fr_core/tests/websites/";
 const ERR_REPO_BASE: &str = "../target/";
-
-/*
-const TD_BASE: &str = "../target/";
-const TD_SRC: &str = "../fr_core/tests/zips/";
-
-fn unzip_some() {
-    for n in ["websites.zip", "feeds.zip"] {
-        assert!(unzipper::unzip_one(&format!("{}{}", TD_SRC, n), TD_BASE).is_ok());
-    }
-}
-*/
 
 // #[ignore]
 #[test]
@@ -37,8 +25,11 @@ fn t_extract_url() {
     let (stc_job_s, _stc_job_r) = flume::unbounded::<SJob>();
     let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(html_base)));
     let (gp_sender, _gp_rec) = flume::bounded::<Job>(2);
-
-    let pairs: [(&str, &str, &str); 4] = [	(
+    let pairs: [(&str, &str, &str); 5] = [	(
+		"netjstech_com.html",
+		"https://www.netjstech.com/2022/10/java-map-size-with-examples.html",
+		"https://www.netjstech.com/feeds/posts/default?alt=rss",
+	), 	(
 		"hp_neopr.html",
 		"https://www.neopresse.com/politik/teile-der-afd-fordern-atomwaffen-fuer-deutschland/",
 		"https://www.neopresse.com/feed/",
@@ -275,7 +266,7 @@ fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
             logger_config::QuietFlags::Downloader as u64,
-            // 0
+            //  0,
         );
         unzipper::unzip_some();
     });

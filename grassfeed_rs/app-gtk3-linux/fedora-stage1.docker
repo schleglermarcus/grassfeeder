@@ -8,8 +8,6 @@ RUN dnf clean all
 
 ## These are not available on Fedora 33:
 RUN dnf install -y  rust-glib-sys-devel  rust-gdk-sys+default-devel   webkit2gtk3-devel  rust-webkit2gtk-devel rust-gdk-sys-devel   rust-gdk-pixbuf-sys-devel    webkit2gtk4.0  javascriptcoregtk4.0
-
-
 RUN dnf install -y webkit2gtk3-jsc-devel cmake  gcc
 RUN dnf install -y wget python3-pip python3-setuptools patchelf desktop-file-utils  fakeroot strace fuse  curl pkgconf  git file  tar libsoup libsoup-devel
 
@@ -20,11 +18,10 @@ WORKDIR /root
 ## seems that rust is already installed by now
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH=/root/.cargo/bin:$PATH
-
 RUN rustc --version
 RUN cargo --version
-
 RUN rustup update stable
+
 # RUN cargo install cargo-deb
 RUN cargo install cargo-appimage
 RUN cargo install cargo-generate-rpm

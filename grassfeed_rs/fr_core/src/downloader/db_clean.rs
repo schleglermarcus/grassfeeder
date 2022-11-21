@@ -1,5 +1,7 @@
 use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
+use crate::db::errors_repo::ErrorEntry;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::message::MessageRow;
 use crate::db::messages_repo::IMessagesRepo;
@@ -9,6 +11,7 @@ use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::util::db_time_to_display;
 use crate::util::filter_by_iso8859_1;
+use crate::util::timestamp_now;
 use crate::util::Step;
 use crate::util::StepResult;
 use flume::Sender;
@@ -21,12 +24,16 @@ use std::sync::Mutex;
 /// Later:  sanity for recursion
 pub const MAX_PATH_DEPTH: usize = 30;
 
+pub const MAX_ERROR_LINES_PER_SUBSCRIPTION: usize = 100;
+pub const MAX_ERROR_LINE_AGE_S: usize = 60 * 60 * 24 * 360;
+
 pub struct CleanerInner {
     pub cjob_sender: Sender<CJob>,
     pub sourcetree_job_sender: Sender<SJob>,
     pub subscriptionrepo: SubscriptionRepo,
     pub messgesrepo: MessagesRepo,
     pub iconrepo: IconRepo,
+    pub error_repo: ErrorRepo,
     pub fp_correct_subs_parent: Mutex<Vec<i32>>,
     pub subs_parents_active: Mutex<Vec<i32>>,
     pub need_update_subscriptions: bool,
@@ -43,6 +50,7 @@ impl CleanerInner {
         msg_re: MessagesRepo,
         ico_re: IconRepo,
         max_msg: i32,
+        err_re: ErrorRepo,
     ) -> Self {
         CleanerInner {
             cjob_sender: c_se,
@@ -55,6 +63,7 @@ impl CleanerInner {
             need_update_messages: false,
             need_update_subscriptions: false,
             max_messages_per_subscription: max_msg,
+            error_repo: err_re,
         }
     }
 }
@@ -168,9 +177,9 @@ impl Step<CleanerInner> for ReSortParentId {
     }
 }
 
+///  Correct all Folder names that are empty
 pub struct CorrectNames(pub CleanerInner);
 impl Step<CleanerInner> for CorrectNames {
-    //  Correct all Folder names that are empty
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner
@@ -334,11 +343,7 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 .filter(|fse| !fse.is_folder)
                 .map(|fse| fse.subs_id)
                 .collect::<Vec<isize>>();
-            debug!(
-                "ReduceTooManyMessages(max={})  #folders:{}",
-                inner.max_messages_per_subscription,
-                subs_ids.len()
-            );
+            // trace!(                "ReduceTooManyMessages(max={})  #folders:{}",                inner.max_messages_per_subscription,                subs_ids.len()            );
             for su_id in &subs_ids {
                 let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id, true);
                 let length_before = msg_per_subscription.len();
@@ -357,7 +362,6 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                             length_before,
                             id_list.len(),
                             db_time_to_display(first_msg.entry_src_date),
-                            // id_list
                         );
                         inner.messgesrepo.update_is_deleted_many(&id_list, true);
                     }
@@ -431,14 +435,93 @@ impl Step<CleanerInner> for PurgeMessages {
                 to_delete.len(),
                 num_deleted,
             );
-        } else {
+        } else if num_deleted > 0 {
             debug!(
                 "PurgeMessages: #all={}  Deleted {} messages",
                 all_count, num_deleted
             );
         }
+        StepResult::Continue(Box::new(CheckErrorLog(inner)))
+    }
+}
+
+pub struct CheckErrorLog(pub CleanerInner);
+impl Step<CleanerInner> for CheckErrorLog {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let inner = self.0;
+        let parent_ids_active: HashSet<isize> = inner
+            .subscriptionrepo
+            .get_all_nonfolder()
+            .iter()
+            .filter(|se| !se.isdeleted())
+            .map(|se| se.subs_id as isize)
+            .collect::<HashSet<isize>>(); // TODO use this later
+        // debug!("USE LATER: parent_ids_active: {:?}", parent_ids_active);
+        inner.error_repo.startup_read();
+        let list: Vec<ErrorEntry> = inner.error_repo.get_all_stored_entries();
+        let num_errors_before = list.len();
+        let subs_ids: Vec<isize> = parent_ids_active.into_iter().collect();
+        let (mut new_errors, msg) = filter_error_entries(&list, subs_ids);
+        if new_errors.len() < num_errors_before {
+            debug!(
+                "reduced error lines: {}->{}  {}",
+                num_errors_before,
+                new_errors.len(),
+                msg
+            );
+            new_errors.sort_by(|a, b| a.err_id.cmp(&b.err_id));
+            inner.error_repo.replace_errors_file(new_errors);
+        }
         StepResult::Continue(Box::new(Notify(inner)))
     }
+}
+
+pub fn filter_error_entries(
+    existing: &Vec<ErrorEntry>,
+    subs_ids: Vec<isize>,
+) -> (Vec<ErrorEntry>, String) {
+    let subs_ids_h: HashSet<isize> = if subs_ids.is_empty() {
+        existing.iter().map(|l| l.subs_id).collect()
+    } else {
+        subs_ids.into_iter().collect()
+    };
+    let mut new_errors: Vec<ErrorEntry> = Vec::default();
+    let mut msg = String::default();
+    for subs_id in subs_ids_h {
+        let mut errors: Vec<ErrorEntry> = existing
+            .iter()
+            .filter(|e| e.subs_id == subs_id)
+            .map(|e| e.clone())
+            .collect();
+        let previous_len = errors.len();
+        let min_date: i64 = timestamp_now() - MAX_ERROR_LINE_AGE_S as i64;
+        errors.sort_by(|a, b| a.date.cmp(&b.date));
+        errors = errors
+            .iter()
+            .filter(|e| e.date > min_date)
+            .cloned()
+            .collect::<Vec<ErrorEntry>>();
+        let deleted_by_date = previous_len - errors.len();
+        let mut deleted_by_sum = errors.len() as isize - MAX_ERROR_LINES_PER_SUBSCRIPTION as isize;
+        if deleted_by_sum > 0 {
+            errors = errors
+                .split_at(errors.len() - MAX_ERROR_LINES_PER_SUBSCRIPTION)
+                .0
+                .to_vec();
+        } else {
+            deleted_by_sum = 0;
+        }
+
+        if errors.len() < previous_len {
+            msg.push_str(&format!(
+                "ID{} B{} A{} S{} \t",
+                subs_id, previous_len, deleted_by_date, deleted_by_sum
+            ));
+        }
+        errors.into_iter().for_each(|e| new_errors.push(e));
+    }
+    new_errors.sort_by(|a, b| a.err_id.cmp(&b.err_id));
+    (new_errors, msg)
 }
 
 pub struct Notify(pub CleanerInner);

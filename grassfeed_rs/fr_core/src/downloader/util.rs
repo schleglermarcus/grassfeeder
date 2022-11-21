@@ -193,12 +193,15 @@ pub fn workaround_https_declaration(wrong: String) -> String {
     )
 }
 
-// via parser
-pub fn extract_feed_from_website(page_content: &str) -> Result<String, String> {
+/// extract feed url via parser
+/// if none found, we return    Error message ,  raw-text, comments
+pub fn extract_feed_from_website(page_content: &str) -> Result<String, (String, String)> {
+    let mut rawtext: String = String::default();
+    // let mut comments: String = String::default();
     let dom: tl::VDom = match tl::parse(page_content, tl::ParserOptions::default()) {
         Ok(d) => d,
         Err(e) => {
-            return Err(format!("XF: parsing homepage: {:?}", e));
+            return Err((format!("XF: parsing homepage: {:?}", e), rawtext));
         }
     };
     let link_tags: Vec<&HTMLTag> = dom
@@ -206,13 +209,20 @@ pub fn extract_feed_from_website(page_content: &str) -> Result<String, String> {
         .iter()
         .filter_map(|n| match n {
             Node::Tag(htmltag) => Some(htmltag),
+            Node::Raw(bytes) => {
+                rawtext.push_str(&bytes.as_utf8_str());
+                None
+            }
+            // Node::Comment(bytes) => {                comments.push_str(&bytes.as_utf8_str());                None            }
             _ => None,
         })
         .filter(|htmltag| {
             let t_name = htmltag.name().as_utf8_str().into_owned();
             t_name == "link"
         })
+        // .inspect(|linktag| debug!("LT: {:?}", linktag))
         .collect();
+
     let feeds_list: Vec<String> = link_tags
         .iter()
         .map(|t| {
@@ -225,7 +235,7 @@ pub fn extract_feed_from_website(page_content: &str) -> Result<String, String> {
             attrmap
         })
         .filter(|attrmap| attrmap.get("rel").is_some())
-        // .inspect(|at_m| debug!("PF1:{:?}", at_m))
+        // .inspect(|at_m| TRACE!("PF1:{:?}", at_m))
         .filter(|attrmap| {
             if let Some(typ_e) = attrmap.get("type") {
                 typ_e.contains("rss") || typ_e.contains("atom")
@@ -233,13 +243,12 @@ pub fn extract_feed_from_website(page_content: &str) -> Result<String, String> {
                 false
             }
         })
-        // .inspect(|at_m| debug!("PF2:{:?}", at_m))
+        // .inspect(|at_m| trace!("PF2:{:?}", at_m))
         .filter(|attrmap| !attrmap.get("href").unwrap().contains("comments"))
         .filter_map(|attrmap| attrmap.get("href").cloned())
         .collect();
-    // trace!("feed_list={:#?}", feeds_list);
     if feeds_list.is_empty() {
-        return Err("No feed-url found. ".to_string());
+        return Err(("No feed-url found. ".to_string(), rawtext));
     }
     let feed_url = feeds_list.first().unwrap().clone();
     Ok(feed_url)
