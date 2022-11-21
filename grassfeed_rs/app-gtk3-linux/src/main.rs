@@ -3,7 +3,6 @@ extern crate xdg;
 extern crate rust_i18n;
 
 mod args_lang;
-// mod setup_logger;
 
 use fr_core::config::init_system;
 use fr_core::config::setup_logger_prod;

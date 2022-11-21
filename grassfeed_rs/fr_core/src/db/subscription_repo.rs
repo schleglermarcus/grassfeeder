@@ -106,7 +106,7 @@ impl SubscriptionRepo {
         let reg_filename = Self::filename(folder_conf);
         let reg_existed = file_exists(&reg_filename);
         if reg_existed {
-            let month_num = chrono::prelude::Utc::today().format("%m"); // %Y-%m-%d
+            let month_num = chrono::prelude::Utc::now().format("%m"); // %Y-%m-%d
             let sub_copy_file = format!("{}subscriptions.db-{}", folder_cache, month_num);
             let r = std::fs::copy(&reg_filename, &sub_copy_file);
             if r.is_err() {

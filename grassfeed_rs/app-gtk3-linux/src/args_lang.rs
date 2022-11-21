@@ -2,19 +2,11 @@ use gumdrop::Options;
 use resources::application_id::*;
 
 const CARGO_PKG_DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
-// const CARGO_PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 const LOCALES_LIST: [&str; 2] = ["en", "de"]; // later into environment variable ?
 
-i18n!("locales");
+// i18n!("../resources/locales");
 
-// Defines options that can be parsed from the command line.
-//
-// `derive(Options)` will generate an implementation of the trait `Options`.
-// Each field must either have a `Default` implementation or an inline
-// default value provided.
-//
-// (`Debug` is derived here only for demonstration purposes.)
 #[derive(Debug, Options)]
 pub struct MyOptions {
     #[options(help = "print this message.")]

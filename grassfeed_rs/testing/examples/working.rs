@@ -61,7 +61,11 @@ fn startup_minihttpserver(port: usize) -> MiniHttpServerController {
 }
 
 fn entry(title: &str, link: &str, descr: &str, pubdate: i64) -> String {
-    let pubdate_str = chrono::offset::Local.timestamp(pubdate, 0).to_rfc2822();
+    let pubdate_str = chrono::offset::Local
+        .timestamp_opt(pubdate, 0)
+        .single()
+        .unwrap()
+        .to_rfc2822();
     format!(
         " <item>\n   <title>{}</title>\n   <link>{}</link>
 		<description>{}</description>

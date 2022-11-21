@@ -176,7 +176,7 @@ impl Step<DragInner> for Notify {
 // returns the grepped Feed urls
 pub fn extract_feed_urls_sloppy(pagetext: &str) -> Vec<String> {
     let mut found_feed_urls: Vec<String> = Vec::default();
-    let lines_separated = pagetext.replace("<", "\n<");
+    let lines_separated = pagetext.replace('<', "\n<");
     for line in lines_separated.lines() {
         let trimmed = line.trim().to_string();
         if trimmed.len() < 3 {

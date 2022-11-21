@@ -26,7 +26,7 @@ fn cleanup_message_doublettes() {
     subsrepo.scrub_all_subscriptions();
     let msgrepo1 = MessagesRepo::new_in_mem();
     let iconrepo = IconRepo::new("");
-    let err_repo = ErrorRepo::new("");
+    let err_repo = ErrorRepo::new("../target/"); // ErrorRepo::by_existing_list(Arc::new(RwLock::new(MapAndId::default()))); //   new("");
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let cleaner_i = CleanerInner::new(
@@ -48,7 +48,7 @@ fn db_cleanup_too_many_messages() {
     let msgrepo1 = MessagesRepo::new_in_mem();
     let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
     let iconrepo = IconRepo::new("");
-    let err_repo = ErrorRepo::new("");
+    let err_repo = ErrorRepo::new("../target/");
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5, err_repo);
@@ -132,19 +132,15 @@ fn t_db_cleanup_1() {
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
     let iconrepo = IconRepo::new("");
-    let err_repo = ErrorRepo::new("");
-
+    let err_repo = ErrorRepo::new("../target/");
     let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5, err_repo);
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
     assert_eq!(parent_ids_to_correct.len(), 1);
     let sub1 = subsrepo1.get_by_index(1).unwrap();
-    // debug!("SUB1 {:?}", sub1);
     assert!(sub1.display_name.starts_with("folder1"));
     assert!(subsrepo1.get_by_index(2).unwrap().display_name.len() < 10);
     assert!(!subsrepo1.get_by_index(2).unwrap().expanded);
-    // msgrepo2        .get_all_messages()        .iter()        .for_each(|m| debug!("MSG {}", m));
-    // assert_eq!(msgrepo2.get_by_index(1).unwrap().is_deleted, true); //  belongs to folder,   delete it
     assert_eq!(msgrepo2.get_by_index(2).unwrap().is_deleted, false); // belongs to subscription, keep it
 }
 
@@ -169,8 +165,6 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
     se.expanded = false;
     se.folder_position = 4;
     assert!(subsrepo.store_entry(&se).is_ok()); // 5
-
-    // subsrepo.debug_dump_tree("###");
     let mut m1 = MessageRow::default();
     m1.fetch_date = timestamp_now();
     m1.subscription_id = 1;
@@ -186,7 +180,6 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
         m1.fetch_date = 1000000000_i64 + 100000 * i;
         let _r = msgrepo.insert(&m1);
     }
-
     m1.is_deleted = false;
     m1.subscription_id = 5;
     m1.title = compress("fifth"); // .to_string();
@@ -211,8 +204,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            0,
-            // logger_config::QuietFlags::Downloader as u64,
+            // 0,
+            logger_config::QuietFlags::Downloader as u64,
         );
         unzipper::unzip_some();
     });

@@ -1,8 +1,3 @@
-use chrono::DateTime;
-use chrono::FixedOffset;
-use chrono::Local;
-use chrono::NaiveDate;
-use chrono::NaiveDateTime;
 use lz4_compression::prelude;
 use serde::Deserialize;
 use serde::Serialize;
@@ -256,25 +251,6 @@ fn subs_serde_xml() {
         }
         Err(e) => warn!("{:?}", e),
     };
-}
-
-// #[test]
-#[allow(dead_code)]
-fn time_display() {
-    // setup();
-    let now: DateTime<Local> = Local::now();
-    let rfc2822: String = now.to_rfc2822();
-    let another_st = "Tue, 1 Jul 2003 10:52:37 +0000";
-    let another: DateTime<FixedOffset> = DateTime::parse_from_rfc2822(&another_st).unwrap();
-    let nai: NaiveDate = NaiveDate::from_ymd(0, 1, 1);
-    let ndt: NaiveDateTime = NaiveDateTime::from_timestamp(0, 0);
-    trace!(
-        "Now is: {}   Fixed other={}   Naive={}  NTS={}   ",
-        rfc2822,
-        another,
-        nai,
-        ndt
-    );
 }
 
 #[macro_use]
