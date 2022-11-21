@@ -2,10 +2,10 @@ grassfeeder (0.1.4) unstable; urgency=low
 
   * Feed Error display sorted by time
   * Error DB: limit entries by time, subscription
-  * Create debian updating repository
-  * Create gzipped changelog, add it to *.deb file
-  * New rust-i18n version, adaption of yaml translations
+  * Created debian updating repository
   * Improved drag url recognition: www.netjstech.com
+  * Create gzipped changelog, added it to *.deb file
+  * rust-i18n update, yaml adapted
   * Bugfix about-dialog reopen fail.
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 21 Nov 2022 00:22:00 +0000
