@@ -1,19 +1,19 @@
 Origin: Marcus der Schlegler
 Label: RSS Feed Reader
 Codename: grassfeeder
-Date: Sun, 13 Nov 2022 02:45:24 UTC
+Date: Mon, 21 Nov 2022 20:54:33 UTC
 Architectures: amd64
 Components: binary
 Description: Apt repository for project GrassFeeder
 MD5Sum:
- 02d1faada331e975aa7c18c85bf8cdbc 850 binary/binary-amd64/Packages
- 6efae842041afe753d704d521ce21c1e 572 binary/binary-amd64/Packages.gz
+ 3e5cf207d87aece4a86b3d6d9872cd57 844 binary/binary-amd64/Packages
+ ee4d34310a8c72250d9a4014b69d43b3 569 binary/binary-amd64/Packages.gz
  20c6d73284065b9e0d93a095f49f0f0d 142 binary/binary-amd64/Release
 SHA1:
- e5eb315971f155ab23fad68f51e05b94a58177e3 850 binary/binary-amd64/Packages
- 5a580fc50297d63d5c584f3bc77d8885084eb6a6 572 binary/binary-amd64/Packages.gz
+ 77dfcb59ac0aa68213a65919d936f30cd4e1d1e1 844 binary/binary-amd64/Packages
+ 191543af2aa6f0845ff6599f33cc7573407deb40 569 binary/binary-amd64/Packages.gz
  e907c6ecba95cff60fd741aabf24ee7982aefa0f 142 binary/binary-amd64/Release
 SHA256:
- cc9ebc8ce960763dc2e7a655f30ee124c306747cd90e5c23917ac1a0e1997da2 850 binary/binary-amd64/Packages
- 401181b8de6b30c28818e9dd86b3d1c702a0746d2f1ccd80621e7fa976aaf2ca 572 binary/binary-amd64/Packages.gz
+ 0680b078352c4207059854f8ad42f377a583873ca7daaec0493bbe6ea206aba7 844 binary/binary-amd64/Packages
+ b01c334f82ca97979c2f441547d2608f154a8a3f4e68b2382c0c499e3f43c795 569 binary/binary-amd64/Packages.gz
  6056b5ca838ced56468043305392604a868a9f01a558702f63d721aa39866715 142 binary/binary-amd64/Release
