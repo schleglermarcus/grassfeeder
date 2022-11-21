@@ -1,11 +1,8 @@
-Sun, 13 Nov 2022 00:22:00 +0000
+Mon, 21 Nov 2022 00:22:00 +0000
 * Feed Error display sorted by time
 * Error DB: limit entries by time, subscription
-* Create debian updating repository
+* Created debian updating repository
 * Improved drag url recognition: www.netjstech.com
+* Create gzipped changelog, added it to *.deb file
+* rust-i18n update, yaml adapted
 * Bugfix about-dialog reopen fail.
-* create gzipped changelog
-* add gzipped changelog to *.deb file
-
-
-- Text Translation, Upstream problem
