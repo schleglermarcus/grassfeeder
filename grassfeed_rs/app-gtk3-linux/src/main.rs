@@ -15,7 +15,6 @@ use log::{debug, error, info, trace, warn};
 i18n!("../resources/locales");
 
 fn main() {
-    assert_eq!(t!("M_SETTINGS"), "Settings".to_string());
     let xdg_dirs = xdg::BaseDirectories::with_prefix(APP_NAME).unwrap();
     let conf: String = xdg_dirs
         .get_config_home()
