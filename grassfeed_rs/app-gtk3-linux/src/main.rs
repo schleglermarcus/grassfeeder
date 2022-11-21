@@ -3,7 +3,6 @@ extern crate xdg;
 extern crate rust_i18n;
 
 mod args_lang;
-// mod setup_logger;
 
 use fr_core::config::init_system;
 use fr_core::config::setup_logger_prod;
@@ -16,6 +15,7 @@ use log::{debug, error, info, trace, warn};
 i18n!("../resources/locales");
 
 fn main() {
+    assert_eq!(t!("M_SETTINGS"), "Settings".to_string());
     let xdg_dirs = xdg::BaseDirectories::with_prefix(APP_NAME).unwrap();
     let conf: String = xdg_dirs
         .get_config_home()

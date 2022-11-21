@@ -1,109 +1,108 @@
-en: 
-  ABOUT_APP_TXT : About this application
-  ABOUT_APP_DESCRIPTION : A rusty feed reader
+ABOUT_APP_TXT : About this application
+ABOUT_APP_DESCRIPTION : A rusty feed reader
 
-  M_FILE: File              #  test listens
-  M_IMPORT_OPML: Import Opml
-  M_EXPORT_OPML: Export Opml
-  M_FILE_QUIT: Quit!
+M_FILE: File              #  test listens
+M_IMPORT_OPML: Import Opml
+M_EXPORT_OPML: Export Opml
+M_FILE_QUIT: Quit!
 
-  M_OPTIONS: Options
-  M_SETTINGS: Settings
-  M_HELP: Help
-  M_ABOUT: About
-  M_ICONS: Icons
-  M_SHORT_HELP: Short help text
+M_OPTIONS: Options
+M_SETTINGS: Settings
+M_HELP: Help
+M_ABOUT: About
+M_ICONS: Icons
+M_SHORT_HELP: Short help text
 
-  TB_ADD_FOLDER: Add Folder
-  TB_ADD_FEED: Add Subscription
-  TB_REFRESH_ALL: Refresh all Feeds
-  TB_FILTER_1: Filter messages
-  TB_BROWSER_ZOOM_IN: View larger
-  TB_BROWSER_ZOOM_OUT: View smaller
-  TB_BROWSER_ZOOM_DEFAULT: View default size
+TB_ADD_FOLDER: Add Folder
+TB_ADD_FEED: Add Subscription
+TB_REFRESH_ALL: Refresh all Feeds
+TB_FILTER_1: Filter messages
+TB_BROWSER_ZOOM_IN: View larger
+TB_BROWSER_ZOOM_OUT: View smaller
+TB_BROWSER_ZOOM_DEFAULT: View default size
 
-  SUBSC_DEFAULT_FOLDER1: Examples
-  SUBSC_DEFAULT_FOLDER2: Tech
+SUBSC_DEFAULT_FOLDER1: Examples
+SUBSC_DEFAULT_FOLDER2: Tech
 
-  SYSTRAY_CMD_QUIT: "Quit"
-  SYSTRAY_CMD_SHOW_WINDOW: "Show / hide the application"
+SYSTRAY_CMD_QUIT: "Quit"
+SYSTRAY_CMD_SHOW_WINDOW: "Show / hide the application"
 
-  MSGLIST_TOP_TITLE: "Title"
-  MSGLIST_TOP_DATE: "Date"
+MSGLIST_TOP_TITLE: "Title"
+MSGLIST_TOP_DATE: "Date"
 
-  CM_MSG_MARK_AS_READ: Mark as read
-  CM_MSG_MARK_AS_UNREAD: Mark as unread
-  CM_MSG_OPEN_IN_BROWSER: Open in Browser
-  CM_MSG_DELETE: Delete
-  CM_MSG_COPY_LINK_CLIPBOARD: Copy Link to Clipboard
+CM_MSG_MARK_AS_READ: Mark as read
+CM_MSG_MARK_AS_UNREAD: Mark as unread
+CM_MSG_OPEN_IN_BROWSER: Open in Browser
+CM_MSG_DELETE: Delete
+CM_MSG_COPY_LINK_CLIPBOARD: Copy Link to Clipboard
 
-  D_BUTTON_YES: Yes
-  D_BUTTON_NO: No
-  D_BUTTON_OK: Ok
-  D_BUTTON_CANCEL: Cancel
-  D_NEW_FOLDER_TITLE: Create New Folder
+D_BUTTON_YES: Yes
+D_BUTTON_NO: No
+D_BUTTON_OK: Ok
+D_BUTTON_CANCEL: Cancel
+D_NEW_FOLDER_TITLE: Create New Folder
 
-  D_DELETE_FOLDER_TITLE: Delete subscriptions folder
-  D_DELETE_FOLDER_QUEST: Delete this folder ?
-  D_DELETE_SUBSCRIPTION_QUEST: Delete this subscription ?
-  D_DELETE_SUBSCRIPTION_TITLE: Unsubscribe Feed Source
+D_DELETE_FOLDER_TITLE: Delete subscriptions folder
+D_DELETE_FOLDER_QUEST: Delete this folder ?
+D_DELETE_SUBSCRIPTION_QUEST: Delete this subscription ?
+D_DELETE_SUBSCRIPTION_TITLE: Unsubscribe Feed Source
 
-  D_EDIT_FOLDER_NAME: Edit Folder
+D_EDIT_FOLDER_NAME: Edit Folder
 
-  CM_SUB_ADD_FEED: Add Feed
-  CM_SUB_ADD_FOLDER: Add Folder
-  CM_SUB_UPDATE: Update
-  CM_SUB_MARK_AS_READ: Mark as read
-  CM_SUB_EDIT: Edit
-  CM_SUB_DELETE: Delete
+CM_SUB_ADD_FEED: Add Feed
+CM_SUB_ADD_FOLDER: Add Folder
+CM_SUB_UPDATE: Update
+CM_SUB_MARK_AS_READ: Mark as read
+CM_SUB_EDIT: Edit
+CM_SUB_DELETE: Delete
 
-  D_NEW_SUBSCRIPTION_TITLE: New Subscription
-  D_NEW_SUBSCRIPTION_URL: Feed Address
-  D_NEW_SUBSCRIPTION_NAME: Name
+D_NEW_SUBSCRIPTION_TITLE: New Subscription
+D_NEW_SUBSCRIPTION_URL: Feed Address
+D_NEW_SUBSCRIPTION_NAME: Name
 
-  D_EDIT_SUBSCRIPTION_TITLE: Edit Subscription
-  D_EDIT_SUBSCRIPTION_TAB1: Basic
-  D_EDIT_SUBSCRIPTION_ICON: Icon
-  D_EDIT_SUBSCRIPTION_TAB2: Statistics
-  D_EDIT_SUBSCRIPTION_TAB3: Errors
+D_EDIT_SUBSCRIPTION_TITLE: Edit Subscription
+D_EDIT_SUBSCRIPTION_TAB1: Basic
+D_EDIT_SUBSCRIPTION_ICON: Icon
+D_EDIT_SUBSCRIPTION_TAB2: Statistics
+D_EDIT_SUBSCRIPTION_TAB3: Errors
 
-  D_EDIT_SUBSCRIPTION_MAIN_WEBSITE: Main Website
-  D_EDIT_SUBSCRIPTION_NUM_MESSAGES: Number of Messages
-  D_EDIT_SUBSCRIPTION_NUM_UNREAD: Unread Messages
-  D_EDIT_SUBSCRIPTION_LAST_DOWNLOAD: Last download
-  D_EDIT_SUBSCRIPTION_LAST_CREATION: Feed compiled
+D_EDIT_SUBSCRIPTION_MAIN_WEBSITE: Main Website
+D_EDIT_SUBSCRIPTION_NUM_MESSAGES: Number of Messages
+D_EDIT_SUBSCRIPTION_NUM_UNREAD: Unread Messages
+D_EDIT_SUBSCRIPTION_LAST_DOWNLOAD: Last download
+D_EDIT_SUBSCRIPTION_LAST_CREATION: Feed compiled
 
-  D_SETTINGS_TITLE: Settings
-  D_SETTINGS_TAB1: Feeds
-  D_SETTINGS_UPDATE_ON_START: "Update Feeds on Start: "
-  D_SETTINGS_UPDATE_UPDATE_AFTER: "Update Feeds automatically after: "
-  D_SETTINGS_UPDATERS_PARALLEL: "Web Updater Threads: "
-  D_SETTINGS_MESSAGE_FOCUS_POLICY: "Message focused when feed selected: "
-  D_SETTINGS_TAB2: View
-  D_SETTINGS_SHOW_MESSAGE_COUNT: "Display count of all stored messages: "
-  D_SETTINGS_MESSAGES_KEEP_COUNT: "Maximum messages to keep: "
-  D_SETTINGS_MANUAL_FONT_SIZE: "Manual Font Size: "
-  D_SETTINGS_BROWSER_BACKGROUND_BRIGHTNESS: "Browser Background Brightness:"
-  D_SETTINGS_INTERVAL_01_MINUTES: "Minutes"
-  D_SETTINGS_INTERVAL_02_HOURS: "Hours"
-  D_SETTINGS_INTERVAL_03_DAYS: "Days"
-  D_SETTINGS_FOCUS_POLICY_NONE: "None"
-  D_SETTINGS_FOCUS_POLICY_LAST_SELECTED: "Last Selected Message"
-  D_SETTINGS_FOCUS_POLICY_NEWEST: "Most Recent Message"
-  D_SETTINGS_FOCUS_POLICY_BEFORE_UNREAD: "Before Oldest Unread Message"
-  D_SETTINGS_DATABASES_CLEAN_ONSTART: "Clean up databases on start"
-  D_SETTINGS_BROWSER_CACHE_CLEAR: "Clear browser cache"
-  D_SETTINGS_SYSTRAY_ICON_ENABLE: "Show Systray Icon"
+D_SETTINGS_TITLE: Settings
+D_SETTINGS_TAB1: Feeds
+D_SETTINGS_UPDATE_ON_START: "Update Feeds on Start: "
+D_SETTINGS_UPDATE_UPDATE_AFTER: "Update Feeds automatically after: "
+D_SETTINGS_UPDATERS_PARALLEL: "Web Updater Threads: "
+D_SETTINGS_MESSAGE_FOCUS_POLICY: "Message focused when feed selected: "
+D_SETTINGS_TAB2: View
+D_SETTINGS_SHOW_MESSAGE_COUNT: "Display count of all stored messages: "
+D_SETTINGS_MESSAGES_KEEP_COUNT: "Maximum messages to keep: "
+D_SETTINGS_MANUAL_FONT_SIZE: "Manual Font Size: "
+D_SETTINGS_BROWSER_BACKGROUND_BRIGHTNESS: "Browser Background Brightness:"
+D_SETTINGS_INTERVAL_01_MINUTES: "Minutes"
+D_SETTINGS_INTERVAL_02_HOURS: "Hours"
+D_SETTINGS_INTERVAL_03_DAYS: "Days"
+D_SETTINGS_FOCUS_POLICY_NONE: "None"
+D_SETTINGS_FOCUS_POLICY_LAST_SELECTED: "Last Selected Message"
+D_SETTINGS_FOCUS_POLICY_NEWEST: "Most Recent Message"
+D_SETTINGS_FOCUS_POLICY_BEFORE_UNREAD: "Before Oldest Unread Message"
+D_SETTINGS_DATABASES_CLEAN_ONSTART: "Clean up databases on start"
+D_SETTINGS_BROWSER_CACHE_CLEAR: "Clear browser cache"
+D_SETTINGS_SYSTRAY_ICON_ENABLE: "Show Systray Icon"
 
 
-  D_IMPORT_OPML_SELECT_FILE: "Select Opml file"
-  D_STORE_OPML_SELECT_FILE: "Name Opml file"
+D_IMPORT_OPML_SELECT_FILE: "Select Opml file"
+D_STORE_OPML_SELECT_FILE: "Name Opml file"
 
-  M_SHORTHELP_TEXT: "Grassfeeder RSS Reader Keyboard assignments\n
-    Tab         switch focus forward:  Subscriptions, Messages, Browser \n
-    Shift-Tab   switch focus reverse  \n
-    a           Mark all messages of that subscription as read \n
-    s           Jump to previous unread message \n
-    x           Jump to next unread message \n
-    Space       Start browser with multiple messages \n
-    "
+M_SHORTHELP_TEXT: "Grassfeeder RSS Reader Keyboard assignments\n
+  Tab         switch focus forward:  Subscriptions, Messages, Browser \n
+  Shift-Tab   switch focus reverse  \n
+  a           Mark all messages of that subscription as read \n
+  s           Jump to previous unread message \n
+  x           Jump to next unread message \n
+  Space       Start browser with multiple messages \n
+  "

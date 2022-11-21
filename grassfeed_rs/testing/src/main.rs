@@ -1,13 +1,26 @@
+#[macro_use]
+extern crate rust_i18n;
+
+i18n!("../resources/locales");
+
+fn main() {
+    assert_eq!(t!("M_SETTINGS"), "Settings".to_string());
+    if false {
+        http_serve_short();
+    }
+}
+
+//--
+
 extern crate chrono;
 extern crate log;
 
-use testing::minihttpserver::minisrv;
-
-use std::error::Error;
+// use std::error::Error;
 use std::sync::Arc;
 use std::time::Duration;
+use testing::minihttpserver::minisrv;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn http_serve_short() {
     let addr = String::from("127.0.0.1:8001");
     let conf = minisrv::ServerConfig {
         htdocs_dir: String::from("tests/htdocs"),
@@ -26,5 +39,4 @@ fn main() -> Result<(), Box<dyn Error>> {
     std::thread::sleep(Duration::from_millis(wait_seconds * 1000));
 
     msc.stop();
-    Ok(())
 }

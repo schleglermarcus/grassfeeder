@@ -1,7 +1,44 @@
+use fr_core::db::errors_repo::ErrorEntry;
 use fr_core::db::message::MessageRow;
+use fr_core::downloader::db_clean::filter_error_entries;
+use fr_core::downloader::db_clean::MAX_ERROR_LINES_PER_SUBSCRIPTION;
 use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::downloader::util::extract_icon_from_homepage;
+use fr_core::util::timestamp_now;
 use fr_core::TD_BASE;
+
+#[test]
+fn db_errorlist_filter() {
+    setup();
+    let date_now = timestamp_now();
+    let mut err_list: Vec<ErrorEntry> = Vec::default();
+    for i in 0..10 {
+        err_list.push(ErrorEntry {
+            err_id: i * 100,
+            subs_id: i,
+            date: date_now - i as i64 * 10000000,
+            err_code: 0,
+            remote_address: String::default(),
+            text: String::default(),
+        });
+    }
+    let (result, _msg) = filter_error_entries(&err_list, Vec::default());
+    assert_eq!(result.len(), 4);
+    let mut err_list: Vec<ErrorEntry> = Vec::default();
+    for i in 0..MAX_ERROR_LINES_PER_SUBSCRIPTION * 2 {
+        err_list.push(ErrorEntry {
+            err_id: i as isize,
+            subs_id: 3,
+            date: date_now + i as i64,
+            err_code: 0,
+            remote_address: String::default(),
+            text: String::default(),
+        });
+    }
+    let (result, _msg) = filter_error_entries(&err_list, Vec::default());
+    // debug!("before:{}   after:{}", err_list.len(), result.len());
+    assert_eq!(result.len(), MAX_ERROR_LINES_PER_SUBSCRIPTION);
+}
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test   downloader::messages::t_:feed_text_to_entries_tages  --lib -- --exact --nocapture "
 // A date entry is not contained here

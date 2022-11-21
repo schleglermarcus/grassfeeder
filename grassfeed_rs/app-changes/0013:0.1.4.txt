@@ -1,11 +1,11 @@
 Sun, 13 Nov 2022 00:22:00 +0000
 * Feed Error display sorted by time
+* Error DB: limit entries by time, subscription
 * Create debian updating repository
 * Improved drag url recognition: www.netjstech.com
-* create gzipped changelog
 * Bugfix about-dialog reopen fail.
+* create gzipped changelog
 * add gzipped changelog to *.deb file
-* Error DB: limit entries by time, subscription
 
 
 - Text Translation, Upstream problem

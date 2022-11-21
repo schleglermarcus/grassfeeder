@@ -1,8 +1,7 @@
 #[macro_use]
 extern crate rust_i18n;
 
-// i18n!("../resources/locales");
-i18n!("/locales");
+i18n!("../resources/locales");
 
 #[cfg(test)]
 mod t {
@@ -13,9 +12,7 @@ mod t {
     fn basic_translation() {
         rust_i18n::set_locale("en");
         let locale = rust_i18n::locale();
-
-        let translated = t!("M_SETTINGS");
-        println!("translated={}  locale={}", translated, locale);
-        assert_eq!(translated, "Settings".to_string());
+        println!("translated={}  locale={}", t!("M_SETTINGS"), locale);
+        assert_eq!(t!("M_SETTINGS"), "Settings".to_string());
     }
 }
