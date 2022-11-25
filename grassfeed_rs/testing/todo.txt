@@ -1,7 +1,4 @@
 To Do List
-
-- Upgrade  rust-i18n = ">=0.6.1"
-- Bug: set cursor to message, minimize, restore, cursor is moved to wrong positions
 - Bug: insert subscription by drag,   set-read on messages, tree is not updated
 - Focus indicator for browser area: move down
 - After deleting Message, set Cursor to next one
@@ -13,6 +10,7 @@ To Do List
 
 - Marking of Messages, Favorites
 - Possible Bug:   launch in browser : multiple list items appear
+- Possible Bug: set cursor to message, minimize, restore, cursor is moved to wrong positions
 
 
 

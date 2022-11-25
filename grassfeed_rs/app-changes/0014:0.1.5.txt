@@ -1,0 +1,6 @@
+Mon, 21 Nov 2022 00:22:00 +0000
+
+- Refactor SourceTreeController 
+- Bug: insert subscription by drag,   set-read on messages, tree is not updated
+- Focus indicator for browser area: move down
+- After deleting Message, set Cursor to next one

@@ -270,7 +270,7 @@ impl GtkModelUpdaterInt {
         }
         list_view.set_model(Some(list_store));
         let elapsed = now.elapsed().as_millis();
-        if elapsed > 100 {
+        if elapsed > 200 {
             trace!(
                 "update_list_model took {:?}ms #lines:{} ",
                 elapsed,

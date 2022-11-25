@@ -309,7 +309,12 @@ impl FeedContents {
             4 => {
                 let o_before_earliest_unread_id =
                     self.msg_state.read().unwrap().find_before_earliest_unread();
-                // trace!(                    "BeforeOldestUnread {} `{}` earliest:{:?} ",                    fp, fp_name, o_before_earliest_unread_id                );
+                trace!(
+                    "BeforeOldestUnread {} `{}` earliest:{:?} ",
+                    fp,
+                    fp_name,
+                    o_before_earliest_unread_id
+                );
                 if let Some(id) = o_before_earliest_unread_id {
                     (*self.gui_updater).borrow().list_set_cursor(
                         TREEVIEW1,

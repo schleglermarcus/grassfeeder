@@ -5,3 +5,4 @@ pub mod guiprocessor;
 pub mod sourcetree;
 pub mod statusbar;
 pub mod timer;
+pub mod subscriptions_display;

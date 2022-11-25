@@ -694,8 +694,8 @@ impl GuiProcessor {
 
     fn start_settings_dialog(&mut self) {
         let mut sources_conf = (*self.feedsources_r).borrow().get_config();
-        if sources_conf.feeds_fetch_interval_unit == 0 {
-            sources_conf.feeds_fetch_interval_unit = 3; // set to days if it was not set before
+        if (sources_conf).borrow().feeds_fetch_interval_unit == 0 {
+            (sources_conf).borrow_mut().feeds_fetch_interval_unit = 3; // set to days if it was not set before
         }
         let downloader_conf = (*self.downloader_r).borrow().get_config();
         let contentlist_conf = (*self.feedcontents_r).borrow().get_config();
@@ -718,19 +718,19 @@ impl GuiProcessor {
             .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP);
         let systray_enable = self.is_systray_enabled();
         let dd: Vec<AValue> = vec![
-            AValue::ABOOL(sources_conf.feeds_fetch_at_start), // 0 : FetchFeedsOnStart
-            AValue::AU32(sources_conf.feeds_fetch_interval),  // 1 UpdateFeeds Cardinal
-            AValue::AU32(sources_conf.feeds_fetch_interval_unit), // 2 UpdateFeeds Unit:  1:minutes  2:hours  3:days
+            AValue::ABOOL((sources_conf).borrow().feeds_fetch_at_start), // 0 : FetchFeedsOnStart
+            AValue::AU32((sources_conf).borrow().feeds_fetch_interval),  // 1 UpdateFeeds Cardinal
+            AValue::AU32((sources_conf).borrow().feeds_fetch_interval_unit), // 2 UpdateFeeds Unit:  1:minutes  2:hours  3:days
             AValue::AU32(downloader_conf.num_downloader_threads as u32), // 3 Web Fetcher Threads
-            AValue::AI32(contentlist_conf.focus_policy as i32),   // 4 Message Focus Policy
-            AValue::ABOOL(sources_conf.display_feedcount_all),    // 5 : DisplayCountOfAllFeeds
-            AValue::AU32(contentlist_conf.message_keep_count as u32), // 6 Messages Keep Count
-            AValue::ABOOL(fontsize_manual_enable),                // 7 : FontSizeManualEnable
-            AValue::AU32(fontsize_manual),                        // 8 : Font size Manual
-            AValue::AU32(browser_conf.browser_bg as u32),         // 9 : Browser_BG
-            AValue::ABOOL(browser_cache_clear),                   // 10 : Browser Cache Cleanup
-            AValue::ABOOL(databases_cleanup),                     // 11 : Cleanup-on-start
-            AValue::ABOOL(systray_enable),                        // 12 : Systray enable
+            AValue::AI32(contentlist_conf.focus_policy as i32),          // 4 Message Focus Policy
+            AValue::ABOOL((sources_conf).borrow().display_feedcount_all), // 5 : DisplayCountOfAllFeeds
+            AValue::AU32(contentlist_conf.message_keep_count as u32),     // 6 Messages Keep Count
+            AValue::ABOOL(fontsize_manual_enable), // 7 : FontSizeManualEnable
+            AValue::AU32(fontsize_manual),         // 8 : Font size Manual
+            AValue::AU32(browser_conf.browser_bg as u32), // 9 : Browser_BG
+            AValue::ABOOL(browser_cache_clear),    // 10 : Browser Cache Cleanup
+            AValue::ABOOL(databases_cleanup),      // 11 : Cleanup-on-start
+            AValue::ABOOL(systray_enable),         // 12 : Systray enable
         ];
         (*self.gui_val_store)
             .write()

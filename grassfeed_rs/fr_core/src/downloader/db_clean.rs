@@ -356,7 +356,7 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                         let id_list: Vec<i32> =
                             remove.iter().map(|e| e.message_id as i32).collect();
                         let first_msg = remove.iter().next().unwrap();
-                        debug!(
+                        trace!(
                             "Reduce(ID {}), has {}, reduce {} messages. Latest date: {}	", // \t message-ids={:?}
                             su_id,
                             length_before,
