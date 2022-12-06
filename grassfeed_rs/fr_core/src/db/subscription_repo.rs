@@ -759,34 +759,6 @@ mod ut {
         assert_eq!(list.get(2).unwrap().folder_position, 2);
     }
 
-    /*
-
-        //cargo test   db::subscription_repo::ut::t_store_and_read_pretty_json  --lib  -- --exact --nocapture
-        #[test]
-        fn t_store_and_read_on_fs() {
-            setup();
-            let repopath = "../target/db_sr_pretty";
-            {
-                let mut sr = SubscriptionRepo::new2(repopath.to_string());
-                sr.startup_int();
-                sr.scrub_all_subscriptions();
-                let s1 = SubscriptionEntry::default();
-                let r1 = sr.store_entry(&s1);
-                assert!(r1.is_ok());
-                assert!(sr.store_entry(&s1).is_ok());
-                let list = sr.get_all_entries();
-                assert_eq!(list.len(), 2);
-                // sr.store_to_file_pretty();
-            }
-            {
-                let mut sr = SubscriptionRepo::new2(repopath.to_string());
-                sr.startup_int();
-                let entries = sr.get_all_entries();
-                assert_eq!(entries.len(), 2);
-            }
-        }
-    */
-
     // dummy instead of log configuration
     fn setup() {}
 }

@@ -2,15 +2,14 @@ use feed_rs::parser;
 use flume::Receiver;
 use flume::Sender;
 use fr_core::config::init_system::GrassFeederConfig;
-use fr_core::controller::contentlist;
 use fr_core::controller::contentlist::match_new_entries_to_existing;
-use fr_core::controller::contentlist::message_from_modelentry;
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::contentlist::FeedContents;
 use fr_core::controller::contentlist::IFeedContents;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
+use fr_core::downloader::messages::message_from_modelentry;
 use fr_core::downloader::util::workaround_https_declaration;
 use fr_core::util;
 use fr_core::TD_BASE;
@@ -151,7 +150,7 @@ fn parse_convert_entry_file1() {
     let rss_str = std::fs::read_to_string(filename).unwrap();
     let feeds = parser::parse(rss_str.as_bytes()).unwrap();
     let first_entry = feeds.entries.get(0).unwrap();
-    let fce: MessageRow = contentlist::message_from_modelentry(&first_entry).0;
+    let fce: MessageRow = message_from_modelentry(&first_entry).0;
     assert_eq!(fce.content_text, "Today: Lorem ipsum dolor sit amet");
 }
 

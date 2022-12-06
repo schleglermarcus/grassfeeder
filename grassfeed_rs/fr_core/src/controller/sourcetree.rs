@@ -89,7 +89,7 @@ pub enum SJob {
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
 pub struct SourceTreeController {
-	pub messagesrepo_w: Weak<RefCell<MessagesRepo>>,
+    pub messagesrepo_w: Weak<RefCell<MessagesRepo>>,
     pub(super) subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
     pub(super) iconrepo_r: Rc<RefCell<IconRepo>>,
     pub(super) configmanager_r: Rc<RefCell<ConfigManager>>,
@@ -153,17 +153,6 @@ impl SourceTreeController {
         let (q_s, q_r) = flume::bounded::<SJob>(JOBQUEUE_SIZE);
         let statemap_ = Rc::new(RefCell::new(SubscriptionState::default()));
         let confi = Rc::new(RefCell::new(Config::default()));
-        /*
-                let su_di = SubscriptionsDisplay {
-                    statemap: statemap_.clone(),
-                    subscriptionrepo_r: subscr_rr.clone(),
-                    gui_val_store: v_s_a.clone(),
-                    iconrepo_r: iconrepoo.clone(),
-                    erro_repo_r: err_rep.clone(),
-                    config: confi.clone(),
-                    gui_updater: upd_ad.clone(),
-                };
-        */
         SourceTreeController {
             timer_r: timer_,
             subscriptionrepo_r: subscr_rr,
@@ -181,7 +170,6 @@ impl SourceTreeController {
             current_new_folder_parent_id: None,
             config: confi,
             new_source: NewSourceTempData::default(),
-            // tree_fontsize: 0,
             current_selected_subscription: None,
             gui_context_w: Weak::new(),
             messagesrepo_w: Weak::new(),
@@ -189,7 +177,6 @@ impl SourceTreeController {
             statemap: statemap_.clone(),
             erro_repo_r: err_rep,
             currently_minimized: false,
-            // subscriptions_display: su_di,
         }
     }
 
@@ -407,10 +394,7 @@ impl SourceTreeController {
     ///  Read all sources   from db and put into ModelValueAdapter
     pub fn feedsources_into_store_adapter(&mut self) {
         (*self.gui_val_store).write().unwrap().clear_tree(0);
-        // let _num_items = self.insert_tree_row(&Vec::<u16>::default(), 0);
-
         self.insert_tree_row(&Vec::<u16>::default(), 0);
-
         self.addjob(SJob::CheckSpinnerActive);
     }
 
@@ -457,7 +441,6 @@ impl SourceTreeController {
             return;
         }
         let su_st = o_state.unwrap();
-        // self.tree_update_one(&fse, &su_st);
         if !self.tree_update_one(&fse, &su_st) {
             self.need_check_fs_paths.replace(true);
         }
@@ -1069,14 +1052,10 @@ impl SourceTreeController {
                     "tree_update_one: no path for id {} <= {:?}",
                     subscr.subs_id, su_st.tree_path
                 );
-                // self.need_check_fs_paths.replace(true);
                 false
             }
         }
     }
-    //
-
-    //	impl SourceTree
 }
 
 impl TimerReceiver for SourceTreeController {

@@ -303,11 +303,6 @@ impl GtkObjectTree {
         label_entry_link.set_wrap(true);
         box1_v.pack_start(&label_entry_link, false, false, 0);
 
-        let box3_h = gtk::Box::new(Orientation::Horizontal, 0);
-        box3_h.set_height_request(TAB_MARKER_HEIGHT as i32);
-        box3_h.set_widget_name("box_1");
-        box1_v.pack_start(&box3_h, false, false, 1);
-
         let box2_h = gtk::Box::new(Orientation::Horizontal, 0);
         box1_v.pack_start(&box2_h, false, false, 1);
         let label_author = Label::new(Some("-"));
@@ -332,12 +327,16 @@ impl GtkObjectTree {
         label_cat.set_line_wrap_mode(WrapMode::Word);
         box1_v.pack_start(&label_cat, false, false, 0);
 
+        let box3_h = gtk::Box::new(Orientation::Horizontal, 0);
+        box3_h.set_height_request(TAB_MARKER_HEIGHT as i32);
+        box3_h.set_widget_name("box_1");
+        box1_v.pack_start(&box3_h, false, false, 1);
+
         let browserdir = self
             .initvalues
             .get(&PropDef::BrowserDir)
             .cloned()
             .unwrap_or_default();
-
         let fontsize_manual_enable_s = self
             .initvalues
             .get(&PropDef::GuiFontSizeManualEnable)
