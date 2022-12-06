@@ -6,7 +6,7 @@ use crate::tree_drag_common::dataset_simple_trio;
 use crate::tree_drag_common::dataset_some_tree;
 use crate::tree_drag_common::dataset_three_folders;
 use crate::tree_drag_common::prepare_source_tree_controller;
-use fr_core::controller::sourcetree::ISourceTreeController;
+use fr_core::controller::isourcetree::ISourceTreeController;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 
 /// Dragging the first folder   between the second and third.   0 -> 2

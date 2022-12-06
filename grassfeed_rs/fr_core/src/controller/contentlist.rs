@@ -1,7 +1,7 @@
 use crate::config::configmanager::ConfigManager;
 use crate::controller::browserpane::BrowserPane;
 use crate::controller::browserpane::IBrowserPane;
-use crate::controller::sourcetree::ISourceTreeController;
+use crate::controller::isourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::timer::Timer;

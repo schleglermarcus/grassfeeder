@@ -7,7 +7,7 @@ use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
 use crate::controller::contentlist::ListMoveCommand;
-use crate::controller::sourcetree::ISourceTreeController;
+use crate::controller::isourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::statusbar::StatusBar;
@@ -693,7 +693,7 @@ impl GuiProcessor {
     }
 
     fn start_settings_dialog(&mut self) {
-        let mut sources_conf = (*self.feedsources_r).borrow().get_config();
+        let sources_conf = (*self.feedsources_r).borrow().get_config();
         if (sources_conf).borrow().feeds_fetch_interval_unit == 0 {
             (sources_conf).borrow_mut().feeds_fetch_interval_unit = 3; // set to days if it was not set before
         }

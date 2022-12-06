@@ -1,5 +1,6 @@
 use crate::db::message::decompress;
 use std::collections::HashMap;
+use crate::util::db_time_to_display_nonnull;
 
 #[derive(Default, Debug, Clone)]
 pub struct MessageState {
@@ -197,9 +198,9 @@ impl MessageStateMap {
     }
 
     /// Searches the message before the oldest unread
-    ///  message-id,  seek-to:  true:higher timestamps, false: lower_timestamps
     pub fn find_before_earliest_unread(&self) -> Option<isize> {
         if self.msgmap.is_empty() {
+            debug!("MSGSTATE:  msgmap empty!");
             return None;
         }
         let mut vals: Vec<MessageState> = self.msgmap.values().cloned().collect();
@@ -210,6 +211,12 @@ impl MessageStateMap {
         }
         if new_index > 0_isize {
             return Some(vals[(new_index - 1) as usize].msg_id);
+        } else {
+            debug!(
+                "find_before_earliest_unread:  index==0  #vals={} #val0.date={:?}",
+                vals.len(),
+                db_time_to_display_nonnull(vals.get(0).unwrap().msg_created_timestamp)
+            );
         }
         None
     }

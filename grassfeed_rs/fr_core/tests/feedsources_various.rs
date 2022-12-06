@@ -6,7 +6,7 @@ mod downloader_dummy;
 use crate::downloader_dummy::DownloaderDummy;
 use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::IDownloader;
-use fr_core::controller::sourcetree::ISourceTreeController;
+use fr_core::controller::isourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
 use fr_core::controller::timer::build_timer;
 use fr_core::controller::timer::ITimer;

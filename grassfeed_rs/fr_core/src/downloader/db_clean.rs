@@ -9,7 +9,6 @@ use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
-use crate::util::db_time_to_display;
 use crate::util::filter_by_iso8859_1;
 use crate::util::timestamp_now;
 use crate::util::Step;
@@ -355,14 +354,8 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                     if !remove.is_empty() {
                         let id_list: Vec<i32> =
                             remove.iter().map(|e| e.message_id as i32).collect();
-                        let first_msg = remove.iter().next().unwrap();
-                        trace!(
-                            "Reduce(ID {}), has {}, reduce {} messages. Latest date: {}	", // \t message-ids={:?}
-                            su_id,
-                            length_before,
-                            id_list.len(),
-                            db_time_to_display(first_msg.entry_src_date),
-                        );
+                        //  let first_msg = remove.iter().next().unwrap();
+                        // trace!(                            "Reduce(ID {}), has {}, reduce {} messages. Latest date: {}	", // \t message-ids={:?}                            su_id,                            length_before,                            id_list.len(),                            db_time_to_display(first_msg.entry_src_date),                        );
                         inner.messgesrepo.update_is_deleted_many(&id_list, true);
                     }
                 }

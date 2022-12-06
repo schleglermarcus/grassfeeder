@@ -1,6 +1,10 @@
 Mon, 21 Nov 2022 00:22:00 +0000
 
-- Refactor SourceTreeController 
+- Refactor SourceTreeController
+
+- Bug: Focus on Tree Folder with Feeds, Minimize, Restore -> no browser
+
+
 - Bug: insert subscription by drag,   set-read on messages, tree is not updated
 - Focus indicator for browser area: move down
 - After deleting Message, set Cursor to next one

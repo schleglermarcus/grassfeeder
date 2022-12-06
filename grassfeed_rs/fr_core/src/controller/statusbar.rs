@@ -2,7 +2,7 @@ use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::IFeedContents;
 use crate::controller::guiprocessor::dl_char_for_kind;
-use crate::controller::sourcetree::ISourceTreeController;
+use crate::controller::isourcetree::ISourceTreeController;
 use crate::db::subscription_state::SubsMapEntry;
 use crate::util::string_escape_url;
 use crate::util::timestamp_now;

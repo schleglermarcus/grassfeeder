@@ -24,6 +24,10 @@ Later:
 - Systray Icon integration
 - Re-create WebView
 
+- Alternatives for Gui:
+   https://wasmer.io/posts/wasm-as-universal-binary-format-part-1-native-executables
+	 https://slint-ui.com/blog/rust-and-cpp.html
+
 - Windows  Build, Gui
   https://github.com/gabdube/native-windows-gui/tree/master/showcase
   https://www.ebbflow.io/blog/vending-win
