@@ -107,13 +107,12 @@ impl ISourceTreeController for SourceTreeController {
             }
         }
         self.addjob(SJob::UpdateTreePaths);
-        // trace!(            "on-drag updating:  {} {}",            from_parent_id, to_parent_subs_id        );
+        // debug!(            "on-drag subs-id: from_p:{}  to_p:{}",            from_parent_id, to_parent_subs_id        );
+        self.addjob(SJob::FillSourcesTree);
         if from_parent_id >= 0 {
-            self.addjob(SJob::FillSourcesTreeSingle(from_parent_id));
             self.addjob(SJob::GuiUpdateTree(from_parent_id));
         }
         if to_parent_subs_id >= 0 && to_parent_subs_id != from_parent_id {
-            self.addjob(SJob::FillSourcesTreeSingle(to_parent_subs_id));
             self.addjob(SJob::GuiUpdateTree(to_parent_subs_id));
         }
         success
@@ -667,5 +666,4 @@ impl ISourceTreeController for SourceTreeController {
     fn memory_conserve(&mut self, act: bool) {
         self.currently_minimized = act;
     }
-
 }

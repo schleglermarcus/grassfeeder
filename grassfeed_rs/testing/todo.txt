@@ -1,7 +1,5 @@
 To Do List
 
-- After deleting Message, set Cursor to next one
-
 
 
 
@@ -11,7 +9,6 @@ To Do List
 
 - Possible Bug:   launch in browser : multiple list items appear
 - Possible Bug: set cursor to message, minimize, restore, cursor is moved to wrong positions
-- Possible Bug: insert subscription by drag, set-read on messages, tree is not updated
 
 
 

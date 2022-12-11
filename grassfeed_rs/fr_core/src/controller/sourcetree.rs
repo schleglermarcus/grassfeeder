@@ -225,13 +225,13 @@ impl SourceTreeController {
                 SJob::FillSourcesTreeSingle(subs_id) => {
                     self.insert_tree_row_single(subs_id);
                 }
-                SJob::GuiUpdateTree(feed_source_id) => {
-                    if let Some(path) = self.get_path_for_src(feed_source_id) {
+                SJob::GuiUpdateTree(subs_id) => {
+                    if let Some(path) = self.get_path_for_src(subs_id) {
                         (*self.gui_updater)
                             .borrow()
                             .update_tree_single(0, path.as_slice());
                     } else {
-                        warn!(" path not found for FS-ID {}", feed_source_id);
+                        warn!("GuiUpdateTree: No Path for id:{}", subs_id);
                     }
                 }
                 SJob::GuiUpdateTreeAll => {
@@ -446,10 +446,13 @@ impl SourceTreeController {
         }
     }
 
-    pub fn get_path_for_src(&self, feed_source_id: isize) -> Option<Vec<u16>> {
-        let o_path = self.statemap.borrow().get_tree_path(feed_source_id);
+    pub fn get_path_for_src(&self, subs_id: isize) -> Option<Vec<u16>> {
+        let o_path = self.statemap.borrow().get_tree_path(subs_id);
         if o_path.is_none() {
-            debug!("get_path_for_src {} => {:?}", feed_source_id, o_path);
+            if subs_id == 0 {
+                return Some([0].to_vec());
+            }
+            debug!("get_path_for_src {} => {:?}", subs_id, o_path);
             self.need_check_fs_paths.replace(true);
             return None;
         }
@@ -738,12 +741,10 @@ impl SourceTreeController {
             .iter()
             .filter(|fse| !fse.is_folder)
             .filter(|fse| {
-                let su_st = self
-                    .statemap
-                    .borrow()
-                    .get_state(fse.subs_id)
-                    .unwrap_or_default();
-                !su_st.is_fetch_scheduled() && !su_st.is_fetch_in_progress()
+                if let Some(st) = self.statemap.borrow().get_state(fse.subs_id) {
+                    return !st.is_fetch_scheduled() && !st.is_fetch_in_progress();
+                }
+                false
             })
             .for_each(|fse| {
                 self.addjob(SJob::ScheduleUpdateFeed(fse.subs_id));

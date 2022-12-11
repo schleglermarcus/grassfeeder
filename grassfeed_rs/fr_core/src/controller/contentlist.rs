@@ -251,10 +251,8 @@ impl FeedContents {
     fn set_cursor_to_policy(&self) {
         let fp: usize = self.config.focus_policy as usize;
         assert!(fp < FOCUS_POLICY_NAMES.len());
-        let fp_name = FOCUS_POLICY_NAMES[fp];
         match fp {
             1 => {
-                // (*self.gui_updater).borrow().list_set_cursor(                    TREEVIEW1,                    -1,                    LIST0_COL_MSG_ID,                    LIST_SCROLL_POS,                ); // None
                 self.set_cursor_to_message(-1); // None
             }
             2 => {
@@ -267,40 +265,25 @@ impl FeedContents {
                     }
                 }
                 if last_selected_msg_id > 0 {
-                    // (*self.gui_updater).borrow().list_set_cursor(                        TREEVIEW1,                        last_selected_msg_id,                        LIST0_COL_MSG_ID,                        LIST_SCROLL_POS,                    );
                     self.set_cursor_to_message(last_selected_msg_id);
                 }
             }
             3 => {
-                trace!(
-                    "set_cursor  MostRecent {} {}  sort_col={}  sort_asc={}",
-                    fp,
-                    fp_name,
-                    self.config.list_sort_column,
-                    self.config.list_sort_order_up
-                );
                 let (highest_ts_repo_id, _highest_created_timestamp, _earliest_id, _earliest_ts) =
                     self.msg_state
                         .read()
                         .unwrap()
                         .find_latest_earliest_created_timestamp();
                 if highest_ts_repo_id > 0 {
-                    // (*self.gui_updater).borrow().list_set_cursor(                        TREEVIEW1,                        highest_ts_repo_id,                        LIST0_COL_MSG_ID,                        LIST_SCROLL_POS,                    );
                     self.set_cursor_to_message(highest_ts_repo_id);
                 }
             }
             4 => {
                 let o_before_earliest_unread_id =
                     self.msg_state.read().unwrap().find_before_earliest_unread();
-                trace!(
-                    "BeforeOldestUnread {} `{}` earliest:{:?} ",
-                    fp,
-                    fp_name,
-                    o_before_earliest_unread_id
-                );
+                // trace!(                    "BeforeOldestUnread {} `{}` earliest:{:?} ",                    fp,                    fp_name,                    o_before_earliest_unread_id                );
                 if let Some(id) = o_before_earliest_unread_id {
                     self.set_cursor_to_message(id);
-                    // (*self.gui_updater).borrow().list_set_cursor(                        TREEVIEW1,                        id,                        LIST0_COL_MSG_ID,                        LIST_SCROLL_POS,                    );
                 }
             }
             _ => (),
@@ -333,7 +316,6 @@ impl FeedContents {
             .case_insensitive(true)
             .build()
             .unwrap();
-
         let out_list: Vec<MessageRow> = list_in
             .iter()
             .filter(|m| {
@@ -368,7 +350,6 @@ impl FeedContents {
                     child_ids = child_subs;
                 }
             }
-
             for subs_id in child_ids {
                 (*(self.messagesrepo_r.borrow_mut()))
                     .get_by_src_id(subs_id as isize, false)
@@ -427,13 +408,11 @@ impl FeedContents {
         (self.messagesrepo_r)
             .borrow()
             .update_is_deleted_many(del_ids, true);
-
         let o_neighbour = self
             .msg_state
             .read()
             .unwrap()
             .find_neighbour_message(del_ids);
-
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         trace!(
             "kb_delete: {:?} {:?}  next={:?}",
@@ -818,7 +797,6 @@ impl IFeedContents for FeedContents {
 
     fn launch_browser(&self) {
         let id_list = self.list_selected_ids.read().unwrap();
-        debug!("launch_browser: {:?}", &id_list);
         let mut listpos_id: Vec<(u32, u32)> = Vec::default();
         id_list.iter().for_each(|dbid| {
             self.msg_state
