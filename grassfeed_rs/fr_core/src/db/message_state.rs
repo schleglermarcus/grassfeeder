@@ -1,5 +1,6 @@
 use crate::db::message::decompress;
 use crate::util::db_time_to_display_nonnull;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 
 #[derive(Default, Debug, Clone)]
@@ -239,27 +240,40 @@ impl MessageStateMap {
                     current_index = num as isize;
                 }
             }
-            // println!(                " num:{}  msg:{:?} guipos:{:?}",                num, sta.msg_id, sta.gui_list_position            );
         }
         if low_gui_list_pos > 0 {
             low_gui_list_pos -= 1;
         }
-        if current_index > 0 {
-            current_index -= 1;
-        } else if current_index < 0 {
-            if let Some(sta) = vals
-                .iter()
-                .filter(|sta| sta.gui_list_position == low_gui_list_pos)
-                .next()
-            {
-                debug!("  found_neighbour by gui_list_pos: {:?}", sta);
-                return Some((sta.msg_id, low_gui_list_pos as isize));
+        match current_index.cmp(&0) {
+            Ordering::Greater => current_index -= 1,
+            Ordering::Less => {
+                if let Some(sta) = vals
+                    .iter()
+                    .find(|sta| sta.gui_list_position == low_gui_list_pos)
+                {
+                    // trace!("  found_neighbour by gui_list_pos: {:?}", sta);
+                    return Some((sta.msg_id, low_gui_list_pos as isize));
+                }
+                return None;
             }
-            return None;
+            _ => (),
         }
-
+        /*
+                if current_index > 0 {
+                    current_index -= 1;
+                } else if current_index < 0 {
+                    if let Some(sta) = vals
+                        .iter()
+                        .filter(|sta| sta.gui_list_position == low_gui_list_pos)
+                        .next()
+                    {
+                        debug!("  found_neighbour by gui_list_pos: {:?}", sta);
+                        return Some((sta.msg_id, low_gui_list_pos as isize));
+                    }
+                    return None;
+                }
+        */
         let neighbour_id = vals[current_index as usize].msg_id;
-        // debug!(            "  find_neighbour_message {:?}  =>  {:?} {:?} id:{}",            del_msg_ids, current_index, low_gui_list_pos, neighbour_id        );
         Some((neighbour_id, low_gui_list_pos))
     }
 }

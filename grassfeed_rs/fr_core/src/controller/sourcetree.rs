@@ -174,7 +174,7 @@ impl SourceTreeController {
             gui_context_w: Weak::new(),
             messagesrepo_w: Weak::new(),
             need_check_fs_paths: RefCell::new(true),
-            statemap: statemap_.clone(),
+            statemap: statemap_,
             erro_repo_r: err_rep,
             currently_minimized: false,
         }
@@ -1193,7 +1193,7 @@ impl std::fmt::Debug for NewSourceTempData {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum NewSourceState {
     None,
     UrlChanged,
