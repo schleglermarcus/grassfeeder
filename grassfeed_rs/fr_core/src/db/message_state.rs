@@ -1,8 +1,11 @@
 use crate::db::message::decompress;
+use crate::util::db_time_to_display_nonnull;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 
 #[derive(Default, Debug, Clone)]
 pub struct MessageState {
+    pub msg_id: isize,
     /// remember  list position for setting the cursor
     pub gui_list_position: isize,
     pub msg_created_timestamp: i64,
@@ -10,7 +13,6 @@ pub struct MessageState {
     pub contents_author_categories_d: Option<(String, String, String)>,
     /// display text, decompressed
     pub title_d: String,
-    pub msg_id: isize,
     pub subscription_id_copy: isize,
 }
 
@@ -33,6 +35,7 @@ impl std::fmt::Display for MessageState {
 
 #[derive(Default)]
 pub struct MessageStateMap {
+    /// message-id  , MessageState
     msgmap: HashMap<isize, MessageState>,
 }
 
@@ -197,9 +200,9 @@ impl MessageStateMap {
     }
 
     /// Searches the message before the oldest unread
-    ///  message-id,  seek-to:  true:higher timestamps, false: lower_timestamps
     pub fn find_before_earliest_unread(&self) -> Option<isize> {
         if self.msgmap.is_empty() {
+            debug!("MSGSTATE:  msgmap empty!");
             return None;
         }
         let mut vals: Vec<MessageState> = self.msgmap.values().cloned().collect();
@@ -210,8 +213,68 @@ impl MessageStateMap {
         }
         if new_index > 0_isize {
             return Some(vals[(new_index - 1) as usize].msg_id);
+        } else {
+            debug!(
+                "find_before_earliest_unread:  index==0  #vals={} #val0.date={:?}",
+                vals.len(),
+                db_time_to_display_nonnull(vals.get(0).unwrap().msg_created_timestamp)
+            );
         }
         None
+    }
+
+    /// returns the next message-id relative to the one to be deleted.
+    ///    message-ids
+    ///  Returns :    message-id,  gui-list-pos
+    pub fn find_neighbour_message(&self, del_msg_ids: &[i32]) -> Option<(isize, isize)> {
+        let mut vals: Vec<MessageState> = self.msgmap.values().cloned().collect();
+        vals.sort_by(|a, b| a.msg_created_timestamp.cmp(&b.msg_created_timestamp));
+        let mut current_index: isize = -1;
+        let mut low_gui_list_pos: isize = -1;
+        for (num, sta) in vals.iter().enumerate() {
+            if del_msg_ids.contains(&(sta.msg_id as i32)) {
+                if low_gui_list_pos < 0 || sta.gui_list_position > low_gui_list_pos {
+                    low_gui_list_pos = sta.gui_list_position;
+                }
+                if current_index < 0 || (num as isize) < current_index {
+                    current_index = num as isize;
+                }
+            }
+        }
+        if low_gui_list_pos > 0 {
+            low_gui_list_pos -= 1;
+        }
+        match current_index.cmp(&0) {
+            Ordering::Greater => current_index -= 1,
+            Ordering::Less => {
+                if let Some(sta) = vals
+                    .iter()
+                    .find(|sta| sta.gui_list_position == low_gui_list_pos)
+                {
+                    // trace!("  found_neighbour by gui_list_pos: {:?}", sta);
+                    return Some((sta.msg_id, low_gui_list_pos as isize));
+                }
+                return None;
+            }
+            _ => (),
+        }
+        /*
+                if current_index > 0 {
+                    current_index -= 1;
+                } else if current_index < 0 {
+                    if let Some(sta) = vals
+                        .iter()
+                        .filter(|sta| sta.gui_list_position == low_gui_list_pos)
+                        .next()
+                    {
+                        debug!("  found_neighbour by gui_list_pos: {:?}", sta);
+                        return Some((sta.msg_id, low_gui_list_pos as isize));
+                    }
+                    return None;
+                }
+        */
+        let neighbour_id = vals[current_index as usize].msg_id;
+        Some((neighbour_id, low_gui_list_pos))
     }
 }
 
@@ -276,10 +339,28 @@ pub mod t {
                 0,
             );
         }
-        // msm.dump();
         let o_last_read = msm.find_before_earliest_unread();
-        // println!("  o_last_read={:?}", o_last_read);
         assert_eq!(o_last_read, Some(2));
+    }
+
+    //cargo watch -s "cargo test db::message_state::t::t_find_neighbour_message  --lib -- --exact --nocapture"
+    #[test]
+    fn t_find_neighbour_message() {
+        let mut msm = MessageStateMap::default();
+        let lim = 7;
+        for a in 0..lim {
+            msm.insert(
+                a + 1,
+                (a < 2) || (a > 3 && a < 5),
+                a + 100,
+                (1 + a as i64) * 10000000,
+                String::default(),
+                0,
+            );
+        }
+        let o_neigh = msm.find_neighbour_message(&[4, 5]);
+        // println!("{:?}", o_neigh);
+        assert_eq!(o_neigh, Some((3, 103)))
     }
 
     //

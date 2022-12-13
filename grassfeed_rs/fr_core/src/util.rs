@@ -29,7 +29,10 @@ pub fn string_is_http_url(s: &str) -> bool {
 }
 
 pub fn db_time_to_display(db_time: i64) -> String {
-    let fetchd_loc = chrono::offset::Local.timestamp_opt(db_time, 0).single().unwrap();
+    let fetchd_loc = chrono::offset::Local
+        .timestamp_opt(db_time, 0)
+        .single()
+        .unwrap();
     fetchd_loc.format(DATETIME_FORMAT).to_string()
 }
 
@@ -222,7 +225,7 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#38;", "&");
     ret = ret.replace("&#038;", "&");
     ret = ret.replace("&#039;", "\"");
-	ret = ret.replace("&#x26;", "&");
+    ret = ret.replace("&#x26;", "&");
     ret = ret.replace("&#x27;", "\'");
     ret = ret.replace("&gt;", ">");
     ret = ret.replace("&amp;", " & ");

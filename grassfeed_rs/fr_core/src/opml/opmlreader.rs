@@ -152,6 +152,7 @@ impl OpmlReader {
             max_line_length: 1000,
             entity_mode: display::EntityMode::Standard,
             indent_text_nodes: false,
+            end_pad: 0,
         };
         let formatted = doc.to_string_pretty_with_config(&conf);
         let _r = file.write(formatted.as_bytes())?;

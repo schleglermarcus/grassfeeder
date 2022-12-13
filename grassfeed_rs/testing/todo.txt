@@ -1,18 +1,14 @@
 To Do List
 
-- Upgrade  rust-i18n = ">=0.6.1"
-- Bug: set cursor to message, minimize, restore, cursor is moved to wrong positions
-- Bug: insert subscription by drag,   set-read on messages, tree is not updated
-- Focus indicator for browser area: move down
-- After deleting Message, set Cursor to next one
 
-
+- Spinner Indicator on Dragging Urls Dialog
 
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
 - Use different app-indicator  lib
-
 - Marking of Messages, Favorites
+
 - Possible Bug:   launch in browser : multiple list items appear
+- Possible Bug: set cursor to message, minimize, restore, cursor is moved to wrong positions
 
 
 
@@ -25,6 +21,10 @@ Later:
 	https://docs.gtk.org/gio/method.Application.run.html
 - Systray Icon integration
 - Re-create WebView
+
+- Alternatives for Gui:
+   https://wasmer.io/posts/wasm-as-universal-binary-format-part-1-native-executables
+	 https://slint-ui.com/blog/rust-and-cpp.html
 
 - Windows  Build, Gui
   https://github.com/gabdube/native-windows-gui/tree/master/showcase

@@ -2,7 +2,7 @@ use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::IFeedContents;
 use crate::controller::guiprocessor::dl_char_for_kind;
-use crate::controller::sourcetree::ISourceTreeController;
+use crate::controller::isourcetree::ISourceTreeController;
 use crate::db::subscription_state::SubsMapEntry;
 use crate::util::string_escape_url;
 use crate::util::timestamp_now;
@@ -180,7 +180,7 @@ impl StatusBar {
             self.selected_repo_id = repo_id_new;
             // time-to next feed update
             let fs_conf = self.r_subscriptions_controller.borrow().get_config();
-            let interval_s = fs_conf.get_interval_seconds();
+            let interval_s = (*fs_conf).borrow().get_interval_seconds();
             let elapsed: i64 = std::cmp::min(timestamp_now - (last_fetch_time as i64), interval_s);
             block_vertical = self.get_vertical_block_char(elapsed as usize, interval_s as usize);
             need_update2 = true;

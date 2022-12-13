@@ -82,7 +82,7 @@ impl ModelValueStoreImpl {
 
     #[allow(dead_code)]
     fn dump_elements_r(node: &GuiTreeItem, path: &[u16], ident: &str) {
-        debug!(
+        trace!(
             "DUMP {}:\t{:?}\t{:?}\t{:?}",
             ident,
             &path,

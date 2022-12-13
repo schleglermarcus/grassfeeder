@@ -4,7 +4,7 @@ use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
 use crate::controller::guiprocessor::GuiProcessor;
 use crate::controller::guiprocessor::Job;
-use crate::controller::sourcetree::ISourceTreeController;
+use crate::controller::isourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::timer::Timer;

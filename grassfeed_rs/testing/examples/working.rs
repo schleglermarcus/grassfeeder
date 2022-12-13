@@ -2,7 +2,7 @@ use chrono::Local;
 use chrono::TimeZone;
 use context::appcontext::AppContext;
 use fr_core::config::init_system::GrassFeederConfig;
-use fr_core::controller::sourcetree::ISourceTreeController;
+use fr_core::controller::isourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
@@ -119,50 +119,37 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_dynamic = format!("{}/dynamic.rss", addr);
     let url_gui_proc = format!("{}/gui_proc_3.rss", addr);
     let url_feedburner = format!("{}/feedburner.rss", addr);
-    let url_staseve = format!("{}/staseve-11.xml", addr);
+    // let url_staseve = format!("{}/staseve-11.xml", addr);
     let url_r_foto = format!("{}/reddit-Fotografie.rss", addr);
     let url_insi = format!("{}/newsinsideout_com.rss", addr);
-    let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
+    // let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
     // let url_relay = format!("{}/relay_rd.rss", addr); // very big
 
     let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
-    let folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
-    let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder1);
-    let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), folder1);
+    let _folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
 
     // feedsources.add_new_subscription_at_parent(url_relay, "relay_rd too big".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder1, false);
+    // feedsources.add_new_subscription_at_parent(            url_nn_aug,            "NN-aug".to_string(),            folder1,            false,        );
+    // feedsources.add_new_subscription_at_parent(            url_staseve,            "staseve11".to_string(),            folder1,            false,        );
 
     if true {
         let src = [
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
-            ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
         ];
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
-                folder2,
+                folder1,
                 false,
             );
         });
         feedsources.add_new_subscription_at_parent(
-            url_nn_aug,
-            "NN-aug".to_string(),
-            folder1,
-            false,
-        );
-        feedsources.add_new_subscription_at_parent(
             url_gui_proc.clone(),
             "gui_proc_2 & big-icon".to_string(),
-            folder1,
-            false,
-        );
-        feedsources.add_new_subscription_at_parent(
-            url_staseve,
-            "staseve11".to_string(),
             folder1,
             false,
         );
@@ -221,6 +208,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://www.reddit.com/r/aww.rss", "aww"),
             ("https://feeds.breakingnews.ie/bnworld", "breaknew"),
         ];
+        let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder1);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
@@ -373,6 +361,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "seoulnews - 기사 요약 -",
             ),
         ];
+        let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), folder1);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),
