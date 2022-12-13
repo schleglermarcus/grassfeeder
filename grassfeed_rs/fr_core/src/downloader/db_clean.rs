@@ -448,8 +448,7 @@ impl Step<CleanerInner> for CheckErrorLog {
             .iter()
             .filter(|se| !se.isdeleted())
             .map(|se| se.subs_id as isize)
-            .collect::<HashSet<isize>>(); // TODO use this later
-                                          // debug!("USE LATER: parent_ids_active: {:?}", parent_ids_active);
+            .collect::<HashSet<isize>>();
         inner.error_repo.startup_read();
         let list: Vec<ErrorEntry> = inner.error_repo.get_all_stored_entries();
         let num_errors_before = list.len();

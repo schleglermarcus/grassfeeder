@@ -1,7 +1,7 @@
 To Do List
 
 
-
+- Spinner Indicator on Dragging Urls Dialog
 
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
 - Use different app-indicator  lib

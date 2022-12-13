@@ -41,7 +41,7 @@ pub fn create_debian_changelog(
         let chfilename = format!("{}{}", in_folder, name);
         let contents = std::fs::read_to_string(chfilename).unwrap();
         let line1 = format!("{} ({}) {}\n\n", package_name, parts[1], top_line_rest);
-		file_contents.push_str(&line1);
+        file_contents.push_str(&line1);
         outfile
             .write_all(line1.as_bytes())
             .expect("error writing out file");
