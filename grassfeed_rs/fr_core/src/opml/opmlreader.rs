@@ -318,7 +318,7 @@ mod t_ {
         opmlreader.transfer_from_db();
         let _r = opmlreader.write_to_file(String::from(dest_filename));
         let written_length = std::fs::metadata(dest_filename).unwrap().len();
-        assert_eq!(written_length, 693);
+        assert_eq!(written_length, 689);
     }
 
     #[allow(dead_code)]

@@ -1,3 +1,13 @@
+grassfeeder (0.1.5) unstable; urgency=low
+
+  * Focus indicator for browser area: move down
+  * After deleting Message, set Cursor to next one
+  * Refactored SourceTreeController,  message_from_modelentry
+  * Bugfix: Focus on Folder, Minimize, Restore results in list content out of sync, no browser
+  * Bugfix: insert subscription by drag, set-read on messages, tree is not updated
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Thu, 13 Dez 2022 00:10:00 +0000
+
 grassfeeder (0.1.4) unstable; urgency=low
 
   * Feed Error display sorted by time
