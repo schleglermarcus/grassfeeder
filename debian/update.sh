@@ -2,8 +2,8 @@
 #  Update the repository tree, with the new *.deb
 
 export REPREPRO_BASE_DIR=`pwd`
-test -d dists && mv dists ../grassfeed_rs/target/dists.old
-test -d db && mv db ../grassfeed_rs/target/db.old
+test -d dists && ( rm   -rf ../grassfeed_rs/target/dists.old ;  mv dists ../grassfeed_rs/target/dists.old )
+test -d db && ( rm -rf  ../grassfeed_rs/target/db.old ; mv db ../grassfeed_rs/target/db.old )
 
 DEBS=`find . -name "*.deb" |xargs`
 reprepro --delete clearvanished 

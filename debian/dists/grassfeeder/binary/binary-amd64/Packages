@@ -1,16 +1,16 @@
 Package: grassfeeder
-Version: 0.1.4
+Version: 0.1.5
 Architecture: amd64
 Maintainer: Marcus <schlegler_marcus@posteo.de>
-Installed-Size: 8499
-Depends: libgdk-pixbuf-2.0-0 (>= 2.22.0), libgtk-3-0 (>= 3.16.2), libpango-1.0-0 (>= 1.14.0), libwebkit2gtk-4.0-37 (>= 2.33.1), libc6 (>= 2.29), libglib2.0-0 (>= 2.33.14)
+Installed-Size: 8479
+Depends: libpango-1.0-0 (>= 1.14.0), libglib2.0-0 (>= 2.33.14), libc6 (>= 2.29), libwebkit2gtk-4.0-37 (>= 2.33.1), libgtk-3-0 (>= 3.16.2), libgdk-pixbuf-2.0-0 (>= 2.22.0)
 Priority: optional
 Section: web
-Filename: pool/binary/g/grassfeeder/grassfeeder_0.1.4_amd64.deb
-Size: 3004288
-SHA256: fc231a45bb0609a3b1970a4b1dd5dc525f72426b4727e4e288521beec87889ff
-SHA1: 30bbe1d2932ca9f7af541fb205ef595bae4f353f
-MD5sum: f2e40df9d24c82b547ad6af11a8abb26
+Filename: pool/binary/g/grassfeeder/grassfeeder_0.1.5_amd64.deb
+Size: 3000008
+SHA256: bbff3539be8fcf38d0e733ce2218adfa4612c414e29c2db6ab61a502647a23e4
+SHA1: 87e7b8e856ee8d020df2a1026bd9fbbfe8af58ee
+MD5sum: 5d241227b11cc4e6ad6b9b864bcb167a
 Description: Feed Reader Linux-Gtk3 Application
  This application polls Feeds (Streams of messages) regularly and presents them
  in a list of events. Browser Urls of blogs, news sites etc. can be dropped and
