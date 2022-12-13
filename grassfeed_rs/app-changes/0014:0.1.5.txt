@@ -1,6 +1,6 @@
-Mon, 21 Nov 2022 00:22:00 +0000
+Thu, 13 Dez 2022 00:10:00 +0000
 * Focus indicator for browser area: move down
-* Bugfix: Focus on Folder, Minimize, Restore results in list content out of sync, no browser
-* Refactored SourceTreeController,  message_from_modelentry
 * After deleting Message, set Cursor to next one
+* Refactored SourceTreeController,  message_from_modelentry
+* Bugfix: Focus on Folder, Minimize, Restore results in list content out of sync, no browser
 * Bugfix: insert subscription by drag, set-read on messages, tree is not updated
