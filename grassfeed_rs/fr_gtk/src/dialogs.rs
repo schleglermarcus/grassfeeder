@@ -200,9 +200,9 @@ pub fn create_new_subscription_dialog(
     box2h.set_expand(true);
     let spinner = Spinner::new();
     box2h.pack_end(&spinner, false, false, 0);
-    spinner.set_active(false);
+    spinner.set_active(false); // shall be invisible at start of dialog
+    spinner.stop(); // no animation at  start of dialog
     box1v.pack_start(&box2h, false, false, 1);
-
     let box3h = gtk::Box::new(Orientation::Horizontal, 1);
     let label3 = Label::new(None);
     box3h.pack_start(&label3, true, true, 1);
@@ -216,11 +216,13 @@ pub fn create_new_subscription_dialog(
     }
     box3h.pack_end(&image_icon, false, false, 0);
     box1v.pack_start(&box3h, false, false, 1);
+    // let spinner_c = spinner.clone();
     let ev_se = g_ev_se.clone();
     entry_url.connect_text_notify(move |entry_url| {
+        let e_text = entry_url.text().as_str().to_string();
         let _r = ev_se.send(GuiEvents::DialogEditData(
             "feedsource-edit".to_string(),
-            AValue::ASTR(entry_url.text().as_str().to_string()),
+            AValue::ASTR(e_text),
         ));
     });
     entry_url.set_activates_default(true);
@@ -245,7 +247,11 @@ pub fn create_new_subscription_dialog(
                 ];
                 let _r = ev_se.send(GuiEvents::DialogData("new-feedsource".to_string(), payload));
             }
-            ResponseType::Cancel | ResponseType::DeleteEvent => {}
+            ResponseType::Cancel | ResponseType::DeleteEvent => {
+                debug!("cancel-> deleting entry1 entry2");
+                ent1_c.buffer().set_text("");
+                ent2_c.buffer().set_text("");
+            }
             _ => {
                 warn!("new-subscription:response unexpected {}", rt);
             }
@@ -256,11 +262,9 @@ pub fn create_new_subscription_dialog(
         dia.hide();
         gtk::Inhibit(true)
     });
-    // let ent1_c = entry_url.clone();
     let ent2_c = entry_name.clone();
     let label3_c = label3.clone();
     dialog.connect_show(move |dialog| {
-        // ent1_c.set_text("");
         ent2_c.set_text("");
         label3_c.set_text("");
         dialog.set_response_sensitive(ResponseType::Ok, false);
@@ -268,7 +272,6 @@ pub fn create_new_subscription_dialog(
     let entry_name_c = entry_name.clone();
     let image_icon_c = image_icon;
     let label3_c = label3;
-    let spinner_c = spinner;
     let ent1_c = entry_url.clone();
     ddd.set_dialog_distribute(DIALOG_NEW_SUBSCRIPTION, move |dialogdata| {
         if dialogdata.len() < 2 {
@@ -291,13 +294,15 @@ pub fn create_new_subscription_dialog(
             }
         }
         let spinner_act = dialogdata.get(3).unwrap().boo();
-        trace!("Spinner active: {} ", spinner_act);
-        spinner_c.set_active(spinner_act);
-        if spinner_act {
-            spinner_c.start();
-        } else {
-            spinner_c.stop();
-        }
+        trace!("DD: Spinner set active: {} ", spinner_act);
+        spinner.set_active(spinner_act);
+        /*
+                if spinner_act {
+                    spinner.start();
+                } else {
+                    spinner.stop();
+                }
+        */
         if let Some(s) = dialogdata.get(4).unwrap().str() {
             ent1_c.set_text(&s); // 4: feed-url
         }

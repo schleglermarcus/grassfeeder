@@ -641,7 +641,6 @@ pub fn create_toolbar(
             &String::default(),
             TOOLBAR_ICON_SIZE,
         );
-
         let but: ToolButton = ToolButtonBuilder::new()
             .icon_widget(&image)
             .tooltip_text(&t!("TB_ADD_FEED"))
