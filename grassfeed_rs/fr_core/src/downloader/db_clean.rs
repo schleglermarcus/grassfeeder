@@ -7,6 +7,7 @@ use crate::db::message::MessageRow;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_entry::SubscriptionEntry;
+use crate::db::subscription_entry::SRC_REPO_ID_DUMMY;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::util::filter_by_iso8859_1;
@@ -237,8 +238,10 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
             .collect();
         let mut reset_icon_subs_ids: Vec<i32> = all_folders
             .iter()
+            .filter(|se| se.subs_id >= 0 && se.subs_id != SRC_REPO_ID_DUMMY)
             .filter_map(|se| {
                 if se.icon_id != gen_icons::IDX_08_GNOME_FOLDER_48 {
+                    debug!("CorrectIconsOfFolders:  folder= {:?}", se);
                     Some(se.subs_id as i32)
                 } else {
                     None
@@ -247,7 +250,8 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
             .collect::<Vec<i32>>();
         reset_icon_subs_ids.sort();
         if !reset_icon_subs_ids.is_empty() {
-            debug!("CorrectIconsOfFolders: {:?}", reset_icon_subs_ids);
+            //  -3,-2  is always in the list
+            debug!("CorrectIconsOfFolders:  IDS={:?}", reset_icon_subs_ids);
             inner
                 .subscriptionrepo
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_08_GNOME_FOLDER_48);
@@ -475,8 +479,8 @@ impl Step<CleanerInner> for Notify {
         inner.subscriptionrepo.db_vacuum();
         inner.messgesrepo.db_vacuum();
         if inner.need_update_subscriptions {
-            let _r = inner.sourcetree_job_sender.send(SJob::FillSourcesTree);
             let _r = inner.sourcetree_job_sender.send(SJob::UpdateTreePaths);
+            let _r = inner.sourcetree_job_sender.send(SJob::FillSourcesTree);
         }
         // later: refresh message display
         StepResult::Stop(inner)

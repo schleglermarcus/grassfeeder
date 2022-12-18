@@ -1,8 +1,5 @@
 To Do List
 
-
-- Spinner Indicator on Dragging Urls Dialog
-
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
 - Use different app-indicator  lib
 - Marking of Messages, Favorites
@@ -43,19 +40,15 @@ Perhaps:
 - Keybard configuration in settings
 - Updating Sources:  prioritize by tree position, expanded flag
 - Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
-- Feed-Import with progress bar ?
+- Feed-Opml-Import with progress bar ?
 - Do extra recognition  to process   invalid feed titles  containg  &     :      dieneuewelle.xml
-- Grouping of feeds by folders ?
-
-
-
 
 No more
 - startup:  delayed creation of dialogs not good, they need to be present for the menu
 - Browser  enable theme related colors  -->  1. We can't get the theme background color  2. We cannot set the browser foreground color
 - Drag extra care:
-    www.extremnews.com:address given is broken
-		therationalmale.com  : title in feed is empty
+    www.extremnews.com: address provided is broken
+		therationalmale.com:  title in feed is empty
 - Reduce Size of Binary:   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
 
 

@@ -1,3 +1,4 @@
 Thu, 13 Dez 2022 00:10:00 +0000
 * Bugfix: Spinner Indicator on Drag Url Dialog not working
-* Bugfix Draggign an url twice did not work: now deleting input fields on cancel.
+* Bugfix: Dragging an url twice did not work: now deleting input fields on cancel.
+* Bugfix: Db cleanup does not result in unnecessary tree update
