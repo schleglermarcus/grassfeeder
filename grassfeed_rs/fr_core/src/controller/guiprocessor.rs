@@ -551,7 +551,10 @@ impl GuiProcessor {
                         .add_new_folder(s.to_string());
                     self.feedsources_r
                         .borrow_mut()
-                        .addjob(SJob::FillSourcesTree);
+                        .addjob(SJob::FillSubscriptionsAdapter);
+                    self.feedsources_r
+                        .borrow_mut()
+                        .addjob(SJob::FillSubscriptionsTreeUpdate);
                 }
             }
             "new-feedsource" => {
@@ -566,10 +569,13 @@ impl GuiProcessor {
                         .add_new_subscription(s0.clone(), s1.clone());
                     self.feedsources_r
                         .borrow_mut()
-                        .addjob(SJob::FillSourcesTree);
+                        .addjob(SJob::UpdateTreePaths);
                     self.feedsources_r
                         .borrow_mut()
-                        .addjob(SJob::UpdateTreePaths);
+                        .addjob(SJob::FillSubscriptionsAdapter);
+                    self.feedsources_r
+                        .borrow_mut()
+                        .addjob(SJob::FillSubscriptionsTreeUpdate);
                     self.feedsources_r
                         .borrow_mut()
                         .addjob(SJob::ScanEmptyUnread);

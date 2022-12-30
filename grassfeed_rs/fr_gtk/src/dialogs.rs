@@ -294,15 +294,7 @@ pub fn create_new_subscription_dialog(
             }
         }
         let spinner_act = dialogdata.get(3).unwrap().boo();
-        trace!("DD: Spinner set active: {} ", spinner_act);
         spinner.set_active(spinner_act);
-        /*
-                if spinner_act {
-                    spinner.start();
-                } else {
-                    spinner.stop();
-                }
-        */
         if let Some(s) = dialogdata.get(4).unwrap().str() {
             ent1_c.set_text(&s); // 4: feed-url
         }
@@ -380,7 +372,6 @@ pub fn create_subscription_delete_dialog(
             label3c.set_text(&s);
         }
     });
-
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_FS_DELETE, &dialog);
 }

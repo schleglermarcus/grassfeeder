@@ -1,11 +1,22 @@
 To Do List
 
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
+   https://www.debian.org/doc/manuals/developers-reference/pkgs.html#newpackage
+	 https://wiki.debian.org/DebianMentorsFaq
+
+- https://launchpad.net/grassfeeder
+https://help.launchpad.net/Packaging/PPA/Uploading
+https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
+https://packaging.ubuntu.com/html/packaging-new-software.html
+
+
 - Use different app-indicator  lib
 - Marking of Messages, Favorites
 
 - Possible Bug:   launch in browser : multiple list items appear
 - Possible Bug: set cursor to message, minimize, restore, cursor is moved to wrong positions
+
+
 
 
 
@@ -158,6 +169,24 @@ https://blog.packagecloud.io/how-to-create-debian-repository-with-reprepro/
 https://www.debian.org/doc/manuals/securing-debian-manual/deb-pack-sign.en.html
 https://unix.stackexchange.com/questions/387053/debian-9-apt-and-gpg-error-inrelease-the-following-signatures-were-inva
 https://debian-handbook.info/browse/stable/sect.package-authentication.html
+
+
+
+
+
+#  gpg --fingerprint schleglermarcus@posteo.de
+gpg: Die Benutzung der Hashmethode SHA256 ist im --compliance=pgp6 Modus nicht erlaubt.
+gpg: Diese Botschaft könnte für PGP 6.x unbrauchbar sein
+pub   rsa4096 2022-11-12 [SC] [verfällt: 2024-11-11]
+      2457 9093 9B8F D40D C29D  0EF9 C28E BCE0 F940 E69F
+uid        [uneingeschränkt] schleglermarcus <schleglermarcus@posteo.de>
+
+#  gpg --keyserver keyserver.ubuntu.com --send-keys "2457 9093 9B8F D40D C29D  0EF9 C28E BCE0 F940 E69F"
+gpg: Die Benutzung der Hashmethode SHA256 ist im --compliance=pgp6 Modus nicht erlaubt.
+gpg: Diese Botschaft könnte für PGP 6.x unbrauchbar sein
+gpg: sende Schlüssel C28EBCE0F940E69F auf hkp://keyserver.ubuntu.com
+
+
 
 
 

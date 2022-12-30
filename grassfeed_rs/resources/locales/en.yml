@@ -1,10 +1,10 @@
 ABOUT_APP_TXT : About this application
 ABOUT_APP_DESCRIPTION : A rusty feed reader
 
-M_FILE: File              #  test listens
+M_FILE: File
 M_IMPORT_OPML: Import Opml
 M_EXPORT_OPML: Export Opml
-M_FILE_QUIT: Quit!
+M_FILE_QUIT: Quit
 
 M_OPTIONS: Options
 M_SETTINGS: Settings

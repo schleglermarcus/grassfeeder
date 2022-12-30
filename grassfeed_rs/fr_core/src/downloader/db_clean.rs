@@ -21,9 +21,8 @@ use std::borrow::Borrow;
 use std::collections::HashSet;
 use std::sync::Mutex;
 
-/// Later:  sanity for recursion
+///  sanity in case of recursion
 pub const MAX_PATH_DEPTH: usize = 30;
-
 pub const MAX_ERROR_LINES_PER_SUBSCRIPTION: usize = 100;
 pub const MAX_ERROR_LINE_AGE_S: usize = 60 * 60 * 24 * 360;
 
@@ -480,7 +479,7 @@ impl Step<CleanerInner> for Notify {
         inner.messgesrepo.db_vacuum();
         if inner.need_update_subscriptions {
             let _r = inner.sourcetree_job_sender.send(SJob::UpdateTreePaths);
-            let _r = inner.sourcetree_job_sender.send(SJob::FillSourcesTree);
+            let _r = inner.sourcetree_job_sender.send(SJob::FillSubscriptionsAdapter);
         }
         // later: refresh message display
         StepResult::Stop(inner)

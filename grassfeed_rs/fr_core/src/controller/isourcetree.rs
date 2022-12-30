@@ -107,8 +107,8 @@ impl ISourceTreeController for SourceTreeController {
             }
         }
         self.addjob(SJob::UpdateTreePaths);
-        // debug!(            "on-drag subs-id: from_p:{}  to_p:{}",            from_parent_id, to_parent_subs_id        );
-        self.addjob(SJob::FillSourcesTree);
+        //  debug!("on-drag subs-id: from_p:{}  to_p:{}", from_parent_id, to_parent_subs_id        );
+        self.addjob(SJob::FillSubscriptionsAdapter);
         if from_parent_id >= 0 {
             self.addjob(SJob::GuiUpdateTree(from_parent_id));
         }
@@ -222,7 +222,8 @@ impl ISourceTreeController for SourceTreeController {
         match r {
             Ok(fse) => {
                 self.addjob(SJob::UpdateTreePaths);
-                self.addjob(SJob::FillSourcesTree);
+                self.addjob(SJob::FillSubscriptionsAdapter);
+                self.addjob(SJob::FillSubscriptionsTreeUpdate);
                 fse.subs_id
             }
             Err(e2) => {
@@ -288,7 +289,8 @@ impl ISourceTreeController for SourceTreeController {
             Ok(fse2) => {
                 self.addjob(SJob::UpdateTreePaths);
                 if load_messages {
-                    self.addjob(SJob::FillSourcesTree);
+                    self.addjob(SJob::FillSubscriptionsAdapter);
+                    self.addjob(SJob::FillSubscriptionsTreeUpdate);
                     self.addjob(SJob::ScheduleUpdateFeed(fse2.subs_id));
                     self.addjob(SJob::CheckSpinnerActive);
                 }
@@ -379,7 +381,8 @@ impl ISourceTreeController for SourceTreeController {
             .set_deleted_rec(fse.subs_id);
         self.resort_parent_list(fse.parent_subs_id);
         self.addjob(SJob::UpdateTreePaths);
-        self.addjob(SJob::FillSourcesTree);
+        self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::FillSubscriptionsTreeUpdate);
         self.addjob(SJob::GuiUpdateTreeAll);
         self.feedsource_delete_id = None;
     }
@@ -394,7 +397,8 @@ impl ISourceTreeController for SourceTreeController {
             .borrow()
             .delete_by_index(fs_id as isize);
         self.addjob(SJob::UpdateTreePaths);
-        self.addjob(SJob::FillSourcesTree);
+        self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::FillSubscriptionsTreeUpdate);
         self.addjob(SJob::GuiUpdateTreeAll);
         self.feedsource_delete_id = None;
     }
@@ -582,12 +586,10 @@ impl ISourceTreeController for SourceTreeController {
     }
 
     fn notify_config_update(&mut self) {
-        // self.tree_fontsize = get_font_size_from_config(self.configmanager_r.clone());
-
         (*self.config).borrow_mut().tree_fontsize =
             get_font_size_from_config(self.configmanager_r.clone()) as u8;
-
-        self.addjob(SJob::FillSourcesTree);
+        // self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::FillSubscriptionsTreeUpdate);
     }
 
     fn set_selected_feedsource(&mut self, src_repo_id: isize) {
@@ -643,7 +645,8 @@ impl ISourceTreeController for SourceTreeController {
             }
         }
         self.addjob(SJob::UpdateTreePaths);
-        self.addjob(SJob::FillSourcesTree);
+        self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::FillSubscriptionsTreeUpdate);
     }
 
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)> {
