@@ -30,7 +30,7 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
     let msg_fn = MessagesRepo::filename(config_folder);
     let msg_copy = format!("{}.copy", msg_fn);
     std::fs::copy(&msg_fn, msg_copy).unwrap();
-    let msgrepo1 = MessagesRepo::by_filename(&msg_fn);
+    let msgrepo1 = MessagesRepo::new_by_filename_add_column(&msg_fn);
     let iconrepo = IconRepo::new(cache_folder);
     let err_repo = ErrorRepo::new(cache_folder);
 

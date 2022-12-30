@@ -266,6 +266,35 @@ impl<T: TableInfo> SqliteContext<T> {
     pub fn db_existed_before(&self) -> bool {
         self.db_file_existed_before
     }
+
+    pub fn is_column_present(&self, column_name: &str) -> bool {
+        let stm = format!("select {} from {}", column_name, T::table_name());
+        let mut errmsg: String = String::default();
+        match (*self.connection).lock().unwrap().execute(&stm, []) {
+            Ok(_) => (),
+            Err(e) => errmsg = e.to_string(),
+        }
+        if errmsg.contains("no such column") {
+            debug!("{}   {:?}", stm, errmsg);
+            return false;
+        }
+        true
+    }
+
+    pub fn add_column(&self, column_name: &str, column_type: &str) -> usize {
+        let stm = format!(
+            "ALTER TABLE   {} ADD COLUMN {} {}",
+            T::table_name(),
+            column_name,
+            column_type
+        );
+        match (*self.connection).lock().unwrap().execute(&stm, []) {
+            Ok(n) => return n,
+            Err(e) => warn!(" {:?} {:?}", stm, e),
+        }
+        0
+    }
+
 }
 
 #[derive(Debug)]
@@ -275,6 +304,7 @@ pub enum Wrap {
     STR(String),
     BOO(bool),
     BLOB(Vec<u8>),
+    U64(u64),
 }
 
 impl Wrap {
@@ -282,6 +312,7 @@ impl Wrap {
         match self {
             Wrap::INT(i) => i,
             Wrap::I64(i) => i,
+            Wrap::U64(u) => u,
             Wrap::STR(s) => s,
             Wrap::BLOB(v) => v,
             Wrap::BOO(b) => b,

@@ -1,4 +1,5 @@
 Thu, 13 Dez 2022 00:10:00 +0000
+* Messages-DB: adding marker column on startup
 * Bugfix: Spinner Indicator on Drag Url Dialog not working
 * Bugfix: Dragging an url twice did not work: now deleting input fields on cancel.
 * Bugfix: Db cleanup shall not result in unnecessary tree update
