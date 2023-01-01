@@ -60,6 +60,8 @@ pub enum CJob {
     RequestUnreadAllCount(isize),
     UpdateMessageList,
     ListSetCursorToMessage(isize),
+    ///  list_position, msg_id, Favorite
+    SetFavoriteSome(Vec<(u32, u32)>, bool),
 }
 
 pub trait IFeedContents {
@@ -84,6 +86,7 @@ pub trait IFeedContents {
     fn toggle_feed_item_read(&self, msg_id: isize, list_position: i32);
     ///  clicking on the favorite left
     fn toggle_favorite(&self, msg_id: isize, list_position: i32, new_fav: Option<bool>);
+    fn set_favorite_multi(&self, msg_id: &Vec<(i32, i32)>, new_fav: bool);
 
     fn get_job_receiver(&self) -> Receiver<CJob>;
     fn get_job_sender(&self) -> Sender<CJob>;
@@ -182,7 +185,7 @@ impl FeedContents {
     ) -> Vec<AValue> {
         let mut newrow: Vec<AValue> = Vec::default();
         let ifav = if fc.is_favorite() {
-            gen_icons::ICON_42_ICON_GREEN_C
+            gen_icons::ICON_44_ICON_GREEN_D
         } else {
             gen_icons::ICON_03_ICON_TRANSPARENT_48
         };
@@ -345,7 +348,6 @@ impl FeedContents {
     fn update_feed_list_contents_int(&self) {
         let (subs_id, num_msg, isfolder) = *self.current_subscription.borrow();
         let mut messagelist: Vec<MessageRow> = Vec::default();
-
         let mut child_ids: Vec<i32> = Vec::default();
         if isfolder {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
@@ -434,6 +436,32 @@ impl FeedContents {
         if let Some((msg_id, _gui_list_pos)) = o_neighbour {
             self.addjob(CJob::ListSetCursorToMessage(msg_id));
         }
+    }
+
+    fn set_favorite_int(&self, listpos_msgid: &Vec<(u32, u32)>, new_fav: bool) {
+        let mut mod_listpos_db: Vec<(u32, u32)> = Vec::default();
+        listpos_msgid.iter().for_each(|(listpos, msg_id)| {
+            let o_msg = (*(self.messagesrepo_r.borrow_mut())).get_by_index(*msg_id as isize);
+            if o_msg.is_none() {
+                warn!("FAV: msg not found: {}", msg_id);
+                return;
+            }
+            let mut msg = o_msg.unwrap();
+            // trace!(                "TOGGLE_FAV  {}   col{}  isFav:{}  newFav:{}",                msg_id,                listpos,                msg.is_favorite(),                new_fav            );
+            if msg.is_favorite() != new_fav {
+                msg.set_favorite(new_fav);
+                mod_listpos_db.push((*listpos as u32, *msg_id as u32));
+            }
+            (*(self.messagesrepo_r.borrow_mut())).update_markers(*msg_id as isize, msg.markers);
+        });
+        self.update_content_list_some(&mod_listpos_db);
+        let vec_listpos = mod_listpos_db
+            .iter()
+            .map(|(p, _d)| *p)
+            .collect::<Vec<u32>>();
+        (*self.gui_updater)
+            .borrow()
+            .update_list_some(TREEVIEW1, &vec_listpos);
     }
 } // impl FeedContents
 
@@ -536,6 +564,9 @@ impl IFeedContents for FeedContents {
                 }
                 CJob::ListSetCursorToMessage(msg_id) => {
                     self.set_cursor_to_message(msg_id);
+                }
+                CJob::SetFavoriteSome(ref vec_listpos_msgid, new_fav) => {
+                    self.set_favorite_int(vec_listpos_msgid, new_fav);
                 }
             }
             let elapsed_m = now.elapsed().as_millis();
@@ -710,6 +741,33 @@ impl IFeedContents for FeedContents {
             .update_list_some(TREEVIEW1, &[list_position as u32]);
     }
 
+    /// [  ( msg-id , list-pos ) ]
+    fn set_favorite_multi(&self, msg_id_listpos: &Vec<(i32, i32)>, new_fav: bool) {
+        let chunk_size = 7;
+        if msg_id_listpos.len() <= chunk_size {
+            let mut mod_listpos_db: Vec<(u32, u32)> = Vec::default();
+            msg_id_listpos.iter().for_each(|(msg_id, listpos)| {
+                mod_listpos_db.push((*listpos as u32, *msg_id as u32));
+            });
+            self.addjob(CJob::SetFavoriteSome(mod_listpos_db, new_fav));
+            return;
+        }
+        let num_chunks = (msg_id_listpos.len() + chunk_size - 1) / chunk_size;
+        let num_lines = (msg_id_listpos.len() + 1) / num_chunks;
+        for c in 0..num_chunks {
+            let mut mod_listpos_db: Vec<(u32, u32)> = Vec::default();
+            msg_id_listpos
+                .iter()
+                .skip(c * num_lines)
+                .take(num_lines)
+                .for_each(|(msg_id, listpos)| {
+                    mod_listpos_db.push((*listpos as u32, *msg_id as u32));
+                });
+            // trace!(" {}    lines {:?}", c, mod_listpos_db);
+            self.addjob(CJob::SetFavoriteSome(mod_listpos_db, new_fav));
+        }
+    }
+
     fn get_job_receiver(&self) -> Receiver<CJob> {
         self.job_queue_receiver.clone()
     }
@@ -768,25 +826,25 @@ impl IFeedContents for FeedContents {
         self.list_selected_ids.read().unwrap().clone()
     }
 
-    fn process_list_action(&self, action: String, repoid_listpos: Vec<(i32, i32)>) {
+    fn process_list_action(&self, action: String, msgid_listpos: Vec<(i32, i32)>) {
         match action.as_str() {
             "mark-as-read" => {
-                self.set_read_many(&repoid_listpos, true);
+                self.set_read_many(&msgid_listpos, true);
             }
             "mark-as-unread" => {
-                self.set_read_many(&repoid_listpos, false);
+                self.set_read_many(&msgid_listpos, false);
             }
             "open-in-browser" => {
-                let db_ids: Vec<i32> = repoid_listpos.iter().map(|(db, _lp)| *db).collect();
+                let db_ids: Vec<i32> = msgid_listpos.iter().map(|(db, _lp)| *db).collect();
                 self.start_web_browser(db_ids);
-                self.set_read_many(&repoid_listpos, true);
+                self.set_read_many(&msgid_listpos, true);
             }
             "messages-delete" => {
-                let db_ids: Vec<i32> = repoid_listpos.iter().map(|(db, _lp)| *db).collect();
+                let db_ids: Vec<i32> = msgid_listpos.iter().map(|(db, _lp)| *db).collect();
                 self.delete_messages(&db_ids);
             }
             "message-copy-link" => {
-                if let Some((subs_id, _lispos)) = repoid_listpos.first() {
+                if let Some((subs_id, _lispos)) = msgid_listpos.first() {
                     if let Some(e_msg) = (*self.messagesrepo_r)
                         .borrow()
                         .get_by_index(*subs_id as isize)
@@ -798,14 +856,10 @@ impl IFeedContents for FeedContents {
                 }
             }
             "mark-as-favorite" => {
-                repoid_listpos.iter().for_each(|(subs_id, listpos)| {
-                    self.toggle_favorite(*subs_id as isize, *listpos, Some(true))
-                });
+                self.set_favorite_multi(&msgid_listpos, true);
             }
             "unmark-favorite" => {
-                repoid_listpos.iter().for_each(|(subs_id, listpos)| {
-                    self.toggle_favorite(*subs_id as isize, *listpos, Some(false))
-                });
+                self.set_favorite_multi(&msgid_listpos, false);
             }
 
             _ => {
