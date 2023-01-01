@@ -3,17 +3,11 @@ use crate::db::sqlite_context::Wrap;
 use crate::util;
 use lz4_compression::prelude;
 
+pub const MARKERS_FAVORITE: u64 = 1;
+
 #[derive(Default, PartialEq, Clone, Debug, Eq)]
 pub struct CompWrap(pub String, pub Option<String>);
 impl CompWrap {
-    /*
-        /// compressed, as in DB
-        #[deprecated]
-        pub fn get(&self) -> &String {
-            &self.0
-        }
-    */
-
     /// compressed, as in DB
     pub fn set(&mut self, s: String) {
         self.0 = s;
@@ -76,6 +70,18 @@ impl MessageRow {
             message_id: -1,
             fetch_date: util::timestamp_now(),
             ..Default::default()
+        }
+    }
+
+    pub fn is_favorite(&self) -> bool {
+        self.markers & MARKERS_FAVORITE > 0
+    }
+
+    pub fn set_favorite(&mut self, n: bool) {
+        if n {
+            self.markers = self.markers | MARKERS_FAVORITE
+        } else {
+            self.markers = self.markers & !MARKERS_FAVORITE;
         }
     }
 }

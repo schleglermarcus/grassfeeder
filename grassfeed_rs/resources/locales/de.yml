@@ -35,6 +35,8 @@ CM_MSG_MARK_AS_UNREAD: Als ungelesen markieren
 CM_MSG_OPEN_IN_BROWSER: Im Browser öffnen
 CM_MSG_DELETE: Löschen
 CM_MSG_COPY_LINK_CLIPBOARD: Verweis in Zwischenablage kopieren
+CM_MSG_MARK_FAVORITE: Als Favorit markieren
+CM_MSG_UNMARK_FAVORITE: Favorit aufheben
 
 D_BUTTON_YES: Ja
 D_BUTTON_NO: Nein

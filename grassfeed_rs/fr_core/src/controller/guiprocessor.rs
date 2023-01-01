@@ -210,6 +210,13 @@ impl GuiProcessor {
                         (*self.feedcontents_r)
                             .borrow()
                             .toggle_feed_item_read(msg_id as isize, list_position);
+                    } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
+						(*self.feedcontents_r)
+                            .borrow()
+                            .toggle_favorite(msg_id as isize, list_position, None);
+
+                    } else {
+                        warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
                     }
                 }
                 GuiEvents::PanedMoved(pane_id, pos) => match pane_id {

@@ -53,6 +53,7 @@ pub trait IMessagesRepo {
     fn update_entry_src_date(&self, repo_id: isize, n_src_date: i64) -> usize;
 
     fn update_is_deleted_many(&self, repo_ids: &[i32], new_is_del: bool);
+    fn update_markers(&self, msg_id: isize, n_markers: u64) -> usize;
 
     fn get_ctx(&self) -> &SqliteContext<MessageRow>;
 
@@ -336,6 +337,17 @@ impl IMessagesRepo for MessagesRepo {
             joined
         );
         self.ctx.execute(sql);
+    }
+
+    fn update_markers(&self, msg_id: isize, n_markers: u64) -> usize {
+        let sql = format!(
+            "UPDATE {}  SET  markers = \"{}\"    WHERE {} = {}",
+            MessageRow::table_name(),
+            n_markers,
+            MessageRow::index_column_name(),
+            msg_id,
+        );
+        self.ctx.execute(sql)
     }
 
     ///  deletes really those IDs, if they were set to is_deleted  before.

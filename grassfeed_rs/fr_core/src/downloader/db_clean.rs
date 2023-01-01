@@ -355,8 +355,11 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                     let (_stay, remove) =
                         msg_per_subscription.split_at(inner.max_messages_per_subscription as usize);
                     if !remove.is_empty() {
-                        let id_list: Vec<i32> =
-                            remove.iter().map(|e| e.message_id as i32).collect();
+                        let id_list: Vec<i32> = remove
+                            .iter()
+                            .filter(|e| !e.is_favorite())
+                            .map(|e| e.message_id as i32)
+                            .collect();
                         //  let first_msg = remove.iter().next().unwrap();
                         // trace!(                            "Reduce(ID {}), has {}, reduce {} messages. Latest date: {}	", // \t message-ids={:?}                            su_id,                            length_before,                            id_list.len(),                            db_time_to_display(first_msg.entry_src_date),                        );
                         inner.messgesrepo.update_is_deleted_many(&id_list, true);
@@ -479,7 +482,9 @@ impl Step<CleanerInner> for Notify {
         inner.messgesrepo.db_vacuum();
         if inner.need_update_subscriptions {
             let _r = inner.sourcetree_job_sender.send(SJob::UpdateTreePaths);
-            let _r = inner.sourcetree_job_sender.send(SJob::FillSubscriptionsAdapter);
+            let _r = inner
+                .sourcetree_job_sender
+                .send(SJob::FillSubscriptionsAdapter);
         }
         // later: refresh message display
         StepResult::Stop(inner)

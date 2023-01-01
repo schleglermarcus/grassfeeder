@@ -81,7 +81,9 @@ pub trait IFeedContents {
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]);
 
     /// for clicking on the is-read icon
-    fn toggle_feed_item_read(&self, content_repo_id: isize, list_position: i32);
+    fn toggle_feed_item_read(&self, msg_id: isize, list_position: i32);
+    ///  clicking on the favorite left
+    fn toggle_favorite(&self, msg_id: isize, list_position: i32, new_fav: Option<bool>);
 
     fn get_job_receiver(&self) -> Receiver<CJob>;
     fn get_job_sender(&self) -> Sender<CJob>;
@@ -179,9 +181,12 @@ impl FeedContents {
         debug_mode: bool,
     ) -> Vec<AValue> {
         let mut newrow: Vec<AValue> = Vec::default();
-        newrow.push(AValue::AIMG(
-            gen_icons::ICON_03_ICON_TRANSPARENT_48.to_string(),
-        )); // 0
+        let ifav = if fc.is_favorite() {
+            gen_icons::ICON_42_ICON_GREEN_C
+        } else {
+            gen_icons::ICON_03_ICON_TRANSPARENT_48
+        };
+        newrow.push(AValue::AIMG(ifav.to_string())); // 0
         newrow.push(AValue::ASTR(title_d)); // 1: message title
         if fc.entry_src_date > 0 {
             let mut displaytime = db_time_to_display(fc.entry_src_date);
@@ -683,6 +688,28 @@ impl IFeedContents for FeedContents {
         self.addjob(CJob::RequestUnreadAllCount(subs_id));
     }
 
+    /// for clicking on Favorite Icon
+    fn toggle_favorite(&self, msg_id: isize, list_position: i32, new_fav: Option<bool>) {
+        let o_msg = (*(self.messagesrepo_r.borrow_mut())).get_by_index(msg_id);
+        if o_msg.is_none() {
+            warn!("FAV: msg not found: {}", msg_id);
+            return;
+        }
+        let mut msg = o_msg.unwrap();
+        // trace!(            "TOGGLE_FAV  {}   col{}  isFav:{} ",            msg_id,            list_position,            msg.is_favorite()        );
+        if new_fav.is_none() {
+            msg.set_favorite(!msg.is_favorite());
+        } else {
+            msg.set_favorite(new_fav.unwrap());
+        }
+        (*(self.messagesrepo_r.borrow_mut())).update_markers(msg_id, msg.markers);
+        let vec_pos_db: Vec<(u32, u32)> = vec![(list_position as u32, msg_id as u32)];
+        self.update_content_list_some(&vec_pos_db);
+        (*self.gui_updater)
+            .borrow()
+            .update_list_some(TREEVIEW1, &[list_position as u32]);
+    }
+
     fn get_job_receiver(&self) -> Receiver<CJob> {
         self.job_queue_receiver.clone()
     }
@@ -770,6 +797,17 @@ impl IFeedContents for FeedContents {
                     debug!("copy-link : no subs-id !!");
                 }
             }
+            "mark-as-favorite" => {
+                repoid_listpos.iter().for_each(|(subs_id, listpos)| {
+                    self.toggle_favorite(*subs_id as isize, *listpos, Some(true))
+                });
+            }
+            "unmark-favorite" => {
+                repoid_listpos.iter().for_each(|(subs_id, listpos)| {
+                    self.toggle_favorite(*subs_id as isize, *listpos, Some(false))
+                });
+            }
+
             _ => {
                 warn!("contentlist_action unknown {}", &action);
             }
