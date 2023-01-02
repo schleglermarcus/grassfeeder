@@ -81,7 +81,7 @@ fn test_extract_icon_kolkata() {
 #[test]
 fn multiple_icons_location() {
     setup();
-    let urls: [(String, String); 12] = [
+    let urls: [(String, String); 11] = [
         (
             "http://chaosradio.ccc.de/chaosradio-complete.rss".to_string(),
             "".to_string(),
@@ -110,10 +110,8 @@ fn multiple_icons_location() {
             "https://www.ft.com/news-feed?format=rss".to_string(),
             "https://www.ft.com/".to_string(),
         ),
-        (
-            "https://www.neweurope.eu/category/world/feed/".to_string(),
-            "https://www.neweurope.eu".to_string(),
-        ),
+		// currently offline
+        //  (            "https://www.neweurope.eu/category/world/feed/".to_string(),            "https://www.neweurope.eu".to_string(),        ),
         (
             "https://www.naturalnews.com/rss.xml".to_string(),
             "https://www.naturalnews.com/".to_string(),

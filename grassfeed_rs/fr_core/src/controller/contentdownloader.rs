@@ -227,15 +227,12 @@ impl Downloader {
     }
 
     fn add_to_queue(&self, dljob: DLJob) {
-        if (*self.job_queue).read().unwrap().contains(&dljob) {
-            // let _kind = dljob.kind();
-            // trace!("download job already queued:  {}:{:?}", kind, &dljob);
-        } else {
+        if !(*self.job_queue).read().unwrap().contains(&dljob) {
             (*self.job_queue).write().unwrap().push_back(dljob);
         }
     }
 
-    // returns   used time in milliseconds
+    /// returns   used time in milliseconds
     fn process_job(dljob: DLJob, gp_sender: Sender<Job>, proc_num: u8) -> u64 {
         let now = std::time::Instant::now();
         let job_kind = dljob.kind();
