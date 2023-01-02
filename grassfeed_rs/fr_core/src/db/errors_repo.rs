@@ -122,7 +122,7 @@ impl ErrorRepo {
         let filename = self.filename();
         if !std::path::Path::new(&filename).exists() {
             let folder = (*self.list_unstored).read().unwrap().folder_name.clone();
-            std::fs::create_dir_all(&folder)?;
+            std::fs::create_dir_all(folder)?;
             let _file = File::create(&filename)?;
         }
         Ok(())
@@ -190,7 +190,7 @@ impl ErrorRepo {
             .write()
             .unwrap()
             .map
-            .insert(n_id as isize, entrym);
+            .insert(n_id, entrym);
     }
 
     pub fn next_id(&self) -> isize {
@@ -220,7 +220,6 @@ impl ErrorRepo {
 
     fn check_stored_are_present(&self) {
         let numstored = (*self.list_stored).read().unwrap().len();
-        // debug!("check_stored_are_present : numstored={}", numstored);
         if numstored == 0 {
             self.read_stored();
         }

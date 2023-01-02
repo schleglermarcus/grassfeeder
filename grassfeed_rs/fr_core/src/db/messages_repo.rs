@@ -53,6 +53,7 @@ pub trait IMessagesRepo {
     fn update_entry_src_date(&self, repo_id: isize, n_src_date: i64) -> usize;
 
     fn update_is_deleted_many(&self, repo_ids: &[i32], new_is_del: bool);
+    fn update_markers(&self, msg_id: isize, n_markers: u64) -> usize;
 
     fn get_ctx(&self) -> &SqliteContext<MessageRow>;
 
@@ -75,15 +76,16 @@ impl MessagesRepo {
     pub const CONF_DB_KEY_FOLDER: &'static str = "messages_db_folder";
 
     pub fn by_folder(foldername: &str) -> Self {
-        MessagesRepo {
-            ctx: SqliteContext::new(MessagesRepo::filename(foldername)),
-        }
+        let filename: &str = &MessagesRepo::filename(foldername);
+        Self::new_by_filename_add_column(filename)
+        // MessagesRepo {            ctx: SqliteContext::new(filename),         }
     }
 
     pub fn filename(foldername: &str) -> String {
         format!("{}messages.db", foldername)
     }
 
+    #[deprecated]
     pub fn by_filename(filename: &str) -> Self {
         MessagesRepo {
             ctx: SqliteContext::new(filename.to_string()),
@@ -108,6 +110,20 @@ impl MessagesRepo {
 
     pub fn get_connection(&self) -> Arc<Mutex<Connection>> {
         self.ctx.get_connection()
+    }
+
+    pub fn new_by_filename_add_column(filename: &str) -> Self {
+        let insert_column = "markers";
+        let dbctx = SqliteContext::new(filename.to_string());
+        let m_e = dbctx.is_column_present(insert_column);
+        if !m_e {
+            debug!("adding column  {}  ", insert_column);
+            let _num = dbctx.add_column(insert_column, " INTEGER DEFAULT 0  ");
+        }
+        if !dbctx.is_column_present(insert_column) {
+            warn!("could not add column:: {}  ", insert_column);
+        }
+        MessagesRepo { ctx: dbctx }
     }
 }
 
@@ -321,6 +337,17 @@ impl IMessagesRepo for MessagesRepo {
             joined
         );
         self.ctx.execute(sql);
+    }
+
+    fn update_markers(&self, msg_id: isize, n_markers: u64) -> usize {
+        let sql = format!(
+            "UPDATE {}  SET  markers = \"{}\"    WHERE {} = {}",
+            MessageRow::table_name(),
+            n_markers,
+            MessageRow::index_column_name(),
+            msg_id,
+        );
+        self.ctx.execute(sql)
     }
 
     ///  deletes really those IDs, if they were set to is_deleted  before.

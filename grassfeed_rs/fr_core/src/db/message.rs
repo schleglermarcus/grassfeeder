@@ -3,14 +3,11 @@ use crate::db::sqlite_context::Wrap;
 use crate::util;
 use lz4_compression::prelude;
 
+pub const MARKERS_FAVORITE: u64 = 1;
+
 #[derive(Default, PartialEq, Clone, Debug, Eq)]
 pub struct CompWrap(pub String, pub Option<String>);
 impl CompWrap {
-    /// compressed, as in DB
-    #[deprecated]
-    pub fn get(&self) -> &String {
-        &self.0
-    }
     /// compressed, as in DB
     pub fn set(&mut self, s: String) {
         self.0 = s;
@@ -61,7 +58,7 @@ pub struct MessageRow {
     pub enclosure_url: String,
     pub author: String,
     pub categories: String,
-
+    pub markers: u64,
     /// a copy of the decompressed title, needed for sorting
     title_d: Option<String>,
 }
@@ -72,6 +69,18 @@ impl MessageRow {
             message_id: -1,
             fetch_date: util::timestamp_now(),
             ..Default::default()
+        }
+    }
+
+    pub fn is_favorite(&self) -> bool {
+        self.markers & MARKERS_FAVORITE > 0
+    }
+
+    pub fn set_favorite(&mut self, n: bool) {
+        if n {
+            self.markers |= MARKERS_FAVORITE
+        } else {
+            self.markers &= !MARKERS_FAVORITE;
         }
     }
 }
@@ -123,8 +132,9 @@ impl TableInfo for MessageRow {
     fn create_string() -> String {
         String::from(
         "message_id  INTEGER  PRIMARY KEY, feed_src_id  INTEGER, title  BLOB, post_id  text,  link  text, \
-is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEGER   \
-,  content_text  BLOB, enclosure_url  text, author BLOB, categories BLOB    " )
+		is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEGER,   \
+	 	content_text  BLOB, enclosure_url  text, author BLOB, categories BLOB,  \
+		markers INTEGER  	" )
     }
 
     fn create_indices() -> Vec<String> {
@@ -152,23 +162,25 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
             String::from("enclosure_url"), // 10
             String::from("author"),
             String::from("categories"),
+            String::from("markers"),
         ]
     }
 
     fn get_insert_values(&self) -> Vec<Wrap> {
         vec![
-            Wrap::INT(self.subscription_id),
+            Wrap::INT(self.subscription_id), // 1
             Wrap::STR(self.title.clone()),
             Wrap::STR(self.post_id.clone()),
             Wrap::STR(self.link.clone()),
-            Wrap::BOO(self.is_deleted),
+            Wrap::BOO(self.is_deleted), // 5
             Wrap::BOO(self.is_read),
             Wrap::I64(self.fetch_date),
             Wrap::I64(self.entry_src_date),
             Wrap::STR(self.content_text.clone()),
-            Wrap::STR(self.enclosure_url.clone()),
+            Wrap::STR(self.enclosure_url.clone()), // 10
             Wrap::STR(self.author.clone()),
             Wrap::STR(self.categories.clone()),
+            Wrap::U64(self.markers),
         ]
     }
 
@@ -187,6 +199,7 @@ is_deleted BOOLEAN, is_read BOOLEAN , fetch_date  INTEGER , entry_src_date INTEG
             enclosure_url: row.get(10).unwrap(),
             author: row.get(11).unwrap(),
             categories: row.get(12).unwrap(),
+            markers: row.get(13).unwrap(),
             ..Default::default()
         }
     }

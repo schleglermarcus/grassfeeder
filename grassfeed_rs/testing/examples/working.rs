@@ -119,19 +119,33 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_dynamic = format!("{}/dynamic.rss", addr);
     let url_gui_proc = format!("{}/gui_proc_3.rss", addr);
     let url_feedburner = format!("{}/feedburner.rss", addr);
-    // let url_staseve = format!("{}/staseve-11.xml", addr);
     let url_r_foto = format!("{}/reddit-Fotografie.rss", addr);
     let url_insi = format!("{}/newsinsideout_com.rss", addr);
-    // let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
-    // let url_relay = format!("{}/relay_rd.rss", addr); // very big
-
+    // let f2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
+    // feedsources.add_new_folder_at_parent("F3".to_string(), f2);
+    // feedsources.add_new_folder_at_parent("F4".to_string(), f2);
+    // feedsources.add_new_folder_at_parent("F5".to_string(), f2);
+    // feedsources.add_new_folder_at_parent("F6".to_string(), f2);
+    // feedsources.add_new_folder_at_parent("F7".to_string(), f2);
     let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
-    let _folder2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
-
-    // feedsources.add_new_subscription_at_parent(url_relay, "relay_rd too big".to_string(), folder2, false);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder1, false);
-    // feedsources.add_new_subscription_at_parent(            url_nn_aug,            "NN-aug".to_string(),            folder1,            false,        );
-    // feedsources.add_new_subscription_at_parent(            url_staseve,            "staseve11".to_string(),            folder1,            false,        );
+
+    let url_staseve = format!("{}/staseve-11.xml", addr);
+    let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
+    let url_relay = format!("{}/relay_rd.rss", addr); // very big
+    feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder1, false);
+    feedsources.add_new_subscription_at_parent(
+        url_staseve,
+        "staseve11".to_string(),
+        folder1,
+        false,
+    );
+    feedsources.add_new_subscription_at_parent(
+        url_relay,
+        "relay_rd too big".to_string(),
+        folder1,
+        false,
+    );
 
     if true {
         let src = [
@@ -153,6 +167,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             folder1,
             false,
         );
+        // let f5 = feedsources.add_new_folder_at_parent("folder5".to_string(), 0);
+        // feedsources.add_new_folder_at_parent("5_0".to_string(), f5);
+        // feedsources.add_new_folder_at_parent("5_1".to_string(), f5);
+        // feedsources.add_new_folder_at_parent("5_2".to_string(), f5);
+        // feedsources.add_new_folder_at_parent("5_3".to_string(), f5);
+        // feedsources.add_new_folder_at_parent("5_4".to_string(), f5);
     }
     if false {
         let src = [

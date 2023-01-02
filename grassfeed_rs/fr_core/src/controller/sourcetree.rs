@@ -54,8 +54,11 @@ const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
 // #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum SJob {
-    FillSourcesTree,
-    // subscription_id
+    /// only store into adapter
+    FillSubscriptionsAdapter,
+    /// only update from adapter into TreeView
+    FillSubscriptionsTreeUpdate,
+    /// subscription_id
     FillSourcesTreeSingle(isize),
     GuiUpdateTreeAll,
     ScheduleFetchAllFeeds,
@@ -218,8 +221,10 @@ impl SourceTreeController {
                 SJob::UpdateTreePaths => {
                     self.update_cached_paths();
                 }
-                SJob::FillSourcesTree => {
+                SJob::FillSubscriptionsAdapter => {
                     self.feedsources_into_store_adapter();
+                }
+                SJob::FillSubscriptionsTreeUpdate => {
                     (*self.gui_updater).borrow().update_tree(TREEVIEW0);
                 }
                 SJob::FillSourcesTreeSingle(subs_id) => {
@@ -227,6 +232,7 @@ impl SourceTreeController {
                 }
                 SJob::GuiUpdateTree(subs_id) => {
                     if let Some(path) = self.get_path_for_src(subs_id) {
+                        // debug!("GuiUpdateTree {} {:?}  ", subs_id, path);
                         (*self.gui_updater)
                             .borrow()
                             .update_tree_single(0, path.as_slice());
@@ -700,7 +706,7 @@ impl SourceTreeController {
         self.new_source.feed_homepage = feed_homepage;
         let mut icon_str = String::default();
         if icon_id > 0 {
-            if let Some(ie) = self.iconrepo_r.borrow().get_by_index(icon_id as isize) {
+            if let Some(ie) = self.iconrepo_r.borrow().get_by_index(icon_id) {
                 icon_str = ie.icon;
             }
         };
@@ -712,7 +718,6 @@ impl SourceTreeController {
             AValue::ABOOL(false),   // 3: spinner
             AValue::None,           // 4: feed-url
         ];
-        // trace!(            "process_newsource_request_done  {}",            self.new_source.feed_homepage.clone()        );
         (*self.gui_val_store)
             .write()
             .unwrap()
@@ -1114,7 +1119,8 @@ impl StartupWithAppContext for SourceTreeController {
         self.startup_read_config();
         self.addjob(SJob::EmptyTreeCreateDefaultSubscriptions);
         self.addjob(SJob::UpdateTreePaths);
-        self.addjob(SJob::FillSourcesTree);
+        self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::FillSubscriptionsTreeUpdate);
         if (*self.config).borrow().feeds_fetch_at_start {
             self.addjob(SJob::ScheduleFetchAllFeeds);
         }
@@ -1127,6 +1133,7 @@ impl StartupWithAppContext for SourceTreeController {
             self.addjob(SJob::SanitizeSources);
         }
         self.addjob(SJob::UpdateTreePaths);
+        self.addjob(SJob::ScanEmptyUnread);
     }
 }
 

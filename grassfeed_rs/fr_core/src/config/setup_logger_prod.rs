@@ -24,7 +24,7 @@ pub fn setup_logger(
 
     let logfilename = format!("{}{}.log", cache_dir, app_name);
     let old_log_fn = format!("{}.old", logfilename);
-    let _r = std::fs::rename(&logfilename, &old_log_fn);
+    let _r = std::fs::rename(&logfilename, old_log_fn);
     let o_logfile = fern::log_file(logfilename.clone());
     if o_logfile.is_err() {
         eprintln!("setup_logger: cannot create {}", &logfilename);

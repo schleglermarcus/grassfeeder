@@ -50,7 +50,7 @@ impl MessageStateMap {
         subs_id: isize,
     ) {
         let mut st = MessageState {
-            gui_list_position: list_pos as isize, // list_position.unwrap_or(-1),
+            gui_list_position: list_pos,
             msg_created_timestamp: ts_created,
             is_read_copy: is_read,
             msg_id: msg_id_,
@@ -176,7 +176,7 @@ impl MessageStateMap {
                 current_index = a as isize;
             }
         }
-        let mut new_index: isize = current_index as isize;
+        let mut new_index: isize = current_index;
         if seek_to_later {
             while new_index < vals.len() as isize && vals[new_index as usize].is_read_copy {
                 new_index += 1;
@@ -251,28 +251,12 @@ impl MessageStateMap {
                     .iter()
                     .find(|sta| sta.gui_list_position == low_gui_list_pos)
                 {
-                    // trace!("  found_neighbour by gui_list_pos: {:?}", sta);
-                    return Some((sta.msg_id, low_gui_list_pos as isize));
+                    return Some((sta.msg_id, low_gui_list_pos));
                 }
                 return None;
             }
             _ => (),
         }
-        /*
-                if current_index > 0 {
-                    current_index -= 1;
-                } else if current_index < 0 {
-                    if let Some(sta) = vals
-                        .iter()
-                        .filter(|sta| sta.gui_list_position == low_gui_list_pos)
-                        .next()
-                    {
-                        debug!("  found_neighbour by gui_list_pos: {:?}", sta);
-                        return Some((sta.msg_id, low_gui_list_pos as isize));
-                    }
-                    return None;
-                }
-        */
         let neighbour_id = vals[current_index as usize].msg_id;
         Some((neighbour_id, low_gui_list_pos))
     }
@@ -297,7 +281,7 @@ pub mod t {
                 0,
             );
         }
-        msm.dump();
+        // msm.dump();
         assert_eq!(msm.find_unread_message(4, true), Some(2));
         assert_eq!(msm.find_unread_message(4, false), Some(6));
     }
@@ -359,7 +343,6 @@ pub mod t {
             );
         }
         let o_neigh = msm.find_neighbour_message(&[4, 5]);
-        // println!("{:?}", o_neigh);
         assert_eq!(o_neigh, Some((3, 103)))
     }
 

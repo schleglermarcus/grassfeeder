@@ -169,7 +169,6 @@ impl MiniHttpServer {
             if let Ok(numwritten) = r {
                 response.headers.content_length = numwritten;
             }
-            // debug!(" transferdone: {:?}", response.headers);
         }
 
         Ok(())
@@ -200,7 +199,6 @@ impl MiniHttpServer {
                 debug!("{}", msg.unwrap());
                 response.status = sta;
             }
-
             AttachFileInfo::ReplacementText(text, statusc) => {
                 response.status = statusc;
                 if response.status == StatusCode::OK {
@@ -307,7 +305,7 @@ pub fn transfer_file<W: Write + Read>(
                 numwritten = 0;
             }
         }
-        writtensum += numwritten as u64;
+        writtensum += numwritten;
         if numread < FILE_STREAM_BUFFER_SIZE {
             buffer_full = false;
         } else if throttling_kbps > 0 {

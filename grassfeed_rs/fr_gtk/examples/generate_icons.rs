@@ -24,7 +24,6 @@ pub fn main() {
 }
 
 fn generate_icons() {
-    // setup();
     let current_dir = std::env::current_dir().unwrap();
     println!("GENERATE ICONS dir={:?} {:?} ", current_dir, ICONS_FOLDER);
     let mut file_list: Vec<String> = Vec::default();

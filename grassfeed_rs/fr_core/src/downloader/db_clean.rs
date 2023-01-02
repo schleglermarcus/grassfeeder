@@ -7,6 +7,7 @@ use crate::db::message::MessageRow;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_entry::SubscriptionEntry;
+use crate::db::subscription_entry::SRC_REPO_ID_DUMMY;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::util::filter_by_iso8859_1;
@@ -20,9 +21,8 @@ use std::borrow::Borrow;
 use std::collections::HashSet;
 use std::sync::Mutex;
 
-/// Later:  sanity for recursion
+///  sanity in case of recursion
 pub const MAX_PATH_DEPTH: usize = 30;
-
 pub const MAX_ERROR_LINES_PER_SUBSCRIPTION: usize = 100;
 pub const MAX_ERROR_LINE_AGE_S: usize = 60 * 60 * 24 * 360;
 
@@ -237,8 +237,10 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
             .collect();
         let mut reset_icon_subs_ids: Vec<i32> = all_folders
             .iter()
+            .filter(|se| se.subs_id >= 0 && se.subs_id != SRC_REPO_ID_DUMMY)
             .filter_map(|se| {
                 if se.icon_id != gen_icons::IDX_08_GNOME_FOLDER_48 {
+                    debug!("CorrectIconsOfFolders:  folder= {:?}", se);
                     Some(se.subs_id as i32)
                 } else {
                     None
@@ -247,7 +249,8 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
             .collect::<Vec<i32>>();
         reset_icon_subs_ids.sort();
         if !reset_icon_subs_ids.is_empty() {
-            debug!("CorrectIconsOfFolders: {:?}", reset_icon_subs_ids);
+            //  -3,-2  is always in the list
+            debug!("CorrectIconsOfFolders:  IDS={:?}", reset_icon_subs_ids);
             inner
                 .subscriptionrepo
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_08_GNOME_FOLDER_48);
@@ -352,8 +355,11 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                     let (_stay, remove) =
                         msg_per_subscription.split_at(inner.max_messages_per_subscription as usize);
                     if !remove.is_empty() {
-                        let id_list: Vec<i32> =
-                            remove.iter().map(|e| e.message_id as i32).collect();
+                        let id_list: Vec<i32> = remove
+                            .iter()
+                            .filter(|e| !e.is_favorite())
+                            .map(|e| e.message_id as i32)
+                            .collect();
                         //  let first_msg = remove.iter().next().unwrap();
                         // trace!(                            "Reduce(ID {}), has {}, reduce {} messages. Latest date: {}	", // \t message-ids={:?}                            su_id,                            length_before,                            id_list.len(),                            db_time_to_display(first_msg.entry_src_date),                        );
                         inner.messgesrepo.update_is_deleted_many(&id_list, true);
@@ -447,7 +453,7 @@ impl Step<CleanerInner> for CheckErrorLog {
             .get_all_nonfolder()
             .iter()
             .filter(|se| !se.isdeleted())
-            .map(|se| se.subs_id as isize)
+            .map(|se| se.subs_id)
             .collect::<HashSet<isize>>();
         inner.error_repo.startup_read();
         let list: Vec<ErrorEntry> = inner.error_repo.get_all_stored_entries();
@@ -475,8 +481,10 @@ impl Step<CleanerInner> for Notify {
         inner.subscriptionrepo.db_vacuum();
         inner.messgesrepo.db_vacuum();
         if inner.need_update_subscriptions {
-            let _r = inner.sourcetree_job_sender.send(SJob::FillSourcesTree);
             let _r = inner.sourcetree_job_sender.send(SJob::UpdateTreePaths);
+            let _r = inner
+                .sourcetree_job_sender
+                .send(SJob::FillSubscriptionsAdapter);
         }
         // later: refresh message display
         StepResult::Stop(inner)

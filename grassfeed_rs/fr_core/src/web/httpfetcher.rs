@@ -18,7 +18,7 @@ impl HttpFetcher {
         let agent = ureq::builder().user_agent("ferris/1.0").build();
         match agent.get(&url).call() {
             Ok(response) => {
-                r_status = response.status() as u16;
+                r_status = response.status();
                 if is_binary {
                     let mut length: u64 = 0;
                     if let Some(h_cole) = response.header("Content-Length") {
@@ -56,11 +56,11 @@ impl HttpFetcher {
                 }
             }
             Err(ureq::Error::Status(status, response)) => {
-                r_status = status as u16;
+                r_status = status;
                 r_ed = response.status_text().to_string();
             }
             Err(ureq::Error::Transport(transp)) => {
-                r_errorkind = ureq_error_kind_to_u8(transp.kind()) as u8;
+                r_errorkind = ureq_error_kind_to_u8(transp.kind());
                 r_ed = format!("{:?} {}", transp.kind(), transp.message().unwrap_or(""));
             }
         }

@@ -107,8 +107,8 @@ impl ISourceTreeController for SourceTreeController {
             }
         }
         self.addjob(SJob::UpdateTreePaths);
-        // debug!(            "on-drag subs-id: from_p:{}  to_p:{}",            from_parent_id, to_parent_subs_id        );
-        self.addjob(SJob::FillSourcesTree);
+        //  debug!("on-drag subs-id: from_p:{}  to_p:{}", from_parent_id, to_parent_subs_id        );
+        self.addjob(SJob::FillSubscriptionsAdapter);
         if from_parent_id >= 0 {
             self.addjob(SJob::GuiUpdateTree(from_parent_id));
         }
@@ -173,7 +173,7 @@ impl ISourceTreeController for SourceTreeController {
                     if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                         (feedcontents)
                             .borrow_mut()
-                            .set_read_complete_subscription(fse.subs_id as isize);
+                            .set_read_complete_subscription(fse.subs_id);
                     }
                     self.statemap.borrow_mut().clear_num_all_unread(fse.subs_id);
                 });
@@ -184,7 +184,7 @@ impl ISourceTreeController for SourceTreeController {
         } else if let Some(feedcontents) = self.feedcontents_w.upgrade() {
             (feedcontents)
                 .borrow_mut()
-                .set_read_complete_subscription(src_repo_id as isize);
+                .set_read_complete_subscription(src_repo_id);
             feedcontents.borrow().addjob(CJob::UpdateMessageList);
         }
     }
@@ -215,14 +215,15 @@ impl ISourceTreeController for SourceTreeController {
             .map(|fse| fse.folder_position)
             .max();
         if let Some(mfp) = max_folderpos {
-            fse.folder_position = (mfp + 1) as isize;
+            fse.folder_position = mfp + 1;
         }
         fse.subs_id = self.get_next_available_subscription_id();
         let r = (*self.subscriptionrepo_r).borrow().store_entry(&fse);
         match r {
             Ok(fse) => {
                 self.addjob(SJob::UpdateTreePaths);
-                self.addjob(SJob::FillSourcesTree);
+                self.addjob(SJob::FillSubscriptionsAdapter);
+                self.addjob(SJob::FillSubscriptionsTreeUpdate);
                 fse.subs_id
             }
             Err(e2) => {
@@ -281,14 +282,15 @@ impl ISourceTreeController for SourceTreeController {
             .map(|fse| fse.folder_position)
             .max();
         if let Some(mfp) = max_folderpos {
-            fse.folder_position = (mfp + 1) as isize;
+            fse.folder_position = mfp + 1;
         }
         let mut new_id = -1;
         match (*self.subscriptionrepo_r).borrow().store_entry(&fse) {
             Ok(fse2) => {
                 self.addjob(SJob::UpdateTreePaths);
                 if load_messages {
-                    self.addjob(SJob::FillSourcesTree);
+                    self.addjob(SJob::FillSubscriptionsAdapter);
+                    self.addjob(SJob::FillSubscriptionsTreeUpdate);
                     self.addjob(SJob::ScheduleUpdateFeed(fse2.subs_id));
                     self.addjob(SJob::CheckSpinnerActive);
                 }
@@ -314,7 +316,7 @@ impl ISourceTreeController for SourceTreeController {
             false,
         );
         self.set_any_spinner_visible(true);
-        self.tree_store_update_one(source_repo_id as isize);
+        self.tree_store_update_one(source_repo_id);
     }
 
     fn set_fetch_finished(&self, source_repo_id: isize, error_happened: bool) {
@@ -350,7 +352,7 @@ impl ISourceTreeController for SourceTreeController {
             }
         }
         self.addjob(SJob::ScanEmptyUnread);
-        self.tree_store_update_one(source_repo_id as isize);
+        self.tree_store_update_one(source_repo_id);
     }
 
     fn get_job_sender(&self) -> Sender<SJob> {
@@ -379,7 +381,8 @@ impl ISourceTreeController for SourceTreeController {
             .set_deleted_rec(fse.subs_id);
         self.resort_parent_list(fse.parent_subs_id);
         self.addjob(SJob::UpdateTreePaths);
-        self.addjob(SJob::FillSourcesTree);
+        self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::FillSubscriptionsTreeUpdate);
         self.addjob(SJob::GuiUpdateTreeAll);
         self.feedsource_delete_id = None;
     }
@@ -394,7 +397,8 @@ impl ISourceTreeController for SourceTreeController {
             .borrow()
             .delete_by_index(fs_id as isize);
         self.addjob(SJob::UpdateTreePaths);
-        self.addjob(SJob::FillSourcesTree);
+        self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::FillSubscriptionsTreeUpdate);
         self.addjob(SJob::GuiUpdateTreeAll);
         self.feedsource_delete_id = None;
     }
@@ -403,7 +407,7 @@ impl ISourceTreeController for SourceTreeController {
         let mut dialog_id = DIALOG_FS_EDIT;
         let o_fse = (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_index(src_repo_id as isize);
+            .get_by_index(src_repo_id);
         if o_fse.is_none() {
             return;
         }
@@ -482,7 +486,7 @@ impl ISourceTreeController for SourceTreeController {
     fn start_new_fol_sub_dialog(&mut self, src_repo_id: isize, dialog_id: u8) {
         match (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_index(src_repo_id as isize)
+            .get_by_index(src_repo_id)
         {
             None => {
                 debug!("subscription {} not found ", src_repo_id);
@@ -496,7 +500,6 @@ impl ISourceTreeController for SourceTreeController {
                 }
             }
         }
-        // debug!(            "show_dialog {}   parent={:?}",            dialog_id, self.current_new_folder_parent_id        );
         (*self.gui_updater).borrow().update_dialog(dialog_id);
         (*self.gui_updater).borrow().show_dialog(dialog_id);
     }
@@ -504,7 +507,7 @@ impl ISourceTreeController for SourceTreeController {
     fn start_delete_dialog(&mut self, src_repo_id: isize) {
         let o_fse = (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_index(src_repo_id as isize);
+            .get_by_index(src_repo_id);
         if o_fse.is_none() {
             return;
         }
@@ -582,18 +585,16 @@ impl ISourceTreeController for SourceTreeController {
     }
 
     fn notify_config_update(&mut self) {
-        // self.tree_fontsize = get_font_size_from_config(self.configmanager_r.clone());
-
         (*self.config).borrow_mut().tree_fontsize =
             get_font_size_from_config(self.configmanager_r.clone()) as u8;
-
-        self.addjob(SJob::FillSourcesTree);
+        self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::FillSubscriptionsTreeUpdate);
     }
 
     fn set_selected_feedsource(&mut self, src_repo_id: isize) {
         let o_fse = (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_index(src_repo_id as isize);
+            .get_by_index(src_repo_id);
         if let Some(fse) = o_fse {
             let display_name = fse.display_name.clone();
             if let Some(gui_context) = self.gui_context_w.upgrade() {
@@ -643,7 +644,8 @@ impl ISourceTreeController for SourceTreeController {
             }
         }
         self.addjob(SJob::UpdateTreePaths);
-        self.addjob(SJob::FillSourcesTree);
+        self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::FillSubscriptionsTreeUpdate);
     }
 
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)> {

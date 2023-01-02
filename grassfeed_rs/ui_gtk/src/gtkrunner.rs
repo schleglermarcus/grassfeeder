@@ -221,7 +221,7 @@ impl GtkObjectsImpl {
                 warn!("cannot create WebView, no create function here!");
                 return;
             }
-            let o_dest_box = self.get_box(self.browser_config.attach_box_index as u8);
+            let o_dest_box = self.get_box(self.browser_config.attach_box_index);
             if o_dest_box.is_none() {
                 warn!("should not create browser, no gtk-box to attach to !");
                 return;

@@ -128,7 +128,7 @@ pub struct Downloader {
     pub gp_job_sender: Option<Sender<Job>>,
     configmanager_r: Rc<RefCell<ConfigManager>>,
     config: Config,
-    pub busy_indicators: Arc<RwLock<[(u8, String); DOWNLOADER_MAX_NUM_THREADS as usize]>>,
+    pub busy_indicators: Arc<RwLock<[(u8, String); DOWNLOADER_MAX_NUM_THREADS]>>,
     messagesrepo: Rc<RefCell<MessagesRepo>>,
     job_queue: Arc<RwLock<VecDeque<DLJob>>>,
     erro_repo: Rc<RefCell<ErrorRepo>>,
@@ -210,7 +210,7 @@ impl Downloader {
                         let o_job = (*queue_a).write().unwrap().pop_front();
                         if let Some(dljob) = o_job {
                             (*busy_a).write().unwrap()[n as usize] = (dljob.kind(), hostname);
-                            Self::process_job(dljob, gp_sender.clone(), n as u8);
+                            Self::process_job(dljob, gp_sender.clone(), n);
                             (*busy_a).write().unwrap()[n as usize] = (0, String::default());
                         }
                     }
@@ -227,15 +227,12 @@ impl Downloader {
     }
 
     fn add_to_queue(&self, dljob: DLJob) {
-        if (*self.job_queue).read().unwrap().contains(&dljob) {
-            // let _kind = dljob.kind();
-            // trace!("download job already queued:  {}:{:?}", kind, &dljob);
-        } else {
+        if !(*self.job_queue).read().unwrap().contains(&dljob) {
             (*self.job_queue).write().unwrap().push_back(dljob);
         }
     }
 
-    // returns   used time in milliseconds
+    /// returns   used time in milliseconds
     fn process_job(dljob: DLJob, gp_sender: Sender<Job>, proc_num: u8) -> u64 {
         let now = std::time::Instant::now();
         let job_kind = dljob.kind();

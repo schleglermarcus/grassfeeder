@@ -188,7 +188,7 @@ impl GuiProcessor {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
                         .set_selected_feedsource(subs_id as isize);
-                    // trace!("GP:TreeRowActivated{}  {:?} ", subs_id, _path);
+                    trace!("GP:TreeRowActivated{}  {:?} ", subs_id, _path);
                     (*self.feedcontents_r)
                         .borrow()
                         .update_message_list_(subs_id as isize);
@@ -210,6 +210,14 @@ impl GuiProcessor {
                         (*self.feedcontents_r)
                             .borrow()
                             .toggle_feed_item_read(msg_id as isize, list_position);
+                    } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
+                        (*self.feedcontents_r).borrow().toggle_favorite(
+                            msg_id as isize,
+                            list_position,
+                            None,
+                        );
+                    } else {
+                        warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
                     }
                 }
                 GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
@@ -399,7 +407,6 @@ impl GuiProcessor {
                         .memory_conserve(is_minimized);
                     (*self.gui_updater).borrow().memory_conserve(is_minimized);
                 }
-
                 GuiEvents::Indicator(ref cmd, gtktime) => match cmd.as_str() {
                     "app-quit" => {
                         self.addjob(Job::StopApplication);
@@ -551,7 +558,10 @@ impl GuiProcessor {
                         .add_new_folder(s.to_string());
                     self.feedsources_r
                         .borrow_mut()
-                        .addjob(SJob::FillSourcesTree);
+                        .addjob(SJob::FillSubscriptionsAdapter);
+                    self.feedsources_r
+                        .borrow_mut()
+                        .addjob(SJob::FillSubscriptionsTreeUpdate);
                 }
             }
             "new-feedsource" => {
@@ -566,10 +576,13 @@ impl GuiProcessor {
                         .add_new_subscription(s0.clone(), s1.clone());
                     self.feedsources_r
                         .borrow_mut()
-                        .addjob(SJob::FillSourcesTree);
+                        .addjob(SJob::UpdateTreePaths);
                     self.feedsources_r
                         .borrow_mut()
-                        .addjob(SJob::UpdateTreePaths);
+                        .addjob(SJob::FillSubscriptionsAdapter);
+                    self.feedsources_r
+                        .borrow_mut()
+                        .addjob(SJob::FillSubscriptionsTreeUpdate);
                     self.feedsources_r
                         .borrow_mut()
                         .addjob(SJob::ScanEmptyUnread);

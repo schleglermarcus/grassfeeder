@@ -48,7 +48,7 @@ pub fn create_listview(
     content_tree_view.set_widget_name("msg_list");
     content_tree_view.set_margin_top(2);
     let liststoretypes = &[
-        Pixbuf::static_type(), // 0: feed icon
+        Pixbuf::static_type(), // 0: Fav / feed icon
         Type::STRING,          // title
         Type::STRING,          // date
         Pixbuf::static_type(), // status icon
@@ -67,6 +67,7 @@ pub fn create_listview(
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
         col.set_fixed_width(25);
         col.set_expand(false);
+        col.set_sort_column_id(LIST0_COL_FAVICON);
         content_tree_view.append_column(&col);
     }
     {
@@ -245,8 +246,10 @@ pub fn create_listview(
                             let indices = tp.indices();
                             list_pos = indices[0];
                         }
-                        if tvc.sort_column_id() == LIST0_COL_ISREAD {
-                            // debug!(                                "button-left list_pos={:?}   SC={}",                                list_pos,                                tvc.sort_column_id()                            );
+                        // debug!(                            "button-left list_pos={:?}   SC={}",                            list_pos,                            tvc.sort_column_id()                        );
+                        if tvc.sort_column_id() == LIST0_COL_ISREAD
+                            || tvc.sort_column_id() == LIST0_COL_FAVICON
+                        {
                             esw.sendw(GuiEvents::ListCellClicked(
                                 0,
                                 list_pos,
@@ -356,7 +359,7 @@ fn show_context_menu_message(
     let mi_copy_link = MenuItem::with_label(&t!("CM_MSG_COPY_LINK_CLIPBOARD"));
     if repoid_listpos.len() == 1 {
         let esc = EvSenderCache(
-            g_ev_se,
+            g_ev_se.clone(),
             GuiEvents::ListSelectedAction(
                 0,
                 "message-copy-link".to_string(),
@@ -368,6 +371,23 @@ fn show_context_menu_message(
         });
     }
 
+    let mi_mark_favorite = MenuItem::with_label(&t!("CM_MSG_MARK_FAVORITE"));
+    let esc = EvSenderCache(
+        g_ev_se.clone(),
+        GuiEvents::ListSelectedAction(0, "mark-as-favorite".to_string(), repoid_listpos.clone()),
+    );
+    mi_mark_favorite.connect_activate(move |_menuiten| {
+        esc.send();
+    });
+    let mi_unmark_favorite = MenuItem::with_label(&t!("CM_MSG_UNMARK_FAVORITE"));
+    let esc = EvSenderCache(
+        g_ev_se,
+        GuiEvents::ListSelectedAction(0, "unmark-favorite".to_string(), repoid_listpos.clone()),
+    );
+    mi_unmark_favorite.connect_activate(move |_menuiten| {
+        esc.send();
+    });
+
     let menu: gtk::Menu = Menu::new();
     menu.append(&mi_open_browser);
     if repoid_listpos.len() == 1 {
@@ -376,6 +396,8 @@ fn show_context_menu_message(
     menu.append(&mi_mark_read);
     menu.append(&mi_mark_unread);
     menu.append(&mi_delete);
+    menu.append(&mi_mark_favorite);
+    menu.append(&mi_unmark_favorite);
     menu.show_all();
     let c_ev_time = gtk::current_event_time();
     menu.popup_easy(ev_button, c_ev_time);

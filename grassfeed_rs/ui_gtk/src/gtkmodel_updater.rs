@@ -141,7 +141,7 @@ impl GtkModelUpdaterInt {
     ) {
         let debuginfo = gti.a_values[1].str().unwrap();
         for c in 0..max_columns {
-            match gti.a_values.get(c as usize).unwrap() {
+            match gti.a_values.get(c).unwrap() {
                 AValue::AU32(u) => tree_store.set(t_iter, &[(c as u32, &u)]),
                 AValue::AI32(i) => tree_store.set(t_iter, &[(c as u32, &i)]),
                 AValue::ASTR(s) => tree_store.set(t_iter, &[(c as u32, &s)]),

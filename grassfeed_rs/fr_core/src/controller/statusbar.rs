@@ -33,8 +33,8 @@ pub struct StatusBar {
     r_browserpane: Rc<RefCell<dyn IBrowserPane>>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_val_store: UIAdapterValueStoreType,
-    downloader_kind: [u8; DOWNLOADER_MAX_NUM_THREADS as usize],
-    pub downloader_kind_new: [u8; DOWNLOADER_MAX_NUM_THREADS as usize],
+    downloader_kind: [u8; DOWNLOADER_MAX_NUM_THREADS],
+    pub downloader_kind_new: [u8; DOWNLOADER_MAX_NUM_THREADS],
     num_msg_all: isize,
     num_msg_unread: isize,
     last_fetch_time: i64,
@@ -181,7 +181,7 @@ impl StatusBar {
             // time-to next feed update
             let fs_conf = self.r_subscriptions_controller.borrow().get_config();
             let interval_s = (*fs_conf).borrow().get_interval_seconds();
-            let elapsed: i64 = std::cmp::min(timestamp_now - (last_fetch_time as i64), interval_s);
+            let elapsed: i64 = std::cmp::min(timestamp_now - (last_fetch_time), interval_s);
             block_vertical = self.get_vertical_block_char(elapsed as usize, interval_s as usize);
             need_update2 = true;
             need_update1 = true;
@@ -190,7 +190,7 @@ impl StatusBar {
         for (a, busy) in downloader_busy
             .iter()
             .enumerate()
-            .take(DOWNLOADER_MAX_NUM_THREADS as usize)
+            .take(DOWNLOADER_MAX_NUM_THREADS)
         {
             if self.downloader_kind[a] > 0 && *busy == 0 {
                 self.downloader_kind_new[a] = 0;
@@ -213,7 +213,7 @@ impl StatusBar {
         if need_update1 {
             let mut downloader_display: String = String::default();
             for a in 0..(self.num_downloader_threads as usize) {
-                let nc = dl_char_for_kind(self.downloader_kind[a] as u8);
+                let nc = dl_char_for_kind(self.downloader_kind[a]);
                 downloader_display.push(nc);
             }
             let unread_all = format!("{:5} / {:5}", self.num_msg_unread, self.num_msg_all);
@@ -284,19 +284,11 @@ impl StatusBar {
     }
 
     fn get_vertical_block_char(&self, dividend: usize, divisor: usize) -> char {
-        // let elapsed: i64 = std::cmp::min(timestamp_now - (last_fetch_time as i64), interval_s);
-        // let div_idx = if interval_s == 0 {
-        //     0
-        // } else {
-        //     (elapsed * (8_i64)) / interval_s
-        // };
-        //
         let div_idx = if divisor == 0 {
             0
         } else {
             dividend * VERTICAL_RISING_BAR_LEN / divisor
         };
-
-        char::from_u32(VERTICAL_RISING_BAR[div_idx as usize]).unwrap()
+        char::from_u32(VERTICAL_RISING_BAR[div_idx]).unwrap()
     }
 }

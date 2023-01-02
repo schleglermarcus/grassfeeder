@@ -14,7 +14,9 @@ use crate::IntCommands;
 use flume::Receiver;
 use flume::Sender;
 use gio::ApplicationFlags;
+use gtk::traits::SettingsExt;
 use gtk::ApplicationWindow;
+use gtk::Settings;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UiSenderWrapperType;
@@ -246,6 +248,13 @@ fn build_window(
     window.set_title(&title);
     window.set_default_size(width, height);
     window.show_all();
+    if let Some(screen) = window.screen() {
+        if let Some(settings) = Settings::for_screen(&screen) {
+            settings.set_gtk_enable_animations(true);
+        } else {
+            debug!("INT: build_window()  got no settings from gtk screen! ")
+        }
+    }
     let g_ev_se2 = event_sender.clone();
     window.connect_delete_event(move |_a, _b| {
         g_ev_se2.send(GuiEvents::WinDelete).unwrap();

@@ -1,14 +1,22 @@
 To Do List
 
-
-- Spinner Indicator on Dragging Urls Dialog
-
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
+   https://www.debian.org/doc/manuals/developers-reference/pkgs.html#newpackage
+	 https://wiki.debian.org/DebianMentorsFaq
+
+- https://launchpad.net/grassfeeder
+https://help.launchpad.net/Packaging/PPA/Uploading
+https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
+https://packaging.ubuntu.com/html/packaging-new-software.html
+
+
 - Use different app-indicator  lib
 - Marking of Messages, Favorites
 
 - Possible Bug:   launch in browser : multiple list items appear
 - Possible Bug: set cursor to message, minimize, restore, cursor is moved to wrong positions
+
+
 
 
 
@@ -43,19 +51,15 @@ Perhaps:
 - Keybard configuration in settings
 - Updating Sources:  prioritize by tree position, expanded flag
 - Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
-- Feed-Import with progress bar ?
+- Feed-Opml-Import with progress bar ?
 - Do extra recognition  to process   invalid feed titles  containg  &     :      dieneuewelle.xml
-- Grouping of feeds by folders ?
-
-
-
 
 No more
 - startup:  delayed creation of dialogs not good, they need to be present for the menu
 - Browser  enable theme related colors  -->  1. We can't get the theme background color  2. We cannot set the browser foreground color
 - Drag extra care:
-    www.extremnews.com:address given is broken
-		therationalmale.com  : title in feed is empty
+    www.extremnews.com: address provided is broken
+		therationalmale.com:  title in feed is empty
 - Reduce Size of Binary:   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
 
 
@@ -165,6 +169,24 @@ https://blog.packagecloud.io/how-to-create-debian-repository-with-reprepro/
 https://www.debian.org/doc/manuals/securing-debian-manual/deb-pack-sign.en.html
 https://unix.stackexchange.com/questions/387053/debian-9-apt-and-gpg-error-inrelease-the-following-signatures-were-inva
 https://debian-handbook.info/browse/stable/sect.package-authentication.html
+
+
+
+
+
+#  gpg --fingerprint schleglermarcus@posteo.de
+gpg: Die Benutzung der Hashmethode SHA256 ist im --compliance=pgp6 Modus nicht erlaubt.
+gpg: Diese Botschaft könnte für PGP 6.x unbrauchbar sein
+pub   rsa4096 2022-11-12 [SC] [verfällt: 2024-11-11]
+      2457 9093 9B8F D40D C29D  0EF9 C28E BCE0 F940 E69F
+uid        [uneingeschränkt] schleglermarcus <schleglermarcus@posteo.de>
+
+#  gpg --keyserver keyserver.ubuntu.com --send-keys "2457 9093 9B8F D40D C29D  0EF9 C28E BCE0 F940 E69F"
+gpg: Die Benutzung der Hashmethode SHA256 ist im --compliance=pgp6 Modus nicht erlaubt.
+gpg: Diese Botschaft könnte für PGP 6.x unbrauchbar sein
+gpg: sende Schlüssel C28EBCE0F940E69F auf hkp://keyserver.ubuntu.com
+
+
 
 
 

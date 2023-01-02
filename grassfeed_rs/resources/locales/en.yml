@@ -1,10 +1,10 @@
 ABOUT_APP_TXT : About this application
 ABOUT_APP_DESCRIPTION : A rusty feed reader
 
-M_FILE: File              #  test listens
+M_FILE: File
 M_IMPORT_OPML: Import Opml
 M_EXPORT_OPML: Export Opml
-M_FILE_QUIT: Quit!
+M_FILE_QUIT: Quit
 
 M_OPTIONS: Options
 M_SETTINGS: Settings
@@ -35,6 +35,8 @@ CM_MSG_MARK_AS_UNREAD: Mark as unread
 CM_MSG_OPEN_IN_BROWSER: Open in Browser
 CM_MSG_DELETE: Delete
 CM_MSG_COPY_LINK_CLIPBOARD: Copy Link to Clipboard
+CM_MSG_MARK_FAVORITE: Mark as favorite
+CM_MSG_UNMARK_FAVORITE: Unmark favorite
 
 D_BUTTON_YES: Yes
 D_BUTTON_NO: No
