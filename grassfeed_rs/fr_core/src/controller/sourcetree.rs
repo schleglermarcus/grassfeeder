@@ -706,7 +706,7 @@ impl SourceTreeController {
         self.new_source.feed_homepage = feed_homepage;
         let mut icon_str = String::default();
         if icon_id > 0 {
-            if let Some(ie) = self.iconrepo_r.borrow().get_by_index(icon_id ) {
+            if let Some(ie) = self.iconrepo_r.borrow().get_by_index(icon_id) {
                 icon_str = ie.icon;
             }
         };

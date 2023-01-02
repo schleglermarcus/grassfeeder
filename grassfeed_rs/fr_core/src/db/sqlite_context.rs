@@ -294,7 +294,6 @@ impl<T: TableInfo> SqliteContext<T> {
         }
         0
     }
-
 }
 
 #[derive(Debug)]

@@ -782,7 +782,7 @@ impl IFeedContents for FeedContents {
             .borrow()
             .get_by_src_id(source_repo_id, false);
         let num_is_read = all.iter().filter(|fce| fce.is_read).count() as i32;
-        Some((all.len() as i32, (all.len() as i32 - num_is_read) ))
+        Some((all.len() as i32, (all.len() as i32 - num_is_read)))
     }
 
     fn get_config(&self) -> Config {
@@ -894,11 +894,11 @@ impl IFeedContents for FeedContents {
             self.msg_state
                 .write()
                 .unwrap()
-                .set_read_many(&[*dbid ], true);
-            (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[*dbid ], true);
+                .set_read_many(&[*dbid], true);
+            (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[*dbid], true);
             self.addjob(CJob::StartWebBrowser(*dbid));
             let gui_pos = self.msg_state.read().unwrap().get_gui_pos(*dbid as isize);
-            listpos_id.push((gui_pos , *dbid as u32));
+            listpos_id.push((gui_pos, *dbid as u32));
         });
         self.addjob(CJob::UpdateMessageListSome(listpos_id));
 
@@ -1100,7 +1100,7 @@ pub fn match_new_entries_to_existing(
             let matchfield: u8 = match_fce(ee, n_fce);
             let ones_count: u8 = matchfield.count_ones() as u8;
             if ones_count > 1 {
-                exi_pos_match.insert(n, ones_count );
+                exi_pos_match.insert(n, ones_count);
             }
             if ones_count > max_ones_count {
                 max_ones_count = ones_count

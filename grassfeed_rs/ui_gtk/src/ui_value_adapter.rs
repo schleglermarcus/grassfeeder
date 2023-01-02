@@ -263,8 +263,7 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
     }
 
     fn is_tree_row_expanded(&self, idx: usize, gti: &GuiTreeItem) -> bool {
-        if self.expand_data.len() < (idx + 1)
- {
+        if self.expand_data.len() < (idx + 1) {
             warn!("is_tree_row_expanded  {} : no expand set! ", idx);
             return false;
         }

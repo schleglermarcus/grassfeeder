@@ -133,7 +133,7 @@ impl UIAdapterValueStore for AdValSto {
         while self.expand_data.len() < (idx + 1) {
             self.expand_data.push((0, 0));
         }
-        self.expand_data[idx ] = (column, bitmask);
+        self.expand_data[idx] = (column, bitmask);
     }
     fn get_tree_row_expand(&self, idx: usize) -> (usize, u32) {
         self.expand_data[idx]

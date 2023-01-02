@@ -388,7 +388,6 @@ fn show_context_menu_message(
         esc.send();
     });
 
-
     let menu: gtk::Menu = Menu::new();
     menu.append(&mi_open_browser);
     if repoid_listpos.len() == 1 {
