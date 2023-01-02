@@ -168,7 +168,7 @@ impl SubscriptionRepo {
 
     /// recursive, depth-first
     pub fn dump_tree_rec(&self, lpath: &[u16], parent_subs_id: isize, ident: &str) {
-        let entries = self.get_by_parent_repo_id(parent_subs_id as isize);
+        let entries = self.get_by_parent_repo_id(parent_subs_id);
         entries.iter().enumerate().for_each(|(n, fse)| {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(lpath);

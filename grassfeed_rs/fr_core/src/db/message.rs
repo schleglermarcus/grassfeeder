@@ -59,7 +59,6 @@ pub struct MessageRow {
     pub author: String,
     pub categories: String,
     pub markers: u64,
-
     /// a copy of the decompressed title, needed for sorting
     title_d: Option<String>,
 }
@@ -79,9 +78,9 @@ impl MessageRow {
 
     pub fn set_favorite(&mut self, n: bool) {
         if n {
-            self.markers = self.markers | MARKERS_FAVORITE
+            self.markers |= MARKERS_FAVORITE
         } else {
-            self.markers = self.markers & !MARKERS_FAVORITE;
+            self.markers &= !MARKERS_FAVORITE;
         }
     }
 }

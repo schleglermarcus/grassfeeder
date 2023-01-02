@@ -86,7 +86,7 @@ pub trait IFeedContents {
     fn toggle_feed_item_read(&self, msg_id: isize, list_position: i32);
     ///  clicking on the favorite left
     fn toggle_favorite(&self, msg_id: isize, list_position: i32, new_fav: Option<bool>);
-    fn set_favorite_multi(&self, msg_id: &Vec<(i32, i32)>, new_fav: bool);
+    fn set_favorite_multi(&self, msg_id: &[(i32, i32)], new_fav: bool);
 
     fn get_job_receiver(&self) -> Receiver<CJob>;
     fn get_job_sender(&self) -> Sender<CJob>;
@@ -438,7 +438,7 @@ impl FeedContents {
         }
     }
 
-    fn set_favorite_int(&self, listpos_msgid: &Vec<(u32, u32)>, new_fav: bool) {
+    fn set_favorite_int(&self, listpos_msgid: &[(u32, u32)], new_fav: bool) {
         let mut mod_listpos_db: Vec<(u32, u32)> = Vec::default();
         listpos_msgid.iter().for_each(|(listpos, msg_id)| {
             let o_msg = (*(self.messagesrepo_r.borrow_mut())).get_by_index(*msg_id as isize);
@@ -450,7 +450,7 @@ impl FeedContents {
             // trace!(                "TOGGLE_FAV  {}   col{}  isFav:{}  newFav:{}",                msg_id,                listpos,                msg.is_favorite(),                new_fav            );
             if msg.is_favorite() != new_fav {
                 msg.set_favorite(new_fav);
-                mod_listpos_db.push((*listpos as u32, *msg_id as u32));
+                mod_listpos_db.push((*listpos, *msg_id));
             }
             (*(self.messagesrepo_r.borrow_mut())).update_markers(*msg_id as isize, msg.markers);
         });
@@ -586,9 +586,9 @@ impl IFeedContents for FeedContents {
         let msg_ids: Vec<i32> = act_dbid_listpos.keys().cloned().collect();
         for msg_id in &msg_ids {
             if self.msg_state.read().unwrap().get_isread(*msg_id as isize) {
-                is_read_ids.push(*msg_id as i32);
+                is_read_ids.push(*msg_id);
             } else {
-                is_unread_ids.push(*msg_id as i32);
+                is_unread_ids.push(*msg_id);
             }
         }
         self.msg_state
@@ -728,10 +728,10 @@ impl IFeedContents for FeedContents {
         }
         let mut msg = o_msg.unwrap();
         // trace!(            "TOGGLE_FAV  {}   col{}  isFav:{} ",            msg_id,            list_position,            msg.is_favorite()        );
-        if new_fav.is_none() {
-            msg.set_favorite(!msg.is_favorite());
+        if let Some(f) = new_fav {
+            msg.set_favorite(f);
         } else {
-            msg.set_favorite(new_fav.unwrap());
+            msg.set_favorite(!msg.is_favorite());
         }
         (*(self.messagesrepo_r.borrow_mut())).update_markers(msg_id, msg.markers);
         let vec_pos_db: Vec<(u32, u32)> = vec![(list_position as u32, msg_id as u32)];
@@ -742,7 +742,7 @@ impl IFeedContents for FeedContents {
     }
 
     /// [  ( msg-id , list-pos ) ]
-    fn set_favorite_multi(&self, msg_id_listpos: &Vec<(i32, i32)>, new_fav: bool) {
+    fn set_favorite_multi(&self, msg_id_listpos: &[(i32, i32)], new_fav: bool) {
         let chunk_size = 7;
         if msg_id_listpos.len() <= chunk_size {
             let mut mod_listpos_db: Vec<(u32, u32)> = Vec::default();
@@ -782,7 +782,7 @@ impl IFeedContents for FeedContents {
             .borrow()
             .get_by_src_id(source_repo_id, false);
         let num_is_read = all.iter().filter(|fce| fce.is_read).count() as i32;
-        Some((all.len() as i32, (all.len() as i32 - num_is_read) as i32))
+        Some((all.len() as i32, (all.len() as i32 - num_is_read) ))
     }
 
     fn get_config(&self) -> Config {
@@ -894,11 +894,11 @@ impl IFeedContents for FeedContents {
             self.msg_state
                 .write()
                 .unwrap()
-                .set_read_many(&[*dbid as i32], true);
-            (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[*dbid as i32], true);
+                .set_read_many(&[*dbid ], true);
+            (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[*dbid ], true);
             self.addjob(CJob::StartWebBrowser(*dbid));
             let gui_pos = self.msg_state.read().unwrap().get_gui_pos(*dbid as isize);
-            listpos_id.push((gui_pos as u32, *dbid as u32));
+            listpos_id.push((gui_pos , *dbid as u32));
         });
         self.addjob(CJob::UpdateMessageListSome(listpos_id));
 
@@ -1100,7 +1100,7 @@ pub fn match_new_entries_to_existing(
             let matchfield: u8 = match_fce(ee, n_fce);
             let ones_count: u8 = matchfield.count_ones() as u8;
             if ones_count > 1 {
-                exi_pos_match.insert(n, ones_count as u8);
+                exi_pos_match.insert(n, ones_count );
             }
             if ones_count > max_ones_count {
                 max_ones_count = ones_count

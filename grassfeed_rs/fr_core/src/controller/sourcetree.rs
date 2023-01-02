@@ -706,7 +706,7 @@ impl SourceTreeController {
         self.new_source.feed_homepage = feed_homepage;
         let mut icon_str = String::default();
         if icon_id > 0 {
-            if let Some(ie) = self.iconrepo_r.borrow().get_by_index(icon_id as isize) {
+            if let Some(ie) = self.iconrepo_r.borrow().get_by_index(icon_id ) {
                 icon_str = ie.icon;
             }
         };
@@ -718,7 +718,6 @@ impl SourceTreeController {
             AValue::ABOOL(false),   // 3: spinner
             AValue::None,           // 4: feed-url
         ];
-        // trace!(            "process_newsource_request_done  {}",            self.new_source.feed_homepage.clone()        );
         (*self.gui_val_store)
             .write()
             .unwrap()

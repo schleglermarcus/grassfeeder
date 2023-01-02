@@ -252,16 +252,19 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
     }
 
     fn set_tree_row_expand(&mut self, idx: usize, column: usize, bitmask: u32) {
-        if self.expand_data.len() < (idx + 1) as usize {
-            self.expand_data.resize((idx + 1) as usize, (0, 0));
+        if self.expand_data.len() < (idx + 1) {
+            self.expand_data.resize(idx + 1, (0, 0));
         }
-        self.expand_data[idx as usize] = (column as usize, bitmask);
+        self.expand_data[idx] = (column, bitmask);
     }
+
     fn get_tree_row_expand(&self, idx: usize) -> (usize, u32) {
         self.expand_data[idx]
     }
+
     fn is_tree_row_expanded(&self, idx: usize, gti: &GuiTreeItem) -> bool {
-        if self.expand_data.len() < (idx + 1) as usize {
+        if self.expand_data.len() < (idx + 1)
+ {
             warn!("is_tree_row_expanded  {} : no expand set! ", idx);
             return false;
         }

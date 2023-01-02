@@ -381,7 +381,7 @@ fn show_context_menu_message(
     });
     let mi_unmark_favorite = MenuItem::with_label(&t!("CM_MSG_UNMARK_FAVORITE"));
     let esc = EvSenderCache(
-        g_ev_se.clone(),
+        g_ev_se,
         GuiEvents::ListSelectedAction(0, "unmark-favorite".to_string(), repoid_listpos.clone()),
     );
     mi_unmark_favorite.connect_activate(move |_menuiten| {

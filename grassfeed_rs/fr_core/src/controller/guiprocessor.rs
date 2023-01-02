@@ -211,10 +211,11 @@ impl GuiProcessor {
                             .borrow()
                             .toggle_feed_item_read(msg_id as isize, list_position);
                     } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
-						(*self.feedcontents_r)
-                            .borrow()
-                            .toggle_favorite(msg_id as isize, list_position, None);
-
+                        (*self.feedcontents_r).borrow().toggle_favorite(
+                            msg_id as isize,
+                            list_position,
+                            None,
+                        );
                     } else {
                         warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
                     }
@@ -406,7 +407,6 @@ impl GuiProcessor {
                         .memory_conserve(is_minimized);
                     (*self.gui_updater).borrow().memory_conserve(is_minimized);
                 }
-
                 GuiEvents::Indicator(ref cmd, gtktime) => match cmd.as_str() {
                     "app-quit" => {
                         self.addjob(Job::StopApplication);

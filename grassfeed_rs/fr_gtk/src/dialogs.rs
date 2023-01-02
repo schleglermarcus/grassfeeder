@@ -95,8 +95,8 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType) {
 fn grid_attach_icon(grid: &Grid, icon_str: &str, index: i32, y_base: i32, columns: i32) {
     let image = prepare_icon(icon_str, 48).unwrap();
     image.set_tooltip_text(Some(&format!("{}", index)));
-    let y: i32 = index as i32 / columns + y_base;
-    let x: i32 = index as i32 % columns;
+    let y: i32 = index / columns + y_base;
+    let x: i32 = index  % columns;
     grid.attach(&image, x, y, 1, 1);
 }
 
@@ -908,7 +908,7 @@ fn create_settings_dialog(
         let spinbuttonvalue: f64 = interval_cardinal as f64;
         spinb_source_update.set_value(spinbuttonvalue);
         let interval_unit = dd_get_uint(dialogdata, 2, 3); // 2 UpdateFeeds Unit:  1:minutes  2:hours  3:days
-        cbt_timescale.set_active(Some((interval_unit - 1) as u32));
+        cbt_timescale.set_active(Some(interval_unit - 1));
         let fetcher_threads = dd_get_uint(dialogdata, 3, 1); // 3 Web Fetcher Threads
         spinb_numthread.set_value(fetcher_threads as f64);
         let focus_policy: i32 = dialogdata.get(4).unwrap().int().unwrap(); //dd_get_uint(dialogdata, 4, 1); // 4 Message Focus Policy

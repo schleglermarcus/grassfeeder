@@ -128,7 +128,7 @@ pub struct Downloader {
     pub gp_job_sender: Option<Sender<Job>>,
     configmanager_r: Rc<RefCell<ConfigManager>>,
     config: Config,
-    pub busy_indicators: Arc<RwLock<[(u8, String); DOWNLOADER_MAX_NUM_THREADS as usize]>>,
+    pub busy_indicators: Arc<RwLock<[(u8, String); DOWNLOADER_MAX_NUM_THREADS]>>,
     messagesrepo: Rc<RefCell<MessagesRepo>>,
     job_queue: Arc<RwLock<VecDeque<DLJob>>>,
     erro_repo: Rc<RefCell<ErrorRepo>>,
@@ -210,7 +210,7 @@ impl Downloader {
                         let o_job = (*queue_a).write().unwrap().pop_front();
                         if let Some(dljob) = o_job {
                             (*busy_a).write().unwrap()[n as usize] = (dljob.kind(), hostname);
-                            Self::process_job(dljob, gp_sender.clone(), n as u8);
+                            Self::process_job(dljob, gp_sender.clone(), n);
                             (*busy_a).write().unwrap()[n as usize] = (0, String::default());
                         }
                     }

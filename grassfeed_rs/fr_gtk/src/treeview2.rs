@@ -220,16 +220,13 @@ pub fn create_treeview(
             }
         }
     });
-
-    //  Gtk-CRITICAL **: 23:53:24.422: gtk_tree_view_expand_row: assertion 'tree_view->priv->model != NULL' failed
     let t_v_1c = treeview1.clone();
     tree_store.connect_row_has_child_toggled(move |_t_model, t_path, t_iter| {
         if let Some(t_model) = t_v_1c.model() {
             let status = t_model
                 .value(t_iter, TREE0_COL_STATUS)
                 .get::<u32>()
-                .unwrap() as u32;
-            //        debug!(            "store.row_has_child_toggled: DBID={}  ST={}  name={:?} ",           _repo_id, status        );
+                .unwrap();
             if status & TREE0_COL_STATUS_EXPANDED > 0 {
                 let _row_existed = t_v_1c.expand_row(t_path, false);
             }
@@ -239,7 +236,6 @@ pub fn create_treeview(
     treeview1.connect_row_expanded(move |t_view, t_iter, _t_path| {
         if let Some(model) = t_view.model() {
             let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
-            // debug!("G: expanded {}  ", repo_id);
             esw.sendw(GuiEvents::TreeExpanded(0, repo_id));
         }
     });

@@ -19,7 +19,7 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
         return;
     }
     let subs_copy = format!("{}.copy", subs_fn);
-    std::fs::copy(&subs_fn, &subs_copy).unwrap();
+    std::fs::copy(&subs_fn, subs_copy).unwrap();
     let subsrepo1 = SubscriptionRepo::by_file(&subs_fn);
     let all_subscriptions = subsrepo1.get_all_entries();
     debug!(

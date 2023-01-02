@@ -453,7 +453,7 @@ impl Step<CleanerInner> for CheckErrorLog {
             .get_all_nonfolder()
             .iter()
             .filter(|se| !se.isdeleted())
-            .map(|se| se.subs_id as isize)
+            .map(|se| se.subs_id)
             .collect::<HashSet<isize>>();
         inner.error_repo.startup_read();
         let list: Vec<ErrorEntry> = inner.error_repo.get_all_stored_entries();
