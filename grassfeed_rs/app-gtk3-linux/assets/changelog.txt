@@ -1,3 +1,14 @@
+grassfeeder (0.1.6) unstable; urgency=low
+
+  * Messages-DB: adding marker column on startup
+  * Added message favorite display
+  * Bugfix: Spinner Indicator on Drag Url Dialog not working
+  * Bugfix: Dragging an url twice did not work: now deleting input fields on cancel.
+  * Bugfix: Db cleanup shall not result in unnecessary tree update
+  * Bugfix: Reduced tree position jump on subscription move
+
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 02 Jan 2022 00:12:00 +0000
+
 grassfeeder (0.1.5) unstable; urgency=low
 
   * Focus indicator for browser area: move down
