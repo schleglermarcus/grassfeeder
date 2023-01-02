@@ -4,35 +4,35 @@ Hash: SHA256
 Origin: Marcus der Schlegler
 Label: RSS Feed Reader
 Codename: grassfeeder
-Date: Tue, 13 Dec 2022 18:41:37 UTC
+Date: Mon, 02 Jan 2023 01:51:55 UTC
 Architectures: amd64
 Components: binary
 Description: Apt repository for project GrassFeeder
 MD5Sum:
- 3c2bf585048a4bb91158d483d7d570e8 844 binary/binary-amd64/Packages
- f74210c0f4dbf3354e9c42a2dbebfe38 565 binary/binary-amd64/Packages.gz
+ 776fb478616063c94125adc0bf644524 844 binary/binary-amd64/Packages
+ 89b79ab93bb17e5775730b6c6891be2d 569 binary/binary-amd64/Packages.gz
  20c6d73284065b9e0d93a095f49f0f0d 142 binary/binary-amd64/Release
 SHA1:
- c0a2289af2945b4e24b671dc2ee1ff96de859c1a 844 binary/binary-amd64/Packages
- 20d6d146856ff568e8e85801eec243c615f5cfba 565 binary/binary-amd64/Packages.gz
+ a0e6f268076f8125a07421b53bb191b070927d58 844 binary/binary-amd64/Packages
+ e337c8504e8e93611dd854ebf7de63f1a4550b19 569 binary/binary-amd64/Packages.gz
  e907c6ecba95cff60fd741aabf24ee7982aefa0f 142 binary/binary-amd64/Release
 SHA256:
- 08e7f25a7f352543bc6267bc82e7a412a96f12a4ce9aa776d9371d12423f24ec 844 binary/binary-amd64/Packages
- 8573e4019621ff6dc57838bb7f0ae5a22e800395839f818fd2b786bf0bf06174 565 binary/binary-amd64/Packages.gz
+ 7a7d633138454afef7dd11cd68086ed43f3833f11333756652c552be08053813 844 binary/binary-amd64/Packages
+ ad5c69f9801c3533967b04bdd25e6bca5469adfdcc7bfac20cb43ad1a4dc5234 569 binary/binary-amd64/Packages.gz
  6056b5ca838ced56468043305392604a868a9f01a558702f63d721aa39866715 142 binary/binary-amd64/Release
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCAAdFiEEJFeQk5uP1A3CnQ75wo684PlA5p8FAmOYx2EACgkQwo684PlA
-5p+cIg//YrFNsr89WQMOi8sigIIICXnuxlcyYW7/QzQAxPYvH5v+F5/iJFeV8pNb
-ENEE6+AOVHx1L9VgWHLzqV0YT1WVAV/iXIQGBoZNeiyw967FcFFwOVnqgRdsTE6n
-4SojmvmFRBWopqJQ8AH0u5zjDLILRWVaRlMCudgEZHt89vpfbGwk/eTPwyiiB9FU
-cuEhePYrSYCIJv0/6Hz5BpAfbNPnQ9Zp4JNIB3Ce3T27VzaB6iTzOhB5FWg3UnBU
-usk2KqQ+o5U/qNiLAcGMFCqkF37vF6qLeNoJ7eN068365DZg6hFry2nX9BGPJBxS
-ljUXyur8F5lTlxPDNTYSrEpDeO1Ouiqm5P8W+wxvmz3ydztsdyhdftJiEqhYzzN8
-LFCUXva/v9az5d3AbmYM8JrVt3gFlPummf/XQneoRMVbhMnIsHFmPkrMYfm9aDPM
-+DzFKEodCZ8vdIcsWjFi2fxPntBPBIRQHMsLpldKTMBDB0VSiU6qaNAuwQ8yZjMT
-dwtEoE71XC0yLvXwpC2Ss3G/3LlANWBTaNaxNWBT4bpX3ALpl0Q+HIZ7P8ubqsBq
-OW6scQdGLmzb6cDcb31IMSWSm17/7vHoADfwu3yEEnhgRbK91CkzxhoMELDohILk
-4acgpD5y+DogOUqqkEPjrNY/454k0yJ8XeqQIzSIz/Lc8i2pj98=
-=3l3H
+iQIzBAEBCAAdFiEEJFeQk5uP1A3CnQ75wo684PlA5p8FAmOyOL8ACgkQwo684PlA
+5p/gMg/+IKIGzB3Pxsz2npai9d8tbBvNewC36UvtpK6Lh1aN/7aVzsID38JfOezS
+GAu/zYVK/8XnCqPfyv8gcsAbxeus7cxDRs40J1K72Z/9GSVg0NQqKUYxvFiGI90C
+o0HG7c1Q0d7PscxQQczE4+O2jvJoMQm61i5p7ss8cTLGyiAmq8yLorCkUJ4HzKci
+XgPVltlEjNljLoF/A4Gd+MMQXd4Xnk5zsl0QRNoS+T9ruu9ghPL3UbeMUiWxXeQa
+U0kGl/Kmq+idC6BW47/PCX6V3g1wV2sTpkEksu/wveQ26fCyf3bwXsK7HmFdW0QP
+Qi6dylY97z1qO0G5y7O6nk8xALrbHCvLKdKVGgEq2cWXk4FpjmovpqQe5582he5B
+bq4fbAaQxuGcGqJVTCSQKQYUbdlL+buGNbm5oypP4qNGxoFWRDEwCy8Rf/+2PrOO
+q3FKGgGNUDnI7Aulti0MBfoF5lOM/1tWuhn6S1SEfFbwza+CeNs6W9QReKLTOo+l
+T7C662N25hcUw49hiHr1OYr8SWfyVYBR3/hQT08rGAz40BsU/NSmSXQTu4N9esIO
+v+tye+cNNf+DzzsYmwJ6LaNx2Pnbcshy9ZTLk/l2GCiSckjTPiq1L4gIuVBzk1Xb
+xMmMZGEvlAR+DjtwePM7PTul6lbnYtfSzjCTUsuuvI6k2gH9i2Q=
+=qMqT
 -----END PGP SIGNATURE-----
