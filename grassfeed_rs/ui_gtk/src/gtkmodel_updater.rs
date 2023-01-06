@@ -338,10 +338,8 @@ impl GtkModelUpdaterInt {
             let g_o = (*self.g_o_a).read().unwrap();
             let list_store: &ListStore = g_o.get_list_store(list_index as usize).unwrap();
             let maxcols = g_o.get_list_store_max_columns(list_index as usize) as u32;
-
             let gpath = gtk::TreePath::from_indicesv(&[list_position as i32]);
             let iter = list_store.iter(&gpath).unwrap();
-
             if row.len() < maxcols as usize {
                 error!(
                     "update_list_model_single row shorter that columns #row:{}  columns:{}  SKIPPING",

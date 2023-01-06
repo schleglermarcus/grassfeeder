@@ -1,7 +1,7 @@
 pub const LIST0_COL_DISPLAYTEXT: i32 = 1;
 pub const LIST0_COL_TIMESTAMP: i32 = 2;
-pub const LIST0_COL_ISREAD: i32 = 3;
-pub const LIST0_COL_FAVICON: i32 = 0;
+pub const LIST0_COL_ISREAD: i32 = 4;
+pub const LIST0_COL_FAVICON: i32 = 7;
 pub const LIST0_COL_MSG_ID: u8 = 5;
 
 /// Subscription List

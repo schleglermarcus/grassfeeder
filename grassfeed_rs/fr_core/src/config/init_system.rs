@@ -65,8 +65,7 @@ pub fn combine_config_path(path_config: &String) -> String {
 pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, String> {
     check_or_create_folder(&gf_conf.path_config);
     check_or_create_folder(&gf_conf.path_cache);
-
-    debug!(" path_cache={}", &gf_conf.path_cache);
+    // trace!(" path_cache={}", &gf_conf.path_cache);
     let mut ret: HashMap<String, String> = HashMap::default();
     ret.insert(
         icon_repo::KEY_FOLDERNAME.to_string(),

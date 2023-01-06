@@ -1,4 +1,4 @@
-Mon, 02 Jan 2022 00:12:00 +0000
+Mon, 02 Jan 2023 00:03:00 +0000
 * Messages-DB: adding marker column on startup
 * Added message favorite display
 * Bugfix: Spinner Indicator on Drag Url Dialog not working

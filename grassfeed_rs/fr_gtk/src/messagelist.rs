@@ -29,6 +29,10 @@ use resources::id::*;
 use rust_i18n::t;
 use ui_gtk::GtkObjectsType;
 
+const TYPESTRING_TEXT: &str = "text";
+
+const WIDTH_ISREAD_FAV: i32 = 26;
+
 pub fn create_listview(
     g_ev_se: Sender<GuiEvents>,
     col1width: i32,
@@ -36,7 +40,6 @@ pub fn create_listview(
     sort_column: i32,
     sort_ascending: bool,
 ) -> TreeView {
-    const TYPESTRING_TEXT: &str = "text";
     let content_tree_view = TreeView::new();
     content_tree_view.set_headers_visible(true);
     content_tree_view.set_tooltip_column(6);
@@ -52,20 +55,21 @@ pub fn create_listview(
         Type::STRING,          // title
         Type::STRING,          // date
         Pixbuf::static_type(), // status icon
-        u32::static_type(),    // is unread
+        u32::static_type(),    // 4 : is-read
         u32::static_type(),    // 5 : db-id
         Type::STRING,          // tooltip
+        bool::static_type(),   // 7 : Is-Favorite
     ];
     let title_column: TreeViewColumn;
     let date_column: TreeViewColumn;
     {
         let col = TreeViewColumn::new();
         let cellrendpixbuf = CellRendererPixbuf::new();
-        col.pack_start(&cellrendpixbuf, false);
+        col.pack_start(&cellrendpixbuf, true);
         col.add_attribute(&cellrendpixbuf, "gicon", 0_i32);
-        col.set_title("Fav");
+        col.set_title("F");
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
-        col.set_fixed_width(25);
+        col.set_fixed_width(WIDTH_ISREAD_FAV);
         col.set_expand(false);
         col.set_sort_column_id(LIST0_COL_FAVICON);
         content_tree_view.append_column(&col);
@@ -114,8 +118,8 @@ pub fn create_listview(
         col.set_title("R");
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
         col.set_expand(false);
-        col.set_min_width(10);
-        col.set_max_width(20);
+        // col.set_min_width(10);        col.set_max_width(20);
+        col.set_fixed_width(WIDTH_ISREAD_FAV);
         col.set_sort_column_id(LIST0_COL_ISREAD);
         col.set_resizable(false);
         content_tree_view.append_column(&col);

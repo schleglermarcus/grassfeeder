@@ -220,6 +220,7 @@ impl FeedContents {
         } else {
             newrow.push(AValue::None);
         } // 6 :  tooltip
+        newrow.push(AValue::ABOOL(fc.is_favorite()));	//  7 : is-fav
         newrow
     }
 
