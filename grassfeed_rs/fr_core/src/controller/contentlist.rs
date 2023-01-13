@@ -176,7 +176,6 @@ impl FeedContents {
         }
     }
 
-    // later:   remove  content-id  as tooltip
     fn message_to_row(
         fc: &MessageRow,
         fontsize: u32,
@@ -220,7 +219,7 @@ impl FeedContents {
         } else {
             newrow.push(AValue::None);
         } // 6 :  tooltip
-        newrow.push(AValue::ABOOL(fc.is_favorite()));	//  7 : is-fav
+        newrow.push(AValue::ABOOL(fc.is_favorite())); //  7 : is-fav
         newrow
     }
 
@@ -237,7 +236,6 @@ impl FeedContents {
             .unwrap()
             .set_read_many(&repo_ids, is_read);
         let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
-        // trace!(            "set_read_many : subs_id{}  isfolder{}    {} {:?} ",            subs_id,            isfolder,            is_read,            repo_ids        );
         if isfolder {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
                 if let Some((_subs_e, children)) =
@@ -448,7 +446,6 @@ impl FeedContents {
                 return;
             }
             let mut msg = o_msg.unwrap();
-            // trace!(                "TOGGLE_FAV  {}   col{}  isFav:{}  newFav:{}",                msg_id,                listpos,                msg.is_favorite(),                new_fav            );
             if msg.is_favorite() != new_fav {
                 msg.set_favorite(new_fav);
                 mod_listpos_db.push((*listpos, *msg_id));
@@ -482,7 +479,6 @@ impl IFeedContents for FeedContents {
         }
         for job in job_list {
             let now = std::time::Instant::now();
-            // debug!("CJOB: {:?}", &job);
             match job {
                 CJob::DbUpdateTitle(content_id, ref title) => {
                     (*self.messagesrepo_r)
@@ -596,7 +592,6 @@ impl IFeedContents for FeedContents {
             .write()
             .unwrap()
             .set_read_many(&is_unread_ids, true);
-
         let (last_content_id, _last_list_pos) = act_dbid_listpos.iter().last().unwrap();
         self.addjob(CJob::SwitchBrowserTabContent(*last_content_id));
         let list_pos_dbid = act_dbid_listpos
@@ -604,24 +599,20 @@ impl IFeedContents for FeedContents {
             .map(|(k, v)| (*v as u32, *k as u32))
             .collect::<Vec<(u32, u32)>>();
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
-
         let subscr_ids = self
             .msg_state
             .read()
             .unwrap()
             .get_subscription_ids(&msg_ids);
-
         subscr_ids
             .iter()
             .for_each(|subs_id| self.addjob(CJob::RequestUnreadAllCount(*subs_id)));
-
         if !is_unread_ids.is_empty() {
             (*self.messagesrepo_r)
                 .borrow_mut()
                 .update_is_read_many(&is_unread_ids, true);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
         }
-
         self.addjob(CJob::UpdateMessageListSome(list_pos_dbid));
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             (*feedsources)

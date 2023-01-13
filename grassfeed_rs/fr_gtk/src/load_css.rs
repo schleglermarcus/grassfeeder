@@ -19,7 +19,7 @@ fn style_scrolled(name: &str, w_id: u8, height: u8) -> String {
     #{}_{}    {{ border-top:{}px solid transparent; }} \
     #{}_{}_1  {{ border-top:{}px solid green;    }} \
     #{}_{}_2  {{ border-top:{}px solid transparent;  \
-    transition-property:border-top-color; transition-duration:3s;  \
+    transition-property:border-top-color; transition-duration:2s;  \
     transition-timing-function:linear;  transition-delay:1s; }} ",
         name, w_id, height, name, w_id, height, name, w_id, height
     )

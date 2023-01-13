@@ -244,14 +244,16 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#166;", " ... ");
     ret = ret.replace("&#190;", "¾");
     ret = ret.replace("&#194;", "Â");
+    ret = ret.replace("&#196;", "Ä");
     ret = ret.replace("&#220;", "Ü");
+    ret = ret.replace("&#214;", "Ö");
     ret = ret.replace("&#223;", "ß");
     ret = ret.replace("&#226;", "\"");
     ret = ret.replace("&#228;", "ä");
     ret = ret.replace("&#246;", "ö");
     ret = ret.replace("&#252;", "ü");
     ret = ret.replace("&#x166;", " ... ");
-    ret = ret.replace("&#8211;", "\"");
+    ret = ret.replace("&#8211;", "-");
     ret = ret.replace("&#8220;", "\"");
     ret = ret.replace("&#8221;", "\"");
     ret = ret.replace("&#8216;", "\'");

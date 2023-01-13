@@ -1,11 +1,9 @@
 grassfeeder (0.1.7) unstable; urgency=low
 
+  * Msg List Favorite+IsRead column sortable
+  * Tab switch indicator: fade time shorter
   
-  - Msg List fav + isread colum sortable
-  
-  - do the ubuntu package
-  
-  __
+  - Drag:  https://www.phoronix.com/ add /
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 03 Jan 2023 00:12:00 +0000
 
