@@ -7,13 +7,21 @@ use std::io::Write;
 const CHANGELOG_PLAINTEXT: &str = "../app-gtk3-linux/assets/changelog.txt";
 const CHANGELOG_GZIP: &str = "../app-gtk3-linux/assets/changelog.gz";
 
+/*	dput requirements:
+
+#{'allowed': ['release'], 'known': ['release', 'proposed', 'updates', 'backports', 'security']}
+
+*/
+const DISTRIBUTION_SOURCE: &str = "bionic";
+
 #[test]
 pub fn write_changelog() {
     let changelog_text = changelog_debian::create_debian_changelog(
         "../app-changes/",
         CHANGELOG_PLAINTEXT,
         "grassfeeder",
-        "unstable; urgency=low",
+        //  "unstable; urgency=low",
+        &format!("{}; urgency=low", DISTRIBUTION_SOURCE),
         "Marcus der Schlegler <schleglermarcus@posteo.de>",
     );
     let mut e = GzEncoder::new(Vec::new(), Compression::best());

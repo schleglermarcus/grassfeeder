@@ -160,6 +160,7 @@ https://distrowatch.com/table.php?distribution=mint
 ------ Create Ubuntu package
   https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
   https://help.launchpad.net/Packaging/PPA/Uploading
+  https://ubuntuforums.org/showthread.php?t=1971978&page=2&s=37830a9f3283345f9a69d0e2aa865bea
 
 	https://shallowsky.com/blog/programming/packaging-launchpad-ppas.html
   https://ubuntuforums.org/showthread.php?t=1624438

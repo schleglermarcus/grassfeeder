@@ -1,4 +1,4 @@
-grassfeeder (0.1.7) unstable; urgency=low
+grassfeeder (0.1.7) bionic; urgency=low
 
   * Msg List Favorite+IsRead column sortable
   * Tab switch indicator: fade time shorter
@@ -7,7 +7,7 @@ grassfeeder (0.1.7) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 03 Jan 2023 00:12:00 +0000
 
-grassfeeder (0.1.6) unstable; urgency=low
+grassfeeder (0.1.6) bionic; urgency=low
 
   * Messages-DB: adding marker column on startup
   * Added message favorite display
@@ -18,7 +18,7 @@ grassfeeder (0.1.6) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 02 Jan 2023 00:03:00 +0000
 
-grassfeeder (0.1.5) unstable; urgency=low
+grassfeeder (0.1.5) bionic; urgency=low
 
   * Focus indicator for browser area: move down
   * After deleting Message, set Cursor to next one
@@ -28,7 +28,7 @@ grassfeeder (0.1.5) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Thu, 13 Dec 2022 00:10:00 +0000
 
-grassfeeder (0.1.4) unstable; urgency=low
+grassfeeder (0.1.4) bionic; urgency=low
 
   * Feed Error display sorted by time
   * Error DB: limit entries by time, subscription
@@ -40,7 +40,7 @@ grassfeeder (0.1.4) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 21 Nov 2022 00:22:00 +0000
 
-grassfeeder (0.1.3) unstable; urgency=low
+grassfeeder (0.1.3) bionic; urgency=low
 
   * Unix termination signal handling
   * Creating *.rpm:  retaining the appliation name
@@ -52,7 +52,7 @@ grassfeeder (0.1.3) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Thu, 10 Nov 2022 00:22:00 +0000
 
-grassfeeder (0.1.2) unstable; urgency=low
+grassfeeder (0.1.2) bionic; urgency=low
 
   * Message List: set scroll position to upper edge from Cursor
   * Settings Dialog  : switches to even length
@@ -66,7 +66,7 @@ grassfeeder (0.1.2) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sat, 05 Nov 2022 00:22:00 +0000
 
-grassfeeder (0.1.1) unstable; urgency=low
+grassfeeder (0.1.1) bionic; urgency=low
 
   * DragAndDrop for Websites on Subscription Area
   * Bugfix: parsed blogger.com - wrong element recognized as link
@@ -75,7 +75,7 @@ grassfeeder (0.1.1) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 30 Oct 2022 00:18:00 +0000
 
-grassfeeder (0.1.0) unstable; urgency=low
+grassfeeder (0.1.0) bionic; urgency=low
 
   * Application Icon for Systray
   * Message List, new focus policy: before last unread
@@ -88,7 +88,7 @@ grassfeeder (0.1.0) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sun, 23 Oct 2022 00:00:00 +0000
 
-grassfeeder (0.0.9) unstable; urgency=low
+grassfeeder (0.0.9) bionic; urgency=low
 
   * Aggregate Messages on Folder Selection
   * Browser Display :  wrap over   title
@@ -102,7 +102,7 @@ grassfeeder (0.0.9) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sun, 16 Oct 2022 00:01:00 +0000
 
-grassfeeder (0.0.8) unstable; urgency=low
+grassfeeder (0.0.8) bionic; urgency=low
 
   * Search Filter for messages
   * Change Layout: wide bottom line.
@@ -120,7 +120,7 @@ grassfeeder (0.0.8) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 10 Oct 2022 00:15:00 +0000
 
-grassfeeder (0.0.7) unstable; urgency=low
+grassfeeder (0.0.7) bionic; urgency=low
 
   * Error-DB of subscription updating errors, display in edit dialog
   * Create  AppImage
@@ -135,7 +135,7 @@ grassfeeder (0.0.7) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Wed, 04 Oct 2022 00:12:00 +0000
 
-grassfeeder (0.0.6) unstable; urgency=low
+grassfeeder (0.0.6) bionic; urgency=low
 
   * Added desktop icon
   * Show message sums on folders
@@ -152,7 +152,7 @@ grassfeeder (0.0.6) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 27 Sep 2022 00:23:00 +0000
 
-grassfeeder (0.0.5) unstable; urgency=low
+grassfeeder (0.0.5) bionic; urgency=low
 
   * StatusBar: copy Feed address into clipboard
   * Multiple instances shall not be allowed
@@ -169,7 +169,7 @@ grassfeeder (0.0.5) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Wed, 21 Sep 2022 00:12:00 +0000
 
-grassfeeder (0.0.4) unstable; urgency=low
+grassfeeder (0.0.4) bionic; urgency=low
 
   * Startup Commandline processing fixed:    -h shall remain on commandline
   * Drag: Folder down - fixed
@@ -183,7 +183,7 @@ grassfeeder (0.0.4) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Fri, 16 Sep 2022 00:12:00 +0000
 
-grassfeeder (0.0.3) unstable; urgency=low
+grassfeeder (0.0.3) bionic; urgency=low
 
   * Tree Unread-Calculation Speed increased, parallel web requests to 3
   * SendToBrowser :   mark-as-read for all entries
@@ -194,7 +194,7 @@ grassfeeder (0.0.3) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 13 Sep 2022 00:00:00 +0000
 
-grassfeeder (0.0.2) unstable; urgency=low
+grassfeeder (0.0.2) bionic; urgency=low
 
   * Add version and branch info to about dialog,
   * refacture initialisation and property loading, config  as json
@@ -203,7 +203,7 @@ grassfeeder (0.0.2) unstable; urgency=low
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Thu, 08 Sep 2022 00:00:00 +0000
 
-grassfeeder (0.0.1) unstable; urgency=low
+grassfeeder (0.0.1) bionic; urgency=low
 
   * Initial release
 
