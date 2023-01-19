@@ -1,8 +1,7 @@
 Tue, 03 Jan 2023 00:12:00 +0000
 * Msg List Favorite+IsRead column sortable
 * Tab switch indicator: fade time shorter
-
-- Drag:  https://www.phoronix.com/ add /
+* Bugfix: added slash when dragging www.phoronix.com
 
 
 

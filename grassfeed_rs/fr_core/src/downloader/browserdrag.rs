@@ -143,10 +143,13 @@ impl Step<DragInner> for CompleteRelativeUrl {
         if !inner.found_feed_url.is_empty() && !inner.found_feed_url.starts_with("http") {
             let o_homepage_addr = go_to_homepage(&drag_url);
             if let Some(base_url) = o_homepage_addr {
-                inner.found_feed_url = format!("{}{}", base_url, inner.found_feed_url);
-                trace!("CompleteRelativeUrl modified  {} ", inner.found_feed_url);
+                if !base_url.ends_with('/') && !inner.found_feed_url.starts_with('/') {
+                    inner.found_feed_url = format!("{}/{}", base_url, inner.found_feed_url);
+                } else {
+                    inner.found_feed_url = format!("{}{}", base_url, inner.found_feed_url);
+                }
+                // trace!("CompleteRelativeUrl modified  {} ", inner.found_feed_url);
             }
-            // else {                warn!("no HP found!");            }
         }
         StepResult::Continue(Box::new(Notify(inner)))
     }

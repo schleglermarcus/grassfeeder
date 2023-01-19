@@ -1,7 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.1.7.5"
-# version = "0.1.7-B4"
+version = "0.1.7-B6"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -37,7 +36,7 @@ extended-description = "This application polls Feeds (Streams of messages) regul
 section = "web"
 priority = "optional"
 assets =[
-    ["target/release/grassfeeder", "usr/bin/", "755"],
+    ["target/release/grassfeeder", "/usr/bin/", "755"],
 		["assets/changelog.gz", "/usr/share/doc/grassfeeder/", "0644"],
 		["assets/grassfeeder.desktop", "/usr/share/applications/", "0644"],
 		["assets/grassfeeder.xpm",     "/usr/share/pixmaps/grassfeeder/", "0644"],

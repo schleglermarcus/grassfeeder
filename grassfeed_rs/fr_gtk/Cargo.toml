@@ -30,15 +30,6 @@ gdk-pixbuf = ">=0.15.11"
 libappindicator = ">=0.7.1"
 
 
-##   apt-get install libayatana-indicator3-dev    libayatana-appindicator3-dev
-##     apt-get install    libayatana-appindicator3-dev  libappindicator3-0.1-cil-dev  libayatana-appindicator3-0.1-cil-dev
-
-## appindicator3 = { version =  ">=0.2.2", feature = ["original", "v0_5"] }
-## /mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk/Cargo.toml: unused manifest key: dependencies.appindicator3.feature
-# appindicator3 = ">=0.2.2"
-
-
-
 # cargo run  --example icons
 [[example]]
 name = "icons"

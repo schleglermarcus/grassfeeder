@@ -158,6 +158,12 @@ https://distrowatch.com/table.php?distribution=mint
 
 
 ------ Create Ubuntu package
+  https://blog.chmouel.com/2021/01/31/building-packages-for-multiple-distros-on-launchpad-with-docker/
+  https://launchpad.net/ubuntu/focal/+source/rust-pad
+
+
+  https://www.debian.org/doc/devel-manuals#debmake-doc
+
   https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
   https://help.launchpad.net/Packaging/PPA/Uploading
   https://ubuntuforums.org/showthread.php?t=1971978&page=2&s=37830a9f3283345f9a69d0e2aa865bea
