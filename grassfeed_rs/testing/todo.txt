@@ -1,8 +1,12 @@
 To Do List
 
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
+	 https://salsa.debian.org/rust-team/debcargo-conf/ 
    https://www.debian.org/doc/manuals/developers-reference/pkgs.html#newpackage
 	 https://wiki.debian.org/DebianMentorsFaq
+	 https://wiki.debian.org/Teams/RustPackaging
+   https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
+   https://blog.hackeriet.no/packaging-rust-part-II/
 
 - https://launchpad.net/grassfeeder
 https://help.launchpad.net/Packaging/PPA/Uploading
