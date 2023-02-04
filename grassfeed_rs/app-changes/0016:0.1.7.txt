@@ -1,19 +1,5 @@
-Tue, 03 Jan 2023 00:12:00 +0000
+Sat, 04 Feb 2023 00:20:00 +0000
 * Msg List Favorite+IsRead column sortable
+* Charset Additions, Downloader Threads to 9
 * Tab switch indicator: fade time shorter
 * Bugfix: added slash when dragging www.phoronix.com
-
-
-
-Uploading grassfeeder using ftp to ppa (host: ppa.launchpad.net; directory: ~schleglermarcus/grassfeeder-ppa)
-running supported-distribution: check whether the target distribution is currently supported (using distro-info)
-{'allowed': ['release'], 'known': ['release', 'proposed', 'updates', 'backports', 'security']}
-running required-fields: check whether a field is present and non-empty in the changes file
-running checksum: verify checksums before uploading
-running suite-mismatch: check the target distribution for common errors
-running check-debs: makes sure the upload contains a binary package
-running gpg: check GnuPG signatures before the upload
-Uploading grassfeeder_0.1.7.dsc
-Uploading grassfeeder_0.1.7.tar.gz
-Uploading grassfeeder_0.1.7_source.buildinfo
-Uploading grassfeeder_0.1.7_source.changes
