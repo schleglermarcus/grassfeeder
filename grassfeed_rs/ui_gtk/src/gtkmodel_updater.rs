@@ -211,7 +211,7 @@ impl GtkModelUpdaterInt {
             }
             gti = &gti.children[*p_index as usize];
         }
-        let path_cn = format!("{:?}", path)
+        let path_cn = format!("{path:?}")
             .replace(['[', ']', ' '], "")
             .replace(',', ":");
         if let Some(iter) = tree_store.iter_from_string(&path_cn) {
@@ -570,9 +570,9 @@ impl GtkModelUpdaterInt {
             UIUpdaterMarkWidgetType::WebView => "webview_",
         };
         let widget_name = if mark > 0 {
-            format!("{}{}_{}", name, idx, mark)
+            format!("{name}{idx}_{mark}")
         } else {
-            format!("{}{}", name, idx)
+            format!("{name}{idx}")
         };
         if let Some(widget) = self.widget_for_typ(typ, idx) {
             widget.set_widget_name(widget_name.as_str());

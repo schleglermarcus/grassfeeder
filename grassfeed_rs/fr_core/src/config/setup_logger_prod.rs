@@ -21,16 +21,14 @@ pub fn setup_logger(
     colors.info = Color::Green;
     colors.warn = Color::Yellow;
     colors.error = Color::Red;
-
-    let logfilename = format!("{}{}.log", cache_dir, app_name);
-    let old_log_fn = format!("{}.old", logfilename);
+    let logfilename = format!("{cache_dir}{app_name}.log");
+    let old_log_fn = format!("{logfilename}.old");
     let _r = std::fs::rename(&logfilename, old_log_fn);
     let o_logfile = fern::log_file(logfilename.clone());
     if o_logfile.is_err() {
         eprintln!("setup_logger: cannot create {}", &logfilename);
         return Err(fern::InitError::Io(o_logfile.err().unwrap()));
     }
-    //	println!(        "setup_logger :  {}   file:{:?} {:?}  {:?}",        debug_level, logfilename, & o_logfile , filter_level    );
     let logfile = o_logfile.unwrap();
     if debug_level > 0 {
         fern::Dispatch::new()

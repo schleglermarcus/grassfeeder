@@ -10,12 +10,9 @@ fn main() {
     }
 }
 
-//--
-
 extern crate chrono;
 extern crate log;
 
-// use std::error::Error;
 use std::sync::Arc;
 use std::time::Duration;
 use testing::minihttpserver::minisrv;
@@ -32,11 +29,7 @@ fn http_serve_short() {
     let mut msc = minisrv::MiniHttpServerController::new(Arc::new(conf));
     msc.start();
     let wait_seconds = 200;
-    println!(
-        "Server started, waiting {}  seconds until shutdown. ",
-        wait_seconds
-    );
+    println!("Server started, waiting {wait_seconds} seconds until shutdown. ");
     std::thread::sleep(Duration::from_millis(wait_seconds * 1000));
-
     msc.stop();
 }

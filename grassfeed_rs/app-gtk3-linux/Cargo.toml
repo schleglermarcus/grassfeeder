@@ -1,7 +1,6 @@
 [package]
-# name = "app-gtk3-linux"
-name = "grassfeeder"
-version = "0.1.7-B7"
+name = "app-gtk3-linux"
+version = "0.1.7-B8"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -10,6 +9,12 @@ license = "LGPL-3"
 name = "grassfeeder"
 path = "src/main.rs"
 
+
+
+# https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html
+# Note: crates.io does not allow packages to be published with path dependencies
+# (path dev-dependencies are ignored).
+#
 [dependencies]
 gui_layer = { path = "../gui_layer", version="0.1.0" }
 context = { path = "../context", version="0.1.0" }

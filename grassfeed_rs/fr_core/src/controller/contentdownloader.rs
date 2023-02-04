@@ -185,7 +185,7 @@ impl Downloader {
             let gp_sender: Sender<Job> = self.gp_job_sender.as_ref().unwrap().clone();
             let queue_a = self.job_queue.clone();
             let busy_a = self.busy_indicators.clone();
-            let builder = thread::Builder::new().name(format!("dl_{}", n));
+            let builder = thread::Builder::new().name(format!("dl_{n}"));
             let h = builder
                 .spawn(move || loop {
                     let mut skip_it: bool = false;

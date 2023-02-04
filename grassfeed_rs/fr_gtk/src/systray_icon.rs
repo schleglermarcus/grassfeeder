@@ -14,14 +14,14 @@ pub const FILENAME_BASE: &str = "grassfeeder-indicator2";
 pub fn create_systray_icon_3(g_ev_se: UiSenderWrapperType, app_url: String) -> AppIndicator {
     let icon_path_base;
 
-    let icon_filename1 = format!("{}{}.png", ICON_PATH_REL, FILENAME_BASE);
+    let icon_filename1 = format!("{ICON_PATH_REL}{FILENAME_BASE}.png");
     if std::path::Path::new(&icon_filename1).exists() {
         icon_path_base = ICON_PATH_REL.to_string();
         debug!("Icon1 {} found! ", icon_filename1,);
     } else {
         warn!("Icon {} missing! ", icon_filename1,);
-        let icon_filename2 = format!("/{}{}.png", ICON_PATH_REL, FILENAME_BASE);
-        icon_path_base = format!("/{}", ICON_PATH_REL);
+        let icon_filename2 = format!("/{ICON_PATH_REL}{FILENAME_BASE}.png");
+        icon_path_base = format!("/{ICON_PATH_REL}");
         if !std::path::Path::new(&icon_filename2).exists() {
             debug!("Icon2 {} found! ", icon_filename2);
         } else {

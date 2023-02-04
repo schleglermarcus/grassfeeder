@@ -110,7 +110,7 @@ fn multiple_icons_location() {
             "https://www.ft.com/news-feed?format=rss".to_string(),
             "https://www.ft.com/".to_string(),
         ),
-		// currently offline
+        // currently offline
         //  (            "https://www.neweurope.eu/category/world/feed/".to_string(),            "https://www.neweurope.eu".to_string(),        ),
         (
             "https://www.naturalnews.com/rss.xml".to_string(),

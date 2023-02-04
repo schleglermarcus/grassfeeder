@@ -159,7 +159,7 @@ impl MessageStateMap {
     pub fn dump(&self) {
         let mut vals: Vec<MessageState> = self.msgmap.values().cloned().collect();
         vals.sort_by(|a, b| a.msg_id.cmp(&b.msg_id));
-        vals.iter().for_each(|v| println!("MS:{}", v));
+        vals.iter().for_each(|v| println!("MS:{v}"));
     }
 
     /// Searches the next unread message.

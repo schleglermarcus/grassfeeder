@@ -38,7 +38,7 @@ pub fn create_debian_changelog(
     for name in file_list {
         let replaced = name.replace(".txt", "");
         let parts: Vec<&str> = replaced.split(':').collect();
-        let chfilename = format!("{}{}", in_folder, name);
+        let chfilename = format!("{in_folder}{name}");
         let contents = std::fs::read_to_string(chfilename).unwrap();
         let line1 = format!("{} ({}) {}\n\n", package_name, parts[1], top_line_rest);
         file_contents.push_str(&line1);
@@ -48,13 +48,13 @@ pub fn create_debian_changelog(
 
         let date_line = contents.lines().next().unwrap();
         contents.lines().skip(1).for_each(|l| {
-            let co = format!("  {}\n", l);
+            let co = format!("  {l}\n");
             file_contents.push_str(&co);
             outfile
                 .write_all(co.as_bytes())
                 .expect("error writing out file");
         });
-        let line2 = format!("\n -- {}  {}\n\n", bottom_part, date_line);
+        let line2 = format!("\n -- {bottom_part}  {date_line}\n\n");
         file_contents.push_str(&line2);
         outfile
             .write_all(line2.as_bytes())

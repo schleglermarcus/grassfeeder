@@ -411,7 +411,7 @@ impl InvestigateOne for InvIco {
                 }
             }
             Err(e) => {
-                r.message = format!("not_ico: {}", e);
+                r.message = format!("not_ico: {e}");
             }
         }
         r
@@ -434,7 +434,7 @@ impl InvestigateOne for InvPng {
                 }
             }
             Err(e) => {
-                r.message = format!("not_png: {}", e);
+                r.message = format!("not_png: {e}");
             }
         }
         r
@@ -452,7 +452,7 @@ impl InvestigateOne for InvJpg {
                 r.kind = IconKind::Jpg;
             }
             Err(e) => {
-                r.message = format!("not_jpg: {}", e);
+                r.message = format!("not_jpg: {e}");
             }
         }
         r
@@ -473,7 +473,7 @@ impl InvestigateOne for InvGif {
                 }
             }
             Err(e) => {
-                r.message = format!("not_gif: {}", e);
+                r.message = format!("not_gif: {e:?}");
             }
         }
         r
@@ -489,7 +489,7 @@ impl InvestigateOne for InvSvg {
                 r.kind = IconKind::Svg;
             }
             Err(e) => {
-                r.message = format!("not_svg: {}", e);
+                r.message = format!("not_svg: {e:?}");
             }
         }
         r
@@ -505,7 +505,7 @@ impl InvestigateOne for InvWebp {
                 r.kind = IconKind::Webp;
             }
             Err(e) => {
-                r.message = format!("not_webp: {}", e);
+                r.message = format!("not_webp: {e:?}");
             }
         }
         r
@@ -521,11 +521,9 @@ impl InvestigateOne for InvBmp {
                 r.kind = IconKind::Bmp;
             }
             Err(e) => {
-                r.message = format!("not_bmp: {:?}", e);
+                r.message = format!("not_bmp: {e:?}");
             }
         }
         r
     }
 }
-
-//  #[cfg(test)]mod t_ {    use super::*;}

@@ -542,7 +542,7 @@ impl SourceTreeController {
         let o_from_entry = self.get_by_path(from_path);
         if o_from_entry.is_none() {
             self.need_check_fs_paths.replace(true);
-            let msg = format!("from_path={:?}  Missing, check statemap", from_path);
+            let msg = format!("from_path={from_path:?}  Missing, check statemap");
             return Err(msg);
         }
         let from_entry = o_from_entry.unwrap();
@@ -950,12 +950,12 @@ impl SourceTreeController {
         if let Some((num_all, num_unread)) = su_st.num_msg_all_unread {
             if (*self.config).borrow().display_feedcount_all {
                 if num_unread > 0 {
-                    rightcol_text = format!("{}/{}", num_unread, num_all);
+                    rightcol_text = format!("{num_unread}/{num_all}");
                 } else {
-                    rightcol_text = format!("{}", num_all);
+                    rightcol_text = format!("{num_all}");
                 }
             } else {
-                rightcol_text = format!("{}", num_unread);
+                rightcol_text = format!("{num_unread}");
             }
             num_msg_unread = num_unread;
         }

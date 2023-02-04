@@ -222,10 +222,7 @@ impl StatusBar {
             } else {
                 String::default()
             };
-            let msg1 = format!(
-                "<tt>\u{25df}{}\u{25de} {}    \u{2595}{}\u{258F} {}</tt>",
-                downloader_display, unread_all, block_vertical, memdisplay,
-            );
+            let msg1 = format!(   "<tt>\u{25df}{downloader_display}\u{25de} {unread_all}    \u{2595}{block_vertical}\u{258F} {memdisplay}</tt>",            );
             (*self.gui_val_store)
                 .write()
                 .unwrap()
@@ -259,7 +256,7 @@ impl StatusBar {
             (*self.gui_val_store)
                 .write()
                 .unwrap()
-                .set_label_text(LABEL_STATUS_3, format!("<tt>\u{2595}{}</tt>", b_loading));
+                .set_label_text(LABEL_STATUS_3, format!("<tt>\u{2595}{b_loading}</tt>" ));
             (*self.gui_updater)
                 .borrow()
                 .update_label_markup(LABEL_STATUS_3);

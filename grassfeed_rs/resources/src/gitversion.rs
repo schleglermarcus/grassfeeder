@@ -6,7 +6,7 @@ use std::process::Command;
 const RCS_VERSION_FILENAME: &str = "gen_git_info.rs";
 
 pub fn build_rs_main(build_out_folder: &str) {
-    let gen_filename = format!("{}/{}", build_out_folder, RCS_VERSION_FILENAME);
+    let gen_filename = format!("{build_out_folder}/{RCS_VERSION_FILENAME}");
     let r = Command::new("git")
         .arg("rev-parse")
         .arg("--short")
@@ -26,14 +26,12 @@ pub fn build_rs_main(build_out_folder: &str) {
     let git_branchname = c_out.trim();
 
     let mut lines: Vec<String> = Vec::default();
-    lines.push(format!("// {} ", gen_filename));
+    lines.push(format!("// {gen_filename}"));
     lines.push(format!(
-        "pub const RCS_VERSION : &'static str = \"{}\";	",
-        git_version
+        "pub const RCS_VERSION : &'static str = \"{git_version}\";	"
     ));
     lines.push(format!(
-        "pub const RCS_BRANCH : &'static str = \"{}\";",
-        git_branchname
+        "pub const RCS_BRANCH : &'static str = \"{git_branchname}\";"
     ));
     lines.push(format!(
         "pub const RCS_CARGO_PKG_VERSION : &'static str = \"{}\";",

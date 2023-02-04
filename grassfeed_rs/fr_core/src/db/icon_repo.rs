@@ -190,7 +190,7 @@ impl Buildable for IconRepo {
             Some(folder) => IconRepo::new(&folder),
             None => {
                 conf.dump();
-                panic!("iconrepo config has no {} ", KEY_FOLDERNAME);
+                panic!("iconrepo config has no {KEY_FOLDERNAME} ");
             }
         }
     }

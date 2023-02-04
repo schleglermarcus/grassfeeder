@@ -59,7 +59,7 @@ pub fn run(appcontext: &AppContext) {
 }
 
 pub fn combine_config_path(path_config: &String) -> String {
-    format!("{}config.json", path_config)
+    format!("{path_config}config.json")
 }
 
 pub fn create_system_config(gf_conf: &GrassFeederConfig) -> HashMap<String, String> {

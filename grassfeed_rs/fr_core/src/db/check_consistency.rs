@@ -18,7 +18,7 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
         error!("No file {} ", subs_fn);
         return;
     }
-    let subs_copy = format!("{}.copy", subs_fn);
+    let subs_copy = format!("{subs_fn}.copy");
     std::fs::copy(&subs_fn, subs_copy).unwrap();
     let subsrepo1 = SubscriptionRepo::by_file(&subs_fn);
     let all_subscriptions = subsrepo1.get_all_entries();
@@ -28,7 +28,7 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
         all_subscriptions.len()
     );
     let msg_fn = MessagesRepo::filename(config_folder);
-    let msg_copy = format!("{}.copy", msg_fn);
+    let msg_copy = format!("{msg_fn}.copy");
     std::fs::copy(&msg_fn, msg_copy).unwrap();
     let msgrepo1 = MessagesRepo::new_by_filename_add_column(&msg_fn);
     let iconrepo = IconRepo::new(cache_folder);

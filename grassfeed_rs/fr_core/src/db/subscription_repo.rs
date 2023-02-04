@@ -107,7 +107,7 @@ impl SubscriptionRepo {
         let reg_existed = file_exists(&reg_filename);
         if reg_existed {
             let month_num = chrono::prelude::Utc::now().format("%m"); // %Y-%m-%d
-            let sub_copy_file = format!("{}subscriptions.db-{}", folder_cache, month_num);
+            let sub_copy_file = format!("{folder_cache}subscriptions.db-{month_num}");
             let r = std::fs::copy(&reg_filename, &sub_copy_file);
             if r.is_err() {
                 error!(
@@ -126,7 +126,7 @@ impl SubscriptionRepo {
     }
 
     pub fn filename(foldername: &str) -> String {
-        format!("{}subscriptions.db", foldername)
+        format!("{foldername}subscriptions.db")
     }
 
     pub fn by_file(filename: &str) -> Self {
@@ -356,7 +356,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
 
     fn update_timestamps(&self, src_id: isize, updated_int: i64, updated_ext: Option<i64>) {
         let upd_ext_s = if let Some(ue) = updated_ext {
-            format!(", updated_ext={}", ue)
+            format!(", updated_ext={ue}")
         } else {
             String::default()
         };
@@ -489,7 +489,7 @@ impl Buildable for SubscriptionRepo {
             Some(folder) => SubscriptionRepo::by_folder(&folder, &cachedir),
             None => {
                 conf.dump();
-                panic!("subscription config has no {} ", KEY_FOLDERNAME);
+                panic!("subscription config has no {KEY_FOLDERNAME} ");
             }
         }
     }

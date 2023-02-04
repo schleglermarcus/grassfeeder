@@ -114,7 +114,7 @@ impl ErrorRepo {
     fn filename(&self) -> String {
         let folder = (*self.list_unstored).read().unwrap().folder_name.clone();
         let slash = if folder.ends_with('/') { "" } else { "/" };
-        format!("{}{}{}", folder, slash, FILENAME)
+        format!("{folder}{slash}{FILENAME}")
     }
 
     /// make sure the file exists
@@ -293,11 +293,10 @@ impl ErrorRepo {
 
     pub fn replace_errors_file(&self, new_errs: Vec<ErrorEntry>) {
         let filename = self.filename();
-
-        let old_filename = format!("{}.old", filename);
+        let old_filename = format!("{filename}.old");
         let r = std::fs::rename(&filename, &old_filename);
         if r.is_err() {
-            error!("cannot rename log file: {} -> {}", &filename, &old_filename);
+            error!("cannot rename log file: {filename} -> {old_filename}");
             return;
         }
         self.store_all_to_file(new_errs, &filename);
@@ -320,7 +319,7 @@ impl Buildable for ErrorRepo {
         let o_folder = conf.get(KEY_FOLDERNAME);
         if o_folder.is_none() {
             conf.dump();
-            panic!("E-Repo config has no {} ", KEY_FOLDERNAME);
+            panic!("E-Repo config has no {KEY_FOLDERNAME} ");
         }
         let folder = o_folder.unwrap();
         if folder.is_empty() {

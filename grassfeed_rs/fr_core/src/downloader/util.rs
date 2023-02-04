@@ -78,7 +78,7 @@ pub fn extract_icon_from_homepage(
     let dom: tl::VDom = match tl::parse(&hp_content, tl::ParserOptions::default()) {
         Ok(d) => d,
         Err(e) => {
-            return Err(format!("XI: parsing homepage: {:?}", e));
+            return Err(format!("XI: parsing homepage: {e:?}"));
         }
     };
     let link_tags: Vec<&HTMLTag> = dom
@@ -120,7 +120,7 @@ pub fn extract_icon_from_homepage(
     if !icon_list.is_empty() {
         let mut icon_href: String = icon_list.get(0).unwrap().clone();
         if icon_href.starts_with("//") {
-            icon_href = format!("https:{}", icon_href);
+            icon_href = format!("https:{icon_href}");
         }
         if !icon_href.starts_with("http:") && !icon_href.starts_with("https:") {
             let mut homepage_host: String = homepage_url.clone();
@@ -133,7 +133,7 @@ pub fn extract_icon_from_homepage(
                     Err(e) => debug!("XI:2:  ({})   ERR:{:?}", &homepage_url, e),
                 }
             }
-            icon_href = format!("{}{}", homepage_host, icon_href);
+            icon_href = format!("{homepage_host}{icon_href}");
         }
         return Ok(icon_href);
     }
@@ -144,7 +144,7 @@ pub fn feed_url_to_main_url(f_u: String) -> String {
     match Url::parse(&f_u) {
         Ok(parsed) => {
             let port_st = match parsed.port() {
-                Some(p) => format!(":{}", p),
+                Some(p) => format!(":{p}"),
                 None => String::default(),
             };
             let icon_url = format!(
@@ -164,7 +164,7 @@ pub fn feed_url_to_icon_url(f_u: String) -> String {
     match Url::parse(&f_u) {
         Ok(parsed) => {
             let port_st = match parsed.port() {
-                Some(p) => format!(":{}", p),
+                Some(p) => format!(":{p}"),
                 None => String::default(),
             };
             let icon_url = format!(
@@ -201,7 +201,7 @@ pub fn extract_feed_from_website(page_content: &str) -> Result<String, (String, 
     let dom: tl::VDom = match tl::parse(page_content, tl::ParserOptions::default()) {
         Ok(d) => d,
         Err(e) => {
-            return Err((format!("XF: parsing homepage: {:?}", e), rawtext));
+            return Err((format!("XF: parsing homepage: {e:?}"), rawtext));
         }
     };
     let link_tags: Vec<&HTMLTag> = dom

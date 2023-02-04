@@ -94,7 +94,7 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType) {
 
 fn grid_attach_icon(grid: &Grid, icon_str: &str, index: i32, y_base: i32, columns: i32) {
     let image = prepare_icon(icon_str, 48).unwrap();
-    image.set_tooltip_text(Some(&format!("{}", index)));
+    image.set_tooltip_text(Some(&format!("{index}")));
     let y: i32 = index / columns + y_base;
     let x: i32 = index % columns;
     grid.attach(&image, x, y, 1, 1);

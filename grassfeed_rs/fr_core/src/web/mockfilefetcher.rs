@@ -32,7 +32,7 @@ impl IHttpRequester for FileFetcher {
             }
             Err(e) => {
                 r.status = 404;
-                r.error_description = format!("{} {}", e, fs_file);
+                r.error_description = format!("{e} {fs_file}");
             }
         }
         r
@@ -52,7 +52,7 @@ impl IHttpRequester for FileFetcher {
             }
             Err(e) => {
                 r.status = 404;
-                r.error_description = format!("{} {}", e, fs_file);
+                r.error_description = format!("{e} {fs_file}");
             }
         }
         r

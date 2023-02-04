@@ -13,6 +13,7 @@ use crate::gtk::prelude::CssProviderExt;
 // use crate::gtk::prelude::StyleProviderExt;
 
 // double curly brackets for rust strings
+#[allow(clippy::uninlined_format_args)]
 fn style_scrolled(name: &str, w_id: u8, height: u8) -> String {
     format!(
         "\
@@ -31,7 +32,7 @@ pub fn load_css() {
     let s1 = style_scrolled("scrolledwindow", 0, TAB_MARKER_HEIGHT);
     let s2 = style_scrolled("scrolledwindow", 1, TAB_MARKER_HEIGHT);
     let s3 = style_scrolled("box", 1, TAB_MARKER_HEIGHT);
-    let style = format!("{} \n {} \n {} \n ", s1, s2, s3);
+    let style = format!("{s1} \n {s2} \n {s3} \n ");
     match provider.load_from_data(style.as_bytes()) {
         Ok(_) => {}
         Err(e) => {

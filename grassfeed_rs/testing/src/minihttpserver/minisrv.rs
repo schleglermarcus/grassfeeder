@@ -415,7 +415,7 @@ fn check_create_dir_index(htdocs_dir: &str, request_path: &str, index_file_name:
 //   is_folder
 //   requestpath completed with slash added
 pub fn check_request_dir(htdocs_dir: &str, path: &str) -> (bool, bool, String) {
-    let path_str = format!("{}{}", htdocs_dir, path);
+    let path_str = format!("{htdocs_dir}{path}");
     let p = Path::new(&path_str);
     if !p.exists() {
         return (false, false, path.to_string());
@@ -425,7 +425,7 @@ pub fn check_request_dir(htdocs_dir: &str, path: &str) -> (bool, bool, String) {
     }
     if p.is_dir() {
         let retpath: String = if !path.ends_with('/') {
-            format!("{}/", path)
+            format!("{path}/")
         } else {
             path.to_string()
         };
@@ -525,7 +525,7 @@ fn format_response(response: &Response) -> String {
         response.status.as_str(),
         status_reason,
     );
-    result = format!("{}Allow: GET\r\n", result);
+    result = format!("{result}Allow: GET\r\n");
     result = format!(
         "{}content-length: {}\r\n",
         result, response.headers.content_length
@@ -579,9 +579,9 @@ fn create_direntry_text(htdocs_dir: &str, request_dir: &str) -> String {
     dirs.sort();
     files.sort();
     dirs.append(&mut files);
-    let mut r = format!("Index of {} <hr/>\n", request_dir);
+    let mut r = format!("Index of {request_dir} <hr/>\n");
     for e in dirs {
-        let line = format!("<a href=\"{}\">{}</a><br/>\n", e, e);
+        let line = format!("<a href=\"{e}\">{e}</a><br/>\n");
         r.push_str(&line);
     }
     r

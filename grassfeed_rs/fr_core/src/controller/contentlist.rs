@@ -193,7 +193,7 @@ impl FeedContents {
         if fc.entry_src_date > 0 {
             let mut displaytime = db_time_to_display(fc.entry_src_date);
             if fc.entry_invalid_pubdate {
-                displaytime = format!("! {}", displaytime);
+                displaytime = format!("! {displaytime}");
             }
             newrow.push(AValue::ASTR(displaytime));
         } else {

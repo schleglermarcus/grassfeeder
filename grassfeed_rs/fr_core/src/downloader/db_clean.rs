@@ -528,8 +528,7 @@ pub fn filter_error_entries(
         }
         if errors.len() < previous_len {
             msg.push_str(&format!(
-                "ID{} B{} A{} S{} \t",
-                subs_id, previous_len, deleted_by_date, deleted_by_sum
+                "ID{subs_id} B{previous_len} A{deleted_by_date} S{deleted_by_sum} \t",
             ));
         }
         errors.into_iter().for_each(|e| new_errors.push(e));

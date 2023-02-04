@@ -203,14 +203,14 @@ pub fn feed_text_to_entries(
         }
         Err(e) => {
             let detail = match e {
-                ParseFeedError::ParseError(ref kind) => format!("ParseError {:?}", kind),
-                ParseFeedError::IoError(ref ioe) => format!("IoError {:?}", ioe),
-                ParseFeedError::JsonSerde(ref serde_e) => format!("JsonSerde {:?}", serde_e),
+                ParseFeedError::ParseError(ref kind) => format!("ParseError {kind:?}"),
+                ParseFeedError::IoError(ref ioe) => format!("IoError {ioe:?}"),
+                ParseFeedError::JsonSerde(ref serde_e) => format!("JsonSerde {serde_e:?}"),
                 ParseFeedError::JsonUnsupportedVersion(ref s) => {
-                    format!("JsonUnsupportedVersion {:?}", s)
+                    format!("JsonUnsupportedVersion {s:?}")
                 }
                 ParseFeedError::XmlReader(ref xml_e) => {
-                    format!("XmlReader {:?}  ", xml_e)
+                    format!("XmlReader {xml_e:?}  ")
                 }
             };
             err_text = format!("Parsing: {}  length={}   {}", &url, text.len(), detail);

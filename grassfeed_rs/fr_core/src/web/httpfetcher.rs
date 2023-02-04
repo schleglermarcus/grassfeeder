@@ -50,7 +50,7 @@ impl HttpFetcher {
                         Err(e) => {
                             warn!("HttpFetcher: {} response.into_string {:?}", url, e);
                             r_errorkind = 14;
-                            r_ed = format!("r.into_string() {} ", e);
+                            r_ed = format!("ResponseError: {e:?}");
                         }
                     }
                 }

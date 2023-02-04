@@ -78,11 +78,10 @@ impl MessagesRepo {
     pub fn by_folder(foldername: &str) -> Self {
         let filename: &str = &MessagesRepo::filename(foldername);
         Self::new_by_filename_add_column(filename)
-        // MessagesRepo {            ctx: SqliteContext::new(filename),         }
     }
 
     pub fn filename(foldername: &str) -> String {
-        format!("{}messages.db", foldername)
+        format!("{foldername}messages.db")
     }
 
     #[deprecated]
@@ -156,7 +155,6 @@ impl IMessagesRepo for MessagesRepo {
             src_id,
             no_deleted_and,
         );
-        // debug!("PREP={}", prepared);
         let mut list: Vec<MessageRow> = Vec::default();
         if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(&prepared) {
             match stmt.query_map([], |row| {
