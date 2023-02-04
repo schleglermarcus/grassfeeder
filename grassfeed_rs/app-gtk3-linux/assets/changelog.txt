@@ -1,11 +1,11 @@
 grassfeeder (0.1.7) bionic; urgency=low
 
   * Msg List Favorite+IsRead column sortable
+  * Charset Additions, Downloader Threads to 9
   * Tab switch indicator: fade time shorter
-  
-  - Drag:  https://www.phoronix.com/ add /
+  * Bugfix: added slash when dragging www.phoronix.com
 
- -- Marcus der Schlegler <schleglermarcus@posteo.de>  Tue, 03 Jan 2023 00:12:00 +0000
+ -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sat, 04 Feb 2023 00:20:00 +0000
 
 grassfeeder (0.1.6) bionic; urgency=low
 

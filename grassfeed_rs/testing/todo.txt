@@ -189,6 +189,24 @@ gpg: Die Benutzung der Hashmethode SHA256 ist im --compliance=pgp6 Modus nicht e
 gpg: Diese Botschaft könnte für PGP 6.x unbrauchbar sein
 gpg: sende Schlüssel C28EBCE0F940E69F auf hkp://keyserver.ubuntu.com
 
+Uploading grassfeeder using ftp to ppa (host: ppa.launchpad.net; directory: ~schleglermarcus/grassfeeder-ppa)
+running supported-distribution: check whether the target distribution is currently supported (using distro-info)
+{'allowed': ['release'], 'known': ['release', 'proposed', 'updates', 'backports', 'security']}
+running required-fields: check whether a field is present and non-empty in the changes file
+running checksum: verify checksums before uploading
+running suite-mismatch: check the target distribution for common errors
+running check-debs: makes sure the upload contains a binary package
+running gpg: check GnuPG signatures before the upload
+Uploading grassfeeder_0.1.7.dsc
+Uploading grassfeeder_0.1.7.tar.gz
+Uploading grassfeeder_0.1.7_source.buildinfo
+Uploading grassfeeder_0.1.7_source.changes
+
+
+
+
+
+
 
 --------------- Create debian packages
 <marcus_der_schlegler> Hello, I am new here

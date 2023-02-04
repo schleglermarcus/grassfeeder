@@ -80,7 +80,6 @@ impl Step<IconInner> for FeedTextDownload {
                 inner.feed_download_text = result.content;
             }
             _ => {
-                // warn!("FeedTextDownload ERR {}", &result.error_description);
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     result.status as isize,
@@ -127,7 +126,6 @@ impl Step<IconInner> for CompareHomepageToDB {
         let inner: IconInner = self.0;
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
             if !inner.feed_homepage.is_empty() && inner.feed_homepage != subs_e.website_url {
-                // trace!("update-homepage!  {}", inner.feed_homepage);
                 inner
                     .subscriptionrepo
                     .update_homepage(inner.subs_id, &inner.feed_homepage);
@@ -151,7 +149,6 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 }
                 Err(e_descr) => {
-                    //  trace!("IAHP:1 {:?}", &e_descr);
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         r.status as isize,
@@ -162,7 +159,6 @@ impl Step<IconInner> for IconAnalyzeHomepage {
             },
             _ => {
                 let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
-                // trace!(                    "IAHP:3  {:?} alternate HP {:?}",                    &r.error_description,                    alt_hp                );
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     r.status as isize,
@@ -185,7 +181,6 @@ impl Step<IconInner> for IconFallbackSimple {
         let mut inner = self.0;
         if inner.icon_url.is_empty() {
             inner.icon_url = util::feed_url_to_icon_url(inner.feed_url.clone());
-            // trace!("IconFallbackSimple: url={} ", inner.icon_url);
         }
         StepResult::Continue(Box::new(IconDownload(inner)))
     }
@@ -203,7 +198,6 @@ impl Step<IconInner> for IconDownload {
             }
             _ => {
                 inner.download_error_happened = true;
-                // trace!(                    "IconDownload: {} {} '{}'  =>  {} {} {} -> STOP",                    inner.subs_id,                    inner.feed_url,                    inner.icon_url,                    r.get_status(),                    r.get_kind(),                    r.error_description                );
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     r.get_status() as isize,
@@ -231,7 +225,6 @@ impl Step<IconInner> for IconCheckIsImage {
             return StepResult::Continue(Box::new(IconDownscale(inner)));
         }
         if an_res.kind == IconKind::UnknownType || an_res.kind == IconKind::TooSmall {
-            // trace!(                "IconCheckIsImage: url={} length={} #feed_dl_text={}  Reason={}",                inner.icon_url,                inner.icon_bytes.len(),                inner.feed_download_text.len(),                an_res.message            );
             inner.erro_repo.add_error(
                 inner.subs_id,
                 inner.icon_bytes.len() as isize,
