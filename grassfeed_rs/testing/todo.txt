@@ -1,6 +1,11 @@
 To Do List
 
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
+
+	https://www.debian.org/doc/manuals/debian-handbook/debian-packaging.en.html
+	https://wiki.debian.org/Packaging/Intro
+	https://wiki.debian.org/HowToPackageForDebian
+
 	 https://salsa.debian.org/rust-team/debcargo-conf/
    https://www.debian.org/doc/manuals/developers-reference/pkgs.html#newpackage
 	 https://wiki.debian.org/DebianMentorsFaq
@@ -215,6 +220,12 @@ Uploading grassfeeder_0.1.7_source.changes
 <marcus_der_schlegler> I can create working debian packages already with cargo-deb.  Any next ideas how to proceed?
 <noctis> hi, debcargo has basically no support for "off grid" crates. you likely need to follow the old manual path
 
+
+
+https://lib.rs/crates/debian-packaging
+https://docs.rs/debian-packaging/latest/debian_packaging/index.html
+
+
 https://manpages.debian.org/bullseye/dpkg-dev/dpkg-source.1.de.html
 https://github.com/ian910297/deb-example
 https://wiki.debian.org/SimplePackagingTutorial
@@ -229,6 +240,13 @@ Rust stuff outside the Rust team, so maybe ask him about his workflow
 <marcus_> Thanks @pabs. You mean I shall write him an e-mail directly? Is he expecting that? Or is there some other manual page that I could read ?
 <pabs> yeah, send an email. should be fine. don't think he documented his setup yet
 <pabs> tell him I sent you if you want
+
+
+: needs crates.io
+https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
+https://blog.hackeriet.no/packaging-rust-part-II/
+
+
 
 ------ dylib
 https://prog.world/building-and-using-dynamic-link-libraries-in-rust/

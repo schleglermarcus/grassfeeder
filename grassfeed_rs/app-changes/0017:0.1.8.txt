@@ -1,0 +1,5 @@
+Sat, 04 Feb 2023 00:20:00 +0000
+
+- bug:   msg map empty,  at window-restore without selected source
+
+- to do:  debian package for distribution

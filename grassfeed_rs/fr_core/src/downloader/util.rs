@@ -197,7 +197,6 @@ pub fn workaround_https_declaration(wrong: String) -> String {
 /// if none found, we return    Error message ,  raw-text, comments
 pub fn extract_feed_from_website(page_content: &str) -> Result<String, (String, String)> {
     let mut rawtext: String = String::default();
-    // let mut comments: String = String::default();
     let dom: tl::VDom = match tl::parse(page_content, tl::ParserOptions::default()) {
         Ok(d) => d,
         Err(e) => {
@@ -220,7 +219,6 @@ pub fn extract_feed_from_website(page_content: &str) -> Result<String, (String, 
             let t_name = htmltag.name().as_utf8_str().into_owned();
             t_name == "link"
         })
-        // .inspect(|linktag| debug!("LT: {:?}", linktag))
         .collect();
 
     let feeds_list: Vec<String> = link_tags
@@ -235,7 +233,6 @@ pub fn extract_feed_from_website(page_content: &str) -> Result<String, (String, 
             attrmap
         })
         .filter(|attrmap| attrmap.get("rel").is_some())
-        // .inspect(|at_m| TRACE!("PF1:{:?}", at_m))
         .filter(|attrmap| {
             if let Some(typ_e) = attrmap.get("type") {
                 typ_e.contains("rss") || typ_e.contains("atom")
@@ -243,7 +240,6 @@ pub fn extract_feed_from_website(page_content: &str) -> Result<String, (String, 
                 false
             }
         })
-        // .inspect(|at_m| trace!("PF2:{:?}", at_m))
         .filter(|attrmap| !attrmap.get("href").unwrap().contains("comments"))
         .filter_map(|attrmap| attrmap.get("href").cloned())
         .collect();

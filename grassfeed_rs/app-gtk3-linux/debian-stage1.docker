@@ -14,10 +14,10 @@ RUN apt update
 RUN apt install -y wget git pkgconf librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev lintian
 
 RUN cargo install cargo-deb
-RUN cargo install cargo-appimage
 RUN cargo install cargo-generate-rpm
 
 # for AppImage
+RUN cargo install cargo-appimage
 RUN apt install -y  file python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse libfuse2
 RUN wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
 RUN chmod +x /usr/local/bin/appimagetool
