@@ -1,3 +1,9 @@
+# Replacing all the packages by debian variants:
+
+# librust-chrono-dev	librust-fern-dev  librust-gumdrop-dev
+#
+
+
 [package]
 name = "app-gtk3-linux"
 version = "0.1.8-B1"
@@ -20,13 +26,22 @@ gui_layer = { path = "../gui_layer", version="0.1.0" }
 context = { path = "../context", version="0.1.0" }
 fr_core = { path = "../fr_core", version="0.1.0", features = ["ui_gtk", "fr_gtk"] }
 resources = { path = "../resources", version="0.1.0"  }
-log = ">=0.4.14"
 xdg = ">=2.4.1"
-once_cell = ">=1.12.0"
-rust-i18n = ">=1.0.1"
 fern = { version = ">=0.6", features = ["colored", "chrono"] }
 chrono = ">=0.4.19"
-gumdrop = ">=0.8.1"
+
+# gumdrop = ">=0.8.1"	#  the debian packages only have 0.7.0
+gumdrop = ">=0.7.0"
+
+# log = ">=0.4.14"	# the debian packages only have 0.4.11
+log = ">=0.4.11"
+
+# once_cell = ">=1.12.0"	# the debian packages only have 1.9.0
+once_cell = ">=1.9.0"
+
+##  cannot be found as debian package. Build fails.
+rust-i18n = ">=1.0.1"
+syslog = "6.0.1"
 
 
 [profile.release]

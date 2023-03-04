@@ -12,6 +12,8 @@ To Do List
 	 https://wiki.debian.org/Teams/RustPackaging
    https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
    https://blog.hackeriet.no/packaging-rust-part-II/
+  https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
+
 
 - https://launchpad.net/grassfeeder
 https://help.launchpad.net/Packaging/PPA/Uploading
