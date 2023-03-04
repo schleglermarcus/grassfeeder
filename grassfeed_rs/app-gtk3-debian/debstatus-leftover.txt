@@ -1,5 +1,4 @@
-
-## cargo debstatus --no-indent  |egrep -v "in debian"  |sort -u |wc -l
+## cargo debstatus --no-indent  |egrep -v "in debian"  |sort -u
 
 app-gtk3-linux v0.1.8-B1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-linux)
 atk-sys v0.15.1
