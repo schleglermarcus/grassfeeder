@@ -1,0 +1,943 @@
+context v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/context)
+└── log v0.4.17
+    └── cfg-if v1.0.0
+
+fr_core v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_core)
+├── base64 v0.13.1
+├── bincode v1.3.3
+│   └── serde v1.0.152
+│       └── serde_derive v1.0.152 (proc-macro)
+│           ├── proc-macro2 v1.0.49
+│           │   └── unicode-ident v1.0.6
+│           ├── quote v1.0.23
+│           │   └── proc-macro2 v1.0.49 (*)
+│           └── syn v1.0.107
+│               ├── proc-macro2 v1.0.49 (*)
+│               ├── quote v1.0.23 (*)
+│               └── unicode-ident v1.0.6
+├── chrono v0.4.23
+│   ├── iana-time-zone v0.1.53
+│   ├── num-integer v0.1.45
+│   │   └── num-traits v0.2.15
+│   │       [build-dependencies]
+│   │       └── autocfg v1.1.0
+│   │   [build-dependencies]
+│   │   └── autocfg v1.1.0
+│   ├── num-traits v0.2.15 (*)
+│   └── time v0.1.45
+│       └── libc v0.2.139
+├── context v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/context) (*)
+├── feed-rs v1.2.0
+│   ├── chrono v0.4.23 (*)
+│   ├── lazy_static v1.4.0
+│   ├── mime v0.3.16
+│   ├── quick-xml v0.25.0
+│   │   ├── encoding_rs v0.8.31
+│   │   │   └── cfg-if v1.0.0
+│   │   └── memchr v2.5.0
+│   ├── regex v1.7.1
+│   │   ├── aho-corasick v0.7.20
+│   │   │   └── memchr v2.5.0
+│   │   ├── memchr v2.5.0
+│   │   └── regex-syntax v0.6.28
+│   ├── serde v1.0.152 (*)
+│   ├── serde_json v1.0.91
+│   │   ├── itoa v1.0.5
+│   │   ├── ryu v1.0.12
+│   │   └── serde v1.0.152 (*)
+│   ├── siphasher v0.3.10
+│   ├── url v2.3.1
+│   │   ├── form_urlencoded v1.1.0
+│   │   │   └── percent-encoding v2.2.0
+│   │   ├── idna v0.3.0
+│   │   │   ├── unicode-bidi v0.3.8
+│   │   │   └── unicode-normalization v0.1.22
+│   │   │       └── tinyvec v1.6.0
+│   │   │           └── tinyvec_macros v0.1.0
+│   │   └── percent-encoding v2.2.0
+│   └── uuid v1.2.2
+│       └── getrandom v0.2.8
+│           ├── cfg-if v1.0.0
+│           └── libc v0.2.139
+├── fern v0.6.1
+│   ├── colored v1.9.3
+│   │   ├── atty v0.2.14
+│   │   │   └── libc v0.2.139
+│   │   └── lazy_static v1.4.0
+│   └── log v0.4.17 (*)
+├── flume v0.10.14
+│   ├── futures-core v0.3.25
+│   ├── futures-sink v0.3.25
+│   ├── nanorand v0.7.0
+│   │   └── getrandom v0.2.8 (*)
+│   ├── pin-project v1.0.12
+│   │   └── pin-project-internal v1.0.12 (proc-macro)
+│   │       ├── proc-macro2 v1.0.49 (*)
+│   │       ├── quote v1.0.23 (*)
+│   │       └── syn v1.0.107 (*)
+│   └── spin v0.9.4
+│       └── lock_api v0.4.9
+│           └── scopeguard v1.1.0
+│           [build-dependencies]
+│           └── autocfg v1.1.0
+├── gif v0.12.0
+│   ├── color_quant v1.1.0
+│   └── weezl v0.1.7
+├── glob v0.3.1
+├── gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer)
+│   └── serde v1.0.152 (*)
+├── ico v0.3.0
+│   ├── byteorder v1.4.3
+│   └── png v0.17.7
+│       ├── bitflags v1.3.2
+│       ├── crc32fast v1.3.2
+│       │   └── cfg-if v1.0.0
+│       ├── flate2 v1.0.25
+│       │   ├── crc32fast v1.3.2 (*)
+│       │   └── miniz_oxide v0.6.2
+│       │       └── adler v1.0.2
+│       └── miniz_oxide v0.6.2 (*)
+├── image v0.24.5
+│   ├── bytemuck v1.12.3
+│   ├── byteorder v1.4.3
+│   ├── color_quant v1.1.0
+│   ├── exr v1.5.2
+│   │   ├── bit_field v0.10.1
+│   │   ├── flume v0.10.14 (*)
+│   │   ├── half v2.2.1
+│   │   ├── lebe v0.5.2
+│   │   ├── miniz_oxide v0.6.2 (*)
+│   │   ├── smallvec v1.10.0
+│   │   └── threadpool v1.8.1
+│   │       └── num_cpus v1.15.0
+│   │           └── libc v0.2.139
+│   ├── gif v0.11.4
+│   │   ├── color_quant v1.1.0
+│   │   └── weezl v0.1.7
+│   ├── jpeg-decoder v0.3.0
+│   │   └── rayon v1.6.1
+│   │       ├── either v1.8.0
+│   │       └── rayon-core v1.10.1
+│   │           ├── crossbeam-channel v0.5.6
+│   │           │   ├── cfg-if v1.0.0
+│   │           │   └── crossbeam-utils v0.8.14
+│   │           │       └── cfg-if v1.0.0
+│   │           ├── crossbeam-deque v0.8.2
+│   │           │   ├── cfg-if v1.0.0
+│   │           │   ├── crossbeam-epoch v0.9.13
+│   │           │   │   ├── cfg-if v1.0.0
+│   │           │   │   ├── crossbeam-utils v0.8.14 (*)
+│   │           │   │   ├── memoffset v0.7.1
+│   │           │   │   │   [build-dependencies]
+│   │           │   │   │   └── autocfg v1.1.0
+│   │           │   │   └── scopeguard v1.1.0
+│   │           │   │   [build-dependencies]
+│   │           │   │   └── autocfg v1.1.0
+│   │           │   └── crossbeam-utils v0.8.14 (*)
+│   │           ├── crossbeam-utils v0.8.14 (*)
+│   │           └── num_cpus v1.15.0 (*)
+│   ├── num-rational v0.4.1
+│   │   ├── num-integer v0.1.45 (*)
+│   │   └── num-traits v0.2.15 (*)
+│   │   [build-dependencies]
+│   │   └── autocfg v1.1.0
+│   ├── num-traits v0.2.15 (*)
+│   ├── png v0.17.7 (*)
+│   ├── scoped_threadpool v0.1.9
+│   └── tiff v0.8.1
+│       ├── flate2 v1.0.25 (*)
+│       ├── jpeg-decoder v0.3.0 (*)
+│       └── weezl v0.1.7
+├── jpeg-decoder v0.3.0 (*)
+├── libwebp-image v0.3.0
+│   ├── image v0.24.5 (*)
+│   └── libwebp v0.1.2
+│       └── libwebp-sys2 v0.1.4
+│           ├── cfg-if v1.0.0
+│           └── libc v0.2.139
+│           [build-dependencies]
+│           ├── cc v1.0.78
+│           │   └── jobserver v0.1.25
+│           │       └── libc v0.2.139
+│           └── pkg-config v0.3.26
+├── log v0.4.17 (*)
+├── lz4-compression v0.7.0
+├── once_cell v1.17.0
+├── opml v1.1.5
+│   ├── hard-xml v1.21.0
+│   │   ├── hard-xml-derive v1.21.0 (proc-macro)
+│   │   │   ├── bitflags v1.3.2
+│   │   │   ├── proc-macro2 v1.0.49 (*)
+│   │   │   ├── quote v1.0.23 (*)
+│   │   │   └── syn v1.0.107 (*)
+│   │   ├── jetscii v0.5.3
+│   │   ├── lazy_static v1.4.0
+│   │   ├── memchr v2.5.0
+│   │   └── xmlparser v0.13.5
+│   ├── serde v1.0.152 (*)
+│   └── thiserror v1.0.38
+│       └── thiserror-impl v1.0.38 (proc-macro)
+│           ├── proc-macro2 v1.0.49 (*)
+│           ├── quote v1.0.23 (*)
+│           └── syn v1.0.107 (*)
+├── png v0.17.7 (*)
+├── proc-status v0.1.1
+│   └── thiserror v1.0.38 (*)
+├── regex v1.7.1 (*)
+├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources)
+│   ├── log v0.4.17 (*)
+│   ├── once_cell v1.17.0
+│   └── rust-i18n v1.1.0
+│       ├── anyhow v1.0.68
+│       ├── clap v2.34.0
+│       │   ├── ansi_term v0.12.1
+│       │   ├── atty v0.2.14 (*)
+│       │   ├── bitflags v1.3.2
+│       │   ├── strsim v0.8.0
+│       │   ├── textwrap v0.11.0
+│       │   │   └── unicode-width v0.1.10
+│       │   ├── unicode-width v0.1.10
+│       │   └── vec_map v0.8.2
+│       ├── itertools v0.10.5
+│       │   └── either v1.8.0
+│       ├── once_cell v1.17.0
+│       ├── quote v1.0.23 (*)
+│       ├── rust-i18n-extract v1.1.0
+│       │   ├── anyhow v1.0.68
+│       │   ├── ignore v0.4.19
+│       │   │   ├── globset v0.4.10
+│       │   │   │   ├── aho-corasick v0.7.20 (*)
+│       │   │   │   ├── bstr v1.1.0
+│       │   │   │   │   └── memchr v2.5.0
+│       │   │   │   ├── fnv v1.0.7
+│       │   │   │   ├── log v0.4.17 (*)
+│       │   │   │   └── regex v1.7.1 (*)
+│       │   │   ├── lazy_static v1.4.0
+│       │   │   ├── log v0.4.17 (*)
+│       │   │   ├── memchr v2.5.0
+│       │   │   ├── regex v1.7.1 (*)
+│       │   │   ├── same-file v1.0.6
+│       │   │   ├── thread_local v1.1.4
+│       │   │   │   └── once_cell v1.17.0
+│       │   │   └── walkdir v2.3.2
+│       │   │       └── same-file v1.0.6
+│       │   ├── proc-macro2 v1.0.49 (*)
+│       │   ├── quote v1.0.23 (*)
+│       │   ├── regex v1.7.1 (*)
+│       │   ├── rust-i18n-support v1.1.0
+│       │   │   ├── glob v0.3.1
+│       │   │   ├── once_cell v1.17.0
+│       │   │   ├── proc-macro2 v1.0.49 (*)
+│       │   │   ├── serde v1.0.152 (*)
+│       │   │   ├── serde_json v1.0.91 (*)
+│       │   │   └── serde_yaml v0.8.26
+│       │   │       ├── indexmap v1.9.2
+│       │   │       │   └── hashbrown v0.12.3
+│       │   │       │   [build-dependencies]
+│       │   │       │   └── autocfg v1.1.0
+│       │   │       ├── ryu v1.0.12
+│       │   │       ├── serde v1.0.152 (*)
+│       │   │       └── yaml-rust v0.4.5
+│       │   │           └── linked-hash-map v0.5.6
+│       │   ├── serde v1.0.152 (*)
+│       │   ├── serde_json v1.0.91 (*)
+│       │   ├── serde_yaml v0.8.26 (*)
+│       │   └── syn v1.0.107 (*)
+│       ├── rust-i18n-macro v1.1.0 (proc-macro)
+│       │   ├── glob v0.3.1
+│       │   ├── once_cell v1.17.0
+│       │   ├── proc-macro2 v1.0.49 (*)
+│       │   ├── quote v1.0.23 (*)
+│       │   ├── rust-i18n-support v1.1.0 (*)
+│       │   ├── serde v1.0.152 (*)
+│       │   ├── serde_json v1.0.91 (*)
+│       │   ├── serde_yaml v0.8.26 (*)
+│       │   └── syn v1.0.107 (*)
+│       ├── serde v1.0.152 (*)
+│       ├── serde_derive v1.0.152 (proc-macro) (*)
+│       └── toml v0.5.10
+│           └── serde v1.0.152 (*)
+│       [build-dependencies]
+│       ├── glob v0.3.1
+│       └── regex v1.7.1 (*)
+├── rusqlite v0.27.0
+│   ├── bitflags v1.3.2
+│   ├── fallible-iterator v0.2.0
+│   ├── fallible-streaming-iterator v0.1.9
+│   ├── hashlink v0.7.0
+│   │   └── hashbrown v0.11.2
+│   │       └── ahash v0.7.6
+│   │           ├── getrandom v0.2.8 (*)
+│   │           └── once_cell v1.17.0
+│   │           [build-dependencies]
+│   │           └── version_check v0.9.4
+│   ├── libsqlite3-sys v0.24.2
+│   │   [build-dependencies]
+│   │   ├── cc v1.0.78 (*)
+│   │   ├── pkg-config v0.3.26
+│   │   └── vcpkg v0.2.15
+│   ├── memchr v2.5.0
+│   └── smallvec v1.10.0
+├── rust-i18n v1.1.0 (*)
+├── serde v1.0.152 (*)
+├── serde_json v1.0.91 (*)
+├── signal-hook v0.3.14
+│   ├── libc v0.2.139
+│   └── signal-hook-registry v1.4.0
+│       └── libc v0.2.139
+├── textcode v0.2.2
+├── tinybmp v0.4.0
+│   └── embedded-graphics v0.7.1
+│       ├── az v1.2.1
+│       ├── byteorder v1.4.3
+│       ├── embedded-graphics-core v0.3.3
+│       │   ├── az v1.2.1
+│       │   └── byteorder v1.4.3
+│       ├── float-cmp v0.8.0
+│       │   └── num-traits v0.2.15 (*)
+│       └── micromath v1.1.1
+├── tl v0.7.7
+├── ureq v2.6.1
+│   ├── base64 v0.13.1
+│   ├── flate2 v1.0.25 (*)
+│   ├── log v0.4.17 (*)
+│   ├── once_cell v1.17.0
+│   ├── rustls v0.20.8
+│   │   ├── log v0.4.17 (*)
+│   │   ├── ring v0.16.20
+│   │   │   ├── libc v0.2.139
+│   │   │   ├── once_cell v1.17.0
+│   │   │   ├── spin v0.5.2
+│   │   │   └── untrusted v0.7.1
+│   │   │   [build-dependencies]
+│   │   │   └── cc v1.0.78 (*)
+│   │   ├── sct v0.7.0
+│   │   │   ├── ring v0.16.20 (*)
+│   │   │   └── untrusted v0.7.1
+│   │   └── webpki v0.22.0
+│   │       ├── ring v0.16.20 (*)
+│   │       └── untrusted v0.7.1
+│   ├── url v2.3.1 (*)
+│   ├── webpki v0.22.0 (*)
+│   └── webpki-roots v0.22.6
+│       └── webpki v0.22.0 (*)
+├── url v2.3.1 (*)
+├── usvg v0.23.0
+│   ├── base64 v0.13.1
+│   ├── data-url v0.1.1
+│   │   └── matches v0.1.9
+│   ├── flate2 v1.0.25 (*)
+│   ├── float-cmp v0.9.0
+│   ├── fontdb v0.9.3
+│   │   ├── fontconfig-parser v0.5.1
+│   │   │   └── roxmltree v0.15.1
+│   │   │       └── xmlparser v0.13.5
+│   │   ├── log v0.4.17 (*)
+│   │   ├── memmap2 v0.5.8
+│   │   │   └── libc v0.2.139
+│   │   └── ttf-parser v0.17.1
+│   ├── kurbo v0.8.3
+│   │   └── arrayvec v0.7.2
+│   ├── log v0.4.17 (*)
+│   ├── pico-args v0.5.0
+│   ├── rctree v0.4.0
+│   ├── roxmltree v0.14.1
+│   │   └── xmlparser v0.13.5
+│   ├── rustybuzz v0.5.1
+│   │   ├── bitflags v1.3.2
+│   │   ├── bytemuck v1.12.3
+│   │   ├── smallvec v1.10.0
+│   │   ├── ttf-parser v0.15.2
+│   │   ├── unicode-bidi-mirroring v0.1.0
+│   │   ├── unicode-ccc v0.1.2
+│   │   ├── unicode-general-category v0.4.0
+│   │   └── unicode-script v0.5.5
+│   ├── simplecss v0.2.1
+│   │   └── log v0.4.17 (*)
+│   ├── siphasher v0.3.10
+│   ├── svgtypes v0.8.2
+│   │   └── siphasher v0.3.10
+│   ├── ttf-parser v0.15.2
+│   ├── unicode-bidi v0.3.8
+│   ├── unicode-script v0.5.5
+│   ├── unicode-vo v0.1.0
+│   └── xmlwriter v0.1.0
+├── webbrowser v0.8.4
+│   ├── dirs v4.0.0
+│   │   └── dirs-sys v0.3.7
+│   │       └── libc v0.2.139
+│   ├── log v0.4.17 (*)
+│   └── url v2.3.1 (*)
+├── xmlem v0.2.1
+│   ├── cssparser v0.28.1
+│   │   ├── cssparser-macros v0.6.0 (proc-macro)
+│   │   │   ├── quote v1.0.23 (*)
+│   │   │   └── syn v1.0.107 (*)
+│   │   ├── dtoa-short v0.3.3
+│   │   │   └── dtoa v0.4.8
+│   │   ├── itoa v0.4.8
+│   │   ├── matches v0.1.9
+│   │   ├── phf v0.8.0
+│   │   │   ├── phf_macros v0.8.0 (proc-macro)
+│   │   │   │   ├── phf_generator v0.8.0
+│   │   │   │   │   ├── phf_shared v0.8.0
+│   │   │   │   │   │   └── siphasher v0.3.10
+│   │   │   │   │   └── rand v0.7.3
+│   │   │   │   │       ├── getrandom v0.1.16
+│   │   │   │   │       │   ├── cfg-if v1.0.0
+│   │   │   │   │       │   └── libc v0.2.139
+│   │   │   │   │       ├── libc v0.2.139
+│   │   │   │   │       ├── rand_chacha v0.2.2
+│   │   │   │   │       │   ├── ppv-lite86 v0.2.17
+│   │   │   │   │       │   └── rand_core v0.5.1
+│   │   │   │   │       │       └── getrandom v0.1.16 (*)
+│   │   │   │   │       ├── rand_core v0.5.1 (*)
+│   │   │   │   │       └── rand_pcg v0.2.1
+│   │   │   │   │           └── rand_core v0.5.1 (*)
+│   │   │   │   ├── phf_shared v0.8.0 (*)
+│   │   │   │   ├── proc-macro-hack v0.5.20+deprecated (proc-macro)
+│   │   │   │   ├── proc-macro2 v1.0.49 (*)
+│   │   │   │   ├── quote v1.0.23 (*)
+│   │   │   │   └── syn v1.0.107 (*)
+│   │   │   ├── phf_shared v0.8.0 (*)
+│   │   │   └── proc-macro-hack v0.5.20+deprecated (proc-macro)
+│   │   └── smallvec v1.10.0
+│   │   [build-dependencies]
+│   │   ├── proc-macro2 v1.0.49 (*)
+│   │   ├── quote v1.0.23 (*)
+│   │   └── syn v1.0.107 (*)
+│   ├── indexmap v1.9.2 (*)
+│   ├── once_cell v1.17.0
+│   ├── qname v0.1.0
+│   │   ├── qname-impl v0.1.0
+│   │   │   ├── proc-macro2 v1.0.49 (*)
+│   │   │   ├── quote v1.0.23 (*)
+│   │   │   └── syn v1.0.107 (*)
+│   │   └── qname-macro v0.1.0 (proc-macro)
+│   │       ├── proc-macro2 v1.0.49 (*)
+│   │       ├── qname-impl v0.1.0 (*)
+│   │       ├── quote v1.0.23 (*)
+│   │       └── syn v1.0.107 (*)
+│   ├── quick-xml v0.26.0
+│   │   └── memchr v2.5.0
+│   ├── selectors v0.23.0
+│   │   ├── bitflags v1.3.2
+│   │   ├── cssparser v0.28.1 (*)
+│   │   ├── derive_more v0.99.17 (proc-macro)
+│   │   │   ├── convert_case v0.4.0
+│   │   │   ├── proc-macro2 v1.0.49 (*)
+│   │   │   ├── quote v1.0.23 (*)
+│   │   │   └── syn v1.0.107 (*)
+│   │   │   [build-dependencies]
+│   │   │   └── rustc_version v0.4.0
+│   │   │       └── semver v1.0.16
+│   │   ├── fxhash v0.2.1
+│   │   │   └── byteorder v1.4.3
+│   │   ├── log v0.4.17 (*)
+│   │   ├── phf v0.8.0 (*)
+│   │   ├── precomputed-hash v0.1.1
+│   │   ├── servo_arc v0.1.1
+│   │   │   ├── nodrop v0.1.14
+│   │   │   └── stable_deref_trait v1.2.0
+│   │   └── smallvec v1.10.0
+│   │   [build-dependencies]
+│   │   └── phf_codegen v0.8.0
+│   │       ├── phf_generator v0.8.0 (*)
+│   │       └── phf_shared v0.8.0 (*)
+│   ├── slotmap v1.0.6
+│   │   [build-dependencies]
+│   │   └── version_check v0.9.4
+│   ├── tracing v0.1.37
+│   │   ├── cfg-if v1.0.0
+│   │   ├── pin-project-lite v0.2.9
+│   │   ├── tracing-attributes v0.1.23 (proc-macro)
+│   │   │   ├── proc-macro2 v1.0.49 (*)
+│   │   │   ├── quote v1.0.23 (*)
+│   │   │   └── syn v1.0.107 (*)
+│   │   └── tracing-core v0.1.30
+│   │       └── once_cell v1.17.0
+│   └── unic-ucd v0.9.0
+│       ├── unic-ucd-age v0.9.0
+│       │   ├── unic-char-property v0.9.0
+│       │   │   └── unic-char-range v0.9.0
+│       │   ├── unic-char-range v0.9.0
+│       │   └── unic-ucd-version v0.9.0
+│       │       └── unic-common v0.9.0
+│       ├── unic-ucd-bidi v0.9.0
+│       │   ├── unic-char-property v0.9.0 (*)
+│       │   ├── unic-char-range v0.9.0
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       ├── unic-ucd-block v0.9.0
+│       │   ├── unic-char-property v0.9.0 (*)
+│       │   ├── unic-char-range v0.9.0
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       ├── unic-ucd-case v0.9.0
+│       │   ├── unic-char-property v0.9.0 (*)
+│       │   ├── unic-char-range v0.9.0
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       ├── unic-ucd-category v0.9.0
+│       │   ├── matches v0.1.9
+│       │   ├── unic-char-property v0.9.0 (*)
+│       │   ├── unic-char-range v0.9.0
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       ├── unic-ucd-common v0.9.0
+│       │   ├── unic-char-property v0.9.0 (*)
+│       │   ├── unic-char-range v0.9.0
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       ├── unic-ucd-hangul v0.9.0
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       ├── unic-ucd-ident v0.9.0
+│       │   ├── unic-char-property v0.9.0 (*)
+│       │   ├── unic-char-range v0.9.0
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       ├── unic-ucd-name v0.9.0
+│       │   ├── unic-char-property v0.9.0 (*)
+│       │   ├── unic-ucd-hangul v0.9.0 (*)
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       ├── unic-ucd-name_aliases v0.9.0
+│       │   ├── unic-char-property v0.9.0 (*)
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       ├── unic-ucd-normal v0.9.0
+│       │   ├── unic-char-property v0.9.0 (*)
+│       │   ├── unic-char-range v0.9.0
+│       │   ├── unic-ucd-category v0.9.0 (*)
+│       │   ├── unic-ucd-hangul v0.9.0 (*)
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       ├── unic-ucd-segment v0.9.0
+│       │   ├── unic-char-property v0.9.0 (*)
+│       │   ├── unic-char-range v0.9.0
+│       │   └── unic-ucd-version v0.9.0 (*)
+│       └── unic-ucd-version v0.9.0 (*)
+└── xmlparser v0.13.5
+[dev-dependencies]
+├── rand v0.8.5
+│   ├── libc v0.2.139
+│   ├── rand_chacha v0.3.1
+│   │   ├── ppv-lite86 v0.2.17
+│   │   └── rand_core v0.6.4
+│   │       └── getrandom v0.2.8 (*)
+│   └── rand_core v0.6.4 (*)
+└── zip v0.6.3
+    ├── aes v0.7.5
+    │   ├── cfg-if v1.0.0
+    │   ├── cipher v0.3.0
+    │   │   └── generic-array v0.14.6
+    │   │       └── typenum v1.16.0
+    │   │       [build-dependencies]
+    │   │       └── version_check v0.9.4
+    │   ├── cpufeatures v0.2.5
+    │   └── opaque-debug v0.3.0
+    ├── byteorder v1.4.3
+    ├── bzip2 v0.4.4
+    │   ├── bzip2-sys v0.1.11+1.0.8
+    │   │   └── libc v0.2.139
+    │   │   [build-dependencies]
+    │   │   ├── cc v1.0.78 (*)
+    │   │   └── pkg-config v0.3.26
+    │   └── libc v0.2.139
+    ├── constant_time_eq v0.1.5
+    ├── crc32fast v1.3.2 (*)
+    ├── flate2 v1.0.25 (*)
+    ├── hmac v0.12.1
+    │   └── digest v0.10.6
+    │       ├── block-buffer v0.10.3
+    │       │   └── generic-array v0.14.6 (*)
+    │       ├── crypto-common v0.1.6
+    │       │   ├── generic-array v0.14.6 (*)
+    │       │   └── typenum v1.16.0
+    │       └── subtle v2.4.1
+    ├── pbkdf2 v0.11.0
+    │   ├── digest v0.10.6 (*)
+    │   ├── hmac v0.12.1 (*)
+    │   ├── password-hash v0.4.2
+    │   │   ├── base64ct v1.5.3
+    │   │   ├── rand_core v0.6.4 (*)
+    │   │   └── subtle v2.4.1
+    │   └── sha2 v0.10.6
+    │       ├── cfg-if v1.0.0
+    │       ├── cpufeatures v0.2.5
+    │       └── digest v0.10.6 (*)
+    ├── sha1 v0.10.5
+    │   ├── cfg-if v1.0.0
+    │   ├── cpufeatures v0.2.5
+    │   └── digest v0.10.6 (*)
+    ├── time v0.3.17
+    │   ├── itoa v1.0.5
+    │   ├── time-core v0.1.0
+    │   └── time-macros v0.2.6 (proc-macro)
+    │       └── time-core v0.1.0
+    └── zstd v0.11.2+zstd.1.5.2
+        └── zstd-safe v5.0.2+zstd.1.5.2
+            ├── libc v0.2.139
+            └── zstd-sys v2.0.5+zstd.1.5.2
+                └── libc v0.2.139
+                [build-dependencies]
+                ├── cc v1.0.78 (*)
+                └── pkg-config v0.3.26
+
+fr_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk)
+├── chrono v0.4.23 (*)
+├── context v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/context) (*)
+├── fern v0.6.1 (*)
+├── flume v0.10.14 (*)
+├── gdk v0.15.4
+│   ├── bitflags v1.3.2
+│   ├── cairo-rs v0.15.12
+│   │   ├── bitflags v1.3.2
+│   │   ├── cairo-sys-rs v0.15.1
+│   │   │   ├── glib-sys v0.15.10
+│   │   │   │   └── libc v0.2.139
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── system-deps v6.0.3
+│   │   │   │       ├── cfg-expr v0.11.0
+│   │   │   │       │   └── smallvec v1.10.0
+│   │   │   │       ├── heck v0.4.0
+│   │   │   │       ├── pkg-config v0.3.26
+│   │   │   │       ├── toml v0.5.10 (*)
+│   │   │   │       └── version-compare v0.1.1
+│   │   │   └── libc v0.2.139
+│   │   │   [build-dependencies]
+│   │   │   └── system-deps v6.0.3 (*)
+│   │   ├── glib v0.15.12
+│   │   │   ├── bitflags v1.3.2
+│   │   │   ├── futures-channel v0.3.25
+│   │   │   │   └── futures-core v0.3.25
+│   │   │   ├── futures-core v0.3.25
+│   │   │   ├── futures-executor v0.3.25
+│   │   │   │   ├── futures-core v0.3.25
+│   │   │   │   ├── futures-task v0.3.25
+│   │   │   │   └── futures-util v0.3.25
+│   │   │   │       ├── futures-core v0.3.25
+│   │   │   │       ├── futures-macro v0.3.25 (proc-macro)
+│   │   │   │       │   ├── proc-macro2 v1.0.49 (*)
+│   │   │   │       │   ├── quote v1.0.23 (*)
+│   │   │   │       │   └── syn v1.0.107 (*)
+│   │   │   │       ├── futures-task v0.3.25
+│   │   │   │       ├── pin-project-lite v0.2.9
+│   │   │   │       ├── pin-utils v0.1.0
+│   │   │   │       └── slab v0.4.7
+│   │   │   │           [build-dependencies]
+│   │   │   │           └── autocfg v1.1.0
+│   │   │   ├── futures-task v0.3.25
+│   │   │   ├── glib-macros v0.15.11 (proc-macro)
+│   │   │   │   ├── anyhow v1.0.68
+│   │   │   │   ├── heck v0.4.0
+│   │   │   │   ├── proc-macro-crate v1.2.1
+│   │   │   │   │   ├── once_cell v1.17.0
+│   │   │   │   │   ├── thiserror v1.0.38 (*)
+│   │   │   │   │   └── toml v0.5.10 (*)
+│   │   │   │   ├── proc-macro-error v1.0.4
+│   │   │   │   │   ├── proc-macro-error-attr v1.0.4 (proc-macro)
+│   │   │   │   │   │   ├── proc-macro2 v1.0.49 (*)
+│   │   │   │   │   │   └── quote v1.0.23 (*)
+│   │   │   │   │   │   [build-dependencies]
+│   │   │   │   │   │   └── version_check v0.9.4
+│   │   │   │   │   ├── proc-macro2 v1.0.49 (*)
+│   │   │   │   │   ├── quote v1.0.23 (*)
+│   │   │   │   │   └── syn v1.0.107 (*)
+│   │   │   │   │   [build-dependencies]
+│   │   │   │   │   └── version_check v0.9.4
+│   │   │   │   ├── proc-macro2 v1.0.49 (*)
+│   │   │   │   ├── quote v1.0.23 (*)
+│   │   │   │   └── syn v1.0.107 (*)
+│   │   │   ├── glib-sys v0.15.10 (*)
+│   │   │   ├── gobject-sys v0.15.10
+│   │   │   │   ├── glib-sys v0.15.10 (*)
+│   │   │   │   └── libc v0.2.139
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── system-deps v6.0.3 (*)
+│   │   │   ├── libc v0.2.139
+│   │   │   ├── once_cell v1.17.0
+│   │   │   ├── smallvec v1.10.0
+│   │   │   └── thiserror v1.0.38 (*)
+│   │   ├── libc v0.2.139
+│   │   └── thiserror v1.0.38 (*)
+│   ├── gdk-pixbuf v0.15.11
+│   │   ├── bitflags v1.3.2
+│   │   ├── gdk-pixbuf-sys v0.15.10
+│   │   │   ├── gio-sys v0.15.10
+│   │   │   │   ├── glib-sys v0.15.10 (*)
+│   │   │   │   ├── gobject-sys v0.15.10 (*)
+│   │   │   │   └── libc v0.2.139
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── system-deps v6.0.3 (*)
+│   │   │   ├── glib-sys v0.15.10 (*)
+│   │   │   ├── gobject-sys v0.15.10 (*)
+│   │   │   └── libc v0.2.139
+│   │   │   [build-dependencies]
+│   │   │   └── system-deps v6.0.3 (*)
+│   │   ├── gio v0.15.12
+│   │   │   ├── bitflags v1.3.2
+│   │   │   ├── futures-channel v0.3.25 (*)
+│   │   │   ├── futures-core v0.3.25
+│   │   │   ├── futures-io v0.3.25
+│   │   │   ├── gio-sys v0.15.10 (*)
+│   │   │   ├── glib v0.15.12 (*)
+│   │   │   ├── libc v0.2.139
+│   │   │   ├── once_cell v1.17.0
+│   │   │   └── thiserror v1.0.38 (*)
+│   │   ├── glib v0.15.12 (*)
+│   │   └── libc v0.2.139
+│   ├── gdk-sys v0.15.1
+│   │   ├── cairo-sys-rs v0.15.1 (*)
+│   │   ├── gdk-pixbuf-sys v0.15.10 (*)
+│   │   ├── gio-sys v0.15.10 (*)
+│   │   ├── glib-sys v0.15.10 (*)
+│   │   ├── gobject-sys v0.15.10 (*)
+│   │   ├── libc v0.2.139
+│   │   └── pango-sys v0.15.10
+│   │       ├── glib-sys v0.15.10 (*)
+│   │       ├── gobject-sys v0.15.10 (*)
+│   │       └── libc v0.2.139
+│   │       [build-dependencies]
+│   │       └── system-deps v6.0.3 (*)
+│   │   [build-dependencies]
+│   │   ├── pkg-config v0.3.26
+│   │   └── system-deps v6.0.3 (*)
+│   ├── gio v0.15.12 (*)
+│   ├── glib v0.15.12 (*)
+│   ├── libc v0.2.139
+│   └── pango v0.15.10
+│       ├── bitflags v1.3.2
+│       ├── glib v0.15.12 (*)
+│       ├── libc v0.2.139
+│       ├── once_cell v1.17.0
+│       └── pango-sys v0.15.10 (*)
+├── gdk-pixbuf v0.16.7
+│   ├── bitflags v1.3.2
+│   ├── gdk-pixbuf-sys v0.16.3
+│   │   ├── gio-sys v0.16.3
+│   │   │   ├── glib-sys v0.16.3
+│   │   │   │   └── libc v0.2.139
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── system-deps v6.0.3 (*)
+│   │   │   ├── gobject-sys v0.16.3
+│   │   │   │   ├── glib-sys v0.16.3 (*)
+│   │   │   │   └── libc v0.2.139
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── system-deps v6.0.3 (*)
+│   │   │   └── libc v0.2.139
+│   │   │   [build-dependencies]
+│   │   │   └── system-deps v6.0.3 (*)
+│   │   ├── glib-sys v0.16.3 (*)
+│   │   ├── gobject-sys v0.16.3 (*)
+│   │   └── libc v0.2.139
+│   │   [build-dependencies]
+│   │   └── system-deps v6.0.3 (*)
+│   ├── gio v0.16.7
+│   │   ├── bitflags v1.3.2
+│   │   ├── futures-channel v0.3.25 (*)
+│   │   ├── futures-core v0.3.25
+│   │   ├── futures-io v0.3.25
+│   │   ├── futures-util v0.3.25 (*)
+│   │   ├── gio-sys v0.16.3 (*)
+│   │   ├── glib v0.16.7
+│   │   │   ├── bitflags v1.3.2
+│   │   │   ├── futures-channel v0.3.25 (*)
+│   │   │   ├── futures-core v0.3.25
+│   │   │   ├── futures-executor v0.3.25 (*)
+│   │   │   ├── futures-task v0.3.25
+│   │   │   ├── futures-util v0.3.25 (*)
+│   │   │   ├── gio-sys v0.16.3 (*)
+│   │   │   ├── glib-macros v0.16.3 (proc-macro)
+│   │   │   │   ├── anyhow v1.0.68
+│   │   │   │   ├── heck v0.4.0
+│   │   │   │   ├── proc-macro-crate v1.2.1 (*)
+│   │   │   │   ├── proc-macro-error v1.0.4 (*)
+│   │   │   │   ├── proc-macro2 v1.0.49 (*)
+│   │   │   │   ├── quote v1.0.23 (*)
+│   │   │   │   └── syn v1.0.107 (*)
+│   │   │   ├── glib-sys v0.16.3 (*)
+│   │   │   ├── gobject-sys v0.16.3 (*)
+│   │   │   ├── libc v0.2.139
+│   │   │   ├── once_cell v1.17.0
+│   │   │   ├── smallvec v1.10.0
+│   │   │   └── thiserror v1.0.38 (*)
+│   │   ├── libc v0.2.139
+│   │   ├── once_cell v1.17.0
+│   │   ├── pin-project-lite v0.2.9
+│   │   ├── smallvec v1.10.0
+│   │   └── thiserror v1.0.38 (*)
+│   ├── glib v0.16.7 (*)
+│   └── libc v0.2.139
+├── gdk-sys v0.15.1 (*)
+├── gio v0.15.12 (*)
+├── glib v0.15.12 (*)
+├── gtk v0.15.5
+│   ├── atk v0.15.1
+│   │   ├── atk-sys v0.15.1
+│   │   │   ├── glib-sys v0.15.10 (*)
+│   │   │   ├── gobject-sys v0.15.10 (*)
+│   │   │   └── libc v0.2.139
+│   │   │   [build-dependencies]
+│   │   │   └── system-deps v6.0.3 (*)
+│   │   ├── bitflags v1.3.2
+│   │   ├── glib v0.15.12 (*)
+│   │   └── libc v0.2.139
+│   ├── bitflags v1.3.2
+│   ├── cairo-rs v0.15.12 (*)
+│   ├── field-offset v0.3.4
+│   │   └── memoffset v0.6.5
+│   │       [build-dependencies]
+│   │       └── autocfg v1.1.0
+│   │   [build-dependencies]
+│   │   └── rustc_version v0.3.3
+│   │       └── semver v0.11.0
+│   │           └── semver-parser v0.10.2
+│   │               └── pest v2.5.3
+│   │                   ├── thiserror v1.0.38 (*)
+│   │                   └── ucd-trie v0.1.5
+│   ├── futures-channel v0.3.25 (*)
+│   ├── gdk v0.15.4 (*)
+│   ├── gdk-pixbuf v0.15.11 (*)
+│   ├── gio v0.15.12 (*)
+│   ├── glib v0.15.12 (*)
+│   ├── gtk-sys v0.15.3
+│   │   ├── atk-sys v0.15.1 (*)
+│   │   ├── cairo-sys-rs v0.15.1 (*)
+│   │   ├── gdk-pixbuf-sys v0.15.10 (*)
+│   │   ├── gdk-sys v0.15.1 (*)
+│   │   ├── gio-sys v0.15.10 (*)
+│   │   ├── glib-sys v0.15.10 (*)
+│   │   ├── gobject-sys v0.15.10 (*)
+│   │   ├── libc v0.2.139
+│   │   └── pango-sys v0.15.10 (*)
+│   │   [build-dependencies]
+│   │   └── system-deps v6.0.3 (*)
+│   ├── gtk3-macros v0.15.4 (proc-macro)
+│   │   ├── anyhow v1.0.68
+│   │   ├── proc-macro-crate v1.2.1 (*)
+│   │   ├── proc-macro-error v1.0.4 (*)
+│   │   ├── proc-macro2 v1.0.49 (*)
+│   │   ├── quote v1.0.23 (*)
+│   │   └── syn v1.0.107 (*)
+│   ├── libc v0.2.139
+│   ├── once_cell v1.17.0
+│   └── pango v0.15.10 (*)
+│   [build-dependencies]
+│   └── pkg-config v0.3.26
+├── gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer) (*)
+├── itertools v0.10.5 (*)
+├── log v0.4.17 (*)
+├── once_cell v1.17.0
+├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources) (*)
+├── rust-i18n v1.1.0 (*)
+├── ui_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/ui_gtk)
+│   ├── base64 v0.13.1
+│   ├── flume v0.10.14 (*)
+│   ├── gdk-sys v0.15.1 (*)
+│   ├── gio v0.15.12 (*)
+│   ├── glib v0.15.12 (*)
+│   ├── gtk v0.15.5 (*)
+│   ├── gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer) (*)
+│   ├── log v0.4.17 (*)
+│   ├── lz4-compression v0.7.0
+│   ├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources) (*)
+│   ├── serde v1.0.152 (*)
+│   └── webkit2gtk v0.18.2
+│       ├── bitflags v1.3.2
+│       ├── cairo-rs v0.15.12 (*)
+│       ├── gdk v0.15.4 (*)
+│       ├── gdk-sys v0.15.1 (*)
+│       ├── gio v0.15.12 (*)
+│       ├── gio-sys v0.15.10 (*)
+│       ├── glib v0.15.12 (*)
+│       ├── glib-sys v0.15.10 (*)
+│       ├── gobject-sys v0.15.10 (*)
+│       ├── gtk v0.15.5 (*)
+│       ├── gtk-sys v0.15.3 (*)
+│       ├── javascriptcore-rs v0.16.0
+│       │   ├── bitflags v1.3.2
+│       │   ├── glib v0.15.12 (*)
+│       │   └── javascriptcore-rs-sys v0.4.0
+│       │       ├── glib-sys v0.15.10 (*)
+│       │       ├── gobject-sys v0.15.10 (*)
+│       │       └── libc v0.2.139
+│       │       [build-dependencies]
+│       │       └── system-deps v5.0.0
+│       │           ├── cfg-expr v0.9.1
+│       │           │   └── smallvec v1.10.0
+│       │           ├── heck v0.3.3
+│       │           │   └── unicode-segmentation v1.10.0
+│       │           ├── pkg-config v0.3.26
+│       │           ├── toml v0.5.10 (*)
+│       │           └── version-compare v0.0.11
+│       ├── libc v0.2.139
+│       ├── once_cell v1.17.0
+│       ├── soup2 v0.2.1
+│       │   ├── bitflags v1.3.2
+│       │   ├── gio v0.15.12 (*)
+│       │   ├── glib v0.15.12 (*)
+│       │   ├── libc v0.2.139
+│       │   ├── once_cell v1.17.0
+│       │   └── soup2-sys v0.2.0
+│       │       ├── bitflags v1.3.2
+│       │       ├── gio-sys v0.15.10 (*)
+│       │       ├── glib-sys v0.15.10 (*)
+│       │       ├── gobject-sys v0.15.10 (*)
+│       │       └── libc v0.2.139
+│       │       [build-dependencies]
+│       │       └── system-deps v5.0.0 (*)
+│       └── webkit2gtk-sys v0.18.0
+│           ├── atk-sys v0.15.1 (*)
+│           ├── bitflags v1.3.2
+│           ├── cairo-sys-rs v0.15.1 (*)
+│           ├── gdk-pixbuf-sys v0.15.10 (*)
+│           ├── gdk-sys v0.15.1 (*)
+│           ├── gio-sys v0.15.10 (*)
+│           ├── glib-sys v0.15.10 (*)
+│           ├── gobject-sys v0.15.10 (*)
+│           ├── gtk-sys v0.15.3 (*)
+│           ├── javascriptcore-rs-sys v0.4.0 (*)
+│           ├── libc v0.2.139
+│           ├── pango-sys v0.15.10 (*)
+│           └── soup2-sys v0.2.0 (*)
+│           [build-dependencies]
+│           ├── pkg-config v0.3.26
+│           └── system-deps v6.0.3 (*)
+└── webkit2gtk v0.18.2 (*)
+
+gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer) (*)
+
+resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources) (*)
+
+testing v0.0.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/testing)
+├── base64 v0.13.1
+├── bincode v1.3.3 (*)
+├── chrono v0.4.23 (*)
+├── context v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/context) (*)
+├── fern v0.6.1 (*)
+├── flate2 v1.0.25 (*)
+├── flume v0.10.14 (*)
+├── fr_core v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_core) (*)
+├── fr_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk) (*)
+├── gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer) (*)
+├── http v0.2.8
+│   ├── bytes v1.3.0
+│   ├── fnv v1.0.7
+│   └── itoa v1.0.5
+├── log v0.4.17 (*)
+├── lz4-compression v0.7.0
+├── once_cell v1.17.0
+├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources) (*)
+├── rust-i18n v1.1.0 (*)
+├── rust-ini v0.17.0
+│   ├── cfg-if v1.0.0
+│   └── ordered-multimap v0.3.1
+│       ├── dlv-list v0.2.3
+│       │   └── rand v0.8.5 (*)
+│       └── hashbrown v0.9.1
+│           └── ahash v0.4.7
+├── serde v1.0.152 (*)
+├── serde-xml-rs v0.6.0
+│   ├── log v0.4.17 (*)
+│   ├── serde v1.0.152 (*)
+│   ├── thiserror v1.0.38 (*)
+│   └── xml-rs v0.8.4
+├── serde_json v1.0.91 (*)
+└── ui_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/ui_gtk) (*)
+[dev-dependencies]
+├── rand v0.8.5 (*)
+└── rusqlite v0.27.0 (*)
+
+ui_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/ui_gtk) (*)

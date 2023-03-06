@@ -1,7 +1,5 @@
-# Created a complete separate build environment for the debian package, due to 
-# https://wiki.debian.org/Rust 
-
-
+# Created a complete separate build environment for the debian package, due to
+# https://wiki.debian.org/Rust
 
 [build]
 target-dir = "../target"
@@ -13,4 +11,3 @@ target-dir = "../target"
 directory = "/usr/share/cargo/registry"
 [source.crates-io]
 replace-with = "debian-packages"
-
