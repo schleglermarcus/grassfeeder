@@ -18,7 +18,7 @@ use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UISenderWrapper;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::PropDef;
-use libappindicator::AppIndicatorStatus;
+// use libappindicator::AppIndicatorStatus;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;
@@ -29,20 +29,20 @@ pub struct GtkModelUpdaterInt {
     m_v_store: UIAdapterValueStoreType,
     g_o_a: GtkObjectsType,
     pixbufcache: RefCell<HashMap<String, Pixbuf>>,
-    ev_sender_w: Arc<dyn UISenderWrapper + Send + Sync + 'static>,
+    // ev_sender_w: Arc<dyn UISenderWrapper + Send + Sync + 'static>,
 }
 
 impl GtkModelUpdaterInt {
     pub fn new(
         g_m_v_s: UIAdapterValueStoreType,
         gtkobjects_a: GtkObjectsType,
-        ev_se_w: Arc<dyn UISenderWrapper + Send + Sync + 'static>,
+        _ev_se_w: Arc<dyn UISenderWrapper + Send + Sync + 'static>,
     ) -> Self {
         GtkModelUpdaterInt {
             m_v_store: g_m_v_s,
             g_o_a: gtkobjects_a,
             pixbufcache: RefCell::new(HashMap::new()),
-            ev_sender_w: ev_se_w,
+            // ev_sender_w: ev_se_w,
         }
     }
 
@@ -639,32 +639,34 @@ impl GtkModelUpdaterInt {
         }
     }
 
-    pub fn update_tray_icon(&self, enable: bool) {
-        let indicator_present;
-        {
-            let g_o = (*self.g_o_a).read().unwrap();
-            indicator_present = g_o.get_indicator().is_some();
-        }
-        // trace!(            "updateTray pres:{}-> EN:{}  -> CR:{}",            indicator_present,            enable,            do_create_systray        );
-        if !indicator_present && enable {
-            let store = (self.m_v_store).read().unwrap();
-            let app_url = store.get_gui_property_or(PropDef::AppUrl, "no-app-url".to_string());
+    /*
+        pub fn update_tray_icon(&self, enable: bool) {
+            let indicator_present;
+            {
+                let g_o = (*self.g_o_a).read().unwrap();
+                indicator_present = g_o.get_indicator().is_some();
+            }
+            // trace!(            "updateTray pres:{}-> EN:{}  -> CR:{}",            indicator_present,            enable,            do_create_systray        );
+            if !indicator_present && enable {
+                let store = (self.m_v_store).read().unwrap();
+                let app_url = store.get_gui_property_or(PropDef::AppUrl, "no-app-url".to_string());
+                let mut g_o = (*self.g_o_a).write().unwrap();
+                if let Some(create_fn) = g_o.get_create_systray_fn() {
+                    let ind = (*create_fn)(self.ev_sender_w.clone(), app_url);
+                    g_o.set_indicator(Some(ind));
+                }
+            }
             let mut g_o = (*self.g_o_a).write().unwrap();
-            if let Some(create_fn) = g_o.get_create_systray_fn() {
-                let ind = (*create_fn)(self.ev_sender_w.clone(), app_url);
-                g_o.set_indicator(Some(ind));
+            if let Some(indica) = g_o.get_indicator_mut() {
+                let new_status = if enable {
+                    AppIndicatorStatus::Active
+                } else {
+                    AppIndicatorStatus::Passive
+                };
+                indica.set_status(new_status);
             }
         }
-        let mut g_o = (*self.g_o_a).write().unwrap();
-        if let Some(indica) = g_o.get_indicator_mut() {
-            let new_status = if enable {
-                AppIndicatorStatus::Active
-            } else {
-                AppIndicatorStatus::Passive
-            };
-            indica.set_status(new_status);
-        }
-    }
+    */
 
     pub fn memory_conserve(&self, active: bool) {
         if active {

@@ -26,7 +26,6 @@ fern = { version = "0.6", features = ["colored"] }
 chrono = ">=0.4.19"
 tinybmp = ">=0.3.3"
 ico = ">=0.1.0"
-jpeg-decoder = ">=0.2"
 tl = ">=0.7.5"
 usvg = "0.23.0"	# compile error with 0.24.0. https://github.com/RazrFalcon/resvg/issues/552
 serde = ">=1.0.137"
@@ -41,11 +40,17 @@ rusqlite = { version = ">=0.27.0", features = ["bundled"] }
 regex = ">=1.5.6"
 proc-status = ">=0.1.1"
 png = ">=0.17.6"
-gif = ">=0.11.4"
 xmlparser = ">=0.13.5"
 signal-hook = ">=0.3.14"
 rust-i18n = ">=1.0.1"
 once_cell = ">=1.12.0"
+
+
+# jpeg-decoder = ">=0.2"	# Downgrade for debian repo
+jpeg-decoder = ">=0.1.22"
+
+# gif = ">=0.12.0"	# Downgrade for debian repo
+gif = ">=0.10.2"
 
 # xmlem = "=0.2.2"	# Produces error:
 # error[E0599]: no method named `unescape_value` found for struct `Attribute` in the current scope

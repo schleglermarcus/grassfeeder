@@ -18,7 +18,7 @@ use gtk::Application;
 use gtk::Window;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
-use gui_layer::abstract_ui::UiSenderWrapperType;
+// use gui_layer::abstract_ui::UiSenderWrapperType;
 use std::sync::Arc;
 use std::sync::RwLock;
 use webkit2gtk::WebContext;
@@ -82,8 +82,7 @@ pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>
 pub type CreateWebViewFnType =
     Option<Box<dyn Fn(&WebContext, Option<u8>, Sender<GuiEvents>) -> WebView>>;
 
-pub type CreateSystrayFnType =
-    Option<Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>>;
+// pub type CreateSystrayFnType =    Option<Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>>;
 
 pub trait GtkObjects {
     fn get_window(&self) -> Option<Window>;
@@ -161,6 +160,7 @@ pub trait GtkObjects {
     fn set_searchentry(&mut self, idx: u8, e: &gtk::SearchEntry);
     fn get_searchentry(&self, idx: u8) -> Option<&gtk::SearchEntry>;
 
+/*
     fn set_indicator(&mut self, i: Option<libappindicator::AppIndicator>);
     fn get_indicator(&self) -> Option<&libappindicator::AppIndicator>;
     fn get_indicator_mut(&mut self) -> Option<&mut libappindicator::AppIndicator>;
@@ -173,6 +173,7 @@ pub trait GtkObjects {
     fn get_create_systray_fn(
         &self,
     ) -> Option<&dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>;
+*/
 
     fn set_gui_event_sender(&mut self, ev_se: Sender<GuiEvents>);
     fn fet_gui_event_sender(&mut self) -> Option<Sender<GuiEvents>>;

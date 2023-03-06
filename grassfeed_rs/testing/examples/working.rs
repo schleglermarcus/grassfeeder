@@ -121,12 +121,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_feedburner = format!("{}/feedburner.rss", addr);
     let url_r_foto = format!("{}/reddit-Fotografie.rss", addr);
     let url_insi = format!("{}/newsinsideout_com.rss", addr);
-    // let f2 = feedsources.add_new_folder_at_parent("folder2".to_string(), 0);
-    // feedsources.add_new_folder_at_parent("F3".to_string(), f2);
-    // feedsources.add_new_folder_at_parent("F4".to_string(), f2);
-    // feedsources.add_new_folder_at_parent("F5".to_string(), f2);
-    // feedsources.add_new_folder_at_parent("F6".to_string(), f2);
-    // feedsources.add_new_folder_at_parent("F7".to_string(), f2);
     let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
     feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder1, false);
 
@@ -174,7 +168,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         // feedsources.add_new_folder_at_parent("5_3".to_string(), f5);
         // feedsources.add_new_folder_at_parent("5_4".to_string(), f5);
     }
-    if false {
+    if true {
         let src = [
             ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
             ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),

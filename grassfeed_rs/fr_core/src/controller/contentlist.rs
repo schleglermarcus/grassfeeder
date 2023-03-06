@@ -38,7 +38,7 @@ use std::rc::Weak;
 use std::sync::RwLock;
 use webbrowser;
 
-const JOBQUEUE_SIZE: usize = 100;
+const JOBQUEUE_SIZE: usize = 200;
 const LIST_SCROLL_POS: i8 = 80; // to 70% of the upper list is visible, the cursor shall go to the lower 30%
 
 #[derive(Debug, Clone, PartialEq, Eq)]

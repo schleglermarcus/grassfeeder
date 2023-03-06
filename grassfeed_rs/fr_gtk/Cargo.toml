@@ -27,7 +27,9 @@ gdk = "^0.15.2"
 webkit2gtk = {  version = "0.18.2", default-features = false,  features = [ "v2_36"]  }
 gdk-sys = "^0.15.1"
 gdk-pixbuf = ">=0.15.11"
-libappindicator = ">=0.7.1"
+
+# downgrading the feature for debian integration
+# libappindicator = ">=0.7.1"
 
 
 # cargo run  --example icons

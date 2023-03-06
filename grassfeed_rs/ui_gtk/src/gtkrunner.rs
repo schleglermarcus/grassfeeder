@@ -1,7 +1,7 @@
 use crate::gtk::prelude::ContainerExt;
 use crate::gtk::prelude::WidgetExt;
 use crate::runner_internal::GtkRunnerInternal;
-use crate::CreateSystrayFnType;
+// use crate::CreateSystrayFnType;
 use crate::CreateWebViewFnType;
 use crate::DialogDataDistributor;
 use crate::GtkBuilderType;
@@ -34,7 +34,7 @@ use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UISenderWrapper;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
-use gui_layer::abstract_ui::UiSenderWrapperType;
+// use gui_layer::abstract_ui::UiSenderWrapperType;
 use gui_layer::gui_values::PropDef;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -199,8 +199,8 @@ pub struct GtkObjectsImpl {
     create_webview_fn: CreateWebViewFnType,
     browser_config: CreateBrowserConfig,
     pub searchentries: Vec<SearchEntry>,
-    pub indicator: Option<libappindicator::AppIndicator>,
-    create_systray_fn: CreateSystrayFnType,
+    // pub indicator: Option<libappindicator::AppIndicator>,
+    //  create_systray_fn: CreateSystrayFnType,
     gui_event_sender: Option<Sender<GuiEvents>>,
 }
 
@@ -555,31 +555,33 @@ impl GtkObjects for GtkObjectsImpl {
         self.searchentries[idx as usize] = p.clone();
     }
 
-    fn set_indicator(&mut self, i: Option<libappindicator::AppIndicator>) {
-        self.indicator = i;
-    }
+    /*  removed this for debian integration
+        fn set_indicator(&mut self, i: Option<libappindicator::AppIndicator>) {
+            self.indicator = i;
+        }
 
-    fn get_indicator(&self) -> Option<&libappindicator::AppIndicator> {
-        self.indicator.as_ref()
-    }
+        fn get_indicator(&self) -> Option<&libappindicator::AppIndicator> {
+            self.indicator.as_ref()
+        }
 
-    fn get_indicator_mut(&mut self) -> Option<&mut libappindicator::AppIndicator> {
-        self.indicator.as_mut()
-    }
+        fn get_indicator_mut(&mut self) -> Option<&mut libappindicator::AppIndicator> {
+            self.indicator.as_mut()
+        }
 
-    fn set_create_systray_fn(
-        &mut self,
-        systray_fn: Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>,
-    ) {
-        self.create_systray_fn = Some(systray_fn);
-    }
+        fn set_create_systray_fn(
+            &mut self,
+            systray_fn: Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>,
+        ) {
+            self.create_systray_fn = Some(systray_fn);
+        }
 
-    fn get_create_systray_fn(
-        &self,
-    ) -> Option<&dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator> {
-        self.create_systray_fn.as_ref()?;
-        Some(self.create_systray_fn.as_ref().unwrap())
-    }
+        fn get_create_systray_fn(
+            &self,
+        ) -> Option<&dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator> {
+            self.create_systray_fn.as_ref()?;
+            Some(self.create_systray_fn.as_ref().unwrap())
+        }
+    */
 
     fn set_gui_event_sender(&mut self, ev_se: Sender<GuiEvents>) {
         self.gui_event_sender = Some(ev_se);

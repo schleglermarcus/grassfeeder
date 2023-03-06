@@ -198,8 +198,9 @@ impl GtkRunnerInternal {
                         is_minimized.store(act, Ordering::Relaxed);
                         upd_int.memory_conserve(act);
                     }
-                    IntCommands::TrayIconEnable(act) => {
-                        upd_int.update_tray_icon(act);
+                    IntCommands::TrayIconEnable(_act) => {
+                        debug!("  INT:  TrayIconEnable empty ");
+                        //  upd_int.update_tray_icon(act);
                     }
                     IntCommands::UpdateWindowMinimized(mini, ev_time) => {
                         upd_int.update_window_minimized(mini, ev_time)

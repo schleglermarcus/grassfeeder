@@ -2,7 +2,7 @@ use crate::dialogs::create_dialogs;
 use crate::gtk::prelude::WidgetExt;
 use crate::load_css::TAB_MARKER_HEIGHT;
 use crate::messagelist::create_listview;
-use crate::systray_icon::create_systray_icon_3;
+// use crate::systray_icon::create_systray_icon_3;
 use crate::util::process_string_to_image;
 use crate::util::DragState;
 use crate::util::EvSenderWrapper;
@@ -248,8 +248,7 @@ impl GtkGuiBuilder for GtkObjectTree {
             ret.set_paned(PANED_1_LEFT, &paned_1);
             ret.set_scrolledwindow(SCROLLEDWINDOW_0, &scrolledwindow_0);
             ret.set_scrolledwindow(SCROLLEDWINDOW_1, &scrolledwindow_1);
-
-            ret.set_create_systray_fn(Box::new(create_systray_icon_3));
+            //  ret.set_create_systray_fn(Box::new(create_systray_icon_3));
         }
         connect_keyboard(gui_event_sender, gtk_obj_a.clone());
     }

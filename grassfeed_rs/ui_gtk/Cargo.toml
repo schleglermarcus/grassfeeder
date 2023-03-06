@@ -11,12 +11,15 @@ log = "0.4.14"
 webkit2gtk = {  version = "0.18.2", default-features = false,  features = [ "v2_36"]  }
 
 flume = "0.10.9"
-gtk = { version = "0.15.5", features = ["v3_22_30"] }	# backport to ubuntu20
 # gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
+gtk = { version = "0.15.5", features = ["v3_22_30"] }	# backport to ubuntu20
+
 glib = "^0.15.5"
 lz4-compression ="0.7.0"
 base64 = "^0.13.0"
 gio = "^0.15.5"
 serde = ">=1.0.133"
 gdk-sys = "^0.15.1"
-libappindicator = ">=0.7.1"
+
+# downgrading for debian intagration
+# libappindicator = ">=0.7.1"

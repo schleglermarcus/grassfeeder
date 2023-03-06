@@ -222,6 +222,47 @@ Uploading grassfeeder_0.1.7_source.changes
 <marcus_der_schlegler> I can create working debian packages already with cargo-deb.  Any next ideas how to proceed?
 <noctis> hi, debcargo has basically no support for "off grid" crates. you likely need to follow the old manual path
 
+<capitol> check how many of them that we already have packaged with debcargo
+<capitol> https://crates.io/crates/debcargo
+<capitol> sorry, cargo-debstatus i meant: https://crates.io/crates/cargo-debstatus
+<capitol> it's getting late here
+
+<capitol> check how many of them that we already have packaged with debcargo
+<capitol> https://crates.io/crates/debcargo
+<capitol> sorry, cargo-debstatus i meant: https://crates.io/crates/cargo-debstatus
+<capitol> it's getting late here
+<count_omega> that is being worked on by bastif and myself
+<count_omega> may I ask which program you're trying to package ?
+<count_omega> cargo-debstatus shows you conveniently which packes/crates are
+missing. just run it against the cloned repo of the program.
+<count_omega> https://paste.debian.net/1272973/
+<marcus_der_schlegler> i see it.  2nd chapter are local repos, directly available.
+<marcus_der_schlegler> for the other chapters, I am not sure what you mean with
+   "from scratch". I guess they are not in the debian repo yet
+<count_omega> didn't check 100% but I deleted all gtk-related stuff and packages
+skipped by cargo-debstatus where a newer version is in debian. I'd suggest to
+begin with with qname* , unic* and i18n stuff since that is the biggest chunk imho
+<count_omega> yeah, they need packaging from scratch
+
+<count_omega> didn't check 100% but I deleted all gtk-related stuff and packages
+skipped by cargo-debstatus where a newer version is in debian. I'd suggest
+to begin with with qname* , unic* and i18n stuff since that is the biggest chunk imho
+<count_omega> yeah, they need packaging from scratch
+<count_omega> It's a lot of packages, granted, even sans the gtk stuff. But
+packaging a crate is straightforward and faster than a regular debian package
+imho. if you want to dive in. I'd suggest thsi red
+<count_omega> https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
+<count_omega> I'm sure most of the packages missing will be packaged by the
+rust team, but likely not all of them
+<count_omega> well the qname* stuff for instance would be an easy start
+for packaging a rust crate
+
+<count_omega> I meant since a big chuck of the crates your program uses are not in debian an official debian package will less likely happen cargo-deb is a good way to distribute it in the meantime. it's not an issur if you don't want to maintain all those crates
+<count_omega> *issue
+<count_omega> You could file a RPF (request for packaging bug ) againt the wnpp package
+<count_omega> *against
+
+
 
 
 https://lib.rs/crates/debian-packaging
