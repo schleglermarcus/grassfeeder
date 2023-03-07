@@ -105,9 +105,48 @@ mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.7.1\"/\{version=\">=0.7.1\", path=\"..\/embedded-graphics-embedded-graphics-v0.7.1\" \} /"		>$F
 
 
-F=target/rustls-v-0.20.8/Cargo.toml
+F=target/rustls-v-0.20.8/rustls/Cargo.toml
+mv $F ${F}.0	# downgrading  ring, sct, webpki
+cat ${F}.0 |sed -e "s/\"0.16.20\"/\">=0.16.9\" /"		\
+	|sed -e "s/\"0.7.0\"/\">=0.6.0\" /"		\
+	|sed -e "s/\"0.22.0\"/\">=0.21.0\" /"		\
+	>$F
+
+F=target/ureq-2.6.2/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.16.20\"/\">=0.16.9\" /"		>$F
+cat ${F}.0 |sed -e "s/rustls = { version = \"/rustls = \{path=\"..\/rustls-v-0.20.8\/rustls\", version=\">=/"		\
+		|sed -e "s/url = \"2\"/url=\{version=\">=2.0\", path=\"..\/rust-url-2.3.0\/url\"\} /"	\
+		|sed -e "s/webpki = { version = \"0.22\"/webpki=\{version=\">=0.21\"  /"	\
+		|sed -e "s/webpki-roots = {/\webpki-roots={path=\"..\/webpki-roots-v-0.22.6\"\,  /"	\
+	>$F
+
+F=target/resvg-0.29.0/usvg/Cargo.toml
+mv $F ${F}.0		# downgrading base64 ,  data-url  imagesize   kurbo		rctree	strict-num
+cat ${F}.0 	|sed -e "s/\"0.21\"/\">=0.13\" /"\
+		|sed -e "s/\"0.2\"/\">=0.1\" /"	\
+		|sed -e "s/\"0.11\"/\{version=\"0.11\", path=\"..\/..\/imagesize-0.11.0\"\}  /" \
+		|sed -e "s/\"0.9\"/\">=0.7\" /"	\
+		|sed -e "s/\"0.5\"/\">=0.3\" /"	\
+		|sed -e "s/strict-num = \"0.1\"/strict-num={version=\">=0.1\", path=\"..\/..\/strict-num-0.1.0\"\}  /" \
+				>$F
+
+F=target/strict-num-0.1.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.9\"/\">=0.6\" /"	>$F
+
+F=target/webpki-roots-v-0.22.6/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.22.0\"/\">=0.21.0\" /"	>$F
+
+F=target/xmlem-0.2.0/Cargo.toml
+mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors
+cat ${F}.0 	|sed -e "s/\"0.28.1\"/{version=\">=0.28\", path=\"..\/rust-cssparser-0.28.0\"\}  /" \
+	|sed -e "s/\"1.8.1\"/\">=1.7.0\" /"	\
+	|sed -e "s/\"1.10.0\"/\">=1.9.0\" /" \
+	|sed -e "s/\"0.1.0\"/\{version=\"0.1.0\", path=\"..\/qname-0.1.0\"\}  /" \
+	|sed -e "s/\"0.26.0\"/\{version=\">=0.25.0\", path=\"..\/quick-xml-0.25.0\"\}  /" \
+	|sed -e "s/\"0.23.0\"/\">=0.22.0\" /"	\
+	>$F
 
 
 #

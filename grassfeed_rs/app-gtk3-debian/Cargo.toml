@@ -74,6 +74,12 @@ embedded-graphics = { path="target/embedded-graphics-embedded-graphics-v0.7.1" }
 az = { path="target/az-v1.1.0" }
 micromath = { path="target/micromath-1.1.1" }
 rustls = { path="target/rustls-v-0.20.8/rustls" }
+webpki-roots = { path="target/webpki-roots-v-0.22.6" }
+imagesize = { path="target/imagesize-0.11.0" }
+strict-num = { path="target/strict-num-0.1.0" }
+cssparser = { path="target/rust-cssparser-0.28.0" }
+qname = { path="target/qname-0.1.0" }
+selectors = { path="target/servo-selectors-v0.22.0/components/selectors" }
 
 
 
