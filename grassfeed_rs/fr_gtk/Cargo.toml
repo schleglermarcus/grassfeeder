@@ -12,7 +12,7 @@ ui_gtk = { path = "../ui_gtk" }
 resources = { path = "../resources" }
 log = "0.4.11"
 fern = { version = "0.6", features = ["colored"] }
-flume = "0.10.9"
+flume = { version="0.10.9", path="../app-gtk3-debian/target/flume-master" } 
 itertools = "0.10.1"
 chrono = ">=0.4.19"
 rust-i18n = ">=1.0.1"

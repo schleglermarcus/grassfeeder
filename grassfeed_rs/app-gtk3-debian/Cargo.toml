@@ -80,6 +80,11 @@ strict-num = { path="target/strict-num-0.1.0" }
 cssparser = { path="target/rust-cssparser-0.28.0" }
 qname = { path="target/qname-0.1.0" }
 selectors = { path="target/servo-selectors-v0.22.0/components/selectors" }
+derive_more = { path="target/derive_more-0.99.17" }
+convert_case = { path="target/convert_case-0.6.0" }
+slotmap = { path="target/slotmap-1.0.6" }
+unic-ucd = { path="target/rust-unic-0.9.0/unic/ucd" }
+
 
 
 

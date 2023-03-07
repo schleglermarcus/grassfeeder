@@ -100,6 +100,11 @@ cat ${F}.0 |sed -e "s/\"1.1\"/\{version=\">=1.1\", path=\"..\/az-v1.1.0\"\} /" \
 	|sed -e "s/\"1.1.0\"/\">=1.1.0\", path=\"..\/micromath-1.1.1\" /" \
 	|sed -e "s/\"0.8.0\"/\">=0.6.0\" /" 			>$F
 
+F=target/embedded-graphics-embedded-graphics-v0.7.1/core/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"1.1\"/\{version=\">=1.1\", path=\"..\/..\/az-v1.1.0\"\} /" 		>$F
+
+
 F=target/tinybmp-0.4.0/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.7.1\"/\{version=\">=0.7.1\", path=\"..\/embedded-graphics-embedded-graphics-v0.7.1\" \} /"		>$F
@@ -139,14 +144,32 @@ mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.22.0\"/\">=0.21.0\" /"	>$F
 
 F=target/xmlem-0.2.0/Cargo.toml
-mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors
+mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors, thin-slice, slotmap, unic-ucd
 cat ${F}.0 	|sed -e "s/\"0.28.1\"/{version=\">=0.28\", path=\"..\/rust-cssparser-0.28.0\"\}  /" \
 	|sed -e "s/\"1.8.1\"/\">=1.7.0\" /"	\
 	|sed -e "s/\"1.10.0\"/\">=1.9.0\" /" \
 	|sed -e "s/\"0.1.0\"/\{version=\"0.1.0\", path=\"..\/qname-0.1.0\"\}  /" \
 	|sed -e "s/\"0.26.0\"/\{version=\">=0.25.0\", path=\"..\/quick-xml-0.25.0\"\}  /" \
-	|sed -e "s/\"0.23.0\"/\">=0.22.0\" /"	\
+	|sed -e "s/\"0.23.0\"/{version=\">=0.22.0\", path=\"..\/servo-selectors-v0.22.0\/components\/selectors\"\}  /"	\
+	|sed -e "s/\"1.0.6\"/{version=\">=1.0.6\", path=\"..\/slotmap-1.0.6\"\}  /"	\
+	|sed -e "s/\"0.9.0\"/{version=\"0.9.0\", path=\"..\/rust-unic-0.9.0\/unic\/ucd\" \}  /"	\
 	>$F
+
+F=target/servo-selectors-v0.22.0/components/selectors/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.27\"/\{version=\">=0.27\" , path=\"..\/..\/..\/rust-cssparser-0.28.0\"  \}/"	\
+ 	|sed -e "s/\"0.99\"/\{version=\">=0.99\" , path=\"..\/..\/..\/derive_more-0.99.17\"  \}/"	\
+	|sed -e "s/\"0.1.0\"/\">=0.1.0\" /"	\
+	>$F
+
+F=target/convert_case-0.6.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"1.9.0\"/\">=1.6.0\" /"	>$F
+
+F=target/derive_more-0.99.17/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/convert_case = { version = \"0.4\"/convert_case=\{version=\">=0.4\", path=\"..\/convert_case-0.6.0\"\   /"	>$F
+
 
 
 #
