@@ -11,6 +11,9 @@
   - tinybmp v0.4.0						missing
   -	tl v0.7.7									missing     Fast HTML parser written in pure Rust
 	- xmlem v0.2.1
+  - hashlink
+
+
 
 - Debian packages for distribution, Downgrading
   - gif v0.12.0  =>		librust-gif-dev	0.10.2-2
@@ -27,7 +30,33 @@
 	- glob v0.3.1 		=>  librust-glob-dev 0.3.0-1
 	- log v0.4.17		=>	librust-log-dev 	0.4.11-2
   - once_cell v1.17.0		=>   librust-once-cell-dev	1.9.0-2
-
+  - regex v1.7.1		=>  librust-regex-dev	1.5.4-1ubuntu0.1
+  - serde v1.0.152	=>						librust-serde-dev  1.0.130-2
+  - serde_json v1.0.91 => 				librust-serde-json-dev  1.0.45-1
+	- signal-hook v0.3.14 	=>  librust-signal-hook-dev  0.3.13-2
+  - webbrowser v0.8.4			=> librust-webbrowser-dev  0.5.2-2
+ 	- xmlparser v0.13.5  =>  librust-xmlparser-dev	 0.11.0-1
+	- color_quant v1.1.0	=> 	librust-color-quant-dev  1.0.1-2
+  - miniz_oxide v0.6.2		=> 		librust-miniz-oxide-dev		0.4.4-2
+	- threadpool v1.8.1		=> librust-threadpool-dev		=> Version: 1.7.1-1
+	- num-rational v0.4.1		=>	librust-num-rational-dev		 0.4.0-1
+	- scoped_threadpool v0.1.9		=>  librust-scoped-threadpool-dev   0.1.9-1
+ 	- tiff v0.8.1		=>		librust-tiff-dev	 0.5.0-2
+	- rayon v1.6.1	=>	 librust-rayon-dev	1.4.1-1
+  - vcpkg v0.2.15 	=> librust-vcpkg-dev		0.2.8-1
+  -	getrandom v0.2.8		=>		 librust-getrandom-dev	0.2.4-2
+  - deflate "1.0" => librust-deflate-dev	0.7.20-2
+	- encoding_rs v0.8.31		=>  librust-encoding-rs-dev  0.8.22-1
+	- memchr v2.5.0		=>	librust-memchr-dev		2.4.1-1
+	- aho-corasick v0.7.20	=>	librust-aho-corasick-dev  0.7.10-1
+  - fallible-iterator v0.2.0	=> librust-fallible-iterator-dev	0.2.0-2
+	- fallible-streaming-iterator v0.1.9	=> 	librust-fallible-streaming-iterator-dev 	0.1.9-1
+  - hashbrown v0.11.2	=>	librust-hashbrown-dev		0.11.2-2
+ 	- clap v2.34.0		=>	librust-clap-dev 2.33.3-1
+  - itertools v0.10.5		=> librust-itertools-dev		0.10.1-1
+  - float-cmp v0.8.0		=>  librust-float-cmp-dev		0.6.0-3
+  - flate2 v1.0.25	=>	librust-flate2-dev		 1.0.22-1
+	- ring v0.16.20	=>	librust-ring-dev	 0.16.9-4
 
 
 - Downgrade failed!
@@ -36,7 +65,10 @@
 	- uuid v1.2.2					=> librust-uuid-dev 0.8.1-4
 	- spin v0.9.4				=> librust-spin-dev  0.5.2-1
    - 	jpeg-decoder v0.3.0 Version: 0.3.0-1
-
+	 - usvg v0.23.0	=>  librust-usvg-dev	0.8.0-4
+		# failed to read `/usr/share/cargo/registry/usvg-0.8.0/.cargo-checksum.json`
+	- png v0.17.7 				=> librust-png-dev 0.15.0-1		#    rust-ico requires png-0.17
+	- half v2.2.1 => librust-half-dev  1.6.0-2
 
 
 

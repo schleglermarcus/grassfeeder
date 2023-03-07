@@ -5,4 +5,5 @@ authors = ["marcus"]
 edition = "2018"
 
 [dependencies]
-serde = { version = ">=1.0.137", features = ["derive"] }
+# serde = { version = ">=1.0.137", features = ["derive"] }			# Downgrade for debian repo
+serde = { version = ">=1.0.130", features = ["derive"] }

@@ -29,16 +29,12 @@ resources = { path = "../resources", version="0.1.0"  }
 fern = { version = ">=0.6", features = ["colored", "chrono"] }
 syslog = "6.0.1"
 chrono = ">=0.4.19"
-
 # gumdrop = ">=0.8.1"	#  the debian packages only have 0.7.0
 gumdrop = ">=0.7.0"
-
 # log = ">=0.4.14"	# the debian packages only have 0.4.11
 log = ">=0.4.11"
-
 # once_cell = ">=1.12.0"	# the debian packages only have 1.9.0
 once_cell = ">=1.9.0"
-
 # xdg = ">=2.4.1"		# the debian packages only have 2.2.0-3
 xdg = ">=2.2"
 
@@ -58,8 +54,26 @@ image = { path="target/image-0.24.5" }
 jpeg-decoder = { path="target/jpeg-decoder-0.3.0" }
 libwebp-image = { path="target/libwebp-image-rs-0.3.0" }
 lz4-compression = { path="target/lz4-compression-0.7" }
-
-#iana-time-zone = { path = "target/iana-time-zone-0.1.44" ,  optional = true,   features = ["fallback"]  }
+proc-status  = { path="target/proc-status-0.1.1" }
+rusqlite  = { path="target/rusqlite-sys0.25.2" }
+textcode  = { path="target/textcode-0.2.2" }
+tinybmp  = { path="target/tinybmp-0.4.0" }
+tl  = { path="target/tl-0.7.7" }
+ureq  = { path="target/ureq-2.6.2" }
+usvg  = { path="target/resvg-0.29.0/usvg" }
+png  = { path="target/image-png-0.17.5" }
+bytemuck  = { path="target/bytemuck-1.7.0" }
+exr  = { path="target/exrs-1.5.0" }
+bit_field = { path="target/rust-bit-field-0.10.1" }
+half  = { path="target/half-rs-1.8.2" }
+lebe  = { path="target/lebe-0.5.0" }
+libwebp = { path="target/libwebp-rs-0.1.0"  }
+libwebp-sys2 = { path="target/libwebp-sys2-rs-0.1.2" }
+hashlink = { path="target/hashlink-0.8.0" }
+embedded-graphics = { path="target/embedded-graphics-embedded-graphics-v0.7.1" }
+az = { path="target/az-v1.1.0" }
+micromath = { path="target/micromath-1.1.1" }
+rustls = { path="target/rustls-v-0.20.8/rustls" }
 
 
 

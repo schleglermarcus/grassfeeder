@@ -2,9 +2,11 @@
 
 test -d target || mkdir target
 
-for F in src-releases/*.tar.gz ; do
-	(cd target/  ; tar xfz ../$F )
+for F in src-releases/*.tar.?? ; do
+	(cd target/  ; tar xf ../$F )
 done
+
+
 
 ls target/
 
@@ -21,5 +23,91 @@ mv $F ${F}.0
 cat ${F}.0 |sed -e "s/version = \"0.7\"/path=\"..\/nanorand-rs-0.7.0\"/"  -e "s/\"spin\"/\"spin\" , path=\"..\/spin-rs-0.9.2\" /" 	>$F
 
 F=target/image-0.24.5/Cargo.toml
+mv $F ${F}.0			# downgrading color_quant, gif , png, tiff
+cat ${F}.0 |sed -e "s/\"jpeg-decoder\"/\"jpeg-decoder\", path=\"..\/jpeg-decoder-0.3.0\"/" \
+ 		|sed -e "s/\"1.7.0\"/\"1.7.0\", path=\"..\/bytemuck-1.7.0\" /"  \
+ 		|sed -e "s/\"1.1\"/\"1.0\" /" \
+    |sed -e "s/\"1.5.0\"/\"1.5.0\", path=\"..\/exrs-1.5.0\"   /" \
+		|sed -e "s/\"0.11.1\"/\">=0.10.0\"/" \
+		|sed -e "s/tiff = { version = \"0.8.0\"/tiff={version=\">=0.5\"/" \
+		|sed -e "s/\"0.17.6\"/\"0.17.5\", path=\"..\/image-png-0.17.5\"   /" \
+		>$F
+
+F=target/rust-ico-0.3.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"jpeg-decoder\"/\"jpeg-decoder\", path=\"..\/jpeg-decoder-0.3.0\"/" 	>$F
+cat ${F}.0 |sed -e "s/\"0.17\"/\{version=\"0.17\", path=\"..\/image-png-0.17.5\"\}/" 	>$F
+
+F=target/exrs-1.5.0/Cargo.toml
+mv $F ${F}.0		# downgrading miniz_oxide
+cat ${F}.0 |sed -e "s/\"\^0.10.1\"/\{version=\"\^0.10.1\", path=\"..\/rust-bit-field-0.10.1\"\}/" \
+	|sed -e "s/\"\^0.10.9\"/\{version=\"\^0.10.9\", path=\"..\/flume-master\"\}/" \
+	|sed -e "s/\"\^1.8.2\"/\{version=\"\^1.8.2\", path=\"..\/half-rs-1.8.2\"\}/" \
+	|sed -e "s/\"\^0.5.2\"/\{version=\">=0.5.0\", path=\"..\/lebe-0.5.0\"\}/" \
+	|sed -e "s/\"\^0.5.3\"/\">=0.4.0\"/" \
+	|sed -e "s/\"\^1.8.1\"/\">=1.7.0\"/" \
+	>$F
+
+F=target/jpeg-decoder-0.3.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"1.5.1\"/\">=1.4\"/" 	>$F
+
+
+F=target/libwebp-image-rs-0.3.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.24.0\"/\">=0.24.0\", path=\"..\/image-0.24.5\" /" \
+	|sed -e "s/\"0.1.0\"/{ version=\">=0.1.0\", path=\"..\/libwebp-rs-0.1.0\" }/" \
+	>$F
+
+F=target/libwebp-rs-0.1.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/libwebp-sys2 = \"0.1.0\"/libwebp-sys2 ={version=\"0.1.2\", path=\"..\/libwebp-sys2-rs-0.1.2\"} /" >$F
+
+F=target/nanorand-rs-0.7.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /" >$F
+
+F=target/image-png-0.17.5/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\">=0.7\" /" \
+	|sed -e "s/\"\0.5.1\"/\">=0.4.0\"/" \
+	>$F
+
+F=target/quick-xml-0.25.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"2.5\"/\">=2.4\" /" 		>$F
+
+
+F=target/regex-1.6.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.7.18\"/\">=0.7.10\" /" 		>$F
+
+F=target/rusqlite-sys0.25.2/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/hashlink = \"0.8\"/hashlink=\{version=\">=0.7\" , path=\"..\/hashlink-0.8.0\"\}  /" 		>$F
+
+
+F=target/hashlink-0.8.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.12.0\"/\">=0.11\" /" 		>$F
+
+F=target/rust-i18n-1.1.1/Cargo.toml
+mv $F ${F}.0		#downgrading itertools, once_cell
+cat ${F}.0 |sed -e "s/\"0.10.3\"/\">=0.10.0\" /" 	 |sed -e "s/\"1.10.0\"/\">=1.9\" /" 		>$F
+
+F=target/embedded-graphics-embedded-graphics-v0.7.1/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"1.1\"/\{version=\">=1.1\", path=\"..\/az-v1.1.0\"\} /" \
+	|sed -e "s/\"1.1.0\"/\">=1.1.0\", path=\"..\/micromath-1.1.1\" /" \
+	|sed -e "s/\"0.8.0\"/\">=0.6.0\" /" 			>$F
+
+F=target/tinybmp-0.4.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.7.1\"/\{version=\">=0.7.1\", path=\"..\/embedded-graphics-embedded-graphics-v0.7.1\" \} /"		>$F
+
+
+F=target/rustls-v-0.20.8/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.16.20\"/\">=0.16.9\" /"		>$F
+
+
+#
