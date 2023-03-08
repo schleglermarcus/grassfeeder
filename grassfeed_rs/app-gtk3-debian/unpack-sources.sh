@@ -1,12 +1,9 @@
 #!/bin/bash
-
 test -d target || mkdir target
 
 for F in src-releases/*.tar.?? ; do
-	(cd target/  ; tar xf ../$F )
+	(cd target/  ; tar xf ../$F  )
 done
-
-
 
 ls target/
 
@@ -63,12 +60,14 @@ mv $F ${F}.0
 cat ${F}.0 |sed -e "s/libwebp-sys2 = \"0.1.0\"/libwebp-sys2 ={version=\"0.1.2\", path=\"..\/libwebp-sys2-rs-0.1.2\"} /" >$F
 
 F=target/nanorand-rs-0.7.0/Cargo.toml
-mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /" >$F
+mv $F ${F}.0			#  getrandom downgrade , removing   js feature
+cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /"  \
+	|sed -e "s/, \"js\"//"	\
+ 	>$F
 
 F=target/image-png-0.17.5/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\">=0.7\" /" \
+cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\{version=\">=0.7.0\" } /" \
 	|sed -e "s/\"\0.5.1\"/\">=0.4.0\"/" \
 	>$F
 
@@ -94,6 +93,16 @@ F=target/rust-i18n-1.1.1/Cargo.toml
 mv $F ${F}.0		#downgrading itertools, once_cell
 cat ${F}.0 |sed -e "s/\"0.10.3\"/\">=0.10.0\" /" 	 |sed -e "s/\"1.10.0\"/\">=1.9\" /" 		>$F
 
+F=target/rust-i18n-1.1.1/crates/macro/Cargo.toml
+mv $F ${F}.0		# once_cell, syn
+cat ${F}.0  |sed -e "s/\"1.10.0\"/\">=1.9\" /"  |sed -e "s/\"1.0.82\"/\">=1.0.76\" /" 		>$F
+
+
+F=target/rust-i18n-1.1.1/crates/support/Cargo.toml
+mv $F ${F}.0		# once_cell
+cat ${F}.0  |sed -e "s/\"1.10.0\"/\">=1.9\" /"  		>$F
+
+
 F=target/embedded-graphics-embedded-graphics-v0.7.1/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"1.1\"/\{version=\">=1.1\", path=\"..\/az-v1.1.0\"\} /" \
@@ -111,10 +120,11 @@ cat ${F}.0 |sed -e "s/\"0.7.1\"/\{version=\">=0.7.1\", path=\"..\/embedded-graph
 
 
 F=target/rustls-v-0.20.8/rustls/Cargo.toml
-mv $F ${F}.0	# downgrading  ring, sct, webpki
+mv $F ${F}.0	# downgrading  ring, sct, webpki		# removing feature  "alloc"
 cat ${F}.0 |sed -e "s/\"0.16.20\"/\">=0.16.9\" /"		\
 	|sed -e "s/\"0.7.0\"/\">=0.6.0\" /"		\
 	|sed -e "s/\"0.22.0\"/\">=0.21.0\" /"		\
+	|sed -e "s/\"alloc\",//"		\
 	>$F
 
 F=target/ureq-2.6.2/Cargo.toml
@@ -135,9 +145,15 @@ cat ${F}.0 	|sed -e "s/\"0.21\"/\">=0.13\" /"\
 		|sed -e "s/strict-num = \"0.1\"/strict-num={version=\">=0.1\", path=\"..\/..\/strict-num-0.1.0\"\}  /" \
 				>$F
 
+F=target/resvg-0.29.0/rosvgtree/Cargo.toml
+mv $F ${F}.0		# downgrading roxmltree, svgtypes
+cat ${F}.0 	|sed -e "s/\"0.18\"/\">=0.7\" /"  \
+	| sed -e "s/\"0.10\"/\">=0.5\" /"	\
+						>$F
+
 F=target/strict-num-0.1.0/Cargo.toml
-mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.9\"/\">=0.6\" /"	>$F
+mv $F ${F}.0		#  downgrade of  float-cmp,   removing feature  "std"
+cat ${F}.0 |sed -e "s/\"0.9\"/\">=0.6\" /" |sed -e "s/\"std\"//"	>$F
 
 F=target/webpki-roots-v-0.22.6/Cargo.toml
 mv $F ${F}.0
@@ -170,6 +186,69 @@ F=target/derive_more-0.99.17/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/convert_case = { version = \"0.4\"/convert_case=\{version=\">=0.4\", path=\"..\/convert_case-0.6.0\"\   /"	>$F
 
+F=target/hard-xml-v1.21.0/hard-xml/Cargo.toml
+mv $F ${F}.0		#  restoring the version number  here!
+cat ${F}.0 |sed -e "s/\"0.5\"/\{version=\">=0.5\" , path=\"..\/..\/jetscii-0.5.3\"  \}/" \
+	|sed -e "s/\"0.0.0\"/\"1.21.0\"/" \
+	|sed -e "s/\"0.13\"/\">=0.11.0\" /" \
+	>$F
+F=target/hard-xml-v1.21.0/hard-xml-derive/Cargo.toml
+mv $F ${F}.0		#  restoring the version number  here!
+cat ${F}.0 		|sed -e "s/\"0.0.0\"/\"1.21.0\"/" 	>$F
+
+F=target/opml/opml_api/Cargo.toml
+mv $F ${F}.0	#   serde , thiserror
+cat ${F}.0  |sed -e "s/\"1.13.0\"/\{version=\">=1.11\" , path=\"..\/..\/hard-xml-v1.21.0\/hard-xml\"  \} /" 	\
+	|sed -e "s/\"1.0.145\"/\">=1.0.130\"/" \
+	|sed -e "s/\"1.0.37\"/\">=1.0.20\"/" \
+	>$F
+
+F=target/rust-url-2.3.0/idna/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.1.17\"/\">=0.1.12\"/"	>$F
 
 
-#
+F=target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/javascriptcore-rs = \"^0.15.2\"/javascriptcore-rs=\{ version=\">=0.14.9\", path=\"..\/javascriptcore-rs-javascriptcore-rs-v0.15.2\" \} /" \
+	>$F
+
+F=target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/javascriptcore-rs-sys = \"^0.3.2\"/javascriptcore-rs-sys=\{ version=\">=0.3.2\", path=\"..\/..\/javascriptcore-rs-javascriptcore-rs-v0.15.2\/sys\" \} /" \
+		|sed -e "s/soup2-sys = \"^0.1.0\"/soup2-sys=\{ version=\">=0.1.0\", path=\"..\/..\/soup2-sys-0.2.0\" \} /" \
+    |sed -e "s/system-deps = \"5\"/system-deps=\">=3\"/" \
+		>$F
+
+F=target/javascriptcore-rs-javascriptcore-rs-v0.15.2/sys/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0  |sed -e "s/system-deps = \"5\"/system-deps=\">=3\"/" >$F
+
+
+F=target/soup2-sys-0.2.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.15\"/\">=0.14\"/g" \
+ 	|sed -e "s/= \"5\"/=  \">=3\"/"  \
+	>$F
+
+
+
+#----------------------------------------------------------
+exit
+
+
+
+
+F=target/webkit2gtk-rs-webkit2gtk-rs-v0.18.2/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/cairo-rs = \"^0.15.0\"/cairo-rs=\">=0.14.9\"/" \
+	|sed -e "s/gdk = \"^0.15.0\"/gdk=\">=0.14.3\"/" \
+	|sed -e "s/gdk-sys = \"^0.15.0\"/gdk-sys=\">=0.14.0\"/" \
+	|sed -e "s/gio = \"^0.15.0\"/gio=\">=0.14.8\"/" \
+	|sed -e "s/gio-sys = \"^0.15.0\"/gio-sys=\">=0.14.0\"/" \
+	|sed -e "s/glib = \"^0.15.0\"/glib=\">=0.14.8\"/" \
+	|sed -e "s/glib-sys = \"^0.15.0\"/glib-sys=\">=0.14.0\"/" \
+	|sed -e "s/gobject-sys = \"^0.15.0\"/gobject-sys=\">=0.14.0\"/" \
+	|sed -e "s/gtk = \"^0.15.0\"/gtk=\">=0.14.3\"/" \
+	|sed -e "s/gtk-sys = \"^0.15.0\"/gtk-sys=\">=0.14.0\"/" \
+	>$F

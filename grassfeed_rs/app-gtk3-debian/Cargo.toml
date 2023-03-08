@@ -84,7 +84,16 @@ derive_more = { path="target/derive_more-0.99.17" }
 convert_case = { path="target/convert_case-0.6.0" }
 slotmap = { path="target/slotmap-1.0.6" }
 unic-ucd = { path="target/rust-unic-0.9.0/unic/ucd" }
-
+hard-xml = { path="target/hard-xml-v1.21.0/hard-xml" }
+jetscii = { path="target/jetscii-0.5.3" }
+webkit2gtk = { path="target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0" }
+# webkit2gtk = { path="target/webkit2gtk-rs-webkit2gtk-rs-v0.18.2" }
+javascriptcore-rs  = { path="target/javascriptcore-rs-javascriptcore-rs-v0.15.2" }
+javascriptcore-rs-sys  = { path="target/javascriptcore-rs-javascriptcore-rs-v0.15.2/sys" }
+# javascriptcore-rs-sys  = { path="target/javascriptcore-rs-javascriptcore-rs-sys-v0.3.3"}
+# webkit2gtk-sys = { path="target/webkit2gtk-rs-webkit2gtk-sys-v0.16.0" }
+webkit2gtk-sys = { path="target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys" }
+soup2-sys = { path="target/soup2-sys-0.2.0" }
 
 
 

@@ -7,19 +7,33 @@ edition = "2021"
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 resources = { path = "../resources" }
-log = "0.4.14"
-webkit2gtk = {  version = "0.18.2", default-features = false,  features = [ "v2_36"]  }
 
-flume = "0.10.9"
+
+# webkit2gtk = {  version = "0.18.2", default-features = false,  features = [ "v2_36"]	,  path="../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.18.2/"  }
+# downgrade for debian repo
+webkit2gtk = {  version = "0.16.0", default-features = false,  features = [ "v2_30"]	,  path="../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/"  }
+
+
+flume = { version=">=0.10.9",  path="../app-gtk3-debian/target/flume-master" }
+
 # gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
-gtk = { version = "0.15.5", features = ["v3_22_30"] }	# backport to ubuntu20
+#	gtk = { version = "0.15.5", features = ["v3_22_30"] }	# backport to ubuntu20
+gtk = { version = ">=0.14.3", features = ["v3_22_30"] }			# downgrade for debian repo
 
-glib = "^0.15.5"
-lz4-compression ="0.7.0"
+#	gdk-sys = "^0.15.1"		# downgrade for debian repo
+gdk-sys = ">=0.14"
+#	gio = "^0.15.5"		# downgrade for debian repo
+gio = ">=0.14.0"
+#	glib = "^0.15.5"			# downgrade for debian repo
+glib = ">=0.14.8"
+#	log = "0.4.14"				# downgrade for debian repo
+log = ">=0.4.11"
+# serde = ">=1.0.133"			# downgrade for debian repo
+serde = ">=1.0.130"
+
+lz4-compression =  {  version= "0.7.0" , path="../app-gtk3-debian/target/lz4-compression-0.7" }
+
 base64 = "^0.13.0"
-gio = "^0.15.5"
-serde = ">=1.0.133"
-gdk-sys = "^0.15.1"
 
 # downgrading for debian intagration
 # libappindicator = ">=0.7.1"

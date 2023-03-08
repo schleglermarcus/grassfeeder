@@ -12,7 +12,10 @@
   -	tl v0.7.7									missing     Fast HTML parser written in pure Rust
 	- xmlem v0.2.1
   - hashlink
-	-			 librust-thin-slice-dev 0.1.1-1
+	- librust-thin-slice-dev 0.1.1-1
+	-	hard-xml v1.21.0
+ 	- librust-system-deps-dev	 3.0.0-1
+	-	soup2-sys 			!!	https://crates.io/api/v1/crates/soup2-sys/0.2.0/download
 
 
 
@@ -73,6 +76,27 @@
 	- phf_codegen v0.8.0	=>  librust-phf-codegen-dev	 0.8.0-1
   - phf_macros v0.8.0  => librust-phf-macros-dev	0.8.0-1
 	- gdk v0.15.4	=> librust-gdk-dev	0.14.3-1
+ 	-	gdk-pixbuf-0.15.11	=> librust-gdk-pixbuf-dev		0.14.0-1
+  -	gdk-sys  0.15.1 	=>	librust-gdk-sys-dev 0.14.0-1
+	- gio 0.15.5	=>		librust-gio-dev 0.14.8-1
+ 	- glib 0.15.5 	=>		librust-glib-dev	 0.14.8-1
+	- gtk	0.15.5 	=>		librust-gtk-dev		0.14.3-1
+	- xmlparser v0.13.5	=>	librust-xmlparser-dev	0.11.0-1
+  - thiserror v1.0.38	=>  librust-thiserror-dev	1.0.20-1
+ 	- gdk-sys 0.15.1		=>	librust-gdk-sys-dev	 0.14.0-1
+  - gio 0.15.5			=>		librust-gio-dev  0.14.8-1
+	- glib 0.15.5 	=> librust-glib-dev  0.14.8-1
+ 	-	ignore v0.4.19	=>		librust-ignore-dev	 0.4.18-2
+ 	- serde_yaml v0.8.26 	=>	librust-serde-yaml-dev	 0.8.11-2
+  - syn v1.0.107				=>  librust-syn-dev 1.0.76-1
+	- nodrop v0.1.14	=> librust-nodrop-dev	 0.1.13-1
+  - unicode-bidi v0.3.8		=>	librust-unicode-bidi-dev	 0.3.7-1
+  - unicode-normalization v0.1.22		=> librust-unicode-normalization-dev 0.1.12-1
+ 	- idna v0.3.0			=>	librust-idna-dev	 0.2.0-1
+ 	- roxmltree v0.15.1		=>	librust-roxmltree-dev	 0.7.3-1
+  - simplecss v0.2.1		=>	librust-simplecss-dev	0.2.0-1
+ 	- svgtypes v0.8.2	=>	librust-svgtypes-dev	0.5.0-1
+ 	- cairo-rs v0.15.12 => librust-cairo-rs-dev	 0.14.9-2
 
 
 
@@ -98,3 +122,4 @@
 
 
 https://rust-lang-nursery.github.io/rust-cookbook/compression/tar.html
+https://users.rust-lang.org/t/easiest-way-to-manually-download-a-crate-from-crates-io/67338
