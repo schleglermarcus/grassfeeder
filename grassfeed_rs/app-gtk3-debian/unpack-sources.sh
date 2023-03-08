@@ -35,18 +35,18 @@ mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.17\"/\{version=\"0.17\", path=\"..\/image-png-0.17.5\"\}/" 	>$F
 
 F=target/exrs-1.5.0/Cargo.toml
-mv $F ${F}.0		# downgrading miniz_oxide
+mv $F ${F}.0		# downgrading miniz_oxide		lebe
 cat ${F}.0 |sed -e "s/\"\^0.10.1\"/\{version=\"\^0.10.1\", path=\"..\/rust-bit-field-0.10.1\"\}/" \
 	|sed -e "s/\"\^0.10.9\"/\{version=\"\^0.10.9\", path=\"..\/flume-master\"\}/" \
 	|sed -e "s/\"\^1.8.2\"/\{version=\"\^1.8.2\", path=\"..\/half-rs-1.8.2\"\}/" \
-	|sed -e "s/\"\^0.5.2\"/\{version=\">=0.5.0\", path=\"..\/lebe-0.5.0\"\}/" \
+	|sed -e "s/\"\^0.5.2\"/\{version=\">=0.5.0\", path=\"..\/lebe-0.5.2\"\}/" \
 	|sed -e "s/\"\^0.5.3\"/\">=0.4.0\"/" \
 	|sed -e "s/\"\^1.8.1\"/\">=1.7.0\"/" \
 	>$F
 
 F=target/jpeg-decoder-0.3.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"1.5.1\"/\">=1.4\"/" 	>$F
+cat ${F}.0 |sed -e "s/version = \"1.5.1\"/version=\">=1.5.1\", path=\"..\/rayon-1.5.3\"    /" 	>$F
 
 
 F=target/libwebp-image-rs-0.3.0/Cargo.toml
@@ -186,19 +186,28 @@ F=target/derive_more-0.99.17/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/convert_case = { version = \"0.4\"/convert_case=\{version=\">=0.4\", path=\"..\/convert_case-0.6.0\"\   /"	>$F
 
-F=target/hard-xml-v1.21.0/hard-xml/Cargo.toml
-mv $F ${F}.0		#  restoring the version number  here!
+F=target/hard-xml-v1.19.0/hard-xml/Cargo.toml
+mv $F ${F}.0		#  restoring the version number  here!    env_logger
 cat ${F}.0 |sed -e "s/\"0.5\"/\{version=\">=0.5\" , path=\"..\/..\/jetscii-0.5.3\"  \}/" \
-	|sed -e "s/\"0.0.0\"/\"1.21.0\"/" \
+	|sed -e "s/\"0.0.0\"/\"1.19.0\"/" \
 	|sed -e "s/\"0.13\"/\">=0.11.0\" /" \
+	|sed -e "s/\"0.8\"/\">=0.8\" /" \
 	>$F
-F=target/hard-xml-v1.21.0/hard-xml-derive/Cargo.toml
+rm target/hard-xml-v1.19.0/rust-toolchain.toml
+
+F=target/hard-xml-v1.19.0/hard-xml-derive/Cargo.toml
 mv $F ${F}.0		#  restoring the version number  here!
-cat ${F}.0 		|sed -e "s/\"0.0.0\"/\"1.21.0\"/" 	>$F
+cat ${F}.0 		|sed -e "s/\"0.0.0\"/\"1.19.0\"/" 	>$F
+
+F=target/hard-xml-v1.19.0/test-suite/Cargo.toml
+mv $F ${F}.0		#   env_logger
+cat ${F}.0 		|sed -e "s/\"0.8\"/\">=0.8\" /"	|sed -e "s/\"1.0.71\"/\">=1.0.50\" /" 	>$F
+
+
 
 F=target/opml/opml_api/Cargo.toml
 mv $F ${F}.0	#   serde , thiserror
-cat ${F}.0  |sed -e "s/\"1.13.0\"/\{version=\">=1.11\" , path=\"..\/..\/hard-xml-v1.21.0\/hard-xml\"  \} /" 	\
+cat ${F}.0  |sed -e "s/\"1.13.0\"/\{version=\">=1.11\" , path=\"..\/..\/hard-xml-v1.19.0\/hard-xml\"  \} /" 	\
 	|sed -e "s/\"1.0.145\"/\">=1.0.130\"/" \
 	|sed -e "s/\"1.0.37\"/\">=1.0.20\"/" \
 	>$F
@@ -229,6 +238,17 @@ F=target/soup2-sys-0.2.0/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.15\"/\">=0.14\"/g" \
  	|sed -e "s/= \"5\"/=  \">=3\"/"  \
+	>$F
+
+F=target/rayon-1.5.3/Cargo.toml
+mv $F ${F}.0	# downgrade   crossbeam-channel		crossbeam-deque
+cat ${F}.0 	 |sed -e "s/\"0.8.1\"/\">=0.7.4\"/"	\
+		>$F
+
+F=target/rayon-1.5.3/rayon-core/Cargo.toml
+mv $F ${F}.0	# downgrade   crossbeam-channel		crossbeam-deque
+cat ${F}.0 |sed -e "s/\"0.5.0\"/\">=0.4\"/" 	\
+	 |sed -e "s/\"0.8.1\"/\">=0.7.4\"/"	\
 	>$F
 
 

@@ -1,0 +1,814 @@
+app-gtk3-debian v0.1.8-B4 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian)
+├── az v1.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/az-v1.1.0)
+├── bit_field v0.10.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-bit-field-0.10.1)
+├── bytemuck v1.7.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/bytemuck-1.7.0)
+├── chrono v0.4.19
+│   ├── libc v0.2.103
+│   ├── num-integer v0.1.44
+│   │   └── num-traits v0.2.14
+│   │       [build-dependencies]
+│   │       └── autocfg v1.0.1
+│   │   [build-dependencies]
+│   │   └── autocfg v1.0.1
+│   └── num-traits v0.2.14 (*)
+├── context v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/context)
+│   └── log v0.4.11
+│       └── cfg-if v0.1.10
+├── convert_case v0.6.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/convert_case-0.6.0)
+│   └── unicode-segmentation v1.6.0
+├── cssparser v0.28.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-cssparser-0.28.0)
+│   ├── cssparser-macros v0.6.0 (proc-macro) (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-cssparser-0.28.0/macros)
+│   │   ├── quote v1.0.9
+│   │   │   └── proc-macro2 v1.0.28
+│   │   │       └── unicode-xid v0.2.0
+│   │   └── syn v1.0.76
+│   │       ├── proc-macro2 v1.0.28 (*)
+│   │       ├── quote v1.0.9 (*)
+│   │       └── unicode-xid v0.2.0
+│   ├── dtoa-short v0.3.2
+│   │   └── dtoa v0.4.3
+│   ├── itoa v0.4.8
+│   ├── matches v0.1.8
+│   ├── phf v0.8.0
+│   │   ├── phf_macros v0.8.0 (proc-macro)
+│   │   │   ├── phf_generator v0.8.0
+│   │   │   │   ├── phf_shared v0.8.0
+│   │   │   │   │   └── siphasher v0.3.1
+│   │   │   │   └── rand v0.8.4
+│   │   │   │       ├── libc v0.2.103
+│   │   │   │       ├── rand_chacha v0.3.1
+│   │   │   │       │   ├── ppv-lite86 v0.2.16
+│   │   │   │       │   └── rand_core v0.6.3
+│   │   │   │       │       └── getrandom v0.2.4
+│   │   │   │       │           ├── cfg-if v1.0.0
+│   │   │   │       │           └── libc v0.2.103
+│   │   │   │       └── rand_core v0.6.3 (*)
+│   │   │   ├── phf_shared v0.8.0 (*)
+│   │   │   ├── proc-macro-hack v0.5.19 (proc-macro)
+│   │   │   ├── proc-macro2 v1.0.28 (*)
+│   │   │   ├── quote v1.0.9 (*)
+│   │   │   └── syn v1.0.76 (*)
+│   │   ├── phf_shared v0.8.0 (*)
+│   │   └── proc-macro-hack v0.5.19 (proc-macro)
+│   └── smallvec v1.7.0
+│   [build-dependencies]
+│   ├── proc-macro2 v1.0.28 (*)
+│   ├── quote v1.0.9 (*)
+│   └── syn v1.0.76 (*)
+├── derive_more v0.99.17 (proc-macro) (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/derive_more-0.99.17)
+│   ├── convert_case v0.6.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/convert_case-0.6.0) (*)
+│   ├── proc-macro2 v1.0.28 (*)
+│   ├── quote v1.0.9 (*)
+│   └── syn v1.0.76 (*)
+│   [build-dependencies]
+│   └── rustc_version v0.4.0
+│       └── semver v1.0.4
+├── embedded-graphics v0.7.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/embedded-graphics-embedded-graphics-v0.7.1)
+│   ├── az v1.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/az-v1.1.0)
+│   ├── byteorder v1.4.3
+│   ├── embedded-graphics-core v0.3.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/embedded-graphics-embedded-graphics-v0.7.1/core)
+│   │   ├── az v1.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/az-v1.1.0)
+│   │   └── byteorder v1.4.3
+│   ├── float-cmp v0.6.0
+│   │   └── num-traits v0.2.14 (*)
+│   └── micromath v1.1.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/micromath-1.1.1)
+├── exr v1.5.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/exrs-1.5.0)
+│   ├── bit_field v0.10.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-bit-field-0.10.1)
+│   ├── flume v0.10.14 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/flume-master)
+│   │   ├── futures-core v0.3.17
+│   │   ├── futures-sink v0.3.17
+│   │   ├── nanorand v0.7.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/nanorand-rs-0.7.0)
+│   │   │   └── getrandom v0.2.4
+│   │   │       ├── cfg-if v1.0.0
+│   │   │       └── libc v0.2.103
+│   │   └── spin v0.9.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/spin-rs-0.9.2)
+│   │       └── lock_api v0.4.5
+│   │           └── scopeguard v1.1.0
+│   ├── half v1.8.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/half-rs-1.8.2)
+│   ├── lebe v0.5.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/lebe-0.5.2)
+│   ├── miniz_oxide v0.4.4
+│   │   └── adler v1.0.2
+│   │   [build-dependencies]
+│   │   └── autocfg v1.0.1
+│   ├── smallvec v1.7.0
+│   └── threadpool v1.7.1
+│       └── num_cpus v1.13.0
+│           └── libc v0.2.103
+├── feed-rs v1.2.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/feed-rs-1.2.0/feed-rs)
+│   ├── chrono v0.4.19 (*)
+│   ├── lazy_static v1.4.0
+│   ├── mime v0.3.9
+│   │   └── unicase v2.6.0
+│   │       [build-dependencies]
+│   │       └── version_check v0.9.2
+│   ├── quick-xml v0.25.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/quick-xml-0.25.0)
+│   │   ├── encoding_rs v0.8.22
+│   │   │   └── cfg-if v0.1.10
+│   │   └── memchr v2.4.1
+│   ├── regex v1.6.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/regex-1.6.0)
+│   │   ├── aho-corasick v0.7.10
+│   │   │   └── memchr v2.4.1
+│   │   ├── memchr v2.4.1
+│   │   └── regex-syntax v0.6.27 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/regex-1.6.0/regex-syntax)
+│   ├── serde v1.0.130
+│   │   └── serde_derive v1.0.130 (proc-macro)
+│   │       ├── proc-macro2 v1.0.28 (*)
+│   │       ├── quote v1.0.9 (*)
+│   │       └── syn v1.0.76 (*)
+│   ├── serde_json v1.0.45
+│   │   ├── itoa v0.4.8
+│   │   ├── ryu v1.0.2
+│   │   └── serde v1.0.130 (*)
+│   ├── siphasher v0.3.1
+│   ├── url v2.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-url-2.3.0/url)
+│   │   ├── form_urlencoded v1.0.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-url-2.3.0/form_urlencoded)
+│   │   │   └── percent-encoding v2.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-url-2.3.0/percent_encoding)
+│   │   ├── idna v0.2.3 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-url-2.3.0/idna)
+│   │   │   ├── unicode-bidi v0.3.7
+│   │   │   └── unicode-normalization v0.1.12
+│   │   │       └── smallvec v1.7.0
+│   │   └── percent-encoding v2.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-url-2.3.0/percent_encoding)
+│   └── uuid v1.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/uuid-1.1.0)
+│       └── getrandom v0.2.4 (*)
+├── fern v0.6.0
+│   ├── chrono v0.4.19 (*)
+│   ├── colored v1.6.1
+│   │   └── lazy_static v1.4.0
+│   └── log v0.4.11 (*)
+├── flume v0.10.14 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/flume-master) (*)
+├── fr_core v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_core)
+│   ├── base64 v0.13.0
+│   ├── bincode v1.3.3
+│   │   └── serde v1.0.130 (*)
+│   ├── chrono v0.4.19 (*)
+│   ├── context v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/context) (*)
+│   ├── feed-rs v1.2.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/feed-rs-1.2.0/feed-rs) (*)
+│   ├── fern v0.6.0 (*)
+│   ├── flume v0.10.14 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/flume-master) (*)
+│   ├── fr_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk)
+│   │   ├── chrono v0.4.19 (*)
+│   │   ├── context v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/context) (*)
+│   │   ├── fern v0.6.0 (*)
+│   │   ├── flume v0.10.14 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/flume-master) (*)
+│   │   ├── gdk v0.14.3
+│   │   │   ├── bitflags v1.3.2
+│   │   │   ├── cairo-rs v0.14.9
+│   │   │   │   ├── bitflags v1.3.2
+│   │   │   │   ├── cairo-sys-rs v0.14.9
+│   │   │   │   │   ├── glib-sys v0.14.0
+│   │   │   │   │   │   └── libc v0.2.103
+│   │   │   │   │   │   [build-dependencies]
+│   │   │   │   │   │   └── system-deps v3.0.0
+│   │   │   │   │   │       ├── anyhow v1.0.44
+│   │   │   │   │   │       ├── heck v0.3.3
+│   │   │   │   │   │       │   └── unicode-segmentation v1.6.0
+│   │   │   │   │   │       ├── itertools v0.10.1
+│   │   │   │   │   │       │   └── either v1.6.1
+│   │   │   │   │   │       ├── pkg-config v0.3.21
+│   │   │   │   │   │       ├── strum v0.19.2
+│   │   │   │   │   │       │   └── strum_macros v0.19.2 (proc-macro)
+│   │   │   │   │   │       │       ├── heck v0.3.3 (*)
+│   │   │   │   │   │       │       ├── proc-macro2 v1.0.28 (*)
+│   │   │   │   │   │       │       ├── quote v1.0.9 (*)
+│   │   │   │   │   │       │       └── syn v1.0.76 (*)
+│   │   │   │   │   │       ├── strum_macros v0.19.2 (proc-macro) (*)
+│   │   │   │   │   │       ├── thiserror v1.0.20
+│   │   │   │   │   │       │   └── thiserror-impl v1.0.20 (proc-macro)
+│   │   │   │   │   │       │       ├── proc-macro2 v1.0.28 (*)
+│   │   │   │   │   │       │       ├── quote v1.0.9 (*)
+│   │   │   │   │   │       │       └── syn v1.0.76 (*)
+│   │   │   │   │   │       ├── toml v0.5.8
+│   │   │   │   │   │       │   └── serde v1.0.130
+│   │   │   │   │   │       └── version-compare v0.0.10
+│   │   │   │   │   └── libc v0.2.103
+│   │   │   │   │   [build-dependencies]
+│   │   │   │   │   └── system-deps v3.0.0 (*)
+│   │   │   │   ├── glib v0.14.8
+│   │   │   │   │   ├── bitflags v1.3.2
+│   │   │   │   │   ├── futures-channel v0.3.17
+│   │   │   │   │   │   └── futures-core v0.3.17
+│   │   │   │   │   ├── futures-core v0.3.17
+│   │   │   │   │   ├── futures-executor v0.3.17
+│   │   │   │   │   │   ├── futures-core v0.3.17
+│   │   │   │   │   │   ├── futures-task v0.3.17
+│   │   │   │   │   │   └── futures-util v0.3.17
+│   │   │   │   │   │       ├── futures-core v0.3.17
+│   │   │   │   │   │       ├── futures-task v0.3.17
+│   │   │   │   │   │       ├── pin-project-lite v0.2.7
+│   │   │   │   │   │       ├── pin-utils v0.1.0
+│   │   │   │   │   │       └── slab v0.4.4
+│   │   │   │   │   │       [build-dependencies]
+│   │   │   │   │   │       └── autocfg v1.0.1
+│   │   │   │   │   ├── futures-task v0.3.17
+│   │   │   │   │   ├── glib-macros v0.14.1 (proc-macro)
+│   │   │   │   │   │   ├── anyhow v1.0.44
+│   │   │   │   │   │   ├── heck v0.3.3 (*)
+│   │   │   │   │   │   ├── proc-macro-crate v1.1.0
+│   │   │   │   │   │   │   ├── thiserror v1.0.20 (*)
+│   │   │   │   │   │   │   └── toml v0.5.8 (*)
+│   │   │   │   │   │   ├── proc-macro-error v1.0.3
+│   │   │   │   │   │   │   ├── proc-macro-error-attr v1.0.3 (proc-macro)
+│   │   │   │   │   │   │   │   ├── proc-macro2 v1.0.28 (*)
+│   │   │   │   │   │   │   │   ├── quote v1.0.9 (*)
+│   │   │   │   │   │   │   │   ├── syn v1.0.76 (*)
+│   │   │   │   │   │   │   │   └── syn-mid v0.5.0
+│   │   │   │   │   │   │   │       ├── proc-macro2 v1.0.28 (*)
+│   │   │   │   │   │   │   │       ├── quote v1.0.9 (*)
+│   │   │   │   │   │   │   │       └── syn v1.0.76 (*)
+│   │   │   │   │   │   │   │   [build-dependencies]
+│   │   │   │   │   │   │   │   └── version_check v0.9.2
+│   │   │   │   │   │   │   ├── proc-macro2 v1.0.28 (*)
+│   │   │   │   │   │   │   ├── quote v1.0.9 (*)
+│   │   │   │   │   │   │   └── syn v1.0.76 (*)
+│   │   │   │   │   │   │   [build-dependencies]
+│   │   │   │   │   │   │   └── version_check v0.9.2
+│   │   │   │   │   │   ├── proc-macro2 v1.0.28 (*)
+│   │   │   │   │   │   ├── quote v1.0.9 (*)
+│   │   │   │   │   │   └── syn v1.0.76 (*)
+│   │   │   │   │   ├── glib-sys v0.14.0 (*)
+│   │   │   │   │   ├── gobject-sys v0.14.0
+│   │   │   │   │   │   ├── glib-sys v0.14.0 (*)
+│   │   │   │   │   │   └── libc v0.2.103
+│   │   │   │   │   │   [build-dependencies]
+│   │   │   │   │   │   └── system-deps v3.0.0 (*)
+│   │   │   │   │   ├── libc v0.2.103
+│   │   │   │   │   ├── once_cell v1.9.0
+│   │   │   │   │   └── smallvec v1.7.0
+│   │   │   │   ├── libc v0.2.103
+│   │   │   │   └── thiserror v1.0.20 (*)
+│   │   │   ├── gdk-pixbuf v0.14.0
+│   │   │   │   ├── gdk-pixbuf-sys v0.14.0
+│   │   │   │   │   ├── gio-sys v0.14.0
+│   │   │   │   │   │   ├── glib-sys v0.14.0 (*)
+│   │   │   │   │   │   ├── gobject-sys v0.14.0 (*)
+│   │   │   │   │   │   └── libc v0.2.103
+│   │   │   │   │   │   [build-dependencies]
+│   │   │   │   │   │   └── system-deps v3.0.0 (*)
+│   │   │   │   │   ├── glib-sys v0.14.0 (*)
+│   │   │   │   │   ├── gobject-sys v0.14.0 (*)
+│   │   │   │   │   └── libc v0.2.103
+│   │   │   │   │   [build-dependencies]
+│   │   │   │   │   └── system-deps v3.0.0 (*)
+│   │   │   │   ├── gio v0.14.8
+│   │   │   │   │   ├── bitflags v1.3.2
+│   │   │   │   │   ├── futures-channel v0.3.17 (*)
+│   │   │   │   │   ├── futures-core v0.3.17
+│   │   │   │   │   ├── futures-io v0.3.17
+│   │   │   │   │   ├── gio-sys v0.14.0 (*)
+│   │   │   │   │   ├── glib v0.14.8 (*)
+│   │   │   │   │   ├── libc v0.2.103
+│   │   │   │   │   ├── once_cell v1.9.0
+│   │   │   │   │   └── thiserror v1.0.20 (*)
+│   │   │   │   ├── glib v0.14.8 (*)
+│   │   │   │   └── libc v0.2.103
+│   │   │   ├── gdk-sys v0.14.0
+│   │   │   │   ├── cairo-sys-rs v0.14.9 (*)
+│   │   │   │   ├── gdk-pixbuf-sys v0.14.0 (*)
+│   │   │   │   ├── gio-sys v0.14.0 (*)
+│   │   │   │   ├── glib-sys v0.14.0 (*)
+│   │   │   │   ├── gobject-sys v0.14.0 (*)
+│   │   │   │   ├── libc v0.2.103
+│   │   │   │   └── pango-sys v0.14.0
+│   │   │   │       ├── glib-sys v0.14.0 (*)
+│   │   │   │       ├── gobject-sys v0.14.0 (*)
+│   │   │   │       └── libc v0.2.103
+│   │   │   │       [build-dependencies]
+│   │   │   │       └── system-deps v3.0.0 (*)
+│   │   │   │   [build-dependencies]
+│   │   │   │   ├── pkg-config v0.3.21
+│   │   │   │   └── system-deps v3.0.0 (*)
+│   │   │   ├── gio v0.14.8 (*)
+│   │   │   ├── glib v0.14.8 (*)
+│   │   │   ├── libc v0.2.103
+│   │   │   └── pango v0.14.8
+│   │   │       ├── bitflags v1.3.2
+│   │   │       ├── glib v0.14.8 (*)
+│   │   │       ├── libc v0.2.103
+│   │   │       ├── once_cell v1.9.0
+│   │   │       └── pango-sys v0.14.0 (*)
+│   │   ├── gdk-pixbuf v0.14.0 (*)
+│   │   ├── gdk-sys v0.14.0 (*)
+│   │   ├── gio v0.14.8 (*)
+│   │   ├── glib v0.14.8 (*)
+│   │   ├── gtk v0.14.3
+│   │   │   ├── atk v0.14.0
+│   │   │   │   ├── atk-sys v0.14.0
+│   │   │   │   │   ├── glib-sys v0.14.0 (*)
+│   │   │   │   │   ├── gobject-sys v0.14.0 (*)
+│   │   │   │   │   └── libc v0.2.103
+│   │   │   │   │   [build-dependencies]
+│   │   │   │   │   └── system-deps v3.0.0 (*)
+│   │   │   │   ├── bitflags v1.3.2
+│   │   │   │   ├── glib v0.14.8 (*)
+│   │   │   │   └── libc v0.2.103
+│   │   │   ├── bitflags v1.3.2
+│   │   │   ├── cairo-rs v0.14.9 (*)
+│   │   │   ├── field-offset v0.3.4
+│   │   │   │   └── memoffset v0.6.4
+│   │   │   │       [build-dependencies]
+│   │   │   │       └── autocfg v1.0.1
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── rustc_version v0.4.0 (*)
+│   │   │   ├── futures-channel v0.3.17 (*)
+│   │   │   ├── gdk v0.14.3 (*)
+│   │   │   ├── gdk-pixbuf v0.14.0 (*)
+│   │   │   ├── gio v0.14.8 (*)
+│   │   │   ├── glib v0.14.8 (*)
+│   │   │   ├── gtk-sys v0.14.0
+│   │   │   │   ├── atk-sys v0.14.0 (*)
+│   │   │   │   ├── cairo-sys-rs v0.14.9 (*)
+│   │   │   │   ├── gdk-pixbuf-sys v0.14.0 (*)
+│   │   │   │   ├── gdk-sys v0.14.0 (*)
+│   │   │   │   ├── gio-sys v0.14.0 (*)
+│   │   │   │   ├── glib-sys v0.14.0 (*)
+│   │   │   │   ├── gobject-sys v0.14.0 (*)
+│   │   │   │   ├── libc v0.2.103
+│   │   │   │   └── pango-sys v0.14.0 (*)
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── system-deps v3.0.0 (*)
+│   │   │   ├── gtk3-macros v0.14.0 (proc-macro)
+│   │   │   │   ├── anyhow v1.0.44
+│   │   │   │   ├── heck v0.3.3 (*)
+│   │   │   │   ├── proc-macro-crate v1.1.0 (*)
+│   │   │   │   ├── proc-macro-error v1.0.3 (*)
+│   │   │   │   ├── proc-macro2 v1.0.28 (*)
+│   │   │   │   ├── quote v1.0.9 (*)
+│   │   │   │   └── syn v1.0.76 (*)
+│   │   │   ├── libc v0.2.103
+│   │   │   ├── once_cell v1.9.0
+│   │   │   └── pango v0.14.8 (*)
+│   │   │   [build-dependencies]
+│   │   │   └── pkg-config v0.3.21
+│   │   ├── gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer)
+│   │   │   └── serde v1.0.130 (*)
+│   │   ├── itertools v0.10.1 (*)
+│   │   ├── log v0.4.11 (*)
+│   │   ├── once_cell v1.9.0
+│   │   ├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources)
+│   │   │   ├── log v0.4.11 (*)
+│   │   │   ├── once_cell v1.9.0
+│   │   │   └── rust-i18n v1.1.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-i18n-1.1.1)
+│   │   │       ├── anyhow v1.0.44
+│   │   │       ├── clap v2.33.3
+│   │   │       │   ├── ansi_term v0.12.1
+│   │   │       │   ├── atty v0.2.14
+│   │   │       │   │   └── libc v0.2.103
+│   │   │       │   ├── bitflags v1.3.2
+│   │   │       │   ├── strsim v0.9.3
+│   │   │       │   ├── textwrap v0.11.0
+│   │   │       │   │   └── unicode-width v0.1.8
+│   │   │       │   ├── unicode-width v0.1.8
+│   │   │       │   └── vec_map v0.8.1
+│   │   │       ├── itertools v0.10.1 (*)
+│   │   │       ├── once_cell v1.9.0
+│   │   │       ├── quote v1.0.9 (*)
+│   │   │       ├── rust-i18n-extract v1.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-i18n-1.1.1/crates/extract)
+│   │   │       │   ├── anyhow v1.0.44
+│   │   │       │   ├── ignore v0.4.18
+│   │   │       │   │   ├── crossbeam-utils v0.8.5
+│   │   │       │   │   │   ├── cfg-if v1.0.0
+│   │   │       │   │   │   └── lazy_static v1.4.0
+│   │   │       │   │   ├── globset v0.4.8
+│   │   │       │   │   │   ├── aho-corasick v0.7.10 (*)
+│   │   │       │   │   │   ├── bstr v0.2.17
+│   │   │       │   │   │   │   └── memchr v2.4.1
+│   │   │       │   │   │   ├── fnv v1.0.6
+│   │   │       │   │   │   ├── log v0.4.11 (*)
+│   │   │       │   │   │   └── regex v1.5.4
+│   │   │       │   │   │       ├── aho-corasick v0.7.10 (*)
+│   │   │       │   │   │       ├── memchr v2.4.1
+│   │   │       │   │   │       └── regex-syntax v0.6.25
+│   │   │       │   │   ├── lazy_static v1.4.0
+│   │   │       │   │   ├── log v0.4.11 (*)
+│   │   │       │   │   ├── memchr v2.4.1
+│   │   │       │   │   ├── regex v1.5.4 (*)
+│   │   │       │   │   ├── same-file v1.0.6
+│   │   │       │   │   ├── thread_local v1.1.3
+│   │   │       │   │   │   └── once_cell v1.9.0
+│   │   │       │   │   └── walkdir v2.3.1
+│   │   │       │   │       └── same-file v1.0.6
+│   │   │       │   ├── proc-macro2 v1.0.28
+│   │   │       │   │   └── unicode-xid v0.2.0
+│   │   │       │   ├── quote v1.0.9 (*)
+│   │   │       │   ├── regex v1.5.4 (*)
+│   │   │       │   ├── rust-i18n-support v1.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-i18n-1.1.1/crates/support)
+│   │   │       │   │   ├── glob v0.3.0
+│   │   │       │   │   ├── once_cell v1.9.0
+│   │   │       │   │   ├── proc-macro2 v1.0.28 (*)
+│   │   │       │   │   ├── serde v1.0.130 (*)
+│   │   │       │   │   ├── serde_json v1.0.45 (*)
+│   │   │       │   │   └── serde_yaml v0.8.11
+│   │   │       │   │       ├── dtoa v0.4.3
+│   │   │       │   │       ├── linked-hash-map v0.5.4
+│   │   │       │   │       ├── serde v1.0.130 (*)
+│   │   │       │   │       └── yaml-rust v0.4.5
+│   │   │       │   │           └── linked-hash-map v0.5.4
+│   │   │       │   ├── serde v1.0.130 (*)
+│   │   │       │   ├── serde_json v1.0.45 (*)
+│   │   │       │   ├── serde_yaml v0.8.11 (*)
+│   │   │       │   └── syn v1.0.76
+│   │   │       │       ├── proc-macro2 v1.0.28 (*)
+│   │   │       │       ├── quote v1.0.9 (*)
+│   │   │       │       └── unicode-xid v0.2.0
+│   │   │       ├── rust-i18n-macro v1.1.0 (proc-macro) (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-i18n-1.1.1/crates/macro)
+│   │   │       │   ├── glob v0.3.0
+│   │   │       │   ├── once_cell v1.9.0
+│   │   │       │   ├── proc-macro2 v1.0.28 (*)
+│   │   │       │   ├── quote v1.0.9 (*)
+│   │   │       │   ├── rust-i18n-support v1.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-i18n-1.1.1/crates/support) (*)
+│   │   │       │   ├── serde v1.0.130
+│   │   │       │   ├── serde_json v1.0.45 (*)
+│   │   │       │   ├── serde_yaml v0.8.11 (*)
+│   │   │       │   └── syn v1.0.76 (*)
+│   │   │       ├── serde v1.0.130 (*)
+│   │   │       ├── serde_derive v1.0.130 (proc-macro) (*)
+│   │   │       └── toml v0.5.8 (*)
+│   │   │       [build-dependencies]
+│   │   │       ├── glob v0.3.0
+│   │   │       └── regex v1.5.4 (*)
+│   │   ├── rust-i18n v1.1.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-i18n-1.1.1) (*)
+│   │   ├── ui_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/ui_gtk)
+│   │   │   ├── base64 v0.13.0
+│   │   │   ├── flume v0.10.14 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/flume-master) (*)
+│   │   │   ├── gdk-sys v0.14.0 (*)
+│   │   │   ├── gio v0.14.8 (*)
+│   │   │   ├── glib v0.14.8 (*)
+│   │   │   ├── gtk v0.14.3 (*)
+│   │   │   ├── gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer) (*)
+│   │   │   ├── log v0.4.11 (*)
+│   │   │   ├── lz4-compression v0.7.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/lz4-compression-0.7)
+│   │   │   ├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources) (*)
+│   │   │   ├── serde v1.0.130 (*)
+│   │   │   └── webkit2gtk v0.16.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0)
+│   │   │       ├── bitflags v1.3.2
+│   │   │       ├── cairo-rs v0.14.9 (*)
+│   │   │       ├── gdk v0.14.3 (*)
+│   │   │       ├── gdk-sys v0.14.0 (*)
+│   │   │       ├── gio v0.14.8 (*)
+│   │   │       ├── gio-sys v0.14.0 (*)
+│   │   │       ├── glib v0.14.8 (*)
+│   │   │       ├── glib-sys v0.14.0 (*)
+│   │   │       ├── gobject-sys v0.14.0 (*)
+│   │   │       ├── gtk v0.14.3 (*)
+│   │   │       ├── gtk-sys v0.14.0 (*)
+│   │   │       ├── javascriptcore-rs v0.15.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/javascriptcore-rs-javascriptcore-rs-v0.15.2)
+│   │   │       │   ├── bitflags v1.3.2
+│   │   │       │   ├── glib v0.14.8 (*)
+│   │   │       │   └── javascriptcore-rs-sys v0.3.3 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/javascriptcore-rs-javascriptcore-rs-v0.15.2/sys)
+│   │   │       │       ├── glib-sys v0.14.0 (*)
+│   │   │       │       ├── gobject-sys v0.14.0 (*)
+│   │   │       │       └── libc v0.2.103
+│   │   │       │       [build-dependencies]
+│   │   │       │       └── system-deps v3.0.0 (*)
+│   │   │       ├── libc v0.2.103
+│   │   │       ├── once_cell v1.9.0
+│   │   │       └── webkit2gtk-sys v0.16.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys)
+│   │   │           ├── atk-sys v0.14.0 (*)
+│   │   │           ├── bitflags v1.3.2
+│   │   │           ├── cairo-sys-rs v0.14.9 (*)
+│   │   │           ├── gdk-pixbuf-sys v0.14.0 (*)
+│   │   │           ├── gdk-sys v0.14.0 (*)
+│   │   │           ├── gio-sys v0.14.0 (*)
+│   │   │           ├── glib-sys v0.14.0 (*)
+│   │   │           ├── gobject-sys v0.14.0 (*)
+│   │   │           ├── gtk-sys v0.14.0 (*)
+│   │   │           ├── javascriptcore-rs-sys v0.3.3 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/javascriptcore-rs-javascriptcore-rs-v0.15.2/sys) (*)
+│   │   │           ├── libc v0.2.103
+│   │   │           ├── pango-sys v0.14.0 (*)
+│   │   │           └── soup2-sys v0.2.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/soup2-sys-0.2.0)
+│   │   │               ├── bitflags v1.3.2
+│   │   │               ├── gio-sys v0.14.0 (*)
+│   │   │               ├── glib-sys v0.14.0 (*)
+│   │   │               ├── gobject-sys v0.14.0 (*)
+│   │   │               └── libc v0.2.103
+│   │   │               [build-dependencies]
+│   │   │               └── system-deps v3.0.0 (*)
+│   │   │           [build-dependencies]
+│   │   │           ├── pkg-config v0.3.21
+│   │   │           └── system-deps v3.0.0 (*)
+│   │   └── webkit2gtk v0.16.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0) (*)
+│   ├── gif v0.10.2
+│   │   ├── color_quant v1.0.1
+│   │   └── lzw v0.10.0
+│   ├── glob v0.3.0
+│   ├── gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer) (*)
+│   ├── ico v0.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-ico-0.3.0)
+│   │   ├── byteorder v1.4.3
+│   │   └── png v0.17.5 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/image-png-0.17.5)
+│   │       ├── bitflags v1.3.2
+│   │       ├── crc32fast v1.2.0
+│   │       │   └── cfg-if v0.1.10
+│   │       ├── deflate v0.7.20
+│   │       │   ├── adler32 v1.2.0
+│   │       │   └── byteorder v1.4.3
+│   │       └── miniz_oxide v0.4.4 (*)
+│   ├── image v0.24.5 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/image-0.24.5)
+│   │   ├── bytemuck v1.7.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/bytemuck-1.7.0)
+│   │   ├── byteorder v1.4.3
+│   │   ├── color_quant v1.0.1
+│   │   ├── exr v1.5.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/exrs-1.5.0) (*)
+│   │   ├── gif v0.10.2 (*)
+│   │   ├── jpeg-decoder v0.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/jpeg-decoder-0.3.0)
+│   │   │   └── rayon v1.4.1
+│   │   │       ├── crossbeam-deque v0.7.4
+│   │   │       │   ├── crossbeam-epoch v0.8.2
+│   │   │       │   │   ├── cfg-if v0.1.10
+│   │   │       │   │   ├── crossbeam-utils v0.7.2
+│   │   │       │   │   │   ├── cfg-if v0.1.10
+│   │   │       │   │   │   └── lazy_static v1.4.0
+│   │   │       │   │   │   [build-dependencies]
+│   │   │       │   │   │   └── autocfg v1.0.1
+│   │   │       │   │   ├── lazy_static v1.4.0
+│   │   │       │   │   ├── maybe-uninit v2.0.0
+│   │   │       │   │   ├── memoffset v0.6.4 (*)
+│   │   │       │   │   └── scopeguard v1.1.0
+│   │   │       │   │   [build-dependencies]
+│   │   │       │   │   └── autocfg v1.0.1
+│   │   │       │   ├── crossbeam-utils v0.7.2 (*)
+│   │   │       │   └── maybe-uninit v2.0.0
+│   │   │       ├── either v1.6.1
+│   │   │       └── rayon-core v1.8.1
+│   │   │           ├── crossbeam-channel v0.4.4
+│   │   │           │   ├── crossbeam-utils v0.7.2 (*)
+│   │   │           │   └── maybe-uninit v2.0.0
+│   │   │           ├── crossbeam-deque v0.7.4 (*)
+│   │   │           ├── crossbeam-utils v0.7.2 (*)
+│   │   │           ├── lazy_static v1.4.0
+│   │   │           └── num_cpus v1.13.0 (*)
+│   │   │       [build-dependencies]
+│   │   │       └── autocfg v1.0.1
+│   │   ├── num-rational v0.4.0
+│   │   │   ├── num-integer v0.1.44 (*)
+│   │   │   └── num-traits v0.2.14 (*)
+│   │   │   [build-dependencies]
+│   │   │   └── autocfg v1.0.1
+│   │   ├── num-traits v0.2.14 (*)
+│   │   ├── png v0.17.5 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/image-png-0.17.5) (*)
+│   │   ├── scoped_threadpool v0.1.9
+│   │   └── tiff v0.5.0
+│   │       ├── byteorder v1.4.3
+│   │       ├── lzw v0.10.0
+│   │       └── miniz_oxide v0.4.4 (*)
+│   ├── jpeg-decoder v0.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/jpeg-decoder-0.3.0) (*)
+│   ├── libwebp-image v0.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/libwebp-image-rs-0.3.0)
+│   │   ├── image v0.24.5 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/image-0.24.5) (*)
+│   │   └── libwebp v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/libwebp-rs-0.1.0)
+│   │       └── libwebp-sys2 v0.1.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/libwebp-sys2-rs-0.1.2)
+│   │           ├── cfg-if v0.1.10
+│   │           └── libc v0.2.103
+│   │           [build-dependencies]
+│   │           ├── cc v1.0.71
+│   │           └── pkg-config v0.3.21
+│   ├── log v0.4.11 (*)
+│   ├── lz4-compression v0.7.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/lz4-compression-0.7)
+│   ├── once_cell v1.9.0
+│   ├── opml v1.1.5 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/opml/opml_api)
+│   │   ├── hard-xml v1.21.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hard-xml-v1.21.0/hard-xml)
+│   │   │   ├── hard-xml-derive v1.21.0 (proc-macro) (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hard-xml-v1.21.0/hard-xml-derive)
+│   │   │   │   ├── bitflags v1.3.2
+│   │   │   │   ├── proc-macro2 v1.0.28 (*)
+│   │   │   │   ├── quote v1.0.9 (*)
+│   │   │   │   └── syn v1.0.76 (*)
+│   │   │   ├── jetscii v0.5.3 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/jetscii-0.5.3)
+│   │   │   ├── lazy_static v1.4.0
+│   │   │   ├── memchr v2.4.1
+│   │   │   └── xmlparser v0.11.0
+│   │   ├── serde v1.0.130 (*)
+│   │   └── thiserror v1.0.20 (*)
+│   ├── png v0.17.5 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/image-png-0.17.5) (*)
+│   ├── proc-status v0.1.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/proc-status-0.1.1)
+│   │   └── thiserror v1.0.20 (*)
+│   ├── regex v1.5.4 (*)
+│   ├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources) (*)
+│   ├── rusqlite v0.28.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rusqlite-sys0.25.2)
+│   │   ├── bitflags v1.3.2
+│   │   ├── fallible-iterator v0.2.0
+│   │   ├── fallible-streaming-iterator v0.1.9
+│   │   ├── hashlink v0.8.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hashlink-0.8.0)
+│   │   │   └── hashbrown v0.11.2
+│   │   ├── libsqlite3-sys v0.25.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rusqlite-sys0.25.2/libsqlite3-sys)
+│   │   │   [build-dependencies]
+│   │   │   ├── cc v1.0.71
+│   │   │   ├── pkg-config v0.3.21
+│   │   │   └── vcpkg v0.2.8
+│   │   └── smallvec v1.7.0
+│   ├── rust-i18n v1.1.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-i18n-1.1.1) (*)
+│   ├── serde v1.0.130 (*)
+│   ├── serde_json v1.0.45 (*)
+│   ├── signal-hook v0.3.13
+│   │   ├── libc v0.2.103
+│   │   └── signal-hook-registry v1.4.0
+│   │       └── libc v0.2.103
+│   ├── textcode v0.2.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/textcode-0.2.2)
+│   ├── tinybmp v0.4.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/tinybmp-0.4.0)
+│   │   └── embedded-graphics v0.7.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/embedded-graphics-embedded-graphics-v0.7.1) (*)
+│   ├── tl v0.7.7 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/tl-0.7.7)
+│   ├── ui_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/ui_gtk) (*)
+│   ├── ureq v2.6.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/ureq-2.6.2)
+│   │   ├── base64 v0.13.0
+│   │   ├── flate2 v1.0.22
+│   │   │   ├── cfg-if v1.0.0
+│   │   │   ├── crc32fast v1.2.0 (*)
+│   │   │   ├── libc v0.2.103
+│   │   │   └── miniz_oxide v0.4.4 (*)
+│   │   ├── log v0.4.11 (*)
+│   │   ├── once_cell v1.9.0
+│   │   ├── rustls v0.20.8 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rustls-v-0.20.8/rustls)
+│   │   │   ├── log v0.4.11 (*)
+│   │   │   ├── ring v0.16.9
+│   │   │   │   ├── lazy_static v1.4.0
+│   │   │   │   ├── libc v0.2.103
+│   │   │   │   ├── spin v0.5.2
+│   │   │   │   └── untrusted v0.7.0
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── cc v1.0.71
+│   │   │   ├── sct v0.6.0
+│   │   │   │   ├── ring v0.16.9 (*)
+│   │   │   │   └── untrusted v0.7.0
+│   │   │   └── webpki v0.21.0
+│   │   │       ├── ring v0.16.9 (*)
+│   │   │       └── untrusted v0.7.0
+│   │   ├── url v2.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-url-2.3.0/url) (*)
+│   │   ├── webpki v0.21.0 (*)
+│   │   └── webpki-roots v0.22.6 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/webpki-roots-v-0.22.6)
+│   │       └── webpki v0.21.0 (*)
+│   ├── url v2.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-url-2.3.0/url) (*)
+│   ├── usvg v0.29.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/resvg-0.29.0/usvg)
+│   │   ├── base64 v0.13.0
+│   │   ├── data-url v0.1.0
+│   │   │   └── matches v0.1.8
+│   │   ├── flate2 v1.0.22 (*)
+│   │   ├── imagesize v0.11.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/imagesize-0.11.0)
+│   │   ├── kurbo v0.7.1
+│   │   │   └── arrayvec v0.7.2
+│   │   ├── log v0.4.11 (*)
+│   │   ├── rctree v0.3.3
+│   │   ├── rosvgtree v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/resvg-0.29.0/rosvgtree)
+│   │   │   ├── log v0.4.11 (*)
+│   │   │   ├── roxmltree v0.7.3
+│   │   │   │   └── xmlparser v0.11.0
+│   │   │   ├── simplecss v0.2.0
+│   │   │   │   └── log v0.4.11 (*)
+│   │   │   ├── siphasher v0.3.1
+│   │   │   └── svgtypes v0.5.0
+│   │   │       ├── float-cmp v0.6.0 (*)
+│   │   │       └── siphasher v0.3.1
+│   │   └── strict-num v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/strict-num-0.1.0)
+│   │       └── float-cmp v0.6.0 (*)
+│   ├── webbrowser v0.5.2
+│   ├── xmlem v0.2.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/xmlem-0.2.0)
+│   │   ├── cssparser v0.28.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-cssparser-0.28.0) (*)
+│   │   ├── indexmap v1.7.0
+│   │   │   └── hashbrown v0.11.2
+│   │   │   [build-dependencies]
+│   │   │   └── autocfg v1.0.1
+│   │   ├── once_cell v1.9.0
+│   │   ├── qname v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/qname-0.1.0)
+│   │   │   ├── qname-impl v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/qname-0.1.0/impl)
+│   │   │   │   ├── proc-macro2 v1.0.28 (*)
+│   │   │   │   ├── quote v1.0.9 (*)
+│   │   │   │   └── syn v1.0.76 (*)
+│   │   │   └── qname-macro v0.1.0 (proc-macro) (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/qname-0.1.0/macro)
+│   │   │       ├── proc-macro2 v1.0.28 (*)
+│   │   │       ├── qname-impl v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/qname-0.1.0/impl) (*)
+│   │   │       ├── quote v1.0.9 (*)
+│   │   │       └── syn v1.0.76 (*)
+│   │   ├── quick-xml v0.25.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/quick-xml-0.25.0) (*)
+│   │   ├── selectors v0.22.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/servo-selectors-v0.22.0/components/selectors)
+│   │   │   ├── bitflags v1.3.2
+│   │   │   ├── cssparser v0.28.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-cssparser-0.28.0) (*)
+│   │   │   ├── derive_more v0.99.17 (proc-macro) (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/derive_more-0.99.17) (*)
+│   │   │   ├── fxhash v0.2.1
+│   │   │   │   └── byteorder v1.4.3
+│   │   │   ├── log v0.4.11 (*)
+│   │   │   ├── matches v0.1.8
+│   │   │   ├── phf v0.8.0 (*)
+│   │   │   ├── precomputed-hash v0.1.1
+│   │   │   ├── servo_arc v0.1.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/servo-selectors-v0.22.0/components/servo_arc)
+│   │   │   │   ├── nodrop v0.1.13
+│   │   │   │   └── stable_deref_trait v1.1.1
+│   │   │   ├── smallvec v1.7.0
+│   │   │   └── thin-slice v0.1.1
+│   │   │   [build-dependencies]
+│   │   │   └── phf_codegen v0.8.0
+│   │   │       ├── phf_generator v0.8.0 (*)
+│   │   │       └── phf_shared v0.8.0 (*)
+│   │   ├── slotmap v1.0.6 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/slotmap-1.0.6)
+│   │   │   [build-dependencies]
+│   │   │   └── version_check v0.9.2
+│   │   └── unic-ucd v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd)
+│   │       ├── unic-ucd-age v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/age)
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property)
+│   │       │   │   └── unic-char-range v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/range)
+│   │       │   ├── unic-char-range v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/range)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version)
+│   │       │       └── unic-common v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/common)
+│   │       ├── unic-ucd-bidi v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/bidi)
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property) (*)
+│   │       │   ├── unic-char-range v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/range)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       ├── unic-ucd-block v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/block)
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property) (*)
+│   │       │   ├── unic-char-range v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/range)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       ├── unic-ucd-case v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/case)
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property) (*)
+│   │       │   ├── unic-char-range v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/range)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       ├── unic-ucd-category v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/category)
+│   │       │   ├── matches v0.1.8
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property) (*)
+│   │       │   ├── unic-char-range v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/range)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       ├── unic-ucd-common v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/common)
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property) (*)
+│   │       │   ├── unic-char-range v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/range)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       ├── unic-ucd-hangul v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/hangul)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       ├── unic-ucd-ident v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/ident)
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property) (*)
+│   │       │   ├── unic-char-range v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/range)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       ├── unic-ucd-name v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/name)
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property) (*)
+│   │       │   ├── unic-ucd-hangul v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/hangul) (*)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       ├── unic-ucd-name_aliases v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/name_aliases)
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property) (*)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       ├── unic-ucd-normal v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/normal)
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property) (*)
+│   │       │   ├── unic-char-range v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/range)
+│   │       │   ├── unic-ucd-category v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/category) (*)
+│   │       │   ├── unic-ucd-hangul v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/hangul) (*)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       ├── unic-ucd-segment v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/segment)
+│   │       │   ├── unic-char-property v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/property) (*)
+│   │       │   ├── unic-char-range v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/char/range)
+│   │       │   └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   │       └── unic-ucd-version v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd/version) (*)
+│   └── xmlparser v0.11.0
+├── gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer) (*)
+├── gumdrop v0.7.0
+│   └── gumdrop_derive v0.7.0 (proc-macro)
+│       ├── proc-macro2 v1.0.28 (*)
+│       ├── quote v1.0.9 (*)
+│       └── syn v1.0.76 (*)
+├── half v1.8.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/half-rs-1.8.2)
+├── hard-xml v1.21.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hard-xml-v1.21.0/hard-xml) (*)
+├── hashlink v0.8.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hashlink-0.8.0) (*)
+├── ico v0.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-ico-0.3.0) (*)
+├── image v0.24.5 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/image-0.24.5) (*)
+├── imagesize v0.11.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/imagesize-0.11.0)
+├── javascriptcore-rs v0.15.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/javascriptcore-rs-javascriptcore-rs-v0.15.2) (*)
+├── javascriptcore-rs-sys v0.3.3 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/javascriptcore-rs-javascriptcore-rs-v0.15.2/sys) (*)
+├── jetscii v0.5.3 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/jetscii-0.5.3)
+├── jpeg-decoder v0.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/jpeg-decoder-0.3.0) (*)
+├── lebe v0.5.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/lebe-0.5.2)
+├── libwebp v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/libwebp-rs-0.1.0) (*)
+├── libwebp-image v0.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/libwebp-image-rs-0.3.0) (*)
+├── libwebp-sys2 v0.1.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/libwebp-sys2-rs-0.1.2) (*)
+├── log v0.4.11 (*)
+├── lz4-compression v0.7.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/lz4-compression-0.7)
+├── micromath v1.1.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/micromath-1.1.1)
+├── once_cell v1.9.0
+├── png v0.17.5 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/image-png-0.17.5) (*)
+├── proc-status v0.1.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/proc-status-0.1.1) (*)
+├── qname v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/qname-0.1.0) (*)
+├── quick-xml v0.25.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/quick-xml-0.25.0) (*)
+├── regex v1.6.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/regex-1.6.0) (*)
+├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources) (*)
+├── rusqlite v0.28.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rusqlite-sys0.25.2) (*)
+├── rust-i18n v1.1.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-i18n-1.1.1) (*)
+├── rustls v0.20.8 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rustls-v-0.20.8/rustls) (*)
+├── selectors v0.22.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/servo-selectors-v0.22.0/components/selectors) (*)
+├── slotmap v1.0.6 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/slotmap-1.0.6) (*)
+├── soup2-sys v0.2.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/soup2-sys-0.2.0) (*)
+├── spin v0.9.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/spin-rs-0.9.2) (*)
+├── strict-num v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/strict-num-0.1.0) (*)
+├── syslog v6.0.1
+│   ├── error-chain v0.12.4
+│   │   [build-dependencies]
+│   │   └── version_check v0.9.2
+│   ├── hostname v0.3.1
+│   │   ├── libc v0.2.103
+│   │   └── match_cfg v0.1.0
+│   ├── libc v0.2.103
+│   ├── log v0.4.11 (*)
+│   └── time v0.3.5
+│       ├── itoa v0.4.8
+│       └── libc v0.2.103
+├── textcode v0.2.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/textcode-0.2.2)
+├── tinybmp v0.4.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/tinybmp-0.4.0) (*)
+├── tl v0.7.7 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/tl-0.7.7)
+├── unic-ucd v0.9.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-unic-0.9.0/unic/ucd) (*)
+├── ureq v2.6.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/ureq-2.6.2) (*)
+├── url v2.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-url-2.3.0/url) (*)
+├── usvg v0.29.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/resvg-0.29.0/usvg) (*)
+├── uuid v1.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/uuid-1.1.0) (*)
+├── webkit2gtk v0.16.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0) (*)
+├── webkit2gtk-sys v0.16.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys) (*)
+├── webpki-roots v0.22.6 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/webpki-roots-v-0.22.6) (*)
+├── xdg v2.2.0
+└── xmlem v0.2.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/xmlem-0.2.0) (*)

@@ -13,10 +13,10 @@
 	- xmlem v0.2.1
   - hashlink
 	- librust-thin-slice-dev 0.1.1-1
-	-	hard-xml v1.21.0
  	- librust-system-deps-dev	 3.0.0-1
 	-	soup2-sys 			!!	https://crates.io/api/v1/crates/soup2-sys/0.2.0/download
-
+	- librust-env-logger-dev 0.9.0-1
+	- librust-trybuild-dev	1.0.50-1
 
 
 - Debian packages for distribution, Downgrading
@@ -46,7 +46,6 @@
 	- num-rational v0.4.1		=>	librust-num-rational-dev		 0.4.0-1
 	- scoped_threadpool v0.1.9		=>  librust-scoped-threadpool-dev   0.1.9-1
  	- tiff v0.8.1		=>		librust-tiff-dev	 0.5.0-2
-	- rayon v1.6.1	=>	 librust-rayon-dev	1.4.1-1
   - vcpkg v0.2.15 	=> librust-vcpkg-dev		0.2.8-1
   -	getrandom v0.2.8		=>		 librust-getrandom-dev	0.2.4-2
   - deflate "1.0" => librust-deflate-dev	0.7.20-2
@@ -97,6 +96,8 @@
   - simplecss v0.2.1		=>	librust-simplecss-dev	0.2.0-1
  	- svgtypes v0.8.2	=>	librust-svgtypes-dev	0.5.0-1
  	- cairo-rs v0.15.12 => librust-cairo-rs-dev	 0.14.9-2
+	- crossbeam-channel v0.4.4 	=> librust-crossbeam-channel-dev 		 0.4.4-1
+ 	-	crossbeam-deque v0.7.4	=> librust-crossbeam-deque-dev	 0.7.4-2
 
 
 
@@ -111,6 +112,8 @@
 		# failed to read `/usr/share/cargo/registry/usvg-0.8.0/.cargo-checksum.json`
 	- png v0.17.7 				=> librust-png-dev 0.15.0-1		#    rust-ico requires png-0.17
 	- half v2.2.1 => librust-half-dev  1.6.0-2
+	- rayon v1.6.1	=>	 librust-rayon-dev	1.4.1-1			!! jpeg-decoder-0.3.0/src/worker/rayon.rs     rayon::in_place_scope(
+	-	hard-xml v1.21.0			!! does not compile.  use   1.19.0
 
 
 
