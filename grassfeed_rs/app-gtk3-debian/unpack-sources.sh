@@ -203,8 +203,6 @@ F=target/hard-xml-v1.19.0/test-suite/Cargo.toml
 mv $F ${F}.0		#   env_logger
 cat ${F}.0 		|sed -e "s/\"0.8\"/\">=0.8\" /"	|sed -e "s/\"1.0.71\"/\">=1.0.50\" /" 	>$F
 
-
-
 F=target/opml/opml_api/Cargo.toml
 mv $F ${F}.0	#   serde , thiserror
 cat ${F}.0  |sed -e "s/\"1.13.0\"/\{version=\">=1.11\" , path=\"..\/..\/hard-xml-v1.19.0\/hard-xml\"  \} /" 	\
@@ -215,7 +213,6 @@ cat ${F}.0  |sed -e "s/\"1.13.0\"/\{version=\">=1.11\" , path=\"..\/..\/hard-xml
 F=target/rust-url-2.3.0/idna/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.1.17\"/\">=0.1.12\"/"	>$F
-
 
 F=target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/Cargo.toml
 mv $F ${F}.0

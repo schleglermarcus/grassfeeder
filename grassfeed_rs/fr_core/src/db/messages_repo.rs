@@ -1,3 +1,6 @@
+#[cfg(feature = "g3modern")]
+use rusqlite_m as rusqlite;
+
 use crate::controller::timer::Timer;
 use crate::db::message::MessageRow;
 use crate::db::sqlite_context::rusqlite_error_to_boxed;

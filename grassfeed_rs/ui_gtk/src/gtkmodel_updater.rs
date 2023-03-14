@@ -1,3 +1,7 @@
+#[cfg(feature = "g3modern")]
+use webkit2gtk_m  as webkit2gtk;
+
+
 use crate::iconloader::IconLoader;
 use crate::GtkObjectsType;
 use gtk::gdk_pixbuf::Pixbuf;
@@ -23,6 +27,8 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;
 use std::sync::Arc;
+
+
 use webkit2gtk::WebViewExt;
 
 pub struct GtkModelUpdaterInt {

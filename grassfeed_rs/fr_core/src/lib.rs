@@ -3,7 +3,7 @@
 extern crate log;
 #[macro_use]
 extern crate rust_i18n;
-extern crate jpeg_decoder;
+extern crate jpeg_decoder_m as jpeg_decoder;
 extern crate libwebp_image;
 extern crate proc_status;
 #[cfg(test)]

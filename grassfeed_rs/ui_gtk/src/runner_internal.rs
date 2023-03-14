@@ -1,3 +1,7 @@
+#[cfg(feature = "g3modern")]
+use glib_m  as glib;
+
+
 use crate::gtk::prelude::ApplicationExt;
 use crate::gtk::prelude::ApplicationExtManual;
 use crate::gtk::prelude::Cast;

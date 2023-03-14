@@ -1,3 +1,7 @@
+#[cfg(feature = "g3modern")]
+use webkit2gtk_m  as webkit2gtk;
+
+
 use crate::gtk::prelude::ContainerExt;
 use crate::gtk::prelude::WidgetExt;
 use crate::runner_internal::GtkRunnerInternal;
@@ -227,7 +231,6 @@ impl GtkObjectsImpl {
                 return;
             }
             let dest_box = o_dest_box.unwrap();
-
             if let Some(ev_se) = &self.gui_event_sender {
                 if let Some(create_fn) = &self.create_webview_fn {
                     let w_view = (create_fn)(

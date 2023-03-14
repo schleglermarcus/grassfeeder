@@ -1,3 +1,11 @@
+#[cfg(feature = "g3modern")]
+use gio_m  as gio;
+
+#[cfg(feature = "g3modern")]
+use  glib_m  as glib;
+
+
+
 use gio::Cancellable;
 use gio::MemoryInputStream;
 use glib::Bytes;

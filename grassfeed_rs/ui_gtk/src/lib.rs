@@ -1,3 +1,11 @@
+#[cfg(feature = "g3modern")]
+use webkit2gtk_m as webkit2gtk;
+#[cfg(feature = "g3modern")]
+extern crate gio_m  as gio;
+#[cfg(feature = "g3modern")]
+extern crate  glib_m  as glib;
+
+
 #[macro_use]
 extern crate log;
 extern crate gdk_sys;
@@ -18,7 +26,6 @@ use gtk::Application;
 use gtk::Window;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
-// use gui_layer::abstract_ui::UiSenderWrapperType;
 use std::sync::Arc;
 use std::sync::RwLock;
 use webkit2gtk::WebContext;
@@ -160,20 +167,20 @@ pub trait GtkObjects {
     fn set_searchentry(&mut self, idx: u8, e: &gtk::SearchEntry);
     fn get_searchentry(&self, idx: u8) -> Option<&gtk::SearchEntry>;
 
-/*
-    fn set_indicator(&mut self, i: Option<libappindicator::AppIndicator>);
-    fn get_indicator(&self) -> Option<&libappindicator::AppIndicator>;
-    fn get_indicator_mut(&mut self) -> Option<&mut libappindicator::AppIndicator>;
+    /*
+        fn set_indicator(&mut self, i: Option<libappindicator::AppIndicator>);
+        fn get_indicator(&self) -> Option<&libappindicator::AppIndicator>;
+        fn get_indicator_mut(&mut self) -> Option<&mut libappindicator::AppIndicator>;
 
-    fn set_create_systray_fn(
-        &mut self,
-        cb_fn: Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>,
-    );
+        fn set_create_systray_fn(
+            &mut self,
+            cb_fn: Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>,
+        );
 
-    fn get_create_systray_fn(
-        &self,
-    ) -> Option<&dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>;
-*/
+        fn get_create_systray_fn(
+            &self,
+        ) -> Option<&dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>;
+    */
 
     fn set_gui_event_sender(&mut self, ev_se: Sender<GuiEvents>);
     fn fet_gui_event_sender(&mut self) -> Option<Sender<GuiEvents>>;

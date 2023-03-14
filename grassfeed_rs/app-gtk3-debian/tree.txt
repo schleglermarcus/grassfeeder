@@ -509,7 +509,7 @@ app-gtk3-debian v0.1.8-B4 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-g
 │   │   ├── exr v1.5.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/exrs-1.5.0) (*)
 │   │   ├── gif v0.10.2 (*)
 │   │   ├── jpeg-decoder v0.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/jpeg-decoder-0.3.0)
-│   │   │   └── rayon v1.4.1
+│   │   │   └── rayon v1.5.3 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rayon-1.5.3)
 │   │   │       ├── crossbeam-deque v0.7.4
 │   │   │       │   ├── crossbeam-epoch v0.8.2
 │   │   │       │   │   ├── cfg-if v0.1.10
@@ -527,13 +527,12 @@ app-gtk3-debian v0.1.8-B4 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-g
 │   │   │       │   ├── crossbeam-utils v0.7.2 (*)
 │   │   │       │   └── maybe-uninit v2.0.0
 │   │   │       ├── either v1.6.1
-│   │   │       └── rayon-core v1.8.1
+│   │   │       └── rayon-core v1.9.3 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rayon-1.5.3/rayon-core)
 │   │   │           ├── crossbeam-channel v0.4.4
 │   │   │           │   ├── crossbeam-utils v0.7.2 (*)
 │   │   │           │   └── maybe-uninit v2.0.0
 │   │   │           ├── crossbeam-deque v0.7.4 (*)
-│   │   │           ├── crossbeam-utils v0.7.2 (*)
-│   │   │           ├── lazy_static v1.4.0
+│   │   │           ├── crossbeam-utils v0.8.5 (*)
 │   │   │           └── num_cpus v1.13.0 (*)
 │   │   │       [build-dependencies]
 │   │   │       └── autocfg v1.0.1
@@ -563,8 +562,8 @@ app-gtk3-debian v0.1.8-B4 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-g
 │   ├── lz4-compression v0.7.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/lz4-compression-0.7)
 │   ├── once_cell v1.9.0
 │   ├── opml v1.1.5 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/opml/opml_api)
-│   │   ├── hard-xml v1.21.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hard-xml-v1.21.0/hard-xml)
-│   │   │   ├── hard-xml-derive v1.21.0 (proc-macro) (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hard-xml-v1.21.0/hard-xml-derive)
+│   │   ├── hard-xml v1.19.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hard-xml-v1.19.0/hard-xml)
+│   │   │   ├── hard-xml-derive v1.19.0 (proc-macro) (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hard-xml-v1.19.0/hard-xml-derive)
 │   │   │   │   ├── bitflags v1.3.2
 │   │   │   │   ├── proc-macro2 v1.0.28 (*)
 │   │   │   │   ├── quote v1.0.9 (*)
@@ -756,7 +755,7 @@ app-gtk3-debian v0.1.8-B4 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-g
 │       ├── quote v1.0.9 (*)
 │       └── syn v1.0.76 (*)
 ├── half v1.8.2 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/half-rs-1.8.2)
-├── hard-xml v1.21.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hard-xml-v1.21.0/hard-xml) (*)
+├── hard-xml v1.19.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hard-xml-v1.19.0/hard-xml) (*)
 ├── hashlink v0.8.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/hashlink-0.8.0) (*)
 ├── ico v0.3.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rust-ico-0.3.0) (*)
 ├── image v0.24.5 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/image-0.24.5) (*)
@@ -777,6 +776,7 @@ app-gtk3-debian v0.1.8-B4 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-g
 ├── proc-status v0.1.1 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/proc-status-0.1.1) (*)
 ├── qname v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/qname-0.1.0) (*)
 ├── quick-xml v0.25.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/quick-xml-0.25.0) (*)
+├── rayon v1.5.3 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rayon-1.5.3) (*)
 ├── regex v1.6.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/regex-1.6.0) (*)
 ├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources) (*)
 ├── rusqlite v0.28.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/app-gtk3-debian/target/rusqlite-sys0.25.2) (*)

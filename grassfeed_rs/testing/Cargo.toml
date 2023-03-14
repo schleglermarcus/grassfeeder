@@ -6,21 +6,20 @@ description = "Feed Reader Testing Module"
 
 
 [dependencies]
-gui_layer = { path = "../gui_layer" }
-fr_gtk = { path = "../fr_gtk" }
-context = { path = "../context" }
-fr_core = { path = "../fr_core" }
-ui_gtk = { path = "../ui_gtk" }
 resources = { path = "../resources" }
+gui_layer = { path = "../gui_layer" }
+context = { path = "../context" }
+fr_gtk = { path = "../fr_gtk" , features=["g3modern"]  }
+fr_core = { path = "../fr_core" , features=["g3modern"] }
+ui_gtk = { path = "../ui_gtk"  , features=["g3modern"] }
 
 log = "0.4.14"
 chrono = "0.4.19"
 http = "0.2.6"
-rust-ini = "0.17.0"
-flume = "0.10.9"
+# rust-ini = "0.17.0"
+flume = ">=0.10.9"
 serde = ">=1.0.133"
 serde_json = ">=1.0.74"
-# xdg = ">=2.4"
 fern = { version = "0.6", features = ["colored"] }
 serde-xml-rs = ">=0.5.1"	# later remove it
 bincode = ">=1.3.3"
@@ -33,8 +32,8 @@ once_cell = ">=1.12.0"
 
 
 [dev-dependencies]
-rand = "0.8.5"
-rusqlite = { version = "0.27.0", features = ["bundled"] }
+rand = ">=0.8.5"
+rusqlite = { version = ">=0.27.0", features = ["bundled"] }
 
 
 [package.metadata.i18n]

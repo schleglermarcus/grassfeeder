@@ -124,7 +124,7 @@ impl Step<DragInner> for AnalyzeContentSloppy {
         let mut inner: DragInner = self.0;
         let extracted: Vec<String> = extract_feed_urls_sloppy(&inner.dragged_url_content);
         if !extracted.is_empty() {
-            debug!("feed adresses found by sloppy:   {:?}", extracted);
+debug!("feed adresses found by sloppy:   {:?}", extracted);
             inner.found_feed_url = extracted.first().unwrap().clone();
         }
         StepResult::Continue(Box::new(CompleteRelativeUrl(inner)))

@@ -1,4 +1,11 @@
 [workspace]
-members = [ "context", "gui_layer", "resources", "ui_gtk", "fr_gtk" , "fr_core",  "testing" ]
-exclude =[ "app-gtk3-linux" , "app-gtk3-debian"  ]
-
+members = [
+  "context",
+  "gui_layer",
+  "resources",
+  "ui_gtk",
+  "fr_gtk",
+  "fr_core",
+  "testing",
+]
+exclude = ["app-gtk3-linux", "app-gtk3-debian"] #
