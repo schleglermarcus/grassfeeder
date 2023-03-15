@@ -6,7 +6,7 @@ use crate::util::MOUSE_BUTTON_LEFT;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
 use gdk::EventButton;
-use glib::types::Type;
+// use glib::types::Type;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::GtkMenuItemExt;
 use gtk::prelude::TreeModelExt;
@@ -52,12 +52,12 @@ pub fn create_listview(
     content_tree_view.set_margin_top(2);
     let liststoretypes = &[
         Pixbuf::static_type(), // 0: Fav / feed icon
-        Type::STRING,          // title
-        Type::STRING,          // date
+        gtk::glib:: Type::STRING,          // title
+        gtk::glib:: Type::STRING,          // date
         Pixbuf::static_type(), // status icon
         u32::static_type(),    // 4 : is-read
         u32::static_type(),    // 5 : db-id
-        Type::STRING,          // tooltip
+        gtk::glib:: Type::STRING,          // tooltip
         bool::static_type(),   // 7 : Is-Favorite
     ];
     let title_column: TreeViewColumn;

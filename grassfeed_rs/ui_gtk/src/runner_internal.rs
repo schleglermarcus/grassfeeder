@@ -1,5 +1,7 @@
 #[cfg(feature = "g3modern")]
 use glib_m  as glib;
+#[cfg(feature = "g3modern")]
+use gtk_m  as gtk;
 
 
 use crate::gtk::prelude::ApplicationExt;

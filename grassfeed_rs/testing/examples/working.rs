@@ -1,3 +1,8 @@
+#[cfg(feature = "ui-gtk")]
+use fr_core_gtk as fr_core;
+
+
+
 use chrono::Local;
 use chrono::TimeZone;
 use context::appcontext::AppContext;
@@ -168,7 +173,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         // feedsources.add_new_folder_at_parent("5_3".to_string(), f5);
         // feedsources.add_new_folder_at_parent("5_4".to_string(), f5);
     }
-    if true {
+    if false {
         let src = [
             ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
             ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),

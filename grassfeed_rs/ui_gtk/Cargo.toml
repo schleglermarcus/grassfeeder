@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-g3modern = ["webkit2gtk_m", "webkit2gtk_sys_m", "glib_m", "gio_m" ]
+g3modern = ["webkit2gtk_m", "webkit2gtk_sys_m", "glib_m", "gio_m", "gtk_m" ]
 
 # g3legacy = ["webkit2gtk_l", "webkit2gtk_sys_l"]
 # default = ["g3modern"]
@@ -23,15 +23,16 @@ glib_m = { package = "glib", version = "0.15.5", optional = true }
 glib_l = { package = "glib", version = "0.14.8", optional = true }   # downgrade for debian repo
 
 gio_m = {package="gio" , version="^0.15.5"  , optional = true  }
-gio_l = {package="gio" , version="0.14.8"   , optional = true  }    # downgrade for debian repo
+gio_l = {package="gio" , optional = true  , version="0.14.8"    }    # downgrade for debian repo
 
+# gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
+#	gtk = { version = "0.15.5", features = ["v3_22_30"] }	# backport to ubuntu20
+gtk_m = { package="gtk" , optional = true , version = ">=0.15.5", features = [  "v3_22_30",] } 
+# gtk_l = { package="gtk" , optional = true , version = "<=0.14.3", features = [  "v3_22_30",] } # downgrade for debian repo
 
 
 flume = { version = ">=0.10.9", path = "../app-gtk3-debian/target/flume-master" }
 
-# gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
-#	gtk = { version = "0.15.5", features = ["v3_22_30"] }	# backport to ubuntu20
-gtk = { version = ">=0.14.3", features = [  "v3_22_30",] } # downgrade for debian repo
 
 
 

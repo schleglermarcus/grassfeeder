@@ -1,9 +1,12 @@
+#[cfg(feature = "g3modern")]
+extern crate gtk_m as gtk;
+
+
 extern crate gio;
-extern crate gtk;
+
 #[macro_use]
 extern crate log;
 extern crate itertools; // for key codes // background color
-// extern crate libappindicator;
 
 pub extern crate gdk_sys;
 

@@ -1,10 +1,11 @@
-use glib::Cast;
-use glib::Value;
+
+// use glib::Value;
 use gtk::pango::AttrInt;
 use gtk::pango::AttrList;
 use gtk::pango::AttrSize;
 use gtk::pango::Attribute;
 use gtk::pango::Weight;
+use gtk::prelude::Cast;
 use gtk::prelude::CellRendererTextExt;
 use gtk::prelude::TreeModelExt;
 use gtk::CellRenderer;
@@ -73,7 +74,7 @@ where
     ) {
         if let Some(crt) = (*ce_re).downcast_ref::<CellRendererText>() {
             crt.set_attributes(None);
-            let val: Value = (*t_model).value(t_iter, D::column_nr());
+            let val: gtk::glib:: Value = (*t_model).value(t_iter, D::column_nr());
             if let Ok(col_val) = val.get::<u32>() {
                 crt.set_attributes(Some(&D::attrlist(col_val))); // , t_v_col.sort_column_id()
             }

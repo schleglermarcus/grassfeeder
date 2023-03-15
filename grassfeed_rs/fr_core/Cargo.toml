@@ -5,7 +5,7 @@ edition = "2021"
 
 [features]
 ui-gtk = ["ui_gtk", "fr_gtk"]
-g3modern =  [ "rusqlite_m" , "png_m", "image_m" , "jpeg_decoder_m", "ico_m", "xmlem_m" ]
+g3modern =  [ "rusqlite_m" , "png_m", "image_m" , "jpeg_decoder_m", "ico_m", "xmlem_m", "usvg_m" ]
 
 [dependencies]
 gui_layer = { path = "../gui_layer" }
@@ -24,6 +24,11 @@ jpeg_decoder_m = { package="jpeg-decoder", optional=true, version=">=0.3" }
 # jpeg_decoder_l = { package="jpeg-decoder", optional=true, version="=0.1.22", path="../app-gtk3-debian/target/jpeg-decoder-0.3.0" }
 ico_m = { package="ico", optional=true, version=">=0.3.0"}
 #ico_l = { package="ico", optional=true, version="0.1.0", path="../app-gtk3-debian/target/rust-ico-0.3.0" }
+
+# usvg = "0.23.0"	# compile error with 0.24.0. https://github.com/RazrFalcon/resvg/issues/552
+usvg_m  = {  package="usvg", optional=true,  version="0.23"}  ## downgrading for now. Later: upgrade and adapt the code
+# usvg_l  = {  package="usvg", optional=true,  version=">0.24",  path="../app-gtk3-debian/target/resvg-0.29.0/usvg" }
+
 
 # xmlem = "=0.2.2"	# Produces error:
 # error[E0599]: no method named `unescape_value` found for struct `Attribute` in the current scope
@@ -62,8 +67,6 @@ tinybmp = { version= ">=0.3.3" , path="../app-gtk3-debian/target/tinybmp-0.4.0" 
 tl = { version=  ">=0.7.5",  path="../app-gtk3-debian/target/tl-0.7.7" }
 ureq = { version=  ">=2.4.0",  path="../app-gtk3-debian/target/ureq-2.6.2" }
 url = { version=">=2.2.2",  path = "../app-gtk3-debian/target/rust-url-2.3.0/url" }
-# usvg = "0.23.0"	# compile error with 0.24.0. https://github.com/RazrFalcon/resvg/issues/552
-usvg  = { version=">0.24",  path="../app-gtk3-debian/target/resvg-0.29.0/usvg" }
 #	webbrowser = ">=0.7.1"			# Downgrade for debian repo
 webbrowser = ">=0.5"
 # xmlparser = ">=0.13.5"				# Downgrade for debian repo

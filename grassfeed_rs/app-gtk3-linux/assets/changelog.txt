@@ -1,29 +1,11 @@
 grassfeeder (0.1.8) bionic; urgency=low
 
   
+  - create new subscription --> don't jump the complete tree
+  
   - bug:   msg map empty,  at window-restore without selected source
   
-  
-  
-  
   - TO DO  debian package for distribution
-    - rust-i18n v1.1.1 			"count_omega"  WIP
-    - feed-rs v1.3.0		missing			 (with	quick-xml v0.27.1	)
-    - ico v0.3.0				missing
-  
-  libwebp-image v0.3.0
-  lz4-compression v0.7.0
-  opml v1.1.5
-  proc-status v0.1.1
-  textcode v0.2.2
-  tinybmp v0.4.0
-  tl v0.7.7
-  usvg v0.23.0
-  xmlem v0.2.1
-  
-  - Debian packages for distribution, Downgrading
-    - gif v0.12.0  =>		librust-gif-dev	0.10.2-2
-    - jpeg-decoder v0.3.0		=> 	librust-jpeg-decoder+default-dev  0.1.22.1
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sat, 04 Feb 2023 00:20:00 +0000
 

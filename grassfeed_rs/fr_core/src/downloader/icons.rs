@@ -1,3 +1,11 @@
+#[cfg(feature = "g3modern")]
+use png_m as png;
+#[cfg(feature = "g3modern")]
+use ico_m as ico;
+#[cfg(feature = "g3modern")]
+use usvg_m as usvg;
+
+
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;

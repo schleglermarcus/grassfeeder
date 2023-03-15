@@ -4,7 +4,7 @@ use crate::util::EvSenderWrapper;
 use crate::util::DIALOG_ICON_SIZE;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
-use glib::types::Type;
+// use glib::types::Type;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::TreeModelExt;
 use gtk::prelude::TreeViewColumnExt;
@@ -30,8 +30,8 @@ const TREEVIEW_NAME: &str = "TREEVIEW1";
 // const DRAG_TARGET_NAME: &str = "text/html";
 
 pub fn create_tree_store() -> (TreeStore, usize) {
-    let tree_store_types: &[Type] = &[
-        Pixbuf::static_type(), // 0: feed-icon
+    let tree_store_types: &[ gtk::glib:: Type] = &[
+      gtk::gdk_pixbuf::  Pixbuf::static_type(), // 0: feed-icon
         String::static_type(), // 1: Feed-Source-Name
         String::static_type(), // 2: unread-column  text
         Pixbuf::static_type(), // 3: status-icon

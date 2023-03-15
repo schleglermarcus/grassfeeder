@@ -5,12 +5,16 @@ edition = "2021"
 description = "Feed Reader Testing Module"
 
 
+[features]
+ui-gtk = ["fr_core_gtk"]
+
 [dependencies]
 resources = { path = "../resources" }
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
 fr_gtk = { path = "../fr_gtk" , features=["g3modern"]  }
-fr_core = { path = "../fr_core" , features=["g3modern"] }
+fr_core_gtk  = { package="fr_core", path = "../fr_core" , features=["g3modern" , "ui-gtk" ] , optional=true }
+fr_core_mock = { package="fr_core", path = "../fr_core" , features=["g3modern"  ]  , optional=true  }
 ui_gtk = { path = "../ui_gtk"  , features=["g3modern"] }
 
 log = "0.4.14"

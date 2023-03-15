@@ -1,3 +1,7 @@
+#[cfg(feature = "g3modern")]
+use webkit2gtk_m  as webkit2gtk;
+
+
 use crate::dialogs::create_dialogs;
 use crate::gtk::prelude::WidgetExt;
 use crate::load_css::TAB_MARKER_HEIGHT;

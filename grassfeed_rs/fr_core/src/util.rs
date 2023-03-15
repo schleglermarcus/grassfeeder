@@ -1,3 +1,7 @@
+#[cfg(feature = "g3modern")]
+use image_m  as image;
+
+
 use chrono::DateTime;
 use chrono::Local;
 use chrono::TimeZone;
