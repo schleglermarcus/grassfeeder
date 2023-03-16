@@ -2,7 +2,7 @@
 name = "dd-g3new"
 version = "0.1.0"
 edition = "2021"
-description = "distribution dependent package selection  "
+description = "distribution dependent package selection : mint21 and newer  "
 
 
 [dependencies]
@@ -27,7 +27,6 @@ webkit2gtk-sys = { version = "=0.18.0", optional = true }
 ## TODO see if pinning this is needed
 #soup2 = { version = "=0.2.1", optional = true }
 #soup2-sys = { version = "=0.2.0", optional = true }
-
 
 rust-i18n = { version = ">=1.1.4", optional = true }
 # rust-i18n = { version = ">=1.0.1", path = "../app-gtk3-debian/target/rust-i18n-1.1.1" }

@@ -51,15 +51,18 @@ fn main() {
 }
 
 fn startup_minihttpserver(port: usize, current_folder: &String) -> MiniHttpServerController {
+    let htdocs_folder = match current_folder.contains("testing") {
+        true => format!("{}/tests/fr_htdocs", current_folder),
+        false => format!("{}/testing/tests/fr_htdocs", current_folder),
+    };
     let conf = ServerConfig {
-        htdocs_dir: format!("{}/testing/tests/fr_htdocs", current_folder),
+        htdocs_dir: htdocs_folder,
         index_file: String::from("index.html"),
         tcp_address: format!("127.0.0.1:{}", port).to_string(),
         binary_max_size: 1000000,
         download_throttling_kbps: 20,
     };
     debug!("CONF={:?}", conf);
-
     let mut msc = MiniHttpServerController::new(Arc::new(conf));
     msc.start();
     msc

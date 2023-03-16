@@ -5,24 +5,25 @@ edition = "2021"
 description = "Feed Reader Testing Module"
 
 
-[features]
-ui-gtk = ["ui_gtk", "ddl"]
+# [features]
+# ui-gtk = ["ui_gtk", "ddl"]
 
 [dependencies]
 resources = { path = "../resources" }
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
-fr_gtk = { path = "../fr_gtk" }
-fr_core = { path = "../fr_core" }
-ui_gtk = { path = "../ui_gtk", optional = true }
-ddl = { package = "dd-g3new", path = "../dd-g3new", optional = true }
+fr_core = { path = "../fr_core"  } #  , features=["ui-gtk"] 
+fr_gtk = { path = "../fr_gtk"  }
+ui_gtk = { path = "../ui_gtk" } #  , optional = true 
+# ddl = { package = "dd-g3new", path = "../dd-g3new", optional = true }
+dd-g3mid = { path = "../dd-g3mid" }
 
 http = "0.2.6"
 bincode = ">=1.3.3"
 fern =  { version = "* ", features = ["colored"] } # 0.6
 flate2 = ">=1.0.24"
+base64 = "<=0.13.0"
 
-base64 = "*"  # "^0.13.0"
 flume = "*"  # ">=0.10.9"
 log = "*" # "0.4.14"
 chrono = "*" # "0.4.19"

@@ -33,7 +33,6 @@ use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UISenderWrapper;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
-// use gui_layer::abstract_ui::UiSenderWrapperType;
 use gui_layer::gui_values::PropDef;
 use std::cell::RefCell;
 use std::rc::Rc;
