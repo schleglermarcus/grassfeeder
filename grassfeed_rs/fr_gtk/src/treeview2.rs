@@ -4,7 +4,6 @@ use crate::util::EvSenderWrapper;
 use crate::util::DIALOG_ICON_SIZE;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
-// use glib::types::Type;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::TreeModelExt;
 use gtk::prelude::TreeViewColumnExt;

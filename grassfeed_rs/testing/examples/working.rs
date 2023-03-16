@@ -1,8 +1,6 @@
 #[cfg(feature = "ui-gtk")]
 use fr_core_gtk as fr_core;
 
-
-
 use chrono::Local;
 use chrono::TimeZone;
 use context::appcontext::AppContext;
@@ -35,7 +33,7 @@ fn main() {
     loc::init_locales();
     let env_dir = std::env::var("PWD").unwrap();
     let dynamic_filename = format!("{}/target/dynamic.rss", env_dir);
-    let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT);
+    let mut mini_server_c = startup_minihttpserver(MINIHTTPSERVER_PORT, &env_dir);
     let _dyn_wr_handle = std::thread::spawn(move || loop {
         write_feed(&dynamic_filename);
         std::thread::sleep(std::time::Duration::from_secs(19));
@@ -52,14 +50,16 @@ fn main() {
     mini_server_c.stop();
 }
 
-fn startup_minihttpserver(port: usize) -> MiniHttpServerController {
+fn startup_minihttpserver(port: usize, current_folder: &String) -> MiniHttpServerController {
     let conf = ServerConfig {
-        htdocs_dir: String::from("testing/tests/fr_htdocs"),
+        htdocs_dir: format!("{}/testing/tests/fr_htdocs", current_folder),
         index_file: String::from("index.html"),
         tcp_address: format!("127.0.0.1:{}", port).to_string(),
         binary_max_size: 1000000,
         download_throttling_kbps: 20,
     };
+    debug!("CONF={:?}", conf);
+
     let mut msc = MiniHttpServerController::new(Arc::new(conf));
     msc.start();
     msc
