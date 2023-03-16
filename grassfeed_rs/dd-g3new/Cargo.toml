@@ -5,9 +5,30 @@ edition = "2021"
 description = "distribution dependent package selection  "
 
 
-# Braucht libsoup-3.0-dev 
-
 [dependencies]
+#gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecates ubuntu20
+gtk = { version = "0.15.5", features = ["v3_22_30"], optional = true }
+# gtk_l = { package = "gtk", optional = true, version = "0.14.3", features = [  "v3_22_30",] } # downgrade for debian integration
+
+glib = { version = "=0.15.5", optional = true }
+# glib_l = { package = "glib", version = "0.14.8", optional = true }   # downgrade for debian repo
+
+gio = { version = "=0.15.5", optional = true }
+# gio_l = {package="gio"   , version="0.14.8"  , optional = true   }    # downgrade for debian repo
+
+webkit2gtk = { version = "=0.18.2", default-features = false, features = [
+  "v2_36",
+], optional = true }
+## webkit2gtk_l = { package = "webkit2gtk", version = "0.16.0", default-features = false, features = [  "v2_30",], optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/" } # downgrade for debian repo
+
+webkit2gtk-sys = { version = "=0.18.0", optional = true }
+## webkit2gtk_sys_l = { package = "webkit2gtk-sys", version = "0.16.0", optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys" }
+
+## TODO see if pinning this is needed
+#soup2 = { version = "=0.2.1", optional = true }
+#soup2-sys = { version = "=0.2.0", optional = true }
+
+
 rust-i18n = { version = ">=1.1.4", optional = true }
 # rust-i18n = { version = ">=1.0.1", path = "../app-gtk3-debian/target/rust-i18n-1.1.1" }
 
@@ -59,26 +80,6 @@ ureq = { version = ">=2.6.2", optional = true }
 once_cell = { version = ">=1.17.0", optional = true } # ">=1.12.0" 
 # once_cell = ">=1.9" # Downgrade for debian repo
 
-#gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecates ubuntu20
-gtk = { version = "0.15.5", features = ["v3_22_30"], optional = true }
-# gtk_l = { package = "gtk", optional = true, version = "0.14.3", features = [  "v3_22_30",] } # downgrade for debian integration
-
-glib = { version = "0.15.5", optional = true }
-# glib_l = { package = "glib", version = "0.14.8", optional = true }   # downgrade for debian repo
-
-gio = { version = "=0.15.5", optional = true }
-# gio_l = {package="gio"   , version="0.14.8"  , optional = true   }    # downgrade for debian repo
-
-webkit2gtk = { version = "=0.18.2", default-features = false, features = [  "v2_36",], optional = true }
-## webkit2gtk_l = { package = "webkit2gtk", version = "0.16.0", default-features = false, features = [  "v2_30",], optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/" } # downgrade for debian repo
-
-webkit2gtk-sys = { version = "=0.18.0", optional = true }
-## webkit2gtk_sys_l = { package = "webkit2gtk-sys", version = "0.16.0", optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys" }
-
-
-soup2 = { version = "=0.2.1", optional = true }
-soup2-sys = { version = "=0.2.0", optional = true }
-
 
 gdk = { version = "=0.15.4", optional = true }
 # gdk = ">=0.14.3" # downgrade for debian integration
@@ -95,7 +96,7 @@ lz4-compression = { version = "0.7.0", optional = true }
 serde = { version = ">=1.0.133", optional = true }
 # serde = ">=1.0.130" 	# downgrade for debian repo
 
-serde_json = ">=1.0.81"
+serde_json = { version =  ">=1.0.81", optional = true }
 # serde_json = ">=1.0.45" 	# Downgrade for debian repo
 
 base64 = { version = "=0.13.0", optional = true }
@@ -129,9 +130,15 @@ tl = { version = ">=0.7.7", optional = true }
 signal-hook = { version = ">=0.3.15", optional = true }
 # signal-hook = ">=0.3.13"	# Downgrade for debian repo
 
-
 javascriptcore-rs-sys = { version = "<=0.4.0", optional = true }
 
-
-webbrowser = ">=0.7.1"
+webbrowser = { version = ">=0.7.1", optional = true }
 # webbrowser = ">=0.5"	# Downgrade for debian repo
+
+xmlparser = { version = ">=0.13.5", optional = true }
+# xmlparser = ">=0.11"  			# Downgrade for debian repo
+
+gif = { version = ">=0.12.0", optional = true }
+# gif = ">=0.10.2"  # Downgrade for debian repo
+
+fern = { version = ">=0.6.1", features = ["colored"] , optional = true  }

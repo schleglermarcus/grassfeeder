@@ -3,7 +3,7 @@ context v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/context)
     └── cfg-if v1.0.0
 
 fr_core v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_core)
-├── base64 v0.21.0
+├── base64 v0.12.3
 ├── bincode v1.3.3
 │   └── serde v1.0.156
 │       └── serde_derive v1.0.156 (proc-macro)
@@ -221,7 +221,7 @@ fr_core v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_core)
 │       │   │   ├── thread_local v1.1.7
 │       │   │   │   ├── cfg-if v1.0.0
 │       │   │   │   └── once_cell v1.17.1
-│       │   │   └── walkdir v2.3.2
+│       │   │   └── walkdir v2.3.3
 │       │   │       └── same-file v1.0.6
 │       │   ├── proc-macro2 v1.0.52 (*)
 │       │   ├── quote v1.0.26 (*)
@@ -560,12 +560,12 @@ fr_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk)
 ├── context v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/context) (*)
 ├── fern v0.6.1 (*)
 ├── flume v0.10.14 (*)
-├── gdk v0.16.2
+├── gdk v0.15.4
 │   ├── bitflags v1.3.2
-│   ├── cairo-rs v0.16.7
+│   ├── cairo-rs v0.15.12
 │   │   ├── bitflags v1.3.2
-│   │   ├── cairo-sys-rs v0.16.3
-│   │   │   ├── glib-sys v0.16.3
+│   │   ├── cairo-sys-rs v0.15.1
+│   │   │   ├── glib-sys v0.15.10
 │   │   │   │   └── libc v0.2.140
 │   │   │   │   [build-dependencies]
 │   │   │   │   └── system-deps v6.0.3
@@ -578,7 +578,7 @@ fr_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk)
 │   │   │   └── libc v0.2.140
 │   │   │   [build-dependencies]
 │   │   │   └── system-deps v6.0.3 (*)
-│   │   ├── glib v0.16.7
+│   │   ├── glib v0.15.12
 │   │   │   ├── bitflags v1.3.2
 │   │   │   ├── futures-channel v0.3.27
 │   │   │   │   └── futures-core v0.3.27
@@ -599,18 +599,7 @@ fr_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk)
 │   │   │   │           [build-dependencies]
 │   │   │   │           └── autocfg v1.1.0
 │   │   │   ├── futures-task v0.3.27
-│   │   │   ├── futures-util v0.3.27 (*)
-│   │   │   ├── gio-sys v0.16.3
-│   │   │   │   ├── glib-sys v0.16.3 (*)
-│   │   │   │   ├── gobject-sys v0.16.3
-│   │   │   │   │   ├── glib-sys v0.16.3 (*)
-│   │   │   │   │   └── libc v0.2.140
-│   │   │   │   │   [build-dependencies]
-│   │   │   │   │   └── system-deps v6.0.3 (*)
-│   │   │   │   └── libc v0.2.140
-│   │   │   │   [build-dependencies]
-│   │   │   │   └── system-deps v6.0.3 (*)
-│   │   │   ├── glib-macros v0.16.3 (proc-macro)
+│   │   │   ├── glib-macros v0.15.11 (proc-macro)
 │   │   │   │   ├── anyhow v1.0.69
 │   │   │   │   ├── heck v0.4.1
 │   │   │   │   ├── proc-macro-crate v1.3.1
@@ -633,65 +622,69 @@ fr_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk)
 │   │   │   │   ├── proc-macro2 v1.0.52 (*)
 │   │   │   │   ├── quote v1.0.26 (*)
 │   │   │   │   └── syn v1.0.109 (*)
-│   │   │   ├── glib-sys v0.16.3 (*)
-│   │   │   ├── gobject-sys v0.16.3 (*)
+│   │   │   ├── glib-sys v0.15.10 (*)
+│   │   │   ├── gobject-sys v0.15.10
+│   │   │   │   ├── glib-sys v0.15.10 (*)
+│   │   │   │   └── libc v0.2.140
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── system-deps v6.0.3 (*)
 │   │   │   ├── libc v0.2.140
 │   │   │   ├── once_cell v1.17.1
 │   │   │   ├── smallvec v1.10.0
 │   │   │   └── thiserror v1.0.39 (*)
 │   │   ├── libc v0.2.140
-│   │   ├── once_cell v1.17.1
 │   │   └── thiserror v1.0.39 (*)
-│   ├── gdk-pixbuf v0.16.7
+│   ├── gdk-pixbuf v0.15.11
 │   │   ├── bitflags v1.3.2
-│   │   ├── gdk-pixbuf-sys v0.16.3
-│   │   │   ├── gio-sys v0.16.3 (*)
-│   │   │   ├── glib-sys v0.16.3 (*)
-│   │   │   ├── gobject-sys v0.16.3 (*)
+│   │   ├── gdk-pixbuf-sys v0.15.10
+│   │   │   ├── gio-sys v0.15.10
+│   │   │   │   ├── glib-sys v0.15.10 (*)
+│   │   │   │   ├── gobject-sys v0.15.10 (*)
+│   │   │   │   └── libc v0.2.140
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── system-deps v6.0.3 (*)
+│   │   │   ├── glib-sys v0.15.10 (*)
+│   │   │   ├── gobject-sys v0.15.10 (*)
 │   │   │   └── libc v0.2.140
 │   │   │   [build-dependencies]
 │   │   │   └── system-deps v6.0.3 (*)
-│   │   ├── gio v0.16.7
+│   │   ├── gio v0.15.12
 │   │   │   ├── bitflags v1.3.2
 │   │   │   ├── futures-channel v0.3.27 (*)
 │   │   │   ├── futures-core v0.3.27
 │   │   │   ├── futures-io v0.3.27
-│   │   │   ├── futures-util v0.3.27 (*)
-│   │   │   ├── gio-sys v0.16.3 (*)
-│   │   │   ├── glib v0.16.7 (*)
+│   │   │   ├── gio-sys v0.15.10 (*)
+│   │   │   ├── glib v0.15.12 (*)
 │   │   │   ├── libc v0.2.140
 │   │   │   ├── once_cell v1.17.1
-│   │   │   ├── pin-project-lite v0.2.9
-│   │   │   ├── smallvec v1.10.0
 │   │   │   └── thiserror v1.0.39 (*)
-│   │   ├── glib v0.16.7 (*)
+│   │   ├── glib v0.15.12 (*)
 │   │   └── libc v0.2.140
-│   ├── gdk-sys v0.16.0
-│   │   ├── cairo-sys-rs v0.16.3 (*)
-│   │   ├── gdk-pixbuf-sys v0.16.3 (*)
-│   │   ├── gio-sys v0.16.3 (*)
-│   │   ├── glib-sys v0.16.3 (*)
-│   │   ├── gobject-sys v0.16.3 (*)
+│   ├── gdk-sys v0.15.1
+│   │   ├── cairo-sys-rs v0.15.1 (*)
+│   │   ├── gdk-pixbuf-sys v0.15.10 (*)
+│   │   ├── gio-sys v0.15.10 (*)
+│   │   ├── glib-sys v0.15.10 (*)
+│   │   ├── gobject-sys v0.15.10 (*)
 │   │   ├── libc v0.2.140
-│   │   └── pango-sys v0.16.3
-│   │       ├── glib-sys v0.16.3 (*)
-│   │       ├── gobject-sys v0.16.3 (*)
+│   │   └── pango-sys v0.15.10
+│   │       ├── glib-sys v0.15.10 (*)
+│   │       ├── gobject-sys v0.15.10 (*)
 │   │       └── libc v0.2.140
 │   │       [build-dependencies]
 │   │       └── system-deps v6.0.3 (*)
 │   │   [build-dependencies]
 │   │   ├── pkg-config v0.3.26
 │   │   └── system-deps v6.0.3 (*)
-│   ├── gio v0.16.7 (*)
-│   ├── glib v0.16.7 (*)
+│   ├── gio v0.15.12 (*)
+│   ├── glib v0.15.12 (*)
 │   ├── libc v0.2.140
-│   └── pango v0.16.5
+│   └── pango v0.15.10
 │       ├── bitflags v1.3.2
-│       ├── gio v0.16.7 (*)
-│       ├── glib v0.16.7 (*)
+│       ├── glib v0.15.12 (*)
 │       ├── libc v0.2.140
 │       ├── once_cell v1.17.1
-│       └── pango-sys v0.16.3 (*)
+│       └── pango-sys v0.15.10 (*)
 ├── gdk-pixbuf v0.17.0
 │   ├── bitflags v1.3.2
 │   ├── gdk-pixbuf-sys v0.17.0
@@ -751,44 +744,44 @@ fr_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk)
 │   ├── glib v0.17.5 (*)
 │   ├── libc v0.2.140
 │   └── once_cell v1.17.1
-├── gdk-sys v0.16.0 (*)
+├── gdk-sys v0.15.1 (*)
 ├── gio v0.17.4 (*)
 ├── glib v0.17.5 (*)
-├── gtk v0.16.2
-│   ├── atk v0.16.0
-│   │   ├── atk-sys v0.16.0
-│   │   │   ├── glib-sys v0.16.3 (*)
-│   │   │   ├── gobject-sys v0.16.3 (*)
+├── gtk v0.15.5
+│   ├── atk v0.15.1
+│   │   ├── atk-sys v0.15.1
+│   │   │   ├── glib-sys v0.15.10 (*)
+│   │   │   ├── gobject-sys v0.15.10 (*)
 │   │   │   └── libc v0.2.140
 │   │   │   [build-dependencies]
 │   │   │   └── system-deps v6.0.3 (*)
 │   │   ├── bitflags v1.3.2
-│   │   ├── glib v0.16.7 (*)
+│   │   ├── glib v0.15.12 (*)
 │   │   └── libc v0.2.140
 │   ├── bitflags v1.3.2
-│   ├── cairo-rs v0.16.7 (*)
+│   ├── cairo-rs v0.15.12 (*)
 │   ├── field-offset v0.3.5
 │   │   └── memoffset v0.8.0 (*)
 │   │   [build-dependencies]
 │   │   └── rustc_version v0.4.0 (*)
 │   ├── futures-channel v0.3.27 (*)
-│   ├── gdk v0.16.2 (*)
-│   ├── gdk-pixbuf v0.16.7 (*)
-│   ├── gio v0.16.7 (*)
-│   ├── glib v0.16.7 (*)
-│   ├── gtk-sys v0.16.0
-│   │   ├── atk-sys v0.16.0 (*)
-│   │   ├── cairo-sys-rs v0.16.3 (*)
-│   │   ├── gdk-pixbuf-sys v0.16.3 (*)
-│   │   ├── gdk-sys v0.16.0 (*)
-│   │   ├── gio-sys v0.16.3 (*)
-│   │   ├── glib-sys v0.16.3 (*)
-│   │   ├── gobject-sys v0.16.3 (*)
+│   ├── gdk v0.15.4 (*)
+│   ├── gdk-pixbuf v0.15.11 (*)
+│   ├── gio v0.15.12 (*)
+│   ├── glib v0.15.12 (*)
+│   ├── gtk-sys v0.15.3
+│   │   ├── atk-sys v0.15.1 (*)
+│   │   ├── cairo-sys-rs v0.15.1 (*)
+│   │   ├── gdk-pixbuf-sys v0.15.10 (*)
+│   │   ├── gdk-sys v0.15.1 (*)
+│   │   ├── gio-sys v0.15.10 (*)
+│   │   ├── glib-sys v0.15.10 (*)
+│   │   ├── gobject-sys v0.15.10 (*)
 │   │   ├── libc v0.2.140
-│   │   └── pango-sys v0.16.3 (*)
+│   │   └── pango-sys v0.15.10 (*)
 │   │   [build-dependencies]
 │   │   └── system-deps v6.0.3 (*)
-│   ├── gtk3-macros v0.16.0 (proc-macro)
+│   ├── gtk3-macros v0.15.4 (proc-macro)
 │   │   ├── anyhow v1.0.69
 │   │   ├── proc-macro-crate v1.3.1 (*)
 │   │   ├── proc-macro-error v1.0.4 (*)
@@ -797,7 +790,7 @@ fr_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk)
 │   │   └── syn v1.0.109 (*)
 │   ├── libc v0.2.140
 │   ├── once_cell v1.17.1
-│   └── pango v0.16.5 (*)
+│   └── pango v0.15.10 (*)
 │   [build-dependencies]
 │   └── pkg-config v0.3.26
 ├── gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer) (*)
@@ -807,176 +800,81 @@ fr_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/fr_gtk)
 ├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources) (*)
 ├── rust-i18n v1.1.4 (*)
 ├── ui_gtk v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/ui_gtk)
-│   ├── base64 v0.12.3
+│   ├── base64 v0.21.0
 │   ├── flume v0.10.14 (*)
-│   ├── gdk-sys v0.16.0 (*)
+│   ├── gdk-sys v0.15.1 (*)
 │   ├── gio v0.17.4 (*)
 │   ├── glib v0.17.5 (*)
-│   ├── gtk v0.16.2 (*)
+│   ├── gtk v0.15.5 (*)
 │   ├── gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer) (*)
 │   ├── log v0.4.17 (*)
 │   ├── lz4-compression v0.7.0
 │   ├── resources v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/resources) (*)
 │   ├── serde v1.0.156 (*)
-│   ├── webkit2gtk v0.4.0
+│   ├── webkit2gtk v0.18.2
 │   │   ├── bitflags v1.3.2
-│   │   ├── cairo-rs v0.4.1
-│   │   │   ├── c_vec v1.3.3
-│   │   │   ├── cairo-sys-rs v0.6.0
-│   │   │   │   └── libc v0.2.140
-│   │   │   │   [build-dependencies]
-│   │   │   │   └── pkg-config v0.3.26
-│   │   │   ├── glib v0.5.0
-│   │   │   │   ├── bitflags v1.3.2
-│   │   │   │   ├── glib-sys v0.6.0
-│   │   │   │   │   ├── bitflags v1.3.2
-│   │   │   │   │   └── libc v0.2.140
-│   │   │   │   │   [build-dependencies]
-│   │   │   │   │   └── pkg-config v0.3.26
-│   │   │   │   ├── gobject-sys v0.6.0
-│   │   │   │   │   ├── bitflags v1.3.2
-│   │   │   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   │   │   └── libc v0.2.140
-│   │   │   │   │   [build-dependencies]
-│   │   │   │   │   └── pkg-config v0.3.26
-│   │   │   │   ├── lazy_static v1.4.0
-│   │   │   │   └── libc v0.2.140
-│   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   └── libc v0.2.140
-│   │   ├── gdk v0.8.0
+│   │   ├── cairo-rs v0.15.12 (*)
+│   │   ├── gdk v0.15.4 (*)
+│   │   ├── gdk-sys v0.15.1 (*)
+│   │   ├── gio v0.15.12 (*)
+│   │   ├── gio-sys v0.15.10 (*)
+│   │   ├── glib v0.15.12 (*)
+│   │   ├── glib-sys v0.15.10 (*)
+│   │   ├── gobject-sys v0.15.10 (*)
+│   │   ├── gtk v0.15.5 (*)
+│   │   ├── gtk-sys v0.15.3 (*)
+│   │   ├── javascriptcore-rs v0.16.0
 │   │   │   ├── bitflags v1.3.2
-│   │   │   ├── cairo-rs v0.4.1 (*)
-│   │   │   ├── cairo-sys-rs v0.6.0 (*)
-│   │   │   ├── gdk-pixbuf v0.4.0
-│   │   │   │   ├── gdk-pixbuf-sys v0.6.0
-│   │   │   │   │   ├── bitflags v1.3.2
-│   │   │   │   │   ├── gio-sys v0.6.0
-│   │   │   │   │   │   ├── bitflags v1.3.2
-│   │   │   │   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   │   │   │   ├── gobject-sys v0.6.0 (*)
-│   │   │   │   │   │   └── libc v0.2.140
-│   │   │   │   │   │   [build-dependencies]
-│   │   │   │   │   │   └── pkg-config v0.3.26
-│   │   │   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   │   │   ├── gobject-sys v0.6.0 (*)
-│   │   │   │   │   └── libc v0.2.140
-│   │   │   │   │   [build-dependencies]
-│   │   │   │   │   └── pkg-config v0.3.26
-│   │   │   │   ├── gio v0.4.1
-│   │   │   │   │   ├── bitflags v1.3.2
-│   │   │   │   │   ├── gio-sys v0.6.0 (*)
-│   │   │   │   │   ├── glib v0.5.0 (*)
-│   │   │   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   │   │   ├── gobject-sys v0.6.0 (*)
-│   │   │   │   │   ├── lazy_static v1.4.0
-│   │   │   │   │   └── libc v0.2.140
-│   │   │   │   ├── gio-sys v0.6.0 (*)
-│   │   │   │   ├── glib v0.5.0 (*)
-│   │   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   │   ├── gobject-sys v0.6.0 (*)
-│   │   │   │   └── libc v0.2.140
-│   │   │   ├── gdk-sys v0.6.0
-│   │   │   │   ├── bitflags v1.3.2
-│   │   │   │   ├── cairo-sys-rs v0.6.0 (*)
-│   │   │   │   ├── gdk-pixbuf-sys v0.6.0 (*)
-│   │   │   │   ├── gio-sys v0.6.0 (*)
-│   │   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   │   ├── gobject-sys v0.6.0 (*)
-│   │   │   │   ├── libc v0.2.140
-│   │   │   │   └── pango-sys v0.6.0
-│   │   │   │       ├── bitflags v1.3.2
-│   │   │   │       ├── glib-sys v0.6.0 (*)
-│   │   │   │       ├── gobject-sys v0.6.0 (*)
-│   │   │   │       └── libc v0.2.140
-│   │   │   │       [build-dependencies]
-│   │   │   │       └── pkg-config v0.3.26
-│   │   │   │   [build-dependencies]
-│   │   │   │   └── pkg-config v0.3.26
-│   │   │   ├── gio v0.4.1 (*)
-│   │   │   ├── glib v0.5.0 (*)
-│   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   ├── gobject-sys v0.6.0 (*)
-│   │   │   ├── libc v0.2.140
-│   │   │   └── pango v0.4.0
-│   │   │       ├── bitflags v1.3.2
-│   │   │       ├── glib v0.5.0 (*)
-│   │   │       ├── glib-sys v0.6.0 (*)
-│   │   │       ├── gobject-sys v0.6.0 (*)
-│   │   │       ├── libc v0.2.140
-│   │   │       └── pango-sys v0.6.0 (*)
-│   │   ├── gdk-sys v0.6.0 (*)
-│   │   ├── gio v0.4.1 (*)
-│   │   ├── gio-sys v0.6.0 (*)
-│   │   ├── glib v0.5.0 (*)
-│   │   ├── glib-sys v0.6.0 (*)
-│   │   ├── gobject-sys v0.6.0 (*)
-│   │   ├── gtk v0.4.1
-│   │   │   ├── bitflags v1.3.2
-│   │   │   ├── cairo-rs v0.4.1 (*)
-│   │   │   ├── cairo-sys-rs v0.6.0 (*)
-│   │   │   ├── gdk v0.8.0 (*)
-│   │   │   ├── gdk-pixbuf v0.4.0 (*)
-│   │   │   ├── gdk-pixbuf-sys v0.6.0 (*)
-│   │   │   ├── gdk-sys v0.6.0 (*)
-│   │   │   ├── gio v0.4.1 (*)
-│   │   │   ├── gio-sys v0.6.0 (*)
-│   │   │   ├── glib v0.5.0 (*)
-│   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   ├── gobject-sys v0.6.0 (*)
-│   │   │   ├── gtk-sys v0.6.0
-│   │   │   │   ├── atk-sys v0.6.0
-│   │   │   │   │   ├── bitflags v1.3.2
-│   │   │   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   │   │   ├── gobject-sys v0.6.0 (*)
-│   │   │   │   │   └── libc v0.2.140
-│   │   │   │   │   [build-dependencies]
-│   │   │   │   │   └── pkg-config v0.3.26
-│   │   │   │   ├── bitflags v1.3.2
-│   │   │   │   ├── cairo-sys-rs v0.6.0 (*)
-│   │   │   │   ├── gdk-pixbuf-sys v0.6.0 (*)
-│   │   │   │   ├── gdk-sys v0.6.0 (*)
-│   │   │   │   ├── gio-sys v0.6.0 (*)
-│   │   │   │   ├── glib-sys v0.6.0 (*)
-│   │   │   │   ├── gobject-sys v0.6.0 (*)
-│   │   │   │   ├── libc v0.2.140
-│   │   │   │   └── pango-sys v0.6.0 (*)
-│   │   │   │   [build-dependencies]
-│   │   │   │   └── pkg-config v0.3.26
-│   │   │   ├── lazy_static v1.4.0
-│   │   │   ├── libc v0.2.140
-│   │   │   └── pango v0.4.0 (*)
-│   │   ├── gtk-sys v0.6.0 (*)
-│   │   ├── javascriptcore-rs v0.4.0
-│   │   │   ├── glib v0.5.0 (*)
-│   │   │   └── javascriptcore-rs-sys v0.1.2
+│   │   │   ├── glib v0.15.12 (*)
+│   │   │   └── javascriptcore-rs-sys v0.4.0
+│   │   │       ├── glib-sys v0.15.10 (*)
+│   │   │       ├── gobject-sys v0.15.10 (*)
 │   │   │       └── libc v0.2.140
+│   │   │       [build-dependencies]
+│   │   │       └── system-deps v5.0.0
+│   │   │           ├── cfg-expr v0.9.1
+│   │   │           │   └── smallvec v1.10.0
+│   │   │           ├── heck v0.3.3
+│   │   │           │   └── unicode-segmentation v1.10.1
+│   │   │           ├── pkg-config v0.3.26
+│   │   │           ├── toml v0.5.11 (*)
+│   │   │           └── version-compare v0.0.11
 │   │   ├── libc v0.2.140
-│   │   └── webkit2gtk-sys v0.6.0
-│   │       ├── atk-sys v0.6.0 (*)
+│   │   ├── once_cell v1.17.1
+│   │   ├── soup2 v0.2.1
+│   │   │   ├── bitflags v1.3.2
+│   │   │   ├── gio v0.15.12 (*)
+│   │   │   ├── glib v0.15.12 (*)
+│   │   │   ├── libc v0.2.140
+│   │   │   ├── once_cell v1.17.1
+│   │   │   └── soup2-sys v0.2.0
+│   │   │       ├── bitflags v1.3.2
+│   │   │       ├── gio-sys v0.15.10 (*)
+│   │   │       ├── glib-sys v0.15.10 (*)
+│   │   │       ├── gobject-sys v0.15.10 (*)
+│   │   │       └── libc v0.2.140
+│   │   │       [build-dependencies]
+│   │   │       └── system-deps v5.0.0 (*)
+│   │   └── webkit2gtk-sys v0.18.0
+│   │       ├── atk-sys v0.15.1 (*)
 │   │       ├── bitflags v1.3.2
-│   │       ├── cairo-sys-rs v0.6.0 (*)
-│   │       ├── gdk-pixbuf-sys v0.6.0 (*)
-│   │       ├── gdk-sys v0.6.0 (*)
-│   │       ├── gio-sys v0.6.0 (*)
-│   │       ├── glib-sys v0.6.0 (*)
-│   │       ├── gobject-sys v0.6.0 (*)
-│   │       ├── gtk-sys v0.6.0 (*)
-│   │       ├── javascriptcore-rs-sys v0.1.2 (*)
+│   │       ├── cairo-sys-rs v0.15.1 (*)
+│   │       ├── gdk-pixbuf-sys v0.15.10 (*)
+│   │       ├── gdk-sys v0.15.1 (*)
+│   │       ├── gio-sys v0.15.10 (*)
+│   │       ├── glib-sys v0.15.10 (*)
+│   │       ├── gobject-sys v0.15.10 (*)
+│   │       ├── gtk-sys v0.15.3 (*)
+│   │       ├── javascriptcore-rs-sys v0.4.0 (*)
 │   │       ├── libc v0.2.140
-│   │       ├── pango-sys v0.6.0 (*)
-│   │       └── soup-sys v0.6.0
-│   │           ├── bitflags v1.3.2
-│   │           ├── gio-sys v0.6.0 (*)
-│   │           ├── glib-sys v0.6.0 (*)
-│   │           ├── gobject-sys v0.6.0 (*)
-│   │           └── libc v0.2.140
-│   │           [build-dependencies]
-│   │           └── pkg-config v0.3.26
+│   │       ├── pango-sys v0.15.10 (*)
+│   │       └── soup2-sys v0.2.0 (*)
 │   │       [build-dependencies]
-│   │       └── pkg-config v0.3.26
-│   └── webkit2gtk-sys v0.6.0 (*)
-├── webkit2gtk v0.4.0 (*)
-└── webkit2gtk-sys v0.6.0 (*)
+│   │       ├── pkg-config v0.3.26
+│   │       └── system-deps v6.0.3 (*)
+│   └── webkit2gtk-sys v0.18.0 (*)
+├── webkit2gtk v0.18.2 (*)
+└── webkit2gtk-sys v0.18.0 (*)
 
 gui_layer v0.1.0 (/mnt/stripe/workspacer/grassfeeder/grassfeed_rs/gui_layer) (*)
 
