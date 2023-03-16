@@ -58,7 +58,7 @@ once_cell = { version = ">=1.17.0", optional = true } # ">=1.12.0"
 # once_cell = ">=1.9" # Downgrade for debian repo
 
 #gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecates ubuntu20
-gtk = { version = "^0.15.5", features = ["v3_22_30"], optional = true }
+gtk = { version = "0.15.5", features = ["v3_22_30"], optional = true }
 # gtk_l = { package = "gtk", optional = true, version = "0.14.3", features = [  "v3_22_30",] } # downgrade for debian integration
 
 webkit2gtk = { version = "0.18.2", default-features = false, features = [  "v2_36" ], optional = true }
@@ -70,6 +70,6 @@ webkit2gtk-sys = { version = ">=0.18.0", optional = true }
 glib = {  version = "0.15.5", optional = true } 
 # glib_l = { package = "glib", version = "0.14.8", optional = true }   # downgrade for debian repo
 
-gio = { version="^0.15.5"  , optional = true  }
+gio = { version="=0.15.5"  , optional = true  }
 # gio_l = {package="gio"   , version="0.14.8"  , optional = true   }    # downgrade for debian repo
 

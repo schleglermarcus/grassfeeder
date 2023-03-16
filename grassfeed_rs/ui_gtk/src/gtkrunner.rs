@@ -1,11 +1,4 @@
-// #[cfg(feature = "g3modern")]
-// use webkit2gtk_m  as webkit2gtk;
-
-
-use crate::gtk::prelude::ContainerExt;
-use crate::gtk::prelude::WidgetExt;
 use crate::runner_internal::GtkRunnerInternal;
-// use crate::CreateSystrayFnType;
 use crate::CreateWebViewFnType;
 use crate::DialogDataDistributor;
 use crate::GtkBuilderType;
@@ -15,6 +8,8 @@ use crate::WebContentType;
 use flume::Receiver;
 use flume::Sender;
 use gtk::prelude::BoxExt;
+use gtk::prelude::ContainerExt;
+use gtk::prelude::WidgetExt;
 use gtk::Application;
 use gtk::Button;
 use gtk::CellRendererSpinner;
@@ -274,7 +269,7 @@ impl GtkObjects for GtkObjectsImpl {
     fn set_tree_store(&mut self, idx: u8, ts: &gtk::TreeStore) {
         if self.tree_stores.len() < idx as usize + 1 {
             self.tree_stores
-                .resize(idx as usize + 1, TreeStore::new(&[glib::Type::BOOL]));
+                .resize(idx as usize + 1, TreeStore::new(&[gtk::glib::Type::BOOL]));
         }
         self.tree_stores[idx as usize] = ts.clone();
     }
@@ -313,7 +308,7 @@ impl GtkObjects for GtkObjectsImpl {
     fn set_list_store(&mut self, idx: u8, store: &gtk::ListStore) {
         if self.list_stores.len() < idx as usize + 1 {
             self.list_stores
-                .resize(idx as usize + 1, ListStore::new(&[glib::Type::BOOL]));
+                .resize(idx as usize + 1, ListStore::new(&[gtk::glib::Type::BOOL]));
         }
         self.list_stores[idx as usize] = store.clone();
     }

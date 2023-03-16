@@ -1,16 +1,8 @@
-#[cfg(feature = "g3modern")]
-use glib_m  as glib;
-#[cfg(feature = "g3modern")]
-use gtk_m  as gtk;
+// #[cfg(feature = "g3modern")]
+// use glib_m  as glib;
+// #[cfg(feature = "g3modern")]
+// use gtk_m  as gtk;
 
-
-use crate::gtk::prelude::ApplicationExt;
-use crate::gtk::prelude::ApplicationExtManual;
-use crate::gtk::prelude::Cast;
-use crate::gtk::prelude::CellRendererSpinnerExt;
-use crate::gtk::prelude::GtkWindowExt;
-use crate::gtk::prelude::TreeViewColumnExt;
-use crate::gtk::prelude::WidgetExt;
 use crate::gtkmodel_updater::GtkModelUpdaterInt;
 use crate::gtkrunner::GtkObjectsImpl;
 use crate::DialogDataDistributor;
@@ -19,7 +11,14 @@ use crate::GtkObjectsType;
 use crate::IntCommands;
 use flume::Receiver;
 use flume::Sender;
-use gio::ApplicationFlags;
+use gtk::gio::ApplicationFlags;
+use gtk::prelude::ApplicationExt;
+use gtk::prelude::ApplicationExtManual;
+use gtk::prelude::Cast;
+use gtk::prelude::CellRendererSpinnerExt;
+use gtk::prelude::GtkWindowExt;
+use gtk::prelude::TreeViewColumnExt;
+use gtk::prelude::WidgetExt;
 use gtk::traits::SettingsExt;
 use gtk::ApplicationWindow;
 use gtk::Settings;
@@ -70,7 +69,7 @@ impl GtkRunnerInternal {
         let mut appflags: ApplicationFlags = ApplicationFlags::default();
         appflags.set(ApplicationFlags::HANDLES_COMMAND_LINE, false);
         let app = gtk::Application::new(Some(&app_url), appflags);
-        let _r = app.register(gio::Cancellable::NONE);
+        let _r = app.register(gtk::gio::Cancellable::NONE);
         if app.is_remote() {
             warn!(
                 "{} is already running (registered at d-bus, remote=1). Stopping. ",
@@ -79,7 +78,7 @@ impl GtkRunnerInternal {
             let _r = ev_se.send(GuiEvents::AppWasAlreadyRunning);
             app.release();
             if let Some(dbuscon) = app.dbus_connection() {
-                dbuscon.close(gio::Cancellable::NONE, |_a1| {
+                dbuscon.close(gtk::gio::Cancellable::NONE, |_a1| {
                     debug!("GtkRunnerInternal: dbus-closed callback");
                 });
             }
@@ -130,10 +129,10 @@ impl GtkRunnerInternal {
         let m_v_st_a = model_value_store.clone();
         let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects, ev_se_w);
         let is_minimized: AtomicBool = AtomicBool::new(false);
-        glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
+        gtk::glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
             let prev_count = INTERVAL_COUNTER.fetch_add(1, Ordering::Relaxed);
             if is_minimized.load(Ordering::Relaxed) && (prev_count & 7 != 0) {
-                return glib::Continue(true);
+                return gtk::glib::Continue(true);
             }
             let mut rec_set: HashSet<IntCommands> = HashSet::new();
             while let Ok(command) = g_com_rec.try_recv() {
@@ -239,7 +238,7 @@ impl GtkRunnerInternal {
                 }
             }
 
-            glib::Continue(true)
+           gtk:: glib::Continue(true)
         });
     } // timeout
 }

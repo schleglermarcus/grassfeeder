@@ -1,11 +1,8 @@
-// #[cfg(feature = "g3modern")]
-// use webkit2gtk_m  as webkit2gtk;
-
-
 use crate::iconloader::IconLoader;
 use crate::GtkObjectsType;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::*;
+use gtk::glib;
 use gtk::Label;
 use gtk::ListStore;
 use gtk::SortColumn;
@@ -22,7 +19,6 @@ use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UISenderWrapper;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::PropDef;
-// use libappindicator::AppIndicatorStatus;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;

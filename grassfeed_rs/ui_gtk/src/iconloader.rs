@@ -1,15 +1,7 @@
-#[cfg(feature = "g3modern")]
-use gio_m  as gio;
-
-// #[cfg(feature = "g3modern")]
-// use  glib_m  as glib;
-
-
-
-use gio::Cancellable;
-use gio::MemoryInputStream;
-use glib::Bytes;
+use gtk::glib::Bytes;
 use gtk::gdk_pixbuf::Pixbuf;
+use gtk::gio::Cancellable;
+use gtk::gio::MemoryInputStream;
 use lz4_compression::prelude;
 use std::fs::File;
 use std::io::Read;
@@ -30,7 +22,7 @@ impl IconLoader {
         base64::encode(compressed_data)
     }
 
-    pub fn vec_to_pixbuf(buffer: &[u8]) -> Result<Pixbuf, glib::error::Error> {
+    pub fn vec_to_pixbuf(buffer: &[u8]) -> Result<Pixbuf, gtk::glib::error::Error> {
         let mis: MemoryInputStream = MemoryInputStream::from_bytes(&Bytes::from(buffer));
         let cancellable: Option<&Cancellable> = None;
         let pb: Pixbuf = Pixbuf::from_stream(&mis, cancellable)?;
