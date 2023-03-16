@@ -32,6 +32,19 @@ libwebp-image = "*"
 url = "*"
 ureq = "*"
 once_cell = "*"
+lz4-compression  = "*"
+opml = "*"
+proc-status =  "*"
+regex = "*"
+serde = "*"
+serde_json  = "*"
+textcode = "*"
+tinybmp = "*"
+base64 = "*"
+tl = "*"
+signal-hook = "*"
+chrono = "*"
+webbrowser = "*"
 
 
 # rusqlite_m = { package = "rusqlite", optional = true, version = ">=0.28.0", features = [  "bundled",] }
@@ -63,26 +76,24 @@ once_cell = "*"
 # ureq = { version = ">=2.4.0", path = "../app-gtk3-debian/target/ureq-2.6.2" }
 # once_cell = ">=1.12.0" # Downgrade for debian repo
 # once_cell = ">=1.9"
-
-
-lz4-compression = { version = "0.7.0", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
-
-opml = { version = ">=1.1.3", path = "../app-gtk3-debian/target/opml/opml_api" }
-
-proc-status = { version = ">=0.1.1", path = "../app-gtk3-debian/target/proc-status-0.1.1" }
+# lz4-compression = { version = "0.7.0", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
+# opml = { version = ">=1.1.3", path = "../app-gtk3-debian/target/opml/opml_api" }
+# proc-status = { version = ">=0.1.1", path = "../app-gtk3-debian/target/proc-status-0.1.1" }
 # regex = ">=1.5.6"		# Downgrade for debian repo
-regex = ">=1.5.4"
+# regex = ">=1.5.4"
 # serde = ">=1.0.137"		# Downgrade for debian repo
-serde = ">=1.0.130"
+# serde = ">=1.0.130"
 # serde_json = ">=1.0.81"		# Downgrade for debian repo
-serde_json = ">=1.0.45"
+# serde_json = ">=1.0.45"
+# textcode = { version = ">=0.2.2", path = "../app-gtk3-debian/target/textcode-0.2.2" }
+# tinybmp = { version = ">=0.3.3", path = "../app-gtk3-debian/target/tinybmp-0.4.0" }
+# base64 = "^0.13.0"
+# tl = { version = ">=0.7.5", path = "../app-gtk3-debian/target/tl-0.7.7" }
 # signal-hook = ">=0.3.14"		# Downgrade for debian repo
-signal-hook = ">=0.3.13"
-textcode = { version = ">=0.2.2", path = "../app-gtk3-debian/target/textcode-0.2.2" }
-tinybmp = { version = ">=0.3.3", path = "../app-gtk3-debian/target/tinybmp-0.4.0" }
-tl = { version = ">=0.7.5", path = "../app-gtk3-debian/target/tl-0.7.7" }
-#	webbrowser = ">=0.7.1"			# Downgrade for debian repo
-webbrowser = ">=0.5"
+# signal-hook = ">=0.3.13"
+
+
+
 # xmlparser = ">=0.13.5"				# Downgrade for debian repo
 xmlparser = ">=0.11"
 # gif = ">=0.12.0"	# Downgrade for debian repo
@@ -91,9 +102,7 @@ gif = ">=0.10.2"
 
 glob = ">=0.3.0"
 fern = { version = "0.6", features = ["colored"] }
-chrono = ">=0.4.19"
 bincode = ">=1.3.3"
-base64 = "^0.13.0"
 
 
 [dev-dependencies]

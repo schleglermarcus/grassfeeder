@@ -18,11 +18,11 @@ flume = "*"
 
 # webkit2gtk_m = { package = "webkit2gtk", version = "0.18.2", default-features = false, features = [  "v2_36",], optional = true }
 # webkit2gtk_l = { package = "webkit2gtk", version = "0.16.0", default-features = false, features = ["v2_30"], optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/" }
-webkit2gtk = { version = "*", features = ["v2_36"] }
+webkit2gtk = { version = "=0.18.2" , features = ["v2_36"]  } #  
 
 # webkit2gtk_sys_m = { package = "webkit2gtk-sys", version = ">=0.18.0", optional = true }
 # webkit2gtk_sys_l = { package = "webkit2gtk-sys", version = "0.16.0", optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys" }
-webkit2gtk-sys = "*"
+webkit2gtk-sys = "=0.18.0"
 
 # glib_m = { package = "glib", version = "0.15.5", optional = true } 
 # glib_l = { package = "glib", version = "0.14.8", optional = true }   # downgrade for debian repo
@@ -41,12 +41,16 @@ gtk = "*"
 # log = ">=0.4.11"
 log = "*"
 
+# lz4-compression = { version = "0.7.0", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
+lz4-compression = "*"
 
 #	gdk-sys = "^0.15.1"		# downgrade for debian repo
-gdk-sys = ">=0.14"
+# gdk-sys = ">=0.14"
+gdk-sys = "*"
+
 # serde = ">=1.0.133"			# downgrade for debian repo
-serde = ">=1.0.130"
+# serde = ">=1.0.130"
+serde = "*"
 
-lz4-compression = { version = "0.7.0", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
-
-base64 = "^0.13.0"
+# base64 = "^0.13.0"
+base64 = "*"
