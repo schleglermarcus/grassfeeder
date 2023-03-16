@@ -1,10 +1,10 @@
-#[cfg(feature = "g3modern")]
-use webkit2gtk_m as webkit2gtk;
+// #[cfg(feature = "g3modern")]
+// use webkit2gtk_m as webkit2gtk;
 #[cfg(feature = "g3modern")]
 extern crate gio_m as gio;
 #[cfg(feature = "g3modern")]
-extern crate glib_m as glib;
-#[cfg(feature = "g3modern")]
+// extern crate glib_m as glib;
+// #[cfg(feature = "g3modern")]
 extern crate gtk_m as gtk;
 
 #[macro_use]

@@ -13,8 +13,8 @@ ui-gtk = ["ui_gtk", "fr_gtk"] # , "ddl"
 context = { path = "../context" }
 resources = { path = "../resources" }
 gui_layer = { path = "../gui_layer" }
-ui_gtk = { path = "../ui_gtk", features = ["g3modern"], optional = true }
-fr_gtk = { path = "../fr_gtk", features = ["g3modern"], optional = true }
+ui_gtk = { path = "../ui_gtk",  optional = true }
+fr_gtk = { path = "../fr_gtk",  optional = true }
 # ddl = { path = "../dd-g3new", package = "dd-g3new", optional = true }
 
 rust-i18n = "*"
@@ -24,9 +24,15 @@ image = "*"
 jpeg-decoder = "*"
 ico = "*"
 usvg = "*"
-xmlem = "<2.1"
+xmlem = "=0.2.1"
 flume = "*"
 feed-rs = "*"
+log = "*"
+libwebp-image = "*"
+url = "*"
+ureq = "*"
+once_cell = "*"
+
 
 # rusqlite_m = { package = "rusqlite", optional = true, version = ">=0.28.0", features = [  "bundled",] }
 # rusqlite_l = { package="rusqlite", optional=true,  version = "0.25.2", features = ["bundled"], path="../app-gtk3-debian/target/rusqlite-sys0.25.2" }
@@ -52,14 +58,14 @@ feed-rs = "*"
 # flume = { version = ">=0.10.9", path = "../app-gtk3-debian/target/flume-master" }
 # 1.3 available
 # feed-rs = { version = ">=1.1.0", path = "../app-gtk3-debian/target/feed-rs-1.2.0/feed-rs" }
-
-
-libwebp-image = { version = "0.3.0", path = "../app-gtk3-debian/target/libwebp-image-rs-0.3.0" }
-# log = "0.4.14"	# Downgrade for debian repo
-log = ">=0.4.11"
-lz4-compression = { version = "0.7.0", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
+# libwebp-image = { version = "0.3.0", path = "../app-gtk3-debian/target/libwebp-image-rs-0.3.0" }
+# url = { version = ">=2.2.2", path = "../app-gtk3-debian/target/rust-url-2.3.0/url" }
+# ureq = { version = ">=2.4.0", path = "../app-gtk3-debian/target/ureq-2.6.2" }
 # once_cell = ">=1.12.0" # Downgrade for debian repo
-once_cell = ">=1.9"
+# once_cell = ">=1.9"
+
+
+lz4-compression = { version = "0.7.0", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
 
 opml = { version = ">=1.1.3", path = "../app-gtk3-debian/target/opml/opml_api" }
 
@@ -75,8 +81,6 @@ signal-hook = ">=0.3.13"
 textcode = { version = ">=0.2.2", path = "../app-gtk3-debian/target/textcode-0.2.2" }
 tinybmp = { version = ">=0.3.3", path = "../app-gtk3-debian/target/tinybmp-0.4.0" }
 tl = { version = ">=0.7.5", path = "../app-gtk3-debian/target/tl-0.7.7" }
-ureq = { version = ">=2.4.0", path = "../app-gtk3-debian/target/ureq-2.6.2" }
-url = { version = ">=2.2.2", path = "../app-gtk3-debian/target/rust-url-2.3.0/url" }
 #	webbrowser = ">=0.7.1"			# Downgrade for debian repo
 webbrowser = ">=0.5"
 # xmlparser = ">=0.13.5"				# Downgrade for debian repo
@@ -94,7 +98,6 @@ base64 = "^0.13.0"
 
 [dev-dependencies]
 rand = "0.8.5"
-# mockall = "0.11.0"
 zip = "0.6.3"
 
 [package.metadata.i18n]

@@ -1,5 +1,5 @@
-#[cfg(feature = "g3modern")]
-use webkit2gtk_m  as webkit2gtk;
+// #[cfg(feature = "g3modern")]
+// use webkit2gtk_m  as webkit2gtk;
 
 
 use crate::iconloader::IconLoader;

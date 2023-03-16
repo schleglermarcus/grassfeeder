@@ -1,5 +1,5 @@
-#[cfg(feature = "ui-gtk")]
-use fr_core_gtk as fr_core;
+// #[cfg(feature = "ui-gtk")]
+// use fr_core_gtk as fr_core;
 
 use chrono::Local;
 use chrono::TimeZone;

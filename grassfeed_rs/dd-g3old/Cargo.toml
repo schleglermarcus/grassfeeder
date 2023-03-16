@@ -2,6 +2,6 @@
 name = "dd-g3old"
 version = "0.1.0"
 edition = "2021"
-description = "distribution dependent package mounting layer  "
+description = "distribution dependent package selection  "
 
 [dependencies]

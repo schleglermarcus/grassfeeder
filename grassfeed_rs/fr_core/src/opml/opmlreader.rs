@@ -1,7 +1,3 @@
-// #[cfg(feature = "g3modern")]
-// use xmlem_m  as xmlem;
-
-
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
@@ -21,10 +17,8 @@ use std::fs::File;
 use std::io::ErrorKind;
 use std::io::Write;
 use std::rc::Rc;
-
-
-// use xmlem::display;
-// use xmlem::Document;
+use xmlem::display;
+use xmlem::Document;
 
 const EXPORT_TITLE: &str = "GrassFeeder Export";
 

@@ -9,7 +9,7 @@
 
 pub const TAB_MARKER_HEIGHT: u8 = 1;
 
-use crate::gtk::prelude::CssProviderExt;
+use gtk::prelude::CssProviderExt;
 // use crate::gtk::prelude::StyleProviderExt;
 
 // double curly brackets for rust strings

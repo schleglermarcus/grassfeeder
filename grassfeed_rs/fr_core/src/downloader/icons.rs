@@ -484,7 +484,7 @@ struct InvSvg {}
 impl InvestigateOne for InvSvg {
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
-        match usvg::Tree::from_data(vec_u8, &usvg::Options::default().to_ref()) {
+        match usvg::Tree::from_data(vec_u8, &usvg::Options::default() ) {
             Ok(_rtree) => {
                 r.kind = IconKind::Svg;
             }

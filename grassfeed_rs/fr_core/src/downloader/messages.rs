@@ -22,7 +22,6 @@ use feed_rs::model::Entry;
 use feed_rs::parser::ParseFeedError;
 use flume::Sender;
 use regex::Regex;
-use url::Url;
 
 pub struct FetchInner {
     pub fs_repo_id: isize,
@@ -334,7 +333,7 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     for media in &me.media {
         for cont in &media.content {
             if let Some(m_url) = &cont.url {
-                let u: Url = m_url.clone();
+                let u: url::Url = m_url.clone();
                 if u.domain().is_some() {
                     msg.enclosure_url =
                         format!("{}://{}{}", u.scheme(), u.domain().unwrap(), u.path());

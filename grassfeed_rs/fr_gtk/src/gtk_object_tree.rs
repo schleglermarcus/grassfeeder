@@ -1,12 +1,10 @@
-#[cfg(feature = "g3modern")]
-use webkit2gtk_m  as webkit2gtk;
-
+// #[cfg(feature = "g3modern")]
+// use webkit2gtk_m as webkit2gtk;
 
 use crate::dialogs::create_dialogs;
-use crate::gtk::prelude::WidgetExt;
 use crate::load_css::TAB_MARKER_HEIGHT;
 use crate::messagelist::create_listview;
-// use crate::systray_icon::create_systray_icon_3;
+use gtk::prelude::WidgetExt;
 use crate::util::process_string_to_image;
 use crate::util::DragState;
 use crate::util::EvSenderWrapper;

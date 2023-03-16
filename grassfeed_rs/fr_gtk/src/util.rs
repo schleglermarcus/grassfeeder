@@ -1,6 +1,6 @@
-use crate::gtk::prelude::ImageExt;
 use flume::Sender;
 use gtk::gdk_pixbuf::InterpType;
+use gtk::prelude::ImageExt;
 use gtk::Image;
 use gtk::TreePath;
 use gui_layer::abstract_ui::AValue;

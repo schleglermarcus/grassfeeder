@@ -1,5 +1,5 @@
-#[cfg(feature = "g3modern")]
-extern crate gtk_m as gtk;
+// #[cfg(feature = "g3modern")]
+// extern crate gtk_m as gtk;
 
 
 extern crate gio;
