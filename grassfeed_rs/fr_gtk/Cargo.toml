@@ -2,8 +2,8 @@
 name = "fr_gtk"
 version = "0.1.0"
 authors = ["marcus"]
-edition = "2018"
-description = "Feed Reader spplication specific gtk setup"
+edition = "2021"
+description = "Feed Reader application specific gtk setup"
 
 
 [dependencies]

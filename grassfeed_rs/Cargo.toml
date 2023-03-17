@@ -8,4 +8,10 @@ members = [
   "fr_core",
   "testing",
 ]
-exclude = ["app-gtk3-linux", "app-gtk3-debian", "dd-g3new"] #
+exclude = [
+  "app-gtk3-linux",
+  "app-gtk3-debian",
+  "dd-g3new",
+  "dd-g3mid",
+  "dd-g3old",
+]

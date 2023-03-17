@@ -1,6 +1,3 @@
-// #[cfg(feature = "g3modern")]
-// use rusqlite_m as rusqlite;
-
 use crate::util::file_exists;
 use rusqlite::params_from_iter;
 use rusqlite::Connection;
@@ -10,6 +7,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::MutexGuard;
 
 pub trait TableInfo {
     fn table_name() -> String;
@@ -259,8 +257,10 @@ impl<T: TableInfo> SqliteContext<T> {
         -1
     }
 
+    ///  if cache_flush  is not there, rusqlite+bundled is missing
     pub fn cache_flush(&self) {
-        let r = (*self.connection).lock().unwrap().cache_flush();
+        let m_c: MutexGuard<Connection> = (*self.connection).lock().unwrap();
+        let r = (*m_c).cache_flush();
         if r.is_err() {
             warn!("cache_flush {:?}", r.err());
         }

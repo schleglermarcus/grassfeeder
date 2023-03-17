@@ -120,3 +120,5 @@
 
 https://rust-lang-nursery.github.io/rust-cookbook/compression/tar.html
 https://users.rust-lang.org/t/easiest-way-to-manually-download-a-crate-from-crates-io/67338
+https://doc.rust-lang.org/cargo/reference/overriding-dependencies.html#the-patch-section
+
