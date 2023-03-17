@@ -66,10 +66,9 @@ cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /"  \
  	>$F
 
 F=target/image-png-0.17.5/Cargo.toml
-mv $F ${F}.0
-cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\{version=\">=0.7.0\" } /" \
-	|sed -e "s/\"\0.5.1\"/\">=0.4.0\"/" \
-	>$F
+mv $F ${F}.0    #  downgrading deflate, miniz_oxide
+cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\{version=\">=0.7.0\" } /" 	>$F
+#	|sed -e "s/\"\0.5.1\"/\">=0.4.0\"/" \
 
 F=target/quick-xml-0.25.0/Cargo.toml
 mv $F ${F}.0
@@ -159,20 +158,17 @@ F=target/webpki-roots-v-0.22.6/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.22.0\"/\">=0.21.0\" /"	>$F
 
-
-#F=target/xmlem-0.2.0/Cargo.toml
-#mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors, thin-slice, slotmap, unic-ucd
-#cat ${F}.0 	|sed -e "s/\"0.28.1\"/{version=\">=0.28\", path=\"..\/rust-cssparser-0.28.0\"\}  /" \
-#	|sed -e "s/\"1.8.1\"/\">=1.7.0\" /"	\
-#	|sed -e "s/\"1.10.0\"/\">=1.9.0\" /" \
-#	|sed -e "s/\"0.1.0\"/\{version=\"0.1.0\", path=\"..\/qname-0.1.0\"\}  /" \
-#	|sed -e "s/\"0.26.0\"/\{version=\">=0.25.0\", path=\"..\/quick-xml-0.25.0\"\}  /" \
-#	|sed -e "s/\"0.23.0\"/{version=\">=0.22.0\", path=\"..\/servo-selectors-v0.22.0\/components\/selectors\"\}  /"	\
-#	|sed -e "s/\"1.0.6\"/{version=\">=1.0.6\", path=\"..\/slotmap-1.0.6\"\}  /"	\
-#	|sed -e "s/\"0.9.0\"/{version=\"0.9.0\", path=\"..\/rust-unic-0.9.0\/unic\/ucd\" \}  /"	\
-#	>$F
-
-
+F=target/xmlem-0.2.0/Cargo.toml
+mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors, thin-slice, slotmap, unic-ucd
+cat ${F}.0 	|sed -e "s/\"0.28.1\"/{version=\">=0.28\", path=\"..\/rust-cssparser-0.28.0\"\}  /" \
+	|sed -e "s/\"1.8.1\"/\">=1.7.0\" /"	\
+	|sed -e "s/\"1.10.0\"/\">=1.9.0\" /" \
+	|sed -e "s/\"0.1.0\"/\{version=\"0.1.0\", path=\"..\/qname-0.1.0\"\}  /" \
+	|sed -e "s/\"0.26.0\"/\{version=\">=0.25.0\", path=\"..\/quick-xml-0.25.0\"\}  /" \
+	|sed -e "s/\"0.23.0\"/{version=\">=0.22.0\", path=\"..\/servo-selectors-v0.22.0\/components\/selectors\"\}  /"	\
+	|sed -e "s/\"1.0.6\"/{version=\">=1.0.6\", path=\"..\/slotmap-1.0.6\"\}  /"	\
+	|sed -e "s/\"0.9.0\"/{version=\"0.9.0\", path=\"..\/rust-unic-0.9.0\/unic\/ucd\" \}  /"	\
+	>$F
 
 F=target/servo-selectors-v0.22.0/components/selectors/Cargo.toml
 mv $F ${F}.0

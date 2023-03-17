@@ -333,7 +333,8 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     for media in &me.media {
         for cont in &media.content {
             if let Some(m_url) = &cont.url {
-                let u: url::Url = m_url.clone();
+
+                let u = m_url.clone();
                 if u.domain().is_some() {
                     msg.enclosure_url =
                         format!("{}://{}{}", u.scheme(), u.domain().unwrap(), u.path());

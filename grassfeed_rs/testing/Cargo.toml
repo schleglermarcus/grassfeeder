@@ -15,8 +15,9 @@ context = { path = "../context" }
 fr_core = { path = "../fr_core"  } #  , features=["ui-gtk"] 
 fr_gtk = { path = "../fr_gtk"  }
 ui_gtk = { path = "../ui_gtk" } #  , optional = true 
-# ddl = { package = "dd-g3new", path = "../dd-g3new", optional = true }
-dd-g3mid = { path = "../dd-g3mid" }
+dd-g3new = { path = "../dd-g3new" }
+# dd-g3mid = { path = "../dd-g3mid" }
+# dd-g3old = { path = "../dd-g3old" }
 
 http = "0.2.6"
 bincode = ">=1.3.3"
