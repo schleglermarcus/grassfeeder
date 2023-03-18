@@ -4,22 +4,23 @@ version = "0.1.0"
 edition = "2021"
 description = "distribution dependent package selection : debian repository "
 
+
 ##
 [dependencies]
-xmlem = { package = "xmlem", version = "=0.2.0", path = "../app-gtk3-debian/target/xmlem-0.2.0" } # , optional = true 
-feed-rs = { version = "1.2.0", path = "../app-gtk3-debian/target/feed-rs-1.2.0/feed-rs" }  # , optional = true 
-ico = {  version="0.3.0", path="../app-gtk3-debian/target/rust-ico-0.3.0" } #    optional=true,  version="0.1.0", 
-image = {  version="=0.24.5", path="../app-gtk3-debian/target/image-0.24.5" } #  optional=true,  =0.24.2
+xmlem = { package = "xmlem", version = "=0.2.0", path = "../app-gtk3-debian/target/xmlem-0.2.0" }                # , optional = true 
+m_feed-rs = { version = "1.2.0", package = "feed-rs", path = "../app-gtk3-debian/target/feed-rs-1.2.0/feed-rs" }
+flume = { version = "=0.10.14", path = "../app-gtk3-debian/target/flume-master" }
+ico = { version = "0.3.0", path = "../app-gtk3-debian/target/rust-ico-0.3.0" }
+image = { version = "=0.24.5", path = "../app-gtk3-debian/target/image-0.24.5" }
+rayon = { version = "=1.5.1", path = "../app-gtk3-debian/target/rayon-1.5.1", optional = true }
+jpeg-decoder = { version = "0.3",   path="../app-gtk3-debian/target/jpeg-decoder-0.3.0" }#  optional=true,
+
 
 # url = { version = "=2.3.1", optional = true } # ">=2.2.2" 
 url = { version = "=2.3.0", path = "../app-gtk3-debian/target/rust-url-2.3.0/url" }
 
 # ureq = { version = ">=2.6.2", optional = true } #  ">=2.4.0" 
 ureq = { version = "=2.6.2", path = "../app-gtk3-debian/target/ureq-2.6.2" }
-
-
-# flume = { version = ">=0.10.14", optional = true }  #   ">=0.10.9" 
-flume = { version = "=0.10.14", path = "../app-gtk3-debian/target/flume-master" }
 
 
 # -------------------
@@ -57,8 +58,6 @@ png = { version = ">=0.17.7", optional = true }
 #png_l =  {package="png", optional=true,   version="0.17.5",  path="../app-gtk3-debian/target/image-png-0.17.5" }
 
 
-jpeg-decoder = { version = ">=0.3", optional = true }
-# jpeg_decoder_l = { package="jpeg-decoder", optional=true, version="=0.1.22", path="../app-gtk3-debian/target/jpeg-decoder-0.3.0" }
 
 
 # usvg = "0.23.0"	# compile error with 0.24.0. https://github.com/RazrFalcon/resvg/issues/552
@@ -66,14 +65,11 @@ usvg = { version = "0.23", optional = true } ## downgrading for now. Later TODO:
 # usvg_l  = {  package="usvg", optional=true,  version=">0.24",  path="../app-gtk3-debian/target/resvg-0.29.0/usvg" }
 
 
-
-
 log = { version = ">=0.4.17", optional = true } #  ">=0.4.14"
 # log = "0.4.11"    # Downgrade for debian repo
 
 libwebp-image = { version = "0.3.0", optional = true }
 # libwebp-image = { version = "0.3.0", path = "../app-gtk3-debian/target/libwebp-image-rs-0.3.0" }
-
 
 
 once_cell = { version = ">=1.17.0", optional = true } # ">=1.12.0" 

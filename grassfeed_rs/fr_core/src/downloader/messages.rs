@@ -1,3 +1,10 @@
+use dd::flume;
+
+
+#[cfg(not(feature = "dd-g3old"))]
+use dd::m_feed_rs as feed_rs;
+
+
 use crate::controller::contentlist::match_new_entries_to_existing;
 use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
@@ -333,7 +340,6 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     for media in &me.media {
         for cont in &media.content {
             if let Some(m_url) = &cont.url {
-
                 let u = m_url.clone();
                 if u.domain().is_some() {
                     msg.enclosure_url =

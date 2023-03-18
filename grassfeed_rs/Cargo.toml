@@ -15,3 +15,19 @@ exclude = [
   "dd-g3mid",
   "dd-g3old",
 ]
+
+
+# grassfeed_rs
+#[workspace.dependencies]
+#feed-rs = { package = "feed-rs", version = "1.2.0", path = "app-gtk3-debian/target/feed-rs-1.2.0/feed-rs" }
+
+#  this virtual manifest specifies a [features] section, which is not allowed
+#[features]
+#g3old = ["feed-rs"]
+
+
+# [profile.devg3old]
+# inherits = "dev"
+# [profile.devg3old.package.feed-rs]
+# version = "1.2.0"
+# path = "grassfeed_rs/app-gtk3-debian/target/feed-rs-1.2.0/feed-rs"

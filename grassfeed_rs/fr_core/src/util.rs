@@ -1,6 +1,4 @@
-#[cfg(feature = "g3modern")]
-use image_m  as image;
-
+use dd::image;
 
 use chrono::DateTime;
 use chrono::Local;

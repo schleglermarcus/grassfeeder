@@ -1,3 +1,7 @@
+use dd::flume;
+#[cfg(not(feature = "dd-g3old"))]
+use dd::m_feed_rs as feed_rs;
+
 use crate::controller::guiprocessor::Job;
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorRepo;
@@ -6,6 +10,7 @@ use crate::downloader::util::go_to_homepage;
 use crate::util::Step;
 use crate::util::StepResult;
 use crate::web::WebFetcherType;
+use feed_rs::parser;
 use flume::Sender;
 
 pub struct DragInner {
@@ -103,7 +108,7 @@ struct CheckContentIsFeed(DragInner);
 impl Step<DragInner> for CheckContentIsFeed {
     fn step(self: Box<Self>) -> StepResult<DragInner> {
         let mut inner: DragInner = self.0;
-        let parse_r = feed_rs::parser::parse(inner.dragged_url_content.as_bytes());
+        let parse_r = parser::parse(inner.dragged_url_content.as_bytes());
         if parse_r.is_err() {
             inner.error_message += &parse_r.err().unwrap().to_string();
             return StepResult::Continue(Box::new(AnalyzeContentSloppy(inner)));
@@ -124,7 +129,7 @@ impl Step<DragInner> for AnalyzeContentSloppy {
         let mut inner: DragInner = self.0;
         let extracted: Vec<String> = extract_feed_urls_sloppy(&inner.dragged_url_content);
         if !extracted.is_empty() {
-debug!("feed adresses found by sloppy:   {:?}", extracted);
+            debug!("feed adresses found by sloppy:   {:?}", extracted);
             inner.found_feed_url = extracted.first().unwrap().clone();
         }
         StepResult::Continue(Box::new(CompleteRelativeUrl(inner)))

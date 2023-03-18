@@ -1,3 +1,6 @@
+#[cfg(not(feature = "dd-g3old"))]
+use dd::m_feed_rs as feed_rs;
+
 use feed_rs::parser;
 use lz4_compression::prelude;
 use std::collections::HashMap;

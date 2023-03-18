@@ -46,7 +46,7 @@ cat ${F}.0 |sed -e "s/\"\^0.10.1\"/\{version=\"\^0.10.1\", path=\"..\/rust-bit-f
 
 F=target/jpeg-decoder-0.3.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/version = \"1.5.1\"/version=\">=1.5.1\", path=\"..\/rayon-1.5.3\"    /" 	>$F
+cat ${F}.0 |sed -e "s/version = \"1.5.1\"/version=\">=1.5.1\", path=\"..\/rayon-1.5.1\"    /" 	>$F
 
 
 F=target/libwebp-image-rs-0.3.0/Cargo.toml
@@ -236,12 +236,12 @@ cat ${F}.0 |sed -e "s/\"0.15\"/\">=0.14\"/g" \
  	|sed -e "s/= \"5\"/=  \">=3\"/"  \
 	>$F
 
-F=target/rayon-1.5.3/Cargo.toml
+F=target/rayon-1.5.1/Cargo.toml
 mv $F ${F}.0	# downgrade   crossbeam-channel		crossbeam-deque
 cat ${F}.0 	 |sed -e "s/\"0.8.1\"/\">=0.7.4\"/"	\
 		>$F
 
-F=target/rayon-1.5.3/rayon-core/Cargo.toml
+F=target/rayon-1.5.1/rayon-core/Cargo.toml
 mv $F ${F}.0	# downgrade   crossbeam-channel		crossbeam-deque
 cat ${F}.0 |sed -e "s/\"0.5.0\"/\">=0.4\"/" 	\
 	 |sed -e "s/\"0.8.1\"/\">=0.7.4\"/"	\

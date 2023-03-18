@@ -1,3 +1,7 @@
+
+use dd::flume;
+
+
 use crate::config::configmanager::ConfigManager;
 use crate::controller::browserpane::BrowserPane;
 use crate::controller::browserpane::IBrowserPane;

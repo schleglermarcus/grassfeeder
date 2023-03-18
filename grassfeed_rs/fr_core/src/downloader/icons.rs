@@ -1,9 +1,8 @@
-#[cfg(feature = "g3modern")]
-use ico_m as ico;
-// #[cfg(feature = "g3modern")]
-// use png_m as png;
-#[cfg(feature = "g3modern")]
-use usvg_m as usvg;
+use dd::flume;
+use dd::ico;
+use dd::jpeg_decoder;
+
+
 
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorRepo;
@@ -19,7 +18,7 @@ use crate::util::Step;
 use crate::util::StepResult;
 use crate::web::WebFetcherType;
 use flume::Sender;
-use jpeg_decoder;
+// use jpeg_decoder;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;

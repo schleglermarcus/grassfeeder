@@ -2,18 +2,35 @@
 #[macro_use]
 extern crate log;
 
-
 #[macro_use]
 extern crate rust_i18n;
 
+// extern crate jpeg_decoder;
+// extern crate libwebp_image
 
-extern crate jpeg_decoder;
-extern crate libwebp_image;
 extern crate proc_status;
 #[cfg(test)]
 extern crate rand;
 
-// extern crate ddl;
+// extern crate m_flume as flume;
+// extern crate m_ico as ico;
+//  extern crate m_image as image;
+// extern crate m_jpeg_decoder as jpeg_decoder;
+
+extern crate m_libwebp_image as libwebp_image;
+extern crate m_lz4_compression as lz4_compression;
+
+// remapping those crates that need source replacement for debian
+#[cfg(feature = "dd-g3old")]
+extern crate dd_g3old as dd;
+#[cfg(feature = "dd-g3old")]
+use dd_g3old::m_feed_rs as feed_rs;
+
+
+#[cfg(not(feature = "dd-g3old"))]
+extern crate dd_g3new as dd;
+
+
 
 pub mod config;
 pub mod controller;

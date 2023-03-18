@@ -37,13 +37,13 @@ rusqlite = { version = ">=0.28.0", features = ["bundled"], optional = true }
 png = { version = ">=0.17.7", optional = true }
 #png_l =  {package="png", optional=true,   version="0.17.5",  path="../app-gtk3-debian/target/image-png-0.17.5" }
 
-image = { version = ">=0.24.5", optional = true }
+image = { version = ">=0.24.0" } # 
 # image_l = {package="image", optional=true,  version=">=0.24.2", path="../app-gtk3-debian/target/image-0.24.5" }
 
-jpeg-decoder = { version = ">=0.3", optional = true }
+jpeg-decoder = { version = "=0.3.0" } # guc
 # jpeg_decoder_l = { package="jpeg-decoder", optional=true, version="=0.1.22", path="../app-gtk3-debian/target/jpeg-decoder-0.3.0" }
 
-ico = { version = ">=0.3.0", optional = true }
+ico = { version = ">=0.3.0" }
 #ico_l = { package="ico", optional=true, version="0.1.0", path="../app-gtk3-debian/target/rust-ico-0.3.0" }
 
 # usvg = "0.23.0"	# compile error with 0.24.0. https://github.com/RazrFalcon/resvg/issues/552
@@ -57,11 +57,11 @@ usvg = { version = "0.23", optional = true } ## downgrading for now. Later TODO:
 xmlem = { version = "=0.2.1" }
 # xmlem_l = { package="xmlem", optional=true, version="=0.2.0",  path = "../app-gtk3-debian/target/xmlem-0.2.0"}
 
-flume = { version = ">=0.10.14", optional = true }
+flume = { version = ">=0.10.14" }
 #flume = { version = ">=0.10.9", path = "../app-gtk3-debian/target/flume-master" }
 
-## todo  1.3 available
-feed-rs = { version = ">=1.3.0", optional = true }
+
+m_feed-rs = { package = "feed-rs", version = ">=1.3.0" } # , optional = true 
 # feed-rs = { version = ">=1.1.0", path = "../app-gtk3-debian/target/feed-rs-1.2.0/feed-rs" , optional = true   }
 
 log = { version = ">=0.4.17", optional = true } #  ">=0.4.14"
@@ -95,7 +95,7 @@ lz4-compression = { version = "0.7.0", optional = true }
 serde = { version = ">=1.0.133", optional = true }
 # serde = ">=1.0.130" 	# downgrade for debian repo
 
-serde_json = { version =  ">=1.0.81", optional = true }
+serde_json = { version = ">=1.0.81", optional = true }
 # serde_json = ">=1.0.45" 	# Downgrade for debian repo
 
 base64 = { version = "=0.13.0", optional = true }
@@ -140,4 +140,4 @@ xmlparser = { version = ">=0.13.5", optional = true }
 gif = { version = ">=0.12.0", optional = true }
 # gif = ">=0.10.2"  # Downgrade for debian repo
 
-fern = { version = ">=0.6.1", features = ["colored"] , optional = true  }
+fern = { version = ">=0.6.1", features = ["colored"], optional = true }
