@@ -79,9 +79,9 @@ F=target/regex-1.6.0/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.7.18\"/\">=0.7.10\" /" 		>$F
 
-F=target/rusqlite-sys0.25.2/Cargo.toml
-mv $F ${F}.0
-cat ${F}.0 |sed -e "s/hashlink = \"0.8\"/hashlink=\{version=\">=0.7\" , path=\"..\/hashlink-0.8.0\"\}  /" 		>$F
+#F=target/rusqlite-sys0.25.2/Cargo.toml
+#mv $F ${F}.0
+#cat ${F}.0 |sed -e "s/hashlink = \"0.8\"/hashlink=\{version=\">=0.7\" , path=\"..\/hashlink-0.8.0\"\}  /" 		>$F
 
 
 F=target/hashlink-0.8.0/Cargo.toml

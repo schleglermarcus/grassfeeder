@@ -43,7 +43,8 @@ jpeg-decoder = { path = "target/jpeg-decoder-0.3.0", features = [
 libwebp-image = { path = "target/libwebp-image-rs-0.3.0" }
 lz4-compression = { path = "target/lz4-compression-0.7" }
 proc-status = { path = "target/proc-status-0.1.1" }
-rusqlite = { path = "target/rusqlite-sys0.25.2" }
+# rusqlite = { path = "target/rusqlite-sys0.25.2" }
+rusqlite = { path = "target/rusqlite-0.22.0" }
 textcode = { path = "target/textcode-0.2.2" }
 tinybmp = { path = "target/tinybmp-0.4.0" }
 tl = { path = "target/tl-0.7.7" }
