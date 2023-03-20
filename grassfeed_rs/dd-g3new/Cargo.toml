@@ -40,7 +40,7 @@ png = { version = ">=0.17.7", optional = true }
 image = { version = ">=0.24.0" } # 
 # image_l = {package="image", optional=true,  version=">=0.24.2", path="../app-gtk3-debian/target/image-0.24.5" }
 
-jpeg-decoder = { version = ">=0.2.0" } # =0.3.0 problem mit rayon, in zusammenhang mit debian-alt. naechste taktik: downgraden
+jpeg-decoder = { version = ">=0.2.0" } # =0.3.0 problem mit rayon, in zusammenhang mit debian-alt. next tactic downgrade
 # jpeg_decoder_l = { package="jpeg-decoder", optional=true, version="=0.1.22", path="../app-gtk3-debian/target/jpeg-decoder-0.3.0" }
 
 ico = { version = ">=0.3.0" }
