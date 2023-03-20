@@ -1,3 +1,8 @@
+#[cfg(not(feature = "dd-g3old"))]
+extern crate dd_g3new as dd;
+use dd::flume;
+use dd::m_feed_rs as feed_rs;
+
 use feed_rs::parser;
 use flume::Receiver;
 use flume::Sender;

@@ -1,6 +1,10 @@
 mod logger_config;
 mod unzipper;
 
+#[cfg(not(feature = "dd-g3old"))]
+extern crate dd_g3new as dd;
+use dd::flume;
+
 use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::Downloader;
 use fr_core::controller::contentdownloader::IDownloader;

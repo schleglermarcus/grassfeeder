@@ -99,6 +99,7 @@
 	- crossbeam-channel v0.4.4 	=> librust-crossbeam-channel-dev 		 0.4.4-1
  	-	crossbeam-deque v0.7.4	=> librust-crossbeam-deque-dev	 0.7.4-2
 
+  - rayon 1.7.0 => librust-rayon-dev   1.4.1-1
 
 
 - Downgrade failed!
@@ -107,8 +108,8 @@
 	- url 2.3.1	=> librust-url-dev 2.2.2-1
 	- uuid v1.2.2					=> librust-uuid-dev 0.8.1-4
 	- spin v0.9.4				=> librust-spin-dev  0.5.2-1
-   - 	jpeg-decoder v0.3.0 Version: 0.3.0-1
-	 - usvg v0.23.0	=>  librust-usvg-dev	0.8.0-4
+  -	jpeg-decoder v0.3.0 Version: 0.3.0-1
+  - usvg v0.23.0	=>  librust-usvg-dev	0.8.0-4
 		# failed to read `/usr/share/cargo/registry/usvg-0.8.0/.cargo-checksum.json`
 	- png v0.17.7 				=> librust-png-dev 0.15.0-1		#    rust-ico requires png-0.17
 	- half v2.2.1 => librust-half-dev  1.6.0-2
