@@ -11,7 +11,8 @@ extern crate proc_status;
 extern crate rand;
 
 
-extern crate m_libwebp_image as libwebp_image;
+// extern crate m_libwebp_image as libwebp_image;
+
 extern crate m_lz4_compression as lz4_compression;
 
 // remapping those crates that need source replacement for debian

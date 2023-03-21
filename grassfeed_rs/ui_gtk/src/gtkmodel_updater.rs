@@ -1,3 +1,7 @@
+// use dd_g3new::webkit2gtk as webkit2gtk;
+// use webkit2gtk::WebViewExt;
+use dd_g3new::webkit2gtk::WebViewExt;
+
 use crate::iconloader::IconLoader;
 use crate::GtkObjectsType;
 use gtk::gdk_pixbuf::Pixbuf;
@@ -25,7 +29,6 @@ use std::convert::From;
 use std::sync::Arc;
 
 
-use webkit2gtk::WebViewExt;
 
 pub struct GtkModelUpdaterInt {
     m_v_store: UIAdapterValueStoreType,

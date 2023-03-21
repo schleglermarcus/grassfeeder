@@ -1,3 +1,6 @@
+use dd_g3new::webkit2gtk as webkit2gtk;
+
+
 use crate::runner_internal::GtkRunnerInternal;
 use crate::CreateWebViewFnType;
 use crate::DialogDataDistributor;

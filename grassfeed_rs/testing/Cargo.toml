@@ -5,8 +5,6 @@ edition = "2021"
 description = "Feed Reader Testing Module"
 
 
-#[features]
-#ui-gtk = ["ui_gtk", "fr_gtk"]
 
 [dependencies]
 resources = { path = "../resources" }

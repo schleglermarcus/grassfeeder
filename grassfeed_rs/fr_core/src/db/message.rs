@@ -1,5 +1,4 @@
-// #[cfg(feature = "g3modern")]
-// use rusqlite_m as rusqlite;
+use dd_g3new::rusqlite;
 
 use crate::db::sqlite_context::TableInfo;
 use crate::db::sqlite_context::Wrap;

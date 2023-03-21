@@ -45,9 +45,11 @@ fn main() {
         version: "rungui:rungui_local_clear".to_string(),
     };
     let appcontext = fr_core::config::init_system::start(gfconf);
+
     test_setup_values(&appcontext, mini_server_c.get_address());
     fr_core::config::init_system::run(&appcontext);
     mini_server_c.stop();
+
 }
 
 fn startup_minihttpserver(port: usize, current_folder: &String) -> MiniHttpServerController {

@@ -4,18 +4,26 @@ version = "0.1.0"
 edition = "2021"
 
 
+
+[features]
+# ui-gtk = ["ui_gtk", "fr_gtk", "dd-g3new"]
+default = ["dd-g3new"]
+
+
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 resources = { path = "../resources" }
+dd-g3new = { path = "../dd-g3new", optional = true }
+
 
 base64 = "<=0.13.0" # later
 # webkit2gtk_m = { package = "webkit2gtk", version = "0.18.2", default-features = false, features = [  "v2_36",], optional = true }
 # webkit2gtk_l = { package = "webkit2gtk", version = "0.16.0", default-features = false, features = ["v2_30"], optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/" }
-webkit2gtk = {  version = ">=0.16",   features = ["v2_36"] } #  "=0.18.2"  #
+# webkit2gtk = {  version = ">=0.16",   features = ["v2_36"] } #  "=0.18.2"  #
 
 # webkit2gtk_sys_m = { package = "webkit2gtk-sys", version = ">=0.18.0", optional = true }
 # webkit2gtk_sys_l = { package = "webkit2gtk-sys", version = "0.16.0", optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys" }
-webkit2gtk-sys = "<=0.18.0"
+# webkit2gtk-sys = "<=0.18.0"
 
 # flume = { version = ">=0.10.9", path = "../app-gtk3-debian/target/flume-master" }
 flume = "*"

@@ -1,5 +1,4 @@
-// #[cfg(feature = "g3modern")]
-// use rusqlite_m as rusqlite;
+use dd_g3new::rusqlite;
 
 use crate::controller::timer::Timer;
 use crate::db::message::MessageRow;

@@ -1,11 +1,18 @@
-// #[cfg(feature = "g3modern")]
-// use rusqlite_m as rusqlite;
+
+
+// #[macro_use]
+use dd_g3new::rusqlite;
+
+
 
 use crate::db::sqlite_context::TableInfo;
 use crate::db::sqlite_context::Wrap;
 use resources::gen_icons;
-use serde::Deserialize;
-use serde::Serialize;
+
+// #[macro_use]
+use dd::serde::Deserialize;
+// #[macro_use]
+use dd::serde::Serialize;
 use std::fmt;
 
 #[allow(dead_code)]

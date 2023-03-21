@@ -1,15 +1,11 @@
-// #[cfg(feature = "g3modern")]
-// use webkit2gtk_m as webkit2gtk;
-// #[cfg(feature = "g3modern")]
-// extern crate gio_m as gio;
-// #[cfg(feature = "g3modern")]
-// extern crate glib_m as glib;
-// #[cfg(feature = "g3modern")]
-// extern crate gtk_m as gtk;
+use dd_g3new::webkit2gtk;
+
 
 #[macro_use]
 extern crate log;
 extern crate gdk_sys;
+
+
 
 pub mod dialogdatadistributor;
 pub mod gtkmodel_updater;

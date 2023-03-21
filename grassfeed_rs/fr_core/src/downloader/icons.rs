@@ -1,7 +1,7 @@
 use dd::flume;
 use dd::ico;
 use dd::jpeg_decoder;
-
+use dd::libwebp_image;
 
 
 use crate::controller::sourcetree::SJob;
