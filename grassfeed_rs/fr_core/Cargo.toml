@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-ui-gtk = ["ui_gtk", "fr_gtk", "dd-g3new"]
-# ui-gtk-old = ["ui_gtk", "fr_gtk", "app-g3sources"]
-default = ["dd-g3new"]
+ui-gtk = ["ui_gtk", "fr_gtk",  "dd-g3new"  ] # ,
+ui-gtk-old = ["ui_gtk", "fr_gtk", "app-g3sources"]
+default = ["app-g3sources"]
 # ui-gtk-mid = ["ui_gtk", "fr_gtk", "dd-g3mid"]
 
 [dependencies]
@@ -15,29 +15,19 @@ resources = { path = "../resources" }
 gui_layer = { path = "../gui_layer" }
 ui_gtk = { path = "../ui_gtk", optional = true }
 fr_gtk = { path = "../fr_gtk", optional = true }
+
+
 dd-g3new = { path = "../dd-g3new", optional = true }
 
 ## PROBLEM:  deactivating this does not prevent using their sub-dependencies. 
 ##   They contradict the more recent dependencies
-# app-g3sources = { path = "../app-g3sources", optional = true }
+app-g3sources = { path = "../app-g3sources", optional = true }
 
 
 
-# dd-g3mid = { path = "../dd-g3mid", optional = true }
-
-## PROBLEM
-##  Only inserting the    OPTIONAL   g3old crate  messes up the dependency resolution of the g3new  crate !!
-##
-# dd-g3old = { path = "../dd-g3old", optional = true }
-##
-##
-
-
-xmlem = "=0.2.1"
 base64 = "<=0.13.0"
 glob = ">=0.3.0"
 bincode = ">=1.3.3"
-url = "=2.3.0"                                       # for debian: pin this down
 # rusqlite = { version = ">=0.22.0",  features = ["bundled"] } #  
 
 
@@ -52,28 +42,26 @@ url = "=2.3.0"                                       # for debian: pin this down
 # m_libwebp-image = { version = "*", package = "libwebp-image" }
 
 
-m_lz4-compression = { version = "*", package = "lz4-compression" }
+# deaktiviert fuer debian build
+# m_lz4-compression = { version = "*", package = "lz4-compression" }
+# opml = "*"
+# png = "*"
+# proc-status = "*"
+# rust-i18n = "*"
+# textcode = "*"
+# tinybmp = "*"
+# tl = "*"
+# ureq = "*"
+# url = "=2.3.0"                                       # for debian: pin this down
+# usvg = "*"
+# xmlem = "=0.2.1"
 
-# m_ = { version = "*", package = "" }
-# m_ = { version = "*", package = "" }
 
-
-ureq = "*"
-rust-i18n = "*"
-png = "*"
-usvg = "*"
 log = "*"
-
 once_cell = "*"
-
-opml = "*"
-proc-status = "*"
 regex = "*"
 serde = "*"
 serde_json = "*"
-textcode = "*"
-tinybmp = "*"
-tl = "*"
 signal-hook = "*"
 chrono = "*"
 webbrowser = "*"

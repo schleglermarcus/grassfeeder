@@ -67,8 +67,9 @@ cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /"  \
 
 F=target/image-png-0.17.5/Cargo.toml
 mv $F ${F}.0    #  downgrading deflate, miniz_oxide
-cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\{version=\">=0.7.0\" } /" 	>$F
-#	|sed -e "s/\"\0.5.1\"/\">=0.4.0\"/" \
+cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\{version=\">=0.7.0\" } /" \
+	|sed -e "s/\"\0.5.1\"/\">=0.4.0\"/" \
+ 	>$F
 
 F=target/quick-xml-0.25.0/Cargo.toml
 mv $F ${F}.0
@@ -238,7 +239,7 @@ cat ${F}.0 |sed -e "s/\"0.15\"/\">=0.14\"/g" \
 
 F=target/rayon-1.5.1/Cargo.toml
 mv $F ${F}.0	# downgrade   crossbeam-channel		crossbeam-deque
-cat ${F}.0 	 |sed -e "s/\"0.8.1\"/\">=0.7.4\"/"	\
+cat ${F}.0 	 |sed -e "s/\"0.8.0\"/\">=0.7.4\"/"	\
 		>$F
 
 F=target/rayon-1.5.1/rayon-core/Cargo.toml

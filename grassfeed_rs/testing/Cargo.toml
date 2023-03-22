@@ -10,9 +10,10 @@ description = "Feed Reader Testing Module"
 resources = { path = "../resources" }
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
-fr_core = { path = "../fr_core" }     # , features=["ui-gtk"]  
+fr_core = { path = "../fr_core" , features=["ui-gtk"]   }     # 
 fr_gtk = { path = "../fr_gtk" }       #  , optional = true 
 ui_gtk = { path = "../ui_gtk" }       #  , optional = true
+
 dd-g3new = { path = "../dd-g3new" }
 # dd-g3mid = { path = "../dd-g3mid" }
 # dd-g3old = { path = "../dd-g3old" }

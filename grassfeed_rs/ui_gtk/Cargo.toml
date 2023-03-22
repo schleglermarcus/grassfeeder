@@ -4,19 +4,26 @@ version = "0.1.0"
 edition = "2021"
 
 
-
 [features]
-# ui-gtk = ["ui_gtk", "fr_gtk", "dd-g3new"]
-default = ["dd-g3new"]
+ui-gtk = ["dd-g3new"]
+ui-gtk-old = ["app-g3sources"]
+# default = ["dd-g3new"]
 
 
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 resources = { path = "../resources" }
 dd-g3new = { path = "../dd-g3new", optional = true }
+app-g3sources = { path = "../app-g3sources", optional = true }
 
 
-base64 = "<=0.13.0" # later
+## rausgenommen fuer debian build
+# flume = { version = ">=0.10.9", path = "../app-gtk3-debian/target/flume-master" }
+# flume = "*"
+# lz4-compression = { version = "0.7.0", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
+#lz4-compression = "*"
+
+
 # webkit2gtk_m = { package = "webkit2gtk", version = "0.18.2", default-features = false, features = [  "v2_36",], optional = true }
 # webkit2gtk_l = { package = "webkit2gtk", version = "0.16.0", default-features = false, features = ["v2_30"], optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/" }
 # webkit2gtk = {  version = ">=0.16",   features = ["v2_36"] } #  "=0.18.2"  #
@@ -25,8 +32,6 @@ base64 = "<=0.13.0" # later
 # webkit2gtk_sys_l = { package = "webkit2gtk-sys", version = "0.16.0", optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys" }
 # webkit2gtk-sys = "<=0.18.0"
 
-# flume = { version = ">=0.10.9", path = "../app-gtk3-debian/target/flume-master" }
-flume = "*"
 
 # glib_m = { package = "glib", version = "0.15.5", optional = true } 
 # glib_l = { package = "glib", version = "0.14.8", optional = true }   # downgrade for debian repo
@@ -45,9 +50,6 @@ gtk = "*"
 # log = ">=0.4.11"
 log = "*"
 
-# lz4-compression = { version = "0.7.0", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
-lz4-compression = "*"
-
 #	gdk-sys = "^0.15.1"		# downgrade for debian repo
 # gdk-sys = ">=0.14"
 gdk-sys = "*"
@@ -55,3 +57,5 @@ gdk-sys = "*"
 # serde = ">=1.0.133"			# downgrade for debian repo
 # serde = ">=1.0.130"
 serde = "*"
+
+base64 = "<=0.13.0" # later
