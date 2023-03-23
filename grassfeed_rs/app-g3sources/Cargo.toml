@@ -28,6 +28,7 @@ xdg = ">=2.2"
 
 ##  cannot be found as debian package or too old
 lz4-compression = { path = "target/lz4-compression-0.7" }
+az = { path = "target/az-v1.1.0" }
 
 rust-i18n = { path = "target/rust-i18n-1.1.1" }
 quick-xml = { path = "target/quick-xml-0.25.0", features = ["encoding"] }
@@ -60,7 +61,6 @@ libwebp = { path = "target/libwebp-rs-0.1.0" }
 libwebp-sys2 = { path = "target/libwebp-sys2-rs-0.1.2" }
 hashlink = { path = "target/hashlink-0.8.0" }
 embedded-graphics = { path = "target/embedded-graphics-embedded-graphics-v0.7.1" }
-az = { path = "target/az-v1.1.0" }
 micromath = { path = "target/micromath-1.1.1" }
 rustls = { path = "target/rustls-v-0.20.8/rustls" }
 webpki-roots = { path = "target/webpki-roots-v-0.22.6" }
@@ -84,3 +84,6 @@ webkit2gtk-sys = { path = "target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys" }
 soup2-sys = { path = "target/soup2-sys-0.2.0" }
 rayon = { path = "target/rayon-1.5.1" }
 hard-xml = { path = "target/hard-xml-v1.19.0/hard-xml" }
+roxmltree = { path = "target/roxmltree-0.18.0" }
+xmlparser = { path = "target/xmlparser-0.13.5" }
+svgtypes = { path = "target/svgtypes-0.10.0" }

@@ -146,10 +146,15 @@ cat ${F}.0 	|sed -e "s/\"0.21\"/\">=0.13\" /"\
 				>$F
 
 F=target/resvg-0.29.0/rosvgtree/Cargo.toml
-mv $F ${F}.0		# downgrading roxmltree, svgtypes
-cat ${F}.0 	|sed -e "s/\"0.18\"/\">=0.7\" /"  \
-	| sed -e "s/\"0.10\"/\">=0.5\" /"	\
-						>$F
+mv $F ${F}.0		
+cat ${F}.0  	|sed -e "s/\"0.18\"/{version=\"=0.18\", path=\"..\/..\/roxmltree-0.18.0\"\}  /" \
+	|sed -e "s/\"0.10\"/{version=\"^0.10\", path=\"..\/..\/svgtypes-0.10.0\"\}  /"  	>$F
+
+F=target/roxmltree-0.18.0/Cargo.toml
+mv $F ${F}.0		# downgrading xmlparser
+cat ${F}.0  |sed -e "s/\"0.13.5\"/{version=\"^0.13.5\", path=\"..\/xmlparser-0.13.5\"\} /" 	>$F
+
+
 
 F=target/strict-num-0.1.0/Cargo.toml
 mv $F ${F}.0		#  downgrade of  float-cmp,   removing feature  "std"
@@ -245,9 +250,12 @@ cat ${F}.0 	 |sed -e "s/\"0.8.0\"/\">=0.7.4\"/"	\
 F=target/rayon-1.5.1/rayon-core/Cargo.toml
 mv $F ${F}.0	# downgrade   crossbeam-channel		crossbeam-deque
 cat ${F}.0 |sed -e "s/\"0.5.0\"/\">=0.4\"/" 	\
-	 |sed -e "s/\"0.8.1\"/\">=0.7.4\"/"	\
+	 |sed -e "s/\"0.8.0\"/\">=0.7.4\"/"	\
 	>$F
 
+F=target/svgtypes-0.10.0/Cargo.toml
+mv $F ${F}.0		# downgrade kurbo
+cat ${F}.0  	|sed -e "s/\"0.9\"/\">=0.7\"  /" 	>$F
 
 
 #----------------------------------------------------------

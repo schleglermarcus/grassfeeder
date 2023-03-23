@@ -17,12 +17,13 @@
 	-	soup2-sys 			!!	https://crates.io/api/v1/crates/soup2-sys/0.2.0/download
 	- librust-env-logger-dev 0.9.0-1
 	- librust-trybuild-dev	1.0.50-1
+	-  librust-time-0.1-dev		 0.1.44-2
 
 
 - Debian packages for distribution, Downgrading
   - gif v0.12.0  =>		librust-gif-dev	0.10.2-2
   - jpeg-decoder v0.3.0		=> 	librust-jpeg-decoder+default-dev  0.1.22.1
-	- usvg v0.23.0		=> librust-usvg-dev	0.8.0-4			3years old
+  - usvg v0.23.0		=> librust-usvg-dev	0.8.0-4			3years old
   - xdg-2.4.1			=> librust-xdg-dev			2.2.0-3
   - base64 ^0.13.0		=> librust-base64-dev 0.13.0-1
 	- bincode 1.3.3 				=> librust-bincode-dev	1.3.3-1
@@ -39,7 +40,6 @@
   - serde_json v1.0.91 => 				librust-serde-json-dev  1.0.45-1
 	- signal-hook v0.3.14 	=>  librust-signal-hook-dev  0.3.13-2
   - webbrowser v0.8.4			=> librust-webbrowser-dev  0.5.2-2
- 	- xmlparser v0.13.5  =>  librust-xmlparser-dev	 0.11.0-1
 	- color_quant v1.1.0	=> 	librust-color-quant-dev  1.0.1-2
   - miniz_oxide v0.6.2		=> 		librust-miniz-oxide-dev		0.4.4-2
 	- threadpool v1.8.1		=> librust-threadpool-dev		=> Version: 1.7.1-1
@@ -92,14 +92,16 @@
   - unicode-bidi v0.3.8		=>	librust-unicode-bidi-dev	 0.3.7-1
   - unicode-normalization v0.1.22		=> librust-unicode-normalization-dev 0.1.12-1
  	- idna v0.3.0			=>	librust-idna-dev	 0.2.0-1
- 	- roxmltree v0.15.1		=>	librust-roxmltree-dev	 0.7.3-1
   - simplecss v0.2.1		=>	librust-simplecss-dev	0.2.0-1
  	- svgtypes v0.8.2	=>	librust-svgtypes-dev	0.5.0-1
  	- cairo-rs v0.15.12 => librust-cairo-rs-dev	 0.14.9-2
 	- crossbeam-channel v0.4.4 	=> librust-crossbeam-channel-dev 		 0.4.4-1
  	-	crossbeam-deque v0.7.4	=> librust-crossbeam-deque-dev	 0.7.4-2
-
   - rayon 1.7.0 => librust-rayon-dev   1.4.1-1
+   - crossbeam-deque = "0.8.0" =>  librust-crossbeam-deque-dev	 0.7.4-2
+  - lru-cache = "0.1"	=>	librust-lru-cache-dev	0.1.2-1
+
+
 
 
 - Downgrade failed!
@@ -115,7 +117,10 @@
 	- half v2.2.1 => librust-half-dev  1.6.0-2
 	- rayon v1.6.1	=>	 librust-rayon-dev	1.4.1-1			!! jpeg-decoder-0.3.0/src/worker/rayon.rs     rayon::in_place_scope(
 	-	hard-xml v1.21.0			!! does not compile.  use   1.19.0
-
+ 	- roxmltree v0.15.1		=>	librust-roxmltree-dev	 0.7.3-1		## 
+   		Compile Error:  resvg-0.29.0/rosvgtree/src/parse.rs:237:24   roxmltree::StringStorage::new_owned(value),	#	 could not find `StringStorage` in `roxmltree`
+	- xmlparser v0.13.5  =>  librust-xmlparser-dev	 0.11.0-1
+	   ##	 roxmltree-0.18.0/src/parse.rs:100:17     ParserError(xmlparser::Error),     the trait `Clone` is not implemented for `xmlparser::Error`
 
 
 
