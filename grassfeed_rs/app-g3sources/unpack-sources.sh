@@ -19,20 +19,25 @@ F=target/flume-master/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/version = \"0.7\"/path=\"..\/nanorand-rs-0.7.0\"/"  -e "s/\"spin\"/\"spin\" , path=\"..\/spin-rs-0.9.2\" /" 	>$F
 
-F=target/image-0.24.5/Cargo.toml
-mv $F ${F}.0			# downgrading color_quant, gif , png, tiff
+
+F=target/image-0.23.14/Cargo.toml	# upgrading  num-iter, num-rational
+mv $F ${F}.0			# downgrading jpeg_decoder color_quant, gif , png, tiff,
 cat ${F}.0 |sed -e "s/\"jpeg-decoder\"/\"jpeg-decoder\", path=\"..\/jpeg-decoder-0.3.0\"/" \
- 		|sed -e "s/\"1.7.0\"/\"1.7.0\", path=\"..\/bytemuck-1.7.0\" /"  \
+		|sed -e "s/\"0.1.22\"/\">=0.1\"  /"  \
+		|sed -e "s/\"0.11.1\"/\">=0.11.1\", path=\"..\/image-gif-0.12.0\"     /"  \
+ 		|sed -e "s/\"1\"/{ version=\">=1\", path=\"..\/bytemuck-1.7.0\" } /"  \
  		|sed -e "s/\"1.1\"/\"1.0\" /" \
-    |sed -e "s/\"1.5.0\"/\"1.5.0\", path=\"..\/exrs-1.5.0\"   /" \
-		|sed -e "s/\"0.11.1\"/\">=0.10.0\"/" \
-		|sed -e "s/tiff = { version = \"0.8.0\"/tiff={version=\">=0.5\"/" \
-		|sed -e "s/\"0.17.6\"/\"0.17.5\", path=\"..\/image-png-0.17.5\"   /" \
+    	|sed -e "s/\"1.5.0\"/\"1.5.0\", path=\"..\/exrs-1.5.0\"   /" \
+		|sed -e "s/tiff = { version = \"0.6.0\"/tiff={version=\">=0.6\" , path=\"..\/image-tiff-0.8.0\" /" \
+		|sed -e "s/\"0.16.5\"/\">=0.16.5\", path=\"..\/image-png-0.17.2\"   /" \
+ 		|sed -e "s/\"0.1.32\"/\">=0.1.32\" /" \
+ 		|sed -e "s/\"0.3\"/\">=0.3\" /" \
 		>$F
+
 
 F=target/rust-ico-0.3.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.17\"/\{version=\"0.17\", path=\"..\/image-png-0.17.5\"\}/" 	>$F
+cat ${F}.0 |sed -e "s/\"0.17\"/\{version=\">=0.16\", path=\"..\/image-png-0.17.2\"\}/" 	>$F
 
 F=target/exrs-1.5.0/Cargo.toml
 mv $F ${F}.0		# downgrading miniz_oxide		lebe
@@ -51,7 +56,7 @@ cat ${F}.0 |sed -e "s/version = \"1.5.1\"/version=\">=1.5.1\", path=\"..\/rayon-
 
 F=target/libwebp-image-rs-0.3.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.24.0\"/\">=0.24.0\", path=\"..\/image-0.24.5\" /" \
+cat ${F}.0 |sed -e "s/\"0.24.0\"/\">=0.23.0\", path=\"..\/image-0.23.14\" /" \
 	|sed -e "s/\"0.1.0\"/{ version=\">=0.1.0\", path=\"..\/libwebp-rs-0.1.0\" }/" \
 	>$F
 
@@ -65,11 +70,11 @@ cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /"  \
 	|sed -e "s/, \"js\"//"	\
  	>$F
 
-F=target/image-png-0.17.5/Cargo.toml
+F=target/image-png-0.17.2/Cargo.toml
 mv $F ${F}.0    #  downgrading deflate, miniz_oxide
-cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\{version=\">=0.7.0\" } /" \
-	|sed -e "s/\"\0.5.1\"/\">=0.4.0\"/" \
- 	>$F
+cat ${F}.0 |sed -e "s/deflate = \"0.9\"/deflate=\">=0.7.0\"  /" \
+	|sed -e "s/\"\0.4.1\"/\">=0.3.5\"/"  	>$F
+##  |sed -e "s/deflate = { version = \"0.9\"/deflate=\{version=\">=0.7.0\"  /" \ 	
 
 F=target/quick-xml-0.25.0/Cargo.toml
 mv $F ${F}.0
@@ -120,18 +125,18 @@ cat ${F}.0 |sed -e "s/\"0.7.1\"/\{version=\">=0.7.1\", path=\"..\/embedded-graph
 
 
 F=target/rustls-v-0.20.8/rustls/Cargo.toml
-mv $F ${F}.0	# downgrading  ring, sct, webpki		# removing feature  "alloc"
+mv $F ${F}.0	# downgrading  ring, sct		# removing feature  "alloc"
 cat ${F}.0 |sed -e "s/\"0.16.20\"/\">=0.16.9\" /"		\
 	|sed -e "s/\"0.7.0\"/\">=0.6.0\" /"		\
-	|sed -e "s/\"0.22.0\"/\">=0.21.0\" /"		\
-	|sed -e "s/\"alloc\",//"		\
+	|sed -e "s/webpki = { version = \"0.22.0\"/webpki = { version = \"^0.22.0\" , path=\"..\/..\/webpki-0.22.0\" /"		\
 	>$F
+#	|sed -e "s/\"alloc\",//"		\
 
 F=target/ureq-2.6.2/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/rustls = { version = \"/rustls = \{path=\"..\/rustls-v-0.20.8\/rustls\", version=\">=/"		\
 		|sed -e "s/url = \"2\"/url=\{version=\">=2.0\", path=\"..\/rust-url-2.3.0\/url\"\} /"	\
-		|sed -e "s/webpki = { version = \"0.22\"/webpki=\{version=\">=0.21\"  /"	\
+		|sed -e "s/webpki = { version = \"0.22\"/webpki=\{version=\">=0.21\" , path=\"..\/webpki-0.22.0\"  /"	\
 		|sed -e "s/webpki-roots = {/\webpki-roots={path=\"..\/webpki-roots-v-0.22.6\"\,  /"	\
 	>$F
 
@@ -162,7 +167,13 @@ cat ${F}.0 |sed -e "s/\"0.9\"/\">=0.6\" /" |sed -e "s/\"std\"//"	>$F
 
 F=target/webpki-roots-v-0.22.6/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.22.0\"/\">=0.21.0\" /"	>$F
+cat ${F}.0 |sed -e "s/\"0.22.0\"/{ version=\">=0.21.0\", path=\"..\/webpki-0.22.0\" } /"	>$F
+
+
+F=target/webpki-0.22.0/Cargo.toml
+mv $F ${F}.0	# downgrade  ring   untrusted
+cat ${F}.0 |sed -e "s/\"0.16.19\"/\">=0.16.9\" /"	 |sed -e "s/\"0.7.1\"/\">=0.7.0\" /"	>$F
+
 
 F=target/xmlem-0.2.0/Cargo.toml
 mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors, thin-slice, slotmap, unic-ucd
@@ -258,22 +269,15 @@ mv $F ${F}.0		# downgrade kurbo
 cat ${F}.0  	|sed -e "s/\"0.9\"/\">=0.7\"  /" 	>$F
 
 
-#----------------------------------------------------------
-exit
+F=target/image-gif-0.12.0/Cargo.toml
+mv $F ${F}.0		
+cat ${F}.0  |sed -e "s/\"0.1.5\"/\{version=\">=0.1.5\" , path=\"..\/lzw-0.1.5\"  \} /"	>$F
+
+F=target/image-tiff-0.8.0/Cargo.toml
+mv $F ${F}.0		
+cat ${F}.0  |sed -e "s/\"0.3.0\"/ \"^0.3.0\" , path=\"..\/jpeg-decoder-0.3.0\"  /" \
+	|sed -e "s/\"0.1.0\"/\{version=\">=0.1.0\" , path=\"..\/lzw-0.1.5\"  \} /"	>$F
 
 
 
 
-F=target/webkit2gtk-rs-webkit2gtk-rs-v0.18.2/Cargo.toml
-mv $F ${F}.0
-cat ${F}.0 |sed -e "s/cairo-rs = \"^0.15.0\"/cairo-rs=\">=0.14.9\"/" \
-	|sed -e "s/gdk = \"^0.15.0\"/gdk=\">=0.14.3\"/" \
-	|sed -e "s/gdk-sys = \"^0.15.0\"/gdk-sys=\">=0.14.0\"/" \
-	|sed -e "s/gio = \"^0.15.0\"/gio=\">=0.14.8\"/" \
-	|sed -e "s/gio-sys = \"^0.15.0\"/gio-sys=\">=0.14.0\"/" \
-	|sed -e "s/glib = \"^0.15.0\"/glib=\">=0.14.8\"/" \
-	|sed -e "s/glib-sys = \"^0.15.0\"/glib-sys=\">=0.14.0\"/" \
-	|sed -e "s/gobject-sys = \"^0.15.0\"/gobject-sys=\">=0.14.0\"/" \
-	|sed -e "s/gtk = \"^0.15.0\"/gtk=\">=0.14.3\"/" \
-	|sed -e "s/gtk-sys = \"^0.15.0\"/gtk-sys=\">=0.14.0\"/" \
-	>$F

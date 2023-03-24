@@ -10,7 +10,7 @@ feed-rs = { version = "1.2.0", path = "target/feed-rs-1.2.0/feed-rs", package = 
 flume = { version = "0.10.14", path = "target/flume-master" }
 ureq = { path = "target/ureq-2.6.2" }                         #  , optional = true 
 ico = { path = "target/rust-ico-0.3.0" }
-image = { path = "target/image-0.24.5" }
+image = { path = "target/image-0.23.14" }
 
 
 # fern = { version = "*", features = ["colored", "chrono"] }
@@ -26,10 +26,10 @@ once_cell = ">=1.9.0"
 xdg = ">=2.2"
 
 
+
 ##  cannot be found as debian package or too old
 lz4-compression = { path = "target/lz4-compression-0.7" }
 az = { path = "target/az-v1.1.0" }
-
 rust-i18n = { path = "target/rust-i18n-1.1.1" }
 quick-xml = { path = "target/quick-xml-0.25.0", features = ["encoding"] }
 xmlem = { path = "target/xmlem-0.2.0" }
@@ -51,7 +51,7 @@ textcode = { path = "target/textcode-0.2.2" }
 tinybmp = { path = "target/tinybmp-0.4.0" }
 tl = { path = "target/tl-0.7.7" }
 usvg = { path = "target/resvg-0.29.0/usvg" }
-png = { path = "target/image-png-0.17.5" }
+png = { path = "target/image-png-0.17.2" }
 bytemuck = { path = "target/bytemuck-1.7.0" }
 exr = { path = "target/exrs-1.5.0" }
 bit_field = { path = "target/rust-bit-field-0.10.1" }
@@ -87,3 +87,7 @@ hard-xml = { path = "target/hard-xml-v1.19.0/hard-xml" }
 roxmltree = { path = "target/roxmltree-0.18.0" }
 xmlparser = { path = "target/xmlparser-0.13.5" }
 svgtypes = { path = "target/svgtypes-0.10.0" }
+gif = { path = "target/image-gif-0.12.0" }
+weezl = { path = "target/lzw-0.1.5" }
+webpki = { path = "target/webpki-0.22.0" }
+tiff = { path = "target/image-tiff-0.8.0" }

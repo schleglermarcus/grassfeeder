@@ -33,6 +33,8 @@ https://packaging.ubuntu.com/html/packaging-new-software.html
 
 
 Later:
+- crates.io download:                   https://crates.io/api/v1/crates/webpki/0.22.0/download 
+
 - 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20
 
 - GTK4: block multiple instances
@@ -64,6 +66,8 @@ Perhaps:
 - Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
 - Feed-Opml-Import with progress bar ?
 - Do extra recognition  to process   invalid feed titles  containg  &     :      dieneuewelle.xml
+
+
 
 No more
 - startup:  delayed creation of dialogs not good, they need to be present for the menu

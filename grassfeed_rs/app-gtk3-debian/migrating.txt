@@ -18,10 +18,11 @@
 	- librust-env-logger-dev 0.9.0-1
 	- librust-trybuild-dev	1.0.50-1
 	-  librust-time-0.1-dev		 0.1.44-2
+	-  image 0.23.14  needs 0.16.5
+
 
 
 - Debian packages for distribution, Downgrading
-  - gif v0.12.0  =>		librust-gif-dev	0.10.2-2
   - jpeg-decoder v0.3.0		=> 	librust-jpeg-decoder+default-dev  0.1.22.1
   - usvg v0.23.0		=> librust-usvg-dev	0.8.0-4			3years old
   - xdg-2.4.1			=> librust-xdg-dev			2.2.0-3
@@ -31,7 +32,6 @@
   - mime v0.3.16  			 => librust-mime-dev 0.3.9-1
 	- regex	1.7								=> librust-regex+default-dev	 1.5.4-1ubuntu0.1
   - siphasher 0.3				=> librust-siphasher-dev   0.3.1-1
-  - gif v0.12.0 =>			 librust-gif-dev  0.10.2-2
 	- glob v0.3.1 		=>  librust-glob-dev 0.3.0-1
 	- log v0.4.17		=>	librust-log-dev 	0.4.11-2
   - once_cell v1.17.0		=>   librust-once-cell-dev	1.9.0-2
@@ -41,7 +41,6 @@
 	- signal-hook v0.3.14 	=>  librust-signal-hook-dev  0.3.13-2
   - webbrowser v0.8.4			=> librust-webbrowser-dev  0.5.2-2
 	- color_quant v1.1.0	=> 	librust-color-quant-dev  1.0.1-2
-  - miniz_oxide v0.6.2		=> 		librust-miniz-oxide-dev		0.4.4-2
 	- threadpool v1.8.1		=> librust-threadpool-dev		=> Version: 1.7.1-1
 	- num-rational v0.4.1		=>	librust-num-rational-dev		 0.4.0-1
 	- scoped_threadpool v0.1.9		=>  librust-scoped-threadpool-dev   0.1.9-1
@@ -61,7 +60,6 @@
   - flate2 v1.0.25	=>	librust-flate2-dev		 1.0.22-1
 	- ring v0.16.20	=>	librust-ring-dev	 0.16.9-4
  	- sct v0.7.0		=> 	librust-sct-dev 0.6.0-2
-  - webpki v0.22.0	=>	librust-webpki-dev	0.21.0-2
 	- data-url v0.1.1	=>  librust-data-url-dev	 0.1.0-1
  	- kurbo v0.8.3	=> librust-kurbo-dev	 0.7.1-4
  	- rctree v0.4.0	=> librust-rctree-dev	 0.3.3-1
@@ -100,6 +98,9 @@
   - rayon 1.7.0 => librust-rayon-dev   1.4.1-1
    - crossbeam-deque = "0.8.0" =>  librust-crossbeam-deque-dev	 0.7.4-2
   - lru-cache = "0.1"	=>	librust-lru-cache-dev	0.1.2-1
+  - num-iter = "0.1.32"		=>	librust-num-iter-dev	 0.1.42-1
+ 	num-rational 0.3 		=>		librust-num-rational-dev   0.4.0-1
+	encoding = "0.2"		=>	 librust-encoding-dev	0.2.33-1
 
 
 
@@ -121,6 +122,13 @@
    		Compile Error:  resvg-0.29.0/rosvgtree/src/parse.rs:237:24   roxmltree::StringStorage::new_owned(value),	#	 could not find `StringStorage` in `roxmltree`
 	- xmlparser v0.13.5  =>  librust-xmlparser-dev	 0.11.0-1
 	   ##	 roxmltree-0.18.0/src/parse.rs:100:17     ParserError(xmlparser::Error),     the trait `Clone` is not implemented for `xmlparser::Error`
+  - gif v0.12.0  =>		librust-gif-dev	0.10.2-2		fail
+	##   image-0.24.5/./src/codecs/gif.rs:578:18		use gif::EncodingError::*;	#  could not find `EncodingError` in `gif`
+  - webpki v0.22.0	=>	librust-webpki-dev	0.21.0-2
+		## rustls-v-0.20.8/rustls/src/msgs/handshake.rs:268:27         match webpki::DnsNameRef::try_from_ascii(&raw.0) {                               could not find `DnsNameRef` in `webpki`                               help: a struct with a similar name exists: `DNSNameRef`
+  - miniz_oxide v0.6.2		=> 		librust-miniz-oxide-dev		0.4.4-2		FAIL
+	##	image-png-0.16.5/src/decoder/zlib.rs:77:13	            decompress(&mut self.state, in_data, &mut cursor, BASE_FLAGS)	#			an argument of type `usize` is missing
+
 
 
 
