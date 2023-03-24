@@ -6,11 +6,11 @@ description = "Legacy Sources of old versions for debian build"
 
 [dependencies]
 
-feed-rs = { version = "1.2.0", path = "target/feed-rs-1.2.0/feed-rs", package = "feed-rs" } #  ,  optional = true  
+feed-rs = { version = "1.3.0", path = "target/feed-rs-1.3.0/feed-rs" } 
 flume = { version = "0.10.14", path = "target/flume-master" }
 ureq = { path = "target/ureq-2.6.2" }                         #  , optional = true 
 ico = { path = "target/rust-ico-0.3.0" }
-image = { path = "target/image-0.23.14" }
+image = { path = "target/image-0.24.0" }
 
 
 # fern = { version = "*", features = ["colored", "chrono"] }
@@ -31,8 +31,8 @@ xdg = ">=2.2"
 lz4-compression = { path = "target/lz4-compression-0.7" }
 az = { path = "target/az-v1.1.0" }
 rust-i18n = { path = "target/rust-i18n-1.1.1" }
-quick-xml = { path = "target/quick-xml-0.25.0", features = ["encoding"] }
-xmlem = { path = "target/xmlem-0.2.0" }
+quick-xml = { path = "target/quick-xml-0.27.1", features = ["encoding"] }
+xmlem = { path = "target/xmlem-0.2.2" }
 regex = { path = "target/regex-1.6.0" }
 url = { path = "target/rust-url-2.3.0/url" }
 uuid = { path = "target/uuid-1.1.0", features = ["v4"] }
@@ -50,7 +50,6 @@ rusqlite = { path = "target/rusqlite-0.22.0" }
 textcode = { path = "target/textcode-0.2.2" }
 tinybmp = { path = "target/tinybmp-0.4.0" }
 tl = { path = "target/tl-0.7.7" }
-usvg = { path = "target/resvg-0.29.0/usvg" }
 png = { path = "target/image-png-0.17.2" }
 bytemuck = { path = "target/bytemuck-1.7.0" }
 exr = { path = "target/exrs-1.5.0" }
@@ -59,7 +58,6 @@ half = { path = "target/half-rs-1.8.2" }
 lebe = { path = "target/lebe-0.5.2" }
 libwebp = { path = "target/libwebp-rs-0.1.0" }
 libwebp-sys2 = { path = "target/libwebp-sys2-rs-0.1.2" }
-hashlink = { path = "target/hashlink-0.8.0" }
 embedded-graphics = { path = "target/embedded-graphics-embedded-graphics-v0.7.1" }
 micromath = { path = "target/micromath-1.1.1" }
 rustls = { path = "target/rustls-v-0.20.8/rustls" }
@@ -68,7 +66,6 @@ imagesize = { path = "target/imagesize-0.11.0" }
 strict-num = { path = "target/strict-num-0.1.0" }
 cssparser = { path = "target/rust-cssparser-0.28.0" }
 qname = { path = "target/qname-0.1.0" }
-selectors = { path = "target/servo-selectors-v0.22.0/components/selectors" }
 derive_more = { path = "target/derive_more-0.99.17" }
 convert_case = { path = "target/convert_case-0.6.0" }
 slotmap = { path = "target/slotmap-1.0.6" }
@@ -91,3 +88,13 @@ gif = { path = "target/image-gif-0.12.0" }
 weezl = { path = "target/lzw-0.1.5" }
 webpki = { path = "target/webpki-0.22.0" }
 tiff = { path = "target/image-tiff-0.8.0" }
+selectors = { path = "target/selectors-0.23.0" }
+tracing = { path = "target/tracing-tracing-0.1.37/tracing" }
+
+
+## check if needed:
+# usvg = { path = "target/resvg-0.29.0/usvg" }
+# selectors = { path = "target/selectors-v0.23.0/components/selectors" }
+# hashlink = { path = "target/hashlink-0.8.0" }
+
+

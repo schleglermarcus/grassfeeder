@@ -7,9 +7,11 @@ done
 
 ls target/
 
-F=target/feed-rs-1.2.0/feed-rs/Cargo.toml
-mv $F ${F}.0
-cat ${F}.0 |sed -e "s/version = \"0.25\"/path=\"..\/..\/quick-xml-0.25.0\"/" |egrep -v "regex|url|uuid" 	>$F
+F=target/feed-rs-1.3.0/feed-rs/Cargo.toml
+mv $F ${F}.0	#  downgrading chrono, quick-xml
+cat ${F}.0 |sed -e "s/\"0.4.23\"/\">=0.4.19\"  /"  \
+	|sed -e "s/\"0.27.1\"/\">=0.26\",  path=\"..\/..\/quick-xml-0.27.1\"/" \
+	|egrep -v "regex|url|uuid" 	>$F
 echo "regex={ path=\"../../regex-1.6.0\" }  " >>$F
 echo "url={ path=\"../../rust-url-2.3.0/url\" }  " >>$F
 echo "uuid={ path=\"../../uuid-1.1.0\" , features=[\"v4\"] }  " >>$F
@@ -20,16 +22,16 @@ mv $F ${F}.0
 cat ${F}.0 |sed -e "s/version = \"0.7\"/path=\"..\/nanorand-rs-0.7.0\"/"  -e "s/\"spin\"/\"spin\" , path=\"..\/spin-rs-0.9.2\" /" 	>$F
 
 
-F=target/image-0.23.14/Cargo.toml	# upgrading  num-iter, num-rational
+F=target/image-0.24.0/Cargo.toml	# upgrading  num-iter, num-rational, exr
 mv $F ${F}.0			# downgrading jpeg_decoder color_quant, gif , png, tiff,
-cat ${F}.0 |sed -e "s/\"jpeg-decoder\"/\"jpeg-decoder\", path=\"..\/jpeg-decoder-0.3.0\"/" \
+cat ${F}.0 |sed -e "s/\"jpeg-decoder\", version = \"0.2.1\"/\"jpeg-decoder\", version=\">=0.2.1\", path=\"..\/jpeg-decoder-0.3.0\"/" \
 		|sed -e "s/\"0.1.22\"/\">=0.1\"  /"  \
 		|sed -e "s/\"0.11.1\"/\">=0.11.1\", path=\"..\/image-gif-0.12.0\"     /"  \
- 		|sed -e "s/\"1\"/{ version=\">=1\", path=\"..\/bytemuck-1.7.0\" } /"  \
+ 		|sed -e "s/bytemuck = { version = \"1.7.0\"/bytemuck={version=\">=1\", path=\"..\/bytemuck-1.7.0\"  /"  \
  		|sed -e "s/\"1.1\"/\"1.0\" /" \
-    	|sed -e "s/\"1.5.0\"/\"1.5.0\", path=\"..\/exrs-1.5.0\"   /" \
-		|sed -e "s/tiff = { version = \"0.6.0\"/tiff={version=\">=0.6\" , path=\"..\/image-tiff-0.8.0\" /" \
-		|sed -e "s/\"0.16.5\"/\">=0.16.5\", path=\"..\/image-png-0.17.2\"   /" \
+    	|sed -e "s/\"1.4.1\"/\">=1.4.1\", path=\"..\/exrs-1.5.0\"   /" \
+		|sed -e "s/tiff = { version = \"0.7.1\"/tiff={version=\">=0.6\" , path=\"..\/image-tiff-0.8.0\" /" \
+		|sed -e "s/\"0.17.0\"/\">=0.16.5\", path=\"..\/image-png-0.17.2\"   /" \
  		|sed -e "s/\"0.1.32\"/\">=0.1.32\" /" \
  		|sed -e "s/\"0.3\"/\">=0.3\" /" \
 		>$F
@@ -56,7 +58,7 @@ cat ${F}.0 |sed -e "s/version = \"1.5.1\"/version=\">=1.5.1\", path=\"..\/rayon-
 
 F=target/libwebp-image-rs-0.3.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.24.0\"/\">=0.23.0\", path=\"..\/image-0.23.14\" /" \
+cat ${F}.0 |sed -e "s/\"0.24.0\"/\">=0.23.0\", path=\"..\/image-0.24.0\" /" \
 	|sed -e "s/\"0.1.0\"/{ version=\">=0.1.0\", path=\"..\/libwebp-rs-0.1.0\" }/" \
 	>$F
 
@@ -76,7 +78,7 @@ cat ${F}.0 |sed -e "s/deflate = \"0.9\"/deflate=\">=0.7.0\"  /" \
 	|sed -e "s/\"\0.4.1\"/\">=0.3.5\"/"  	>$F
 ##  |sed -e "s/deflate = { version = \"0.9\"/deflate=\{version=\">=0.7.0\"  /" \ 	
 
-F=target/quick-xml-0.25.0/Cargo.toml
+F=target/quick-xml-0.27.1/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"2.5\"/\">=2.4\" /" 		>$F
 
@@ -175,24 +177,41 @@ mv $F ${F}.0	# downgrade  ring   untrusted
 cat ${F}.0 |sed -e "s/\"0.16.19\"/\">=0.16.9\" /"	 |sed -e "s/\"0.7.1\"/\">=0.7.0\" /"	>$F
 
 
-F=target/xmlem-0.2.0/Cargo.toml
-mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors, thin-slice, slotmap, unic-ucd
+F=target/xmlem-0.2.2/Cargo.toml
+mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors, thin-slice, slotmap, unic-ucd , tracing
 cat ${F}.0 	|sed -e "s/\"0.28.1\"/{version=\">=0.28\", path=\"..\/rust-cssparser-0.28.0\"\}  /" \
-	|sed -e "s/\"1.8.1\"/\">=1.7.0\" /"	\
-	|sed -e "s/\"1.10.0\"/\">=1.9.0\" /" \
+	|sed -e "s/\"1.9.2\"/\">=1.7.0\" /"	\
+	|sed -e "s/\"1.17.1\"/\">=1.9.0\" /" \
 	|sed -e "s/\"0.1.0\"/\{version=\"0.1.0\", path=\"..\/qname-0.1.0\"\}  /" \
-	|sed -e "s/\"0.26.0\"/\{version=\">=0.25.0\", path=\"..\/quick-xml-0.25.0\"\}  /" \
-	|sed -e "s/\"0.23.0\"/{version=\">=0.22.0\", path=\"..\/servo-selectors-v0.22.0\/components\/selectors\"\}  /"	\
+	|sed -e "s/\"0.27.1\"/\{version=\">=0.26.0\", path=\"..\/quick-xml-0.27.1\"\}  /" \
+	|sed -e "s/\"0.23.0\"/{version=\">=0.22.0\", path=\"..\/selectors-0.23.0\"\}  /"	\
 	|sed -e "s/\"1.0.6\"/{version=\">=1.0.6\", path=\"..\/slotmap-1.0.6\"\}  /"	\
 	|sed -e "s/\"0.9.0\"/{version=\"0.9.0\", path=\"..\/rust-unic-0.9.0\/unic\/ucd\" \}  /"	\
+	|sed -e "s/\"0.1.37\"/{version=\"0.1.37\", path=\"..\/tracing-tracing-0.1.37\/tracing\" \}  /"	\
 	>$F
 
-F=target/servo-selectors-v0.22.0/components/selectors/Cargo.toml
-mv $F ${F}.0
+
+
+
+## Special case: remove  version number from dependencies.servo_arc
+F=target/selectors-0.23.0/Cargo.toml
+cat $F |grep "servo_arc" -B100 >${F}.0
+cat $F |grep "servo_arc" -A100 |tail -n7 >>${F}.0
+# mv $F ${F}.0		#  setting path to cssparser
 cat ${F}.0 |sed -e "s/\"0.27\"/\{version=\">=0.27\" , path=\"..\/..\/..\/rust-cssparser-0.28.0\"  \}/"	\
- 	|sed -e "s/\"0.99\"/\{version=\">=0.99\" , path=\"..\/..\/..\/derive_more-0.99.17\"  \}/"	\
+ 	|sed -e "s/\"0.99\"/\">=0.99\"\n path=\"..\/derive_more-0.99.17\"  /"	\
+	|sed -e "s/\"0.28\"/\">=0.28\"\n path=\"..\/rust-cssparser-0.28.0\" /" \
+	|sed -e "s/servo_arc]/servo_arc] \n version=\">=0.1\" \n\n /" \
 	|sed -e "s/\"0.1.0\"/\">=0.1.0\" /"	\
 	>$F
+
+
+# F=target/servo-selectors-v0.22.0/components/selectors/Cargo.toml
+# mv $F ${F}.0
+# cat ${F}.0 |sed -e "s/\"0.27\"/\{version=\">=0.27\" , path=\"..\/..\/..\/rust-cssparser-0.28.0\"  \}/"	\
+#  	|sed -e "s/\"0.99\"/\{version=\">=0.99\" , path=\"..\/..\/..\/derive_more-0.99.17\"  \}/"	\
+# 	|sed -e "s/\"0.1.0\"/\">=0.1.0\" /"	\
+# 	>$F
 
 F=target/convert_case-0.6.0/Cargo.toml
 mv $F ${F}.0
@@ -203,11 +222,11 @@ mv $F ${F}.0
 cat ${F}.0 |sed -e "s/convert_case = { version = \"0.4\"/convert_case=\{version=\">=0.4\", path=\"..\/convert_case-0.6.0\"\   /"	>$F
 
 F=target/hard-xml-v1.19.0/hard-xml/Cargo.toml
-mv $F ${F}.0		#  restoring the version number  here!    env_logger
+mv $F ${F}.0		#  restoring the version number  here!    env_logger xmlparser
 cat ${F}.0 |sed -e "s/\"0.5\"/\{version=\">=0.5\" , path=\"..\/..\/jetscii-0.5.3\"  \}/" \
 	|sed -e "s/\"0.0.0\"/\"1.19.0\"/" \
-	|sed -e "s/\"0.13\"/\">=0.11.0\" /" \
 	|sed -e "s/\"0.8\"/\">=0.8\" /" \
+    |sed -e "s/\"0.13\"/{version=\">=0.13\", path=\"..\/..\/xmlparser-0.13.5\"\} /" 	\
 	>$F
 rm target/hard-xml-v1.19.0/rust-toolchain.toml
 
@@ -279,5 +298,17 @@ cat ${F}.0  |sed -e "s/\"0.3.0\"/ \"^0.3.0\" , path=\"..\/jpeg-decoder-0.3.0\"  
 	|sed -e "s/\"0.1.0\"/\{version=\">=0.1.0\" , path=\"..\/lzw-0.1.5\"  \} /"	>$F
 
 
+F=target/tracing-tracing-0.1.37/tracing/Cargo.toml
+mv $F ${F}.0		
+cat ${F}.0  |sed -e "s/\"0.2.9\"/\">=0.2.7\"   /" 	>$F
 
+F=target/tracing-tracing-0.1.37/tracing-attributes/Cargo.toml
+mv $F ${F}.0		
+cat ${F}.0  |sed -e "s/\"1.0.98\"/\">=1.0.76\"   /" 	>$F
+
+
+
+F=target/tracing-tracing-0.1.37/tracing-core/Cargo.toml
+mv $F ${F}.0		
+cat ${F}.0  |sed -e "s/\"1.13.0\"/\">=1.9.0\"   /" 	>$F
 

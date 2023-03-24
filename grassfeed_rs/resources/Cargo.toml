@@ -9,7 +9,7 @@ log = "0.4.11"
 once_cell = ">=1.9"
 
 ## rausgenommen fuer debian build 
-# rust-i18n = { version =  ">=1.0.1", path="../app-gtk3-debian/target/rust-i18n-1.1.1" }
+rust-i18n = { version =  ">=1.0.1", path="../app-g3sources/target/rust-i18n-1.1.1" }
 # rust-i18n = "*"
 
 
