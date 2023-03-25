@@ -1,7 +1,4 @@
-// #[cfg(feature = "g3modern")]
-// use glib_m  as glib;
-// #[cfg(feature = "g3modern")]
-// use gtk_m  as gtk;
+use dd_g3new::flume;
 
 use crate::gtkmodel_updater::GtkModelUpdaterInt;
 use crate::gtkrunner::GtkObjectsImpl;

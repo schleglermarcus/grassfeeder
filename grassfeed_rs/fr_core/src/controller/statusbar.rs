@@ -1,3 +1,5 @@
+use dd::proc_status;
+
 use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::IFeedContents;

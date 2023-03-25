@@ -133,6 +133,8 @@
 	##	image-png-0.16.5/src/decoder/zlib.rs:77:13	            decompress(&mut self.state, in_data, &mut cursor, BASE_FLAGS)	#			an argument of type `usize` is missing
 	- selectors  0.22.0 FAIL
 	##   xmlem-0.2.0/src/select.rs:48:1			48 | impl NonTSPseudoClass for Value ##		missing `has_zero_specificity` in implementation
+    ##  xmlem-0.2.2  does not compile. xmlem-0.2.2/src/document.rs:377:42	##  let value = attr.unescape_value ().unwrap();	 ## help: there is a method with a similar name: `decode_and_unescape_value`
+
    
 
 

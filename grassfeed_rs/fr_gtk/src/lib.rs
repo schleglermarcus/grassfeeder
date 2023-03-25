@@ -1,6 +1,5 @@
-// #[cfg(feature = "g3modern")]
-// extern crate gtk_m as gtk;
-
+use dd_g3new::rust_i18n::i18n;
+use dd_g3new::rust_i18n;
 
 extern crate gio;
 
@@ -10,8 +9,6 @@ extern crate itertools; // for key codes // background color
 
 pub extern crate gdk_sys;
 
-#[macro_use]
-extern crate rust_i18n;
 
 pub mod cell_data_func;
 pub mod dialogs;
@@ -20,5 +17,6 @@ pub mod load_css;
 pub mod messagelist;
 pub mod treeview2;
 pub mod util;
+
 
 i18n!("../resources/locales");

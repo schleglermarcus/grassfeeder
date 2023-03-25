@@ -1,3 +1,5 @@
+use dd_g3new::flume;
+
 use flume::Sender;
 use gtk::gdk_pixbuf::InterpType;
 use gtk::prelude::ImageExt;

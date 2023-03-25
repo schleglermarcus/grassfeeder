@@ -1,3 +1,8 @@
+use dd_g3new::flume;
+use dd_g3new::rust_i18n;
+// use dd_g3new::rust_i18n::t;
+
+
 use crate::util::*;
 use flume::Sender;
 use gtk::builders::NotebookBuilder;

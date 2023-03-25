@@ -10,7 +10,7 @@ ls target/
 F=target/feed-rs-1.3.0/feed-rs/Cargo.toml
 mv $F ${F}.0	#  downgrading chrono, quick-xml
 cat ${F}.0 |sed -e "s/\"0.4.23\"/\">=0.4.19\"  /"  \
-	|sed -e "s/\"0.27.1\"/\">=0.26\",  path=\"..\/..\/quick-xml-0.27.1\"/" \
+	|sed -e "s/\"0.27.1\"/\"0.27.1\",  path=\"..\/..\/quick-xml-0.27.1\"/" \
 	|egrep -v "regex|url|uuid" 	>$F
 echo "regex={ path=\"../../regex-1.6.0\" }  " >>$F
 echo "url={ path=\"../../rust-url-2.3.0/url\" }  " >>$F
@@ -23,7 +23,7 @@ cat ${F}.0 |sed -e "s/version = \"0.7\"/path=\"..\/nanorand-rs-0.7.0\"/"  -e "s/
 
 
 F=target/image-0.24.0/Cargo.toml	# upgrading  num-iter, num-rational, exr
-mv $F ${F}.0			# downgrading jpeg_decoder color_quant, gif , png, tiff,
+mv $F ${F}.0			# downgrading   jpeg_decoder color_quant, gif , png, tiff,
 cat ${F}.0 |sed -e "s/\"jpeg-decoder\", version = \"0.2.1\"/\"jpeg-decoder\", version=\">=0.2.1\", path=\"..\/jpeg-decoder-0.3.0\"/" \
 		|sed -e "s/\"0.1.22\"/\">=0.1\"  /"  \
 		|sed -e "s/\"0.11.1\"/\">=0.11.1\", path=\"..\/image-gif-0.12.0\"     /"  \
@@ -177,18 +177,20 @@ mv $F ${F}.0	# downgrade  ring   untrusted
 cat ${F}.0 |sed -e "s/\"0.16.19\"/\">=0.16.9\" /"	 |sed -e "s/\"0.7.1\"/\">=0.7.0\" /"	>$F
 
 
-F=target/xmlem-0.2.2/Cargo.toml
-mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors, thin-slice, slotmap, unic-ucd , tracing
-cat ${F}.0 	|sed -e "s/\"0.28.1\"/{version=\">=0.28\", path=\"..\/rust-cssparser-0.28.0\"\}  /" \
-	|sed -e "s/\"1.9.2\"/\">=1.7.0\" /"	\
-	|sed -e "s/\"1.17.1\"/\">=1.9.0\" /" \
-	|sed -e "s/\"0.1.0\"/\{version=\"0.1.0\", path=\"..\/qname-0.1.0\"\}  /" \
-	|sed -e "s/\"0.27.1\"/\{version=\">=0.26.0\", path=\"..\/quick-xml-0.27.1\"\}  /" \
-	|sed -e "s/\"0.23.0\"/{version=\">=0.22.0\", path=\"..\/selectors-0.23.0\"\}  /"	\
-	|sed -e "s/\"1.0.6\"/{version=\">=1.0.6\", path=\"..\/slotmap-1.0.6\"\}  /"	\
-	|sed -e "s/\"0.9.0\"/{version=\"0.9.0\", path=\"..\/rust-unic-0.9.0\/unic\/ucd\" \}  /"	\
-	|sed -e "s/\"0.1.37\"/{version=\"0.1.37\", path=\"..\/tracing-tracing-0.1.37\/tracing\" \}  /"	\
-	>$F
+##  xmlem-0.2.2  does not compile. xmlem-0.2.2/src/document.rs:377:42	##  let value = attr.unescape_value ().unwrap();	 ## help: there is a method with a similar name: `decode_and_unescape_value`
+# F=target/xmlem-0.2.0/Cargo.toml
+# mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors, thin-slice, slotmap, unic-ucd , tracing
+# cat ${F}.0 	 \
+#     |sed -e "s/\"0.28.1\"/{version=\">=0.28\", path=\"..\/rust-cssparser-0.28.0\"\}  /" \
+# 	|sed -e "s/\"1.8.1\"/\">=1.7.0\" /"	\
+# 	|sed -e "s/\"1.10.0\"/\">=1.9.0\" /" \
+# 	|sed -e "s/\"0.1.0\"/\{version=\"0.1.0\", path=\"..\/qname-0.1.0\"\}  /" \
+# 	|sed -e "s/\"0.26.0\"/\{version=\">=0.27.1\", path=\"..\/quick-xml-0.27.1\"\}  /" \
+# 	|sed -e "s/\"0.23.0\"/{version=\">=0.22.0\", path=\"..\/selectors-0.23.0\"\}  /"	\
+# 	|sed -e "s/\"1.0.6\"/{version=\">=1.0.6\", path=\"..\/slotmap-1.0.6\"\}  /"	\
+# 	|sed -e "s/\"0.9.0\"/{version=\"0.9.0\", path=\"..\/rust-unic-0.9.0\/unic\/ucd\" \}  /"	\
+# 	|sed -e "s/\"0.1.37\"/{version=\"0.1.37\", path=\"..\/tracing-tracing-0.1.37\/tracing\" \}  /"	\
+# 	>$F
 
 
 

@@ -1,3 +1,6 @@
+// use dd::rust_i18n::t;
+//  use rust_i18n::t;
+
 use crate::config::configmanager::ConfigManager;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::timer::Timer;
@@ -22,7 +25,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 
-// use ddl::rust_i18n::t;
+
 
 const BROWSER_ZOOM_LIMIT_UPPER: u32 = 300;
 const BROWSER_ZOOM_LIMIT_LOWER: u32 = 20;

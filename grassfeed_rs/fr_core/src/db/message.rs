@@ -1,4 +1,5 @@
-use dd_g3new::rusqlite;
+use dd::rusqlite;
+use dd::lz4_compression;
 
 use crate::db::sqlite_context::TableInfo;
 use crate::db::sqlite_context::Wrap;

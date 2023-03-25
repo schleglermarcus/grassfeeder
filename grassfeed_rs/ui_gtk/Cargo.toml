@@ -5,16 +5,17 @@ edition = "2021"
 
 
 [features]
-ui-gtk = ["dd-g3new"]
-ui-gtk-old = ["app-g3sources"]
-# default = ["dd-g3new"]
+g3new = ["dd-g3new"]
+# ui-gtk-old = ["app-g3sources"]
+
 
 
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 resources = { path = "../resources" }
 dd-g3new = { path = "../dd-g3new", optional = true }
-app-g3sources = { path = "../app-g3sources", optional = true }
+
+# app-g3sources = { path = "../app-g3sources", optional = true }
 
 
 ## rausgenommen fuer debian build

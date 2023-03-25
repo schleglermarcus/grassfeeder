@@ -1,4 +1,6 @@
 use dd::image;
+use dd::textcode;
+use dd::ureq;
 
 use chrono::DateTime;
 use chrono::Local;

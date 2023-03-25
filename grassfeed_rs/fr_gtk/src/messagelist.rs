@@ -1,3 +1,7 @@
+use dd_g3new::flume;
+use dd_g3new::rust_i18n;
+// use dd_g3new::webkit2gtk;
+
 use crate::cell_data_func::*;
 use crate::gtk_object_tree::GLOB_CACHE;
 use crate::util::EvSenderCache;
@@ -6,7 +10,6 @@ use crate::util::MOUSE_BUTTON_LEFT;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
 use gdk::EventButton;
-// use glib::types::Type;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::GtkMenuItemExt;
 use gtk::prelude::TreeModelExt;

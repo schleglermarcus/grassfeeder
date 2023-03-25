@@ -6,11 +6,16 @@ edition = "2021"
 description = "Feed Reader application specific gtk setup"
 
 
+[features]
+g3new = ["dd-g3new"]
+
+
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
 ui_gtk = { path = "../ui_gtk" }
 resources = { path = "../resources" }
+dd-g3new = { path = "../dd-g3new", optional = true }
 
 ## Raus wg. Debian Build
 # flume = { version = ">=0.10.9", path = "../app-gtk3-debian/target/flume-master" }

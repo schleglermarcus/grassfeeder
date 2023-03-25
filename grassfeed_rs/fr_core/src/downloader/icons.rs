@@ -2,6 +2,10 @@ use dd::flume;
 use dd::ico;
 use dd::jpeg_decoder;
 use dd::libwebp_image;
+use dd::usvg;
+use dd::tinybmp;
+use dd::png;
+
 
 
 use crate::controller::sourcetree::SJob;
@@ -18,7 +22,7 @@ use crate::util::Step;
 use crate::util::StepResult;
 use crate::web::WebFetcherType;
 use flume::Sender;
-// use jpeg_decoder;
+// use jpeg_decoder::Decoder;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;

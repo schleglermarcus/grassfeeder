@@ -1,4 +1,5 @@
 use dd_g3new::webkit2gtk;
+use dd_g3new::flume;
 
 
 #[macro_use]
