@@ -95,7 +95,5 @@ tracing = { path = "target/tracing-tracing-0.1.37/tracing" }
 # usvg = { path = "target/resvg-0.29.0/usvg" }
 # selectors = { path = "target/selectors-v0.23.0/components/selectors" }
 # hashlink = { path = "target/hashlink-0.8.0" }
-###  neither 2.0  nor 2.2  will compile
-# xmlem = { path = "target/xmlem-0.2.0" }
 
 

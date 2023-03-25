@@ -2,9 +2,18 @@
 #[macro_use]
 extern crate log;
 
+
+/*
 // remapping those crates that need source replacement for debian
 #[cfg(feature = "dd-g3new")]
 extern crate dd_g3new as dd;
+ */
+
+
+
+// remapping also for testing
+extern crate dd_g3new as dd;
+
 
 #[cfg(test)]
 extern crate rand;

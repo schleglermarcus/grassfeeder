@@ -2,9 +2,9 @@ pub mod opmlreader;
 
 #[cfg(test)]
 mod tests {
-    // #[test]    fn it_works() {        assert_eq!(2 + 2, 4);    }
 
-    use opml::Outline;
+
+    use dd::opml::Outline;
 
     #[allow(dead_code)]
     fn build_with_outlines() {

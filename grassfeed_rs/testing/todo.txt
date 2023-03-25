@@ -324,7 +324,36 @@ GTK_DEBUG=interactive
 
 -------------------
 
+	##   xmlem-0.2.0/src/select.rs:48:1			48 | impl NonTSPseudoClass for Value ##		missing `has_zero_specificity` in implementation
+    ##  xmlem-0.2.2  does not compile. xmlem-0.2.2/src/document.rs:377:42	##  let value = attr.unescape_value ().unwrap();	 ## help: there is a method with a similar name: `decode_and_unescape_value`
 
+
+# xmlem = "=0.2.2"	 "=0.2.3"  # Produces error:
+# error[E0599]: no method named `unescape_value` found for struct `Attribute` in the current scope
+# .cargo/registry/src/github.com-1ecc6299db9ec823/xmlem-0.2.2/src/document.rs:373:42
+#    373 |                         let value = attr.unescape_value().unwrap();
+### xmlem = { version = "=0.2.1" }
+# xmlem_l = { package="xmlem", optional=true, version="=0.2.0",  path = "../app-gtk3-debian/target/xmlem-0.2.0"}
+
+
+##  xmlem-0.2.2  does not compile. xmlem-0.2.2/src/document.rs:377:42	##  let value = attr.unescape_value ().unwrap();	 ## help: there is a method with a similar name: `decode_and_unescape_value`
+# F=target/xmlem-0.2.0/Cargo.toml
+# mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors, thin-slice, slotmap, unic-ucd , tracing
+# cat ${F}.0 	 \
+#     |sed -e "s/\"0.28.1\"/{version=\">=0.28\", path=\"..\/rust-cssparser-0.28.0\"\}  /" \
+# 	|sed -e "s/\"1.8.1\"/\">=1.7.0\" /"	\
+# 	|sed -e "s/\"1.10.0\"/\">=1.9.0\" /" \
+# 	|sed -e "s/\"0.1.0\"/\{version=\"0.1.0\", path=\"..\/qname-0.1.0\"\}  /" \
+# 	|sed -e "s/\"0.26.0\"/\{version=\">=0.27.1\", path=\"..\/quick-xml-0.27.1\"\}  /" \
+# 	|sed -e "s/\"0.23.0\"/{version=\">=0.22.0\", path=\"..\/selectors-0.23.0\"\}  /"	\
+# 	|sed -e "s/\"1.0.6\"/{version=\">=1.0.6\", path=\"..\/slotmap-1.0.6\"\}  /"	\
+# 	|sed -e "s/\"0.9.0\"/{version=\"0.9.0\", path=\"..\/rust-unic-0.9.0\/unic\/ucd\" \}  /"	\
+# 	|sed -e "s/\"0.1.37\"/{version=\"0.1.37\", path=\"..\/tracing-tracing-0.1.37\/tracing\" \}  /"	\
+# 	>$F
+
+
+
+-------------------
 
 
 

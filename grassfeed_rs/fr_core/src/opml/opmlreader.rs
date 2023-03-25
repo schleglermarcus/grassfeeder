@@ -1,6 +1,5 @@
 use dd::opml;
 
-
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
@@ -20,8 +19,9 @@ use std::fs::File;
 use std::io::ErrorKind;
 use std::io::Write;
 use std::rc::Rc;
- use xmlem::display;
- use xmlem::Document;
+
+// use xmlem::display;
+// use xmlem::Document;
 
 const EXPORT_TITLE: &str = "GrassFeeder Export";
 
@@ -131,6 +131,7 @@ impl OpmlReader {
         }
     }
 
+    /// downgraded:  removed xmlelem due to compile issues. No more formatted output. Using simple line split
     pub fn write_to_file(&mut self, filename: String) -> Result<(), Box<dyn std::error::Error>> {
         let mut opml = OPML::default();
         opml.body.outlines = self.root_outline.outlines.clone();
@@ -147,17 +148,20 @@ impl OpmlReader {
         }
         let mut file = File::create(filename)?;
         let unformatted = opml.to_string()?;
-        let cursor = std::io::Cursor::new(unformatted.as_bytes());
-        let doc = Document::from_reader(cursor)?;
-        let conf = display::Config {
-            is_pretty: true,
-            indent: 2,
-            max_line_length: 1000,
-            entity_mode: display::EntityMode::Standard,
-            indent_text_nodes: false,
-            end_pad: 0,
-        };
-        let formatted = doc.to_string_pretty_with_config(&conf);
+        /*
+               let cursor = std::io::Cursor::new(unformatted.as_bytes());
+               let doc = Document::from_reader(cursor)?;
+               let conf = display::Config {
+                   is_pretty: true,
+                   indent: 2,
+                   max_line_length: 1000,
+                   entity_mode: display::EntityMode::Standard,
+                   indent_text_nodes: false,
+                   end_pad: 0,
+               };
+               let formatted = doc.to_string_pretty_with_config(&conf);
+        */
+        let formatted = unformatted.replace(">", ">\n");
         let _r = file.write(formatted.as_bytes())?;
         Ok(())
     }
@@ -321,7 +325,7 @@ mod t_ {
         opmlreader.transfer_from_db();
         let _r = opmlreader.write_to_file(String::from(dest_filename));
         let written_length = std::fs::metadata(dest_filename).unwrap().len();
-        assert_eq!(written_length, 689);
+        assert_eq!(written_length, 638);
     }
 
     #[allow(dead_code)]

@@ -17,6 +17,7 @@ pub extern crate once_cell;
 pub extern crate usvg;
 pub extern crate tinybmp;
 pub extern crate png;
+pub extern crate xmlparser;
 
 
 

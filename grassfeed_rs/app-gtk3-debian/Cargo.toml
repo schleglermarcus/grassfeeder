@@ -49,7 +49,6 @@ xdg = ">=2.2"
 # ##  cannot be found as debian package or too old
 # rust-i18n = { path = "target/rust-i18n-1.1.1" }
 # quick-xml = { path = "target/quick-xml-0.25.0", features = ["encoding"] }
-# xmlem = { path = "target/xmlem-0.2.0" }
 # regex = { path = "target/regex-1.6.0" }
 # url = { path = "target/rust-url-2.3.0/url" }
 # uuid = { path = "target/uuid-1.1.0", features = ["v4"] }

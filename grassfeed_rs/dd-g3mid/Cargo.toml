@@ -51,12 +51,6 @@ ico = { version = ">=0.3.0", optional = true }
 usvg = { version = "0.23", optional = true } ## downgrading for now. Later TODO: upgrade and adapt the code
 # usvg_l  = {  package="usvg", optional=true,  version=">0.24",  path="../app-gtk3-debian/target/resvg-0.29.0/usvg" }
 
-# xmlem = "=0.2.2"	 "=0.2.3"  # Produces error:
-# error[E0599]: no method named `unescape_value` found for struct `Attribute` in the current scope
-# .cargo/registry/src/github.com-1ecc6299db9ec823/xmlem-0.2.2/src/document.rs:373:42
-#    373 |                         let value = attr.unescape_value().unwrap();
-xmlem = { version = "=0.2.1" }
-# xmlem_l = { package="xmlem", optional=true, version="=0.2.0",  path = "../app-gtk3-debian/target/xmlem-0.2.0"}
 
 flume = { version = ">=0.10.14", optional = true }
 #flume = { version = ">=0.10.9", path = "../app-gtk3-debian/target/flume-master" }

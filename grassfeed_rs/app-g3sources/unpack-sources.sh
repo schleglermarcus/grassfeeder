@@ -177,22 +177,6 @@ mv $F ${F}.0	# downgrade  ring   untrusted
 cat ${F}.0 |sed -e "s/\"0.16.19\"/\">=0.16.9\" /"	 |sed -e "s/\"0.7.1\"/\">=0.7.0\" /"	>$F
 
 
-##  xmlem-0.2.2  does not compile. xmlem-0.2.2/src/document.rs:377:42	##  let value = attr.unescape_value ().unwrap();	 ## help: there is a method with a similar name: `decode_and_unescape_value`
-# F=target/xmlem-0.2.0/Cargo.toml
-# mv $F ${F}.0		# downgrading   indexmap, once_cell, selectors, thin-slice, slotmap, unic-ucd , tracing
-# cat ${F}.0 	 \
-#     |sed -e "s/\"0.28.1\"/{version=\">=0.28\", path=\"..\/rust-cssparser-0.28.0\"\}  /" \
-# 	|sed -e "s/\"1.8.1\"/\">=1.7.0\" /"	\
-# 	|sed -e "s/\"1.10.0\"/\">=1.9.0\" /" \
-# 	|sed -e "s/\"0.1.0\"/\{version=\"0.1.0\", path=\"..\/qname-0.1.0\"\}  /" \
-# 	|sed -e "s/\"0.26.0\"/\{version=\">=0.27.1\", path=\"..\/quick-xml-0.27.1\"\}  /" \
-# 	|sed -e "s/\"0.23.0\"/{version=\">=0.22.0\", path=\"..\/selectors-0.23.0\"\}  /"	\
-# 	|sed -e "s/\"1.0.6\"/{version=\">=1.0.6\", path=\"..\/slotmap-1.0.6\"\}  /"	\
-# 	|sed -e "s/\"0.9.0\"/{version=\"0.9.0\", path=\"..\/rust-unic-0.9.0\/unic\/ucd\" \}  /"	\
-# 	|sed -e "s/\"0.1.37\"/{version=\"0.1.37\", path=\"..\/tracing-tracing-0.1.37\/tracing\" \}  /"	\
-# 	>$F
-
-
 
 
 ## Special case: remove  version number from dependencies.servo_arc

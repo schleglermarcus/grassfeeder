@@ -1,6 +1,7 @@
 #[cfg(not(feature = "dd-g3old"))]
 extern crate dd_g3new as dd;
 use dd::flume;
+use dd::xmlparser;
 
 
 mod unzipper;
