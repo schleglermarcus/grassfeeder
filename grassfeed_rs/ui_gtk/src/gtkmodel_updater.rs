@@ -1,11 +1,22 @@
-use dd::webkit2gtk::WebViewExt;
+// #[cfg(feature = "g3sources")]
+// use crate::webkit2gtk::traits::WebView;
 
+#[cfg(feature = "g3sources")]
+use crate::webkit2gtk::traits::WebViewExt;
+
+#[cfg(feature = "g3new")]
+use dd::webkit2gtk::WebViewExt;
+#[allow(unused_imports)]
+use std::str::FromStr;
+#[allow(unused_imports)]
+use gtk::gdk::RGBA;
 
 use crate::iconloader::IconLoader;
 use crate::GtkObjectsType;
+use crate::WebView;
 use gtk::gdk_pixbuf::Pixbuf;
-use gtk::prelude::*;
 use gtk::glib;
+use gtk::prelude::*;
 use gtk::Label;
 use gtk::ListStore;
 use gtk::SortColumn;
@@ -26,8 +37,6 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;
 use std::sync::Arc;
-
-
 
 pub struct GtkModelUpdaterInt {
     m_v_store: UIAdapterValueStoreType,
@@ -430,9 +439,7 @@ impl GtkModelUpdaterInt {
                     std::thread::sleep(std::time::Duration::from_millis(3));
                 }
                 let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
-                let bright: f64 = bright_int as f64 / 255.0;
-                let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
-                webview.set_background_color(&c_bg);
+                set_brightness(bright_int, &webview);
                 webview.load_html(&text, None);
                 let browser_zoom_pc = store.get_gui_int_or(PropDef::BrowserZoomPercent, 100);
                 webview.set_zoom_level(browser_zoom_pc as f64 / 100.0);
@@ -447,9 +454,7 @@ impl GtkModelUpdaterInt {
             let o_wv_t = store.get_web_view_text(0);
             if let Some(text) = o_wv_t {
                 let bright_int = store.get_gui_int_or(PropDef::BrowserBackgroundLevel, 50);
-                let bright: f64 = bright_int as f64 / 255.0;
-                let c_bg = gtk::gdk::RGBA::new(bright, bright, bright, 1.0);
-                webview.set_background_color(&c_bg);
+                set_brightness(bright_int, &webview);
                 webview.load_plain_text(&text);
             }
         }
@@ -699,3 +704,22 @@ impl GtkModelUpdaterInt {
         }
     }
 } // GtkModelUpdaterInt
+
+/// outsourcing this due to  the gtk 0.14  incompatible api
+#[cfg(feature = "g3new")]
+pub fn set_brightness(bright: isize, webview: &WebView) {
+    let bright: f64 = bright as f64 / 255.0;
+    let c_bg = RGBA::new(bright, bright, bright, 1.0);
+    webview.set_background_color(&c_bg);
+}
+
+/// No Background setting available  for the old version
+// https://docs.rs/webkit2gtk/0.14.0/webkit2gtk/struct.WebView.html
+// https://github.com/gtk-rs/gtk3-rs/blob/0.14.3/gdk/src/rgba.rs
+#[cfg(feature = "g3sources")]
+pub fn set_brightness(_bright: isize, _webview: &WebView) {
+    // let bright: f64 = bright as f64 / 255.0;
+    // let colorstr = format!("{:2x}{:2x}{:2x}", bright as u8, bright as u8, bright as u8,);
+    // let c_bg = RGBA::from_str(&colorstr);
+    // webview.set_background_color(&c_bg);
+}

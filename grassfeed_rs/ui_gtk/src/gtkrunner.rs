@@ -1,5 +1,24 @@
-use dd_g3new::webkit2gtk as webkit2gtk;
-use dd_g3new::flume;
+
+// #[cfg(feature = "g3sources")]
+// use crate::webkit2gtk::traits::WebViewExt;
+
+#[cfg(feature = "g3sources")]
+use crate::WebContext;
+#[cfg(feature = "g3sources")]
+use crate::WebView;
+
+// #[cfg(feature = "g3new")]
+// use dd::webkit2gtk::WebViewExt;
+
+
+#[allow(unused_imports)]
+use gtk::prelude::WidgetExt;
+#[allow(unused_imports)]
+use gtk::Adjustment;
+use dd::flume;
+#[allow(unused_imports)]
+use crate::WebContentType;
+
 
 use crate::runner_internal::GtkRunnerInternal;
 use crate::CreateWebViewFnType;
@@ -7,12 +26,10 @@ use crate::DialogDataDistributor;
 use crate::GtkBuilderType;
 use crate::GtkObjects;
 use crate::IntCommands;
-use crate::WebContentType;
 use flume::Receiver;
 use flume::Sender;
 use gtk::prelude::BoxExt;
 use gtk::prelude::ContainerExt;
-use gtk::prelude::WidgetExt;
 use gtk::Application;
 use gtk::Button;
 use gtk::CellRendererSpinner;
@@ -42,8 +59,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-use webkit2gtk::WebContext;
-use webkit2gtk::WebView;
+
 
 const EVENT_QUEUE_SIZE: usize = 1000;
 const INTERNAL_QUEUE_SIZE: usize = 2000;
@@ -243,6 +259,27 @@ impl GtkObjectsImpl {
                 error!("gtkrunner:  event sender not here !! ");
             }
         }
+    }
+
+    #[cfg(feature = "g3new")]
+    fn paned_default() -> Paned {
+        gtk::Paned::default()
+    }
+
+    #[cfg(feature = "g3sources")]
+    fn paned_default() -> Paned {
+        gtk::Paned::new(gtk::Orientation::Horizontal)
+    }
+
+    #[cfg(feature = "g3new")]
+    fn scrolledwindow_default() -> ScrolledWindow {
+        gtk::ScrolledWindow::default()
+    }
+
+    #[cfg(feature = "g3sources")]
+    fn scrolledwindow_default() -> ScrolledWindow {
+        const NONE_ADJ: Option<& gtk::Adjustment> = None;
+        gtk::ScrolledWindow::new(NONE_ADJ, NONE_ADJ)
     }
 
     // impl GtkObjectsImpl
@@ -494,7 +531,7 @@ impl GtkObjects for GtkObjectsImpl {
 
     fn set_paned(&mut self, idx: u8, p: &gtk::Paned) {
         if self.paneds.len() < idx as usize + 1 {
-            self.paneds.resize(idx as usize + 1, gtk::Paned::default());
+            self.paneds.resize(idx as usize + 1, Self::paned_default());
         }
         self.paneds[idx as usize] = p.clone();
     }
@@ -510,7 +547,7 @@ impl GtkObjects for GtkObjectsImpl {
     fn set_scrolledwindow(&mut self, idx: u8, p: &ScrolledWindow) {
         if self.scrolledwindows.len() < idx as usize + 1 {
             self.scrolledwindows
-                .resize(idx as usize + 1, ScrolledWindow::default());
+                .resize(idx as usize + 1,  Self:: scrolledwindow_default() );
         }
         self.scrolledwindows[idx as usize] = p.clone();
     }

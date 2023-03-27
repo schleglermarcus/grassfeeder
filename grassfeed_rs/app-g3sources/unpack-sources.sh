@@ -129,7 +129,7 @@ cat ${F}.0 |sed -e "s/\"0.7.1\"/\{version=\">=0.7.1\", path=\"..\/embedded-graph
 F=target/rustls-v-0.20.8/rustls/Cargo.toml
 mv $F ${F}.0	# downgrading  ring, sct		# removing feature  "alloc"
 cat ${F}.0 \
- 	|sed -e "s/\"0.16.20\"/{ version=\"0.16.19\", path=\"..\/..\/ring-0.16.19\" } /" 	\
+ 	|sed -e "s/\"0.16.20\"/{ version=\"0.16.20\", path=\"..\/..\/ring-0.16.20\" } /" 	\
 	|sed -e "s/\"0.7.0\"/{ version=\">=0.6.0\" , path=\"..\/..\/sct.rs-v-0.7.0\" }  /"		\
 	|sed -e "s/webpki = { version = \"0.22.0\"/webpki = { version = \"^0.22.0\" , path=\"..\/..\/webpki-0.22.0\" /"		\
 	>$F
@@ -174,8 +174,8 @@ cat ${F}.0 |sed -e "s/\"0.22.0\"/{ version=\">=0.21.0\", path=\"..\/webpki-0.22.
 
 F=target/webpki-0.22.0/Cargo.toml
 mv $F ${F}.0	# downgrade  ring   untrusted
-cat ${F}.0  	|sed -e "s/\"0.7.1\"/\">=0.7.0\" /" \
-	|sed -e "s/\"0.16.19\"/\"0.16.19\"\npath=\"..\/ring-0.16.19\"  /" 	>$F
+cat ${F}.0  	|sed -e "s/\"0.7.1\"/\"0.7.0\" /" \
+	|sed -e "s/\"0.16.19\"/\"0.16.20\"\npath=\"..\/ring-0.16.20\"  /" 	>$F
 
 
 ## Special case: remove  version number from dependencies.servo_arc
@@ -298,5 +298,5 @@ cat ${F}.0  |sed -e "s/\"1.13.0\"/\">=1.9.0\"   /" 	>$F
 
 F=target/sct.rs-v-0.7.0/Cargo.toml
 mv $F ${F}.0	# downgrade  ring 
-cat ${F}.0 	|sed -e "s/\"0.16.20\"/{ version=\">=0.16.19\", path=\"..\/ring-0.16.19\" } /" 	>$F
+cat ${F}.0 	|sed -e "s/\"0.16.20\"/{ version=\"0.16.20\", path=\"..\/ring-0.16.20\" } /" 	>$F
 

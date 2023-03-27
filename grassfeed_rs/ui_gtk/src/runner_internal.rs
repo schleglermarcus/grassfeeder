@@ -1,4 +1,4 @@
-use dd_g3new::flume;
+use dd::flume;
 
 use crate::gtkmodel_updater::GtkModelUpdaterInt;
 use crate::gtkrunner::GtkObjectsImpl;
@@ -30,6 +30,8 @@ use std::sync::Arc;
 use std::sync::RwLock;
 use std::time::Duration;
 use std::time::Instant;
+use gtk::gio::Cancellable;
+
 
 const GTK_MAIN_INTERVAL: std::time::Duration = Duration::from_millis(100);
 static INTERVAL_COUNTER: AtomicU8 = AtomicU8::new(0);
@@ -66,7 +68,8 @@ impl GtkRunnerInternal {
         let mut appflags: ApplicationFlags = ApplicationFlags::default();
         appflags.set(ApplicationFlags::HANDLES_COMMAND_LINE, false);
         let app = gtk::Application::new(Some(&app_url), appflags);
-        let _r = app.register(gtk::gio::Cancellable::NONE);
+        // let _r = app.register(gtk::gio::Cancellable::NONE);
+        dbus_register(&app);
         if app.is_remote() {
             warn!(
                 "{} is already running (registered at d-bus, remote=1). Stopping. ",
@@ -74,11 +77,8 @@ impl GtkRunnerInternal {
             );
             let _r = ev_se.send(GuiEvents::AppWasAlreadyRunning);
             app.release();
-            if let Some(dbuscon) = app.dbus_connection() {
-                dbuscon.close(gtk::gio::Cancellable::NONE, |_a1| {
-                    debug!("GtkRunnerInternal: dbus-closed callback");
-                });
-            }
+            dbus_close(&app)            ;
+
             return false;
         }
         (*obj_c).write().unwrap().set_application(&app);
@@ -235,7 +235,7 @@ impl GtkRunnerInternal {
                 }
             }
 
-           gtk:: glib::Continue(true)
+            gtk::glib::Continue(true)
         });
     } // timeout
 }
@@ -264,4 +264,35 @@ fn build_window(
         gtk::Inhibit(false)
     });
     window
+}
+
+#[cfg(feature = "g3new")]
+pub fn dbus_close(app: &gtk::Application) {
+    if let Some(dbuscon) = app.dbus_connection() {
+        dbuscon.close(gtk::gio::Cancellable::NONE, |_a1| {
+            debug!("GtkRunnerInternal: dbus-closed callback");
+        });
+    }
+}
+
+#[cfg(feature = "g3sources")]
+pub fn dbus_close(app: &gtk::Application) {
+    if let Some(dbuscon) = app.dbus_connection() {
+        let none_cancellable : Option< & Cancellable> = Option::None;
+        dbuscon.close(none_cancellable, |_a1| {
+            debug!("GtkRunnerInternal: dbus-closed callback");
+        });
+    }
+}
+
+
+#[cfg(feature = "g3new")]
+pub fn dbus_register(app: &gtk::Application)  {
+    let _r = app.register(Cancellable::NONE);
+}
+
+#[cfg(feature = "g3sources")]
+pub fn dbus_register(app: &gtk::Application)  {
+    let none_cancellable : Option<&Cancellable> = Option::None;
+    let _r = app.register(none_cancellable);
 }

@@ -4,3 +4,4 @@ pub extern crate image;
 pub extern crate jpeg_decoder;
 pub extern crate feed_rs;
 pub extern crate webkit2gtk;
+pub extern crate lz4_compression;
