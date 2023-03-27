@@ -20,6 +20,8 @@ extern crate i18local as rust_i18n;
 #[macro_use]
 extern crate rust_i18n;
 
+
+
 use rust_i18n::i18n;
 
 i18n!("../resources/locales");

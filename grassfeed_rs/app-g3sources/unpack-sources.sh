@@ -91,10 +91,9 @@ F=target/rusqlite-0.28.0/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/hashlink = \"0.8\"/hashlink=\{version=\">=0.7\" , path=\"..\/hashlink-0.8.0\"\}  /" 		>$F
 
-
 F=target/hashlink-0.8.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.12.0\"/\">=0.11\" /" 		>$F
+cat ${F}.0 |sed -e "s/\"0.12.0\"/{version=\"^0.12.0\", path=\"..\/hashbrown-0.12.0\" }/" 		>$F
 
 F=target/rust-i18n-1.1.1/Cargo.toml
 mv $F ${F}.0		#downgrading itertools, once_cell
@@ -149,7 +148,7 @@ cat ${F}.0 	|sed -e "s/\"0.21\"/\">=0.13\" /"\
 		|sed -e "s/\"0.2\"/\">=0.1\" /"	\
 		|sed -e "s/\"0.11\"/\{version=\"0.11\", path=\"..\/..\/imagesize-0.11.0\"\}  /" \
 		|sed -e "s/\"0.9\"/\">=0.7\" /"	\
-		|sed -e "s/\"0.5\"/\">=0.3\" /"	\
+		|sed -e "s/\"0.5\"/{version=\">=0.5\", path=\"..\/..\/rctree-0.5.0\"\}  /"	\
 		|sed -e "s/strict-num = \"0.1\"/strict-num={version=\">=0.1\", path=\"..\/..\/strict-num-0.1.0\"\}  /" \
 				>$F
 
@@ -282,7 +281,6 @@ mv $F ${F}.0
 cat ${F}.0  |sed -e "s/\"0.3.0\"/ \"^0.3.0\" , path=\"..\/jpeg-decoder-0.3.0\"  /" \
 	|sed -e "s/\"0.1.0\"/\{version=\">=0.1.0\" , path=\"..\/lzw-0.1.5\"  \} /"	>$F
 
-
 F=target/tracing-tracing-0.1.37/tracing/Cargo.toml
 mv $F ${F}.0		
 cat ${F}.0  |sed -e "s/\"0.2.9\"/\">=0.2.7\"   /" 	>$F
@@ -295,13 +293,16 @@ F=target/tracing-tracing-0.1.37/tracing-core/Cargo.toml
 mv $F ${F}.0		
 cat ${F}.0  |sed -e "s/\"1.13.0\"/\">=1.9.0\"   /" 	>$F
 
-
 F=target/sct.rs-v-0.7.0/Cargo.toml
 mv $F ${F}.0	# downgrade  ring 
 cat ${F}.0 	|sed -e "s/\"0.16.20\"/{ version=\"0.16.20\", path=\"..\/ring-0.16.20\" } /" 	>$F
 
-
 F=target/ring-0.16.20/Cargo.toml
 mv $F ${F}.0	# downgrade     untrusted
 cat ${F}.0  	|sed -e "s/\"0.7.1\"/\">=0.7.0\" /" 	>$F
+
+
+F=target/hashbrown-0.12.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.7.0\"/\">=0.7\", path=\"..\/ahash-0.7.6\" /" 		>$F
 

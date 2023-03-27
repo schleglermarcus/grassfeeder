@@ -2,11 +2,9 @@ use dd::flume;
 use dd::ico;
 use dd::jpeg_decoder;
 use dd::libwebp_image;
-use dd::usvg;
-use dd::tinybmp;
 use dd::png;
-
-
+use dd::tinybmp;
+use dd::usvg;
 
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorRepo;
@@ -464,9 +462,30 @@ impl InvestigateOne for InvJpg {
 
 struct InvGif {}
 impl InvestigateOne for InvGif {
+    #[cfg(feature = "g3sources")]
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         let cursor = std::io::Cursor::new(vec_u8);
+        let decoder = gif::Decoder::new(cursor);
+        match decoder.read_info() {
+            Ok(mut decod2) => {
+                let o_nextframe = decod2.read_next_frame();
+                if o_nextframe.is_ok() {
+                    r.kind = IconKind::Gif;
+                }
+            }
+            Err(e) => {
+                r.message = format!("not_gif: {e:?}");
+            }
+        }
+        r
+    }
+
+    #[cfg(not(feature = "g3sources"))]
+    fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
+        let mut r = IconAnalyseResult::default();
+        let cursor = std::io::Cursor::new(vec_u8);
+
         let decoder = gif::DecodeOptions::new();
         match decoder.read_info(cursor) {
             Ok(mut decod2) => {
@@ -483,11 +502,13 @@ impl InvestigateOne for InvGif {
     }
 }
 
+// pub fn gif_decoder(cursor: &Cursor) {}
+
 struct InvSvg {}
 impl InvestigateOne for InvSvg {
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
-        match usvg::Tree::from_data(vec_u8, &usvg::Options::default() ) {
+        match usvg::Tree::from_data(vec_u8, &usvg::Options::default()) {
             Ok(_rtree) => {
                 r.kind = IconKind::Svg;
             }

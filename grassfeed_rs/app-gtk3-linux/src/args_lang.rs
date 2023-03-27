@@ -64,7 +64,7 @@ pub fn parse_args(version_str: &str) -> Option<MyOptions> {
     }
     let opts = o_opts.unwrap();
     if opts.help_requested() {
-        println!("{} ", opts.self_usage());
+        println!("{} ", MyOptions::usage());  //  gumdrop 0.8   has  self_usage() 
         println!("\t\t\tAvailable Languages: {:?}", LOCALES_LIST,);
         return None;
     }

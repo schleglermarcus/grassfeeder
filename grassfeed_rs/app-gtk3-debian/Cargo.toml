@@ -21,7 +21,10 @@ fr_core = { path = "../fr_core", features = ["g3sources"] }
 ui_gtk = { path = "../ui_gtk", features = ["g3sources"] }
 resources = { path = "../resources" }
 
+
+
 dd = { package = "app-g3sources", path = "../app-g3sources" }
+rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
 
 
 
@@ -47,7 +50,6 @@ xdg = ">=2.2"
 # ico = { path = "target/rust-ico-0.3.0" }
 # image = { path = "target/image-0.24.5" }
 # ##  cannot be found as debian package or too old
-# rust-i18n = { path = "target/rust-i18n-1.1.1" }
 # quick-xml = { path = "target/quick-xml-0.25.0", features = ["encoding"] }
 # regex = { path = "target/regex-1.6.0" }
 # url = { path = "target/rust-url-2.3.0/url" }
