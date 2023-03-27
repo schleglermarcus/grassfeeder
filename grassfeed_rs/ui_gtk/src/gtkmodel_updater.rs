@@ -1,6 +1,5 @@
-// use dd_g3new::webkit2gtk as webkit2gtk;
-// use webkit2gtk::WebViewExt;
-use dd_g3new::webkit2gtk::WebViewExt;
+use dd::webkit2gtk::WebViewExt;
+
 
 use crate::iconloader::IconLoader;
 use crate::GtkObjectsType;

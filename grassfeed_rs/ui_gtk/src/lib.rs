@@ -1,12 +1,17 @@
-use dd_g3new::webkit2gtk;
-use dd_g3new::flume;
+#[cfg(feature = "g3sources")]
+extern crate app_g3sources as dd;
 
+
+#[cfg(feature = "g3new")]
+extern crate dd_g3new as dd;
+
+
+use dd::flume;
+use dd::webkit2gtk;
 
 #[macro_use]
 extern crate log;
 extern crate gdk_sys;
-
-
 
 pub mod dialogdatadistributor;
 pub mod gtkmodel_updater;

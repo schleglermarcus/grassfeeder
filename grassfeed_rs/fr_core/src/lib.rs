@@ -2,34 +2,27 @@
 #[macro_use]
 extern crate log;
 
-
-/*
 // remapping those crates that need source replacement for debian
-#[cfg(feature = "dd-g3new")]
-extern crate dd_g3new as dd;
- */
+#[cfg(feature = "g3sources")]
+extern crate app_g3sources as dd;
 
 
 
 // remapping also for testing
+#[cfg(feature = "g3new")]
 extern crate dd_g3new as dd;
 
 
-#[cfg(test)]
-extern crate rand;
-
 // Old
-// use dd::rust_i18n::i18n;
+#[cfg(feature = "g3sources")]
+use dd::rust_i18n::i18n;
 
 
 // New
+#[cfg(feature = "g3new")]
 #[macro_use]
 extern crate rust_i18n;
-i18n!("../resources/locales");  
-
-
-
-
+i18n!("../resources/locales");
 
 // #[cfg(feature = "ui-gtk")]
 //  extern crate proc_status;
@@ -43,6 +36,10 @@ i18n!("../resources/locales");
 // #[cfg(not(feature = "app-g3sources"))]
 // extern crate dd_g3new as dd;
 
+#[cfg(test)]
+extern crate rand;
+
+
 pub mod config;
 pub mod controller;
 pub mod db;
@@ -51,6 +48,5 @@ pub mod opml;
 pub mod ui_select;
 pub mod util;
 pub mod web;
-
 
 pub const TD_BASE: &str = "../target/td/";

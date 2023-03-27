@@ -17,8 +17,8 @@ path = "src/main.rs"
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
-fr_core = { path = "../fr_core", features = ["ui-gtk-old"] }
-ui_gtk = { path = "../ui_gtk", features = ["ui-gtk-old"] }
+fr_core = { path = "../fr_core", features = ["g3sources"] }
+ui_gtk = { path = "../ui_gtk", features = ["g3sources"] }
 resources = { path = "../resources" }
 
 dd = { package = "app-g3sources", path = "../app-g3sources" }

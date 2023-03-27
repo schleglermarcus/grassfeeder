@@ -20,9 +20,6 @@ use std::io::ErrorKind;
 use std::io::Write;
 use std::rc::Rc;
 
-// use xmlem::display;
-// use xmlem::Document;
-
 const EXPORT_TITLE: &str = "GrassFeeder Export";
 
 pub struct OpmlReader {

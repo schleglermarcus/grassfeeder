@@ -20,6 +20,7 @@ use std::sync::atomic::Ordering;
 
 // 1: Storing the pane position  into file on shutown
 // 2:  Detect circular dependency among context objects that prevent freeing them
+//  #[ignore]
 #[test]
 fn shutdown_store_ini() {
     setup();
@@ -55,6 +56,8 @@ fn shutdown_store_ini() {
     assert_eq!(inuse, false);
 }
 
+
+// #[ignore]
 #[test]
 fn add_folder_and_feed() {
     setup();

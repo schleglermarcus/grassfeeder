@@ -58,7 +58,6 @@
   - itertools v0.10.5		=> librust-itertools-dev		0.10.1-1
   - float-cmp v0.8.0		=>  librust-float-cmp-dev		0.6.0-3
   - flate2 v1.0.25	=>	librust-flate2-dev		 1.0.22-1
-	- ring v0.16.20	=>	librust-ring-dev	 0.16.9-4
  	- sct v0.7.0		=> 	librust-sct-dev 0.6.0-2
 	- data-url v0.1.1	=>  librust-data-url-dev	 0.1.0-1
  	- kurbo v0.8.3	=> librust-kurbo-dev	 0.7.1-4
@@ -132,8 +131,10 @@
   - miniz_oxide v0.6.2		=> 		librust-miniz-oxide-dev		0.4.4-2		FAIL
 	##	image-png-0.16.5/src/decoder/zlib.rs:77:13	            decompress(&mut self.state, in_data, &mut cursor, BASE_FLAGS)	#			an argument of type `usize` is missing
 	- selectors  0.22.0 FAIL
-	##   xmlem-0.2.0/src/select.rs:48:1			48 | impl NonTSPseudoClass for Value ##		missing `has_zero_specificity` in implementation
-    ##  xmlem-0.2.2  does not compile. xmlem-0.2.2/src/document.rs:377:42	##  let value = attr.unescape_value ().unwrap();	 ## help: there is a method with a similar name: `decode_and_unescape_value`
+	- ring v0.16.20	=>	librust-ring-dev	 0.16.9-4
+ 		## 	webpki-0.22.0/src/der.rs:26:5   | ) -> Result<untrusted::Input<'a>, Error> { ##  expected `Result<Input<'a>, error::Error>` because of return type
+    	## ring::io::der::expect_tag_and_get_value(input, tag).map_err(|_| Error::BadDer)		## expected struct `Input`, found struct `untrusted::Input`
+
 
    
 

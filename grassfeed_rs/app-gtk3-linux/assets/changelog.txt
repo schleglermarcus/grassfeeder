@@ -1,6 +1,7 @@
 grassfeeder (0.1.8) bionic; urgency=low
 
-  
+   * downgrade: no more formatted opml output, only simple line break. Due to compile issue on xmlem
+   
   - create new subscription --> don't jump the complete tree
   
   - bug:   msg map empty,  at window-restore without selected source

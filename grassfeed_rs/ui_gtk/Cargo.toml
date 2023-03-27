@@ -5,17 +5,20 @@ edition = "2021"
 
 
 [features]
-g3new = ["dd-g3new"]
-# ui-gtk-old = ["app-g3sources"]
-
+g3new = []  #  ["dd-g3new"]
+g3sources = ["app-g3sources"]
 
 
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 resources = { path = "../resources" }
-dd-g3new = { path = "../dd-g3new", optional = true }
 
-# app-g3sources = { path = "../app-g3sources", optional = true }
+## konflikt bei debian !
+# dd-g3new = { path = "../dd-g3new", optional = true }
+
+
+## deaktivieren fuer normal
+app-g3sources = { path = "../app-g3sources", optional = true }
 
 
 ## rausgenommen fuer debian build

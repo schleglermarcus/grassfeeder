@@ -44,8 +44,6 @@ jpeg-decoder = { path = "target/jpeg-decoder-0.3.0", features = [
 ] }
 libwebp-image = { path = "target/libwebp-image-rs-0.3.0" }
 proc-status = { path = "target/proc-status-0.1.1" }
-# rusqlite = { path = "target/rusqlite-sys0.25.2" }
-rusqlite = { path = "target/rusqlite-0.22.0" }
 textcode = { path = "target/textcode-0.2.2" }
 tinybmp = { path = "target/tinybmp-0.4.0" }
 tl = { path = "target/tl-0.7.7" }
@@ -85,13 +83,19 @@ xmlparser = { path = "target/xmlparser-0.13.5" }
 svgtypes = { path = "target/svgtypes-0.10.0" }
 gif = { path = "target/image-gif-0.12.0" }
 weezl = { path = "target/lzw-0.1.5" }
-webpki = { path = "target/webpki-0.22.0" }
 tiff = { path = "target/image-tiff-0.8.0" }
 selectors = { path = "target/selectors-0.23.0" }
-tracing = { path = "target/tracing-tracing-0.1.37/tracing" }
+rusqlite = { path = "target/rusqlite-0.22.0" }
+libsqlite3-sys = { path = "target/rusqlite-0.22.0/libsqlite3-sys" } # 0.17.3
+ring = { path = "target/ring-0.16.19" } 
+sct = { path = "target/sct.rs-v-0.7.0" } 
+
+
 
 
 ## check if needed:
+# webpki = { path = "target/webpki-0.22.0" }
+# tracing = { path = "target/tracing-tracing-0.1.37/tracing" }
 # usvg = { path = "target/resvg-0.29.0/usvg" }
 # selectors = { path = "target/selectors-v0.23.0/components/selectors" }
 # hashlink = { path = "target/hashlink-0.8.0" }
