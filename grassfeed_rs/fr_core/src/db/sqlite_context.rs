@@ -1,4 +1,4 @@
-use dd_g3new::rusqlite;
+use dd::rusqlite;
 
 use crate::util::file_exists;
 use rusqlite::params_from_iter;

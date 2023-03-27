@@ -1,5 +1,4 @@
-// use dd::rust_i18n::t;
-//  use rust_i18n::t;
+use rust_i18n::t;
 
 use crate::config::configmanager::ConfigManager;
 use crate::controller::contentlist::FeedContents;

@@ -1,4 +1,4 @@
-use dd_g3new::rusqlite;
+use dd::rusqlite;
 
 use crate::controller::timer::Timer;
 use crate::db::errors_repo;

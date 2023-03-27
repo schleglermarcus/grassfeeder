@@ -1,18 +1,13 @@
-
-
 // #[macro_use]
-use dd_g3new::rusqlite;
-
-
+use dd::rusqlite;
 
 use crate::db::sqlite_context::TableInfo;
 use crate::db::sqlite_context::Wrap;
 use resources::gen_icons;
 
-// #[macro_use]
-use dd::serde::Deserialize;
-// #[macro_use]
-use dd::serde::Serialize;
+use serde::Deserialize;
+
+use serde::Serialize;
 use std::fmt;
 
 #[allow(dead_code)]

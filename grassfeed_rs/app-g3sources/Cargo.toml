@@ -24,6 +24,9 @@ log = ">=0.4.11"
 once_cell = ">=1.9.0"
 # xdg = ">=2.4.1"		# the debian packages only have 2.2.0-3
 xdg = ">=2.2"
+serde = { version = ">=1.0.130" } 
+serde_json = { version = ">=1.0.45" } 
+
 
 
 
@@ -85,10 +88,13 @@ gif = { path = "target/image-gif-0.12.0" }
 weezl = { path = "target/lzw-0.1.5" }
 tiff = { path = "target/image-tiff-0.8.0" }
 selectors = { path = "target/selectors-0.23.0" }
-rusqlite = { path = "target/rusqlite-0.22.0" }
-libsqlite3-sys = { path = "target/rusqlite-0.22.0/libsqlite3-sys" } # 0.17.3
+rusqlite = { path = "target/rusqlite-0.28.0", features = ["bundled"]}
+libsqlite3-sys = { path = "target/rusqlite-0.28.0/libsqlite3-sys" } # 0.17.3
 ring = { path = "target/ring-0.16.20" } 
 sct = { path = "target/sct.rs-v-0.7.0" } 
+opml = { path = "target/opml/opml_api" } 
+usvg = { path = "target/resvg-0.29.0/usvg" }  
+hashlink = { path = "target/hashlink-0.8.0" }
 
 
 
@@ -96,8 +102,6 @@ sct = { path = "target/sct.rs-v-0.7.0" }
 ## check if needed:
 # webpki = { path = "target/webpki-0.22.0" }
 # tracing = { path = "target/tracing-tracing-0.1.37/tracing" }
-# usvg = { path = "target/resvg-0.29.0/usvg" }
 # selectors = { path = "target/selectors-v0.23.0/components/selectors" }
-# hashlink = { path = "target/hashlink-0.8.0" }
 
 

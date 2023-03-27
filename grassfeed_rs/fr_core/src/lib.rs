@@ -6,39 +6,32 @@ extern crate log;
 #[cfg(feature = "g3sources")]
 extern crate app_g3sources as dd;
 
-
-
 // remapping also for testing
 #[cfg(feature = "g3new")]
 extern crate dd_g3new as dd;
 
-
-// Old
+// #### Old
 #[cfg(feature = "g3sources")]
-use dd::rust_i18n::i18n;
+extern crate i18local as rust_i18n;
+//  use dd::rust_i18n::i18n;
 
-
-// New
+// #### New
 #[cfg(feature = "g3new")]
 #[macro_use]
 extern crate rust_i18n;
+
+use rust_i18n::i18n;
+
 i18n!("../resources/locales");
 
-// #[cfg(feature = "ui-gtk")]
-//  extern crate proc_status;
-//  use dd_g3new::proc_status;
-// extern crate m_libwebp_image as libwebp_image;
-//  extern crate m_lz4_compression as lz4_compression;
 
-// #[cfg(feature = "dd-g3old")]
-// use dd_g3old::m_feed_rs as feed_rs;
+
 
 // #[cfg(not(feature = "app-g3sources"))]
 // extern crate dd_g3new as dd;
 
 #[cfg(test)]
 extern crate rand;
-
 
 pub mod config;
 pub mod controller;

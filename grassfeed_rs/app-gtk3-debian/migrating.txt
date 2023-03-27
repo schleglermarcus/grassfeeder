@@ -19,7 +19,7 @@
 	- librust-trybuild-dev	1.0.50-1
 	-  librust-time-0.1-dev		 0.1.44-2
 	-  image 0.23.14  needs 0.16.5
-
+	- rusqlite  0.22.0 too old, does not contain params_from_iter. Next try: 0.28
 
 
 - Debian packages for distribution, Downgrading

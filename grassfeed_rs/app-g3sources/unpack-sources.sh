@@ -87,9 +87,9 @@ F=target/regex-1.6.0/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.7.18\"/\">=0.7.10\" /" 		>$F
 
-#F=target/rusqlite-sys0.25.2/Cargo.toml
-#mv $F ${F}.0
-#cat ${F}.0 |sed -e "s/hashlink = \"0.8\"/hashlink=\{version=\">=0.7\" , path=\"..\/hashlink-0.8.0\"\}  /" 		>$F
+F=target/rusqlite-0.28.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/hashlink = \"0.8\"/hashlink=\{version=\">=0.7\" , path=\"..\/hashlink-0.8.0\"\}  /" 		>$F
 
 
 F=target/hashlink-0.8.0/Cargo.toml
@@ -299,4 +299,9 @@ cat ${F}.0  |sed -e "s/\"1.13.0\"/\">=1.9.0\"   /" 	>$F
 F=target/sct.rs-v-0.7.0/Cargo.toml
 mv $F ${F}.0	# downgrade  ring 
 cat ${F}.0 	|sed -e "s/\"0.16.20\"/{ version=\"0.16.20\", path=\"..\/ring-0.16.20\" } /" 	>$F
+
+
+F=target/ring-0.16.20/Cargo.toml
+mv $F ${F}.0	# downgrade     untrusted
+cat ${F}.0  	|sed -e "s/\"0.7.1\"/\">=0.7.0\" /" 	>$F
 
