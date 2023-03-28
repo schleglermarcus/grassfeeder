@@ -1,8 +1,12 @@
+/**
 
-// use glib::Value;
+https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/pango/struct.AttrSize.html
+https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/pango_sys/struct.PangoAttrSize.html
+
+ */
 use gtk::pango::AttrInt;
 use gtk::pango::AttrList;
-use gtk::pango::AttrSize;
+// use gtk::pango::AttrSize;
 use gtk::pango::Attribute;
 use gtk::pango::Weight;
 use gtk::prelude::Cast;
@@ -24,16 +28,45 @@ pub trait BoldFuncDiscriminator {
             FontAttributes::from_activation_bits(act_bits);
         let r = AttrList::new();
         if !is_read && !is_folder {
-            r.insert(Attribute::from(AttrInt::new_weight(Weight::Bold)));
+            // r.insert(Attribute::from(AttrInt::new_weight(Weight::Bold)));
+            add_font_weight(&r);
         }
-        if fontsize > 0 {
-            r.insert(Attribute::from(AttrSize::new(
-                fontsize as i32 * gtk::pango::SCALE,
-            )));
-        }
-        // if is_transparent && sort_column_id == 3 {            r.insert(Attribute::from(AttrColor::new_background(0, 65535, 0)));        }
+
+        add_font_size(&r, fontsize);
+
+        // if fontsize > 0 {
+        //     r.insert(Attribute::from(AttrSize::new(
+        //         fontsize as i32 * gtk::pango::SCALE,
+        //     )));
+        // }
+
         r
     }
+}
+
+#[cfg(not(feature = "g3sources"))]
+pub fn add_font_weight(r: &AttrList) {
+    r.insert(Attribute::from(AttrInt::new_weight(Weight::Bold)));
+}
+
+#[cfg(feature = "g3sources")]
+pub fn add_font_weight(r: &AttrList) {
+    r.insert(gtk::pango::Attribute::new_weight(Weight::Bold));
+}
+
+
+#[cfg(not(feature = "g3sources"))]
+pub fn add_font_size(r: &AttrList, fontsize: u32) {
+    if fontsize > 0 {
+        r.insert(Attribute::from(gtk::pango::AttrSize::new(
+            fontsize as i32 * gtk::pango::SCALE,
+        )));
+    }
+}
+
+#[cfg(feature = "g3sources")]
+pub fn add_font_size(r: &AttrList, fontsize: u32) {
+    // do nothing. Downgrade of functionality with gtk-0.14.   Later   add recent gtk packages
 }
 
 #[derive(Default)]
@@ -74,10 +107,12 @@ where
     ) {
         if let Some(crt) = (*ce_re).downcast_ref::<CellRendererText>() {
             crt.set_attributes(None);
-            let val: gtk::glib:: Value = (*t_model).value(t_iter, D::column_nr());
+            let val: gtk::glib::Value = (*t_model).value(t_iter, D::column_nr());
             if let Ok(col_val) = val.get::<u32>() {
                 crt.set_attributes(Some(&D::attrlist(col_val))); // , t_v_col.sort_column_id()
             }
         }
     }
 }
+
+//

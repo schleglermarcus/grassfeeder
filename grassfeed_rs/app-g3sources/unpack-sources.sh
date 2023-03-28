@@ -173,8 +173,10 @@ cat ${F}.0 |sed -e "s/\"0.22.0\"/{ version=\">=0.21.0\", path=\"..\/webpki-0.22.
 
 F=target/webpki-0.22.0/Cargo.toml
 mv $F ${F}.0	# downgrade  ring   untrusted
-cat ${F}.0  	|sed -e "s/\"0.7.1\"/\"0.7.0\" /" \
+cat ${F}.0  \
+	|sed -e "s/\"0.7.1\"/\">=0.7.0\"\n path=\"..\/untrusted-0.7.1\"  /" \
 	|sed -e "s/\"0.16.19\"/\"0.16.20\"\npath=\"..\/ring-0.16.20\"  /" 	>$F
+#	|sed -e "s/\"0.7.1\"/\"0.7.0\" /" \
 
 
 ## Special case: remove  version number from dependencies.servo_arc
@@ -299,10 +301,10 @@ cat ${F}.0 	|sed -e "s/\"0.16.20\"/{ version=\"0.16.20\", path=\"..\/ring-0.16.2
 
 F=target/ring-0.16.20/Cargo.toml
 mv $F ${F}.0	# downgrade     untrusted
-cat ${F}.0  	|sed -e "s/\"0.7.1\"/\">=0.7.0\" /" 	>$F
+cat ${F}.0  	|sed -e "s/\"0.7.1\"/\">=0.7.0\"\n path=\"..\/untrusted-0.7.1\" /" 	>$F
 
 
 F=target/hashbrown-0.12.0/Cargo.toml
-mv $F ${F}.0
+mv $F ${F}.0	# downgrade ahash
 cat ${F}.0 |sed -e "s/\"0.7.0\"/\">=0.7\", path=\"..\/ahash-0.7.6\" /" 		>$F
 

@@ -1,11 +1,12 @@
-use dd_g3new::flume;
-use dd_g3new::rust_i18n;
-// use dd_g3new::rust_i18n::t;
+use dd::flume;
+#[cfg(not(feature = "g3sources"))]
+use gtk::builders::NotebookBuilder;
+#[cfg(feature = "g3sources")]
+use gtk::NotebookBuilder;
 
-
+use rust_i18n;
 use crate::util::*;
 use flume::Sender;
-use gtk::builders::NotebookBuilder;
 use gtk::gdk_pixbuf::InterpType;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::WidgetExt;
@@ -889,7 +890,7 @@ fn create_settings_dialog(
                 av.push(AValue::AU32(scale_bright_c.value() as u32)); // 9 : Browser BG
                 av.push(AValue::ABOOL(sw_browser_cache_clear_c.state())); // 10 : browser cache cleanup
                 av.push(AValue::ABOOL(sw_subs_db_cleanup_c.state())); // 11 : DB cleanup
-                // av.push(AValue::ABOOL(sw_enable_systray_c.state())); // 12 : Systray Icon
+                                                                      // av.push(AValue::ABOOL(sw_enable_systray_c.state())); // 12 : Systray Icon
                 let _r = ev_se.send(GuiEvents::DialogData("settings".to_string(), av));
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {
@@ -930,7 +931,7 @@ fn create_settings_dialog(
         scale_bright.set_value(browser_bg as f64);
         sw_browser_cache_clear.set_state(dialogdata.get(10).unwrap().boo()); // 10 : browser cache cleanup
         sw_subs_db_cleanup.set_state(dialogdata.get(11).unwrap().boo()); // 11 : DB cleanup
-        // sw_enable_systray.set_state(dialogdata.get(12).unwrap().boo()); // 11 : Systray Enable
+                                                                         // sw_enable_systray.set_state(dialogdata.get(12).unwrap().boo()); // 11 : Systray Enable
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_SETTINGS, &dialog);

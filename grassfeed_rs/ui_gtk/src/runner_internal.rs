@@ -126,10 +126,11 @@ impl GtkRunnerInternal {
         let m_v_st_a = model_value_store.clone();
         let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects, ev_se_w);
         let is_minimized: AtomicBool = AtomicBool::new(false);
-        gtk::glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
+        gtk::glib::timeout_add_local_once(GTK_MAIN_INTERVAL, move || {
             let prev_count = INTERVAL_COUNTER.fetch_add(1, Ordering::Relaxed);
             if is_minimized.load(Ordering::Relaxed) && (prev_count & 7 != 0) {
-                return gtk::glib::Continue(true);
+                // return gtk::glib::Continue(true);
+                return;
             }
             let mut rec_set: HashSet<IntCommands> = HashSet::new();
             while let Ok(command) = g_com_rec.try_recv() {
@@ -235,7 +236,8 @@ impl GtkRunnerInternal {
                 }
             }
 
-            gtk::glib::Continue(true)
+            // gtk::glib::Continue(true)
+            return;
         });
     } // timeout
 }

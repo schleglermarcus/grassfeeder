@@ -1,23 +1,36 @@
-use dd_g3new::flume;
-use dd_g3new::rust_i18n;
-use dd_g3new::webkit2gtk;
+use dd::flume;
+use dd::webkit2gtk;
+use rust_i18n;
 
+#[cfg(not(feature = "g3sources"))]
+use gtk::builders::ToggleToolButtonBuilder;
+#[cfg(feature = "g3sources")]
+use gtk::ToggleToolButtonBuilder;
+
+#[cfg(not(feature = "g3sources"))]
+use gtk::builders::ToolButtonBuilder;
+#[cfg(feature = "g3sources")]
+use gtk::ToolButtonBuilder;
+
+// use webkit2gtk::WebContextExt;
+use webkit2gtk::traits::WebContextExt;
+
+// use webkit2gtk::WebViewExt;
+use webkit2gtk::traits::WebViewExt;
 
 use crate::dialogs::create_dialogs;
 use crate::load_css::TAB_MARKER_HEIGHT;
 use crate::messagelist::create_listview;
-use gtk::prelude::WidgetExt;
 use crate::util::process_string_to_image;
 use crate::util::DragState;
 use crate::util::EvSenderWrapper;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
 use gdk::EventButton;
-use gtk::builders::ToggleToolButtonBuilder;
-use gtk::builders::ToolButtonBuilder;
 use gtk::pango::WrapMode;
 use gtk::prelude::GtkMenuItemExt;
 use gtk::prelude::MenuShellExt;
+use gtk::prelude::WidgetExt;
 use gtk::prelude::*;
 use gtk::Adjustment;
 use gtk::Align;
@@ -55,9 +68,7 @@ use ui_gtk::gtkrunner::CreateBrowserConfig;
 use ui_gtk::GtkGuiBuilder;
 use ui_gtk::GtkObjectsType;
 use webkit2gtk::WebContext;
-use webkit2gtk::WebContextExt;
 use webkit2gtk::WebView;
-use webkit2gtk::WebViewExt;
 use webkit2gtk::WebsiteDataManager;
 
 const TOOLBAR_ICON_SIZE: i32 = 28;
@@ -85,6 +96,18 @@ pub struct GuiCacheValues {
 #[derive(Default)]
 pub struct GtkObjectTree {
     pub initvalues: HashMap<PropDef, String>,
+}
+
+// https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/pango/rectangle/struct.Rectangle.html
+#[cfg(not(feature = "g3sources"))]
+fn get_width_height(rectangle: &gtk::Rectangle) -> (i32, i32) {
+    ((*rectangle).width(), (*rectangle).height())
+}
+
+// https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/pango/struct.Rectangle.html
+#[cfg(feature = "g3sources")]
+fn get_width_height(rectangle: &gtk::Rectangle) -> (i32, i32) {
+    ((*rectangle).width, (*rectangle).height)
 }
 
 ///  this runs in the gtk thread
@@ -118,8 +141,8 @@ impl GtkGuiBuilder for GtkObjectTree {
         let esw = EvSenderWrapper(gui_event_sender.clone());
         crate::load_css::load_css();
         window.connect_size_allocate(move |_win, rectangle| {
-            let n_w: i32 = (*rectangle).width();
-            let n_h: i32 = (*rectangle).height();
+            let (n_w, n_h) = get_width_height(&rectangle);
+            // let n_w: i32 = (*rectangle).width();            let n_h: i32 = (*rectangle).height();
             let (last_w, last_h) =
                 GLOB_CACHE.with(|glob| (glob.borrow().window_width, glob.borrow().window_height));
             if n_w != last_w || n_h != last_h {
@@ -377,15 +400,7 @@ impl GtkObjectTree {
 pub fn create_webcontext(b_conf: CreateBrowserConfig) -> WebContext {
     let wconte: WebContext;
     if !b_conf.browser_dir.is_empty() {
-        let wk_dm = WebsiteDataManager::builder()
-            .base_cache_directory(&b_conf.browser_dir)
-            .base_data_directory(&b_conf.browser_dir)
-            .disk_cache_directory(&b_conf.browser_dir)
-            .hsts_cache_directory(&b_conf.browser_dir)
-            .indexeddb_directory(&b_conf.browser_dir)
-            .local_storage_directory(&b_conf.browser_dir)
-            .build();
-        wconte = WebContext::with_website_data_manager(&wk_dm);
+        wconte = create_webcontext_dep(&b_conf.browser_dir);
         wconte.set_favicon_database_directory(Some(&b_conf.browser_dir));
     } else {
         error!("build_gtk BrowserDir missing!");
@@ -406,11 +421,13 @@ pub fn create_webview(
     let webview1: WebView = WebView::with_context(w_context);
     webview1.set_widget_name("webview_0");
     webview1.set_border_width(1);
-    webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
+    
+    // TODO deactivated 0.14  //  webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
+
     let mut wvs_b = webkit2gtk::SettingsBuilder::new()
         .enable_java(false)
-        .enable_media_capabilities(false)
-        .enable_javascript_markup(false)
+        // .enable_media_capabilities(false)         // TODO deactivated 0.14 
+        //  .enable_javascript_markup(false)
         .enable_html5_local_storage(false)
         .enable_developer_extras(false)
         .enable_smooth_scrolling(true)
@@ -803,6 +820,25 @@ pub fn create_buttonbox(_g_ev_se: Sender<GuiEvents>) -> ButtonBox {
     let button1: Button = Button::with_label("button1");
     buttonbox.add(&button1);
     buttonbox
+}
+
+#[cfg(not(feature = "g3sources"))]
+pub fn create_webcontext_dep(browser_dir: &str) -> WebContext {
+    let wk_dm = WebsiteDataManager::builder()
+        .base_cache_directory(browser_dir)
+        .base_data_directory(browser_dir)
+        .disk_cache_directory(browser_dir)
+        .hsts_cache_directory(browser_dir)
+        .indexeddb_directory(browser_dir)
+        .local_storage_directory(browser_dir)
+        .build();
+    WebContext::with_website_data_manager(&wk_dm)
+}
+
+#[cfg(feature = "g3sources")]
+pub fn create_webcontext_dep(browser_dir: &str) -> WebContext {
+    let wk_dm = WebsiteDataManager::builder().build();
+    WebContext::builder().build()
 }
 
 // ---

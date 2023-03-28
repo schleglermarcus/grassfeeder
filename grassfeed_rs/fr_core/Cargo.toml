@@ -4,36 +4,36 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-ui-gtk = ["ui_gtk", "fr_gtk"] 
-g3new = []  #   "dd-g3new"
-g3sources = ["app-g3sources" , "i18local" ] 
+ui-gtk = ["ui_gtk", "fr_gtk"]
+g3new = []                                #   "dd-g3new"
+g3sources = ["app-g3sources", "i18local"]
 
 [dependencies]
 context = { path = "../context" }
 resources = { path = "../resources" }
 gui_layer = { path = "../gui_layer" }
 ui_gtk = { path = "../ui_gtk", optional = true }
-fr_gtk = { path = "../fr_gtk", optional = true }
 
-## Konflikt mit Debian 
+
+### NEU
 # dd-g3new = { path = "../dd-g3new", optional = true }
-
 ## PROBLEM:  deactivating this does not prevent using their sub-dependencies. 
 ##   They contradict the more recent dependencies
+
+
+### ALT
+fr_gtk = { path = "../fr_gtk", optional = true, features = ["g3sources"] }
+i18local = { package = "rust-i18n", path = "../app-g3sources/target/rust-i18n-1.1.1", optional = true }
 app-g3sources = { path = "../app-g3sources", optional = true }
 
-i18local  = { package = "rust-i18n",  path = "../app-g3sources/target/rust-i18n-1.1.1", optional=true }
 
 base64 = "<=0.13.0"
 glob = ">=0.3.0"
 bincode = ">=1.3.3"
+
 # rusqlite = { version = ">=0.22.0",  features = ["bundled"] } #  
-
-
 ## deaktivieren fuer debian. reaktivieren fuer normal
 # rust-i18n = "^1.1"
-
-
 # feed-rs = { package="feed-rs", version = "*",        path = "../app-gtk3-debian/target/feed-rs-1.2.0/feed-rs" }
 # ureq = { version = "=2.6.2", path = "../app-gtk3-debian/target/ureq-2.6.2" } #  =2.6.2 
 # flume = { version = "*", path = "../app-gtk3-debian/target/flume-master" }
@@ -41,9 +41,6 @@ bincode = ">=1.3.3"
 # image = { version = "*", path = "../app-gtk3-debian/target/image-0.24.5" } #  optional=true,  =0.24.2  =0.24.5 
 # m_jpeg-decoder = { version = "*", package = "jpeg-decoder" }
 # m_libwebp-image = { version = "*", package = "libwebp-image" }
-
-
-####
 
 
 # deaktiviert fuer debian build
@@ -59,9 +56,7 @@ bincode = ">=1.3.3"
 # usvg = "*"
 # xmlparser = "*"
 
-
 fern = { version = "*", features = ["colored"] }
-
 log = "*"
 once_cell = "*"
 regex = "*"

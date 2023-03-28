@@ -8,16 +8,21 @@ description = "Feed Reader application specific gtk setup"
 
 [features]
 g3new = []  #    "dd-g3new" 
+g3sources = ["app-g3sources"]
 
 
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
-ui_gtk = { path = "../ui_gtk" }
+ui_gtk = { path = "../ui_gtk" , features = ["g3sources"] }
 resources = { path = "../resources" }
 
-### konflikt mit debian 
+### NEU
 # dd-g3new = { path = "../dd-g3new", optional = true }
+
+### ALT
+app-g3sources = { path = "../app-g3sources", optional = true }
+rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
 
 
 

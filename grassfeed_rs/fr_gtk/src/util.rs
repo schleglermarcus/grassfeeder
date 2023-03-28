@@ -1,4 +1,4 @@
-use dd_g3new::flume;
+use dd::flume;
 
 use flume::Sender;
 use gtk::gdk_pixbuf::InterpType;

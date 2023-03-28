@@ -261,7 +261,7 @@ impl GtkObjectsImpl {
         }
     }
 
-    #[cfg(feature = "g3new")]
+    #[cfg(not(feature = "g3sources"))]
     fn paned_default() -> Paned {
         gtk::Paned::default()
     }
@@ -271,7 +271,7 @@ impl GtkObjectsImpl {
         gtk::Paned::new(gtk::Orientation::Horizontal)
     }
 
-    #[cfg(feature = "g3new")]
+    #[cfg(not(feature = "g3sources"))]
     fn scrolledwindow_default() -> ScrolledWindow {
         gtk::ScrolledWindow::default()
     }
