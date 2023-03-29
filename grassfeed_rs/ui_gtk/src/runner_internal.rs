@@ -9,6 +9,7 @@ use crate::IntCommands;
 use flume::Receiver;
 use flume::Sender;
 use gtk::gio::ApplicationFlags;
+use gtk::gio::Cancellable;
 use gtk::prelude::ApplicationExt;
 use gtk::prelude::ApplicationExtManual;
 use gtk::prelude::Cast;
@@ -30,11 +31,29 @@ use std::sync::Arc;
 use std::sync::RwLock;
 use std::time::Duration;
 use std::time::Instant;
-use gtk::gio::Cancellable;
-
 
 const GTK_MAIN_INTERVAL: std::time::Duration = Duration::from_millis(100);
 static INTERVAL_COUNTER: AtomicU8 = AtomicU8::new(0);
+
+
+// https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/glib/struct.MainContext.html
+// https://github.com/gtk-rs/gtk-rs-core/issues/186
+// https://github.com/gtk-rs/glib/issues/448
+#[cfg(feature = "g3sources")]
+macro_rules! g14m_guard{
+    ()=>{
+        let mc_ =gtk::glib::MainContext::default();
+        let guard = mc_.acquire();
+        if guard.is_err() {
+            panic!("Special workaround for gtk0.14:   cannot aquire main context! exiting the timer loop ");
+        }
+    }
+}
+
+#[cfg(not(feature = "g3sources"))]
+macro_rules! g14m_guard {
+    () => {};
+}
 
 pub struct GtkRunnerInternal {
     gui_event_sender: Sender<GuiEvents>,
@@ -77,12 +96,13 @@ impl GtkRunnerInternal {
             );
             let _r = ev_se.send(GuiEvents::AppWasAlreadyRunning);
             app.release();
-            dbus_close(&app)            ;
+            dbus_close(&app);
 
             return false;
         }
         (*obj_c).write().unwrap().set_application(&app);
         app.connect_activate(move |app| {
+            trace!("T: building app window ");
             let appwindow = build_window(app, &ev_se, win_title.clone(), win_width, win_height);
             let window: &gtk::Window = appwindow.upcast_ref::<gtk::Window>();
             let mut dd = DialogDataDistributor::default();
@@ -94,6 +114,7 @@ impl GtkRunnerInternal {
             (*builder_c).build_gtk(ev_se.clone(), obj_c2.clone(), &mut dd);
             (*obj_c).write().unwrap().set_dddist(dd);
             window.show_all();
+            trace!("T:  window show done ");
         });
         true
     }
@@ -123,14 +144,15 @@ impl GtkRunnerInternal {
         ev_se_w: UiSenderWrapperType,
     ) {
         let gtk_objects_a = gtk_objects.clone();
+        // let gtk_objects_b = gtk_objects.clone();
         let m_v_st_a = model_value_store.clone();
         let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects, ev_se_w);
         let is_minimized: AtomicBool = AtomicBool::new(false);
-        gtk::glib::timeout_add_local_once(GTK_MAIN_INTERVAL, move || {
+        g14m_guard!();
+        gtk::glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
             let prev_count = INTERVAL_COUNTER.fetch_add(1, Ordering::Relaxed);
             if is_minimized.load(Ordering::Relaxed) && (prev_count & 7 != 0) {
-                // return gtk::glib::Continue(true);
-                return;
+                return gtk::glib::Continue(true);
             }
             let mut rec_set: HashSet<IntCommands> = HashSet::new();
             while let Ok(command) = g_com_rec.try_recv() {
@@ -235,9 +257,7 @@ impl GtkRunnerInternal {
                     }
                 }
             }
-
-            // gtk::glib::Continue(true)
-            return;
+            gtk::glib::Continue(true)
         });
     } // timeout
 }
@@ -280,21 +300,20 @@ pub fn dbus_close(app: &gtk::Application) {
 #[cfg(feature = "g3sources")]
 pub fn dbus_close(app: &gtk::Application) {
     if let Some(dbuscon) = app.dbus_connection() {
-        let none_cancellable : Option< & Cancellable> = Option::None;
+        let none_cancellable: Option<&Cancellable> = Option::None;
         dbuscon.close(none_cancellable, |_a1| {
             debug!("GtkRunnerInternal: dbus-closed callback");
         });
     }
 }
 
-
 #[cfg(feature = "g3new")]
-pub fn dbus_register(app: &gtk::Application)  {
+pub fn dbus_register(app: &gtk::Application) {
     let _r = app.register(Cancellable::NONE);
 }
 
 #[cfg(feature = "g3sources")]
-pub fn dbus_register(app: &gtk::Application)  {
-    let none_cancellable : Option<&Cancellable> = Option::None;
+pub fn dbus_register(app: &gtk::Application) {
+    let none_cancellable: Option<&Cancellable> = Option::None;
     let _r = app.register(none_cancellable);
 }

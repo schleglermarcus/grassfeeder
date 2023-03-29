@@ -1,4 +1,3 @@
-
 // #[cfg(feature = "g3sources")]
 // use crate::webkit2gtk::traits::WebViewExt;
 
@@ -10,15 +9,13 @@ use crate::WebView;
 // #[cfg(feature = "g3new")]
 // use dd::webkit2gtk::WebViewExt;
 
-
+#[allow(unused_imports)]
+use crate::WebContentType;
+use dd::flume;
 #[allow(unused_imports)]
 use gtk::prelude::WidgetExt;
 #[allow(unused_imports)]
 use gtk::Adjustment;
-use dd::flume;
-#[allow(unused_imports)]
-use crate::WebContentType;
-
 
 use crate::runner_internal::GtkRunnerInternal;
 use crate::CreateWebViewFnType;
@@ -59,7 +56,6 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-
 
 const EVENT_QUEUE_SIZE: usize = 1000;
 const INTERNAL_QUEUE_SIZE: usize = 2000;
@@ -119,8 +115,13 @@ impl GuiRunner for GtkRunner {
             .name("TGUI".to_string())
             .spawn(move || {
                 let mut runner_i = GtkRunnerInternal::new(ev_se);
+
+                debug!("T: runner internal ");
+
                 let initsuccess =
                     runner_i.init(&builder_c, win_title, win_width, win_height, app_url);
+                debug!("T: runner internal{initsuccess}");
+
                 if !initsuccess {
                     let _r = co_se2.send(IntCommands::STOP);
                     let _r = ev_se2.send(GuiEvents::AppWasAlreadyRunning);
@@ -128,12 +129,14 @@ impl GuiRunner for GtkRunner {
                 }
 
                 ev_se2.send(GuiEvents::InternalStarted).unwrap();
+                debug!("T: adding timeout .... ");
                 GtkRunnerInternal::add_timeout_loop(
                     co_re2.clone(),
                     runner_i.gtk_objects.clone(),
                     m_v_st_c,
                     ev_se_wc,
                 );
+                debug!("T: adding timeout done  ");
                 if let Ok(cmd) = co_re2.recv() {
                     if cmd == IntCommands::START {
                         runner_i.run();
@@ -278,7 +281,7 @@ impl GtkObjectsImpl {
 
     #[cfg(feature = "g3sources")]
     fn scrolledwindow_default() -> ScrolledWindow {
-        const NONE_ADJ: Option<& gtk::Adjustment> = None;
+        const NONE_ADJ: Option<&gtk::Adjustment> = None;
         gtk::ScrolledWindow::new(NONE_ADJ, NONE_ADJ)
     }
 
@@ -547,7 +550,7 @@ impl GtkObjects for GtkObjectsImpl {
     fn set_scrolledwindow(&mut self, idx: u8, p: &ScrolledWindow) {
         if self.scrolledwindows.len() < idx as usize + 1 {
             self.scrolledwindows
-                .resize(idx as usize + 1,  Self:: scrolledwindow_default() );
+                .resize(idx as usize + 1, Self::scrolledwindow_default());
         }
         self.scrolledwindows[idx as usize] = p.clone();
     }

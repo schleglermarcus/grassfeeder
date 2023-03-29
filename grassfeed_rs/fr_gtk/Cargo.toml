@@ -23,6 +23,7 @@ resources = { path = "../resources" }
 ### ALT
 app-g3sources = { path = "../app-g3sources", optional = true }
 rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
+gio = "=0.14.8"
 
 
 
@@ -52,31 +53,16 @@ fern = "*"
 # gtk_l = { package = "gtk", optional = true, version = "0.14.3", features = [  "v3_22_30",] } # downgrade for debian integration
 gtk = "*"
 
-
-
-#	once_cell = ">=1.12.0"
-# once_cell = ">=1.9.0"
-once_cell = "*"
-
-
-# log = "0.4.11"
-log = "*"
-
+#	gdk-pixbuf = ">=0.15.11"			# downgrade for debian integration
+# gdk-pixbuf = ">=0.14.0"
+# gdk-pixbuf = "*"
 #	glib = "^0.15.5"		# downgrade for debian integration
 # glib = ">=0.14.8"
-glib = "*"
-
 #	gio = "^0.15.5"		# downgrade for debian integration
-# gio = ">=0.14.0"
-gio = "*"
 
 #	gdk = "^0.15.2"	# downgrade for debian integration
 # gdk = ">=0.14.3"
 gdk = "*"
-
-#	gdk-pixbuf = ">=0.15.11"			# downgrade for debian integration
-# gdk-pixbuf = ">=0.14.0"
-gdk-pixbuf = "*"
 
 # gdk-sys = "^0.15.1"			# downgrade for debian integration
 # gdk-sys = ">=0.14.0"
@@ -84,8 +70,13 @@ gdk-sys = "*"
 
 # itertools = "0.10.1"
 itertools = "*"
-
 chrono = "*"
+#	once_cell = ">=1.12.0"
+# once_cell = ">=1.9.0"
+once_cell = "*"
+# log = "0.4.11"
+log = "*"
+
 
 
 # cargo run  --example icons

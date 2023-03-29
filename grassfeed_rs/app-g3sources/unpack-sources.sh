@@ -254,7 +254,7 @@ cat ${F}.0  |sed -e "s/system-deps = \"5\"/system-deps=\">=3\"/" >$F
 
 F=target/soup2-sys-0.2.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.15\"/\">=0.14\"/g" \
+cat ${F}.0 |sed -e "s/\"0.15\"/\"^0.14.0\"/g" \
  	|sed -e "s/= \"5\"/=  \">=3\"/"  \
 	>$F
 

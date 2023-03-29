@@ -51,10 +51,10 @@ pub fn build_timer() -> Timer {
     let sig_term_a = Arc::new(AtomicBool::new(false));
     let sig_int_a = Arc::new(AtomicBool::new(false));
 
-/* TODO:  only on debug add the term hook
+//  Later  add the term hook    only without debug
     let _r = signal_hook::flag::register(signal_hook::consts::SIGTERM, sig_term_a.clone());
     let _r = signal_hook::flag::register(signal_hook::consts::SIGINT, sig_term_a.clone());
- */        
+
     Timer {
         schedules: Default::default(),
         timer_sender: t_s,

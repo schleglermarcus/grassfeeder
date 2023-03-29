@@ -466,11 +466,11 @@ impl InvestigateOne for InvGif {
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         let cursor = std::io::Cursor::new(vec_u8);
-        let decoder = gif::Decoder::new(cursor);
-        match decoder.read_info() {
-            Ok(mut decod2) => {
-                let o_nextframe = decod2.read_next_frame();
-                if o_nextframe.is_ok() {
+        let r_decoder = gif::Decoder::new(cursor);
+        match r_decoder {
+            Ok(mut decod) => {
+                let r_frameinfo = decod.next_frame_info();
+                if r_frameinfo.is_ok() {
                     r.kind = IconKind::Gif;
                 }
             }

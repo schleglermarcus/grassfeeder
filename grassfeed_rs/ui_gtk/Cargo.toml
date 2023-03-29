@@ -17,8 +17,14 @@ resources = { path = "../resources" }
 # dd-g3new = { path = "../dd-g3new", optional = true }
 
 
-## deaktivieren fuer normal
+
+#### cargo watch -s "(cd testing ; RUST_BACKTRACE=1 cargo run --example working)
+
+
+
+## ALT : 
 app-g3sources = { path = "../app-g3sources", optional = true }
+gio ="0.14.8"   ##  range must not be opened
 
 
 ## rausgenommen fuer debian build
@@ -39,11 +45,14 @@ app-g3sources = { path = "../app-g3sources", optional = true }
 
 # glib_m = { package = "glib", version = "0.15.5", optional = true } 
 # glib_l = { package = "glib", version = "0.14.8", optional = true }   # downgrade for debian repo
-glib = "*"
+# glib = "*"
 
 # gio_m = {package="gio" , version="^0.15.5"  , optional = true  }
 # gio_l = {package="gio" , optional = true  , version="0.14.8"    }    # downgrade for debian repo
-gio = "*"
+
+#	gdk-sys = "^0.15.1"		# downgrade for debian repo
+# gdk-sys = ">=0.14"
+gdk-sys = "*"
 
 # gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
 # gtk_m = { package="gtk" , optional = true , version = ">=0.15.5", features = [  "v3_22_30",] } 
@@ -53,10 +62,6 @@ gtk = "*"
 ###	log = "0.4.14"				# downgrade for debian repo
 # log = ">=0.4.11"
 log = "*"
-
-#	gdk-sys = "^0.15.1"		# downgrade for debian repo
-# gdk-sys = ">=0.14"
-gdk-sys = "*"
 
 # serde = ">=1.0.133"			# downgrade for debian repo
 # serde = ">=1.0.130"
