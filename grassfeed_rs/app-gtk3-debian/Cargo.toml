@@ -22,11 +22,8 @@ ui_gtk = { path = "../ui_gtk", features = ["g3sources"] }
 resources = { path = "../resources" }
 
 
-
 dd = { package = "app-g3sources", path = "../app-g3sources" }
-rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
-
-
+rust-i18n = { version = "*", path = "../app-g3sources/target/rust-i18n-1.1.1" }
 
 fern = { version = "*", features = ["colored", "chrono"] }
 syslog = ">=6.0.1"
@@ -39,7 +36,6 @@ log = ">=0.4.11"
 once_cell = ">=1.9.0"
 # xdg = ">=2.4.1"		# the debian packages only have 2.2.0-3
 xdg = ">=2.2"
-
 
 
 [profile.release]

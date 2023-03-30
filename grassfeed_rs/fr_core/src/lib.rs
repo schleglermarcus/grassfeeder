@@ -15,8 +15,12 @@ extern crate dd_g3new as dd;
 extern crate i18local as rust_i18n;
 //  use dd::rust_i18n::i18n;
 
+
+// #[allow(unused_imports)]
+
 // #### New
 #[cfg(feature = "g3new")]
+#[allow(unused_imports)]
 #[macro_use]
 extern crate rust_i18n;
 

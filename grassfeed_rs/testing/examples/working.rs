@@ -1,5 +1,3 @@
-// #[cfg(feature = "ui-gtk")]
-// use fr_core_gtk as fr_core;
 
 use chrono::Local;
 use chrono::TimeZone;
@@ -49,7 +47,6 @@ fn main() {
     test_setup_values(&appcontext, mini_server_c.get_address());
     fr_core::config::init_system::run(&appcontext);
     mini_server_c.stop();
-
 }
 
 fn startup_minihttpserver(port: usize, current_folder: &String) -> MiniHttpServerController {
@@ -136,7 +133,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
     let url_staseve = format!("{}/staseve-11.xml", addr);
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
-    let url_relay = format!("{}/relay_rd.rss", addr); // very big
+    // let url_relay = format!("{}/relay_rd.rss", addr); // very big
     feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder1, false);
     feedsources.add_new_subscription_at_parent(
         url_staseve,
@@ -144,12 +141,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         folder1,
         false,
     );
-    feedsources.add_new_subscription_at_parent(
-        url_relay,
-        "relay_rd too big".to_string(),
-        folder1,
-        false,
-    );
+    // feedsources.add_new_subscription_at_parent(        url_relay,        "relay_rd too big".to_string(),        folder1,        false,    );
 
     if true {
         let src = [

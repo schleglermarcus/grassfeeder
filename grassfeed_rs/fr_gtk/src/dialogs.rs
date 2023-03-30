@@ -1,6 +1,12 @@
 use dd::flume;
 #[cfg(not(feature = "g3sources"))]
+use dd::gtk  as gtk;
+
+
+#[cfg(not(feature = "g3sources"))]
 use gtk::builders::NotebookBuilder;
+
+
 #[cfg(feature = "g3sources")]
 use gtk::NotebookBuilder;
 

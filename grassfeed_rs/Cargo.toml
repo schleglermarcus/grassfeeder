@@ -15,7 +15,12 @@ exclude = [
   "dd-g3new",
   "dd-g3old",
 ]
-#   "dd-g3mid",
 
 
+# Specifying a workspace dependency is similar to package dependencies except:
+#    Dependencies from this table cannot be declared as optional
+#    features declared in this table are additive with the features from [dependencies]
+[workspace.dependencies]
+dd = { path = "../dd-g3new" }
 
+# dd = { path = "../app-g3sources" }

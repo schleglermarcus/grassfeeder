@@ -1,5 +1,7 @@
-use dd::flume;
-use rust_i18n;
+#[cfg(not(feature = "g3sources"))]
+use dd::gtk;
+#[cfg(not(feature = "g3sources"))]
+use dd::gdk;
 
 
 use crate::cell_data_func::*;
@@ -8,6 +10,7 @@ use crate::util::EvSenderCache;
 use crate::util::EvSenderWrapper;
 use crate::util::MOUSE_BUTTON_LEFT;
 use crate::util::MOUSE_BUTTON_RIGHT;
+use dd::flume;
 use flume::Sender;
 use gdk::EventButton;
 use gtk::gdk_pixbuf::Pixbuf;
@@ -29,6 +32,7 @@ use gtk::TreeView;
 use gtk::TreeViewColumn;
 use gui_layer::abstract_ui::GuiEvents;
 use resources::id::*;
+use rust_i18n;
 use rust_i18n::t;
 use ui_gtk::GtkObjectsType;
 
@@ -54,14 +58,14 @@ pub fn create_listview(
     content_tree_view.set_widget_name("msg_list");
     content_tree_view.set_margin_top(2);
     let liststoretypes = &[
-        Pixbuf::static_type(), // 0: Fav / feed icon
-        gtk::glib:: Type::STRING,          // title
-        gtk::glib:: Type::STRING,          // date
-        Pixbuf::static_type(), // status icon
-        u32::static_type(),    // 4 : is-read
-        u32::static_type(),    // 5 : db-id
-        gtk::glib:: Type::STRING,          // tooltip
-        bool::static_type(),   // 7 : Is-Favorite
+        Pixbuf::static_type(),   // 0: Fav / feed icon
+        gtk::glib::Type::STRING, // title
+        gtk::glib::Type::STRING, // date
+        Pixbuf::static_type(),   // status icon
+        u32::static_type(),      // 4 : is-read
+        u32::static_type(),      // 5 : db-id
+        gtk::glib::Type::STRING, // tooltip
+        bool::static_type(),     // 7 : Is-Favorite
     ];
     let title_column: TreeViewColumn;
     let date_column: TreeViewColumn;

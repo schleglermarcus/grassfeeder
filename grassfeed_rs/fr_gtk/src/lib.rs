@@ -8,15 +8,15 @@ extern crate rust_i18n;
 
 use rust_i18n::i18n;
 
-
-extern crate gio;
-
+// #[allow(unused_imports)]
+// #[allow(unused_macros)]
 #[macro_use]
 extern crate log;
-extern crate itertools; // for key codes // background color
 
-pub extern crate gdk_sys;
-
+//   #[cfg(feature = "g3new")]
+//   extern crate dd::gio as gio;
+// extern crate itertools; // for key codes // background color
+//  pub extern crate gdk_sys;
 
 pub mod cell_data_func;
 pub mod dialogs;
@@ -25,6 +25,5 @@ pub mod load_css;
 pub mod messagelist;
 pub mod treeview2;
 pub mod util;
-
 
 i18n!("../resources/locales");

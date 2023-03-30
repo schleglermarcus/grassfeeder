@@ -7,10 +7,12 @@
 // GTK_DEBUG=interactive
 //
 
-pub const TAB_MARKER_HEIGHT: u8 = 1;
+#[cfg(not(feature = "g3sources"))]
+use dd::gtk;
 
 use gtk::prelude::CssProviderExt;
-// use crate::gtk::prelude::StyleProviderExt;
+
+pub const TAB_MARKER_HEIGHT: u8 = 1;
 
 // double curly brackets for rust strings
 #[allow(clippy::uninlined_format_args)]

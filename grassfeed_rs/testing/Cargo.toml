@@ -5,17 +5,14 @@ edition = "2021"
 description = "Feed Reader Testing Module"
 
 
-
 [dependencies]
 resources = { path = "../resources" }
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
-fr_core = { path = "../fr_core" , features=["ui-gtk", "g3sources"]   }     # 
-fr_gtk = { path = "../fr_gtk", features = ["g3sources"] }      
-ui_gtk = { path = "../ui_gtk", features = ["g3sources"] }      
+fr_core = { path = "../fr_core", features = ["ui-gtk", "g3new"] } # 
+fr_gtk = { path = "../fr_gtk", features = ["g3new"] }
+ui_gtk = { path = "../ui_gtk", features = ["g3new"] }
 
-# dd-g3new = { path = "../dd-g3new" }
-# dd-g3old = { path = "../dd-g3old" }
 
 http = "0.2.6"
 bincode = ">=1.3.3"

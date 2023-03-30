@@ -2,21 +2,19 @@ use dd::flume;
 use dd::webkit2gtk;
 use rust_i18n;
 
-#[cfg(not(feature = "g3sources"))]
-use gtk::builders::ToggleToolButtonBuilder;
 #[cfg(feature = "g3sources")]
 use gtk::ToggleToolButtonBuilder;
-
-#[cfg(not(feature = "g3sources"))]
-use gtk::builders::ToolButtonBuilder;
 #[cfg(feature = "g3sources")]
 use gtk::ToolButtonBuilder;
 
-// use webkit2gtk::WebContextExt;
-use webkit2gtk::traits::WebContextExt;
-
-// use webkit2gtk::WebViewExt;
-use webkit2gtk::traits::WebViewExt;
+#[cfg(not(feature = "g3sources"))]
+use dd::gtk;
+#[cfg(not(feature = "g3sources"))]
+use dd::gdk;
+#[cfg(not(feature = "g3sources"))]
+use gtk::builders::ToggleToolButtonBuilder;
+#[cfg(not(feature = "g3sources"))]
+use gtk::builders::ToolButtonBuilder;
 
 use crate::dialogs::create_dialogs;
 use crate::load_css::TAB_MARKER_HEIGHT;
@@ -67,6 +65,8 @@ use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::gtkrunner::CreateBrowserConfig;
 use ui_gtk::GtkGuiBuilder;
 use ui_gtk::GtkObjectsType;
+use webkit2gtk::traits::WebContextExt;
+use webkit2gtk::traits::WebViewExt;
 use webkit2gtk::WebContext;
 use webkit2gtk::WebView;
 use webkit2gtk::WebsiteDataManager;
@@ -421,12 +421,12 @@ pub fn create_webview(
     let webview1: WebView = WebView::with_context(w_context);
     webview1.set_widget_name("webview_0");
     webview1.set_border_width(1);
-    
+
     // TODO deactivated 0.14  //  webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
 
     let mut wvs_b = webkit2gtk::SettingsBuilder::new()
         .enable_java(false)
-        // .enable_media_capabilities(false)         // TODO deactivated 0.14 
+        // .enable_media_capabilities(false)         // TODO deactivated 0.14
         //  .enable_javascript_markup(false)
         .enable_html5_local_storage(false)
         .enable_developer_extras(false)

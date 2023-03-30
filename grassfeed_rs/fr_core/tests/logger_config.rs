@@ -61,11 +61,11 @@ pub fn setup_fern_logger(debug_flags: u64) -> Result<(), fern::InitError> {
             message
         ))
     });
-
     format_config.chain(std::io::stdout()).apply()?;
     Ok(())
 }
 
+/*
 #[deprecated]
 #[allow(dead_code)]
 pub fn setup_logger() -> Result<(), fern::InitError> {
@@ -106,3 +106,5 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
         .apply()?;
     Ok(())
 }
+ */
+

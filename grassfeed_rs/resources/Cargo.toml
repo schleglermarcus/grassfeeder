@@ -3,14 +3,17 @@ name = "resources"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-log = "0.4.11"
-#	once_cell = ">=1.12.0"	# downgrade for debian repo
-once_cell = ">=1.9"
+## ALT
+# [target.'cfg(g3sources)'.dependencies]
+# rust-i18n = { version =  ">=1.0.1", path="../app-g3sources/target/rust-i18n-1.1.1" }
+# once_cell = ">=1.9"
 
+
+
+[dependencies]
+log = ">=0.4.11"
+rust-i18n = "*"
 ## rausgenommen fuer debian build 
-rust-i18n = { version =  ">=1.0.1", path="../app-g3sources/target/rust-i18n-1.1.1" }
-# rust-i18n = "*"
 
 
 [package.metadata.i18n]

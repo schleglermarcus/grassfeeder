@@ -4,9 +4,12 @@ https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/pango/struct.AttrSize.html
 https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/pango_sys/struct.PangoAttrSize.html
 
  */
+
+#[cfg(not(feature = "g3sources"))]
+use dd::gtk;
+
 use gtk::pango::AttrInt;
 use gtk::pango::AttrList;
-// use gtk::pango::AttrSize;
 use gtk::pango::Attribute;
 use gtk::pango::Weight;
 use gtk::prelude::Cast;
@@ -53,7 +56,6 @@ pub fn add_font_weight(r: &AttrList) {
 pub fn add_font_weight(r: &AttrList) {
     r.insert(gtk::pango::Attribute::new_weight(Weight::Bold));
 }
-
 
 #[cfg(not(feature = "g3sources"))]
 pub fn add_font_size(r: &AttrList, fontsize: u32) {

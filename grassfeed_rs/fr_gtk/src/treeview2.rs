@@ -1,14 +1,12 @@
-use dd::flume;
-use rust_i18n;
+#[cfg(not(feature = "g3sources"))]
+use dd::gtk;
 
-
-
-use rust_i18n::t;
 use crate::cell_data_func::*;
 use crate::util::DragState;
 use crate::util::EvSenderWrapper;
 use crate::util::DIALOG_ICON_SIZE;
 use crate::util::MOUSE_BUTTON_RIGHT;
+use dd::flume;
 use flume::Sender;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::TreeModelExt;
@@ -27,6 +25,8 @@ use gtk::TreeViewColumn;
 use gtk::TreeViewGridLines;
 use gui_layer::abstract_ui::GuiEvents;
 use resources::id::*;
+use rust_i18n;
+use rust_i18n::t;
 use std::rc::Rc;
 use std::sync::RwLock;
 use ui_gtk::GtkObjectsType;
@@ -35,19 +35,19 @@ const TREEVIEW_NAME: &str = "TREEVIEW1";
 // const DRAG_TARGET_NAME: &str = "text/html";
 
 pub fn create_tree_store() -> (TreeStore, usize) {
-    let tree_store_types: &[ gtk::glib:: Type] = &[
-      gtk::gdk_pixbuf::  Pixbuf::static_type(), // 0: feed-icon
-        String::static_type(), // 1: Feed-Source-Name
-        String::static_type(), // 2: unread-column  text
-        Pixbuf::static_type(), // 3: status-icon
-        u32::static_type(),    // 4: is-Folder
-        u32::static_type(),    // 5: db-id
-        u32::static_type(),    // 6: num-unread
-        u32::static_type(),    // 7: status
-        String::static_type(), // 8: ToolTip	== TREE0_COL_TOOLTIP
-        bool::static_type(),   // 9: Spinner active, visible
-        bool::static_type(),   // 10: Status Icon Visible
-        bool::static_type(),   // 11: unread-text visible
+    let tree_store_types: &[gtk::glib::Type] = &[
+        gtk::gdk_pixbuf::Pixbuf::static_type(), // 0: feed-icon
+        String::static_type(),                  // 1: Feed-Source-Name
+        String::static_type(),                  // 2: unread-column  text
+        Pixbuf::static_type(),                  // 3: status-icon
+        u32::static_type(),                     // 4: is-Folder
+        u32::static_type(),                     // 5: db-id
+        u32::static_type(),                     // 6: num-unread
+        u32::static_type(),                     // 7: status
+        String::static_type(),                  // 8: ToolTip	== TREE0_COL_TOOLTIP
+        bool::static_type(),                    // 9: Spinner active, visible
+        bool::static_type(),                    // 10: Status Icon Visible
+        bool::static_type(),                    // 11: unread-text visible
     ];
     let tree_store = TreeStore::new(tree_store_types);
     (tree_store, tree_store_types.len())

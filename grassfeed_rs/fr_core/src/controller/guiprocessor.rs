@@ -669,11 +669,12 @@ impl GuiProcessor {
                     payload.get(11).unwrap().boo().to_string(),
                 );
 
-                let systray_e = payload.get(12).unwrap().boo();
-                (self.configmanager_r).borrow().set_val(
-                    &PropDef::SystrayEnable.to_string(),
-                    systray_e.to_string(), // 12 : enable systray
-                );
+                if let Some(systray_e) = payload.get(12) {
+                    (self.configmanager_r).borrow().set_val(
+                        &PropDef::SystrayEnable.to_string(),
+                        systray_e.boo().to_string(), // 12 : enable systray
+                    );
+                }
                 self.addjob(Job::NotifyConfigChanged);
             }
             _ => {

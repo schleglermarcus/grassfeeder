@@ -3,68 +3,33 @@ name = "ui_gtk"
 version = "0.1.0"
 edition = "2021"
 
-
+##  app-g3sources  must be removed from both sections:  features  and dependencies
 [features]
-g3new = []  #  ["dd-g3new"]
-g3sources = ["app-g3sources"]
+g3new = ["dd-g3new"]
+g3sources = []       # "app-g3sources"
 
 
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 resources = { path = "../resources" }
-
-## konflikt bei debian !
-# dd-g3new = { path = "../dd-g3new", optional = true }
-
-
-
-#### cargo watch -s "(cd testing ; RUST_BACKTRACE=1 cargo run --example working)
-
-
-
-## ALT : 
-app-g3sources = { path = "../app-g3sources", optional = true }
-gio ="0.14.8"   ##  range must not be opened
-
-
-## rausgenommen fuer debian build
-# flume = { version = ">=0.10.9", path = "../app-gtk3-debian/target/flume-master" }
-# flume = "*"
-# lz4-compression = { version = "0.7.0", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
-#lz4-compression = "*"
-
-
-# webkit2gtk_m = { package = "webkit2gtk", version = "0.18.2", default-features = false, features = [  "v2_36",], optional = true }
-# webkit2gtk_l = { package = "webkit2gtk", version = "0.16.0", default-features = false, features = ["v2_30"], optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/" }
-# webkit2gtk = {  version = ">=0.16",   features = ["v2_36"] } #  "=0.18.2"  #
-
-# webkit2gtk_sys_m = { package = "webkit2gtk-sys", version = ">=0.18.0", optional = true }
-# webkit2gtk_sys_l = { package = "webkit2gtk-sys", version = "0.16.0", optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys" }
-# webkit2gtk-sys = "<=0.18.0"
-
-
-# glib_m = { package = "glib", version = "0.15.5", optional = true } 
-# glib_l = { package = "glib", version = "0.14.8", optional = true }   # downgrade for debian repo
-# glib = "*"
-
-# gio_m = {package="gio" , version="^0.15.5"  , optional = true  }
-# gio_l = {package="gio" , optional = true  , version="0.14.8"    }    # downgrade for debian repo
-
 #	gdk-sys = "^0.15.1"		# downgrade for debian repo
 # gdk-sys = ">=0.14"
 gdk-sys = "*"
-
 # gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
 # gtk_m = { package="gtk" , optional = true , version = ">=0.15.5", features = [  "v3_22_30",] } 
-# gtk_l = { package="gtk" , optional = true , version = "<=0.14.3", features = [  "v3_22_30",] } # downgrade for debian repo
 gtk = "*"
-
 ###	log = "0.4.14"				# downgrade for debian repo
 # log = ">=0.4.11"
 log = "*"
-
 # serde = ">=1.0.133"			# downgrade for debian repo
 # serde = ">=1.0.130"
 serde = "*"
-
 base64 = "<=0.13.0" # later
+
+
+## NEU:
+dd-g3new = { path = "../dd-g3new", optional = true }
+
+## ALT: 
+# app-g3sources = { path = "../app-g3sources", optional = true }
+# gio ="0.14.8"   ##  range must not be opened

@@ -7,67 +7,44 @@ description = "Feed Reader application specific gtk setup"
 
 
 [features]
-g3new = []  #    "dd-g3new" 
-g3sources = ["app-g3sources"]
+g3new = ["dd-g3new"]
+g3sources = []  # "app-g3sources" 
 
 
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
-ui_gtk = { path = "../ui_gtk" , features = ["g3sources"] }
 resources = { path = "../resources" }
 
 ### NEU
-# dd-g3new = { path = "../dd-g3new", optional = true }
+dd-g3new = { path = "../dd-g3new", optional = true }
+ui_gtk = { path = "../ui_gtk", features = ["g3new"] }
+rust-i18n = { version="*"  }
 
 ### ALT
-app-g3sources = { path = "../app-g3sources", optional = true }
-rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
-gio = "=0.14.8"
+# ui_gtk = { path = "../ui_gtk", features = ["g3sources"] }
+#rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
+#gio = "=0.14.8"
 
 
+# [target.'cfg(g3sources)'.dependencies]
+# app-g3sources = { path = "../app-g3sources", optional = true }
 
-## Raus wg. Debian Build
-# flume = { version = ">=0.10.9", path = "../app-gtk3-debian/target/flume-master" }
-# flume = "*"
 
-# rust-i18n = { version = ">=1.0.1", path = "../app-gtk3-debian/target/rust-i18n-1.1.1" }
-# rust-i18n = "*"
-
-#webkit2gtk_m = { package = "webkit2gtk", version = "0.18.2", default-features = false, features = [  "v2_36",], optional = true }
-## webkit2gtk_l = { package = "webkit2gtk", version = "0.16.0", default-features = false, features = [  "v2_30",], optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/" } # downgrade for debian repo
-# webkit2gtk = { version = "*", features = ["v2_36"] } # "=0.18.2"
-
-#webkit2gtk_sys_m = { package = "webkit2gtk-sys", version = ">=0.18.0", optional = true }
-## webkit2gtk_sys_l = { package = "webkit2gtk-sys", version = "0.16.0", optional = true, path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys" }
-# webkit2gtk-sys = "<=0.18.0"
 
 ## ----
 # fern = { version = "0.6", features = ["colored"] }
 fern = "*"
-
-
-
 # gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
 # gtk_m = { package = "gtk", optional = true, version = "^0.15.5", features = [  "v3_22_30",] }
 # gtk_l = { package = "gtk", optional = true, version = "0.14.3", features = [  "v3_22_30",] } # downgrade for debian integration
 gtk = "*"
-
-#	gdk-pixbuf = ">=0.15.11"			# downgrade for debian integration
-# gdk-pixbuf = ">=0.14.0"
-# gdk-pixbuf = "*"
-#	glib = "^0.15.5"		# downgrade for debian integration
-# glib = ">=0.14.8"
-#	gio = "^0.15.5"		# downgrade for debian integration
-
 #	gdk = "^0.15.2"	# downgrade for debian integration
 # gdk = ">=0.14.3"
 gdk = "*"
-
 # gdk-sys = "^0.15.1"			# downgrade for debian integration
 # gdk-sys = ">=0.14.0"
 gdk-sys = "*"
-
 # itertools = "0.10.1"
 itertools = "*"
 chrono = "*"
@@ -76,7 +53,6 @@ chrono = "*"
 once_cell = "*"
 # log = "0.4.11"
 log = "*"
-
 
 
 # cargo run  --example icons

@@ -1,13 +1,12 @@
-// #[cfg(feature = "g3sources")]
-// use crate::webkit2gtk::traits::WebViewExt;
-
 #[cfg(feature = "g3sources")]
 use crate::WebContext;
 #[cfg(feature = "g3sources")]
 use crate::WebView;
 
-// #[cfg(feature = "g3new")]
-// use dd::webkit2gtk::WebViewExt;
+#[cfg(feature = "g3new")]
+use dd::webkit2gtk::WebContext;
+#[cfg(feature = "g3new")]
+use dd::webkit2gtk::WebView;
 
 #[allow(unused_imports)]
 use crate::WebContentType;
