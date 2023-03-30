@@ -29,7 +29,8 @@ pub fn setup_fern_logger(debug_flags: u64) -> Result<(), fern::InitError> {
         .level_for("sled", log::LevelFilter::Info)
         .level_for("sqlparser::parser", log::LevelFilter::Info)
         .level_for("ureq", log::LevelFilter::Info)
-        .level_for("rustls", log::LevelFilter::Info);
+        .level_for("rustls", log::LevelFilter::Info)
+        .level_for("webbrowser::os", log::LevelFilter::Info);
     if debug_flags & QuietFlags::MiniHttp as u64 > 0 {
         level_config = level_config.level_for("testing::minihttpserver", log::LevelFilter::Debug);
     }

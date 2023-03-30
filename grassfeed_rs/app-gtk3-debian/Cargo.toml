@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-debian"
-version = "0.1.8-B4"
+version = "0.1.8-B5"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -41,74 +41,11 @@ once_cell = ">=1.9.0"
 xdg = ">=2.2"
 
 
-# lz4-compression = { version=">=0.7" }
-
-
-# feed-rs = { version = "1.2.0", path = "target/feed-rs-1.2.0/feed-rs", package = "feed-rs" } #  ,  optional = true  
-# flume = { version = "0.10.14", path = "target/flume-master" }
-# ureq = { path = "target/ureq-2.6.2" }                         #  , optional = true 
-# ico = { path = "target/rust-ico-0.3.0" }
-# image = { path = "target/image-0.24.5" }
-# ##  cannot be found as debian package or too old
-# quick-xml = { path = "target/quick-xml-0.25.0", features = ["encoding"] }
-# regex = { path = "target/regex-1.6.0" }
-# url = { path = "target/rust-url-2.3.0/url" }
-# uuid = { path = "target/uuid-1.1.0", features = ["v4"] }
-# nanorand = { path = "target/nanorand-rs-0.7.0", features = [
-#   "getrandom",
-# ], optional = true }
-# spin = { path = "target/spin-rs-0.9.2" }
-# jpeg-decoder = { path = "target/jpeg-decoder-0.3.0", features = [
-#   "platform_independent",
-# ] }
-# libwebp-image = { path = "target/libwebp-image-rs-0.3.0" }
-# lz4-compression = { path = "target/lz4-compression-0.7" }
-# proc-status = { path = "target/proc-status-0.1.1" }
-# rusqlite = { path = "target/rusqlite-sys0.25.2" }
-# textcode = { path = "target/textcode-0.2.2" }
-# tinybmp = { path = "target/tinybmp-0.4.0" }
-# tl = { path = "target/tl-0.7.7" }
-# usvg = { path = "target/resvg-0.29.0/usvg" }
-# png = { path = "target/image-png-0.17.5" }
-# bytemuck = { path = "target/bytemuck-1.7.0" }
-# exr = { path = "target/exrs-1.5.0" }
-# bit_field = { path = "target/rust-bit-field-0.10.1" }
-# half = { path = "target/half-rs-1.8.2" }
-# lebe = { path = "target/lebe-0.5.2" }
-# libwebp = { path = "target/libwebp-rs-0.1.0" }
-# libwebp-sys2 = { path = "target/libwebp-sys2-rs-0.1.2" }
-# hashlink = { path = "target/hashlink-0.8.0" }
-# embedded-graphics = { path = "target/embedded-graphics-embedded-graphics-v0.7.1" }
-# az = { path = "target/az-v1.1.0" }
-# micromath = { path = "target/micromath-1.1.1" }
-# rustls = { path = "target/rustls-v-0.20.8/rustls" }
-# webpki-roots = { path = "target/webpki-roots-v-0.22.6" }
-# imagesize = { path = "target/imagesize-0.11.0" }
-# strict-num = { path = "target/strict-num-0.1.0" }
-# cssparser = { path = "target/rust-cssparser-0.28.0" }
-# qname = { path = "target/qname-0.1.0" }
-# selectors = { path = "target/servo-selectors-v0.22.0/components/selectors" }
-# derive_more = { path = "target/derive_more-0.99.17" }
-# convert_case = { path = "target/convert_case-0.6.0" }
-# slotmap = { path = "target/slotmap-1.0.6" }
-# unic-ucd = { path = "target/rust-unic-0.9.0/unic/ucd" }
-# jetscii = { path = "target/jetscii-0.5.3" }
-# webkit2gtk = { path = "target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0" }
-# # webkit2gtk = { path="target/webkit2gtk-rs-webkit2gtk-rs-v0.18.2" }
-# javascriptcore-rs = { path = "target/javascriptcore-rs-javascriptcore-rs-v0.15.2" }
-# javascriptcore-rs-sys = { path = "target/javascriptcore-rs-javascriptcore-rs-v0.15.2/sys" }
-# # javascriptcore-rs-sys  = { path="target/javascriptcore-rs-javascriptcore-rs-sys-v0.3.3"}
-# # webkit2gtk-sys = { path="target/webkit2gtk-rs-webkit2gtk-sys-v0.16.0" }
-# webkit2gtk-sys = { path = "target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0/sys" }
-# soup2-sys = { path = "target/soup2-sys-0.2.0" }
-# rayon = { path = "target/rayon-1.5.1" }
-# hard-xml = { path = "target/hard-xml-v1.19.0/hard-xml" }
-
 
 [profile.release]
 opt-level = 's' # Optimize for size.
 lto = true      # Enable Link Time Optimization
-strip = true    # Strip symbols from binary*
+strip = true    # Strip symbols from binary
 
 
 [package.metadata.deb]
