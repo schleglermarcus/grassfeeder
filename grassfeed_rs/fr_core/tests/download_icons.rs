@@ -1,8 +1,10 @@
-#[cfg(not(feature = "dd-g3old"))]
+#[cfg(not(feature = "g3sources"))]
 extern crate dd_g3new as dd;
+
+#[cfg(feature = "g3sources")]
+extern crate app_g3sources as dd;
+
 use dd::flume;
-
-
 use fr_core::controller::contentdownloader::Downloader;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::errors_repo::ErrorRepo;
@@ -58,6 +60,7 @@ fn test_extract_icon_nn() {
     );
 }
 
+// #[ignore]
 #[test]
 fn image_webp_to_png() {
     setup();

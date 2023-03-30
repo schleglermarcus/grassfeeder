@@ -115,28 +115,20 @@ impl GuiRunner for GtkRunner {
             .name("TGUI".to_string())
             .spawn(move || {
                 let mut runner_i = GtkRunnerInternal::new(ev_se);
-
-                debug!("T: runner internal ");
-
                 let initsuccess =
                     runner_i.init(&builder_c, win_title, win_width, win_height, app_url);
-                debug!("T: runner internal{initsuccess}");
-
                 if !initsuccess {
                     let _r = co_se2.send(IntCommands::STOP);
                     let _r = ev_se2.send(GuiEvents::AppWasAlreadyRunning);
                     return;
                 }
-
                 ev_se2.send(GuiEvents::InternalStarted).unwrap();
-                debug!("T: adding timeout .... ");
                 GtkRunnerInternal::add_timeout_loop(
                     co_re2.clone(),
                     runner_i.gtk_objects.clone(),
                     m_v_st_c,
                     ev_se_wc,
                 );
-                debug!("T: adding timeout done  ");
                 if let Ok(cmd) = co_re2.recv() {
                     if cmd == IntCommands::START {
                         runner_i.run();

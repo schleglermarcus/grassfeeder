@@ -1,4 +1,5 @@
 use dd::flume;
+use dd::gif;
 use dd::ico;
 use dd::jpeg_decoder;
 use dd::libwebp_image;
@@ -20,7 +21,6 @@ use crate::util::Step;
 use crate::util::StepResult;
 use crate::web::WebFetcherType;
 use flume::Sender;
-// use jpeg_decoder::Decoder;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;
@@ -68,7 +68,7 @@ impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
-            // trace!(                "IconLoadStart: db-HP:{}   prev-iconurl:{}",                subs_e.website_url,                inner.icon_url            );
+            //  debug!(                "IconLoadStart: db-HP:{}   prev-iconurl:{}",                subs_e.website_url, inner.icon_url            );
             if !subs_e.website_url.is_empty() {
                 inner.feed_homepage = subs_e.website_url;
                 return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
@@ -113,7 +113,7 @@ impl Step<IconInner> for HomepageDownload {
                 inner.feed_homepage = homepage;
             } else {
                 let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
-                trace!("found_HP==feed-url :-/ ALT-HP={}", alt_hp);
+                // debug!("found_HP==feed-url :-/ ALT-HP={}", alt_hp);
                 inner.feed_homepage = alt_hp;
             }
             return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
@@ -139,7 +139,7 @@ impl Step<IconInner> for CompareHomepageToDB {
                     .update_homepage(inner.subs_id, &inner.feed_homepage);
             }
         } else {
-            debug!("no subscription in db for {}", inner.subs_id);
+            //  debug!("no subscription in db for {}", inner.subs_id);
         }
         StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)))
     }
@@ -502,7 +502,6 @@ impl InvestigateOne for InvGif {
     }
 }
 
-// pub fn gif_decoder(cursor: &Cursor) {}
 
 struct InvSvg {}
 impl InvestigateOne for InvSvg {

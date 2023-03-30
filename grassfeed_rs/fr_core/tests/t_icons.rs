@@ -79,7 +79,7 @@ fn analyze_icon_local() {
     ];
     set.iter().for_each(|(ic_name, e_kind)| {
         let filename = format!("{}icons/{}", TD_BASE, ic_name);
-        // trace!(            "FILE: {}   PWD={:?}",            filename,            std::env::current_dir().unwrap()        );
+        // trace!("FILE: {}   ", filename);
         let o_blob = mockfilefetcher::file_to_bin(&filename);
         if o_blob.is_err() {
             error!("{:?}  {}", &o_blob.as_ref().err(), &filename);

@@ -40,7 +40,7 @@ pub fn setup_fern_logger(debug_flags: u64) -> Result<(), fern::InitError> {
         level_config = level_config.level_for("fr_core::db", log::LevelFilter::Info);
     }
     if debug_flags & QuietFlags::Downloader as u64 > 0 {
-        level_config = level_config.level_for("fr_core::downloader", log::LevelFilter::Info);
+        level_config = level_config.level_for("fr_core::downloader", log::LevelFilter::Debug);
     }
     if debug_flags & QuietFlags::Controller as u64 > 0 {
         level_config = level_config.level_for("fr_core::controller", log::LevelFilter::Info);

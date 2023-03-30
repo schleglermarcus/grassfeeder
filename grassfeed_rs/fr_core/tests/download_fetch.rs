@@ -1,8 +1,10 @@
-#[cfg(not(feature = "dd-g3old"))]
+#[cfg(not(feature = "g3sources"))]
 extern crate dd_g3new as dd;
-// use dd::feed_rs;
-use dd::flume;
 
+#[cfg(feature = "g3sources")]
+extern crate app_g3sources as dd;
+
+use dd::flume;
 mod logger_config;
 
 use chrono::DateTime;

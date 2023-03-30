@@ -31,7 +31,7 @@ cat ${F}.0 |sed -e "s/\"jpeg-decoder\", version = \"0.2.1\"/\"jpeg-decoder\", ve
  		|sed -e "s/\"1.1\"/\"1.0\" /" \
     	|sed -e "s/\"1.4.1\"/\">=1.4.1\", path=\"..\/exrs-1.5.0\"   /" \
 		|sed -e "s/tiff = { version = \"0.7.1\"/tiff={version=\">=0.6\" , path=\"..\/image-tiff-0.8.0\" /" \
-		|sed -e "s/\"0.17.0\"/\">=0.16.5\", path=\"..\/image-png-0.17.2\"   /" \
+		|sed -e "s/\"0.17.0\"/\">=0.16.5\", path=\"..\/image-png-0.17.5\"   /" \
  		|sed -e "s/\"0.1.32\"/\">=0.1.32\" /" \
  		|sed -e "s/\"0.3\"/\">=0.3\" /" \
 		>$F
@@ -39,7 +39,7 @@ cat ${F}.0 |sed -e "s/\"jpeg-decoder\", version = \"0.2.1\"/\"jpeg-decoder\", ve
 
 F=target/rust-ico-0.3.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.17\"/\{version=\">=0.16\", path=\"..\/image-png-0.17.2\"\}/" 	>$F
+cat ${F}.0 |sed -e "s/\"0.17\"/\{version=\">=0.16\", path=\"..\/image-png-0.17.5\"\}/" 	>$F
 
 F=target/exrs-1.5.0/Cargo.toml
 mv $F ${F}.0		# downgrading miniz_oxide		lebe
@@ -72,11 +72,11 @@ cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /"  \
 	|sed -e "s/, \"js\"//"	\
  	>$F
 
-F=target/image-png-0.17.2/Cargo.toml
+F=target/image-png-0.17.5/Cargo.toml
 mv $F ${F}.0    #  downgrading deflate, miniz_oxide
-cat ${F}.0 |sed -e "s/deflate = \"0.9\"/deflate=\">=0.7.0\"  /" \
-	|sed -e "s/\"\0.4.1\"/\">=0.3.5\"/"  	>$F
-##  |sed -e "s/deflate = { version = \"0.9\"/deflate=\{version=\">=0.7.0\"  /" \ 	
+cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\">=0.7.0\"  /" \
+	|sed -e "s/\"\0.5.1\"/\">=0.3.5\"/"  	>$F
+
 
 F=target/quick-xml-0.27.1/Cargo.toml
 mv $F ${F}.0

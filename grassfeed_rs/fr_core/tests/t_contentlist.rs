@@ -1,7 +1,11 @@
-#[cfg(not(feature = "dd-g3old"))]
+#[cfg(not(feature = "g3sources"))]
 extern crate dd_g3new as dd;
+
+#[cfg(feature = "g3sources")]
+extern crate app_g3sources as dd;
+
+use dd::feed_rs;
 use dd::flume;
-use dd::m_feed_rs as feed_rs;
 
 use feed_rs::parser;
 use flume::Receiver;

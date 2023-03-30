@@ -53,7 +53,7 @@ proc-status = { path = "target/proc-status-0.1.1" }
 textcode = { path = "target/textcode-0.2.2" }
 tinybmp = { path = "target/tinybmp-0.4.0" }
 tl = { path = "target/tl-0.7.7" }
-png = { path = "target/image-png-0.17.2" }
+png = { path = "target/image-png-0.17.5"  }
 bytemuck = { path = "target/bytemuck-1.7.0" }
 exr = { path = "target/exrs-1.5.0" }
 bit_field = { path = "target/rust-bit-field-0.10.1" }

@@ -36,7 +36,7 @@ rusqlite = { version = ">=0.28.0", features = [
 ] } # , optional = true  
 # rusqlite_l = { package="rusqlite", optional=true,  version = "0.25.2", features = ["bundled"], path="../app-gtk3-debian/target/rusqlite-sys0.25.2" }
 
-png = { version = ">=0.17.7"} # , optional = true  
+png = { version = ">=0.17.7"}
 #png_l =  {package="png", optional=true,   version="0.17.5",  path="../app-gtk3-debian/target/image-png-0.17.5" }
 
 image = { version = ">=0.24.0" } # 
