@@ -92,11 +92,11 @@ sct = { path = "target/sct.rs-v-0.7.0" }
 opml = { path = "target/opml/opml_api" } 
 usvg = { path = "target/resvg-0.29.0/usvg" }  
 hashlink = { path = "target/hashlink-0.8.0" }
+deflate = { path = "target/deflate-1.0.0" }
 
 
 ## not needed 
 # miniz_oxide = { path = "target/miniz_oxide-0.6.2/miniz_oxide" }
-# deflate = { path = "target/deflate-0.1.0" }
 
 
 

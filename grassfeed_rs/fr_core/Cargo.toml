@@ -6,7 +6,7 @@ edition = "2021"
 [features]
 ui-gtk = ["ui_gtk", "fr_gtk"]
 g3new = []                    #   "dd-g3new"
-g3sources = []                #  "i18local"  "app-g3sources" 
+g3sources = [ "app-g3sources" ]                #  "i18local"
 
 [dependencies]
 context = { path = "../context" }
@@ -14,7 +14,7 @@ resources = { path = "../resources" }
 gui_layer = { path = "../gui_layer" }
 
 ### NEU
-## PROBLEM:  deactivating this does not prevent using their sub-dependencies. 
+## PROBLEM:  deactivating this does not prevent using their sub-dependencies.
 # dd-g3new = { path = "../dd-g3new", optional = true }
 # fr_gtk = { path = "../fr_gtk", optional = true, features = ["g3new"] }
 # ui_gtk = { path = "../ui_gtk", optional = true, features = ["g3new"]  }
@@ -24,13 +24,13 @@ gui_layer = { path = "../gui_layer" }
 ### ALT
 #fr_gtk = { path = "../fr_gtk", optional = true, features = ["g3sources"] }
 #ui_gtk = { path = "../ui_gtk", optional = true, features = ["g3sources"]  }
-#i18local = { package = "rust-i18n", path = "../app-g3sources/target/rust-i18n-1.1.1", optional = true }
 app-g3sources = { path = "../app-g3sources", optional = true }
 # app-g3sources = "*"
 # dd = "*"
 ui_gtk = { path = "../ui_gtk", optional = true }
 fr_gtk = { path = "../fr_gtk", optional = true }
-rust-i18n = { version = "*", optional = true }
+# rust-i18n = {  path = "../app-g3sources/target/rust-i18n-1.1.1", optional = true }
+rust-i18n = { version = "*", path = "../app-g3sources/target/rust-i18n-1.1.1"  }
 
 
 base64 = "<=0.13.0"

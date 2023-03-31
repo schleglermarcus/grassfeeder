@@ -75,12 +75,20 @@ cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /"  \
  	>$F
 
 
-
 F=target/image-png-0.17.5/Cargo.toml
 mv $F ${F}.0    #  downgrading deflate, miniz_oxide
-cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\">=0.7.0\"  /" \
-	|sed -e "s/\"\0.5.1\"/\">=0.3.5\"/"  	>$F
+cat ${F}.0	| sed -e "s/deflate = \"1.0\"/deflate={version=\"1.0\", path=\"..\/deflate-1.0.0\"} /"	\
+	| sed -e "s/\"\0.5.1\"/{ version=\">=0.5.1\" , path=\"..\/miniz_oxide-0.5.1\/miniz_oxide\" } /"  \
+	>$F
+
+
+# 	|sed -e "s/deflate = \"1.0\"/deflate=\">=0.7.0\"  /" \
 #	|sed -e "s/\"\0.5.1\"/{ version=\"0.6.2\" , path=\"..\/miniz_oxide-0.6.2\/miniz_oxide\" } /"  \
+# 	|sed -e "s/\"\0.5.1\"/\">=0.3.5\"/"  \
+
+
+
+
 
 
 F=target/quick-xml-0.27.1/Cargo.toml
@@ -158,7 +166,7 @@ cat ${F}.0 	|sed -e "s/\"0.21\"/\">=0.13\" /"\
 				>$F
 
 F=target/resvg-0.29.0/rosvgtree/Cargo.toml
-mv $F ${F}.0		
+mv $F ${F}.0
 cat ${F}.0  	|sed -e "s/\"0.18\"/{version=\"=0.18\", path=\"..\/..\/roxmltree-0.18.0\"\}  /" \
 	|sed -e "s/\"0.10\"/{version=\"^0.10\", path=\"..\/..\/svgtypes-0.10.0\"\}  /"  	>$F
 
@@ -280,28 +288,28 @@ cat ${F}.0  	|sed -e "s/\"0.9\"/\">=0.7\"  /" 	>$F
 
 
 F=target/image-gif-0.12.0/Cargo.toml
-mv $F ${F}.0		
+mv $F ${F}.0
 cat ${F}.0  |sed -e "s/\"0.1.5\"/\{version=\">=0.1.5\" , path=\"..\/lzw-0.1.5\"  \} /"	>$F
 
 F=target/image-tiff-0.8.0/Cargo.toml
-mv $F ${F}.0		
+mv $F ${F}.0
 cat ${F}.0  |sed -e "s/\"0.3.0\"/ \"^0.3.0\" , path=\"..\/jpeg-decoder-0.3.0\"  /" \
 	|sed -e "s/\"0.1.0\"/\{version=\">=0.1.0\" , path=\"..\/lzw-0.1.5\"  \} /"	>$F
 
 F=target/tracing-tracing-0.1.37/tracing/Cargo.toml
-mv $F ${F}.0		
+mv $F ${F}.0
 cat ${F}.0  |sed -e "s/\"0.2.9\"/\">=0.2.7\"   /" 	>$F
 
 F=target/tracing-tracing-0.1.37/tracing-attributes/Cargo.toml
-mv $F ${F}.0		
+mv $F ${F}.0
 cat ${F}.0  |sed -e "s/\"1.0.98\"/\">=1.0.76\"   /" 	>$F
 
 F=target/tracing-tracing-0.1.37/tracing-core/Cargo.toml
-mv $F ${F}.0		
+mv $F ${F}.0
 cat ${F}.0  |sed -e "s/\"1.13.0\"/\">=1.9.0\"   /" 	>$F
 
 F=target/sct.rs-v-0.7.0/Cargo.toml
-mv $F ${F}.0	# downgrade  ring 
+mv $F ${F}.0	# downgrade  ring
 cat ${F}.0 	|sed -e "s/\"0.16.20\"/{ version=\"0.16.20\", path=\"..\/ring-0.16.20\" } /" 	>$F
 
 F=target/ring-0.16.20/Cargo.toml
