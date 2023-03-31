@@ -4,8 +4,8 @@ test -d target || mkdir target
 for F in src-releases/*.tar.?? ; do
 	(cd target/  ; tar xf ../$F  )
 done
-## ls target/
 
+ls target/
 
 F=target/feed-rs-1.3.0/feed-rs/Cargo.toml
 mv $F ${F}.0	#  downgrading chrono, quick-xml
