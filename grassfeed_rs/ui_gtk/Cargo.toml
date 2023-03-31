@@ -5,8 +5,8 @@ edition = "2021"
 
 ##  app-g3sources  must be removed from both sections:  features  and dependencies
 [features]
-g3new = ["dd-g3new"]
-g3sources = []       # "app-g3sources"
+g3new = []  #    "dd-g3new" 
+g3sources = [ "app-g3sources" ]       #
 
 
 [dependencies]
@@ -28,8 +28,9 @@ base64 = "<=0.13.0" # later
 
 
 ## NEU:
-dd-g3new = { path = "../dd-g3new", optional = true }
+# dd-g3new = { path = "../dd-g3new", optional = true }
+
 
 ## ALT: 
-# app-g3sources = { path = "../app-g3sources", optional = true }
-# gio ="0.14.8"   ##  range must not be opened
+app-g3sources = { path = "../app-g3sources", optional = true }
+gio ="0.14.8"   ##  range must not be opened

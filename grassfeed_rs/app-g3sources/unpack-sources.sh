@@ -50,6 +50,8 @@ cat ${F}.0 |sed -e "s/\"\^0.10.1\"/\{version=\"\^0.10.1\", path=\"..\/rust-bit-f
 	|sed -e "s/\"\^0.5.3\"/\">=0.4.0\"/" \
 	|sed -e "s/\"\^1.8.1\"/\">=1.7.0\"/" \
 	>$F
+# |sed -e "s/\"\0.5.1\"/{ version=\">=0.5.1\" , path=\"..\/miniz_oxide-0.6.2\/miniz_oxide\" } /" \
+
 
 F=target/jpeg-decoder-0.3.0/Cargo.toml
 mv $F ${F}.0
@@ -72,10 +74,13 @@ cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /"  \
 	|sed -e "s/, \"js\"//"	\
  	>$F
 
+
+
 F=target/image-png-0.17.5/Cargo.toml
 mv $F ${F}.0    #  downgrading deflate, miniz_oxide
 cat ${F}.0 |sed -e "s/deflate = \"1.0\"/deflate=\">=0.7.0\"  /" \
 	|sed -e "s/\"\0.5.1\"/\">=0.3.5\"/"  	>$F
+#	|sed -e "s/\"\0.5.1\"/{ version=\"0.6.2\" , path=\"..\/miniz_oxide-0.6.2\/miniz_oxide\" } /"  \
 
 
 F=target/quick-xml-0.27.1/Cargo.toml

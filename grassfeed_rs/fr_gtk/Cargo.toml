@@ -7,8 +7,8 @@ description = "Feed Reader application specific gtk setup"
 
 
 [features]
-g3new = ["dd-g3new"]
-g3sources = []  # "app-g3sources" 
+g3new = []  #    "dd-g3new" 
+g3sources = [ "app-g3sources"  ]  # 
 
 
 [dependencies]
@@ -17,18 +17,22 @@ context = { path = "../context" }
 resources = { path = "../resources" }
 
 ### NEU
-dd-g3new = { path = "../dd-g3new", optional = true }
-ui_gtk = { path = "../ui_gtk", features = ["g3new"] }
-rust-i18n = { version="*"  }
-
-### ALT
-# ui_gtk = { path = "../ui_gtk", features = ["g3sources"] }
-#rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
-#gio = "=0.14.8"
+# dd-g3new = { path = "../dd-g3new", optional = true }
+# ui_gtk = { path = "../ui_gtk", features = ["g3new"] }
+# rust-i18n = { version="*"  }
 
 
-# [target.'cfg(g3sources)'.dependencies]
-# app-g3sources = { path = "../app-g3sources", optional = true }
+
+### ALT  
+rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
+# rust-i18n = { version="1.1.1" , optional = true }
+ui_gtk = { path = "../ui_gtk", features = ["g3sources"] }
+# ui_gtk = { path = "../ui_gtk"  }
+
+app-g3sources = { path = "../app-g3sources", optional = true }
+gio = "=0.14.8"
+
+
 
 
 
@@ -53,6 +57,11 @@ chrono = "*"
 once_cell = "*"
 # log = "0.4.11"
 log = "*"
+
+
+
+# [target.'cfg(g3sources)'.dependencies]
+# app-g3sources = { path = "../app-g3sources", optional = true }
 
 
 # cargo run  --example icons

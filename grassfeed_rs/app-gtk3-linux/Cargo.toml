@@ -16,10 +16,10 @@ path = "src/main.rs"
 # (path dev-dependencies are ignored).
 #
 [dependencies]
-gui_layer = { path = "../gui_layer", version="0.1.0" }
-context = { path = "../context", version="0.1.0" }
-fr_core = { path = "../fr_core", version="0.1.0", features = ["ui_gtk", "fr_gtk"] }
-resources = { path = "../resources", version="0.1.0"  }
+gui_layer = { path = "../gui_layer" }
+context = { path = "../context" }
+fr_core = { path = "../fr_core", features = ["ui_gtk", "fr_gtk"] }
+resources = { path = "../resources" }
 dd-g3new = { path = "../dd-g3new" }
 
 

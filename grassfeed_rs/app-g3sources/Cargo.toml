@@ -5,7 +5,6 @@ edition = "2021"
 description = "Legacy Sources of old versions for debian build"
 
 [dependencies]
-
 feed-rs = { version = "1.3.0", path = "target/feed-rs-1.3.0/feed-rs" } 
 flume = { version = "0.10.14", path = "target/flume-master" }
 ureq = { path = "target/ureq-2.6.2" }                         #  , optional = true 
@@ -13,7 +12,6 @@ ico = { path = "target/rust-ico-0.3.0" }
 image = { path = "target/image-0.24.0" }
 
 
-# fern = { version = "*", features = ["colored", "chrono"] }
 syslog = ">=6.0.1"
 chrono = ">=0.4.19"
 # gumdrop = ">=0.8.1"	#  the debian packages only have 0.7.0
@@ -26,11 +24,10 @@ once_cell = ">=1.9.0"
 xdg = ">=2.2"
 serde = { version = ">=1.0.130" } 
 serde_json = { version = ">=1.0.45" } 
-
-
 gdk-pixbuf = "=0.14.0"
 gio = "=0.14.8"
 glib  = "=0.14.8"
+fern = { version = ">=0.6", features = ["colored", "chrono"] }
 
 
 ##  cannot be found as debian package or too old
@@ -95,6 +92,11 @@ sct = { path = "target/sct.rs-v-0.7.0" }
 opml = { path = "target/opml/opml_api" } 
 usvg = { path = "target/resvg-0.29.0/usvg" }  
 hashlink = { path = "target/hashlink-0.8.0" }
+
+
+## not needed 
+# miniz_oxide = { path = "target/miniz_oxide-0.6.2/miniz_oxide" }
+# deflate = { path = "target/deflate-0.1.0" }
 
 
 
