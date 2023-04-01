@@ -44,8 +44,7 @@ jpeg-decoder = { version = ">=0.3.0" }                      # ">=0.2.0"
 libwebp-image = "0.3.0"
 proc-status = ">=0.1.1"
 usvg = "0.25"
-base64 = "<=0.20.0"      #  0.21  needs code adaption on many places
-
+base64 = "<=0.20.0"                                         #  0.21  wants code adaption on many places
 
 [dev-dependencies]
 rand = "0.8.5"

@@ -167,7 +167,7 @@ impl Step<CleanerInner> for ReSortParentId {
         parent_ids.sort();
         parent_ids.dedup();
         if !parent_ids.is_empty() {
-            debug!("Cleanup: resorting {:?}", parent_ids);
+            trace!("Cleanup: resorting {:?}", parent_ids);
             parent_ids.iter().for_each(|p| {
                 resort_parent_list(*p as isize, &inner.subscriptionrepo);
             });
@@ -217,7 +217,7 @@ impl Step<CleanerInner> for CollapseSubscriptions {
             .map(|fse| fse.subs_id)
             .collect::<Vec<isize>>();
         if !collapse_ids.is_empty() {
-            debug!("Cleanup:  collapsing folders: {:?}", collapse_ids);
+            trace!("Cleanup:  collapsing folders: {:?}", collapse_ids);
             inner.subscriptionrepo.update_expanded(collapse_ids, false);
             inner.need_update_subscriptions = true;
         }
@@ -238,19 +238,13 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
         let mut reset_icon_subs_ids: Vec<i32> = all_folders
             .iter()
             .filter(|se| se.subs_id >= 0 && se.subs_id != SRC_REPO_ID_DUMMY)
-            .filter_map(|se| {
-                if se.icon_id != gen_icons::IDX_08_GNOME_FOLDER_48 {
-                    debug!("CorrectIconsOfFolders:  folder= {:?}", se);
-                    Some(se.subs_id as i32)
-                } else {
-                    None
-                }
-            })
+            .filter(|se| se.icon_id != gen_icons::IDX_08_GNOME_FOLDER_48)
+            .map(|se| se.subs_id as i32)
             .collect::<Vec<i32>>();
         reset_icon_subs_ids.sort();
         if !reset_icon_subs_ids.is_empty() {
             //  -3,-2  is always in the list
-            debug!("CorrectIconsOfFolders:  IDS={:?}", reset_icon_subs_ids);
+            trace!("CorrectIconsOfFolders:  IDS={:?}", reset_icon_subs_ids);
             inner
                 .subscriptionrepo
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_08_GNOME_FOLDER_48);
@@ -284,7 +278,7 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
         }
         reset_icon_subs_ids.sort();
         if !reset_icon_subs_ids.is_empty() {
-            debug!("CorrectIconsOnSubscriptions : {:?}", reset_icon_subs_ids);
+            trace!("CorrectIconsOnSubscriptions : {:?}", reset_icon_subs_ids);
             inner
                 .subscriptionrepo
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_05_RSS_FEEDS_GREY_64_D);
@@ -314,9 +308,10 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
             .collect::<Vec<i32>>();
         if !noncon_ids.is_empty() {
             if noncon_ids.len() < 100 && parent_ids_active.len() < 100 {
-                debug!(
+                trace!(
                     "Cleanup: not connected messages={:?}   parent-ids={:?}",
-                    &noncon_ids, &parent_ids_active
+                    &noncon_ids,
+                    &parent_ids_active
                 );
             } else {
                 debug!(
@@ -397,7 +392,6 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
                     known.insert((msg.entry_src_date, msg.title.clone()));
                 };
             });
-            // for d in &delete_list {                trace!(                    "ID{} == ID:{}\tdate:{} fetch:{}\t{}  post-id:{}",                    subs_id,                    d.message_id,                    db_time_to_display(d.entry_src_date),                    db_time_to_display(d.fetch_date),                    crate::db::message::decompress(&d.title),                    d.post_id                );            }
             if !delete_list.is_empty() {
                 let del_indices: Vec<i32> =
                     delete_list.iter().map(|m| m.message_id as i32).collect();
@@ -435,7 +429,7 @@ impl Step<CleanerInner> for PurgeMessages {
                 num_deleted,
             );
         } else if num_deleted > 0 {
-            debug!(
+            trace!(
                 "PurgeMessages: #all={}  Deleted {} messages",
                 all_count, num_deleted
             );

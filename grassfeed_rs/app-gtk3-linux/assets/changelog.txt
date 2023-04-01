@@ -1,12 +1,13 @@
 grassfeeder (0.1.8) bionic; urgency=low
 
-   * downgrade: no more formatted opml output, only simple line break. Due to compile issue on xmlem
+   * Downgrade due to compile issue on xmlem : no more formatted opml output, only simple line break. 
+  
+  - preparing debian package build process without network 
    
   - create new subscription --> don't jump the complete tree
   
   - bug:   msg map empty,  at window-restore without selected source
   
-  - TO DO  debian package for distribution
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Sat, 04 Feb 2023 00:20:00 +0000
 

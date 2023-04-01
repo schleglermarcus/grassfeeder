@@ -11,6 +11,7 @@ use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::ui_select::gui_context::GuiContext;
+use fr_core::ui_select::select::ui_select;
 use gui_layer::abstract_ui::AValue;
 use gui_layer::abstract_ui::GuiEvents;
 use std::cell::RefCell;
@@ -20,11 +21,14 @@ use std::sync::atomic::Ordering;
 
 // 1: Storing the pane position  into file on shutown
 // 2:  Detect circular dependency among context objects that prevent freeing them
+//  cargo    test  --test   shutdown_store_clean   --lib  -- --exact
 //  #[ignore]
 #[test]
 fn shutdown_store_ini() {
     setup();
     {
+        assert!(ui_select::is_mock_mode());
+
         let folder = "../target/db_shutdown".to_string();
         let gf_conf = GrassFeederConfig {
             path_config: folder.clone(),
@@ -56,11 +60,11 @@ fn shutdown_store_ini() {
     assert_eq!(inuse, false);
 }
 
-
-// #[ignore]
+#[ignore]
 #[test]
 fn add_folder_and_feed() {
     setup();
+    assert!(ui_select::is_mock_mode());
     let gf_conf = GrassFeederConfig {
         path_config: "../target/db_feedsource_add".to_string(),
         path_cache: "../target/db_feedsource_add".to_string(),

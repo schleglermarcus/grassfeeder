@@ -38,6 +38,10 @@ pub mod ui_select {
     pub fn from_gdk_sys(code: isize) -> KeyCodes {
         ui_gtk::keyboard_codes::from_gdk_sys(code)
     }
+
+    pub fn is_mock_mode() -> bool {
+        false
+    }
 }
 
 #[cfg(not(feature = "ui_gtk"))]
@@ -76,5 +80,9 @@ pub mod ui_select {
     #[allow(dead_code)]
     pub fn from_gdk_sys(_code: isize) -> KeyCodes {
         KeyCodes::Nothing
+    }
+
+    pub fn is_mock_mode() -> bool {
+        true
     }
 }

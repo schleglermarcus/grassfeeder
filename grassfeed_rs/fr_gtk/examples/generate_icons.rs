@@ -1,4 +1,4 @@
-// cargo run  --example icons
+// cd .. ;  cargo run  --example icons
 
 extern crate gdk;
 extern crate glib;

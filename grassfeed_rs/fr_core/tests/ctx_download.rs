@@ -23,8 +23,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 
-// const BASE_PATH: &str = "../fr_core/tests/feeds/";
-
 #[test]
 fn comprehensive_feed_download() {
     setup();
@@ -119,21 +117,6 @@ fn chrono_broken_timestamp() {
         "trailing input".to_string()
     );
 }
-
-/*
-fn prepare_feedsource_dummy() -> Rc<RefCell<dyn ISubscriptionRepo>> {
-    let mut fse = SubscriptionEntry::from_new_url(
-        "feed1-display".to_string(),
-        "gui_proc_rss2_v1.rss".to_string(),
-    );
-    fse.subs_id = 1;
-    fse.folder_position = 0;
-    let subscription_repo = SubscriptionRepo::new_inmem();
-    let _r = subscription_repo.store_entry(&fse);
-    let r_fsource: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(subscription_repo));
-    r_fsource
-}
-*/
 
 // ------------------------------------
 
