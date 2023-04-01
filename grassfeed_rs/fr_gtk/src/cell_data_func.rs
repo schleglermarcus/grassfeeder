@@ -47,17 +47,17 @@ pub trait BoldFuncDiscriminator {
     }
 }
 
-#[cfg(not(feature = "g3sources"))]
+#[cfg(not(feature = "legacy3gtk14"))]
 pub fn add_font_weight(r: &AttrList) {
     r.insert(Attribute::from(AttrInt::new_weight(Weight::Bold)));
 }
 
-#[cfg(feature = "g3sources")]
+#[cfg(feature = "legacy3gtk14")]
 pub fn add_font_weight(r: &AttrList) {
     r.insert(gtk::pango::Attribute::new_weight(Weight::Bold));
 }
 
-#[cfg(not(feature = "g3sources"))]
+#[cfg(not(feature = "legacy3gtk14"))]
 pub fn add_font_size(r: &AttrList, fontsize: u32) {
     if fontsize > 0 {
         r.insert(Attribute::from(gtk::pango::AttrSize::new(
@@ -66,9 +66,9 @@ pub fn add_font_size(r: &AttrList, fontsize: u32) {
     }
 }
 
-#[cfg(feature = "g3sources")]
+#[cfg(feature = "legacy3gtk14")]
 pub fn add_font_size(r: &AttrList, fontsize: u32) {
-    // do nothing. Downgrade of functionality with gtk-0.14.   Later   add recent gtk packages
+    // do nothing. Downgrade of functionality with gtk-0.14.   Later   add newer gtk packages
 }
 
 #[derive(Default)]

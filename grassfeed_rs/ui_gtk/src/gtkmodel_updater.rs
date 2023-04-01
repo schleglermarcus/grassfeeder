@@ -3,10 +3,14 @@
 // use crate::webkit2gtk::traits::WebView;
 // #[cfg(feature = "g3sources")]
 // use crate::webkit2gtk::traits::WebViewExt;
-// #[cfg(feature = "g3new")]
 // use dd::webkit2gtk::WebViewExt;
-// #[allow(unused_imports)]
-// #[allow(unused_imports)]
+
+#[cfg(not(feature = "legacy3gtk14"))]
+use webkit2gtk::WebViewExt;
+#[cfg(feature = "legacy3gtk14")]
+use webkit2gtk::traits::WebViewExt;
+
+
 
 use crate::iconloader::IconLoader;
 use crate::GtkObjectsType;
@@ -34,7 +38,6 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;
 use std::sync::Arc;
-use webkit2gtk::WebViewExt;
 use webkit2gtk::WebView;
 
 pub struct GtkModelUpdaterInt {

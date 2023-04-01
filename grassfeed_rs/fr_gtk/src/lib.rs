@@ -9,6 +9,7 @@
 // extern crate itertools; // for key codes // background color
 //  pub extern crate gdk_sys;
 
+#[macro_use]
 extern crate rust_i18n;
 #[macro_use]
 extern crate log;

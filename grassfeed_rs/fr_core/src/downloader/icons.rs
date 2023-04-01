@@ -464,7 +464,7 @@ impl InvestigateOne for InvJpg {
 
 struct InvGif {}
 impl InvestigateOne for InvGif {
-    #[cfg(feature = "g3sources")]
+    #[cfg(feature = "legacy3gtk14")]
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         let cursor = std::io::Cursor::new(vec_u8);
@@ -483,7 +483,7 @@ impl InvestigateOne for InvGif {
         r
     }
 
-    #[cfg(not(feature = "g3sources"))]
+    #[cfg(not(feature = "legacy3gtk14"))]
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         let cursor = std::io::Cursor::new(vec_u8);
@@ -506,9 +506,25 @@ impl InvestigateOne for InvGif {
 
 struct InvSvg {}
 impl InvestigateOne for InvSvg {
+
+    #[cfg(not(feature = "legacy3gtk14"))]
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
         match usvg::Tree::from_data(vec_u8, &usvg::Options::default().to_ref()) {
+            Ok(_rtree) => {
+                r.kind = IconKind::Svg;
+            }
+            Err(e) => {
+                r.message = format!("not_svg: {e:?}");
+            }
+        }
+        r
+    }
+
+    #[cfg(feature = "legacy3gtk14")]
+    fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
+        let mut r = IconAnalyseResult::default();
+        match usvg::Tree::from_data(vec_u8, &usvg::Options::default()) {
             Ok(_rtree) => {
                 r.kind = IconKind::Svg;
             }

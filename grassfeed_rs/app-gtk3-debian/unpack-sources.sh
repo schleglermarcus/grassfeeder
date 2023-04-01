@@ -5,7 +5,7 @@ for F in src-releases/*.tar.?? ; do
 	(cd target/  ; tar xf ../$F  )
 done
 
-ls target/
+# ls target/
 
 F=target/feed-rs-1.3.0/feed-rs/Cargo.toml
 mv $F ${F}.0	#  downgrading chrono, quick-xml
@@ -177,7 +177,7 @@ cat ${F}.0  |sed -e "s/\"0.13.5\"/{version=\"^0.13.5\", path=\"..\/xmlparser-0.1
 
 F=target/strict-num-0.1.0/Cargo.toml
 mv $F ${F}.0		#  downgrade of  float-cmp,   removing feature  "std"
-cat ${F}.0 |sed -e "s/\"0.9\"/\">=0.6\" /" |sed -e "s/\"std\"//"	>$F
+cat ${F}.0 |sed -e "s/\"0.9\"/\"0.6\" /" |sed -e "s/\"std\"//"	>$F
 
 F=target/webpki-roots-v-0.22.6/Cargo.toml
 mv $F ${F}.0

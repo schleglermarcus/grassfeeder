@@ -259,22 +259,22 @@ impl GtkObjectsImpl {
         }
     }
 
-    #[cfg(not(feature = "g3sources"))]
+    #[cfg(not(feature = "legacy3gtk14"))]
     fn paned_default() -> Paned {
         gtk::Paned::default()
     }
 
-    #[cfg(feature = "g3sources")]
+    #[cfg(feature = "legacy3gtk14")]
     fn paned_default() -> Paned {
         gtk::Paned::new(gtk::Orientation::Horizontal)
     }
 
-    #[cfg(not(feature = "g3sources"))]
+    #[cfg(not(feature = "legacy3gtk14"))]
     fn scrolledwindow_default() -> ScrolledWindow {
         gtk::ScrolledWindow::default()
     }
 
-    #[cfg(feature = "g3sources")]
+    #[cfg(feature = "legacy3gtk14")]
     fn scrolledwindow_default() -> ScrolledWindow {
         const NONE_ADJ: Option<&gtk::Adjustment> = None;
         gtk::ScrolledWindow::new(NONE_ADJ, NONE_ADJ)

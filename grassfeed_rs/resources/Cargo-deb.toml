@@ -11,13 +11,8 @@ edition = "2021"
 [dependencies]
 log = ">=0.4.11"
 once_cell = "*"
+rust-i18n = { version = "1.1.1" , path = "../app-gtk3-debian/target/rust-i18n-1.1.1" }
 
-
-
-## ALT
-# rust-i18n = { version = ">=1.1.1", optional = true, path="../app-g3sources/target/rust-i18n-1.1.1"   }
-## Everything else did not work !           TODO patch this later
-rust-i18n = { version = "*", path = "../app-g3sources/target/rust-i18n-1.1.1" }
 
 [package.metadata.i18n]
 available-locales = ["en", "de"]

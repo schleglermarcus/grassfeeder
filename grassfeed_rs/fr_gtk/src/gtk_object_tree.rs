@@ -111,13 +111,13 @@ pub struct GtkObjectTree {
 }
 
 // https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/pango/rectangle/struct.Rectangle.html
-#[cfg(not(feature = "g3sources"))]
+#[cfg(not(feature = "legacy3gtk14"))]
 fn get_width_height(rectangle: &gtk::Rectangle) -> (i32, i32) {
     ((*rectangle).width(), (*rectangle).height())
 }
 
 // https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/pango/struct.Rectangle.html
-#[cfg(feature = "g3sources")]
+#[cfg(feature = "legacy3gtk14")]
 fn get_width_height(rectangle: &gtk::Rectangle) -> (i32, i32) {
     ((*rectangle).width, (*rectangle).height)
 }
@@ -834,7 +834,7 @@ pub fn create_buttonbox(_g_ev_se: Sender<GuiEvents>) -> ButtonBox {
     buttonbox
 }
 
-#[cfg(not(feature = "g3sources"))]
+#[cfg(not(feature = "legacy3gtk14"))]
 pub fn create_webcontext_dep(browser_dir: &str) -> WebContext {
     let wk_dm = WebsiteDataManager::builder()
         .base_cache_directory(browser_dir)
@@ -847,7 +847,7 @@ pub fn create_webcontext_dep(browser_dir: &str) -> WebContext {
     WebContext::with_website_data_manager(&wk_dm)
 }
 
-#[cfg(feature = "g3sources")]
+#[cfg(feature = "legacy3gtk14")]
 pub fn create_webcontext_dep(browser_dir: &str) -> WebContext {
     let wk_dm = WebsiteDataManager::builder().build();
     WebContext::builder().build()

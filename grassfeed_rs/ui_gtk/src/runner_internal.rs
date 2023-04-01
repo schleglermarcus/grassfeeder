@@ -38,7 +38,7 @@ static INTERVAL_COUNTER: AtomicU8 = AtomicU8::new(0);
 // https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/glib/struct.MainContext.html
 // https://github.com/gtk-rs/gtk-rs-core/issues/186
 // https://github.com/gtk-rs/glib/issues/448
-#[cfg(feature = "g3sources")]
+#[cfg(feature = "legacy3gtk14")]
 macro_rules! g14m_guard{
     ()=>{
         let mc_ =gtk::glib::MainContext::default();
@@ -49,7 +49,7 @@ macro_rules! g14m_guard{
     }
 }
 
-#[cfg(not(feature = "g3sources"))]
+#[cfg(not(feature = "legacy3gtk14"))]
 macro_rules! g14m_guard {
     () => {};
 }
