@@ -3,34 +3,27 @@ name = "ui_gtk"
 version = "0.1.0"
 edition = "2021"
 
-##  app-g3sources  must be removed from both sections:  features  and dependencies
 [features]
-g3new = []  #    "dd-g3new" 
-g3sources = [ "app-g3sources" ]       #
-
+legacy3gtk14 = []
 
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 resources = { path = "../resources" }
-#	gdk-sys = "^0.15.1"		# downgrade for debian repo
-# gdk-sys = ">=0.14"
-gdk-sys = "*"
+log = ">=0.4.11"
+gdk-sys = "^0.15.1"
+gio = { version = "=0.15.5" }
+serde = ">=1.0.133"
+base64 = "^0.21.0"
+flume = { version = ">=0.10.14" }
+webkit2gtk = { version = "=0.18.2", features = [
+    "v2_36",
+], default-features = false }
 # gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
-# gtk_m = { package="gtk" , optional = true , version = ">=0.15.5", features = [  "v3_22_30",] } 
-gtk = "*"
-###	log = "0.4.14"				# downgrade for debian repo
-# log = ">=0.4.11"
-log = "*"
-# serde = ">=1.0.133"			# downgrade for debian repo
-# serde = ">=1.0.130"
-serde = "*"
-base64 = "<=0.13.0" # later
-
+gtk = { version = ">=0.15.5", features = ["v3_22_30"] }
+lz4-compression = "0.7.0"
 
 ## NEU:
 # dd-g3new = { path = "../dd-g3new", optional = true }
-
-
-## ALT: 
-app-g3sources = { path = "../app-g3sources", optional = true }
-gio ="0.14.8"   ##  range must not be opened
+## ALT:
+# app-g3sources = { path = "../app-g3sources", optional = true }
+# gio ="0.14.8"   ##  range must not be opened

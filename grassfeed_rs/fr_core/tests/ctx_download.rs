@@ -1,13 +1,13 @@
-#[cfg(not(feature = "g3sources"))]
-extern crate dd_g3new as dd;
+// #[cfg(not(feature = "g3sources"))]
+// extern crate dd_g3new as dd;
+// #[cfg(feature = "g3sources")]
+// extern crate app_g3sources as dd;
+// use dd::flume;
 
-#[cfg(feature = "g3sources")]
-extern crate app_g3sources as dd;
 
 mod logger_config;
 mod unzipper;
 
-use dd::flume;
 
 use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::Downloader;

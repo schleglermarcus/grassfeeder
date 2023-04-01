@@ -1,19 +1,16 @@
+// use std::str::FromStr;
 // #[cfg(feature = "g3sources")]
 // use crate::webkit2gtk::traits::WebView;
-
-#[cfg(feature = "g3sources")]
-use crate::webkit2gtk::traits::WebViewExt;
-
-#[cfg(feature = "g3new")]
-use dd::webkit2gtk::WebViewExt;
-#[allow(unused_imports)]
-use std::str::FromStr;
-#[allow(unused_imports)]
-use gtk::gdk::RGBA;
+// #[cfg(feature = "g3sources")]
+// use crate::webkit2gtk::traits::WebViewExt;
+// #[cfg(feature = "g3new")]
+// use dd::webkit2gtk::WebViewExt;
+// #[allow(unused_imports)]
+// #[allow(unused_imports)]
 
 use crate::iconloader::IconLoader;
 use crate::GtkObjectsType;
-use crate::WebView;
+use gtk::gdk::RGBA;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::glib;
 use gtk::prelude::*;
@@ -37,6 +34,8 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;
 use std::sync::Arc;
+use webkit2gtk::WebViewExt;
+use webkit2gtk::WebView;
 
 pub struct GtkModelUpdaterInt {
     m_v_store: UIAdapterValueStoreType,
@@ -706,7 +705,7 @@ impl GtkModelUpdaterInt {
 } // GtkModelUpdaterInt
 
 /// outsourcing this due to  the gtk 0.14  incompatible api
-#[cfg(feature = "g3new")]
+#[cfg(not(feature = "legacy3gtk14"))]
 pub fn set_brightness(bright: isize, webview: &WebView) {
     let bright: f64 = bright as f64 / 255.0;
     let c_bg = RGBA::new(bright, bright, bright, 1.0);
@@ -716,10 +715,5 @@ pub fn set_brightness(bright: isize, webview: &WebView) {
 /// No Background setting available  for the old version
 // https://docs.rs/webkit2gtk/0.14.0/webkit2gtk/struct.WebView.html
 // https://github.com/gtk-rs/gtk3-rs/blob/0.14.3/gdk/src/rgba.rs
-#[cfg(feature = "g3sources")]
-pub fn set_brightness(_bright: isize, _webview: &WebView) {
-    // let bright: f64 = bright as f64 / 255.0;
-    // let colorstr = format!("{:2x}{:2x}{:2x}", bright as u8, bright as u8, bright as u8,);
-    // let c_bg = RGBA::from_str(&colorstr);
-    // webview.set_background_color(&c_bg);
-}
+#[cfg(feature = "legacy3gtk14")]
+pub fn set_brightness(_bright: isize, _webview: &WebView) {}

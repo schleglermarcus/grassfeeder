@@ -1,7 +1,8 @@
-#[cfg(not(feature = "g3sources"))]
-use dd::gtk;
+// #[cfg(not(feature = "g3sources"))]
+// use dd::gtk;
+// use dd::flume;
 
-use dd::flume;
+
 use flume::Sender;
 use gtk::gdk_pixbuf::InterpType;
 use gtk::prelude::ImageExt;

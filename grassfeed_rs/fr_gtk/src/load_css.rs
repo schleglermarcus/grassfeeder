@@ -7,8 +7,8 @@
 // GTK_DEBUG=interactive
 //
 
-#[cfg(not(feature = "g3sources"))]
-use dd::gtk;
+// #[cfg(not(feature = "g3sources"))]
+// use dd::gtk;
 
 use gtk::prelude::CssProviderExt;
 

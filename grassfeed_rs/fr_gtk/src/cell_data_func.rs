@@ -1,12 +1,12 @@
 /**
+// #[cfg(not(feature = "g3sources"))]
+// use dd::gtk;
 
 https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/pango/struct.AttrSize.html
 https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/pango_sys/struct.PangoAttrSize.html
 
  */
 
-#[cfg(not(feature = "g3sources"))]
-use dd::gtk;
 
 use gtk::pango::AttrInt;
 use gtk::pango::AttrList;

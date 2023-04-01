@@ -7,60 +7,43 @@ description = "Feed Reader application specific gtk setup"
 
 
 [features]
-g3new = []  #    "dd-g3new" 
-g3sources = [ "app-g3sources"  ]  # 
+legacy3gtk14 = []
 
 
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
 resources = { path = "../resources" }
+ui_gtk = { path = "../ui_gtk" }
+rust-i18n = { version = ">=1.1.4" }
+fern = { version = "^0.6.2", features = ["colored"] }
+# gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
+gtk = { package = "gtk", version = "^0.15.5", features = ["v3_22_30"] }
+gdk = "^0.15.2"
+gdk-sys = "^0.15.1"
+itertools = "^0.10.1"
+once_cell = "^1.12.0"
+log = "^0.4.17"
+pango = "^0.15.10"
+flume = ">=0.10.14"
+webkit2gtk = { version = "=0.18.2", default-features = false, features = [
+    "v2_36",
+] }
+
+
+# chrono = "*"
+# gio = "=0.14.8"
 
 ### NEU
 # dd-g3new = { path = "../dd-g3new", optional = true }
-# ui_gtk = { path = "../ui_gtk", features = ["g3new"] }
 # rust-i18n = { version="*"  }
 
 
-
-### ALT  
-rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
+### ALT
+#rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
 # rust-i18n = { version="1.1.1" , optional = true }
-ui_gtk = { path = "../ui_gtk", features = ["g3sources"] }
+#ui_gtk = { path = "../ui_gtk", features = ["g3sources"] }
 # ui_gtk = { path = "../ui_gtk"  }
-
-app-g3sources = { path = "../app-g3sources", optional = true }
-gio = "=0.14.8"
-
-
-
-
-
-## ----
-# fern = { version = "0.6", features = ["colored"] }
-fern = "*"
-# gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
-# gtk_m = { package = "gtk", optional = true, version = "^0.15.5", features = [  "v3_22_30",] }
-# gtk_l = { package = "gtk", optional = true, version = "0.14.3", features = [  "v3_22_30",] } # downgrade for debian integration
-gtk = "*"
-#	gdk = "^0.15.2"	# downgrade for debian integration
-# gdk = ">=0.14.3"
-gdk = "*"
-# gdk-sys = "^0.15.1"			# downgrade for debian integration
-# gdk-sys = ">=0.14.0"
-gdk-sys = "*"
-# itertools = "0.10.1"
-itertools = "*"
-chrono = "*"
-#	once_cell = ">=1.12.0"
-# once_cell = ">=1.9.0"
-once_cell = "*"
-# log = "0.4.11"
-log = "*"
-
-
-
-# [target.'cfg(g3sources)'.dependencies]
 # app-g3sources = { path = "../app-g3sources", optional = true }
 
 

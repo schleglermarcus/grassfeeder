@@ -1,14 +1,12 @@
-#[cfg(not(feature = "g3sources"))]
-extern crate dd_g3new as dd;
+// #[cfg(not(feature = "g3sources"))]
+// extern crate dd_g3new as dd;
+// #[cfg(feature = "g3sources")]
+// extern crate app_g3sources as dd;
+// use dd::flume;
+// use dd::xmlparser;
 
-#[cfg(feature = "g3sources")]
-extern crate app_g3sources as dd;
-
-use dd::flume;
-use dd::xmlparser;
 
 mod unzipper;
-
 use crate::unzipper::TD_BASE;
 use fr_core::controller::guiprocessor::Job;
 use fr_core::controller::sourcetree::SJob;

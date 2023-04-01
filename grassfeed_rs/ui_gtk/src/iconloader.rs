@@ -1,4 +1,4 @@
-use dd::lz4_compression;
+// use dd::lz4_compression;
 
 use gtk::glib::Bytes;
 use gtk::gdk_pixbuf::Pixbuf;

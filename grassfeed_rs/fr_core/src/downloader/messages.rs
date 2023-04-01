@@ -1,6 +1,6 @@
-#[cfg(not(feature = "dd-g3old"))]
-use dd::feed_rs;
-use dd::flume;
+// #[cfg(not(feature = "dd-g3old"))]
+// use dd::feed_rs;
+// use dd::flume;
 
 use crate::controller::contentlist::match_new_entries_to_existing;
 use crate::controller::contentlist::CJob;

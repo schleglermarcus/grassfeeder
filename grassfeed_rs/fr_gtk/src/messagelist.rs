@@ -1,7 +1,8 @@
-#[cfg(not(feature = "g3sources"))]
-use dd::gtk;
-#[cfg(not(feature = "g3sources"))]
-use dd::gdk;
+// #[cfg(not(feature = "g3sources"))]
+// use dd::gtk;
+// #[cfg(not(feature = "g3sources"))]
+// use dd::gdk;
+// use dd::flume;
 
 
 use crate::cell_data_func::*;
@@ -10,7 +11,6 @@ use crate::util::EvSenderCache;
 use crate::util::EvSenderWrapper;
 use crate::util::MOUSE_BUTTON_LEFT;
 use crate::util::MOUSE_BUTTON_RIGHT;
-use dd::flume;
 use flume::Sender;
 use gdk::EventButton;
 use gtk::gdk_pixbuf::Pixbuf;

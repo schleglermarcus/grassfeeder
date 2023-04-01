@@ -1,16 +1,21 @@
-use dd::flume;
-#[cfg(not(feature = "g3sources"))]
-use dd::gtk  as gtk;
+// use dd::flume;
+// #[cfg(not(feature = "g3sources"))]
+// use dd::gtk  as gtk;
+// #[cfg(not(feature = "g3sources"))]
 
 
-#[cfg(not(feature = "g3sources"))]
-use gtk::builders::NotebookBuilder;
 
-
-#[cfg(feature = "g3sources")]
+#[cfg(feature = "legacy3gtk14")]
 use gtk::NotebookBuilder;
+#[cfg(feature = "legacy3gtk14")]
+use gtk::ToolButtonBuilder;
 
-use rust_i18n;
+#[cfg(not(feature = "legacy3gtk14"))]
+use gtk::builders::NotebookBuilder;
+#[cfg(not(feature = "legacy3gtk14"))]
+use gtk::builders::ToolButtonBuilder;
+
+
 use crate::util::*;
 use flume::Sender;
 use gtk::gdk_pixbuf::InterpType;
@@ -48,6 +53,7 @@ use resources::gen_icons::*;
 use resources::id::*;
 use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
+use rust_i18n;
 use rust_i18n::t;
 use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::iconloader::IconLoader;

@@ -1,12 +1,12 @@
-#[cfg(not(feature = "g3sources"))]
-use dd::gtk;
+// #[cfg(not(feature = "g3sources"))]
+// use dd::gtk;
+// use dd::flume;
 
 use crate::cell_data_func::*;
 use crate::util::DragState;
 use crate::util::EvSenderWrapper;
 use crate::util::DIALOG_ICON_SIZE;
 use crate::util::MOUSE_BUTTON_RIGHT;
-use dd::flume;
 use flume::Sender;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::TreeModelExt;

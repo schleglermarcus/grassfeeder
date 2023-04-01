@@ -9,14 +9,14 @@ description = "Feed Reader Testing Module"
 resources = { path = "../resources" }
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
-fr_core = { path = "../fr_core", features = ["ui-gtk", "g3new"] } # 
-fr_gtk = { path = "../fr_gtk", features = ["g3new"] }
-ui_gtk = { path = "../ui_gtk", features = ["g3new"] }
+fr_core = { path = "../fr_core", features = ["ui-gtk"] }
+fr_gtk = { path = "../fr_gtk" }
+ui_gtk = { path = "../ui_gtk" }
 
 
 http = "0.2.6"
 bincode = ">=1.3.3"
-fern = { version = "* ", features = ["colored"] } # 0.6
+fern = { version = "*", features = ["colored"] } # 0.6
 flate2 = ">=1.0.24"
 base64 = "<=0.13.0"
 

@@ -1,4 +1,4 @@
-use dd::flume;
+// use dd::flume;
 
 use crate::gtkmodel_updater::GtkModelUpdaterInt;
 use crate::gtkrunner::GtkObjectsImpl;
@@ -34,7 +34,6 @@ use std::time::Instant;
 
 const GTK_MAIN_INTERVAL: std::time::Duration = Duration::from_millis(100);
 static INTERVAL_COUNTER: AtomicU8 = AtomicU8::new(0);
-
 
 // https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/glib/struct.MainContext.html
 // https://github.com/gtk-rs/gtk-rs-core/issues/186
@@ -288,7 +287,7 @@ fn build_window(
     window
 }
 
-#[cfg(feature = "g3new")]
+#[cfg(not(feature = "legacy3gtk14"))]
 pub fn dbus_close(app: &gtk::Application) {
     if let Some(dbuscon) = app.dbus_connection() {
         dbuscon.close(gtk::gio::Cancellable::NONE, |_a1| {
@@ -297,7 +296,7 @@ pub fn dbus_close(app: &gtk::Application) {
     }
 }
 
-#[cfg(feature = "g3sources")]
+#[cfg(feature = "legacy3gtk14")]
 pub fn dbus_close(app: &gtk::Application) {
     if let Some(dbuscon) = app.dbus_connection() {
         let none_cancellable: Option<&Cancellable> = Option::None;
@@ -307,12 +306,12 @@ pub fn dbus_close(app: &gtk::Application) {
     }
 }
 
-#[cfg(feature = "g3new")]
+#[cfg(not(feature = "legacy3gtk14"))]
 pub fn dbus_register(app: &gtk::Application) {
     let _r = app.register(Cancellable::NONE);
 }
 
-#[cfg(feature = "g3sources")]
+#[cfg(feature = "legacy3gtk14")]
 pub fn dbus_register(app: &gtk::Application) {
     let none_cancellable: Option<&Cancellable> = Option::None;
     let _r = app.register(none_cancellable);
