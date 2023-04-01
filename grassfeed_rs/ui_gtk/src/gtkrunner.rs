@@ -801,4 +801,14 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     fn update_window_minimized(&self, mini: bool, ev_time: u32) {
         self.send_to_int(&IntCommands::UpdateWindowMinimized(mini, ev_time));
     }
+
+    fn tree_set_cursor(&self, tree_idx: u8, path: Vec<u16>, column: u8, scroll_pos: i8)
+    {
+
+        self.send_to_int(&&IntCommands::TreeSetCursor(
+            tree_idx, path, column, scroll_pos,
+        ));
+
+    }
+
 } //

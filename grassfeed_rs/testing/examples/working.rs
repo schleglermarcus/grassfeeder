@@ -1,4 +1,3 @@
-
 use chrono::Local;
 use chrono::TimeZone;
 use context::appcontext::AppContext;
@@ -163,12 +162,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             folder1,
             false,
         );
-        // let f5 = feedsources.add_new_folder_at_parent("folder5".to_string(), 0);
-        // feedsources.add_new_folder_at_parent("5_0".to_string(), f5);
-        // feedsources.add_new_folder_at_parent("5_1".to_string(), f5);
-        // feedsources.add_new_folder_at_parent("5_2".to_string(), f5);
-        // feedsources.add_new_folder_at_parent("5_3".to_string(), f5);
-        // feedsources.add_new_folder_at_parent("5_4".to_string(), f5);
+        let f5 = feedsources.add_new_folder_at_parent("folder5".to_string(), 0);
+        feedsources.add_new_folder_at_parent("5_0".to_string(), f5);
+        feedsources.add_new_folder_at_parent("5_1".to_string(), f5);
+        feedsources.add_new_folder_at_parent("5_2".to_string(), f5);
+        feedsources.add_new_folder_at_parent("5_3".to_string(), f5);
+        feedsources.add_new_folder_at_parent("5_4".to_string(), f5);
     }
     if false {
         let src = [
@@ -224,7 +223,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://www.reddit.com/r/aww.rss", "aww"),
             ("https://feeds.breakingnews.ie/bnworld", "breaknew"),
         ];
-        let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), folder1);
+        let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
             feedsources.add_new_subscription_at_parent(
                 url.to_string(),

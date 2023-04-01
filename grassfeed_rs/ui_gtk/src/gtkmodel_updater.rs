@@ -83,6 +83,12 @@ impl GtkModelUpdaterInt {
         let path: Vec<i32> = vec![];
         let mut expand_paths: Vec<TreePath> = Vec::default();
         let gui_tree_root = (self.m_v_store).read().unwrap().get_tree_root();
+
+        trace!(
+            "update_tree_model  #CHILD: {} ",
+            gui_tree_root.children.len()
+        );
+
         for (path_index, gti) in gui_tree_root.children.iter().enumerate() {
             let mut innerpath = path.clone();
             innerpath.push(path_index as i32);
@@ -194,9 +200,8 @@ impl GtkModelUpdaterInt {
         }
     }
 
-    //  replaces a single line of the tree
+    ///  replaces a single line of the tree
     pub fn update_tree_model_single(&self, index: u8, path: Vec<u16>) {
-        // let now = Instant::now();
         let max_columns;
         let tree_store: TreeStore;
         {
@@ -228,8 +233,68 @@ impl GtkModelUpdaterInt {
                 &path, &path_cn, gti
             );
         }
-        // let elapsed_fin = now.elapsed().as_millis();
-        // if elapsed_fin > 40 {            debug!(                "update_tree_model_single({} {:?}) TOO LONG {:?} times:{} {} ",                index, path, &gti.a_values[1], elapsed_3, elapsed_fin            );        }
+    }
+
+    pub fn tree_set_cursor(&self, idx: u8, path: Vec<u16>, column: u8, scroll_pos: i8) {
+        let g_o = (*self.g_o_a).read().unwrap();
+        // let o_treestore = g_o.get_list_store(idx as usize);
+        debug!("GMU: tree_set_cursor {}   {:?}  col:{} ", idx, path, column);
+        let tree_store: TreeStore;
+        let tree_view: TreeView;
+        {
+            let g_o = (*self.g_o_a).read().unwrap();
+            // max_columns = g_o.get_tree_store_max_columns(index as usize) as usize;
+            tree_store = g_o.get_tree_store(idx as usize).unwrap().clone();
+            let o_treeview = g_o.get_tree_view(idx as usize);
+            if o_treeview.is_none() {
+                warn!("tree_set_cursor: no treeview!");
+                return;
+            }
+            tree_view = o_treeview.unwrap().clone();
+        }
+
+        let path_cn = format!("{:?}", path )
+            .replace(['[', ']', ' '], "")
+            .replace(',', ":");
+
+        if let Some(iter) = tree_store.iter_from_string(&path_cn) {
+
+
+            if let Some (t_path)  = tree_store.path(&iter) {
+                debug!("GMU tree_set_cursor :  {:?} ", path_cn);
+                let focus_column: Option<&TreeViewColumn> = None;
+                tree_view.set_cursor(&t_path, focus_column, false);
+
+            }
+
+        } else {
+            error!(
+                "tree_set_cursor: BadPath3 {:?} {:?} : TreeStore does not contain iter.  {:?}  ",
+                &path, &path_cn, column
+            );
+        }
+        /*
+
+               if let Some(t_path) = matching_path {
+                   // trace!(                "list_set_cursor :  {:?} scroll: {}",                &t_path.indices(),                scroll_pos            );
+                   let focus_column: Option<&TreeViewColumn> = None;
+                   (*treeview).set_cursor(&t_path, focus_column, false);
+                   if scroll_pos >= 0 {
+                       (*treeview).scroll_to_cell(
+                           Some(&t_path),
+                           focus_column,
+                           true,
+                           (scroll_pos as f32) / 100.0,
+                           0.0,
+                       );
+                   }
+               } else {
+                   warn!(
+                       "GMU: list_set_cursor {}   {}  col:{}  path not found! {:?} ",
+                       idx, db_id, column, &matching_path
+                   );
+               }
+        */
     }
 
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
@@ -516,7 +581,6 @@ impl GtkModelUpdaterInt {
     //  unavailable db-id:   remove focus.
     //  Tried to:  disconnect, reconnect ->  cursor is gone
     pub fn list_set_cursor(&self, idx: u8, db_id: isize, column: u8, scroll_pos: i8) {
-        let now = std::time::Instant::now();
         let g_o = (*self.g_o_a).read().unwrap();
         let o_treestore = g_o.get_list_store(idx as usize);
         if o_treestore.is_none() {
@@ -558,11 +622,14 @@ impl GtkModelUpdaterInt {
                 );
             }
         }
-        let elapsed = now.elapsed().as_millis();
-        if elapsed > 30 {
-            debug!("list_set_cursor({})  {} ms ", db_id, elapsed);
+/*         else {
+            warn!(
+                "GMU: list_set_cursor {}   {}  col:{}  path not found! {:?} ",
+                idx, db_id, column, &matching_path
+            );
         }
-    }
+*/
+}
 
     pub fn widget_mark(&self, typ: UIUpdaterMarkWidgetType, idx: u8, mark: u8) {
         let name: &str = match typ {

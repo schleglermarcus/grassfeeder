@@ -46,10 +46,16 @@ pub enum IntCommands {
     UpdateTreeModel(u8),
     ///  tree_index,   path
     UpdateTreeModelSingle(u8, Vec<u16>),
+
+    ///  tree_index,   path, column,   scroll-pos
+    TreeSetCursor(u8, Vec<u16>, u8, i8),
+
     UpdateListModel(u8),
     ///  list_index,   list_position
     UpdateListModelSingle(u8, u32),
     UpdateListModelSome(u8, Vec<u32>),
+    ///  list_index,   db-id, column,   scroll-pos
+    ListSetCursor(u8, isize, u8, i8),
     UpdateTextView(u8),
     UpdateWebView(u8),
     UpdateWebViewPlain(u8),
@@ -61,8 +67,6 @@ pub enum IntCommands {
     ShowDialog(u8),
     ///  paned-index , position
     UpdatePanedPos(u8, i32),
-    ///  list_index,   db-id, column,   scroll-pos
-    ListSetCursor(u8, isize, u8, i8),
     ///  type, effect marker number, used for renaming its ID, to match CSS definitions
     WidgetMark(UIUpdaterMarkWidgetType, u8, u8),
     ///  Type, index,

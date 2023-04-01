@@ -181,12 +181,18 @@ impl GtkRunnerInternal {
                     IntCommands::UpdateTreeModelSingle(tree_nr, ref path) => {
                         upd_int.update_tree_model_single(tree_nr, path.clone())
                     }
+                    IntCommands::TreeSetCursor(i, ref path, column, scroll_pos) => {
+                        upd_int.tree_set_cursor(i, path.clone(), column, scroll_pos)
+                    }
                     IntCommands::UpdateListModel(i) => upd_int.update_list_model(i),
                     IntCommands::UpdateListModelSingle(i, list_pos) => {
                         upd_int.update_list_model_single(i, list_pos)
                     }
                     IntCommands::UpdateListModelSome(i, ref list_pos) => {
                         upd_int.update_list_model_some(i, list_pos.clone())
+                    }
+                    IntCommands::ListSetCursor(i, pos, column, scroll_pos) => {
+                        upd_int.list_set_cursor(i, pos, column, scroll_pos)
                     }
                     IntCommands::UpdateTextView(i) => upd_int.update_text_view(i),
                     IntCommands::UpdateLabel(i) => upd_int.update_label(i),
@@ -195,9 +201,6 @@ impl GtkRunnerInternal {
                     IntCommands::UpdateLinkButton(i) => upd_int.update_linkbutton(i),
                     IntCommands::ShowDialog(i) => upd_int.show_dialog(i),
                     IntCommands::UpdatePanedPos(i, pos) => upd_int.update_paned_pos(i, pos),
-                    IntCommands::ListSetCursor(i, pos, column, scroll_pos) => {
-                        upd_int.list_set_cursor(i, pos, column, scroll_pos)
-                    }
                     IntCommands::WidgetMark(ref typ, i, mark) => {
                         upd_int.widget_mark(typ.clone(), i, mark);
                     }

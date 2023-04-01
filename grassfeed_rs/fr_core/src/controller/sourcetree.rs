@@ -56,16 +56,18 @@ const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
 pub enum SJob {
     /// only store into adapter
     FillSubscriptionsAdapter,
-    /// only update from adapter into TreeView
-    FillSubscriptionsTreeUpdate,
     /// subscription_id
     FillSourcesTreeSingle(isize),
+
+    /// only update from adapter into TreeView
     GuiUpdateTreeAll,
+    /// subscription_id
+    GuiUpdateTree(isize),
+
     ScheduleFetchAllFeeds,
     CheckSpinnerActive,
     /// subscription_id
     ScheduleUpdateFeed(isize),
-    GuiUpdateTree(isize),
     /// subscription_id
     SetFetchInProgress(isize),
     /// subscription_id, error_happened
@@ -88,6 +90,8 @@ pub enum SJob {
     EmptyTreeCreateDefaultSubscriptions,
     ///  Drag-String   Feed-Url   Error-Message,   Home-Page-Title
     DragUrlEvaluated(String, String, String, String),
+    /// subs_id
+    SetCursorToSubsID(isize),
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -193,6 +197,7 @@ impl SourceTreeController {
         }
         for job in job_list {
             let now = Instant::now();
+            trace!("SJOB: {:?} ", &job);
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
                     let o_subs_state = self
@@ -224,9 +229,6 @@ impl SourceTreeController {
                 SJob::FillSubscriptionsAdapter => {
                     self.feedsources_into_store_adapter();
                 }
-                SJob::FillSubscriptionsTreeUpdate => {
-                    (*self.gui_updater).borrow().update_tree(TREEVIEW0);
-                }
                 SJob::FillSourcesTreeSingle(subs_id) => {
                     self.insert_tree_row_single(subs_id);
                 }
@@ -240,9 +242,11 @@ impl SourceTreeController {
                         warn!("GuiUpdateTree: No Path for id:{}", subs_id);
                     }
                 }
+                // SJob::FillSubscriptionsTreeUpdate => {                    (*self.gui_updater).borrow().update_tree(TREEVIEW0);                }
                 SJob::GuiUpdateTreeAll => {
                     (*self.gui_updater).borrow().update_tree(TREEVIEW0);
                 }
+
                 SJob::ScheduleFetchAllFeeds => {
                     self.statemap.borrow_mut().set_schedule_fetch_all();
                 }
@@ -352,6 +356,13 @@ impl SourceTreeController {
                         (*self.gui_updater)
                             .borrow()
                             .show_dialog(DIALOG_NEW_SUBSCRIPTION);
+                    }
+                }
+                SJob::SetCursorToSubsID(subs_id) => {
+                    if let Some(path) = self.get_path_for_src(subs_id) {
+                        self.set_cursor_to_subs_id(path);
+                    } else {
+                        warn!("SetCursorToSubsID: No Path for id:{}", subs_id);
                     }
                 }
             }
@@ -1062,6 +1073,16 @@ impl SourceTreeController {
             }
         }
     }
+
+    fn set_cursor_to_subs_id(&self, path: Vec<u16>) {
+        debug!("set_cursor_to_subs_id : {:?} ", path);
+        (*self.gui_updater).borrow().tree_set_cursor(
+            TREEVIEW0,
+            path,
+            TREE0_COL_REPO_ID as u8,
+            50, // list scroll position in percent
+        );
+    }
 }
 
 impl TimerReceiver for SourceTreeController {
@@ -1120,7 +1141,7 @@ impl StartupWithAppContext for SourceTreeController {
         self.addjob(SJob::EmptyTreeCreateDefaultSubscriptions);
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::FillSubscriptionsAdapter);
-        self.addjob(SJob::FillSubscriptionsTreeUpdate);
+        self.addjob(SJob::GuiUpdateTreeAll);
         if (*self.config).borrow().feeds_fetch_at_start {
             self.addjob(SJob::ScheduleFetchAllFeeds);
         }

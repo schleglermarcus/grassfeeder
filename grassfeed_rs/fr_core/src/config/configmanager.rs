@@ -16,7 +16,6 @@ use std::rc::Rc;
 pub struct ConfigManager {
     cconf_modified: RefCell<bool>,
     cconf_filename: String,
-
     user_config: Rc<RefCell<HashMap<String, String>>>,
     system_config: Rc<RefCell<HashMap<String, String>>>,
 }

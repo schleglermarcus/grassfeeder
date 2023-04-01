@@ -211,7 +211,7 @@ impl UpdAda {
 impl UIUpdaterAdapter for UpdAda {
     fn update_tree(&self, _tree_index: u8) {}
     fn update_tree_single(&self, _tree_index: u8, _path: &[u16]) {}
-
+    fn tree_set_cursor(&self, _list_index: u8, _path: Vec<u16>, _column: u8, _scroll_pos: i8) {}
     fn update_list(&self, _list_index: u8) {}
     fn update_list_single(&self, _list_index: u8, _list_position: u32) {}
     fn update_list_some(&self, _list_index: u8, _list_position: &[u32]) {}

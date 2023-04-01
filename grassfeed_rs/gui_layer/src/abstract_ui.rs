@@ -206,6 +206,7 @@ impl std::fmt::Debug for GuiTreeItem {
 pub trait UIUpdaterAdapter {
     fn update_tree(&self, tree_index: u8);
     fn update_tree_single(&self, tree_index: u8, path: &[u16]);
+    fn tree_set_cursor(&self, list_index: u8, path: Vec<u16>, column: u8, scroll_pos: i8);
 
     fn update_list(&self, list_index: u8);
     fn update_list_single(&self, list_index: u8, list_position: u32);

@@ -1,3 +1,4 @@
+use crate::config::configmanager::ConfigManager;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
@@ -48,10 +49,6 @@ pub fn build_timer() -> Timer {
     let (t_s, t_r) = flume::bounded::<TimerJob>(TIMER_JOB_QUEUE_SIZE);
     let sig_term_a = Arc::new(AtomicBool::new(false));
     let sig_int_a = Arc::new(AtomicBool::new(false));
-
-    //  Later  add the term hook    only without debug
-    let _r = signal_hook::flag::register(signal_hook::consts::SIGTERM, sig_term_a.clone());
-    let _r = signal_hook::flag::register(signal_hook::consts::SIGINT, sig_term_a.clone());
 
     Timer {
         schedules: Default::default(),
@@ -149,7 +146,26 @@ impl Buildable for Timer {
     }
 }
 
-impl StartupWithAppContext for Timer {}
+impl StartupWithAppContext for Timer {
+    fn startup(&mut self, ac: &AppContext) {
+        let configmanager_r = ac.get_rc::<ConfigManager>().unwrap();
+        let mut is_debug: bool = false;
+        if let Some(s) = (*configmanager_r)
+            .borrow()
+            .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
+        {
+            if let Ok(b) = s.parse::<bool>() {
+                is_debug = b;
+            }
+        }
+        if !is_debug {
+            let _r =
+                signal_hook::flag::register(signal_hook::consts::SIGTERM, self.signal_term.clone());
+            let _r =
+                signal_hook::flag::register(signal_hook::consts::SIGINT, self.signal_int.clone());
+        }
+    }
+}
 
 //------------------------------------------------------
 
