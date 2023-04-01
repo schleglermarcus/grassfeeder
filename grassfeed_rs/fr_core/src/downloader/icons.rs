@@ -1,14 +1,3 @@
-// use dd::flume;
-// use dd::gif;
-// use dd::ico;
-// use dd::jpeg_decoder;
-// use dd::libwebp_image;
-// use dd::png;
-// use dd::tinybmp;
-// use dd::usvg;
-// #[cfg(feature = "g3new")]
-// use crate::dd::usvg::TreeParsing;
-
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;

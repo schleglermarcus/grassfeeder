@@ -1,5 +1,3 @@
-// use dd::flume;
-
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
@@ -157,7 +155,6 @@ impl StartupWithAppContext for Timer {}
 
 #[cfg(test)]
 mod appcontext_test {
-    // use dd::flume;
 
     use crate::config::configmanager::ConfigManager;
     use crate::config::init_system::create_system_config;

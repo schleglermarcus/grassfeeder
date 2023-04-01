@@ -1,9 +1,3 @@
-// #[cfg(not(feature = "g3sources"))]
-// extern crate dd_g3new as dd;
-// #[cfg(feature = "g3sources")]
-// extern crate app_g3sources as dd;
-// use dd::flume;
-
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::errors_repo::ErrorRepo;

@@ -1,13 +1,7 @@
 /**
-// #[cfg(not(feature = "g3sources"))]
-// use dd::gtk;
-
 https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/pango/struct.AttrSize.html
 https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/pango_sys/struct.PangoAttrSize.html
-
  */
-
-
 use gtk::pango::AttrInt;
 use gtk::pango::AttrList;
 use gtk::pango::Attribute;
@@ -31,18 +25,9 @@ pub trait BoldFuncDiscriminator {
             FontAttributes::from_activation_bits(act_bits);
         let r = AttrList::new();
         if !is_read && !is_folder {
-            // r.insert(Attribute::from(AttrInt::new_weight(Weight::Bold)));
             add_font_weight(&r);
         }
-
         add_font_size(&r, fontsize);
-
-        // if fontsize > 0 {
-        //     r.insert(Attribute::from(AttrSize::new(
-        //         fontsize as i32 * gtk::pango::SCALE,
-        //     )));
-        // }
-
         r
     }
 }

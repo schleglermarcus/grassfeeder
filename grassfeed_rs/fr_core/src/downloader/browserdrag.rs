@@ -1,7 +1,3 @@
-// use dd::flume;
-// #[cfg(not(feature = "dd-g3old"))]
-// use dd::feed_rs as feed_rs;
-
 use crate::controller::guiprocessor::Job;
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorRepo;

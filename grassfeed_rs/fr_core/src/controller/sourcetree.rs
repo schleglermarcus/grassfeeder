@@ -1,5 +1,3 @@
-// use dd::flume;
-// use rust_i18n::t;
 use crate::config::configmanager::ConfigManager;
 use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;

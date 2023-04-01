@@ -3,8 +3,7 @@ pub mod opmlreader;
 #[cfg(test)]
 mod tests {
 
-
-    use dd::opml::Outline;
+    use opml::Outline;
 
     #[allow(dead_code)]
     fn build_with_outlines() {

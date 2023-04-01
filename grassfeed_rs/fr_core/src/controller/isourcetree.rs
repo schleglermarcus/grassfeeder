@@ -1,4 +1,3 @@
-// use dd::flume;
 use crate::controller::contentlist::get_font_size_from_config;
 use crate::controller::contentlist::CJob;
 use crate::controller::contentlist::IFeedContents;

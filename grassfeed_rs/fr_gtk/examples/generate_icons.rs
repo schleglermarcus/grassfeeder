@@ -1,10 +1,5 @@
 // cargo run  --example icons
 
-
-#[cfg(feature = "g3modern")]
-extern crate gtk_m as gtk;
-
-
 extern crate gdk;
 extern crate glib;
 

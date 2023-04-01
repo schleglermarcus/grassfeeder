@@ -1,3 +1,6 @@
+#
+# cargo run  --example icons
+#
 [package]
 name = "fr_gtk"
 version = "0.1.0"
@@ -5,10 +8,8 @@ authors = ["marcus"]
 edition = "2021"
 description = "Feed Reader application specific gtk setup"
 
-
 [features]
 legacy3gtk14 = []
-
 
 [dependencies]
 gui_layer = { path = "../gui_layer" }
@@ -29,29 +30,13 @@ flume = ">=0.10.14"
 webkit2gtk = { version = "=0.18.2", default-features = false, features = [
     "v2_36",
 ] }
+glib = "^0.15.5"
+chrono = ">=0.4.24"
 
 
-# chrono = "*"
-# gio = "=0.14.8"
-
-### NEU
-# dd-g3new = { path = "../dd-g3new", optional = true }
-# rust-i18n = { version="*"  }
-
-
-### ALT
-#rust-i18n = { version="*" , path = "../app-g3sources/target/rust-i18n-1.1.1" }
-# rust-i18n = { version="1.1.1" , optional = true }
-#ui_gtk = { path = "../ui_gtk", features = ["g3sources"] }
-# ui_gtk = { path = "../ui_gtk"  }
-# app-g3sources = { path = "../app-g3sources", optional = true }
-
-
-# cargo run  --example icons
 [[example]]
 name = "icons"
 path = "examples/generate_icons.rs"
-
 
 [package.metadata.i18n]
 available-locales = ["en", "de"]

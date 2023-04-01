@@ -1,19 +1,12 @@
-// use dd::flume;
-// #[cfg(not(feature = "g3sources"))]
-// use dd::gtk  as gtk;
-// #[cfg(not(feature = "g3sources"))]
-
-
-
 #[cfg(feature = "legacy3gtk14")]
 use gtk::NotebookBuilder;
-#[cfg(feature = "legacy3gtk14")]
-use gtk::ToolButtonBuilder;
+// #[cfg(feature = "legacy3gtk14")]
+// use gtk::ToolButtonBuilder;
 
 #[cfg(not(feature = "legacy3gtk14"))]
 use gtk::builders::NotebookBuilder;
-#[cfg(not(feature = "legacy3gtk14"))]
-use gtk::builders::ToolButtonBuilder;
+// #[cfg(not(feature = "legacy3gtk14"))]
+// use gtk::builders::ToolButtonBuilder;
 
 
 use crate::util::*;

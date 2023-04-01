@@ -1,26 +1,12 @@
-// use dd::flume;
-// use dd::webkit2gtk;
-// #[cfg(feature = "g3sources")]
-// #[cfg(feature = "g3sources")]
-// use gtk::ToolButtonBuilder;
-// #[cfg(not(feature = "g3sources"))]
-// use dd::gtk;
-// #[cfg(not(feature = "g3sources"))]
-// use dd::gdk;
-// #[cfg(not(feature = "g3sources"))]
-// use gtk::builders::ToggleToolButtonBuilder;
-// #[cfg(not(feature = "g3sources"))]
-// use gtk::builders::ToolButtonBuilder;
-
-#[cfg(feature = "legacy3gtk14")]
-use gtk::NotebookBuilder;
+// #[cfg(feature = "legacy3gtk14")]
+// use gtk::NotebookBuilder;
 #[cfg(feature = "legacy3gtk14")]
 use gtk::ToolButtonBuilder;
 #[cfg(feature = "legacy3gtk14")]
 use gtk::ToggleToolButtonBuilder;
 
-#[cfg(not(feature = "legacy3gtk14"))]
-use gtk::builders::NotebookBuilder;
+// #[cfg(not(feature = "legacy3gtk14"))]
+// use gtk::builders::NotebookBuilder;
 #[cfg(not(feature = "legacy3gtk14"))]
 use gtk::builders::ToolButtonBuilder;
 #[cfg(not(feature = "legacy3gtk14"))]

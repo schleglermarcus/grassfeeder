@@ -7,9 +7,6 @@
 // GTK_DEBUG=interactive
 //
 
-// #[cfg(not(feature = "g3sources"))]
-// use dd::gtk;
-
 use gtk::prelude::CssProviderExt;
 
 pub const TAB_MARKER_HEIGHT: u8 = 1;

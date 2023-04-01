@@ -1,10 +1,3 @@
-// #[cfg(not(feature = "g3sources"))]
-// use dd::gtk;
-// #[cfg(not(feature = "g3sources"))]
-// use dd::gdk;
-// use dd::flume;
-
-
 use crate::cell_data_func::*;
 use crate::gtk_object_tree::GLOB_CACHE;
 use crate::util::EvSenderCache;

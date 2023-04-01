@@ -1,6 +1,3 @@
-// use dd::ureq;
-
-
 use crate::web::HttpGetResult;
 use crate::web::IHttpRequester;
 use std::io::Read;

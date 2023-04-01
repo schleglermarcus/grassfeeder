@@ -1,5 +1,3 @@
-// use dd::rusqlite;
-
 use crate::controller::timer::Timer;
 use crate::db::message::MessageRow;
 use crate::db::sqlite_context::rusqlite_error_to_boxed;
