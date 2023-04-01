@@ -431,7 +431,8 @@ impl Step<CleanerInner> for PurgeMessages {
         } else if num_deleted > 0 {
             trace!(
                 "PurgeMessages: #all={}  Deleted {} messages",
-                all_count, num_deleted
+                all_count,
+                num_deleted
             );
         }
         StepResult::Continue(Box::new(CheckErrorLog(inner)))

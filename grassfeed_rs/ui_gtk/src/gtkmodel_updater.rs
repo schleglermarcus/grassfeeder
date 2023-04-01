@@ -1,16 +1,7 @@
-// use std::str::FromStr;
-// #[cfg(feature = "g3sources")]
-// use crate::webkit2gtk::traits::WebView;
-// #[cfg(feature = "g3sources")]
-// use crate::webkit2gtk::traits::WebViewExt;
-// use dd::webkit2gtk::WebViewExt;
-
-#[cfg(not(feature = "legacy3gtk14"))]
-use webkit2gtk::WebViewExt;
 #[cfg(feature = "legacy3gtk14")]
 use webkit2gtk::traits::WebViewExt;
-
-
+#[cfg(not(feature = "legacy3gtk14"))]
+use webkit2gtk::WebViewExt;
 
 use crate::iconloader::IconLoader;
 use crate::GtkObjectsType;

@@ -24,8 +24,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 
-
-
 const BROWSER_ZOOM_LIMIT_UPPER: u32 = 300;
 const BROWSER_ZOOM_LIMIT_LOWER: u32 = 20;
 

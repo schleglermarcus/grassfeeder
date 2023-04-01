@@ -1,9 +1,4 @@
-
-
-// #[allow(unused_imports)]
-// #[macro_use]
-//  extern crate i18_local as rust_i18n;
-extern crate  rust_i18n;
+extern crate rust_i18n;
 
 pub mod application_id;
 pub mod changelog_debian;

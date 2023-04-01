@@ -256,7 +256,7 @@ impl StatusBar {
             (*self.gui_val_store)
                 .write()
                 .unwrap()
-                .set_label_text(LABEL_STATUS_3, format!("<tt>\u{2595}{b_loading}</tt>" ));
+                .set_label_text(LABEL_STATUS_3, format!("<tt>\u{2595}{b_loading}</tt>"));
             (*self.gui_updater)
                 .borrow()
                 .update_label_markup(LABEL_STATUS_3);

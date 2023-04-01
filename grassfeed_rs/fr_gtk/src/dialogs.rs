@@ -1,13 +1,8 @@
 #[cfg(feature = "legacy3gtk14")]
 use gtk::NotebookBuilder;
-// #[cfg(feature = "legacy3gtk14")]
-// use gtk::ToolButtonBuilder;
 
 #[cfg(not(feature = "legacy3gtk14"))]
 use gtk::builders::NotebookBuilder;
-// #[cfg(not(feature = "legacy3gtk14"))]
-// use gtk::builders::ToolButtonBuilder;
-
 
 use crate::util::*;
 use flume::Sender;

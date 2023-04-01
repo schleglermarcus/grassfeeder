@@ -1,4 +1,3 @@
-
 mod unzipper;
 use crate::unzipper::TD_BASE;
 use fr_core::controller::guiprocessor::Job;

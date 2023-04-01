@@ -495,7 +495,6 @@ impl InvestigateOne for InvGif {
 
 struct InvSvg {}
 impl InvestigateOne for InvSvg {
-
     #[cfg(not(feature = "legacy3gtk14"))]
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();

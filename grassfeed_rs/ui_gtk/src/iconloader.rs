@@ -1,9 +1,7 @@
-// use dd::lz4_compression;
-
-use gtk::glib::Bytes;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::gio::Cancellable;
 use gtk::gio::MemoryInputStream;
+use gtk::glib::Bytes;
 use lz4_compression::prelude;
 use std::fs::File;
 use std::io::Read;

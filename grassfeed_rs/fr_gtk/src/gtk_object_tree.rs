@@ -1,19 +1,13 @@
-// #[cfg(feature = "legacy3gtk14")]
-// use gtk::NotebookBuilder;
-#[cfg(feature = "legacy3gtk14")]
-use gtk::ToolButtonBuilder;
 #[cfg(feature = "legacy3gtk14")]
 use gtk::ToggleToolButtonBuilder;
+#[cfg(feature = "legacy3gtk14")]
+use gtk::ToolButtonBuilder;
 
-// #[cfg(not(feature = "legacy3gtk14"))]
-// use gtk::builders::NotebookBuilder;
-#[cfg(not(feature = "legacy3gtk14"))]
-use gtk::builders::ToolButtonBuilder;
 #[cfg(not(feature = "legacy3gtk14"))]
 use gtk::builders::ToggleToolButtonBuilder;
+#[cfg(not(feature = "legacy3gtk14"))]
+use gtk::builders::ToolButtonBuilder;
 
-
-use rust_i18n;
 use crate::dialogs::create_dialogs;
 use crate::load_css::TAB_MARKER_HEIGHT;
 use crate::messagelist::create_listview;
@@ -54,6 +48,7 @@ use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
 use resources::id::*;
+use rust_i18n;
 use rust_i18n::t;
 use std::cell::RefCell;
 use std::collections::HashMap;
