@@ -221,14 +221,10 @@ impl ISourceTreeController for SourceTreeController {
         let r = (*self.subscriptionrepo_r).borrow().store_entry(&fse);
         match r {
             Ok(fse) => {
-                info!("NEW FOLDER id:{}  parent: {}  ", fse.subs_id, parent_id);
-
                 self.addjob(SJob::UpdateTreePaths);
                 self.addjob(SJob::FillSubscriptionsAdapter);
-
                 self.addjob(SJob::GuiUpdateTreeAll);
                 self.addjob(SJob::SetCursorToSubsID(fse.subs_id));
-
                 fse.subs_id
             }
             Err(e2) => {
@@ -378,7 +374,6 @@ impl ISourceTreeController for SourceTreeController {
             .borrow()
             .get_by_index(fs_id as isize)
             .unwrap();
-        // debug!(            "feedsource_move_to_trash {:?}   Parent: {}  ",            self.feedsource_delete_id, fse.parent_subs_id        );
         (*self.subscriptionrepo_r)
             .borrow()
             .update_parent_and_folder_position(fse.subs_id, SRC_REPO_ID_DELETED, 0);

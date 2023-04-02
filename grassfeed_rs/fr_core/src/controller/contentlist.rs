@@ -1,6 +1,8 @@
 use crate::config::configmanager::ConfigManager;
 use crate::controller::browserpane::BrowserPane;
 use crate::controller::browserpane::IBrowserPane;
+use crate::controller::contentdownloader::Downloader;
+use crate::controller::contentdownloader::IDownloader;
 use crate::controller::isourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
@@ -36,7 +38,6 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::sync::RwLock;
-use webbrowser;
 
 const JOBQUEUE_SIZE: usize = 200;
 const LIST_SCROLL_POS: i8 = 80; // to 70% of the upper list is visible, the cursor shall go to the lower 30%
@@ -54,18 +55,24 @@ pub enum CJob {
     /// feed_content_id
     SwitchBrowserTabContent(i32),
     ListSetCursorToPolicy,
-    ///  db-id
-    StartWebBrowser(i32),
+
+    // #[deprecated]
+    // StartWebBrowser(i32),
     /// feed-source-id
     RequestUnreadAllCount(isize),
     UpdateMessageList,
     ListSetCursorToMessage(isize),
     ///  list_position, msg_id, Favorite
     SetFavoriteSome(Vec<(u32, u32)>, bool),
+
+    ///  db-id,   list-position
+    LaunchBrowserSuccess(isize, u32),
 }
 
 pub trait IFeedContents {
-    fn addjob(&self, nj: CJob);
+    /// returns queue size
+    fn addjob(&self, nj: CJob) -> usize;
+
     fn process_jobs(&mut self);
 
     /// Sets those entries read, updates the  gui-store
@@ -101,7 +108,6 @@ pub trait IFeedContents {
 
     fn process_list_action(&self, action: String, repoid: Vec<(i32, i32)>);
     fn set_sort_order(&mut self, sort_column: u8, order_up: bool);
-    fn start_web_browser(&self, db_ids: Vec<i32>);
 
     fn set_selected_content_ids(&self, list: Vec<i32>);
     fn get_selected_content_ids(&self) -> Vec<i32>;
@@ -114,12 +120,13 @@ pub trait IFeedContents {
     ) -> (String, String, String);
     fn move_list_cursor(&self, c: ListMoveCommand);
     fn set_messages_filter(&mut self, newtext: &str);
+    fn launch_browser_single(&self, db_ids: Vec<i32>);
+    fn launch_browser_selected(&self);
 
     /// does not update the message list
     fn set_read_complete_subscription(&mut self, source_repo_id: isize);
 
     fn memory_conserve(&mut self, act: bool);
-    fn launch_browser(&self);
     fn keyboard_delete(&self);
 }
 
@@ -131,6 +138,7 @@ pub struct FeedContents {
     configmanager_r: Rc<RefCell<ConfigManager>>,
     browserpane_r: Rc<RefCell<dyn IBrowserPane>>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
+    downloader_r: Rc<RefCell<dyn IDownloader>>,
     gui_val_store: UIAdapterValueStoreType,
     job_queue_receiver: Receiver<CJob>,
     job_queue_sender: Sender<CJob>,
@@ -138,7 +146,6 @@ pub struct FeedContents {
     list_selected_ids: RwLock<Vec<i32>>,
     msg_state: RwLock<MessageStateMap>,
     msg_filter: Option<String>,
-
     ///  subscription-id, number-of-lines, is_folder
     current_subscription: RefCell<(isize, isize, bool)>,
     currently_minimized: bool,
@@ -157,6 +164,7 @@ impl FeedContents {
         let cm_r = (*ac).get_rc::<ConfigManager>().unwrap();
         let bp_r = (*ac).get_rc::<BrowserPane>().unwrap();
         let msg_r = (*ac).get_rc::<MessagesRepo>().unwrap();
+        let dl_r = (*ac).get_rc::<Downloader>().unwrap();
         FeedContents {
             timer_r: (*ac).get_rc::<Timer>().unwrap(),
             gui_updater: u_a,
@@ -173,6 +181,7 @@ impl FeedContents {
             msg_filter: None,
             current_subscription: RefCell::new((-1, -1, false)),
             currently_minimized: false,
+            downloader_r: dl_r,
         }
     }
 
@@ -464,12 +473,14 @@ impl FeedContents {
 } // impl FeedContents
 
 impl IFeedContents for FeedContents {
-    fn addjob(&self, nj: CJob) {
+    /// returns queue size
+    fn addjob(&self, nj: CJob) -> usize {
         if self.job_queue_sender.is_full() {
             error!("FeedContents CJob queue full  Skipping  {:?}", nj);
         } else {
             self.job_queue_sender.send(nj).unwrap();
         }
+        self.job_queue_sender.len()
     }
 
     fn process_jobs(&mut self) {
@@ -533,15 +544,19 @@ impl IFeedContents for FeedContents {
                         .switch_browsertab_content(msg_id, title, o_co_au_ca);
                 }
                 CJob::ListSetCursorToPolicy => self.set_cursor_to_policy(),
-                CJob::StartWebBrowser(db_id) => {
-                    if let Some(fce) = (*self.messagesrepo_r).borrow().get_by_index(db_id as isize)
-                    {
-                        let r = webbrowser::open(&fce.link);
-                        if let Err(e) = r {
-                            warn!("opening web page {} {}", &fce.link, e);
-                        }
-                    }
-                }
+
+                /*
+                                CJob::StartWebBrowser(db_id) => {
+                                    ///  TODO   launch  SINGLE       in downloader queue !!
+                                    if let Some(fce) = (*self.messagesrepo_r).borrow().get_by_index(db_id as isize)
+                                    {
+                                        let r = webbrowser::open(&fce.link);
+                                        if let Err(e) = r {
+                                            warn!("opening web page {} {}", &fce.link, e);
+                                        }
+                                    }
+                                }
+                */
                 CJob::RequestUnreadAllCount(feed_source_id) => {
                     let msg_count = (*self.messagesrepo_r).borrow().get_src_sum(feed_source_id);
                     let read_count = (*self.messagesrepo_r).borrow().get_read_sum(feed_source_id);
@@ -564,6 +579,10 @@ impl IFeedContents for FeedContents {
                 }
                 CJob::SetFavoriteSome(ref vec_listpos_msgid, new_fav) => {
                     self.set_favorite_int(vec_listpos_msgid, new_fav);
+                }
+                CJob::LaunchBrowserSuccess(msg_id, list_position) => {
+                    // trace!("LaunchBrowserSuccess {} {} ", msg_id, list_position);
+                    self.set_read_many(&vec![(msg_id as i32, list_position as i32)], true);
                 }
             }
             let elapsed_m = now.elapsed().as_millis();
@@ -604,9 +623,9 @@ impl IFeedContents for FeedContents {
             .read()
             .unwrap()
             .get_subscription_ids(&msg_ids);
-        subscr_ids
-            .iter()
-            .for_each(|subs_id| self.addjob(CJob::RequestUnreadAllCount(*subs_id)));
+        subscr_ids.iter().for_each(|subs_id| {
+            self.addjob(CJob::RequestUnreadAllCount(*subs_id));
+        });
         if !is_unread_ids.is_empty() {
             (*self.messagesrepo_r)
                 .borrow_mut()
@@ -828,8 +847,10 @@ impl IFeedContents for FeedContents {
             }
             "open-in-browser" => {
                 let db_ids: Vec<i32> = msgid_listpos.iter().map(|(db, _lp)| *db).collect();
-                self.start_web_browser(db_ids);
-                self.set_read_many(&msgid_listpos, true);
+                self.launch_browser_single(db_ids);
+
+                // set-read  delayed, on launch success
+                // self.set_read_many(&msgid_listpos, true);
             }
             "messages-delete" => {
                 let db_ids: Vec<i32> = msgid_listpos.iter().map(|(db, _lp)| *db).collect();
@@ -873,31 +894,61 @@ impl IFeedContents for FeedContents {
         );
     }
 
-    fn start_web_browser(&self, db_ids: Vec<i32>) {
+    fn launch_browser_single(&self, db_ids: Vec<i32>) {
         db_ids
             .iter()
-            .for_each(|dbid| self.addjob(CJob::StartWebBrowser(*dbid)));
+            .filter_map(|msg_id| {
+                let o_msg = (*self.messagesrepo_r)
+                    .borrow()
+                    .get_by_index(*msg_id as isize);
+
+                let list_pos = self.msg_state.read().unwrap().get_gui_pos(*msg_id as isize);
+                if o_msg.is_none() {
+                    return None;
+                }
+                Some((*msg_id as isize, o_msg.unwrap().link.clone(), list_pos))
+            })
+            .for_each(|(db_id, url, list_pos)| {
+                (self.downloader_r)
+                    .borrow()
+                    .launch_webbrowser(url, db_id, list_pos);
+            });
     }
 
-    fn launch_browser(&self) {
-        let id_list = self.list_selected_ids.read().unwrap();
-        let mut listpos_id: Vec<(u32, u32)> = Vec::default();
-        id_list.iter().for_each(|dbid| {
-            self.msg_state
-                .write()
-                .unwrap()
-                .set_read_many(&[*dbid], true);
-            (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[*dbid], true);
-            self.addjob(CJob::StartWebBrowser(*dbid));
-            let gui_pos = self.msg_state.read().unwrap().get_gui_pos(*dbid as isize);
-            listpos_id.push((gui_pos, *dbid as u32));
-        });
-        self.addjob(CJob::UpdateMessageListSome(listpos_id));
+    /// TODO  start it via downloader queue!
+    fn launch_browser_selected(&self) {
+        let id_list: Vec<i32> = self.list_selected_ids.read().unwrap().clone();
+        debug!("launch-selected: {:?} ", id_list);
+        self.launch_browser_single(id_list);
+        /*
+               let mut listpos_id: Vec<(u32, u32)> = Vec::default();
+               id_list.iter().for_each(|dbid| {
+                   self.msg_state
+                       .write()
+                       .unwrap()
+                       .set_read_many(&[*dbid], true);
 
-        let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
-        if let Some(feedsources) = self.feedsources_w.upgrade() {
-            (*feedsources).borrow().clear_read_unread(subs_id);
-        }
+                   // set-read  delayed, on Return
+                   // (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[*dbid], true);
+
+
+                   /// put jobs into downloader queue
+                   // self.addjob(CJob::StartWebBrowser(*dbid));
+                   let gui_pos = self.msg_state.read().unwrap().get_gui_pos(*dbid as isize);
+
+                   (self.downloader_r)
+                       .borrow()
+                       .launch_webbrowser(url, *db_id, gui_pos);
+
+                   listpos_id.push((gui_pos, *dbid as u32));
+               });
+               self.addjob(CJob::UpdateMessageListSome(listpos_id));
+
+               let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
+               if let Some(feedsources) = self.feedsources_w.upgrade() {
+                   (*feedsources).borrow().clear_read_unread(subs_id);
+               }
+        */
     }
 
     fn get_msg_content_author_categories(

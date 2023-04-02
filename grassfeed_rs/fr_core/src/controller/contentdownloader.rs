@@ -21,6 +21,8 @@ use crate::downloader::db_clean::CleanerInner;
 use crate::downloader::db_clean::CleanerStart;
 use crate::downloader::icons::IconInner;
 use crate::downloader::icons::IconLoadStart;
+use crate::downloader::launch_web::LaunchInner;
+use crate::downloader::launch_web::LaunchWebBrowserStart;
 use crate::downloader::messages::FetchInner;
 use crate::downloader::messages::FetchStart;
 use crate::util::StepResult;
@@ -51,7 +53,7 @@ pub const CONF_DATABASES_CLEANUP: &str = "DatabasesCleanup";
 pub const DOWNLOADER_THREADS_DEFAULT: u8 = 2;
 pub const DOWNLOADER_LOOP_DELAY_S: u8 = 1;
 pub const DOWNLOADER_LOOP_WAIT_MS: u64 = 200; // between downloader queue requests
-pub const DOWNLOADER_JOB_QUEUE: usize = 10000;
+pub const DOWNLOADER_JOB_QUEUE: usize = 2000;
 
 pub trait IDownloader {
     fn shutdown(&mut self);
@@ -65,6 +67,7 @@ pub trait IDownloader {
     fn cleanup_db(&self);
     fn get_queue_size(&self) -> usize;
     fn browser_drag_request(&self, dragged_url: &str);
+    fn launch_webbrowser(&self, url: String, cl_id: isize, list_pos: u32);
 }
 
 #[derive(Debug, PartialEq)]
@@ -75,6 +78,7 @@ pub enum DLJob {
     ComprehensiveFeed(ComprehensiveInner),
     CleanDatabase(CleanerInner),
     BrowserDragEvaluation(DragInner),
+    LaunchWebBrowser(LaunchInner),
 }
 
 trait DLKind {
@@ -95,6 +99,7 @@ impl DLKind for DLJob {
             DLJob::ComprehensiveFeed(_) => 3,
             DLJob::CleanDatabase(_) => 4,
             DLJob::BrowserDragEvaluation(_) => 5,
+            DLJob::LaunchWebBrowser(_) => 6,
         }
     }
 
@@ -114,6 +119,7 @@ impl DLKind for DLJob {
             DLJob::ComprehensiveFeed(_) => -2,
             DLJob::CleanDatabase(_) => -3,
             DLJob::BrowserDragEvaluation(_) => -4,
+            DLJob::LaunchWebBrowser(_) => -5,
         }
     }
 }
@@ -255,6 +261,9 @@ impl Downloader {
             }
             DLJob::BrowserDragEvaluation(i) => {
                 let _i = StepResult::start(Box::new(BrowserEvalStart::new(i)));
+            }
+            DLJob::LaunchWebBrowser(i) => {
+                let _i = StepResult::start(Box::new(LaunchWebBrowserStart::new(i)));
             }
         }
         let elapsedms = now.elapsed().as_millis();
@@ -443,6 +452,13 @@ impl IDownloader for Downloader {
             gp_sender,
         );
         self.add_to_queue(DLJob::BrowserDragEvaluation(drag_i));
+    }
+
+    fn launch_webbrowser(&self, url: String, cl_id: isize, list_pos: u32) {
+        // trace!("LAUNCH:  {} {} {} ", cl_id, list_pos, url);
+        let cl_sender: Sender<CJob> = self.contentlist_job_sender.as_ref().unwrap().clone();
+        let inner = LaunchInner::new(url, cl_id, list_pos, cl_sender);
+        self.add_to_queue(DLJob::LaunchWebBrowser(inner));
     }
 }
 

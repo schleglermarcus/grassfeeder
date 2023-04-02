@@ -83,7 +83,7 @@ pub struct GuiProcessor {
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_runner: Rc<RefCell<dyn GuiRunner>>,
     feedsources_r: Rc<RefCell<dyn ISourceTreeController>>,
-    feedcontents_r: Rc<RefCell<dyn IFeedContents>>,
+    contentlist_r: Rc<RefCell<dyn IFeedContents>>,
     downloader_r: Rc<RefCell<dyn IDownloader>>,
     gui_context_r: Rc<RefCell<GuiContext>>,
     browserpane_r: Rc<RefCell<dyn IBrowserPane>>,
@@ -118,7 +118,7 @@ impl GuiProcessor {
             subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
             configmanager_r: (*ac).get_rc::<ConfigManager>().unwrap(),
             feedsources_r: (*ac).get_rc::<SourceTreeController>().unwrap(),
-            feedcontents_r: (*ac).get_rc::<FeedContents>().unwrap(),
+            contentlist_r: (*ac).get_rc::<FeedContents>().unwrap(),
             iconrepo_r: (*ac).get_rc::<IconRepo>().unwrap(),
             timer_r: (*ac).get_rc::<Timer>().unwrap(),
             browserpane_r: (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
@@ -130,7 +130,6 @@ impl GuiProcessor {
             gui_runner: guirunner,
             downloader_r: dl_r,
             gui_context_r: guicontex_r,
-            // statusbar_items: StatusBarItems::default(),
             focus_by_tab: FocusByTab::None,
             erro_repo_r: err_rep,
             currently_minimized: false,
@@ -188,8 +187,8 @@ impl GuiProcessor {
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
                         .set_selected_feedsource(subs_id as isize);
-                    trace!("GP:TreeRowActivated{}  {:?} ", subs_id, _path);
-                    (*self.feedcontents_r)
+                    // trace!("GP:TreeRowActivated{}  {:?} ", subs_id, _path);
+                    (*self.contentlist_r)
                         .borrow()
                         .update_message_list_(subs_id as isize);
                     self.focus_by_tab = FocusByTab::FocusSubscriptions;
@@ -200,18 +199,18 @@ impl GuiProcessor {
                 }
                 GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
                     self.focus_by_tab = FocusByTab::FocusMessages;
-                    (*self.feedcontents_r)
+                    (*self.contentlist_r)
                         .borrow()
-                        .start_web_browser(vec![fc_repo_id]);
+                        .launch_browser_single(vec![fc_repo_id]);
                 }
                 GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) => {
                     self.focus_by_tab = FocusByTab::FocusMessages;
                     if sort_col_nr == LIST0_COL_ISREAD && msg_id >= 0 {
-                        (*self.feedcontents_r)
+                        (*self.contentlist_r)
                             .borrow()
                             .toggle_feed_item_read(msg_id as isize, list_position);
                     } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
-                        (*self.feedcontents_r).borrow().toggle_favorite(
+                        (*self.contentlist_r).borrow().toggle_favorite(
                             msg_id as isize,
                             list_position,
                             None,
@@ -364,20 +363,20 @@ impl GuiProcessor {
                     (*(self.configmanager_r.borrow_mut())).store_column_width(col_nr, width);
                 }
                 GuiEvents::ListSelected(_list_idx, ref selected_list) => {
-                    (*self.feedcontents_r)
+                    (*self.contentlist_r)
                         .borrow()
                         .set_selected_content_ids(selected_list.clone());
                 }
                 GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) => {
                     if list_idx == 0 {
-                        (*self.feedcontents_r)
+                        (*self.contentlist_r)
                             .borrow()
                             .process_list_action(action.clone(), repoid_list_pos.clone());
                     }
                 }
                 GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) => {
                     if list_idx == 0 {
-                        (*self.feedcontents_r)
+                        (*self.contentlist_r)
                             .borrow_mut()
                             .set_sort_order(col_id, ascending);
                     }
@@ -386,7 +385,7 @@ impl GuiProcessor {
                     self.process_key_press(keycode, o_char);
                 }
                 GuiEvents::SearchEntryTextChanged(_idx, ref newtext) => {
-                    (*self.feedcontents_r)
+                    (*self.contentlist_r)
                         .borrow_mut()
                         .set_messages_filter(newtext);
                 }
@@ -398,7 +397,7 @@ impl GuiProcessor {
                     (*self.feedsources_r)
                         .borrow_mut()
                         .memory_conserve(is_minimized);
-                    (*self.feedcontents_r)
+                    (*self.contentlist_r)
                         .borrow_mut()
                         .memory_conserve(is_minimized);
                     (*self.gui_val_store)
@@ -441,7 +440,7 @@ impl GuiProcessor {
             }
         }
         if !list_row_activated_map.is_empty() {
-            (*self.feedcontents_r)
+            (*self.contentlist_r)
                 .borrow()
                 .process_list_row_activated(&list_row_activated_map);
         }
@@ -487,7 +486,7 @@ impl GuiProcessor {
                     (*self.gui_runner).borrow_mut().stop();
                 }
                 Job::SwitchContentList(feed_source_id) => {
-                    (*self.feedcontents_r)
+                    (*self.contentlist_r)
                         .borrow()
                         .update_message_list_(feed_source_id);
                     (*self.gui_updater).borrow().update_list(0);
@@ -505,7 +504,7 @@ impl GuiProcessor {
                     (*self.gui_updater).borrow().update_label(nr);
                 }
                 Job::NotifyConfigChanged => {
-                    (*self.feedcontents_r).borrow_mut().notify_config_update();
+                    (*self.contentlist_r).borrow_mut().notify_config_update();
                     (*self.feedsources_r).borrow_mut().notify_config_update();
                     (*self.gui_updater)
                         .borrow()
@@ -622,13 +621,13 @@ impl GuiProcessor {
                 self.downloader_r
                     .borrow_mut()
                     .set_conf_num_threads(payload.get(3).unwrap().int().unwrap() as u8);
-                self.feedcontents_r
+                self.contentlist_r
                     .borrow_mut()
                     .set_conf_focus_policy(payload.get(4).unwrap().int().unwrap() as u8);
                 self.feedsources_r
                     .borrow_mut() // 5 : DisplayCountOfAllFeeds
                     .set_conf_display_feedcount_all(payload.get(5).unwrap().boo());
-                self.feedcontents_r
+                self.contentlist_r
                     .borrow_mut()
                     .set_conf_msg_keep_count(payload.get(6).unwrap().int().unwrap());
                 (*self.gui_context_r)
@@ -694,7 +693,7 @@ impl GuiProcessor {
             (sources_conf).borrow_mut().feeds_fetch_interval_unit = 3; // set to days if it was not set before
         }
         let downloader_conf = (*self.downloader_r).borrow().get_config();
-        let contentlist_conf = (*self.feedcontents_r).borrow().get_config();
+        let contentlist_conf = (*self.contentlist_r).borrow().get_config();
         let browser_conf = (*self.browserpane_r).borrow().get_config();
         let fontsize_manual_enable = (*self.gui_val_store)
             .read()
@@ -770,26 +769,28 @@ impl GuiProcessor {
                 }
             }
             KeyCodes::Key_s => {
-                (*self.feedcontents_r)
+                (*self.contentlist_r)
                     .borrow_mut()
                     .move_list_cursor(ListMoveCommand::PreviousUnreadMessage);
             }
             KeyCodes::Key_x => {
-                (*self.feedcontents_r)
+                (*self.contentlist_r)
                     .borrow_mut()
                     .move_list_cursor(ListMoveCommand::LaterUnreadMessage);
             }
             KeyCodes::Delete => {
                 if self.focus_by_tab == FocusByTab::FocusMessages {
-                    (*self.feedcontents_r).borrow().keyboard_delete();
+                    (*self.contentlist_r).borrow().keyboard_delete();
                 } else {
                     debug!("delete key but unfocused");
                 }
             }
             KeyCodes::Space => {
                 if self.focus_by_tab == FocusByTab::FocusMessages {
-                    (*self.feedcontents_r).borrow().launch_browser();
-                } //  else {                    debug!("space key but unfocused");                }
+                    (*self.contentlist_r).borrow().launch_browser_selected();
+                } else {
+                    debug!("space key but unfocused");
+                }
             }
 
             _ => {
@@ -878,6 +879,7 @@ pub fn dl_char_for_kind(kind: u8) -> char {
         3 => char::from_u32(0x21d3).unwrap(), // feed-comprehensive : double arrow
         4 => char::from_u32(0x26c1).unwrap(), // DatabaseCleanup : database icon
         5 => char::from_u32(0x21d3).unwrap(), // Drag Url eval : double arrow
+        6 => char::from_u32(0x2191).unwrap(), // Launch Browser : arrow up
         _ => '_',
     };
     nc

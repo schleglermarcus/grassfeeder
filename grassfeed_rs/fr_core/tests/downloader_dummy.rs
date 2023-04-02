@@ -41,4 +41,8 @@ impl IDownloader for DownloaderDummy {
     fn browser_drag_request(&self, _dragged_url: &str) {
         unimplemented!()
     }
+
+    fn launch_webbrowser(&self, _url: String, _cl_id: isize, _list_pos: u32) {
+        unimplemented!()
+    }
 }
