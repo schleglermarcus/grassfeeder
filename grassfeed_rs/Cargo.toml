@@ -10,7 +10,6 @@ members = [
 
 exclude = [
   "testing",
-  "app-g3sources",
   "app-gtk3-linux",
   "app-gtk3-debian",
 ]

@@ -10,16 +10,10 @@ name = "grassfeeder"
 path = "src/main.rs"
 
 
-# https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html
-# Note: crates.io does not allow packages to be published with path dependencies
-# (path dev-dependencies are ignored).
-#
 [dependencies]
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
 fr_core = { path = "../fr_core", features = [ "ui-gtk", "legacy3gtk14"] }
-# ui_gtk = { path = "../ui_gtk"  , features = ["legacy3gtk14"]  } #
-# fr_gtk = { path = "../fr_gtk"  , features = ["legacy3gtk14"]  } #
 resources = { path = "../resources" } #  , features = ["g3sources"]
 rust-i18n = { version = "1.1.1" , path = "../app-gtk3-debian/target/rust-i18n-1.1.1" }
 
@@ -27,16 +21,10 @@ rust-i18n = { version = "1.1.1" , path = "../app-gtk3-debian/target/rust-i18n-1.
 fern = { version = ">=0.6", features = ["colored", "chrono"] }
 syslog = ">=6.0.1"
 chrono = ">=0.4.19"
-# gumdrop = ">=0.8.1"	#  the debian packages only have 0.7.0
 gumdrop = ">=0.7.0"
-# log = ">=0.4.14"	# the debian packages only have 0.4.11
 log = ">=0.4.11"
-# once_cell = ">=1.12.0"	# the debian packages only have 1.9.0
 once_cell = ">=1.9.0"
-# xdg = ">=2.4.1"		# the debian packages only have 2.2.0-3
 xdg = ">=2.2"
-# app-g3sources = {  path = "../app-g3sources" }
-#
 
 
 

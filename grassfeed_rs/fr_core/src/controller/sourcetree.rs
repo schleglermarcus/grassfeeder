@@ -197,7 +197,6 @@ impl SourceTreeController {
         }
         for job in job_list {
             let now = Instant::now();
-            trace!("SJOB: {:?} ", &job);
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
                     let o_subs_state = self
@@ -1075,13 +1074,9 @@ impl SourceTreeController {
     }
 
     fn set_cursor_to_subs_id(&self, path: Vec<u16>) {
-        debug!("set_cursor_to_subs_id : {:?} ", path);
-        (*self.gui_updater).borrow().tree_set_cursor(
-            TREEVIEW0,
-            path,
-            TREE0_COL_REPO_ID as u8,
-            50, // list scroll position in percent
-        );
+        (*self.gui_updater)
+            .borrow()
+            .tree_set_cursor(TREEVIEW0, path);
     }
 }
 

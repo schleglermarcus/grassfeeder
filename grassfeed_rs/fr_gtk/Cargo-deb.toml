@@ -24,27 +24,12 @@ gtk = { package = "gtk", version = "0.14.3", features = ["v3_22_30"] }
 webkit2gtk = { version = "^0.16", path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0" }
 pango = "^0.14.8"
 flume = { version = "0.10.14", path = "../app-gtk3-debian/target/flume-master" }
-
-
-#--- check if needed
 gdk-sys = ">=0.14"
+itertools = "*"
 # chrono = ">=0.4.19"
 # itertools = "0.10.1"
-itertools = "*"
 
 
-### NEU
-# dd-g3new = { path = "../dd-g3new", optional = true }
-# ui_gtk = { path = "../ui_gtk", features = ["g3new"] }
-# rust-i18n = { version="*"  }
-
-### ALT
-# rust-i18n = { version="1.1.1" , optional = true }
-# ui_gtk = { path = "../ui_gtk"  }
-# app-g3sources = { path = "../app-g3sources", optional = true }
-
-
-# cargo run  --example icons
 [[example]]
 name = "icons"
 path = "examples/generate_icons.rs"

@@ -6,8 +6,6 @@ edition = "2021"
 [features]
 ui-gtk = ["ui_gtk", "fr_gtk"]
 legacy3gtk14 = []
-# g3new = []                    #   "dd-g3new"
-# g3sources = [ "app-g3sources" ]                #  "i18local"
 
 
 [dependencies]
@@ -54,25 +52,6 @@ textcode = { path = "../app-gtk3-debian/target/textcode-0.2.2" }
 url = { path = "../app-gtk3-debian/target/rust-url-2.3.0/url" }
 ico = { path = "../app-gtk3-debian/target/rust-ico-0.3.0" }
 
-
-#---------- check if needed
-#glob = ">=0.3.0"
-
-
-### NEU
-## PROBLEM:  deactivating this does not prevent using their sub-dependencies.
-# dd-g3new = { path = "../dd-g3new", optional = true }
-# fr_gtk = { path = "../fr_gtk", optional = true, features = ["g3new"] }
-# ui_gtk = { path = "../ui_gtk", optional = true, features = ["g3new"]  }
-# rust-i18n = "*"
-
-
-### ALT
-#fr_gtk = { path = "../fr_gtk", optional = true, features = ["g3sources"] }
-#ui_gtk = { path = "../ui_gtk", optional = true, features = ["g3sources"]  }
-# app-g3sources = { path = "../app-g3sources", optional = true }
-# app-g3sources = "*"
-# rust-i18n = {  path = "../app-g3sources/target/rust-i18n-1.1.1", optional = true }
 
 
 [dev-dependencies]

@@ -1,20 +1,3 @@
-// #[cfg(feature = "g3sources")]
-// use crate::WebContext;
-// #[cfg(feature = "g3sources")]
-// use crate::WebView;
-
-// #[cfg(feature = "g3new")]
-// use dd::webkit2gtk::WebContext;
-// #[cfg(feature = "g3new")]
-// use dd::webkit2gtk::WebView;
-
-// #[allow(unused_imports)]
-// use crate::WebContentType;
-// use dd::flume;
-
-// #[allow(unused_imports)]
-// #[allow(unused_imports)]
-// use gtk::Adjustment;
 
 use crate::runner_internal::GtkRunnerInternal;
 use crate::CreateWebViewFnType;
@@ -802,13 +785,7 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
         self.send_to_int(&IntCommands::UpdateWindowMinimized(mini, ev_time));
     }
 
-    fn tree_set_cursor(&self, tree_idx: u8, path: Vec<u16>, column: u8, scroll_pos: i8)
-    {
-
-        self.send_to_int(&&IntCommands::TreeSetCursor(
-            tree_idx, path, column, scroll_pos,
-        ));
-
+    fn tree_set_cursor(&self, tree_idx: u8, path: Vec<u16>) {
+        self.send_to_int(&&IntCommands::TreeSetCursor(tree_idx, path));
     }
-
 } //

@@ -83,12 +83,6 @@ impl GtkModelUpdaterInt {
         let path: Vec<i32> = vec![];
         let mut expand_paths: Vec<TreePath> = Vec::default();
         let gui_tree_root = (self.m_v_store).read().unwrap().get_tree_root();
-
-        trace!(
-            "update_tree_model  #CHILD: {} ",
-            gui_tree_root.children.len()
-        );
-
         for (path_index, gti) in gui_tree_root.children.iter().enumerate() {
             let mut innerpath = path.clone();
             innerpath.push(path_index as i32);
@@ -235,66 +229,30 @@ impl GtkModelUpdaterInt {
         }
     }
 
-    pub fn tree_set_cursor(&self, idx: u8, path: Vec<u16>, column: u8, scroll_pos: i8) {
-        let g_o = (*self.g_o_a).read().unwrap();
-        // let o_treestore = g_o.get_list_store(idx as usize);
-        debug!("GMU: tree_set_cursor {}   {:?}  col:{} ", idx, path, column);
+    pub fn tree_set_cursor(&self, idx: u8, path: Vec<u16>) {
         let tree_store: TreeStore;
         let tree_view: TreeView;
         {
             let g_o = (*self.g_o_a).read().unwrap();
-            // max_columns = g_o.get_tree_store_max_columns(index as usize) as usize;
             tree_store = g_o.get_tree_store(idx as usize).unwrap().clone();
             let o_treeview = g_o.get_tree_view(idx as usize);
             if o_treeview.is_none() {
-                warn!("tree_set_cursor: no treeview!");
+                error!("tree_set_cursor: no treeview!");
                 return;
             }
             tree_view = o_treeview.unwrap().clone();
         }
-
-        let path_cn = format!("{:?}", path )
+        let path_cn = format!("{:?}", path)
             .replace(['[', ']', ' '], "")
             .replace(',', ":");
-
         if let Some(iter) = tree_store.iter_from_string(&path_cn) {
-
-
-            if let Some (t_path)  = tree_store.path(&iter) {
-                debug!("GMU tree_set_cursor :  {:?} ", path_cn);
+            if let Some(t_path) = tree_store.path(&iter) {
                 let focus_column: Option<&TreeViewColumn> = None;
                 tree_view.set_cursor(&t_path, focus_column, false);
-
             }
-
         } else {
-            error!(
-                "tree_set_cursor: BadPath3 {:?} {:?} : TreeStore does not contain iter.  {:?}  ",
-                &path, &path_cn, column
-            );
+            error!("tree_set_cursor: BadPath3 {:?} {:?}   ", &path, &path_cn);
         }
-        /*
-
-               if let Some(t_path) = matching_path {
-                   // trace!(                "list_set_cursor :  {:?} scroll: {}",                &t_path.indices(),                scroll_pos            );
-                   let focus_column: Option<&TreeViewColumn> = None;
-                   (*treeview).set_cursor(&t_path, focus_column, false);
-                   if scroll_pos >= 0 {
-                       (*treeview).scroll_to_cell(
-                           Some(&t_path),
-                           focus_column,
-                           true,
-                           (scroll_pos as f32) / 100.0,
-                           0.0,
-                       );
-                   }
-               } else {
-                   warn!(
-                       "GMU: list_set_cursor {}   {}  col:{}  path not found! {:?} ",
-                       idx, db_id, column, &matching_path
-                   );
-               }
-        */
     }
 
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
@@ -622,14 +580,7 @@ impl GtkModelUpdaterInt {
                 );
             }
         }
-/*         else {
-            warn!(
-                "GMU: list_set_cursor {}   {}  col:{}  path not found! {:?} ",
-                idx, db_id, column, &matching_path
-            );
-        }
-*/
-}
+    }
 
     pub fn widget_mark(&self, typ: UIUpdaterMarkWidgetType, idx: u8, mark: u8) {
         let name: &str = match typ {
@@ -707,35 +658,6 @@ impl GtkModelUpdaterInt {
             }
         }
     }
-
-    /*
-        pub fn update_tray_icon(&self, enable: bool) {
-            let indicator_present;
-            {
-                let g_o = (*self.g_o_a).read().unwrap();
-                indicator_present = g_o.get_indicator().is_some();
-            }
-            // trace!(            "updateTray pres:{}-> EN:{}  -> CR:{}",            indicator_present,            enable,            do_create_systray        );
-            if !indicator_present && enable {
-                let store = (self.m_v_store).read().unwrap();
-                let app_url = store.get_gui_property_or(PropDef::AppUrl, "no-app-url".to_string());
-                let mut g_o = (*self.g_o_a).write().unwrap();
-                if let Some(create_fn) = g_o.get_create_systray_fn() {
-                    let ind = (*create_fn)(self.ev_sender_w.clone(), app_url);
-                    g_o.set_indicator(Some(ind));
-                }
-            }
-            let mut g_o = (*self.g_o_a).write().unwrap();
-            if let Some(indica) = g_o.get_indicator_mut() {
-                let new_status = if enable {
-                    AppIndicatorStatus::Active
-                } else {
-                    AppIndicatorStatus::Passive
-                };
-                indica.set_status(new_status);
-            }
-        }
-    */
 
     pub fn memory_conserve(&self, active: bool) {
         if active {

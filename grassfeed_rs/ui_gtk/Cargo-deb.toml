@@ -20,8 +20,3 @@ log = ">=0.4.11"
 serde = { version = ">=1.0.130" }
 lz4-compression = { version = ">=0.7", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
 
-
-## NEU:
-# dd-g3new = { path = "../dd-g3new", optional = true }
-## ALT:
-# app-g3sources = { path = "../app-g3sources", optional = true }

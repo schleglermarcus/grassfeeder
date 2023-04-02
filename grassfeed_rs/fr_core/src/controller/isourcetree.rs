@@ -292,19 +292,13 @@ impl ISourceTreeController for SourceTreeController {
         let mut new_id = -1;
         match (*self.subscriptionrepo_r).borrow().store_entry(&fse) {
             Ok(fse2) => {
-                debug!(
-                    "NEW SUBSCRIPTION    Parent {}   SUB_ID {}  {}",
-                    parent_id, fse2.subs_id, load_messages
-                );
                 self.addjob(SJob::UpdateTreePaths);
                 self.addjob(SJob::FillSubscriptionsAdapter);
                 self.addjob(SJob::GuiUpdateTreeAll);
                 self.addjob(SJob::SetCursorToSubsID(fse2.subs_id));
-
                 if load_messages {
-
-                    // self.addjob(SJob::ScheduleUpdateFeed(fse2.subs_id));
-                    // self.addjob(SJob::CheckSpinnerActive);
+                    self.addjob(SJob::ScheduleUpdateFeed(fse2.subs_id));
+                    self.addjob(SJob::CheckSpinnerActive);
                 }
                 new_id = fse2.subs_id;
             }

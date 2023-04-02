@@ -46,10 +46,8 @@ pub enum IntCommands {
     UpdateTreeModel(u8),
     ///  tree_index,   path
     UpdateTreeModelSingle(u8, Vec<u16>),
-
-    ///  tree_index,   path, column,   scroll-pos
-    TreeSetCursor(u8, Vec<u16>, u8, i8),
-
+    ///  tree_index,   path
+    TreeSetCursor(u8, Vec<u16>),
     UpdateListModel(u8),
     ///  list_index,   list_position
     UpdateListModelSingle(u8, u32),
@@ -164,21 +162,6 @@ pub trait GtkObjects {
 
     fn set_searchentry(&mut self, idx: u8, e: &gtk::SearchEntry);
     fn get_searchentry(&self, idx: u8) -> Option<&gtk::SearchEntry>;
-
-    /*
-        fn set_indicator(&mut self, i: Option<libappindicator::AppIndicator>);
-        fn get_indicator(&self) -> Option<&libappindicator::AppIndicator>;
-        fn get_indicator_mut(&mut self) -> Option<&mut libappindicator::AppIndicator>;
-
-        fn set_create_systray_fn(
-            &mut self,
-            cb_fn: Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>,
-        );
-
-        fn get_create_systray_fn(
-            &self,
-        ) -> Option<&dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>;
-    */
 
     fn set_gui_event_sender(&mut self, ev_se: Sender<GuiEvents>);
     fn fet_gui_event_sender(&mut self) -> Option<Sender<GuiEvents>>;

@@ -86,7 +86,6 @@ impl GtkRunnerInternal {
         let mut appflags: ApplicationFlags = ApplicationFlags::default();
         appflags.set(ApplicationFlags::HANDLES_COMMAND_LINE, false);
         let app = gtk::Application::new(Some(&app_url), appflags);
-        // let _r = app.register(gtk::gio::Cancellable::NONE);
         dbus_register(&app);
         if app.is_remote() {
             warn!(
@@ -96,12 +95,10 @@ impl GtkRunnerInternal {
             let _r = ev_se.send(GuiEvents::AppWasAlreadyRunning);
             app.release();
             dbus_close(&app);
-
             return false;
         }
         (*obj_c).write().unwrap().set_application(&app);
         app.connect_activate(move |app| {
-            trace!("T: building app window ");
             let appwindow = build_window(app, &ev_se, win_title.clone(), win_width, win_height);
             let window: &gtk::Window = appwindow.upcast_ref::<gtk::Window>();
             let mut dd = DialogDataDistributor::default();
@@ -113,7 +110,6 @@ impl GtkRunnerInternal {
             (*builder_c).build_gtk(ev_se.clone(), obj_c2.clone(), &mut dd);
             (*obj_c).write().unwrap().set_dddist(dd);
             window.show_all();
-            trace!("T:  window show done ");
         });
         true
     }
@@ -181,8 +177,8 @@ impl GtkRunnerInternal {
                     IntCommands::UpdateTreeModelSingle(tree_nr, ref path) => {
                         upd_int.update_tree_model_single(tree_nr, path.clone())
                     }
-                    IntCommands::TreeSetCursor(i, ref path, column, scroll_pos) => {
-                        upd_int.tree_set_cursor(i, path.clone(), column, scroll_pos)
+                    IntCommands::TreeSetCursor(i, ref path) => {
+                        upd_int.tree_set_cursor(i, path.clone())
                     }
                     IntCommands::UpdateListModel(i) => upd_int.update_list_model(i),
                     IntCommands::UpdateListModelSingle(i, list_pos) => {
