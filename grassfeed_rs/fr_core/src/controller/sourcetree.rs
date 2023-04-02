@@ -1216,16 +1216,11 @@ impl std::fmt::Debug for NewSourceTempData {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Default)]
 pub enum NewSourceState {
+    #[default]
     None,
     UrlChanged,
     Requesting,
     Completed,
-}
-
-impl Default for NewSourceState {
-    fn default() -> Self {
-        NewSourceState::None
-    }
 }

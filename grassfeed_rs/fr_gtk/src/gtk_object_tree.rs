@@ -134,7 +134,7 @@ impl GtkGuiBuilder for GtkObjectTree {
         let esw = EvSenderWrapper(gui_event_sender.clone());
         crate::load_css::load_css();
         window.connect_size_allocate(move |_win, rectangle| {
-            let (n_w, n_h) = get_width_height(&rectangle);
+            let (n_w, n_h) = get_width_height(rectangle);
             // let n_w: i32 = (*rectangle).width();            let n_h: i32 = (*rectangle).height();
             let (last_w, last_h) =
                 GLOB_CACHE.with(|glob| (glob.borrow().window_width, glob.borrow().window_height));

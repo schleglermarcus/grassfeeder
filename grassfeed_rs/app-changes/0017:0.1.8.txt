@@ -1,10 +1,7 @@
-Sat, 04 Feb 2023 00:20:00 +0000
+Sat, 05 Apr 2023 00:18:00 +0000
  * Downgrade due to compile issue on xmlem : no more formatted opml output, only simple line break.
  * Prepared debian package build without network
  * Database-close with signal-hook only without debug mode
  * On creating  new folders or subscription: put focus to tree
-
- - browser launch on many items: reduce  blocking
-
-- bug:   msg map empty,  at window-restore without selected source
+ * Browser start: launch delayed, prevent blocking the application
 

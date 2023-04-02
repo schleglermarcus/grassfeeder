@@ -80,8 +80,9 @@ pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Result
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Eq)]
+#[derive(Debug, PartialEq, Clone, Eq, Default)]
 pub enum IconKind {
+    #[default]
     None,
     TooSmall,
     Ico,
@@ -94,11 +95,11 @@ pub enum IconKind {
     UnknownType, // all analyses done
 }
 
-impl Default for IconKind {
-    fn default() -> Self {
-        IconKind::None
-    }
-}
+// impl Default for IconKind {
+//     fn default() -> Self {
+//         IconKind::None
+//     }
+// }
 
 pub fn downscale_image(
     img_bytes: &[u8],

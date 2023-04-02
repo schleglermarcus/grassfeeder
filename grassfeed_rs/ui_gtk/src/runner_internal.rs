@@ -222,7 +222,6 @@ impl GtkRunnerInternal {
                         upd_int.memory_conserve(act);
                     }
                     IntCommands::TrayIconEnable(_act) => {
-                        debug!("  INT:  TrayIconEnable empty ");
                         //  upd_int.update_tray_icon(act);
                     }
                     IntCommands::UpdateWindowMinimized(mini, ev_time) => {

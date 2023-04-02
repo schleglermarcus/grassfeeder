@@ -469,9 +469,7 @@ impl GuiProcessor {
                         .unwrap()
                         .set_window_icon(gen_icons::ICON_04_GRASS_CUT_2.to_string());
                     (*self.gui_updater).borrow().update_window_icon();
-                    (*self.gui_updater)
-                        .borrow()
-                        .update_systray_indicator(self.is_systray_enabled());
+                    // (*self.gui_updater)                        .borrow()                        .update_systray_indicator(self.is_systray_enabled());
                 }
                 Job::StopApplication => {
                     match self
@@ -506,9 +504,7 @@ impl GuiProcessor {
                 Job::NotifyConfigChanged => {
                     (*self.contentlist_r).borrow_mut().notify_config_update();
                     (*self.feedsources_r).borrow_mut().notify_config_update();
-                    (*self.gui_updater)
-                        .borrow()
-                        .update_systray_indicator(self.is_systray_enabled());
+                    // (*self.gui_updater)                        .borrow()                        .update_systray_indicator(self.is_systray_enabled());
                 }
                 Job::DownloaderJobStarted(threadnr, kind) => {
                     self.statusbar.downloader_kind_new[threadnr as usize] = kind;

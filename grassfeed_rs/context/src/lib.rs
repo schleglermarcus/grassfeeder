@@ -28,7 +28,7 @@ pub trait StartupWithAppContext {
 
 #[repr(u64)]
 #[allow(unused)]
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub enum TimerEvent {
     Timer100s = 0,
     Timer10s,
@@ -40,6 +40,7 @@ pub enum TimerEvent {
     Timer10ms,
     Shutdown,
     Startup,
+    #[default]
     None,
 }
 
@@ -56,12 +57,6 @@ pub const TIMER_EVENT_TABLE: [(TimerEvent, u64); 11] = [
     (TimerEvent::Startup, 0),
     (TimerEvent::None, 0),
 ];
-
-impl Default for TimerEvent {
-    fn default() -> TimerEvent {
-        TimerEvent::None
-    }
-}
 
 impl TimerEvent {
     pub fn from_int(i: usize) -> TimerEvent {

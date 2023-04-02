@@ -903,10 +903,8 @@ impl IFeedContents for FeedContents {
                     .get_by_index(*msg_id as isize);
 
                 let list_pos = self.msg_state.read().unwrap().get_gui_pos(*msg_id as isize);
-                if o_msg.is_none() {
-                    return None;
-                }
-                Some((*msg_id as isize, o_msg.unwrap().link.clone(), list_pos))
+                o_msg.as_ref()?;
+                Some((*msg_id as isize, o_msg.unwrap().link, list_pos))
             })
             .for_each(|(db_id, url, list_pos)| {
                 (self.downloader_r)
@@ -915,40 +913,9 @@ impl IFeedContents for FeedContents {
             });
     }
 
-    /// TODO  start it via downloader queue!
     fn launch_browser_selected(&self) {
         let id_list: Vec<i32> = self.list_selected_ids.read().unwrap().clone();
-        debug!("launch-selected: {:?} ", id_list);
         self.launch_browser_single(id_list);
-        /*
-               let mut listpos_id: Vec<(u32, u32)> = Vec::default();
-               id_list.iter().for_each(|dbid| {
-                   self.msg_state
-                       .write()
-                       .unwrap()
-                       .set_read_many(&[*dbid], true);
-
-                   // set-read  delayed, on Return
-                   // (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[*dbid], true);
-
-
-                   /// put jobs into downloader queue
-                   // self.addjob(CJob::StartWebBrowser(*dbid));
-                   let gui_pos = self.msg_state.read().unwrap().get_gui_pos(*dbid as isize);
-
-                   (self.downloader_r)
-                       .borrow()
-                       .launch_webbrowser(url, *db_id, gui_pos);
-
-                   listpos_id.push((gui_pos, *dbid as u32));
-               });
-               self.addjob(CJob::UpdateMessageListSome(listpos_id));
-
-               let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
-               if let Some(feedsources) = self.feedsources_w.upgrade() {
-                   (*feedsources).borrow().clear_read_unread(subs_id);
-               }
-        */
     }
 
     fn get_msg_content_author_categories(

@@ -156,7 +156,7 @@ impl OpmlReader {
                };
                let formatted = doc.to_string_pretty_with_config(&conf);
         */
-        let formatted = unformatted.replace(">", ">\n");
+        let formatted = unformatted.replace('>', ">\n");
         let _r = file.write(formatted.as_bytes())?;
         Ok(())
     }

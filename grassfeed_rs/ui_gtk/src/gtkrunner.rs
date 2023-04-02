@@ -1,4 +1,3 @@
-
 use crate::runner_internal::GtkRunnerInternal;
 use crate::CreateWebViewFnType;
 use crate::DialogDataDistributor;
@@ -777,8 +776,8 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
         self.send_to_int(&IntCommands::MemoryConserve(act));
     }
 
-    fn update_systray_indicator(&self, enable: bool) {
-        self.send_to_int(&IntCommands::TrayIconEnable(enable));
+    fn update_systray_indicator(&self, _enable: bool) {
+        //  self.send_to_int(&IntCommands::TrayIconEnable(enable));
     }
 
     fn update_window_minimized(&self, mini: bool, ev_time: u32) {
@@ -786,6 +785,6 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     }
 
     fn tree_set_cursor(&self, tree_idx: u8, path: Vec<u16>) {
-        self.send_to_int(&&IntCommands::TreeSetCursor(tree_idx, path));
+        self.send_to_int(&IntCommands::TreeSetCursor(tree_idx, path));
     }
 } //

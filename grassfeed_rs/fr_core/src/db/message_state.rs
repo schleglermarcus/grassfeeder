@@ -199,6 +199,9 @@ impl MessageStateMap {
         }
     }
 
+
+
+
     /// Searches the message before the oldest unread
     pub fn find_before_earliest_unread(&self) -> Option<isize> {
         if self.msgmap.is_empty() {
@@ -211,6 +214,9 @@ impl MessageStateMap {
         while new_index < vals.len() as isize && vals[new_index as usize].is_read_copy {
             new_index += 1;
         }
+
+/// TODO choose the last entry anyway, even if it's marked
+
         if new_index > 0_isize {
             return Some(vals[(new_index - 1) as usize].msg_id);
         } else {

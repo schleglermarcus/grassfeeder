@@ -44,8 +44,9 @@ pub trait UISenderWrapper {
     fn send(&self, ev: GuiEvents);
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Eq, Hash)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Eq, Hash, Default)]
 pub enum GuiEvents {
+    #[default]
     None,
     InternalStarted,
     AppWasAlreadyRunning,
@@ -101,11 +102,11 @@ pub enum GuiEvents {
     BrowserEvent(BrowserEventType, i32),
 }
 
-impl Default for GuiEvents {
-    fn default() -> GuiEvents {
-        GuiEvents::None
-    }
-}
+// impl Default for GuiEvents {
+//     fn default() -> GuiEvents {
+//         GuiEvents::None
+//     }
+// }
 
 pub trait UIAdapterValueStore {
     fn memory_conserve(&mut self, active: bool);
