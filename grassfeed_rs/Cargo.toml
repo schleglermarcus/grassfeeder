@@ -6,13 +6,11 @@ members = [
   "ui_gtk",
   "fr_gtk",
   "fr_core",
+  "testing",    
 ]
 
 exclude = [
-  "testing",
   "app-gtk3-linux",
   "app-gtk3-debian",
 ]
 
-## The testing module shall not be at members.
-## If it ere there, the UI module is linked with it, but the tests shall run without the UI module.

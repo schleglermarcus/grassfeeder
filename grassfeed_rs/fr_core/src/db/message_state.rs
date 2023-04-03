@@ -1,5 +1,4 @@
 use crate::db::message::decompress;
-use crate::util::db_time_to_display_nonnull;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
@@ -33,7 +32,7 @@ impl std::fmt::Display for MessageState {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct MessageStateMap {
     /// message-id  , MessageState
     msgmap: HashMap<isize, MessageState>,
@@ -199,13 +198,9 @@ impl MessageStateMap {
         }
     }
 
-
-
-
-    /// Searches the message before the oldest unread
+    /// Searches the message before the oldest unread. IF the first one is not read, it still selects it.
     pub fn find_before_earliest_unread(&self) -> Option<isize> {
         if self.msgmap.is_empty() {
-            debug!("MSGSTATE:  msgmap empty!");
             return None;
         }
         let mut vals: Vec<MessageState> = self.msgmap.values().cloned().collect();
@@ -214,17 +209,10 @@ impl MessageStateMap {
         while new_index < vals.len() as isize && vals[new_index as usize].is_read_copy {
             new_index += 1;
         }
-
-/// TODO choose the last entry anyway, even if it's marked
-
-        if new_index > 0_isize {
+        if new_index >= 1_isize {
             return Some(vals[(new_index - 1) as usize].msg_id);
-        } else {
-            debug!(
-                "find_before_earliest_unread:  index==0  #vals={} #val0.date={:?}",
-                vals.len(),
-                db_time_to_display_nonnull(vals.get(0).unwrap().msg_created_timestamp)
-            );
+        } else if new_index == 0_isize {
+            return Some(vals[0].msg_id);
         }
         None
     }
@@ -330,7 +318,11 @@ pub mod t {
             );
         }
         let o_last_read = msm.find_before_earliest_unread();
+        dbg!(&o_last_read);
         assert_eq!(o_last_read, Some(2));
+        msm.set_read_many(&[1], false);
+        let o_last_read = msm.find_before_earliest_unread();
+        assert_eq!(o_last_read, Some(1)); // select the first message, even if it was unread
     }
 
     //cargo watch -s "cargo test db::message_state::t::t_find_neighbour_message  --lib -- --exact --nocapture"

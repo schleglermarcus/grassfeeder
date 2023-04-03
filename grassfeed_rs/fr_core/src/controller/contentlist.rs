@@ -297,7 +297,7 @@ impl FeedContents {
             4 => {
                 let o_before_earliest_unread_id =
                     self.msg_state.read().unwrap().find_before_earliest_unread();
-                // trace!(                    "BeforeOldestUnread {} `{}` earliest:{:?} ",                    fp,                    fp_name,                    o_before_earliest_unread_id                );
+                // trace!(                    "BeforeOldestUnread {}  earliest:{:?} ",                    fp,                    o_before_earliest_unread_id                );
                 if let Some(id) = o_before_earliest_unread_id {
                     self.set_cursor_to_message(id);
                 }
@@ -586,7 +586,7 @@ impl IFeedContents for FeedContents {
                 }
             }
             let elapsed_m = now.elapsed().as_millis();
-            if elapsed_m > 100 {
+            if elapsed_m > 200 {
                 debug!("CJOB: {:?} took {:?}", &job, elapsed_m);
             }
         }

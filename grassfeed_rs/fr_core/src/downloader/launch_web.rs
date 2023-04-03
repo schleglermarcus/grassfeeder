@@ -45,8 +45,6 @@ impl LaunchWebBrowserStart {
 
 impl Step<LaunchInner> for LaunchWebBrowserStart {
     fn step(self: Box<Self>) -> StepResult<LaunchInner> {
-        // trace!("webbrowser::open ... {} ", &self.0.url);
-        std::thread::sleep(Duration::from_millis(LAUNCH_WAIT_MS));
         let r = webbrowser::open(&self.0.url);
         if r.is_err() {
             warn!("webbrowser::open {:?} {:?} ", &self.0.url, r);
