@@ -91,18 +91,6 @@ pub struct GtkObjectTree {
     pub initvalues: HashMap<PropDef, String>,
 }
 
-// https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/pango/rectangle/struct.Rectangle.html
-#[cfg(not(feature = "legacy3gtk14"))]
-fn get_width_height(rectangle: &gtk::Rectangle) -> (i32, i32) {
-    ((*rectangle).width(), (*rectangle).height())
-}
-
-// https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/pango/struct.Rectangle.html
-#[cfg(feature = "legacy3gtk14")]
-fn get_width_height(rectangle: &gtk::Rectangle) -> (i32, i32) {
-    ((*rectangle).width, (*rectangle).height)
-}
-
 ///  this runs in the gtk thread
 impl GtkGuiBuilder for GtkObjectTree {
     fn build_gtk(
@@ -414,18 +402,14 @@ pub fn create_webview(
     let webview1: WebView = WebView::with_context(w_context);
     webview1.set_widget_name("webview_0");
     webview1.set_border_width(1);
-
-    // TODO deactivated 0.14  //  webview1.set_background_color(&gtk::gdk::RGBA::new(0.5, 0.5, 0.5, 0.5));
-
     let mut wvs_b = webkit2gtk::SettingsBuilder::new()
         .enable_java(false)
-        // .enable_media_capabilities(false)         // TODO deactivated 0.14
-        //  .enable_javascript_markup(false)
         .enable_html5_local_storage(false)
         .enable_developer_extras(false)
         .enable_smooth_scrolling(true)
         .enable_webgl(false)
         .enable_xss_auditor(false);
+    wvs_b = webkit_settings(wvs_b);
     if let Some(fontsize) = manual_fontsize {
         let adapted_size: u32 = RATIO_BROWSER_FONTSIZE_PERCENT * fontsize as u32 / 100;
         wvs_b = wvs_b.default_font_size(adapted_size);
@@ -832,6 +816,29 @@ pub fn create_webcontext_dep(browser_dir: &str) -> WebContext {
 pub fn create_webcontext_dep(browser_dir: &str) -> WebContext {
     let wk_dm = WebsiteDataManager::builder().build();
     WebContext::builder().build()
+}
+
+// https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/pango/rectangle/struct.Rectangle.html
+#[cfg(not(feature = "legacy3gtk14"))]
+fn get_width_height(rectangle: &gtk::Rectangle) -> (i32, i32) {
+    ((*rectangle).width(), (*rectangle).height())
+}
+
+// https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/pango/struct.Rectangle.html
+#[cfg(feature = "legacy3gtk14")]
+fn get_width_height(rectangle: &gtk::Rectangle) -> (i32, i32) {
+    ((*rectangle).width, (*rectangle).height)
+}
+
+#[cfg(not(feature = "legacy3gtk14"))]
+fn webkit_settings(w_b: webkit2gtk::SettingsBuilder) -> webkit2gtk::SettingsBuilder {
+    w_b.enable_media_capabilities(false)
+        .enable_javascript_markup(false)
+}
+
+#[cfg(feature = "legacy3gtk14")]
+fn webkit_settings(w_b: webkit2gtk::SettingsBuilder) -> webkit2gtk::SettingsBuilder {
+    w_b
 }
 
 // ---

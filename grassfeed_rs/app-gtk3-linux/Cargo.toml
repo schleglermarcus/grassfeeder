@@ -10,7 +10,6 @@ name = "grassfeeder"
 path = "src/main.rs"
 
 
-
 # https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html
 # Note: crates.io does not allow packages to be published with path dependencies
 # (path dev-dependencies are ignored).
@@ -20,25 +19,18 @@ gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
 fr_core = { path = "../fr_core", features = ["ui_gtk", "fr_gtk"] }
 resources = { path = "../resources" }
-dd-g3new = { path = "../dd-g3new" }
-
-
 xdg = ">=2.4.1"
 gumdrop = ">=0.8.1"
-# log = ">=0.4.14"
-log = "*"
-# once_cell = ">=1.12.0"
-once_cell = "*"
-# rust-i18n = ">=1.0.1"
-rust-i18n = "*"
-fern = { version = "*", features = ["colored", "chrono"] }    #  ">=0.6"
-
+log = ">=0.4.14"
+once_cell = ">=1.12.0"
+rust-i18n = ">=1.0.1"
+fern = { version = ">=0.6", features = ["colored", "chrono"] }
 
 
 [profile.release]
-opt-level = 's'     # Optimize for size.
-lto = true          # Enable Link Time Optimization
-strip = true        # Strip symbols from binary*
+opt-level = 's' # Optimize for size.
+lto = true      # Enable Link Time Optimization
+strip = true    # Strip symbols from binary*
 
 
 [package.metadata.deb]
@@ -48,12 +40,32 @@ name = "grassfeeder"
 extended-description = "This application polls Feeds (Streams of messages) regularly and presents them in a list of events. Browser Urls of blogs, news sites etc. can be dropped and create a new subscription. It reads Atom and several RSS versions."
 section = "web"
 priority = "optional"
-assets =[
-    ["target/release/grassfeeder", "/usr/bin/", "755"],
-		["assets/changelog.gz", "/usr/share/doc/grassfeeder/", "0644"],
-		["assets/grassfeeder.desktop", "/usr/share/applications/", "0644"],
-		["assets/grassfeeder.xpm",     "/usr/share/pixmaps/grassfeeder/", "0644"],
-		["assets/usr/share/pixmaps/grassfeeder/grassfeeder-indicator2.png", "/usr/share/pixmaps/grassfeeder/", "0644"],
+assets = [
+	[
+		"target/release/grassfeeder",
+		"/usr/bin/",
+		"755",
+	],
+	[
+		"assets/changelog.gz",
+		"/usr/share/doc/grassfeeder/",
+		"0644",
+	],
+	[
+		"assets/grassfeeder.desktop",
+		"/usr/share/applications/",
+		"0644",
+	],
+	[
+		"assets/grassfeeder.xpm",
+		"/usr/share/pixmaps/grassfeeder/",
+		"0644",
+	],
+	[
+		"assets/usr/share/pixmaps/grassfeeder/grassfeeder-indicator2.png",
+		"/usr/share/pixmaps/grassfeeder/",
+		"0644",
+	],
 ]
 
 [package.metadata.i18n]
@@ -63,20 +75,16 @@ default-locale = "en"
 [package.metadata.appimage]
 assets = ["assets/usr"]
 auto_link = false
-auto_link_exclude_list = [
-    "libc.so*",
-    "libdl.so*",
-    "libpthread.so*",
-]
+auto_link_exclude_list = ["libc.so*", "libdl.so*", "libpthread.so*"]
 
 
 [package.metadata.generate-rpm]
 name = "grassfeeder"
 assets = [
-    	{ source="../target/release/grassfeeder", dest="/usr/bin/grassfeeder", mode="755" },
-    	{ source="assets/grassfeeder.desktop", dest="/usr/share/applications/grassfeeder.desktop", mode="755" },
-    	{ source="assets/grassfeeder.xpm",     dest="/usr/share/pixmaps/grassfeeder/grassfeeder.xpm", mode="755" },
-    	{ source="assets/grassfeeder-logo-128x128-t.png", dest="/usr/share/pixmaps/grassfeeder/grassfeeder.png", mode="755" },
+	{ source = "../target/release/grassfeeder", dest = "/usr/bin/grassfeeder", mode = "755" },
+	{ source = "assets/grassfeeder.desktop", dest = "/usr/share/applications/grassfeeder.desktop", mode = "755" },
+	{ source = "assets/grassfeeder.xpm", dest = "/usr/share/pixmaps/grassfeeder/grassfeeder.xpm", mode = "755" },
+	{ source = "assets/grassfeeder-logo-128x128-t.png", dest = "/usr/share/pixmaps/grassfeeder/grassfeeder.png", mode = "755" },
 ]
 
 [package.metadata.generate-rpm.requires]

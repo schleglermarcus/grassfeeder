@@ -6,10 +6,11 @@ members = [
   "ui_gtk",
   "fr_gtk",
   "fr_core",
-  "testing",    
+
 ]
 
 exclude = [
+  "testing",
   "app-gtk3-linux",
   "app-gtk3-debian",
 ]

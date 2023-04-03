@@ -157,7 +157,6 @@ impl GtkRunnerInternal {
             rec_list.sort();
             for command in rec_list {
                 let now = Instant::now();
-                // trace!("  INT: #{}   ", prev_count);
                 match *command {
                     IntCommands::START => {
                         error!("glib loop: unexpected START ");

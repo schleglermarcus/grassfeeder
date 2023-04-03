@@ -26,9 +26,8 @@ use std::sync::atomic::Ordering;
 #[test]
 fn shutdown_store_ini() {
     setup();
+    assert!(ui_select::is_mock_mode());
     {
-        assert!(ui_select::is_mock_mode());
-
         let folder = "../target/db_shutdown".to_string();
         let gf_conf = GrassFeederConfig {
             path_config: folder.clone(),
@@ -60,7 +59,6 @@ fn shutdown_store_ini() {
     assert_eq!(inuse, false);
 }
 
-#[ignore]
 #[test]
 fn add_folder_and_feed() {
     setup();

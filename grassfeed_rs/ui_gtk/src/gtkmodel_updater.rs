@@ -35,7 +35,6 @@ pub struct GtkModelUpdaterInt {
     m_v_store: UIAdapterValueStoreType,
     g_o_a: GtkObjectsType,
     pixbufcache: RefCell<HashMap<String, Pixbuf>>,
-    // ev_sender_w: Arc<dyn UISenderWrapper + Send + Sync + 'static>,
 }
 
 impl GtkModelUpdaterInt {
@@ -48,7 +47,6 @@ impl GtkModelUpdaterInt {
             m_v_store: g_m_v_s,
             g_o_a: gtkobjects_a,
             pixbufcache: RefCell::new(HashMap::new()),
-            // ev_sender_w: ev_se_w,
         }
     }
 
@@ -299,11 +297,10 @@ impl GtkModelUpdaterInt {
         }
         list_view.set_model(Some(list_store));
         let elapsed = now.elapsed().as_millis();
-        if elapsed > 200 {
-            trace!(
+        if elapsed > 300 {
+            debug!(
                 "update_list_model took {:?}ms #lines:{} ",
-                elapsed,
-                num_lines
+                elapsed, num_lines
             );
         }
     }
