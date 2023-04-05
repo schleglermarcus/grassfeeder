@@ -6,6 +6,7 @@ use crate::controller::contentdownloader::DOWNLOADER_THREADS_DEFAULT;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::guiprocessor::GuiProcessor;
 use crate::controller::sourcetree::SourceTreeController;
+use crate::controller::subscriptionmove::SubscriptionMove;
 use crate::controller::timer::ITimer;
 use crate::controller::timer::Timer;
 use crate::db::errors_repo;
@@ -46,6 +47,7 @@ pub fn start(conf: GrassFeederConfig) -> AppContext {
     appcontext.build::<ErrorRepo>();
     appcontext.build::<Downloader>();
     appcontext.build::<SourceTreeController>();
+    appcontext.build::<SubscriptionMove>();
     appcontext.build::<BrowserPane>();
     appcontext.build::<FeedContents>();
     appcontext.build::<GuiProcessor>();

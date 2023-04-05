@@ -158,14 +158,15 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             folder1,
             false,
         );
-    }
-    if false {
         let f5 = feedsources.add_new_folder_at_parent("folder5".to_string(), 0);
         feedsources.add_new_folder_at_parent("5_0".to_string(), f5);
         feedsources.add_new_folder_at_parent("5_1".to_string(), f5);
         feedsources.add_new_folder_at_parent("5_2".to_string(), f5);
         feedsources.add_new_folder_at_parent("5_3".to_string(), f5);
         feedsources.add_new_folder_at_parent("5_4".to_string(), f5);
+
+    }
+    if false {
         let src = [
             ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
             ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),

@@ -24,7 +24,9 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 pub trait ISourceTreeController {
+    #[deprecated]
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool;
+
     fn mark_schedule_fetch(&self, subscription_id: isize);
     fn set_tree_expanded(&self, subscription_id: isize, new_expanded: bool);
     fn addjob(&self, nj: SJob);
@@ -79,6 +81,8 @@ pub trait ISourceTreeController {
 }
 
 impl ISourceTreeController for SourceTreeController {
+    // moving
+
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool {
         trace!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
         let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
@@ -127,6 +131,7 @@ impl ISourceTreeController for SourceTreeController {
             .unwrap_or_default();
         if let Some(entry) = (*self.subscriptionrepo_r).borrow().get_by_index(subs_id) {
             is_folder = entry.is_folder;
+
             if entry.isdeleted() {
                 return;
             }
@@ -196,6 +201,7 @@ impl ISourceTreeController for SourceTreeController {
             .update_expanded(src_vec, new_expanded);
     }
 
+    // moving
     /// returns  source_repo_id
     fn add_new_folder(&mut self, folder_name: String) -> isize {
         let mut new_parent_id = 0;
@@ -205,6 +211,7 @@ impl ISourceTreeController for SourceTreeController {
         self.add_new_folder_at_parent(folder_name, new_parent_id)
     }
 
+    // moving
     fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize {
         let mut fse = SubscriptionEntry::from_new_foldername(folder_name, parent_id);
         fse.expanded = true;
@@ -245,11 +252,13 @@ impl ISourceTreeController for SourceTreeController {
         }
     }
 
+    // moving
     fn add_new_subscription(&mut self, newsource: String, display: String) -> isize {
         let p_id = self.current_new_folder_parent_id.unwrap_or(0);
         self.add_new_subscription_at_parent(newsource, display, p_id, false)
     }
 
+    // moving
     fn add_new_subscription_at_parent(
         &mut self,
         newsource: String,
@@ -365,6 +374,7 @@ impl ISourceTreeController for SourceTreeController {
         self.feedsource_delete_id = o_fs_id;
     }
 
+    // moving
     fn feedsource_move_to_trash(&mut self) {
         if self.feedsource_delete_id.is_none() {
             return;
@@ -387,6 +397,7 @@ impl ISourceTreeController for SourceTreeController {
         self.feedsource_delete_id = None;
     }
 
+    // moving
     // later: delete only those from trash bin
     fn feedsource_delete(&mut self) {
         if self.feedsource_delete_id.is_none() {
@@ -630,6 +641,7 @@ impl ISourceTreeController for SourceTreeController {
         }
     }
 
+    // moving
     fn import_opml(&mut self, filename: String) {
         let new_folder_id = self.add_new_folder_at_parent("import".to_string(), 0);
         let mut opmlreader = OpmlReader::new(self.subscriptionrepo_r.clone());

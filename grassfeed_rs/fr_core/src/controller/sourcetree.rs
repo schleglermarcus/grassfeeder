@@ -42,6 +42,9 @@ use std::rc::Rc;
 use std::rc::Weak;
 use std::time::Instant;
 
+use super::subscriptionmove::ISubscriptionMove;
+use super::subscriptionmove::SubscriptionMove;
+
 pub const JOBQUEUE_SIZE: usize = 1000;
 pub const TREE_STATUS_COLUMN: usize = 7;
 
@@ -105,13 +108,12 @@ pub struct SourceTreeController {
     pub(super) feedcontents_w: Weak<RefCell<FeedContents>>, // YY
     pub(super) gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     pub(super) gui_val_store: UIAdapterValueStoreType,
+    pub(super) erro_repo_r: Rc<RefCell<ErrorRepo>>,
     pub(super) config: Rc<RefCell<Config>>,
+
     pub(super) feedsource_delete_id: Option<usize>,
     pub(super) current_edit_fse: Option<SubscriptionEntry>,
     pub(super) current_new_folder_parent_id: Option<isize>,
-    pub(super) new_source: NewSourceTempData,
-    pub(super) statemap: Rc<RefCell<SubscriptionState>>,
-    pub(super) erro_repo_r: Rc<RefCell<ErrorRepo>>,
     //  Subscription,  Non-Folder-Child-IDs
     pub(super) current_selected_subscription: Option<(SubscriptionEntry, Vec<i32>)>,
     pub(super) currently_minimized: bool,
@@ -120,6 +122,12 @@ pub struct SourceTreeController {
     timer_r: Rc<RefCell<dyn ITimer>>,
     any_spinner_visible: RefCell<bool>,
     need_check_fs_paths: RefCell<bool>,
+    pub(super) new_source: NewSourceTempData,
+
+
+    // moved over
+    #[deprecated]
+    pub(super) statemap: Rc<RefCell<SubscriptionState>>,
 }
 
 impl SourceTreeController {
@@ -158,7 +166,7 @@ impl SourceTreeController {
         err_rep: Rc<RefCell<ErrorRepo>>,
     ) -> Self {
         let (q_s, q_r) = flume::bounded::<SJob>(JOBQUEUE_SIZE);
-        let statemap_ = Rc::new(RefCell::new(SubscriptionState::default()));
+        // let statemap_ = Rc::new(RefCell::new(SubscriptionState::default()));
         let confi = Rc::new(RefCell::new(Config::default()));
         SourceTreeController {
             timer_r: timer_,
@@ -180,10 +188,14 @@ impl SourceTreeController {
             current_selected_subscription: None,
             gui_context_w: Weak::new(),
             messagesrepo_w: Weak::new(),
-            need_check_fs_paths: RefCell::new(true),
-            statemap: statemap_,
+            statemap: Default::default(),
             erro_repo_r: err_rep,
             currently_minimized: false,
+
+            // already migrated
+
+            #[deprecated]
+            need_check_fs_paths: RefCell::new(true),
         }
     }
 
@@ -233,7 +245,6 @@ impl SourceTreeController {
                 }
                 SJob::GuiUpdateTree(subs_id) => {
                     if let Some(path) = self.get_path_for_src(subs_id) {
-                        // debug!("GuiUpdateTree {} {:?}  ", subs_id, path);
                         (*self.gui_updater)
                             .borrow()
                             .update_tree_single(0, path.as_slice());
@@ -241,7 +252,6 @@ impl SourceTreeController {
                         warn!("GuiUpdateTree: No Path for id:{}", subs_id);
                     }
                 }
-                // SJob::FillSubscriptionsTreeUpdate => {                    (*self.gui_updater).borrow().update_tree(TREEVIEW0);                }
                 SJob::GuiUpdateTreeAll => {
                     (*self.gui_updater).borrow().update_tree(TREEVIEW0);
                 }
@@ -543,7 +553,7 @@ impl SourceTreeController {
     /// Mouse-Drag  to [1]  creates a drag-event  to [1, 0]
     /// Mouse-Drag  under [0]  creates a drag-event  to [1]
     ///
-    ///
+    #[deprecated]
     pub fn drag_calc_positions(
         &self,
         from_path: &[u16],
@@ -621,6 +631,7 @@ impl SourceTreeController {
         panic!();
     }
 
+    #[deprecated]
     pub fn drag_move(
         &self,
         from_entry: SubscriptionEntry,
@@ -662,6 +673,9 @@ impl SourceTreeController {
         });
     }
 
+
+
+    #[deprecated]
     /// straightens the folder_pos
     pub fn resort_parent_list(&self, parent_subs_id: isize) {
         let mod_list = (*self.subscriptionrepo_r)
@@ -1121,6 +1135,11 @@ impl StartupWithAppContext for SourceTreeController {
         self.feedcontents_w = Rc::downgrade(&(*ac).get_rc::<FeedContents>().unwrap());
         self.gui_context_w = Rc::downgrade(&(*ac).get_rc::<GuiContext>().unwrap());
         self.messagesrepo_w = Rc::downgrade(&(*ac).get_rc::<MessagesRepo>().unwrap());
+
+
+        let sm_c_r  :  Rc<RefCell<dyn ISubscriptionMove>> = (*ac).get_rc::<SubscriptionMove>().unwrap();
+        self.statemap  = (*sm_c_r).borrow().get_state_map();
+
         let f_so_r = ac.get_rc::<SourceTreeController>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();

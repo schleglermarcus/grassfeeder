@@ -48,6 +48,9 @@ use std::collections::HashSet;
 use std::rc::Rc;
 use std::time::Instant;
 
+use super::subscriptionmove::ISubscriptionMove;
+use super::subscriptionmove::SubscriptionMove;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Job {
     StartApplication,
@@ -87,6 +90,7 @@ pub struct GuiProcessor {
     downloader_r: Rc<RefCell<dyn IDownloader>>,
     gui_context_r: Rc<RefCell<GuiContext>>,
     browserpane_r: Rc<RefCell<dyn IBrowserPane>>,
+    subscriptionmove_r: Rc<RefCell<dyn ISubscriptionMove>>,
     subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
     iconrepo_r: Rc<RefCell<IconRepo>>,
     statusbar: StatusBar,
@@ -134,6 +138,7 @@ impl GuiProcessor {
             erro_repo_r: err_rep,
             currently_minimized: false,
             statusbar: status_bar,
+            subscriptionmove_r: (*ac).get_rc::<SubscriptionMove>().unwrap(),
         }
     }
 
@@ -289,7 +294,9 @@ impl GuiProcessor {
                     }
                 }
                 GuiEvents::TreeDragEvent(_tree_nr, ref from_path, ref to_path) => {
-                    let _success = self.feedsources_r.borrow().on_fs_drag(
+                    // let _success = self.feedsources_r.borrow().on_fs_drag(_tree_nr,from_path.clone(),to_path.clone(),);
+
+                    let _success = self.subscriptionmove_r.borrow().on_subscription_drag(
                         _tree_nr,
                         from_path.clone(),
                         to_path.clone(),

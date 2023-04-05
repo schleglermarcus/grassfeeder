@@ -15,25 +15,21 @@ To Do List
   https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
 
 
+
+- Use different app-indicator  lib
+
+
+
+
+
 - https://launchpad.net/grassfeeder
 https://help.launchpad.net/Packaging/PPA/Uploading
 https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
 https://packaging.ubuntu.com/html/packaging-new-software.html
 
 
-- Use different app-indicator  lib
-- Marking of Messages, Favorites
-
-- Possible Bug:   launch in browser : multiple list items appear
-- Possible Bug: set cursor to message, minimize, restore, cursor is moved to wrong positions
-
-
-
-
-
 
 Later:
-- crates.io download:                   https://crates.io/api/v1/crates/webpki/0.22.0/download 
 
 - 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20
 
@@ -157,6 +153,9 @@ findmnt /mnt/kav || mount /mnt/kav
 rsync -av  --delete /mnt/kav/gfdist ~/
 
 
+crates.io download:                   https://crates.io/api/v1/crates/webpki/0.22.0/download
+
+
 
 ------ AppImage
 https://github.com/AppImage/appimage.github.io
@@ -235,6 +234,8 @@ Uploading grassfeeder_0.1.7_source.changes
 <capitol> https://crates.io/crates/debcargo
 <capitol> sorry, cargo-debstatus i meant: https://crates.io/crates/cargo-debstatus
 <capitol> it's getting late here
+
+
 <count_omega> that is being worked on by bastif and myself
 <count_omega> may I ask which program you're trying to package ?
 <count_omega> cargo-debstatus shows you conveniently which packes/crates are
@@ -267,18 +268,6 @@ for packaging a rust crate
 <count_omega> *against
 
 
-
-
-https://lib.rs/crates/debian-packaging
-https://docs.rs/debian-packaging/latest/debian_packaging/index.html
-
-
-https://manpages.debian.org/bullseye/dpkg-dev/dpkg-source.1.de.html
-https://github.com/ian910297/deb-example
-https://wiki.debian.org/SimplePackagingTutorial
-https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
-https://ostechnix.com/how-to-build-debian-packages-from-source/
-https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
 
 
 <pabs> the rust team workflow relies on crates.io

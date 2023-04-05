@@ -16,7 +16,7 @@ gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
 resources = { path = "../resources" }
 ui_gtk = { path = "../ui_gtk" }
-rust-i18n = { version = ">=1.1.4" }
+rust-i18n = "1.1.1"	# 1.1.4 seems to attract files from outside
 fern = { version = "^0.6.2", features = ["colored"] }
 # gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
 gtk = { package = "gtk", version = "^0.15.5", features = ["v3_22_30"] }
