@@ -77,7 +77,7 @@ pub fn prepare_SubscriptionMove(
     let r_dl: Rc<RefCell<dyn IDownloader>> = Rc::new(RefCell::new(downloaderdummy));
     let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
     let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
-    let fs = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r);
+    let fs = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r, r_error_repo);
     fs.update_cached_paths();
     (fs, r_subscriptions_repo)
 }

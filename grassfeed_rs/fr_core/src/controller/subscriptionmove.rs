@@ -4,6 +4,7 @@ use crate::controller::sourcetree::NewSourceState;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::sourcetree::JOBQUEUE_SIZE;
+use crate::db::errors_repo::ErrorRepo;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_entry;
@@ -14,6 +15,9 @@ use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::db::subscription_state::ISubscriptionState;
 use crate::db::subscription_state::SubscriptionState;
+use crate::opml::opmlreader::OpmlReader;
+use crate::util::filter_by_iso8859_1;
+use crate::util::remove_invalid_chars_from_input;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
@@ -26,15 +30,25 @@ pub trait ISubscriptionMove {
     fn on_subscription_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool;
 
     fn get_state_map(&self) -> Rc<RefCell<SubscriptionState>>;
+    fn update_cached_paths(&self);
 
     fn set_delete_subscription_id(&mut self, o_fs_id: Option<usize>);
     fn move_subscription_to_trash(&mut self);
 
     /// using internal state for parent id
     fn add_new_folder(&mut self, folder_name: String) -> isize;
-    fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize;
+    fn add_new_folder_at_parent(& self, folder_name: String, parent_id: isize) -> isize;
+    fn add_new_subscription(&mut self, newsource: String, display: String) -> isize;
+    fn add_new_subscription_at_parent(
+        &mut self,
+        newsource: String,
+        display: String,
+        parent_id: isize,
+        load_messages: bool,
+    ) -> isize;
 
-    fn update_cached_paths(&self);
+    fn import_opml(&self, filename: String);
+    fn empty_create_default_subscriptions(&mut self);
 
     //
 }
@@ -43,6 +57,7 @@ pub struct SubscriptionMove {
     subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     feedsources_w: Weak<RefCell<SourceTreeController>>,
+    erro_repo_r: Rc<RefCell<ErrorRepo>>,
 
     statemap: Rc<RefCell<SubscriptionState>>,
     need_check_fs_paths: RefCell<bool>,
@@ -55,24 +70,25 @@ impl SubscriptionMove {
         // let gc_r = (*ac).get_rc::<GuiContext>().unwrap();
         // let u_a = (*gc_r).borrow().get_updater_adapter();
         // let v_s_a = (*gc_r).borrow().get_values_adapter();
-
-        // let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
         // (*ac).get_rc::<Timer>().unwrap(),
         Self::new(
             (*ac).get_rc::<SubscriptionRepo>().unwrap(),
             (*ac).get_rc::<MessagesRepo>().unwrap(),
+            (*ac).get_rc::<ErrorRepo>().unwrap(),
         )
     }
 
     pub fn new(
         subs_repo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
         msg_repo_r: Rc<RefCell<dyn IMessagesRepo>>,
+        err_rep: Rc<RefCell<ErrorRepo>>,
     ) -> Self {
         let statemap_ = Rc::new(RefCell::new(SubscriptionState::default()));
         SubscriptionMove {
             subscriptionrepo_r: subs_repo_r,
             messagesrepo_r: msg_repo_r,
             feedsources_w: Weak::new(),
+            erro_repo_r: err_rep,
             statemap: statemap_,
             need_check_fs_paths: RefCell::new(true),
             feedsource_delete_id: Default::default(),
@@ -250,7 +266,6 @@ impl SubscriptionMove {
         next_subs_id
     }
 
-
     pub fn update_paths_rec(
         &self,
         localpath: &[u16],
@@ -275,6 +290,11 @@ impl SubscriptionMove {
         false
     }
 
+    pub fn addjob(&self, j: SJob) {
+        if let Some(subs_w) = self.feedsources_w.upgrade() {
+            (*subs_w).borrow().addjob(j);
+        }
+    }
 } // impl SubscriptionMove
 
 impl ISubscriptionMove for SubscriptionMove {
@@ -366,7 +386,7 @@ impl ISubscriptionMove for SubscriptionMove {
     }
 
     // moving
-    fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize {
+    fn add_new_folder_at_parent(&self, folder_name: String, parent_id: isize) -> isize {
         let mut fse = SubscriptionEntry::from_new_foldername(folder_name, parent_id);
         fse.expanded = true;
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
@@ -399,12 +419,152 @@ impl ISubscriptionMove for SubscriptionMove {
         }
     }
 
-
     fn update_cached_paths(&self) {
         self.update_paths_rec(&Vec::<u16>::default(), 0, false);
     }
 
-}
+    fn add_new_subscription(&mut self, newsource: String, display: String) -> isize {
+        let p_id = self.current_new_folder_parent_id.unwrap_or(0);
+        self.add_new_subscription_at_parent(newsource, display, p_id, false)
+    }
+
+    fn add_new_subscription_at_parent(
+        &mut self,
+        newsource: String,
+        display: String,
+        parent_id: isize,
+        load_messages: bool,
+    ) -> isize {
+        let san_source = remove_invalid_chars_from_input(newsource.clone())
+            .trim()
+            .to_string();
+        let mut san_display = remove_invalid_chars_from_input(display.clone())
+            .trim()
+            .to_string();
+        let (filtered, was_truncated) = filter_by_iso8859_1(&san_display);
+        if !was_truncated {
+            san_display = filtered; // later see how to filter  https://www.ksta.de/feed/index.rss
+        }
+        let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
+        fse.subs_id = self.get_next_available_subscription_id();
+        fse.parent_subs_id = parent_id;
+        if was_truncated {
+            let msg = format!("Found non-ISO chars in Subscription Title: {}", &display);
+            (*self.erro_repo_r)
+                .borrow()
+                .add_error(fse.subs_id, 0, newsource, msg);
+        }
+        let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
+            .borrow()
+            .get_by_parent_repo_id(parent_id)
+            .iter()
+            .map(|fse| fse.folder_position)
+            .max();
+        if let Some(mfp) = max_folderpos {
+            fse.folder_position = mfp + 1;
+        }
+        let mut new_id = -1;
+        match (*self.subscriptionrepo_r).borrow().store_entry(&fse) {
+            Ok(fse2) => {
+                self.addjob(SJob::UpdateTreePaths);
+                self.addjob(SJob::FillSubscriptionsAdapter);
+                self.addjob(SJob::GuiUpdateTreeAll);
+                self.addjob(SJob::SetCursorToSubsID(fse2.subs_id));
+                if load_messages {
+                    self.addjob(SJob::ScheduleUpdateFeed(fse2.subs_id));
+                    self.addjob(SJob::CheckSpinnerActive);
+                }
+
+                new_id = fse2.subs_id;
+            }
+            Err(e) => {
+                error!(" add_new_subscription_at_parent >{}<  {:?}", &san_source, e);
+            }
+        }
+        new_id
+    }
+
+    // moving
+    fn import_opml(&self, filename: String) {
+        let new_folder_id = self.add_new_folder_at_parent("import".to_string(), 0);
+        let mut opmlreader = OpmlReader::new(self.subscriptionrepo_r.clone());
+        match opmlreader.read_from_file(filename) {
+            Ok(_) => {
+                opmlreader.transfer_to_db(new_folder_id);
+                self.addjob(SJob::UpdateTreePaths);
+            }
+            Err(e) => {
+                warn!("reading opml {:?}", e);
+            }
+        }
+        self.addjob(SJob::UpdateTreePaths);
+        self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::GuiUpdateTreeAll);
+    }
+
+
+    fn empty_create_default_subscriptions(&mut self) {
+        let before = (*self.subscriptionrepo_r).borrow().db_existed_before();
+        if before {
+            return;
+        }
+        {   // TODO: into array
+            let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
+            self.add_new_subscription_at_parent(
+                "https://rss.slashdot.org/Slashdot/slashdot".to_string(),
+                "Slashdot".to_string(),
+                folder1,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://www.reddit.com/r/aww.rss".to_string(),
+                "Reddit - Aww".to_string(),
+                folder1,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://xkcd.com/atom.xml".to_string(),
+                "XKCD".to_string(),
+                folder1,
+                true,
+            );
+        }
+        {
+            let folder2 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER2"), 0);
+            self.add_new_subscription_at_parent(
+                "https://github.com/schleglermarcus/grassfeeder/releases.atom".to_string(),
+                "Grassfeeder Releases".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://blog.linuxmint.com/?feed=rss2".to_string(),
+                "Linux Mint".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "http://blog.rust-lang.org/feed.xml".to_string(),
+                "Rust Language".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://www.heise.de/rss/heise-atom.xml".to_string(),
+                "Heise.de".to_string(),
+                folder2,
+                true,
+            );
+            self.add_new_subscription_at_parent(
+                "https://rss.golem.de/rss.php?feed=ATOM1.0".to_string(),
+                "Golem.de".to_string(),
+                folder2,
+                true,
+            );
+        }
+    }
+
+} //  impl ISubscriptionMove
 
 impl Buildable for SubscriptionMove {
     type Output = SubscriptionMove;

@@ -111,6 +111,8 @@ pub struct SourceTreeController {
     pub(super) erro_repo_r: Rc<RefCell<ErrorRepo>>,
     pub(super) config: Rc<RefCell<Config>>,
 
+    subscriptionmove_w: Weak<RefCell<SubscriptionMove>>,
+
     pub(super) current_edit_fse: Option<SubscriptionEntry>,
 
     //  Subscription,  Non-Folder-Child-IDs
@@ -122,7 +124,6 @@ pub struct SourceTreeController {
     any_spinner_visible: RefCell<bool>,
     need_check_fs_paths: RefCell<bool>,
     pub(super) new_source: NewSourceTempData,
-
 
     // moved over
     pub(super) statemap: Rc<RefCell<SubscriptionState>>,
@@ -178,6 +179,7 @@ impl SourceTreeController {
             job_queue_sender: q_s,
             job_queue_receiver: q_r,
             gui_updater: upd_ad,
+
             gui_val_store: v_s_a,
             any_spinner_visible: RefCell::new(false),
             feedcontents_w: Weak::new(),
@@ -190,12 +192,12 @@ impl SourceTreeController {
             current_selected_subscription: None,
             gui_context_w: Weak::new(),
             messagesrepo_w: Weak::new(),
+            subscriptionmove_w: Weak::new(),
             statemap: Default::default(),
             erro_repo_r: err_rep,
             currently_minimized: false,
 
             // already migrated
-
             #[deprecated]
             need_check_fs_paths: RefCell::new(true),
         }
@@ -330,7 +332,11 @@ impl SourceTreeController {
                     }
                 }
                 SJob::EmptyTreeCreateDefaultSubscriptions => {
-                    self.empty_create_default_subscriptions()
+                    // self.empty_create_default_subscriptions()
+
+                    if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                        subs_mov.borrow_mut().empty_create_default_subscriptions();
+                    }
                 }
                 SJob::DragUrlEvaluated(
                     ref drag_string,
@@ -675,8 +681,6 @@ impl SourceTreeController {
         });
     }
 
-
-
     #[deprecated]
     /// straightens the folder_pos
     pub fn resort_parent_list(&self, parent_subs_id: isize) {
@@ -840,8 +844,7 @@ impl SourceTreeController {
         None
     }
 
-
-#[deprecated]
+    #[deprecated]
     pub fn update_paths_rec(
         &self,
         localpath: &[u16],
@@ -883,11 +886,15 @@ impl SourceTreeController {
         next_subs_id
     }
 
+/*
+
+    #[deprecated]
     fn empty_create_default_subscriptions(&mut self) {
         let before = (*self.subscriptionrepo_r).borrow().db_existed_before();
         if before {
             return;
         }
+
         {
             let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
             self.add_new_subscription_at_parent(
@@ -943,6 +950,8 @@ impl SourceTreeController {
             );
         }
     }
+ */
+
 
     /// Creates the tree, fills the gui_val_store ,  is recursive.
     pub fn insert_tree_row(&self, localpath: &[u16], parent_subs_id: i32) -> i32 {
@@ -1141,9 +1150,11 @@ impl StartupWithAppContext for SourceTreeController {
         self.gui_context_w = Rc::downgrade(&(*ac).get_rc::<GuiContext>().unwrap());
         self.messagesrepo_w = Rc::downgrade(&(*ac).get_rc::<MessagesRepo>().unwrap());
 
+        self.subscriptionmove_w = Rc::downgrade(&(*ac).get_rc::<SubscriptionMove>().unwrap());
 
-        let sm_c_r  :  Rc<RefCell<dyn ISubscriptionMove>> = (*ac).get_rc::<SubscriptionMove>().unwrap();
-        self.statemap  = (*sm_c_r).borrow().get_state_map();
+        let sm_c_r: Rc<RefCell<dyn ISubscriptionMove>> =
+            (*ac).get_rc::<SubscriptionMove>().unwrap();
+        self.statemap = (*sm_c_r).borrow().get_state_map();
 
         let f_so_r = ac.get_rc::<SourceTreeController>().unwrap();
         {

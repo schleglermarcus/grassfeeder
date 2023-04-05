@@ -174,7 +174,7 @@ fn prepare_subscription_move(
     let r_icons_repo = Rc::new(RefCell::new(IconRepo::new("")));
     let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
 
-    let subs_move = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r);
+    let subs_move = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r, r_error_repo);
     (subs_move, r_subscriptions_repo.clone())
 }
 

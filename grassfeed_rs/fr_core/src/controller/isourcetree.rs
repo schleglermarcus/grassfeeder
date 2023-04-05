@@ -24,24 +24,12 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 pub trait ISourceTreeController {
-
     // #[deprecated]
     // fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool;
 
     fn mark_schedule_fetch(&self, subscription_id: isize);
     fn set_tree_expanded(&self, subscription_id: isize, new_expanded: bool);
     fn addjob(&self, nj: SJob);
-
-    fn add_new_subscription(&mut self, newsource: String, display: String) -> isize;
-    fn add_new_subscription_at_parent(
-        &mut self,
-        newsource: String,
-        display: String,
-        parent_id: isize,
-        load_messages: bool,
-    ) -> isize;
-
-
 
     fn set_fetch_in_progress(&self, subscription_id: isize);
     fn set_fetch_finished(&self, subscription_id: isize, error_happened: bool);
@@ -64,7 +52,6 @@ pub trait ISourceTreeController {
 
     fn notify_config_update(&mut self);
     fn set_selected_feedsource(&mut self, src_repo_id: isize);
-    fn import_opml(&mut self, filename: String);
 
     fn mark_as_read(&self, src_repo_id: isize);
 
@@ -76,66 +63,34 @@ pub trait ISourceTreeController {
 
     fn set_selected_message_id(&mut self, subs_id: isize, msg_id: isize);
 
+    //--
 
-    // #[deprecated]
-    // fn feedsource_move_to_trash(&mut self);
+    #[deprecated]
+    fn add_new_subscription(&mut self, newsource: String, display: String) -> isize;
+    #[deprecated]
+    fn add_new_subscription_at_parent(
+        &mut self,
+        newsource: String,
+        display: String,
+        parent_id: isize,
+        load_messages: bool,
+    ) -> isize;
+
+
 
     #[deprecated]
     /// writes the path array into the cached subscription list
     fn update_cached_paths(&self);
-
-
-    #[deprecated]
-    /// using internal state for parent id
-    fn add_new_folder(&mut self, folder_name: String) -> isize;
-    #[deprecated]
-    fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize;
-
+    // using internal state for parent id
+    // #[deprecated]
+    // fn add_new_folder(&mut self, folder_name: String) -> isize;
+    // #[deprecated]
+    // fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize;
+    // #[deprecated]
+    // fn import_opml(&mut self, filename: String);
 }
 
 impl ISourceTreeController for SourceTreeController {
-/*
-    // moving
-    fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool {
-        trace!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
-        let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
-        let length_before = all1.len();
-        let mut success: bool = false;
-        let mut from_parent_id: isize = -1;
-        let mut to_parent_subs_id: isize = -1;
-        match self.drag_calc_positions(&from_path, &to_path) {
-            Ok((from_entry, to_parent_id, to_folderpos)) => {
-                from_parent_id = from_entry.parent_subs_id;
-                to_parent_subs_id = to_parent_id;
-                self.drag_move(from_entry, to_parent_id, to_folderpos);
-                let all2 = (*self.subscriptionrepo_r).borrow().get_all_entries();
-                if all2.len() != length_before {
-                    error!("Drag lost entries: {}->{}", length_before, all2.len());
-                    success = false;
-                } else {
-                    success = true;
-                }
-            }
-            Err(msg) => {
-                warn!("DragFail: {:?}=>{:?} --> {} ", from_path, to_path, msg);
-                (*self.subscriptionrepo_r)
-                    .borrow()
-                    .debug_dump_tree("dragfail");
-            }
-        }
-        self.addjob(SJob::UpdateTreePaths);
-        //  debug!("on-drag subs-id: from_p:{}  to_p:{}", from_parent_id, to_parent_subs_id        );
-        self.addjob(SJob::FillSubscriptionsAdapter);
-        if from_parent_id >= 0 {
-            self.addjob(SJob::GuiUpdateTree(from_parent_id));
-        }
-        if to_parent_subs_id >= 0 && to_parent_subs_id != from_parent_id {
-            self.addjob(SJob::GuiUpdateTree(to_parent_subs_id));
-        }
-        success
-    }
- */
-
     fn mark_schedule_fetch(&self, subs_id: isize) {
         let mut is_folder: bool = false;
         let su_st = self
@@ -176,7 +131,6 @@ impl ISourceTreeController for SourceTreeController {
         }
     }
 
-
     fn mark_as_read(&self, src_repo_id: isize) {
         let mut is_folder: bool = false;
         if let Some(st) = self.statemap.borrow().get_state(src_repo_id) {
@@ -216,6 +170,7 @@ impl ISourceTreeController for SourceTreeController {
             .update_expanded(src_vec, new_expanded);
     }
 
+/*
     // moving
     /// returns  source_repo_id
     fn add_new_folder(&mut self, folder_name: String) -> isize {
@@ -255,6 +210,8 @@ impl ISourceTreeController for SourceTreeController {
             }
         }
     }
+ */
+
 
     fn addjob(&self, nj: SJob) {
         if self.job_queue_sender.is_full() {
@@ -388,7 +345,6 @@ impl ISourceTreeController for SourceTreeController {
     fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>) {
         self.feedsource_delete_id = o_fs_id;
     }
-
 
     // moving
     // later: delete only those from trash bin
@@ -634,6 +590,7 @@ impl ISourceTreeController for SourceTreeController {
         }
     }
 
+/*
     // moving
     fn import_opml(&mut self, filename: String) {
         let new_folder_id = self.add_new_folder_at_parent("import".to_string(), 0);
@@ -651,6 +608,9 @@ impl ISourceTreeController for SourceTreeController {
         self.addjob(SJob::FillSubscriptionsAdapter);
         self.addjob(SJob::GuiUpdateTreeAll);
     }
+ */
+
+
 
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)> {
         self.current_selected_subscription.clone()

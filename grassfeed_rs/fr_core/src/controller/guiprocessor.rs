@@ -555,7 +555,7 @@ impl GuiProcessor {
         match ident.as_str() {
             "new-folder" => {
                 if let Some(AValue::ASTR(s)) = payload.get(0) {
-                    (*self.feedsources_r)
+                    (*self.subscriptionmove_r)
                         .borrow_mut()
                         .add_new_folder(s.to_string());
                 }
@@ -579,7 +579,7 @@ impl GuiProcessor {
             }
             "import-opml" => {
                 if let Some(AValue::ASTR(ref s)) = payload.get(0) {
-                    (*self.feedsources_r)
+                    (*self.subscriptionmove_r)
                         .borrow_mut()
                         .import_opml(s.to_string());
                 }
