@@ -111,9 +111,8 @@ pub struct SourceTreeController {
     pub(super) erro_repo_r: Rc<RefCell<ErrorRepo>>,
     pub(super) config: Rc<RefCell<Config>>,
 
-    pub(super) feedsource_delete_id: Option<usize>,
     pub(super) current_edit_fse: Option<SubscriptionEntry>,
-    pub(super) current_new_folder_parent_id: Option<isize>,
+
     //  Subscription,  Non-Folder-Child-IDs
     pub(super) current_selected_subscription: Option<(SubscriptionEntry, Vec<i32>)>,
     pub(super) currently_minimized: bool,
@@ -126,8 +125,11 @@ pub struct SourceTreeController {
 
 
     // moved over
-    #[deprecated]
     pub(super) statemap: Rc<RefCell<SubscriptionState>>,
+    #[deprecated]
+    pub(super) feedsource_delete_id: Option<usize>,
+    #[deprecated]
+    pub(super) current_new_folder_parent_id: Option<isize>,
 }
 
 impl SourceTreeController {
@@ -838,6 +840,8 @@ impl SourceTreeController {
         None
     }
 
+
+#[deprecated]
     pub fn update_paths_rec(
         &self,
         localpath: &[u16],
@@ -864,6 +868,7 @@ impl SourceTreeController {
 
     /// scans the messages for highest subscription id, if there is a higher one, use next higher subscription id
     /// returns 0     to use   autoincrement
+    #[deprecated]
     pub fn get_next_available_subscription_id(&self) -> isize {
         let subs_repo_highest = (*self.subscriptionrepo_r).borrow().get_highest_src_id();
         let mut next_subs_id = std::cmp::max(subs_repo_highest + 1, 10);

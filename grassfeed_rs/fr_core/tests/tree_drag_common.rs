@@ -2,16 +2,22 @@ use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::IDownloader;
 use fr_core::controller::isourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
+use fr_core::controller::subscriptionmove::SubscriptionMove;
 use fr_core::controller::timer::build_timer;
 use fr_core::controller::timer::ITimer;
 use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::icon_repo::IconRepo;
+use fr_core::db::message::MessageRow;
+use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::ui_select::uimock::UIMock;
 use std::cell::RefCell;
 use std::rc::Rc;
+use fr_core::db::messages_repo::IMessagesRepo;
+use fr_core::controller::subscriptionmove::ISubscriptionMove;
+
 
 #[allow(dead_code)]
 pub fn prepare_source_tree_controller(
@@ -41,6 +47,37 @@ pub fn prepare_source_tree_controller(
         r_dl,
         r_error_repo,
     );
+    fs.update_cached_paths();
+    (fs, r_subscriptions_repo)
+}
+
+#[allow(dead_code)]
+pub fn prepare_SubscriptionMove(
+    fs_list: Vec<SubscriptionEntry>,
+) -> (SubscriptionMove, Rc<RefCell<dyn ISubscriptionRepo>>) {
+    let subscrip_repo = SubscriptionRepo::new_inmem(); // new("");
+    subscrip_repo.scrub_all_subscriptions();
+    fs_list.iter().for_each(|e| {
+        let _r = subscrip_repo.store_entry(e);
+    });
+    let r_subscriptions_repo: Rc<RefCell<dyn ISubscriptionRepo>> =
+        Rc::new(RefCell::new(subscrip_repo));
+
+    let msgrepo = MessagesRepo::new_in_mem();
+    msgrepo.get_ctx().create_table();
+    let mut mr1: MessageRow = MessageRow::default();
+    mr1.subscription_id = 20;
+    let _mr1id = msgrepo.insert(&mr1).unwrap() as isize;
+    let msg_r_r = Rc::new(RefCell::new(msgrepo));
+
+    let r_icons_repo = Rc::new(RefCell::new(IconRepo::new("")));
+    let r_timer: Rc<RefCell<dyn ITimer>> = Rc::new(RefCell::new(build_timer()));
+    let uimock = UIMock::new();
+    let downloaderdummy = DownloaderDummy::default();
+    let r_dl: Rc<RefCell<dyn IDownloader>> = Rc::new(RefCell::new(downloaderdummy));
+    let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
+    let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
+    let fs = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r);
     fs.update_cached_paths();
     (fs, r_subscriptions_repo)
 }

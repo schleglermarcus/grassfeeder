@@ -24,8 +24,9 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 pub trait ISourceTreeController {
-    #[deprecated]
-    fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool;
+
+    // #[deprecated]
+    // fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool;
 
     fn mark_schedule_fetch(&self, subscription_id: isize);
     fn set_tree_expanded(&self, subscription_id: isize, new_expanded: bool);
@@ -40,9 +41,8 @@ pub trait ISourceTreeController {
         load_messages: bool,
     ) -> isize;
 
-    /// using internal state for parent id
-    fn add_new_folder(&mut self, folder_name: String) -> isize;
-    fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize;
+
+
     fn set_fetch_in_progress(&self, subscription_id: isize);
     fn set_fetch_finished(&self, subscription_id: isize, error_happened: bool);
 
@@ -55,7 +55,6 @@ pub trait ISourceTreeController {
     fn set_conf_display_feedcount_all(&mut self, a: bool);
 
     fn feedsource_delete(&mut self);
-    fn feedsource_move_to_trash(&mut self);
 
     fn start_feedsource_edit_dialog(&mut self, source_repo_id: isize);
     fn end_feedsource_edit_dialog(&mut self, values: &[AValue]);
@@ -71,18 +70,32 @@ pub trait ISourceTreeController {
 
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry>;
-    /// writes the path array into the cached subscription list
-    fn update_cached_paths(&self);
 
     fn clear_read_unread(&self, subs_id: isize);
     fn memory_conserve(&mut self, act: bool);
 
     fn set_selected_message_id(&mut self, subs_id: isize, msg_id: isize);
+
+
+    // #[deprecated]
+    // fn feedsource_move_to_trash(&mut self);
+
+    #[deprecated]
+    /// writes the path array into the cached subscription list
+    fn update_cached_paths(&self);
+
+
+    #[deprecated]
+    /// using internal state for parent id
+    fn add_new_folder(&mut self, folder_name: String) -> isize;
+    #[deprecated]
+    fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize;
+
 }
 
 impl ISourceTreeController for SourceTreeController {
+/*
     // moving
-
     fn on_fs_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool {
         trace!("START_DRAG {:?} => {:?}      ", &from_path, &to_path);
         let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
@@ -121,6 +134,7 @@ impl ISourceTreeController for SourceTreeController {
         }
         success
     }
+ */
 
     fn mark_schedule_fetch(&self, subs_id: isize) {
         let mut is_folder: bool = false;
@@ -161,6 +175,7 @@ impl ISourceTreeController for SourceTreeController {
             self.addjob(SJob::GuiUpdateTree(subs_id));
         }
     }
+
 
     fn mark_as_read(&self, src_repo_id: isize) {
         let mut is_folder: bool = false;
@@ -374,28 +389,6 @@ impl ISourceTreeController for SourceTreeController {
         self.feedsource_delete_id = o_fs_id;
     }
 
-    // moving
-    fn feedsource_move_to_trash(&mut self) {
-        if self.feedsource_delete_id.is_none() {
-            return;
-        }
-        let fs_id = self.feedsource_delete_id.unwrap();
-        let fse: SubscriptionEntry = (*self.subscriptionrepo_r)
-            .borrow()
-            .get_by_index(fs_id as isize)
-            .unwrap();
-        (*self.subscriptionrepo_r)
-            .borrow()
-            .update_parent_and_folder_position(fse.subs_id, SRC_REPO_ID_DELETED, 0);
-        (*self.subscriptionrepo_r)
-            .borrow()
-            .set_deleted_rec(fse.subs_id);
-        self.resort_parent_list(fse.parent_subs_id);
-        self.addjob(SJob::UpdateTreePaths);
-        self.addjob(SJob::FillSubscriptionsAdapter);
-        self.addjob(SJob::GuiUpdateTreeAll);
-        self.feedsource_delete_id = None;
-    }
 
     // moving
     // later: delete only those from trash bin

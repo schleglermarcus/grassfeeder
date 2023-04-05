@@ -599,7 +599,9 @@ impl GuiProcessor {
                 }
             }
             "feedsource-delete" => {
-                self.feedsources_r.borrow_mut().feedsource_move_to_trash();
+                self.subscriptionmove_r
+                    .borrow_mut()
+                    .move_subscription_to_trash();
             }
             "subscription-edit-ok" => {
                 self.feedsources_r

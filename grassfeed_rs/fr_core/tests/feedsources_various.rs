@@ -1,13 +1,13 @@
-mod logger_config;
-
-// mockall cannot provide a consistent data set, needs to be instrumented for each request separately.
 mod downloader_dummy;
+mod logger_config; // mockall cannot provide a consistent data set, needs to be instrumented for each request separately.
 
 use crate::downloader_dummy::DownloaderDummy;
 use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::IDownloader;
 use fr_core::controller::isourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
+use fr_core::controller::subscriptionmove::ISubscriptionMove;
+use fr_core::controller::subscriptionmove::SubscriptionMove;
 use fr_core::controller::timer::build_timer;
 use fr_core::controller::timer::ITimer;
 use fr_core::db::errors_repo::ErrorRepo;
@@ -65,9 +65,10 @@ fn add_feed_empty() {
 fn delete_feed_v1() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    let (mut fsc, r_fsource) = prepare_stc(fs_list);
-    fsc.set_fs_delete_id(Some(2));
-    fsc.feedsource_move_to_trash();
+    // let (mut fsc, r_fsource) = prepare_stc(fs_list);
+    let (mut fsc, r_fsource) = prepare_subscription_move(fs_list);
+    fsc.set_delete_subscription_id(Some(2));
+    fsc.move_subscription_to_trash();
     let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
     // debug!("{:?}", &result);
     assert_eq!(result.get(0).unwrap().folder_position, 0);
@@ -145,6 +146,36 @@ fn prepare_stc(
         r_error_repo,
     );
     (fs, r_subscriptions_repo)
+}
+
+fn prepare_subscription_move(
+    fs_list: Vec<SubscriptionEntry>,
+) -> (SubscriptionMove, Rc<RefCell<dyn ISubscriptionRepo>>) {
+    let mut subscrip_repo = SubscriptionRepo::new_inmem();
+    subscrip_repo.startup_int();
+    fs_list.iter().for_each(|e| {
+        let _r = subscrip_repo.store_entry(e);
+    });
+    let r_subscriptions_repo: Rc<RefCell<dyn ISubscriptionRepo>> =
+        Rc::new(RefCell::new(subscrip_repo));
+
+    let msgrepo = MessagesRepo::new_in_mem();
+    msgrepo.get_ctx().create_table();
+    let mut mr1: MessageRow = MessageRow::default();
+    mr1.subscription_id = 20;
+    let _mr1id = msgrepo.insert(&mr1).unwrap() as isize;
+    let msg_r_r = Rc::new(RefCell::new(msgrepo));
+
+    let r_timer: Rc<RefCell<dyn ITimer>> = Rc::new(RefCell::new(build_timer()));
+    let uimock = UIMock::new();
+    let downloaderdummy = DownloaderDummy::default();
+    let r_dl: Rc<RefCell<dyn IDownloader>> = Rc::new(RefCell::new(downloaderdummy));
+    let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
+    let r_icons_repo = Rc::new(RefCell::new(IconRepo::new("")));
+    let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
+
+    let subs_move = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r);
+    (subs_move, r_subscriptions_repo.clone())
 }
 
 fn dataset_simple_trio() -> Vec<SubscriptionEntry> {

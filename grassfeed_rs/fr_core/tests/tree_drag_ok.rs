@@ -7,6 +7,8 @@ use crate::tree_drag_common::dataset_some_tree;
 use crate::tree_drag_common::dataset_three_folders;
 use crate::tree_drag_common::prepare_source_tree_controller;
 use fr_core::controller::isourcetree::ISourceTreeController;
+use fr_core::controller::subscriptionmove::ISubscriptionMove;
+use crate::tree_drag_common::prepare_SubscriptionMove;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 
 /// Dragging the first folder   between the second and third.   0 -> 2
@@ -80,8 +82,8 @@ fn drag_outofrange_fail() {
 fn drag_folder_one_up() {
     setup(); //
     let fs_list: Vec<SubscriptionEntry> = dataset_three_folders();
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
-    let success = fsc.on_fs_drag(0, vec![1], vec![0, 0]);
+    let (fsc, r_fsource) = prepare_SubscriptionMove(fs_list);
+    let success = fsc.on_subscription_drag(0, vec![1], vec![0, 0]);
     // r_fsource.borrow().debug_dump_tree("after ");
     let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(1);
     assert_eq!(result.len(), 1);

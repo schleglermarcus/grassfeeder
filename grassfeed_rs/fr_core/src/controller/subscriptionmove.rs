@@ -4,8 +4,11 @@ use crate::controller::sourcetree::NewSourceState;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::sourcetree::JOBQUEUE_SIZE;
+use crate::db::messages_repo::IMessagesRepo;
+use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_entry;
 use crate::db::subscription_entry::SubscriptionEntry;
+use crate::db::subscription_entry::SRC_REPO_ID_DELETED;
 use crate::db::subscription_entry::SRC_REPO_ID_MOVING;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
@@ -23,15 +26,28 @@ pub trait ISubscriptionMove {
     fn on_subscription_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool;
 
     fn get_state_map(&self) -> Rc<RefCell<SubscriptionState>>;
+
+    fn set_delete_subscription_id(&mut self, o_fs_id: Option<usize>);
+    fn move_subscription_to_trash(&mut self);
+
+    /// using internal state for parent id
+    fn add_new_folder(&mut self, folder_name: String) -> isize;
+    fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize;
+
+    fn update_cached_paths(&self);
+
     //
 }
 
 pub struct SubscriptionMove {
     subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
+    messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     feedsources_w: Weak<RefCell<SourceTreeController>>,
 
     statemap: Rc<RefCell<SubscriptionState>>,
     need_check_fs_paths: RefCell<bool>,
+    feedsource_delete_id: Option<usize>,
+    pub(super) current_new_folder_parent_id: Option<isize>,
 }
 
 impl SubscriptionMove {
@@ -39,19 +55,28 @@ impl SubscriptionMove {
         // let gc_r = (*ac).get_rc::<GuiContext>().unwrap();
         // let u_a = (*gc_r).borrow().get_updater_adapter();
         // let v_s_a = (*gc_r).borrow().get_values_adapter();
-        // let dl_r = (*ac).get_rc::<contentdownloader::Downloader>().unwrap();
+
         // let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
         // (*ac).get_rc::<Timer>().unwrap(),
-        Self::new((*ac).get_rc::<SubscriptionRepo>().unwrap())
+        Self::new(
+            (*ac).get_rc::<SubscriptionRepo>().unwrap(),
+            (*ac).get_rc::<MessagesRepo>().unwrap(),
+        )
     }
 
-    pub fn new(subs_repo_r: Rc<RefCell<dyn ISubscriptionRepo>>) -> Self {
+    pub fn new(
+        subs_repo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
+        msg_repo_r: Rc<RefCell<dyn IMessagesRepo>>,
+    ) -> Self {
         let statemap_ = Rc::new(RefCell::new(SubscriptionState::default()));
         SubscriptionMove {
             subscriptionrepo_r: subs_repo_r,
-            statemap: statemap_,
+            messagesrepo_r: msg_repo_r,
             feedsources_w: Weak::new(),
+            statemap: statemap_,
             need_check_fs_paths: RefCell::new(true),
+            feedsource_delete_id: Default::default(),
+            current_new_folder_parent_id: Default::default(),
         }
     }
 
@@ -210,6 +235,46 @@ impl SubscriptionMove {
             }
         });
     }
+
+    /// scans the messages for highest subscription id, if there is a higher one, use next higher subscription id
+    /// returns 0     to use   autoincrement
+    pub fn get_next_available_subscription_id(&self) -> isize {
+        let subs_repo_highest = (*self.subscriptionrepo_r).borrow().get_highest_src_id();
+        let mut next_subs_id = std::cmp::max(subs_repo_highest + 1, 10);
+        let h = (*self.messagesrepo_r).borrow().get_max_src_index();
+        if h >= next_subs_id {
+            next_subs_id = h + 1;
+        } else {
+            next_subs_id = 0; // default auto increment
+        }
+        next_subs_id
+    }
+
+
+    pub fn update_paths_rec(
+        &self,
+        localpath: &[u16],
+        parent_subs_id: i32,
+        mut is_deleted: bool,
+    ) -> bool {
+        if parent_subs_id < 0 {
+            is_deleted = true;
+        }
+        let entries: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
+            .borrow()
+            .get_by_parent_repo_id(parent_subs_id as isize);
+        entries.iter().enumerate().for_each(|(num, entry)| {
+            let mut path: Vec<u16> = Vec::new();
+            path.extend_from_slice(localpath);
+            path.push(num as u16);
+            self.update_paths_rec(&path, entry.subs_id as i32, is_deleted);
+            let mut smm = self.statemap.borrow_mut();
+            smm.set_tree_path(entry.subs_id, path, entry.is_folder);
+            smm.set_deleted(entry.subs_id, is_deleted);
+        });
+        false
+    }
+
 } // impl SubscriptionMove
 
 impl ISubscriptionMove for SubscriptionMove {
@@ -261,6 +326,84 @@ impl ISubscriptionMove for SubscriptionMove {
     fn get_state_map(&self) -> Rc<RefCell<SubscriptionState>> {
         self.statemap.clone()
     }
+
+    fn move_subscription_to_trash(&mut self) {
+        if self.feedsource_delete_id.is_none() {
+            return;
+        }
+        let fs_id = self.feedsource_delete_id.unwrap();
+        let fse: SubscriptionEntry = (*self.subscriptionrepo_r)
+            .borrow()
+            .get_by_index(fs_id as isize)
+            .unwrap();
+        (*self.subscriptionrepo_r)
+            .borrow()
+            .update_parent_and_folder_position(fse.subs_id, SRC_REPO_ID_DELETED, 0);
+        (*self.subscriptionrepo_r)
+            .borrow()
+            .set_deleted_rec(fse.subs_id);
+        self.resort_parent_list(fse.parent_subs_id);
+        self.feedsource_delete_id = None;
+        if let Some(subs_w) = self.feedsources_w.upgrade() {
+            (*subs_w).borrow().addjob(SJob::UpdateTreePaths);
+            (*subs_w).borrow().addjob(SJob::FillSubscriptionsAdapter);
+            (*subs_w).borrow().addjob(SJob::GuiUpdateTreeAll);
+        }
+    }
+
+    fn set_delete_subscription_id(&mut self, o_fs_id: Option<usize>) {
+        self.feedsource_delete_id = o_fs_id;
+    }
+
+    // moving
+    /// returns  source_repo_id
+    fn add_new_folder(&mut self, folder_name: String) -> isize {
+        let mut new_parent_id = 0;
+        if self.current_new_folder_parent_id.is_some() {
+            new_parent_id = self.current_new_folder_parent_id.take().unwrap();
+        }
+        self.add_new_folder_at_parent(folder_name, new_parent_id)
+    }
+
+    // moving
+    fn add_new_folder_at_parent(&mut self, folder_name: String, parent_id: isize) -> isize {
+        let mut fse = SubscriptionEntry::from_new_foldername(folder_name, parent_id);
+        fse.expanded = true;
+        let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
+            .borrow()
+            .get_by_parent_repo_id(parent_id)
+            .iter()
+            .map(|fse| fse.folder_position)
+            .max();
+        if let Some(mfp) = max_folderpos {
+            fse.folder_position = mfp + 1;
+        }
+        fse.subs_id = self.get_next_available_subscription_id();
+        let r = (*self.subscriptionrepo_r).borrow().store_entry(&fse);
+        match r {
+            Ok(fse) => {
+                if let Some(subs_w) = self.feedsources_w.upgrade() {
+                    (*subs_w).borrow().addjob(SJob::UpdateTreePaths);
+                    (*subs_w).borrow().addjob(SJob::FillSubscriptionsAdapter);
+                    (*subs_w).borrow().addjob(SJob::GuiUpdateTreeAll);
+                    (*subs_w)
+                        .borrow()
+                        .addjob(SJob::SetCursorToSubsID(fse.subs_id));
+                }
+                fse.subs_id
+            }
+            Err(e2) => {
+                error!("add_new_folder: {:?}", e2);
+                -1
+            }
+        }
+    }
+
+
+    fn update_cached_paths(&self) {
+        self.update_paths_rec(&Vec::<u16>::default(), 0, false);
+    }
+
 }
 
 impl Buildable for SubscriptionMove {
