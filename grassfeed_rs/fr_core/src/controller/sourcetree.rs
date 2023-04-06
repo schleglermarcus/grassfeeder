@@ -129,6 +129,8 @@ pub struct SourceTreeController {
     pub(super) statemap: Rc<RefCell<SubscriptionState>>,
     #[deprecated]
     pub(super) feedsource_delete_id: Option<usize>,
+
+
     #[deprecated]
     pub(super) current_new_folder_parent_id: Option<isize>,
 }

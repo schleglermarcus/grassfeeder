@@ -1,13 +1,9 @@
 use crate::controller::isourcetree::ISourceTreeController;
-use crate::controller::sourcetree::Config;
-use crate::controller::sourcetree::NewSourceState;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
-use crate::controller::sourcetree::JOBQUEUE_SIZE;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
-use crate::db::subscription_entry;
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_entry::SRC_REPO_ID_DELETED;
 use crate::db::subscription_entry::SRC_REPO_ID_MOVING;
@@ -37,10 +33,10 @@ pub trait ISubscriptionMove {
 
     /// using internal state for parent id
     fn add_new_folder(&mut self, folder_name: String) -> isize;
-    fn add_new_folder_at_parent(& self, folder_name: String, parent_id: isize) -> isize;
+    fn add_new_folder_at_parent(&self, folder_name: String, parent_id: isize) -> isize;
     fn add_new_subscription(&mut self, newsource: String, display: String) -> isize;
     fn add_new_subscription_at_parent(
-        &mut self,
+        &self,
         newsource: String,
         display: String,
         parent_id: isize,
@@ -50,19 +46,23 @@ pub trait ISubscriptionMove {
     fn import_opml(&self, filename: String);
     fn empty_create_default_subscriptions(&mut self);
 
+    fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>);
+    // later: delete only those from trash bin
+    fn feedsource_delete(&mut self);
+
     //
 }
 
 pub struct SubscriptionMove {
     subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
-    messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
+    pub messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     feedsources_w: Weak<RefCell<SourceTreeController>>,
     erro_repo_r: Rc<RefCell<ErrorRepo>>,
 
     statemap: Rc<RefCell<SubscriptionState>>,
     need_check_fs_paths: RefCell<bool>,
     feedsource_delete_id: Option<usize>,
-    pub(super) current_new_folder_parent_id: Option<isize>,
+    current_new_folder_parent_id: Option<isize>,
 }
 
 impl SubscriptionMove {
@@ -104,7 +104,6 @@ impl SubscriptionMove {
     /// Mouse-Drag  to [1]  creates a drag-event  to [1, 0]
     /// Mouse-Drag  under [0]  creates a drag-event  to [1]
     ///
-
     pub fn drag_calc_positions(
         &self,
         from_path: &[u16],
@@ -429,7 +428,7 @@ impl ISubscriptionMove for SubscriptionMove {
     }
 
     fn add_new_subscription_at_parent(
-        &mut self,
+        &self,
         newsource: String,
         display: String,
         parent_id: isize,
@@ -502,13 +501,13 @@ impl ISubscriptionMove for SubscriptionMove {
         self.addjob(SJob::GuiUpdateTreeAll);
     }
 
-
     fn empty_create_default_subscriptions(&mut self) {
         let before = (*self.subscriptionrepo_r).borrow().db_existed_before();
         if before {
             return;
         }
-        {   // TODO: into array
+        {
+            // TODO: into array
             let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
             self.add_new_subscription_at_parent(
                 "https://rss.slashdot.org/Slashdot/slashdot".to_string(),
@@ -564,6 +563,24 @@ impl ISubscriptionMove for SubscriptionMove {
         }
     }
 
+    fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>) {
+        self.feedsource_delete_id = o_fs_id;
+    }
+
+    // later: delete only those from trash bin
+    fn feedsource_delete(&mut self) {
+        if self.feedsource_delete_id.is_none() {
+            return;
+        }
+        let fs_id = self.feedsource_delete_id.unwrap();
+        (*self.subscriptionrepo_r)
+            .borrow()
+            .delete_by_index(fs_id as isize);
+        self.addjob(SJob::UpdateTreePaths);
+        self.addjob(SJob::FillSubscriptionsAdapter);
+        self.addjob(SJob::GuiUpdateTreeAll);
+        self.feedsource_delete_id = None;
+    }
 } //  impl ISubscriptionMove
 
 impl Buildable for SubscriptionMove {

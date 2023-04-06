@@ -566,8 +566,9 @@ impl GuiProcessor {
                 } else if let (Some(AValue::ASTR(ref s0)), Some(AValue::ASTR(ref s1))) =
                     (payload.get(0), payload.get(1))
                 {
+                    // .feedsources_r
                     let new_id = self
-                        .feedsources_r
+                        .subscriptionmove_r
                         .borrow_mut()
                         .add_new_subscription(s0.clone(), s1.clone());
                     if new_id > 0 {

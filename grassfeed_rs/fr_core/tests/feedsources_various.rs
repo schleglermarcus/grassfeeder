@@ -4,7 +4,6 @@ mod logger_config; // mockall cannot provide a consistent data set, needs to be 
 use crate::downloader_dummy::DownloaderDummy;
 use fr_core::config::configmanager::ConfigManager;
 use fr_core::controller::contentdownloader::IDownloader;
-use fr_core::controller::isourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
 use fr_core::controller::subscriptionmove::ISubscriptionMove;
 use fr_core::controller::subscriptionmove::SubscriptionMove;
@@ -32,16 +31,18 @@ use std::rc::Rc;
 fn add_subscription_with_existing_messages() {
     setup();
     let subscriptions_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    let (mut subscription_controller, _r_fsource) = prepare_stc(subscriptions_list);
+    let (mut subscription_controller, _r_fsource) = prepare_subscription_move(subscriptions_list);
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
     let mut mr1: MessageRow = MessageRow::default();
     mr1.subscription_id = 20;
     let _mr1id = msgrepo.insert(&mr1).unwrap() as isize;
     let msg_r_r = Rc::new(RefCell::new(msgrepo));
-    subscription_controller.messagesrepo_w = Rc::downgrade(&msg_r_r);
+    subscription_controller.messagesrepo_r = msg_r_r.clone(); //  Rc::downgrade(&msg_r_r);
+
     let subs_id = subscription_controller
         .add_new_subscription("some-url-3".to_string(), "name-proc3".to_string());
+
     assert_eq!(subs_id, mr1.subscription_id + 1);
     let message = (*(msg_r_r.borrow())).get_by_src_id(subs_id, false);
     assert_eq!(message.len(), 0); // the new created subscription may not have messages attached
@@ -51,7 +52,7 @@ fn add_subscription_with_existing_messages() {
 #[test]
 fn add_feed_empty() {
     setup();
-    let (mut fsc, r_fsource) = prepare_stc(Vec::default());
+    let (mut fsc, r_fsource) = prepare_subscription_move(Vec::default());
     fsc.add_new_subscription(
         "tests/data/gui_proc_rss2_v1.rss".to_string(),
         "name-proc2".to_string(),

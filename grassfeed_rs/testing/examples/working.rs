@@ -4,6 +4,8 @@ use context::appcontext::AppContext;
 use fr_core::config::init_system::GrassFeederConfig;
 use fr_core::controller::isourcetree::ISourceTreeController;
 use fr_core::controller::sourcetree::SourceTreeController;
+use fr_core::controller::subscriptionmove::ISubscriptionMove;
+use fr_core::controller::subscriptionmove::SubscriptionMove;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
@@ -121,23 +123,25 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     let feedsources_r: Rc<RefCell<dyn ISourceTreeController>> =
         acr.get_rc::<SourceTreeController>().unwrap();
-    let ref mut feedsources = (*feedsources_r).borrow_mut();
+    // let ref mut feedsources = (*feedsources_r).borrow_mut();
+
+    let subs_move_r: Rc<RefCell<dyn ISubscriptionMove>> = acr.get_rc::<SubscriptionMove>().unwrap();
+    let ref subs_move = (*subs_move_r).borrow();
+
     let url_dynamic = format!("{}/dynamic.rss", addr);
     let url_gui_proc = format!("{}/gui_proc_3.rss", addr);
     let url_feedburner = format!("{}/feedburner.rss", addr);
     let url_r_foto = format!("{}/reddit-Fotografie.rss", addr);
     let url_insi = format!("{}/newsinsideout_com.rss", addr);
-    let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
-    feedsources.add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder1, false);
+
+    // let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
+    let folder1 = subs_move.add_new_folder_at_parent("folder1".to_string(), 0);
+
+    (*subs_move).add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder1, false);
     let url_staseve = format!("{}/staseve-11.xml", addr);
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
-    feedsources.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder1, false);
-    feedsources.add_new_subscription_at_parent(
-        url_staseve,
-        "staseve11".to_string(),
-        folder1,
-        false,
-    );
+    subs_move.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder1, false);
+    subs_move.add_new_subscription_at_parent(url_staseve, "staseve11".to_string(), folder1, false);
     if true {
         let src = [
             (url_feedburner.as_str(), "feedburner"),
@@ -145,26 +149,22 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_r_foto.as_str(), "fotograf"),
         ];
         src.iter().for_each(|(url, desc)| {
-            feedsources.add_new_subscription_at_parent(
+            subs_move.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
                 folder1,
                 false,
             );
         });
-        feedsources.add_new_subscription_at_parent(
+        subs_move.add_new_subscription_at_parent(
             url_gui_proc.clone(),
             "gui_proc_2 & big-icon".to_string(),
             folder1,
             false,
         );
-        let f5 = feedsources.add_new_folder_at_parent("folder5".to_string(), 0);
-        feedsources.add_new_folder_at_parent("5_0".to_string(), f5);
-        feedsources.add_new_folder_at_parent("5_1".to_string(), f5);
-        feedsources.add_new_folder_at_parent("5_2".to_string(), f5);
-        feedsources.add_new_folder_at_parent("5_3".to_string(), f5);
-        feedsources.add_new_folder_at_parent("5_4".to_string(), f5);
-
+        let f5 = subs_move.add_new_folder_at_parent("folder5".to_string(), 0);
+        subs_move.add_new_folder_at_parent("5_0".to_string(), f5);
+        subs_move.add_new_folder_at_parent("5_1".to_string(), f5);
     }
     if false {
         let src = [
@@ -220,9 +220,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("https://www.reddit.com/r/aww.rss", "aww"),
             ("https://feeds.breakingnews.ie/bnworld", "breaknew"),
         ];
-        let folder3 = feedsources.add_new_folder_at_parent("folder3".to_string(), 0);
+        let folder3 = subs_move.add_new_folder_at_parent("folder3".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
-            feedsources.add_new_subscription_at_parent(
+            subs_move.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
                 folder3,
@@ -373,9 +373,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
                 "seoulnews - 기사 요약 -",
             ),
         ];
-        let folder4 = feedsources.add_new_folder_at_parent("folder4".to_string(), folder1);
+        let folder4 = subs_move.add_new_folder_at_parent("folder4".to_string(), folder1);
         src.iter().for_each(|(url, desc)| {
-            feedsources.add_new_subscription_at_parent(
+            subs_move.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
                 folder4,
@@ -383,8 +383,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             );
         });
     }
-    // feedsources.set_fs_delete_id(Some(13));
-    // feedsources.feedsource_delete();
 }
 
 // ------------------------------------
