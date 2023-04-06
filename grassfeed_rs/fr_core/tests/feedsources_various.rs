@@ -1,16 +1,9 @@
 mod downloader_dummy;
 mod logger_config; // mockall cannot provide a consistent data set, needs to be instrumented for each request separately.
 
-use crate::downloader_dummy::DownloaderDummy;
-use fr_core::config::configmanager::ConfigManager;
-use fr_core::controller::contentdownloader::IDownloader;
-use fr_core::controller::sourcetree::SourceTreeController;
 use fr_core::controller::subscriptionmove::ISubscriptionMove;
 use fr_core::controller::subscriptionmove::SubscriptionMove;
-use fr_core::controller::timer::build_timer;
-use fr_core::controller::timer::ITimer;
 use fr_core::db::errors_repo::ErrorRepo;
-use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
@@ -18,7 +11,6 @@ use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::icons::icon_analyser;
-use fr_core::ui_select::uimock::UIMock;
 use fr_core::util::IconKind;
 use fr_core::web::httpfetcher::HttpFetcher;
 use fr_core::web::IHttpRequester;
@@ -81,7 +73,7 @@ fn delete_feed_v1() {
 fn update_folder_pos() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    let (_fsc, r_fsource) = prepare_stc(fs_list);
+    let (_fsc, r_fsource) = prepare_subscription_move(fs_list);
     r_fsource
         .borrow()
         .update_parent_and_folder_position(1, 22, 33);
@@ -117,7 +109,7 @@ fn test_remote_redirect() {
 }
 
 // ----------------------------
-
+/*
 fn prepare_stc(
     fs_list: Vec<SubscriptionEntry>,
 ) -> (SourceTreeController, Rc<RefCell<dyn ISubscriptionRepo>>) {
@@ -148,6 +140,7 @@ fn prepare_stc(
     );
     (fs, r_subscriptions_repo)
 }
+ */
 
 fn prepare_subscription_move(
     fs_list: Vec<SubscriptionEntry>,
@@ -167,12 +160,12 @@ fn prepare_subscription_move(
     let _mr1id = msgrepo.insert(&mr1).unwrap() as isize;
     let msg_r_r = Rc::new(RefCell::new(msgrepo));
 
-    let r_timer: Rc<RefCell<dyn ITimer>> = Rc::new(RefCell::new(build_timer()));
-    let uimock = UIMock::new();
-    let downloaderdummy = DownloaderDummy::default();
-    let r_dl: Rc<RefCell<dyn IDownloader>> = Rc::new(RefCell::new(downloaderdummy));
-    let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
-    let r_icons_repo = Rc::new(RefCell::new(IconRepo::new("")));
+    // let r_timer: Rc<RefCell<dyn ITimer>> = Rc::new(RefCell::new(build_timer()));
+    // let uimock = UIMock::new();
+    // let downloaderdummy = DownloaderDummy::default();
+    // let r_dl: Rc<RefCell<dyn IDownloader>> = Rc::new(RefCell::new(downloaderdummy));
+    // let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
+    // let r_icons_repo = Rc::new(RefCell::new(IconRepo::new("")));
     let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
 
     let subs_move = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r, r_error_repo);

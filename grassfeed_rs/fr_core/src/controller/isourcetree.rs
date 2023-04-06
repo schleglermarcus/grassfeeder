@@ -6,6 +6,7 @@ use crate::controller::sourcetree::NewSourceState;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::sourcetree::JOBQUEUE_SIZE;
+use crate::controller::subscriptionmove::ISubscriptionMove;
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_state::FeedSourceState;
 use crate::db::subscription_state::ISubscriptionState;
@@ -55,29 +56,14 @@ pub trait ISourceTreeController {
 
     fn set_selected_message_id(&mut self, subs_id: isize, msg_id: isize);
 
-    //--
-    #[deprecated = "soon"]
-    fn feedsource_delete(&mut self);
-    #[deprecated = "soon"]
-    fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>);
-    #[deprecated = "soon"]
-    /// writes the path array into the cached subscription list
-    fn update_cached_paths(&self);
     /*
-       #[deprecated]
-       fn import_opml(&mut self, filename: String);
-
-       #[deprecated]
-       fn add_new_subscription(&mut self, newsource: String, display: String) -> isize;
-       #[deprecated]
-       fn add_new_subscription_at_parent(
-           &mut self,
-           newsource: String,
-           display: String,
-           parent_id: isize,
-           load_messages: bool,
-       ) -> isize;
-
+    #[deprecated]
+    fn update_cached_paths(&self);
+         #[deprecated = "soon"]
+        fn feedsource_delete(&mut self);
+        #[deprecated = "soon"]
+        fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>);
+        #[deprecated = "soon"]
 
     */
 }
@@ -173,70 +159,6 @@ impl ISourceTreeController for SourceTreeController {
         }
     }
 
-    /*
-       // moving
-       fn add_new_subscription(&mut self, newsource: String, display: String) -> isize {
-           let p_id = self.current_new_folder_parent_id.unwrap_or(0);
-           self.add_new_subscription_at_parent(newsource, display, p_id, false)
-       }
-
-       // moving
-       fn add_new_subscription_at_parent(
-           &mut self,
-           newsource: String,
-           display: String,
-           parent_id: isize,
-           load_messages: bool,
-       ) -> isize {
-           let san_source = remove_invalid_chars_from_input(newsource.clone())
-               .trim()
-               .to_string();
-           let mut san_display = remove_invalid_chars_from_input(display.clone())
-               .trim()
-               .to_string();
-           let (filtered, was_truncated) = filter_by_iso8859_1(&san_display);
-           if !was_truncated {
-               san_display = filtered; // later see how to filter  https://www.ksta.de/feed/index.rss
-           }
-           let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
-           fse.subs_id = self.get_next_available_subscription_id();
-           fse.parent_subs_id = parent_id;
-           if was_truncated {
-               let msg = format!("Found non-ISO chars in Subscription Title: {}", &display);
-               (*self.erro_repo_r)
-                   .borrow()
-                   .add_error(fse.subs_id, 0, newsource, msg);
-           }
-           let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
-               .borrow()
-               .get_by_parent_repo_id(parent_id)
-               .iter()
-               .map(|fse| fse.folder_position)
-               .max();
-           if let Some(mfp) = max_folderpos {
-               fse.folder_position = mfp + 1;
-           }
-           let mut new_id = -1;
-           match (*self.subscriptionrepo_r).borrow().store_entry(&fse) {
-               Ok(fse2) => {
-                   self.addjob(SJob::UpdateTreePaths);
-                   self.addjob(SJob::FillSubscriptionsAdapter);
-                   self.addjob(SJob::GuiUpdateTreeAll);
-                   self.addjob(SJob::SetCursorToSubsID(fse2.subs_id));
-                   if load_messages {
-                       self.addjob(SJob::ScheduleUpdateFeed(fse2.subs_id));
-                       self.addjob(SJob::CheckSpinnerActive);
-                   }
-                   new_id = fse2.subs_id;
-               }
-               Err(e) => {
-                   error!(" add_new_subscription_at_parent >{}<  {:?}", &san_source, e);
-               }
-           }
-           new_id
-       }
-    */
-
     fn set_fetch_in_progress(&self, source_repo_id: isize) {
         self.statemap
             .borrow_mut()
@@ -293,26 +215,28 @@ impl ISourceTreeController for SourceTreeController {
         self.job_queue_sender.clone()
     }
 
-    // #[deprecated= "soon"]
-    fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>) {
-        self.feedsource_delete_id = o_fs_id;
-    }
+    /*
+       // #[deprecated= "soon"]
+       fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>) {
+           self.feedsource_delete_id = o_fs_id;
+       }
 
-    // later: delete only those from trash bin
-    // #[deprecated= "soon"]
-    fn feedsource_delete(&mut self) {
-        if self.feedsource_delete_id.is_none() {
-            return;
-        }
-        let fs_id = self.feedsource_delete_id.unwrap();
-        (*self.subscriptionrepo_r)
-            .borrow()
-            .delete_by_index(fs_id as isize);
-        self.addjob(SJob::UpdateTreePaths);
-        self.addjob(SJob::FillSubscriptionsAdapter);
-        self.addjob(SJob::GuiUpdateTreeAll);
-        self.feedsource_delete_id = None;
-    }
+       // later: delete only those from trash bin
+       // #[deprecated= "soon"]
+       fn feedsource_delete(&mut self) {
+           if self.feedsource_delete_id.is_none() {
+               return;
+           }
+           let fs_id = self.feedsource_delete_id.unwrap();
+           (*self.subscriptionrepo_r)
+               .borrow()
+               .delete_by_index(fs_id as isize);
+           self.addjob(SJob::UpdateTreePaths);
+           self.addjob(SJob::FillSubscriptionsAdapter);
+           self.addjob(SJob::GuiUpdateTreeAll);
+           self.feedsource_delete_id = None;
+       }
+    */
 
     fn start_feedsource_edit_dialog(&mut self, src_repo_id: isize) {
         let mut dialog_id = DIALOG_FS_EDIT;
@@ -423,7 +347,14 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let fse = o_fse.unwrap();
-        self.set_fs_delete_id(Some(src_repo_id as usize));
+
+        // self.set_fs_delete_id(Some(src_repo_id as usize));
+        if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+            subs_mov
+                .borrow_mut()
+                .set_fs_delete_id(Some(src_repo_id as usize));
+        }
+
         let dd: Vec<AValue> = vec![
             AValue::ABOOL(fse.is_folder),           // 0
             AValue::ASTR(fse.display_name.clone()), // 1
@@ -550,9 +481,11 @@ impl ISourceTreeController for SourceTreeController {
         self.statemap.borrow().get_state(search_id)
     }
 
+/*
     fn update_cached_paths(&self) {
         self.update_paths_rec(&Vec::<u16>::default(), 0, false);
     }
+ */
 
     fn clear_read_unread(&self, subs_id: isize) {
         self.statemap.borrow_mut().clear_num_all_unread(subs_id);

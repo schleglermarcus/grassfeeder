@@ -47,10 +47,7 @@ pub trait ISubscriptionMove {
     fn empty_create_default_subscriptions(&mut self);
 
     fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>);
-    // later: delete only those from trash bin
     fn feedsource_delete(&mut self);
-
-    //
 }
 
 pub struct SubscriptionMove {
@@ -67,10 +64,6 @@ pub struct SubscriptionMove {
 
 impl SubscriptionMove {
     pub fn new_ac(ac: &AppContext) -> Self {
-        // let gc_r = (*ac).get_rc::<GuiContext>().unwrap();
-        // let u_a = (*gc_r).borrow().get_updater_adapter();
-        // let v_s_a = (*gc_r).borrow().get_values_adapter();
-        // (*ac).get_rc::<Timer>().unwrap(),
         Self::new(
             (*ac).get_rc::<SubscriptionRepo>().unwrap(),
             (*ac).get_rc::<MessagesRepo>().unwrap(),

@@ -5,10 +5,8 @@ mod tree_drag_common;
 use crate::tree_drag_common::dataset_simple_trio;
 use crate::tree_drag_common::dataset_some_tree;
 use crate::tree_drag_common::dataset_three_folders;
-use crate::tree_drag_common::prepare_source_tree_controller;
-use fr_core::controller::isourcetree::ISourceTreeController;
+use crate::tree_drag_common::prepare_subscription_move;
 use fr_core::controller::subscriptionmove::ISubscriptionMove;
-use crate::tree_drag_common::prepare_SubscriptionMove;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 
 /// Dragging the first folder   between the second and third.   0 -> 2
@@ -17,7 +15,7 @@ use fr_core::db::subscription_entry::SubscriptionEntry;
 fn drag_folder_one_down() {
     setup(); //
     let fs_list: Vec<SubscriptionEntry> = dataset_three_folders();
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, r_fsource) = prepare_subscription_move(fs_list);
     match fsc.drag_calc_positions(&vec![0], &vec![2]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             // debug!(                "OK:  to_parent_id={}  to_folderpos={} ",                to_parent_id, to_folderpos            );
@@ -50,7 +48,7 @@ fn drag_different_parent_down() {
     fse.folder_position = 1;
     fse.is_folder = true;
     fs_list.push(fse.clone());
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list.clone());
+    let (fsc, r_fsource) = prepare_subscription_move(fs_list);
     match fsc.drag_calc_positions(&vec![0], &vec![1, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             fsc.drag_move(from_entry, to_parent_id, to_folderpos);
@@ -69,7 +67,7 @@ fn drag_different_parent_down() {
 fn drag_outofrange_fail() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    let (fsc, _r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, _r_fsource) = prepare_subscription_move(fs_list);
     match fsc.drag_calc_positions(&vec![0], &vec![0, 6, 0, 0]) {
         Ok(_) => assert!(false),
         Err(_e) => {
@@ -82,7 +80,7 @@ fn drag_outofrange_fail() {
 fn drag_folder_one_up() {
     setup(); //
     let fs_list: Vec<SubscriptionEntry> = dataset_three_folders();
-    let (fsc, r_fsource) = prepare_SubscriptionMove(fs_list);
+    let (fsc, r_fsource) = prepare_subscription_move(fs_list);
     let success = fsc.on_subscription_drag(0, vec![1], vec![0, 0]);
     // r_fsource.borrow().debug_dump_tree("after ");
     let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(1);
@@ -94,7 +92,7 @@ fn drag_folder_one_up() {
 fn same_folder_move_third_under_first() {
     setup(); //   [2] => [1]
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, r_fsource) = prepare_subscription_move(fs_list);
     let entries: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
     fsc.drag_move(entries[2].clone(), 0, 1);
     let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
@@ -108,7 +106,7 @@ fn same_folder_move_third_under_first() {
 fn same_folder_move_first_under_second() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, r_fsource) = prepare_subscription_move(fs_list);
     let entries: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
     fsc.drag_move(entries[0].clone(), 0, 2);
     //    r_fsource.borrow().debug_dump_tree("UNS_");
@@ -127,7 +125,7 @@ fn same_folder_move_first_under_second() {
 fn drag_2nd_folder_to_1st_folder() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_some_tree();
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, r_fsource) = prepare_subscription_move(fs_list);
     match fsc.drag_calc_positions(&vec![1], &vec![0, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             // debug!(                "to_parent_id={}, to_folderpos={} ",                to_parent_id, to_folderpos            );
@@ -148,7 +146,7 @@ fn drag_2nd_folder_to_1st_folder() {
 fn drag_up_to_root() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_some_tree();
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, r_fsource) = prepare_subscription_move(fs_list);
     match fsc.drag_calc_positions(&vec![0, 1], &vec![0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             // debug!(                "to_parent_id={}, to_folderpos={} ",                to_parent_id, to_folderpos            );
@@ -170,7 +168,7 @@ fn drag_up_to_root() {
 fn drag_under_feed() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_some_tree();
-    let (fsc, _r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, _r_fsource) = prepare_subscription_move(fs_list);
     match fsc.drag_calc_positions(&vec![1], &vec![0, 0, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             // fsc.drag_move(from_entry, to_parent_id, to_folderpos);
@@ -187,7 +185,7 @@ fn drag_under_feed() {
 fn drag_folder_on_other_folder() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_three_folders();
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, r_fsource) = prepare_subscription_move(fs_list);
     //  drag the first entry onto second
     match fsc.drag_calc_positions(&vec![0], &vec![1, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
@@ -210,7 +208,7 @@ fn drag_folder_on_other_folder() {
 fn reject_folder_onto_child() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_some_tree();
-    let (fsc, _r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, _r_fsource) = prepare_subscription_move(fs_list);
     match fsc.drag_calc_positions(&vec![0], &vec![0, 1]) {
         Ok((_from_entry, _to_parent_id, _to_folderpos)) => {
             assert!(false);
@@ -223,7 +221,7 @@ fn reject_folder_onto_child() {
 fn drag_entry_below_last() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    let (fsc, r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, r_fsource) = prepare_subscription_move(fs_list);
     match fsc.drag_calc_positions(&vec![0], &vec![3]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             fsc.drag_move(from_entry, to_parent_id, to_folderpos);
@@ -244,7 +242,7 @@ fn drag_entry_below_last() {
 fn drag_entry_on_other_entry() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    let (fsc, _r_fsource) = prepare_source_tree_controller(fs_list);
+    let (fsc, _r_fsource) = prepare_subscription_move(fs_list);
     match fsc.drag_calc_positions(&vec![0], &vec![1, 0]) {
         Ok((from_entry, to_parent_id, to_folderpos)) => {
             panic!(
@@ -259,7 +257,7 @@ fn drag_entry_on_other_entry() {
 #[test]
 fn check_paths_simple() {
     setup();
-    let (stc, _fsource_r) = prepare_source_tree_controller(dataset_some_tree());
+    let (stc, _fsource_r) = prepare_subscription_move(dataset_some_tree());
     assert_eq!(stc.get_by_path(&vec![0]).unwrap().subs_id, 1);
     assert_eq!(stc.get_by_path(&vec![0, 0]).unwrap().subs_id, 2);
     assert_eq!(stc.get_by_path(&vec![2]), None);

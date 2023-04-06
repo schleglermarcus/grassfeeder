@@ -5,6 +5,8 @@ use crate::controller::contentlist::CJob;
 use crate::controller::contentlist::FeedContents;
 use crate::controller::contentlist::IFeedContents;
 use crate::controller::isourcetree::ISourceTreeController;
+use crate::controller::subscriptionmove::ISubscriptionMove;
+use crate::controller::subscriptionmove::SubscriptionMove;
 use crate::controller::timer::ITimer;
 use crate::controller::timer::Timer;
 use crate::db::errors_repo::ErrorRepo;
@@ -12,7 +14,7 @@ use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_entry::SubscriptionEntry;
-use crate::db::subscription_entry::SRC_REPO_ID_MOVING;
+// use crate::db::subscription_entry::SRC_REPO_ID_MOVING;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::db::subscription_state::FeedSourceState;
@@ -41,9 +43,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::time::Instant;
-
-use super::subscriptionmove::ISubscriptionMove;
-use super::subscriptionmove::SubscriptionMove;
 
 pub const JOBQUEUE_SIZE: usize = 1000;
 pub const TREE_STATUS_COLUMN: usize = 7;
@@ -110,9 +109,7 @@ pub struct SourceTreeController {
     pub(super) gui_val_store: UIAdapterValueStoreType,
     pub(super) erro_repo_r: Rc<RefCell<ErrorRepo>>,
     pub(super) config: Rc<RefCell<Config>>,
-
-    subscriptionmove_w: Weak<RefCell<SubscriptionMove>>,
-
+    pub(super) subscriptionmove_w: Weak<RefCell<SubscriptionMove>>,
     pub(super) current_edit_fse: Option<SubscriptionEntry>,
 
     //  Subscription,  Non-Folder-Child-IDs
@@ -122,17 +119,15 @@ pub struct SourceTreeController {
     job_queue_receiver: Receiver<SJob>,
     timer_r: Rc<RefCell<dyn ITimer>>,
     any_spinner_visible: RefCell<bool>,
-    need_check_fs_paths: RefCell<bool>,
     pub(super) new_source: NewSourceTempData,
-
-    // moved over
-    pub(super) statemap: Rc<RefCell<SubscriptionState>>,
-    #[deprecated]
-    pub(super) feedsource_delete_id: Option<usize>,
-
-
-    #[deprecated]
+    pub(super) statemap: Rc<RefCell<SubscriptionState>>, // moved over
     pub(super) current_new_folder_parent_id: Option<isize>,
+
+    // #[deprecated]
+    need_check_fs_paths: RefCell<bool>,
+    // #[deprecated]
+    // pub(super) feedsource_delete_id: Option<usize>,
+    // #[deprecated]
 }
 
 impl SourceTreeController {
@@ -186,9 +181,8 @@ impl SourceTreeController {
             any_spinner_visible: RefCell::new(false),
             feedcontents_w: Weak::new(),
             downloader_r: downloader_,
-            feedsource_delete_id: None,
+            // feedsource_delete_id: None,
             current_edit_fse: None,
-            current_new_folder_parent_id: None,
             config: confi,
             new_source: NewSourceTempData::default(),
             current_selected_subscription: None,
@@ -198,6 +192,7 @@ impl SourceTreeController {
             statemap: Default::default(),
             erro_repo_r: err_rep,
             currently_minimized: false,
+            current_new_folder_parent_id: None,
 
             // already migrated
             #[deprecated]
@@ -241,7 +236,9 @@ impl SourceTreeController {
                     }
                 }
                 SJob::UpdateTreePaths => {
-                    self.update_cached_paths();
+                    if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                        subs_mov.borrow_mut().update_cached_paths();
+                    }
                 }
                 SJob::FillSubscriptionsAdapter => {
                     self.feedsources_into_store_adapter();
@@ -312,7 +309,6 @@ impl SourceTreeController {
                     self.set_selected_feedsource(src_repo_id)
                 }
                 SJob::UpdateLastSelectedMessageId(fs_id, fc_id) => {
-                    // trace!(                        "processing UpdateLastSelectedMessageId {} {}  ",                        fs_id,                        fc_id                    );
                     (*self.subscriptionrepo_r)
                         .borrow()
                         .update_last_selected(fs_id, fc_id); // later: this  takes a long time sometimes
@@ -334,8 +330,6 @@ impl SourceTreeController {
                     }
                 }
                 SJob::EmptyTreeCreateDefaultSubscriptions => {
-                    // self.empty_create_default_subscriptions()
-
                     if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
                         subs_mov.borrow_mut().empty_create_default_subscriptions();
                     }
@@ -555,133 +549,134 @@ impl SourceTreeController {
         (*self.gui_val_store).write().unwrap().set_spinner_active(v);
     }
 
-    /// returns:   From-Entry,   To-Parent-ID,  to-folderpos
-    ///
-    /// When dragging on a folder, we get a sub-sub-Path  from gtk
-    ///
-    /// Mouse-Drag  to [0]  creates a drag-event  to [0, 0]
-    /// Mouse-Drag  to [1]  creates a drag-event  to [1, 0]
-    /// Mouse-Drag  under [0]  creates a drag-event  to [1]
-    ///
-    #[deprecated]
-    pub fn drag_calc_positions(
-        &self,
-        from_path: &[u16],
-        to_path: &[u16],
-    ) -> Result<(SubscriptionEntry, isize, isize), String> {
-        let o_from_entry = self.get_by_path(from_path);
-        if o_from_entry.is_none() {
-            self.need_check_fs_paths.replace(true);
-            let msg = format!("from_path={from_path:?}  Missing, check statemap");
-            return Err(msg);
-        }
-        let from_entry = o_from_entry.unwrap();
-        let mut to_path_parent: &[u16] = &[];
-        let mut to_path_prev: Vec<u16> = Vec::default();
-        let mut o_to_entry_parent: Option<SubscriptionEntry> = None;
-        if !to_path.is_empty() {
-            if let Some((last, elements)) = to_path.split_last() {
-                to_path_parent = elements;
-                if *last > 0 {
-                    to_path_prev = elements.to_vec();
-                    to_path_prev.push(*last - 1);
-                }
-                o_to_entry_parent = self.get_by_path(to_path_parent);
-            }
-        } else {
-            warn!("drag_calc_positions: to_path too short: {:?}", &to_path);
-        }
-        if o_to_entry_parent.is_none() && !to_path_parent.is_empty() {
-            if let Some((_last, elements)) = to_path_parent.split_last() {
-                to_path_parent = elements;
-            }
-            o_to_entry_parent = self.get_by_path(to_path_parent);
-        }
-        let o_to_entry_direct = self.get_by_path(to_path);
-        let mut o_to_entry_prev: Option<SubscriptionEntry> = None;
-        if o_to_entry_direct.is_none() && o_to_entry_parent.is_none() {
-            o_to_entry_prev = self.get_by_path(to_path_prev.as_slice());
-        }
-        if o_to_entry_direct.is_none() && o_to_entry_parent.is_none() && o_to_entry_prev.is_none() {
-            return Err(format!(
-                "to_id not found for {:?} {:?}",
-                &to_path, to_path_parent
-            ));
-        }
-        let to_parent_folderpos: isize;
-        let to_parent_id;
-        if let Some(to_entry_direct) = o_to_entry_direct {
-            to_parent_id = to_entry_direct.parent_subs_id;
-            if from_entry.subs_id == to_parent_id {
-                return Err(format!(
-                    "drag on same element: {}:{:?} => {}:{:?}",
-                    from_entry.subs_id, &from_path, to_parent_id, to_path_parent
-                ));
-            }
-            to_parent_folderpos = to_entry_direct.folder_position; // dragging insidethe tree down
-            return Ok((from_entry, to_parent_id, to_parent_folderpos));
-        }
-        if let Some(to_entry_parent) = o_to_entry_parent {
-            if to_entry_parent.is_folder {
-                to_parent_id = to_entry_parent.subs_id;
-                to_parent_folderpos = 0;
-            } else {
-                return Err(format!(
-                    "drag on entry: {}:{:?} => {:?}:{:?} no more",
-                    from_entry.subs_id, &from_path, to_path_parent, to_entry_parent
-                ));
-            }
-            return Ok((from_entry, to_parent_id, to_parent_folderpos));
-        }
-        if let Some(to_entry_prev) = o_to_entry_prev {
-            to_parent_id = to_entry_prev.parent_subs_id;
-            to_parent_folderpos = to_entry_prev.folder_position + 1;
-            return Ok((from_entry, to_parent_id, to_parent_folderpos));
-        }
-        panic!();
-    }
+    /*
+       /// returns:   From-Entry,   To-Parent-ID,  to-folderpos
+       ///
+       /// When dragging on a folder, we get a sub-sub-Path  from gtk
+       ///
+       /// Mouse-Drag  to [0]  creates a drag-event  to [0, 0]
+       /// Mouse-Drag  to [1]  creates a drag-event  to [1, 0]
+       /// Mouse-Drag  under [0]  creates a drag-event  to [1]
+       ///
+       #[deprecated]
+       pub fn drag_calc_positions(
+           &self,
+           from_path: &[u16],
+           to_path: &[u16],
+       ) -> Result<(SubscriptionEntry, isize, isize), String> {
+           let o_from_entry = self.get_by_path(from_path);
+           if o_from_entry.is_none() {
+               self.need_check_fs_paths.replace(true);
+               let msg = format!("from_path={from_path:?}  Missing, check statemap");
+               return Err(msg);
+           }
+           let from_entry = o_from_entry.unwrap();
+           let mut to_path_parent: &[u16] = &[];
+           let mut to_path_prev: Vec<u16> = Vec::default();
+           let mut o_to_entry_parent: Option<SubscriptionEntry> = None;
+           if !to_path.is_empty() {
+               if let Some((last, elements)) = to_path.split_last() {
+                   to_path_parent = elements;
+                   if *last > 0 {
+                       to_path_prev = elements.to_vec();
+                       to_path_prev.push(*last - 1);
+                   }
+                   o_to_entry_parent = self.get_by_path(to_path_parent);
+               }
+           } else {
+               warn!("drag_calc_positions: to_path too short: {:?}", &to_path);
+           }
+           if o_to_entry_parent.is_none() && !to_path_parent.is_empty() {
+               if let Some((_last, elements)) = to_path_parent.split_last() {
+                   to_path_parent = elements;
+               }
+               o_to_entry_parent = self.get_by_path(to_path_parent);
+           }
+           let o_to_entry_direct = self.get_by_path(to_path);
+           let mut o_to_entry_prev: Option<SubscriptionEntry> = None;
+           if o_to_entry_direct.is_none() && o_to_entry_parent.is_none() {
+               o_to_entry_prev = self.get_by_path(to_path_prev.as_slice());
+           }
+           if o_to_entry_direct.is_none() && o_to_entry_parent.is_none() && o_to_entry_prev.is_none() {
+               return Err(format!(
+                   "to_id not found for {:?} {:?}",
+                   &to_path, to_path_parent
+               ));
+           }
+           let to_parent_folderpos: isize;
+           let to_parent_id;
+           if let Some(to_entry_direct) = o_to_entry_direct {
+               to_parent_id = to_entry_direct.parent_subs_id;
+               if from_entry.subs_id == to_parent_id {
+                   return Err(format!(
+                       "drag on same element: {}:{:?} => {}:{:?}",
+                       from_entry.subs_id, &from_path, to_parent_id, to_path_parent
+                   ));
+               }
+               to_parent_folderpos = to_entry_direct.folder_position; // dragging insidethe tree down
+               return Ok((from_entry, to_parent_id, to_parent_folderpos));
+           }
+           if let Some(to_entry_parent) = o_to_entry_parent {
+               if to_entry_parent.is_folder {
+                   to_parent_id = to_entry_parent.subs_id;
+                   to_parent_folderpos = 0;
+               } else {
+                   return Err(format!(
+                       "drag on entry: {}:{:?} => {:?}:{:?} no more",
+                       from_entry.subs_id, &from_path, to_path_parent, to_entry_parent
+                   ));
+               }
+               return Ok((from_entry, to_parent_id, to_parent_folderpos));
+           }
+           if let Some(to_entry_prev) = o_to_entry_prev {
+               to_parent_id = to_entry_prev.parent_subs_id;
+               to_parent_folderpos = to_entry_prev.folder_position + 1;
+               return Ok((from_entry, to_parent_id, to_parent_folderpos));
+           }
+           panic!();
+       }
 
-    #[deprecated]
-    pub fn drag_move(
-        &self,
-        from_entry: SubscriptionEntry,
-        to_parent_id: isize,
-        to_folderpos: isize,
-    ) {
-        let mut to_folderpos_lim = to_folderpos;
-        if from_entry.parent_subs_id == to_parent_id && to_folderpos > from_entry.folder_position {
-            to_folderpos_lim -= 1;
-        }
-        // remove the from-entry, re-write the folder-positions
-        (*self.subscriptionrepo_r)
-            .borrow()
-            .update_parent_and_folder_position(
-                from_entry.subs_id,
-                SRC_REPO_ID_MOVING,
-                to_folderpos,
-            );
-        // rewrite the folder positions
-        self.resort_parent_list(from_entry.parent_subs_id);
-        // insert element into destination list
-        let mut to_list = (*self.subscriptionrepo_r)
-            .borrow()
-            .get_by_parent_repo_id(to_parent_id);
-        if to_folderpos_lim > to_list.len() as isize {
-            to_folderpos_lim = to_list.len() as isize;
-        }
-        to_list.insert(to_folderpos_lim as usize, from_entry.clone());
-        to_list.iter().enumerate().for_each(|(n, fse)| {
-            if fse.subs_id == from_entry.subs_id {
-                (*self.subscriptionrepo_r)
-                    .borrow()
-                    .update_parent_and_folder_position(fse.subs_id, to_parent_id, n as isize);
-            } else if n != fse.folder_position as usize {
-                (*self.subscriptionrepo_r)
-                    .borrow()
-                    .update_folder_position(fse.subs_id, n as isize);
-            }
-        });
-    }
+       #[deprecated]
+       pub fn drag_move(
+           &self,
+           from_entry: SubscriptionEntry,
+           to_parent_id: isize,
+           to_folderpos: isize,
+       ) {
+           let mut to_folderpos_lim = to_folderpos;
+           if from_entry.parent_subs_id == to_parent_id && to_folderpos > from_entry.folder_position {
+               to_folderpos_lim -= 1;
+           }
+           // remove the from-entry, re-write the folder-positions
+           (*self.subscriptionrepo_r)
+               .borrow()
+               .update_parent_and_folder_position(
+                   from_entry.subs_id,
+                   SRC_REPO_ID_MOVING,
+                   to_folderpos,
+               );
+           // rewrite the folder positions
+           self.resort_parent_list(from_entry.parent_subs_id);
+           // insert element into destination list
+           let mut to_list = (*self.subscriptionrepo_r)
+               .borrow()
+               .get_by_parent_repo_id(to_parent_id);
+           if to_folderpos_lim > to_list.len() as isize {
+               to_folderpos_lim = to_list.len() as isize;
+           }
+           to_list.insert(to_folderpos_lim as usize, from_entry.clone());
+           to_list.iter().enumerate().for_each(|(n, fse)| {
+               if fse.subs_id == from_entry.subs_id {
+                   (*self.subscriptionrepo_r)
+                       .borrow()
+                       .update_parent_and_folder_position(fse.subs_id, to_parent_id, n as isize);
+               } else if n != fse.folder_position as usize {
+                   (*self.subscriptionrepo_r)
+                       .borrow()
+                       .update_folder_position(fse.subs_id, n as isize);
+               }
+           });
+       }
 
     #[deprecated]
     /// straightens the folder_pos
@@ -697,6 +692,7 @@ impl SourceTreeController {
             }
         });
     }
+    */
 
     pub fn process_newsource_edit(&mut self) {
         if self.new_source.state == NewSourceState::UrlChanged {
@@ -827,7 +823,11 @@ impl SourceTreeController {
 
     fn check_paths(&self) {
         if *self.need_check_fs_paths.borrow() {
-            self.update_cached_paths();
+            // self.update_cached_paths();
+            if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                subs_mov.borrow_mut().update_cached_paths();
+            }
+
             self.need_check_fs_paths.replace(false);
         }
     }
@@ -887,73 +887,6 @@ impl SourceTreeController {
         }
         next_subs_id
     }
-
-/*
-
-    #[deprecated]
-    fn empty_create_default_subscriptions(&mut self) {
-        let before = (*self.subscriptionrepo_r).borrow().db_existed_before();
-        if before {
-            return;
-        }
-
-        {
-            let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
-            self.add_new_subscription_at_parent(
-                "https://rss.slashdot.org/Slashdot/slashdot".to_string(),
-                "Slashdot".to_string(),
-                folder1,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "https://www.reddit.com/r/aww.rss".to_string(),
-                "Reddit - Aww".to_string(),
-                folder1,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "https://xkcd.com/atom.xml".to_string(),
-                "XKCD".to_string(),
-                folder1,
-                true,
-            );
-        }
-        {
-            let folder2 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER2"), 0);
-            self.add_new_subscription_at_parent(
-                "https://github.com/schleglermarcus/grassfeeder/releases.atom".to_string(),
-                "Grassfeeder Releases".to_string(),
-                folder2,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "https://blog.linuxmint.com/?feed=rss2".to_string(),
-                "Linux Mint".to_string(),
-                folder2,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "http://blog.rust-lang.org/feed.xml".to_string(),
-                "Rust Language".to_string(),
-                folder2,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "https://www.heise.de/rss/heise-atom.xml".to_string(),
-                "Heise.de".to_string(),
-                folder2,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "https://rss.golem.de/rss.php?feed=ATOM1.0".to_string(),
-                "Golem.de".to_string(),
-                folder2,
-                true,
-            );
-        }
-    }
- */
-
 
     /// Creates the tree, fills the gui_val_store ,  is recursive.
     pub fn insert_tree_row(&self, localpath: &[u16], parent_subs_id: i32) -> i32 {
