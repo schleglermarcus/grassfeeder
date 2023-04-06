@@ -58,7 +58,6 @@ fn drag_different_parent_down() {
             assert!(false);
         }
     }
-    //    r_fsource.borrow().debug_dump_tree("DIF_");
     let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(2);
     assert_eq!(result.len(), 1);
 }

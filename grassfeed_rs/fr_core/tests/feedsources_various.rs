@@ -1,5 +1,5 @@
 mod downloader_dummy;
-mod logger_config; // mockall cannot provide a consistent data set, needs to be instrumented for each request separately.
+mod logger_config;
 
 use fr_core::controller::subscriptionmove::ISubscriptionMove;
 use fr_core::controller::subscriptionmove::SubscriptionMove;
@@ -109,38 +109,6 @@ fn test_remote_redirect() {
 }
 
 // ----------------------------
-/*
-fn prepare_stc(
-    fs_list: Vec<SubscriptionEntry>,
-) -> (SourceTreeController, Rc<RefCell<dyn ISubscriptionRepo>>) {
-    let mut subscrip_repo = SubscriptionRepo::new_inmem();
-    subscrip_repo.startup_int();
-    fs_list.iter().for_each(|e| {
-        let _r = subscrip_repo.store_entry(e);
-    });
-    let r_subscriptions_repo: Rc<RefCell<dyn ISubscriptionRepo>> =
-        Rc::new(RefCell::new(subscrip_repo));
-    let r_timer: Rc<RefCell<dyn ITimer>> = Rc::new(RefCell::new(build_timer()));
-    let uimock = UIMock::new();
-    let downloaderdummy = DownloaderDummy::default();
-    let r_dl: Rc<RefCell<dyn IDownloader>> = Rc::new(RefCell::new(downloaderdummy));
-    let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
-    let r_icons_repo = Rc::new(RefCell::new(IconRepo::new("")));
-    let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
-
-    let fs = SourceTreeController::new(
-        r_timer,
-        r_subscriptions_repo.clone(),
-        r_configmanager,
-        r_icons_repo,
-        uimock.upd_adp(),
-        uimock.val_sto(),
-        r_dl,
-        r_error_repo,
-    );
-    (fs, r_subscriptions_repo)
-}
- */
 
 fn prepare_subscription_move(
     fs_list: Vec<SubscriptionEntry>,
@@ -152,20 +120,12 @@ fn prepare_subscription_move(
     });
     let r_subscriptions_repo: Rc<RefCell<dyn ISubscriptionRepo>> =
         Rc::new(RefCell::new(subscrip_repo));
-
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
     let mut mr1: MessageRow = MessageRow::default();
     mr1.subscription_id = 20;
     let _mr1id = msgrepo.insert(&mr1).unwrap() as isize;
     let msg_r_r = Rc::new(RefCell::new(msgrepo));
-
-    // let r_timer: Rc<RefCell<dyn ITimer>> = Rc::new(RefCell::new(build_timer()));
-    // let uimock = UIMock::new();
-    // let downloaderdummy = DownloaderDummy::default();
-    // let r_dl: Rc<RefCell<dyn IDownloader>> = Rc::new(RefCell::new(downloaderdummy));
-    // let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
-    // let r_icons_repo = Rc::new(RefCell::new(IconRepo::new("")));
     let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
 
     let subs_move = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r, r_error_repo);

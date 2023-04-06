@@ -499,68 +499,35 @@ impl ISubscriptionMove for SubscriptionMove {
         if before {
             return;
         }
-        {
-            // TODO: into array
-            let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
-            self.add_new_subscription_at_parent(
-                "https://rss.slashdot.org/Slashdot/slashdot".to_string(),
-                "Slashdot".to_string(),
-                folder1,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "https://www.reddit.com/r/aww.rss".to_string(),
-                "Reddit - Aww".to_string(),
-                folder1,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "https://xkcd.com/atom.xml".to_string(),
-                "XKCD".to_string(),
-                folder1,
-                true,
-            );
-        }
-        {
-            let folder2 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER2"), 0);
-            self.add_new_subscription_at_parent(
-                "https://github.com/schleglermarcus/grassfeeder/releases.atom".to_string(),
-                "Grassfeeder Releases".to_string(),
-                folder2,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "https://blog.linuxmint.com/?feed=rss2".to_string(),
-                "Linux Mint".to_string(),
-                folder2,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "http://blog.rust-lang.org/feed.xml".to_string(),
-                "Rust Language".to_string(),
-                folder2,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "https://www.heise.de/rss/heise-atom.xml".to_string(),
-                "Heise.de".to_string(),
-                folder2,
-                true,
-            );
-            self.add_new_subscription_at_parent(
-                "https://rss.golem.de/rss.php?feed=ATOM1.0".to_string(),
-                "Golem.de".to_string(),
-                folder2,
-                true,
-            );
-        }
+        let url_names: [(&str, &str); 3] = [
+            ("https://rss.slashdot.org/Slashdot/slashdot", "Slashdot"),
+            ("https://www.reddit.com/r/aww.rss", "Reddit - Aww"),
+            ("https://xkcd.com/atom.xml", "XKCD"),
+        ];
+        let folder1 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER1"), 0);
+        url_names.iter().for_each(|(u, n)| {
+            self.add_new_subscription_at_parent(u.to_string(), n.to_string(), folder1, true);
+        });
+        let url_names: [(&str, &str); 5] = [
+            ("https://blog.linuxmint.com/?feed=rss2", "Linux Mint"),
+            ("http://blog.rust-lang.org/feed.xml", "Rust Language"),
+            ("https://rss.golem.de/rss.php?feed=ATOM1.0", "Golem.de"),
+            ("https://www.heise.de/rss/heise-atom.xml", "Heise.de"),
+            (
+                "https://github.com/schleglermarcus/grassfeeder/releases.atom",
+                "Grassfeeder Releases",
+            ),
+        ];
+        let folder2 = self.add_new_folder_at_parent(t!("SUBSC_DEFAULT_FOLDER2"), 0);
+        url_names.iter().for_each(|(u, n)| {
+            self.add_new_subscription_at_parent(u.to_string(), n.to_string(), folder2, true);
+        });
     }
 
     fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>) {
         self.feedsource_delete_id = o_fs_id;
     }
 
-    // later: delete only those from trash bin
     fn feedsource_delete(&mut self) {
         if self.feedsource_delete_id.is_none() {
             return;

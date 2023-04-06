@@ -27,45 +27,31 @@ pub trait ISourceTreeController {
     fn set_tree_expanded(&self, subscription_id: isize, new_expanded: bool);
     fn addjob(&self, nj: SJob);
     fn get_job_sender(&self) -> Sender<SJob>;
+    fn get_state(&self, search_id: isize) -> Option<SubsMapEntry>;
+    fn clear_read_unread(&self, subs_id: isize);
+    fn memory_conserve(&mut self, act: bool);
 
     fn set_fetch_in_progress(&self, subscription_id: isize);
     fn set_fetch_finished(&self, subscription_id: isize, error_happened: bool);
+    fn mark_as_read(&self, src_repo_id: isize);
 
     fn get_config(&self) -> Rc<RefCell<Config>>;
     fn set_conf_load_on_start(&mut self, n: bool);
     fn set_conf_fetch_interval(&mut self, n: i32);
     fn set_conf_fetch_interval_unit(&mut self, n: i32);
     fn set_conf_display_feedcount_all(&mut self, a: bool);
+    fn notify_config_update(&mut self);
 
     fn start_feedsource_edit_dialog(&mut self, source_repo_id: isize);
     fn end_feedsource_edit_dialog(&mut self, values: &[AValue]);
     fn start_new_fol_sub_dialog(&mut self, src_repo_id: isize, dialog_id: u8);
     fn start_delete_dialog(&mut self, src_repo_id: isize);
     fn newsource_dialog_edit(&mut self, edit_feed_url: String);
-
-    fn notify_config_update(&mut self);
     fn set_selected_feedsource(&mut self, src_repo_id: isize);
 
-    fn mark_as_read(&self, src_repo_id: isize);
-
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
-    fn get_state(&self, search_id: isize) -> Option<SubsMapEntry>;
-
-    fn clear_read_unread(&self, subs_id: isize);
-    fn memory_conserve(&mut self, act: bool);
-
     fn set_selected_message_id(&mut self, subs_id: isize, msg_id: isize);
 
-    /*
-    #[deprecated]
-    fn update_cached_paths(&self);
-         #[deprecated = "soon"]
-        fn feedsource_delete(&mut self);
-        #[deprecated = "soon"]
-        fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>);
-        #[deprecated = "soon"]
-
-    */
 }
 
 impl ISourceTreeController for SourceTreeController {
@@ -214,29 +200,6 @@ impl ISourceTreeController for SourceTreeController {
     fn get_job_sender(&self) -> Sender<SJob> {
         self.job_queue_sender.clone()
     }
-
-    /*
-       // #[deprecated= "soon"]
-       fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>) {
-           self.feedsource_delete_id = o_fs_id;
-       }
-
-       // later: delete only those from trash bin
-       // #[deprecated= "soon"]
-       fn feedsource_delete(&mut self) {
-           if self.feedsource_delete_id.is_none() {
-               return;
-           }
-           let fs_id = self.feedsource_delete_id.unwrap();
-           (*self.subscriptionrepo_r)
-               .borrow()
-               .delete_by_index(fs_id as isize);
-           self.addjob(SJob::UpdateTreePaths);
-           self.addjob(SJob::FillSubscriptionsAdapter);
-           self.addjob(SJob::GuiUpdateTreeAll);
-           self.feedsource_delete_id = None;
-       }
-    */
 
     fn start_feedsource_edit_dialog(&mut self, src_repo_id: isize) {
         let mut dialog_id = DIALOG_FS_EDIT;
@@ -480,12 +443,6 @@ impl ISourceTreeController for SourceTreeController {
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry> {
         self.statemap.borrow().get_state(search_id)
     }
-
-/*
-    fn update_cached_paths(&self) {
-        self.update_paths_rec(&Vec::<u16>::default(), 0, false);
-    }
- */
 
     fn clear_read_unread(&self, subs_id: isize) {
         self.statemap.borrow_mut().clear_num_all_unread(subs_id);

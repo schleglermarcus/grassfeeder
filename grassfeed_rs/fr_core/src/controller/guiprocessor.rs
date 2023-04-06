@@ -155,11 +155,27 @@ impl GuiProcessor {
             }
         }
         let mut list_row_activated_map: HashMap<i32, i32> = HashMap::default();
+        for ev in &ev_set {
+            match ev {
+                GuiEvents::ListRowActivated(_list_idx, list_position, msg_id) => {
+                    list_row_activated_map.insert(*msg_id, *list_position);
+                }
+                _ => (),
+            }
+        }
+        if !list_row_activated_map.is_empty() {
+            self.focus_by_tab = FocusByTab::FocusMessages;
+            (*self.contentlist_r)
+                .borrow()
+                .process_list_row_activated(&list_row_activated_map);
+        }
+
         for ev in ev_set {
             // trace!("GP: ev={:?} ", &ev);
             let now = Instant::now();
             match ev {
                 GuiEvents::None => {}
+                GuiEvents::ListRowActivated(_list_idx, _list_position, _msg_id) => (), // handled above
                 GuiEvents::WinDelete => {
                     self.addjob(Job::StopApplication);
                 }
@@ -168,6 +184,9 @@ impl GuiProcessor {
                     self.addjob(Job::StopApplication);
                 }
                 GuiEvents::MenuActivate(ref s) => match s.as_str() {
+
+
+
                     "M_FILE_QUIT" => {
                         self.addjob(Job::StopApplication);
                     }
@@ -189,6 +208,11 @@ impl GuiProcessor {
                     _ => debug!("GP2 Button:  {:?}", b),
                 },
                 GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) => {
+
+
+                    // debug!("TreeRowActivated {:?}" ,  &_path );
+
+
                     (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
                         .borrow_mut()
                         .set_selected_feedsource(subs_id as isize);
@@ -197,10 +221,6 @@ impl GuiProcessor {
                         .borrow()
                         .update_message_list_(subs_id as isize);
                     self.focus_by_tab = FocusByTab::FocusSubscriptions;
-                }
-                GuiEvents::ListRowActivated(_list_idx, list_position, msg_id) => {
-                    self.focus_by_tab = FocusByTab::FocusMessages;
-                    list_row_activated_map.insert(msg_id, list_position);
                 }
                 GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
                     self.focus_by_tab = FocusByTab::FocusMessages;
@@ -446,11 +466,6 @@ impl GuiProcessor {
                 debug!("EV  {:?}   took {:?}", &ev, elapsed_m);
             }
         }
-        if !list_row_activated_map.is_empty() {
-            (*self.contentlist_r)
-                .borrow()
-                .process_list_row_activated(&list_row_activated_map);
-        }
     }
 
     /// is run by  the timer
@@ -566,7 +581,6 @@ impl GuiProcessor {
                 } else if let (Some(AValue::ASTR(ref s0)), Some(AValue::ASTR(ref s1))) =
                     (payload.get(0), payload.get(1))
                 {
-                    // .feedsources_r
                     let new_id = self
                         .subscriptionmove_r
                         .borrow_mut()
