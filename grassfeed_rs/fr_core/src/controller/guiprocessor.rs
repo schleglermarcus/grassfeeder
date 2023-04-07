@@ -11,6 +11,8 @@ use crate::controller::isourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::statusbar::StatusBar;
+use crate::controller::subscriptionmove::ISubscriptionMove;
+use crate::controller::subscriptionmove::SubscriptionMove;
 use crate::controller::timer::ITimer;
 use crate::controller::timer::Timer;
 use crate::controller::timer::TimerJob;
@@ -45,11 +47,9 @@ use resources::id::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::mem::Discriminant;
 use std::rc::Rc;
 use std::time::Instant;
-
-use super::subscriptionmove::ISubscriptionMove;
-use super::subscriptionmove::SubscriptionMove;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Job {
@@ -90,13 +90,18 @@ pub struct GuiProcessor {
     downloader_r: Rc<RefCell<dyn IDownloader>>,
     gui_context_r: Rc<RefCell<GuiContext>>,
     browserpane_r: Rc<RefCell<dyn IBrowserPane>>,
+    erro_repo_r: Rc<RefCell<ErrorRepo>>,
     subscriptionmove_r: Rc<RefCell<dyn ISubscriptionMove>>,
     subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
     iconrepo_r: Rc<RefCell<IconRepo>>,
     statusbar: StatusBar,
-    focus_by_tab: FocusByTab,
-    erro_repo_r: Rc<RefCell<ErrorRepo>>,
+    focus_by_tab: RefCell<FocusByTab>,
     currently_minimized: bool,
+    event_handler_map: HashMap<Discriminant<GuiEvents>, Box<dyn HandleSingleEvent>>,
+}
+
+pub trait HandleSingleEvent {
+    fn handle(&self, _ev: &GuiEvents) {}
 }
 
 impl GuiProcessor {
@@ -134,11 +139,12 @@ impl GuiProcessor {
             gui_runner: guirunner,
             downloader_r: dl_r,
             gui_context_r: guicontex_r,
-            focus_by_tab: FocusByTab::None,
             erro_repo_r: err_rep,
+            subscriptionmove_r: (*ac).get_rc::<SubscriptionMove>().unwrap(),
+            focus_by_tab: RefCell::new(FocusByTab::None),
             currently_minimized: false,
             statusbar: status_bar,
-            subscriptionmove_r: (*ac).get_rc::<SubscriptionMove>().unwrap(),
+            event_handler_map: Default::default(),
         }
     }
 
@@ -164,7 +170,7 @@ impl GuiProcessor {
             }
         }
         if !list_row_activated_map.is_empty() {
-            self.focus_by_tab = FocusByTab::FocusMessages;
+            self.focus_by_tab.replace(FocusByTab::FocusMessages);
             (*self.contentlist_r)
                 .borrow()
                 .process_list_row_activated(&list_row_activated_map);
@@ -173,291 +179,290 @@ impl GuiProcessor {
         for ev in ev_set {
             // trace!("GP: ev={:?} ", &ev);
             let now = Instant::now();
-            match ev {
-                GuiEvents::None => {}
-                GuiEvents::ListRowActivated(_list_idx, _list_position, _msg_id) => (), // handled above
-                GuiEvents::WinDelete => {
-                    self.addjob(Job::StopApplication);
-                }
-                GuiEvents::AppWasAlreadyRunning => {
-                    let _r = self.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
-                    self.addjob(Job::StopApplication);
-                }
-                GuiEvents::MenuActivate(ref s) => match s.as_str() {
 
+            if let Some(handler_b) = self.event_handler_map.get(&std::mem::discriminant(&ev)) {
+                handler_b.handle(&ev);
+            } else {
+                match ev {
+                    GuiEvents::None => {}
+                    GuiEvents::ListRowActivated(_list_idx, _list_position, _msg_id) => {} // handled above
 
-
-                    "M_FILE_QUIT" => {
+                    // TODO:    double borrow of mutable GuiProcessor   will crash
+                    // GuiEvents::WinDelete => {                        self.addjob(Job::StopApplication);                    }
+                    //
+                    GuiEvents::AppWasAlreadyRunning => {
+                        let _r = self.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
                         self.addjob(Job::StopApplication);
                     }
-                    "M_SETTINGS" => {
-                        self.start_settings_dialog();
-                    }
-                    "M_ABOUT" => {
-                        self.start_about_dialog();
-                    }
-                    "M_SHORT_HELP" => {
-                        (*self.browserpane_r).borrow().display_short_help();
-                    }
-                    _ => warn!("Menu Unprocessed:{:?} ", s),
-                },
-                GuiEvents::ButtonClicked(ref b) => match b.as_str() {
-                    "button1" => {
-                        info!("ButtonClicked: button1");
-                    }
-                    _ => debug!("GP2 Button:  {:?}", b),
-                },
-                GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) => {
-
-
-                    // debug!("TreeRowActivated {:?}" ,  &_path );
-
-
-                    (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
-                        .borrow_mut()
-                        .set_selected_feedsource(subs_id as isize);
-                    // trace!("GP:TreeRowActivated{}  {:?} ", subs_id, _path);
-                    (*self.contentlist_r)
-                        .borrow()
-                        .update_message_list_(subs_id as isize);
-                    self.focus_by_tab = FocusByTab::FocusSubscriptions;
-                }
-                GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
-                    self.focus_by_tab = FocusByTab::FocusMessages;
-                    (*self.contentlist_r)
-                        .borrow()
-                        .launch_browser_single(vec![fc_repo_id]);
-                }
-                GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) => {
-                    self.focus_by_tab = FocusByTab::FocusMessages;
-                    if sort_col_nr == LIST0_COL_ISREAD && msg_id >= 0 {
+                    GuiEvents::MenuActivate(ref s) => match s.as_str() {
+                        "M_FILE_QUIT" => {
+                            self.addjob(Job::StopApplication);
+                        }
+                        "M_SETTINGS" => {
+                            self.start_settings_dialog();
+                        }
+                        "M_ABOUT" => {
+                            self.start_about_dialog();
+                        }
+                        "M_SHORT_HELP" => {
+                            (*self.browserpane_r).borrow().display_short_help();
+                        }
+                        _ => warn!("Menu Unprocessed:{:?} ", s),
+                    },
+                    GuiEvents::ButtonClicked(ref b) => match b.as_str() {
+                        "button1" => {
+                            info!("ButtonClicked: button1");
+                        }
+                        _ => debug!("GP2 Button:  {:?}", b),
+                    },
+                    GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) => {
+                        (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
+                            .borrow_mut()
+                            .set_selected_feedsource(subs_id as isize);
+                        // trace!("GP:TreeRowActivated{}  {:?} ", subs_id, _path);
                         (*self.contentlist_r)
                             .borrow()
-                            .toggle_feed_item_read(msg_id as isize, list_position);
-                    } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
-                        (*self.contentlist_r).borrow().toggle_favorite(
-                            msg_id as isize,
-                            list_position,
-                            None,
-                        );
-                    } else {
-                        warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
+                            .update_message_list_(subs_id as isize);
+                        self.focus_by_tab.replace(FocusByTab::FocusSubscriptions);
                     }
-                }
-                GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
-                    0 => {
-                        if pos < TREE_PANE1_MIN_WIDTH {
-                            (*self.gui_updater)
+                    GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
+                        self.focus_by_tab.replace(FocusByTab::FocusMessages);
+                        (*self.contentlist_r)
+                            .borrow()
+                            .launch_browser_single(vec![fc_repo_id]);
+                    }
+                    GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) => {
+                        self.focus_by_tab.replace(FocusByTab::FocusMessages);
+                        if sort_col_nr == LIST0_COL_ISREAD && msg_id >= 0 {
+                            (*self.contentlist_r)
                                 .borrow()
-                                .update_paned_pos(PANED_1_LEFT, TREE_PANE1_MIN_WIDTH);
+                                .toggle_feed_item_read(msg_id as isize, list_position);
+                        } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
+                            (*self.contentlist_r).borrow().toggle_favorite(
+                                msg_id as isize,
+                                list_position,
+                                None,
+                            );
                         } else {
-                            (*(self.configmanager_r.borrow_mut())).store_gui_pane1_pos(pos);
+                            warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
                         }
                     }
-                    1 => (*(self.configmanager_r.borrow_mut())).store_gui_pane2_pos(pos),
-                    _ => {}
-                },
-                GuiEvents::WindowSizeChanged(width, height) => {
-                    (*(self.configmanager_r.borrow_mut())).store_window_size(width, height);
-                }
-                GuiEvents::DialogData(ref ident, ref payload) => {
-                    self.process_dialogdata(ident.clone(), payload.clone());
-                }
-                GuiEvents::DialogEditData(ref ident, ref payload) => match ident.as_str() {
-                    "feedsource-edit" => {
-                        if let Some(edit_url) = payload.str() {
-                            (*self.feedsources_r)
-                                .borrow_mut()
-                                .newsource_dialog_edit(edit_url);
+                    GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
+                        0 => {
+                            if pos < TREE_PANE1_MIN_WIDTH {
+                                (*self.gui_updater)
+                                    .borrow()
+                                    .update_paned_pos(PANED_1_LEFT, TREE_PANE1_MIN_WIDTH);
+                            } else {
+                                (*(self.configmanager_r.borrow_mut())).store_gui_pane1_pos(pos);
+                            }
+                        }
+                        1 => (*(self.configmanager_r.borrow_mut())).store_gui_pane2_pos(pos),
+                        _ => {}
+                    },
+                    GuiEvents::WindowSizeChanged(width, height) => {
+                        (*(self.configmanager_r.borrow_mut())).store_window_size(width, height);
+                    }
+                    GuiEvents::DialogData(ref ident, ref payload) => {
+                        self.process_dialogdata(ident.clone(), payload.clone());
+                    }
+                    GuiEvents::DialogEditData(ref ident, ref payload) => match ident.as_str() {
+                        "feedsource-edit" => {
+                            if let Some(edit_url) = payload.str() {
+                                (*self.feedsources_r)
+                                    .borrow_mut()
+                                    .newsource_dialog_edit(edit_url);
+                            }
+                        }
+                        _ => {
+                            warn!(" other DialogEditData  {:?} {:?}", &ident, payload);
+                        }
+                    },
+                    GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) => {
+                        match command.as_str() {
+                            "feedsource-delete-dialog" => {
+                                (*self.feedsources_r)
+                                    .borrow_mut()
+                                    .start_delete_dialog(src_repo_id as isize);
+                            }
+                            "feedsource-update" => {
+                                self.feedsources_r
+                                    .borrow_mut()
+                                    .mark_schedule_fetch(src_repo_id as isize);
+                            }
+                            "feedsource-edit-dialog" => {
+                                (*self.feedsources_r)
+                                    .borrow_mut()
+                                    .start_feedsource_edit_dialog(src_repo_id as isize);
+                            }
+                            "feedsource-mark-as-read" => {
+                                (*self.feedsources_r)
+                                    .borrow_mut()
+                                    .mark_as_read(src_repo_id as isize);
+                            }
+                            "new-folder-dialog" => {
+                                (*self.feedsources_r).borrow_mut().start_new_fol_sub_dialog(
+                                    src_repo_id as isize,
+                                    DIALOG_NEW_FOLDER,
+                                );
+                            }
+                            "new-subscription-dialog" => {
+                                (*self.feedsources_r).borrow_mut().start_new_fol_sub_dialog(
+                                    src_repo_id as isize,
+                                    DIALOG_NEW_SUBSCRIPTION,
+                                );
+                            }
+                            _ => {
+                                warn!("unknown command for TreeEvent   {}", command);
+                            }
                         }
                     }
-                    _ => {
-                        warn!(" other DialogEditData  {:?} {:?}", &ident, payload);
+                    GuiEvents::TreeDragEvent(_tree_nr, ref from_path, ref to_path) => {
+                        // let _success = self.feedsources_r.borrow().on_fs_drag(_tree_nr,from_path.clone(),to_path.clone(),);
+
+                        let _success = self.subscriptionmove_r.borrow().on_subscription_drag(
+                            _tree_nr,
+                            from_path.clone(),
+                            to_path.clone(),
+                        );
                     }
-                },
-                GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) => {
-                    match command.as_str() {
-                        "feedsource-delete-dialog" => {
-                            (*self.feedsources_r)
-                                .borrow_mut()
-                                .start_delete_dialog(src_repo_id as isize);
-                        }
-                        "feedsource-update" => {
+                    GuiEvents::TreeExpanded(_idx, repo_id) => {
+                        self.feedsources_r
+                            .borrow()
+                            .set_tree_expanded(repo_id as isize, true);
+                    }
+                    GuiEvents::TreeCollapsed(_idx, repo_id) => {
+                        self.feedsources_r
+                            .borrow()
+                            .set_tree_expanded(repo_id as isize, false);
+                    }
+                    GuiEvents::ToolBarButton(ref id) => match id.as_str() {
+                        "reload-feeds-all" => {
                             self.feedsources_r
                                 .borrow_mut()
-                                .mark_schedule_fetch(src_repo_id as isize);
+                                .addjob(SJob::ScheduleFetchAllFeeds);
                         }
-                        "feedsource-edit-dialog" => {
-                            (*self.feedsources_r)
-                                .borrow_mut()
-                                .start_feedsource_edit_dialog(src_repo_id as isize);
+                        "browser-zoom-in" => {
+                            (*self.browserpane_r)
+                                .borrow()
+                                .set_browser_zoom(BrowserZoomCommand::ZoomIn);
                         }
-                        "feedsource-mark-as-read" => {
-                            (*self.feedsources_r)
-                                .borrow_mut()
-                                .mark_as_read(src_repo_id as isize);
+                        "browser-zoom-out" => {
+                            (*self.browserpane_r)
+                                .borrow()
+                                .set_browser_zoom(BrowserZoomCommand::ZoomOut);
                         }
-                        "new-folder-dialog" => {
-                            (*self.feedsources_r)
-                                .borrow_mut()
-                                .start_new_fol_sub_dialog(src_repo_id as isize, DIALOG_NEW_FOLDER);
+                        "browser-zoom-default" => {
+                            (*self.browserpane_r)
+                                .borrow()
+                                .set_browser_zoom(BrowserZoomCommand::ZoomDefault);
                         }
-                        "new-subscription-dialog" => {
-                            (*self.feedsources_r).borrow_mut().start_new_fol_sub_dialog(
-                                src_repo_id as isize,
-                                DIALOG_NEW_SUBSCRIPTION,
+                        "toolbutton-troubleshoot1" => {
+                            debug!("toolbutton-troubleshoot1");
+                        }
+                        _ => {
+                            warn!("unknown ToolBarButton {} ", id);
+                        }
+                    },
+                    GuiEvents::ToolBarToggle(ref id, active) => match id.as_str() {
+                        "special1" => {
+                            let mark = if active { 1 } else { 2 };
+                            debug!(" ToolBarToggle {} {} {}", id, active, mark);
+                            (*self.gui_updater).borrow().widget_mark(
+                                UIUpdaterMarkWidgetType::ScrolledWindow,
+                                SCROLLEDWINDOW_0,
+                                mark,
+                            );
+
+                            (*self.gui_updater).borrow().widget_mark(
+                                UIUpdaterMarkWidgetType::Box,
+                                BOX_CONTAINER_3_MARK,
+                                mark,
+                            );
+                            (*self.gui_updater).borrow().widget_mark(
+                                UIUpdaterMarkWidgetType::ScrolledWindow,
+                                SCROLLEDWINDOW_1,
+                                mark,
                             );
                         }
                         _ => {
-                            warn!("unknown command for TreeEvent   {}", command);
+                            warn!("unknown ToolBarToggle {} ", id);
+                        }
+                    },
+
+                    GuiEvents::ColumnWidth(col_nr, width) => {
+                        (*(self.configmanager_r.borrow_mut())).store_column_width(col_nr, width);
+                    }
+                    GuiEvents::ListSelected(_list_idx, ref selected_list) => {
+                        (*self.contentlist_r)
+                            .borrow()
+                            .set_selected_content_ids(selected_list.clone());
+                    }
+                    GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) => {
+                        if list_idx == 0 {
+                            (*self.contentlist_r)
+                                .borrow()
+                                .process_list_action(action.clone(), repoid_list_pos.clone());
                         }
                     }
-                }
-                GuiEvents::TreeDragEvent(_tree_nr, ref from_path, ref to_path) => {
-                    // let _success = self.feedsources_r.borrow().on_fs_drag(_tree_nr,from_path.clone(),to_path.clone(),);
-
-                    let _success = self.subscriptionmove_r.borrow().on_subscription_drag(
-                        _tree_nr,
-                        from_path.clone(),
-                        to_path.clone(),
-                    );
-                }
-                GuiEvents::TreeExpanded(_idx, repo_id) => {
-                    self.feedsources_r
-                        .borrow()
-                        .set_tree_expanded(repo_id as isize, true);
-                }
-                GuiEvents::TreeCollapsed(_idx, repo_id) => {
-                    self.feedsources_r
-                        .borrow()
-                        .set_tree_expanded(repo_id as isize, false);
-                }
-                GuiEvents::ToolBarButton(ref id) => match id.as_str() {
-                    "reload-feeds-all" => {
-                        self.feedsources_r
-                            .borrow_mut()
-                            .addjob(SJob::ScheduleFetchAllFeeds);
+                    GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) => {
+                        if list_idx == 0 {
+                            (*self.contentlist_r)
+                                .borrow_mut()
+                                .set_sort_order(col_id, ascending);
+                        }
                     }
-                    "browser-zoom-in" => {
-                        (*self.browserpane_r)
-                            .borrow()
-                            .set_browser_zoom(BrowserZoomCommand::ZoomIn);
+                    GuiEvents::KeyPressed(keycode, o_char) => {
+                        self.process_key_press(keycode, o_char);
                     }
-                    "browser-zoom-out" => {
-                        (*self.browserpane_r)
-                            .borrow()
-                            .set_browser_zoom(BrowserZoomCommand::ZoomOut);
-                    }
-                    "browser-zoom-default" => {
-                        (*self.browserpane_r)
-                            .borrow()
-                            .set_browser_zoom(BrowserZoomCommand::ZoomDefault);
-                    }
-                    "toolbutton-troubleshoot1" => {
-                        debug!("toolbutton-troubleshoot1");
-                    }
-                    _ => {
-                        warn!("unknown ToolBarButton {} ", id);
-                    }
-                },
-                GuiEvents::ToolBarToggle(ref id, active) => match id.as_str() {
-                    "special1" => {
-                        let mark = if active { 1 } else { 2 };
-                        debug!(" ToolBarToggle {} {} {}", id, active, mark);
-                        (*self.gui_updater).borrow().widget_mark(
-                            UIUpdaterMarkWidgetType::ScrolledWindow,
-                            SCROLLEDWINDOW_0,
-                            mark,
-                        );
-
-                        (*self.gui_updater).borrow().widget_mark(
-                            UIUpdaterMarkWidgetType::Box,
-                            BOX_CONTAINER_3_MARK,
-                            mark,
-                        );
-                        (*self.gui_updater).borrow().widget_mark(
-                            UIUpdaterMarkWidgetType::ScrolledWindow,
-                            SCROLLEDWINDOW_1,
-                            mark,
-                        );
-                    }
-                    _ => {
-                        warn!("unknown ToolBarToggle {} ", id);
-                    }
-                },
-
-                GuiEvents::ColumnWidth(col_nr, width) => {
-                    (*(self.configmanager_r.borrow_mut())).store_column_width(col_nr, width);
-                }
-                GuiEvents::ListSelected(_list_idx, ref selected_list) => {
-                    (*self.contentlist_r)
-                        .borrow()
-                        .set_selected_content_ids(selected_list.clone());
-                }
-                GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) => {
-                    if list_idx == 0 {
-                        (*self.contentlist_r)
-                            .borrow()
-                            .process_list_action(action.clone(), repoid_list_pos.clone());
-                    }
-                }
-                GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) => {
-                    if list_idx == 0 {
+                    GuiEvents::SearchEntryTextChanged(_idx, ref newtext) => {
                         (*self.contentlist_r)
                             .borrow_mut()
-                            .set_sort_order(col_id, ascending);
+                            .set_messages_filter(newtext);
                     }
-                }
-                GuiEvents::KeyPressed(keycode, o_char) => {
-                    self.process_key_press(keycode, o_char);
-                }
-                GuiEvents::SearchEntryTextChanged(_idx, ref newtext) => {
-                    (*self.contentlist_r)
-                        .borrow_mut()
-                        .set_messages_filter(newtext);
-                }
-                GuiEvents::WindowThemeChanged(ref theme_name) => {
-                    (*self.gui_context_r).borrow().set_theme_name(theme_name);
-                }
-                GuiEvents::WindowIconified(is_minimized) => {
-                    self.currently_minimized = is_minimized;
-                    (*self.feedsources_r)
-                        .borrow_mut()
-                        .memory_conserve(is_minimized);
-                    (*self.contentlist_r)
-                        .borrow_mut()
-                        .memory_conserve(is_minimized);
-                    (*self.gui_val_store)
-                        .write()
-                        .unwrap()
-                        .memory_conserve(is_minimized);
-                    (*self.gui_updater).borrow().memory_conserve(is_minimized);
-                }
-                GuiEvents::Indicator(ref cmd, gtktime) => match cmd.as_str() {
-                    "app-quit" => {
-                        self.addjob(Job::StopApplication);
+                    GuiEvents::WindowThemeChanged(ref theme_name) => {
+                        (*self.gui_context_r).borrow().set_theme_name(theme_name);
                     }
-                    "show-window" => {
-                        // trace!(                            "Indicator -> show-window!  cur-min {}  time:{}",                            self.currently_minimized, gtktime                        );
-                        self.currently_minimized = !self.currently_minimized;
-                        (*self.gui_updater)
-                            .borrow()
-                            .update_window_minimized(self.currently_minimized, gtktime);
+                    GuiEvents::WindowIconified(is_minimized) => {
+                        self.currently_minimized = is_minimized;
+                        (*self.feedsources_r)
+                            .borrow_mut()
+                            .memory_conserve(is_minimized);
+                        (*self.contentlist_r)
+                            .borrow_mut()
+                            .memory_conserve(is_minimized);
+                        (*self.gui_val_store)
+                            .write()
+                            .unwrap()
+                            .memory_conserve(is_minimized);
+                        (*self.gui_updater).borrow().memory_conserve(is_minimized);
+                    }
+                    GuiEvents::Indicator(ref cmd, gtktime) => match cmd.as_str() {
+                        "app-quit" => {
+                            self.addjob(Job::StopApplication);
+                        }
+                        "show-window" => {
+                            // trace!(                            "Indicator -> show-window!  cur-min {}  time:{}",                            self.currently_minimized, gtktime                        );
+                            self.currently_minimized = !self.currently_minimized;
+                            (*self.gui_updater)
+                                .borrow()
+                                .update_window_minimized(self.currently_minimized, gtktime);
+                        }
+                        _ => {
+                            warn!("unknown indicator event");
+                        }
+                    },
+                    GuiEvents::DragDropUrlReceived(ref url) => {
+                        (*self.downloader_r).borrow().browser_drag_request(url);
+                    }
+                    GuiEvents::BrowserEvent(ref ev_type, value) => {
+                        if ev_type == &BrowserEventType::LoadingProgress {
+                            self.statusbar.browser_loading_progress = value as u8;
+                        }
                     }
                     _ => {
-                        warn!("unknown indicator event");
+                        warn!("other GuiEvents: {:?}", &ev);
                     }
-                },
-                GuiEvents::DragDropUrlReceived(ref url) => {
-                    (*self.downloader_r).borrow().browser_drag_request(url);
-                }
-                GuiEvents::BrowserEvent(ref ev_type, value) => {
-                    if ev_type == &BrowserEventType::LoadingProgress {
-                        self.statusbar.browser_loading_progress = value as u8;
-                    }
-                }
-                _ => {
-                    warn!("other GuiEvents: {:?}", &ev);
                 }
             }
 
@@ -771,7 +776,7 @@ impl GuiProcessor {
 
     ///  for key codes look at selec.rs                           gdk_sys::GDK_KEY_Escape => KeyCodes::Escape,
     fn process_key_press(&mut self, keycode: isize, _o_char: Option<char>) {
-        let mut new_focus_by_tab = self.focus_by_tab.clone();
+        let mut new_focus_by_tab = self.focus_by_tab.borrow().clone();
         let kc: KeyCodes = ui_select::from_gdk_sys(keycode);
         let subscription_id: isize = match (*self.feedsources_r)
             .borrow()
@@ -781,8 +786,8 @@ impl GuiProcessor {
             None => -1,
         };
         match kc {
-            KeyCodes::Tab => new_focus_by_tab = self.focus_by_tab.next(),
-            KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.prev(),
+            KeyCodes::Tab => new_focus_by_tab = self.focus_by_tab.borrow().next(),
+            KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.borrow().prev(),
             KeyCodes::Key_a => {
                 if subscription_id > 0 {
                     (*self.feedsources_r).borrow().mark_as_read(subscription_id);
@@ -799,14 +804,14 @@ impl GuiProcessor {
                     .move_list_cursor(ListMoveCommand::LaterUnreadMessage);
             }
             KeyCodes::Delete => {
-                if self.focus_by_tab == FocusByTab::FocusMessages {
+                if *self.focus_by_tab.borrow() == FocusByTab::FocusMessages {
                     (*self.contentlist_r).borrow().keyboard_delete();
                 } else {
                     debug!("delete key but unfocused");
                 }
             }
             KeyCodes::Space => {
-                if self.focus_by_tab == FocusByTab::FocusMessages {
+                if *self.focus_by_tab.borrow() == FocusByTab::FocusMessages {
                     (*self.contentlist_r).borrow().launch_browser_selected();
                 } else {
                     debug!("space key but unfocused");
@@ -817,12 +822,12 @@ impl GuiProcessor {
                 // trace!("key-pressed: other {} {:?} {:?}", keycode, _o_char, kc);
             }
         }
-        if new_focus_by_tab != self.focus_by_tab {
-            self.focus_by_tab = new_focus_by_tab;
+        if new_focus_by_tab != *self.focus_by_tab.borrow() {
+            self.focus_by_tab.replace(new_focus_by_tab);
             self.switch_focus_marker(true);
             self.addjob(Job::CheckFocusMarker(2));
             // trace!("FOCUS:  {:?} ", &self.focus_by_tab );
-            match &self.focus_by_tab {
+            match *self.focus_by_tab.borrow() {
                 FocusByTab::FocusSubscriptions => {
                     (*self.gui_updater)
                         .borrow()
@@ -845,8 +850,7 @@ impl GuiProcessor {
 
     fn switch_focus_marker(&self, marker_active: bool) {
         let mark = if marker_active { 1 } else { 2 };
-        // trace!("switch_focus_marker: {:?} {:?} ", self.focus_by_tab, mark);
-        match &self.focus_by_tab {
+        match *self.focus_by_tab.borrow() {
             FocusByTab::FocusSubscriptions => {
                 (*self.gui_updater).borrow().widget_mark(
                     UIUpdaterMarkWidgetType::ScrolledWindow,
@@ -885,6 +889,10 @@ impl GuiProcessor {
         (*self.gui_updater).borrow().update_dialog(DIALOG_ABOUT);
     }
 
+    pub fn add_handler<T: HandleSingleEvent + 'static>(&mut self, ev: &GuiEvents, handler: T) {
+        self.event_handler_map
+            .insert(std::mem::discriminant(&ev), Box::new(handler));
+    }
     // GuiProcessor
 }
 
@@ -947,15 +955,23 @@ impl TimerReceiver for GuiProcessor {
     }
 }
 
+struct HandleWinDelete(Rc<RefCell<GuiProcessor>>);
+impl HandleSingleEvent for HandleWinDelete {
+    fn handle(&self, _ev: &GuiEvents) {
+        debug!("H: windelete!");
+        (*self.0).borrow().addjob(Job::StopApplication);
+    }
+}
+
 impl StartupWithAppContext for GuiProcessor {
     fn startup(&mut self, ac: &AppContext) {
-        let gp_r = ac.get_rc::<GuiProcessor>().unwrap();
+        let gp_r: Rc<RefCell<GuiProcessor>> = ac.get_rc::<GuiProcessor>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();
             t.register(&TimerEvent::Timer100ms, gp_r.clone());
             t.register(&TimerEvent::Timer1s, gp_r.clone());
             t.register(&TimerEvent::Timer10s, gp_r.clone());
-            t.register(&TimerEvent::Startup, gp_r);
+            t.register(&TimerEvent::Startup, gp_r.clone());
             self.timer_sender = Some((*t).get_ctrl_sender());
         }
         self.addjob(Job::StartApplication);
@@ -973,6 +989,10 @@ impl StartupWithAppContext for GuiProcessor {
                 self.statusbar.mode_debug = b;
             }
         }
+
+        // ---------------
+
+        self.add_handler(&GuiEvents::WinDelete, HandleWinDelete(gp_r.clone()));
     }
 }
 

@@ -48,6 +48,9 @@ pub trait ISubscriptionMove {
 
     fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>);
     fn feedsource_delete(&mut self);
+
+    fn request_check_paths(&self, needs_check: bool);
+    fn check_paths(&self);
 }
 
 pub struct SubscriptionMove {
@@ -541,6 +544,18 @@ impl ISubscriptionMove for SubscriptionMove {
         self.addjob(SJob::GuiUpdateTreeAll);
         self.feedsource_delete_id = None;
     }
+
+    fn request_check_paths(&self, needs_check: bool) {
+        self.need_check_fs_paths.replace(needs_check);
+    }
+
+    fn check_paths(&self) {
+        if *self.need_check_fs_paths.borrow() {
+            self.update_cached_paths();
+            self.need_check_fs_paths.replace(false);
+        }
+    }
+
 } //  impl ISubscriptionMove
 
 impl Buildable for SubscriptionMove {

@@ -120,12 +120,8 @@ pub struct SourceTreeController {
     pub(super) new_source: NewSourceTempData,
     pub(super) statemap: Rc<RefCell<SubscriptionState>>, // moved over
     pub(super) current_new_folder_parent_id: Option<isize>,
-
     // #[deprecated]
-    need_check_fs_paths: RefCell<bool>,
-    // #[deprecated]
-    // pub(super) feedsource_delete_id: Option<usize>,
-    // #[deprecated]
+    // need_check_fs_paths: RefCell<bool>,
 }
 
 impl SourceTreeController {
@@ -191,10 +187,8 @@ impl SourceTreeController {
             erro_repo_r: err_rep,
             currently_minimized: false,
             current_new_folder_parent_id: None,
-
-            // already migrated
-            #[deprecated]
-            need_check_fs_paths: RefCell::new(true),
+            //
+            // need_check_fs_paths: RefCell::new(true),
         }
     }
 
@@ -227,7 +221,10 @@ impl SourceTreeController {
                             self.addjob(SJob::ScanEmptyUnread);
                         }
                         if !self.tree_update_one(&subs_e, &su_st) {
-                            self.need_check_fs_paths.replace(true);
+                            // self.need_check_fs_paths.replace(true);
+                            if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                                subs_mov.borrow_mut().request_check_paths(true);
+                            }
                         }
                     } else {
                         warn!("could not store readcount for id {}", subs_id);
@@ -470,7 +467,11 @@ impl SourceTreeController {
         }
         let su_st = o_state.unwrap();
         if !self.tree_update_one(&fse, &su_st) {
-            self.need_check_fs_paths.replace(true);
+            if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                subs_mov.borrow_mut().request_check_paths(true);
+            }
+
+            // self.need_check_fs_paths.replace(true);
         }
     }
 
@@ -480,8 +481,9 @@ impl SourceTreeController {
             if subs_id == 0 {
                 return Some([0].to_vec());
             }
-            debug!("get_path_for_src {} => {:?}", subs_id, o_path);
-            self.need_check_fs_paths.replace(true);
+            if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                subs_mov.borrow_mut().request_check_paths(true);
+            }
             return None;
         }
         let path = o_path.unwrap();
@@ -674,16 +676,18 @@ impl SourceTreeController {
         }
     }
 
-    fn check_paths(&self) {
-        if *self.need_check_fs_paths.borrow() {
-            // self.update_cached_paths();
-            if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
-                subs_mov.borrow_mut().update_cached_paths();
-            }
-
-            self.need_check_fs_paths.replace(false);
-        }
-    }
+    /*
+       #[deprecated]
+       fn check_paths(&self) {
+           if *self.need_check_fs_paths.borrow() {
+               // self.update_cached_paths();
+               if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                   subs_mov.borrow_mut().update_cached_paths();
+               }
+               self.need_check_fs_paths.replace(false);
+           }
+       }
+    */
 
     pub fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {
         let o_subs_id = self.statemap.borrow().get_id_by_path(path);
@@ -698,53 +702,6 @@ impl SourceTreeController {
         }
         None
     }
-
-    /*
-       #[deprecated]
-       pub fn update_paths_rec(
-           &self,
-           localpath: &[u16],
-           parent_subs_id: i32,
-           mut is_deleted: bool,
-       ) -> bool {
-           if parent_subs_id < 0 {
-               is_deleted = true;
-           }
-           let entries: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
-               .borrow()
-               .get_by_parent_repo_id(parent_subs_id as isize);
-           entries.iter().enumerate().for_each(|(num, entry)| {
-               let mut path: Vec<u16> = Vec::new();
-               path.extend_from_slice(localpath);
-               path.push(num as u16);
-               self.update_paths_rec(&path, entry.subs_id as i32, is_deleted);
-               let mut smm = self.statemap.borrow_mut();
-               smm.set_tree_path(entry.subs_id, path, entry.is_folder);
-               smm.set_deleted(entry.subs_id, is_deleted);
-           });
-           false
-       }
-
-
-
-       /// scans the messages for highest subscription id, if there is a higher one, use next higher subscription id
-       /// returns 0     to use   autoincrement
-       #[deprecated]
-       pub fn get_next_available_subscription_id(&self) -> isize {
-           let subs_repo_highest = (*self.subscriptionrepo_r).borrow().get_highest_src_id();
-           let mut next_subs_id = std::cmp::max(subs_repo_highest + 1, 10);
-           if let Some(messagesrepo) = self.messagesrepo_w.upgrade() {
-               let h = (*messagesrepo).borrow().get_max_src_index();
-               if h >= next_subs_id {
-                   next_subs_id = h + 1;
-               } else {
-                   next_subs_id = 0; // default auto increment
-               }
-           }
-           next_subs_id
-       }
-
-    */
 
     /// Creates the tree, fills the gui_val_store ,  is recursive.
     pub fn insert_tree_row(&self, localpath: &[u16], parent_subs_id: i32) -> i32 {
@@ -908,7 +865,11 @@ impl TimerReceiver for SourceTreeController {
                 self.process_jobs();
                 self.process_fetch_scheduled();
                 self.process_newsource_edit();
-                self.check_paths();
+
+                if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                    subs_mov.borrow_mut().check_paths();
+                }
+
                 self.check_feed_update_times();
             }
         } else {
@@ -919,7 +880,9 @@ impl TimerReceiver for SourceTreeController {
                 }
                 TimerEvent::Timer1s => {
                     self.process_newsource_edit();
-                    self.check_paths();
+                    if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                        subs_mov.borrow_mut().check_paths();
+                    }
                 }
                 TimerEvent::Timer10s => {
                     self.check_feed_update_times();

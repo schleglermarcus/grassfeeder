@@ -102,12 +102,6 @@ pub enum GuiEvents {
     BrowserEvent(BrowserEventType, i32),
 }
 
-// impl Default for GuiEvents {
-//     fn default() -> GuiEvents {
-//         GuiEvents::None
-//     }
-// }
-
 pub trait UIAdapterValueStore {
     fn memory_conserve(&mut self, active: bool);
 
