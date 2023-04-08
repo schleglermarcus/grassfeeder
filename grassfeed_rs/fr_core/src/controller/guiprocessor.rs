@@ -101,7 +101,7 @@ pub struct GuiProcessor {
 }
 
 pub trait HandleSingleEvent {
-    fn handle(&self, _ev: &GuiEvents) {}
+    fn handle(&self, _ev: GuiEvents) {}
 }
 
 impl GuiProcessor {
@@ -176,21 +176,15 @@ impl GuiProcessor {
         }
 
         for ev in ev_set {
-            let now = Instant::now();
-
+            let ev_ident = (Instant::now(), format!("{:?}", &ev));
             if let Some(handler_b) = self.event_handler_map.get(&std::mem::discriminant(&ev)) {
                 // trace!("GP: ev={:?} ", &ev);
-                handler_b.handle(&ev);
+                handler_b.handle(ev);
             } else {
                 match ev {
                     GuiEvents::None => {}
                     GuiEvents::ListRowActivated(_l, _p, _m) => {} // handled above
                     /*
-                                       GuiEvents::WinDelete => {                        self.addjob(Job::StopApplication);                    }
-                                       GuiEvents::AppWasAlreadyRunning => {
-                                           let _r = self.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
-                                           self.addjob(Job::StopApplication);
-                                       }
                     GuiEvents::MenuActivate(ref s) => match s.as_str() {
                         "M_FILE_QUIT" => {
                             self.addjob(Job::StopApplication);
@@ -200,14 +194,13 @@ impl GuiProcessor {
                         }
                         "M_ABOUT" => {
                             self.start_about_dialog();
-                        }
+                        },
                         "M_SHORT_HELP" => {
                             (*self.browserpane_r).borrow().display_short_help();
                         }
                         _ => warn!("Menu Unprocessed:{:?} ", s),
                     },
 
-                    */
                     GuiEvents::ButtonClicked(ref b) => match b.as_str() {
                         "button1" => {
                             info!("ButtonClicked: button1");
@@ -246,6 +239,7 @@ impl GuiProcessor {
                             warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
                         }
                     }
+                    */
                     GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
                         0 => {
                             if pos < TREE_PANE1_MIN_WIDTH {
@@ -466,9 +460,9 @@ impl GuiProcessor {
                 }
             }
 
-            let elapsed_m = now.elapsed().as_millis();
+            let elapsed_m = ev_ident.0.elapsed().as_millis();
             if elapsed_m > 100 {
-                debug!("EV  {:?}   took {:?}", &ev, elapsed_m);
+                debug!("EV  {}   took {:?}", ev_ident.1, elapsed_m);
             }
         }
     }
@@ -983,6 +977,9 @@ impl StartupWithAppContext for GuiProcessor {
         }
 
         // ---------------
+        let sourcetree_r: Rc<RefCell<dyn ISourceTreeController>> =
+            ac.get_rc::<SourceTreeController>().unwrap();
+        let feedcontents_r: Rc<RefCell<dyn IFeedContents>> = ac.get_rc::<FeedContents>().unwrap();
 
         self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2(gp_r.clone()));
         self.add_handler(
@@ -992,6 +989,18 @@ impl StartupWithAppContext for GuiProcessor {
         self.add_handler(
             &GuiEvents::MenuActivate(String::default()),
             HandleMenuActivate(gp_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::TreeRowActivated(0, Vec::default(), 0),
+            HandleTreeRowActivated(gp_r.clone(), sourcetree_r.clone(), feedcontents_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::ListRowDoubleClicked(0, 0, 0),
+            HandleListRowDoubleClicked(gp_r.clone(), feedcontents_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::ListCellClicked(0, 0, 0, 0),
+            HandleListCellClicked(gp_r.clone(), feedcontents_r.clone()),
         );
     }
 }
@@ -1023,26 +1032,16 @@ impl FocusByTab {
     }
 }
 
-/*
-struct HandleWinDelete(Sender<Job>);
-impl HandleSingleEvent for HandleWinDelete {
-    fn handle(&self, _ev: &GuiEvents) {
-        debug!("H: windelete!");
-        let _r = self.0.send(Job::StopApplication);
-    }
-}
- */
-
 struct HandleWinDelete2(Rc<RefCell<GuiProcessor>>);
 impl HandleSingleEvent for HandleWinDelete2 {
-    fn handle(&self, _ev: &GuiEvents) {
+    fn handle(&self, _ev: GuiEvents) {
         self.0.borrow().addjob(Job::StopApplication);
     }
 }
 
 struct HandleAppWasAlreadyRunning(Rc<RefCell<GuiProcessor>>);
 impl HandleSingleEvent for HandleAppWasAlreadyRunning {
-    fn handle(&self, _ev: &GuiEvents) {
+    fn handle(&self, _ev: GuiEvents) {
         let gp = (*self.0).borrow();
         let _r = gp.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
         gp.addjob(Job::StopApplication);
@@ -1051,7 +1050,7 @@ impl HandleSingleEvent for HandleAppWasAlreadyRunning {
 
 struct HandleMenuActivate(Rc<RefCell<GuiProcessor>>);
 impl HandleSingleEvent for HandleMenuActivate {
-    fn handle(&self, ev: &GuiEvents) {
+    fn handle(&self, ev: GuiEvents) {
         match ev {
             GuiEvents::MenuActivate(ref s) => match s.as_str() {
                 "M_FILE_QUIT" => {
@@ -1069,6 +1068,73 @@ impl HandleSingleEvent for HandleMenuActivate {
                 }
                 _ => warn!("Menu Unprocessed:{:?} ", s),
             },
+            _ => (),
+        }
+    }
+}
+
+struct HandleTreeRowActivated(
+    Rc<RefCell<GuiProcessor>>,
+    Rc<RefCell<dyn ISourceTreeController>>,
+    Rc<RefCell<dyn IFeedContents>>,
+);
+impl HandleSingleEvent for HandleTreeRowActivated {
+    fn handle(&self, ev: GuiEvents) {
+        match ev {
+            GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) => {
+                // set it first into sources, we need that at contents for the focus
+                (*self.1)
+                    .borrow_mut()
+                    .set_selected_feedsource(subs_id as isize);
+                // trace!("GP:TreeRowActivated{}  {:?} ", subs_id, _path);
+                (*self.2).borrow().update_message_list_(subs_id as isize);
+                (*self.0)
+                    .borrow()
+                    .focus_by_tab
+                    .replace(FocusByTab::FocusSubscriptions);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleListRowDoubleClicked(Rc<RefCell<GuiProcessor>>, Rc<RefCell<dyn IFeedContents>>);
+impl HandleSingleEvent for HandleListRowDoubleClicked {
+    fn handle(&self, ev: GuiEvents) {
+        match ev {
+            GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
+                (self.0)
+                    .borrow()
+                    .focus_by_tab
+                    .replace(FocusByTab::FocusMessages);
+                (*self.1).borrow().launch_browser_single(vec![fc_repo_id]);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleListCellClicked(Rc<RefCell<GuiProcessor>>, Rc<RefCell<dyn IFeedContents>>);
+impl HandleSingleEvent for HandleListCellClicked {
+    fn handle(&self, ev: GuiEvents) {
+        match ev {
+            GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) => {
+                (*self.0)
+                    .borrow()
+                    .focus_by_tab
+                    .replace(FocusByTab::FocusMessages);
+                if sort_col_nr == LIST0_COL_ISREAD && msg_id >= 0 {
+                    (*self.1)
+                        .borrow()
+                        .toggle_feed_item_read(msg_id as isize, list_position);
+                } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
+                    (*self.1)
+                        .borrow()
+                        .toggle_favorite(msg_id as isize, list_position, None);
+                } else {
+                    warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
+                }
+            }
             _ => (),
         }
     }
