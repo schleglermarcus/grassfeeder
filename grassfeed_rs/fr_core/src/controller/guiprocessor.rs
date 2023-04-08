@@ -186,115 +186,6 @@ impl GuiProcessor {
                     GuiEvents::ListRowActivated(_l, _p, _m) => {} // handled above
 
                     /*
-                    GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) => {
-                        match command.as_str() {
-                            "feedsource-delete-dialog" => {
-                                (*self.feedsources_r)
-                                    .borrow_mut()
-                                    .start_delete_dialog(src_repo_id as isize);
-                            }
-                            "feedsource-update" => {
-                                self.feedsources_r
-                                    .borrow_mut()
-                                    .mark_schedule_fetch(src_repo_id as isize);
-                            }
-                            "feedsource-edit-dialog" => {
-                                (*self.feedsources_r)
-                                    .borrow_mut()
-                                    .start_feedsource_edit_dialog(src_repo_id as isize);
-                            }
-                            "feedsource-mark-as-read" => {
-                                (*self.feedsources_r)
-                                    .borrow_mut()
-                                    .mark_as_read(src_repo_id as isize);
-                            }
-                            "new-folder-dialog" => {
-                                (*self.feedsources_r).borrow_mut().start_new_fol_sub_dialog(
-                                    src_repo_id as isize,
-                                    DIALOG_NEW_FOLDER,
-                                );
-                            }
-                            "new-subscription-dialog" => {
-                                (*self.feedsources_r).borrow_mut().start_new_fol_sub_dialog(
-                                    src_repo_id as isize,
-                                    DIALOG_NEW_SUBSCRIPTION,
-                                );
-                            }
-                            _ => {
-                                warn!("unknown command for TreeEvent   {}", command);
-                            }
-                        }
-                    }
-                    GuiEvents::TreeDragEvent(_tree_nr, ref from_path, ref to_path) => {
-                        let _success = self.subscriptionmove_r.borrow().on_subscription_drag(
-                            _tree_nr,
-                            from_path.clone(),
-                            to_path.clone(),
-                        );
-                    }
-                    GuiEvents::TreeExpanded(_idx, repo_id) => {
-                        self.feedsources_r
-                            .borrow()
-                            .set_tree_expanded(repo_id as isize, true);
-                    }
-                    GuiEvents::TreeCollapsed(_idx, repo_id) => {
-                        self.feedsources_r
-                            .borrow()
-                            .set_tree_expanded(repo_id as isize, false);
-                    }
-                    GuiEvents::ToolBarButton(ref id) => match id.as_str() {
-                        "reload-feeds-all" => {
-                            self.feedsources_r
-                                .borrow_mut()
-                                .addjob(SJob::ScheduleFetchAllFeeds);
-                        }
-                        "browser-zoom-in" => {
-                            (*self.browserpane_r)
-                                .borrow()
-                                .set_browser_zoom(BrowserZoomCommand::ZoomIn);
-                        }
-                        "browser-zoom-out" => {
-                            (*self.browserpane_r)
-                                .borrow()
-                                .set_browser_zoom(BrowserZoomCommand::ZoomOut);
-                        }
-                        "browser-zoom-default" => {
-                            (*self.browserpane_r)
-                                .borrow()
-                                .set_browser_zoom(BrowserZoomCommand::ZoomDefault);
-                        }
-                        "toolbutton-troubleshoot1" => {
-                            debug!("toolbutton-troubleshoot1");
-                        }
-                        _ => {
-                            warn!("unknown ToolBarButton {} ", id);
-                        }
-                    },
-                    GuiEvents::ToolBarToggle(ref id, active) => match id.as_str() {
-                        "special1" => {
-                            let mark = if active { 1 } else { 2 };
-                            debug!(" ToolBarToggle {} {} {}", id, active, mark);
-                            (*self.gui_updater).borrow().widget_mark(
-                                UIUpdaterMarkWidgetType::ScrolledWindow,
-                                SCROLLEDWINDOW_0,
-                                mark,
-                            );
-
-                            (*self.gui_updater).borrow().widget_mark(
-                                UIUpdaterMarkWidgetType::Box,
-                                BOX_CONTAINER_3_MARK,
-                                mark,
-                            );
-                            (*self.gui_updater).borrow().widget_mark(
-                                UIUpdaterMarkWidgetType::ScrolledWindow,
-                                SCROLLEDWINDOW_1,
-                                mark,
-                            );
-                        }
-                        _ => {
-                            warn!("unknown ToolBarToggle {} ", id);
-                        }
-                    },
                     GuiEvents::ColumnWidth(col_nr, width) => {
                         (*(self.configmanager_r.borrow_mut())).store_column_width(col_nr, width);
                     }
@@ -303,7 +194,6 @@ impl GuiProcessor {
                             .borrow()
                             .set_selected_content_ids(selected_list.clone());
                     }
-                    */
                     GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) => {
                         if list_idx == 0 {
                             (*self.contentlist_r)
@@ -367,6 +257,7 @@ impl GuiProcessor {
                             self.statusbar.borrow_mut().browser_loading_progress = value as u8;
                         }
                     }
+                    */
                     _ => {
                         warn!("other GuiEvents: {:?}", &ev);
                     }
@@ -474,122 +365,124 @@ impl GuiProcessor {
         }
     }
 
-    #[deprecated]
-    pub fn process_dialogdata(&self, ident: String, payload: Vec<AValue>) {
-        match ident.as_str() {
-            "new-folder" => {
-                if let Some(AValue::ASTR(s)) = payload.get(0) {
-                    (*self.subscriptionmove_r)
-                        .borrow_mut()
-                        .add_new_folder(s.to_string());
-                }
-            }
-            "new-feedsource" => {
-                if payload.len() < 2 {
-                    error!("new-feedsource, too few data ");
-                } else if let (Some(AValue::ASTR(ref s0)), Some(AValue::ASTR(ref s1))) =
-                    (payload.get(0), payload.get(1))
-                {
-                    let new_id = self
-                        .subscriptionmove_r
-                        .borrow_mut()
-                        .add_new_subscription(s0.clone(), s1.clone());
-                    if new_id > 0 {
-                        self.feedsources_r
-                            .borrow_mut()
-                            .addjob(SJob::ScheduleUpdateFeed(new_id));
-                    }
-                }
-            }
-            "import-opml" => {
-                if let Some(AValue::ASTR(ref s)) = payload.get(0) {
-                    (*self.subscriptionmove_r)
-                        .borrow_mut()
-                        .import_opml(s.to_string());
-                }
-            }
-            "export-opml" => {
-                if let Some(AValue::ASTR(ref s)) = payload.get(0) {
-                    let mut opmlreader = OpmlReader::new(self.subscriptionrepo_r.clone());
-                    opmlreader.transfer_from_db();
-                    match opmlreader.write_to_file(s.to_string()) {
-                        Ok(()) => {
-                            debug!("Writing {} success ", s);
-                        }
-                        Err(e) => {
-                            warn!("Writing {} : {:?}", s, e);
-                        }
-                    }
-                }
-            }
-            "feedsource-delete" => {
-                self.subscriptionmove_r
-                    .borrow_mut()
-                    .move_subscription_to_trash();
-            }
-            "subscription-edit-ok" => {
-                self.feedsources_r
-                    .borrow_mut()
-                    .end_feedsource_edit_dialog(&payload);
-            }
-            "folder-edit" => {
-                self.feedsources_r
-                    .borrow_mut()
-                    .end_feedsource_edit_dialog(&payload);
-            }
-            "settings" => {
-                self.feedsources_r
-                    .borrow_mut()
-                    .set_conf_load_on_start(payload.get(0).unwrap().boo());
-                self.feedsources_r
-                    .borrow_mut()
-                    .set_conf_fetch_interval(payload.get(1).unwrap().int().unwrap());
-                self.feedsources_r
-                    .borrow_mut()
-                    .set_conf_fetch_interval_unit(payload.get(2).unwrap().int().unwrap());
-                self.downloader_r
-                    .borrow_mut()
-                    .set_conf_num_threads(payload.get(3).unwrap().int().unwrap() as u8);
-                self.contentlist_r
-                    .borrow_mut()
-                    .set_conf_focus_policy(payload.get(4).unwrap().int().unwrap() as u8);
-                self.feedsources_r
-                    .borrow_mut() // 5 : DisplayCountOfAllFeeds
-                    .set_conf_display_feedcount_all(payload.get(5).unwrap().boo());
-                self.contentlist_r
-                    .borrow_mut()
-                    .set_conf_msg_keep_count(payload.get(6).unwrap().int().unwrap());
-                (*self.gui_context_r)
-                    .borrow() // 7 : ManualFontSizeEnable
-                    .set_conf_fontsize_manual_enable(payload.get(7).unwrap().boo());
-                (*self.gui_context_r)
-                    .borrow() // 8 : ManualFontSize
-                    .set_conf_fontsize_manual(payload.get(8).unwrap().int().unwrap());
-                (*self.browserpane_r)
-                    .borrow_mut() // 9 : browser bg
-                    .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
-                (self.configmanager_r).borrow().set_val(
-                    &PropDef::BrowserClearCache.to_string(),
-                    payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
-                );
-                (self.configmanager_r).borrow().set_val(
-                    contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
-                    payload.get(11).unwrap().boo().to_string(),
-                );
+    /*
+       #[deprecated]
+       pub fn process_dialogdata(&self, ident: String, payload: Vec<AValue>) {
+           match ident.as_str() {
+               "new-folder" => {
+                   if let Some(AValue::ASTR(s)) = payload.get(0) {
+                       (*self.subscriptionmove_r)
+                           .borrow_mut()
+                           .add_new_folder(s.to_string());
+                   }
+               }
+               "new-feedsource" => {
+                   if payload.len() < 2 {
+                       error!("new-feedsource, too few data ");
+                   } else if let (Some(AValue::ASTR(ref s0)), Some(AValue::ASTR(ref s1))) =
+                       (payload.get(0), payload.get(1))
+                   {
+                       let new_id = self
+                           .subscriptionmove_r
+                           .borrow_mut()
+                           .add_new_subscription(s0.clone(), s1.clone());
+                       if new_id > 0 {
+                           self.feedsources_r
+                               .borrow_mut()
+                               .addjob(SJob::ScheduleUpdateFeed(new_id));
+                       }
+                   }
+               }
+               "import-opml" => {
+                   if let Some(AValue::ASTR(ref s)) = payload.get(0) {
+                       (*self.subscriptionmove_r)
+                           .borrow_mut()
+                           .import_opml(s.to_string());
+                   }
+               }
+               "export-opml" => {
+                   if let Some(AValue::ASTR(ref s)) = payload.get(0) {
+                       let mut opmlreader = OpmlReader::new(self.subscriptionrepo_r.clone());
+                       opmlreader.transfer_from_db();
+                       match opmlreader.write_to_file(s.to_string()) {
+                           Ok(()) => {
+                               debug!("Writing {} success ", s);
+                           }
+                           Err(e) => {
+                               warn!("Writing {} : {:?}", s, e);
+                           }
+                       }
+                   }
+               }
+               "feedsource-delete" => {
+                   self.subscriptionmove_r
+                       .borrow_mut()
+                       .move_subscription_to_trash();
+               }
+               "subscription-edit-ok" => {
+                   self.feedsources_r
+                       .borrow_mut()
+                       .end_feedsource_edit_dialog(&payload);
+               }
+               "folder-edit" => {
+                   self.feedsources_r
+                       .borrow_mut()
+                       .end_feedsource_edit_dialog(&payload);
+               }
+               "settings" => {
+                   self.feedsources_r
+                       .borrow_mut()
+                       .set_conf_load_on_start(payload.get(0).unwrap().boo());
+                   self.feedsources_r
+                       .borrow_mut()
+                       .set_conf_fetch_interval(payload.get(1).unwrap().int().unwrap());
+                   self.feedsources_r
+                       .borrow_mut()
+                       .set_conf_fetch_interval_unit(payload.get(2).unwrap().int().unwrap());
+                   self.downloader_r
+                       .borrow_mut()
+                       .set_conf_num_threads(payload.get(3).unwrap().int().unwrap() as u8);
+                   self.contentlist_r
+                       .borrow_mut()
+                       .set_conf_focus_policy(payload.get(4).unwrap().int().unwrap() as u8);
+                   self.feedsources_r
+                       .borrow_mut() // 5 : DisplayCountOfAllFeeds
+                       .set_conf_display_feedcount_all(payload.get(5).unwrap().boo());
+                   self.contentlist_r
+                       .borrow_mut()
+                       .set_conf_msg_keep_count(payload.get(6).unwrap().int().unwrap());
+                   (*self.gui_context_r)
+                       .borrow() // 7 : ManualFontSizeEnable
+                       .set_conf_fontsize_manual_enable(payload.get(7).unwrap().boo());
+                   (*self.gui_context_r)
+                       .borrow() // 8 : ManualFontSize
+                       .set_conf_fontsize_manual(payload.get(8).unwrap().int().unwrap());
+                   (*self.browserpane_r)
+                       .borrow_mut() // 9 : browser bg
+                       .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
+                   (self.configmanager_r).borrow().set_val(
+                       &PropDef::BrowserClearCache.to_string(),
+                       payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
+                   );
+                   (self.configmanager_r).borrow().set_val(
+                       contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
+                       payload.get(11).unwrap().boo().to_string(),
+                   );
 
-                if let Some(systray_e) = payload.get(12) {
-                    (self.configmanager_r).borrow().set_val(
-                        &PropDef::SystrayEnable.to_string(),
-                        systray_e.boo().to_string(), // 12 : enable systray
-                    );
-                }
-                self.addjob(Job::NotifyConfigChanged);
-            }
-            _ => {
-                warn!("other DialogData: {:?}  {:?} ", &ident, payload);
-            }
-        }
-    }
+                   if let Some(systray_e) = payload.get(12) {
+                       (self.configmanager_r).borrow().set_val(
+                           &PropDef::SystrayEnable.to_string(),
+                           systray_e.boo().to_string(), // 12 : enable systray
+                       );
+                   }
+                   self.addjob(Job::NotifyConfigChanged);
+               }
+               _ => {
+                   warn!("other DialogData: {:?}  {:?} ", &ident, payload);
+               }
+           }
+       }
+    */
 
     pub fn addjob(&self, nj: Job) {
         if self.job_queue_sender.is_full() {
@@ -918,7 +811,6 @@ impl StartupWithAppContext for GuiProcessor {
             &GuiEvents::TreeRowActivated(0, Vec::default(), 0),
             HandleTreeRowActivated(self.contentlist_r.clone(), self.feedsources_r.clone()),
         );
-
         self.add_handler(
             &GuiEvents::ListRowDoubleClicked(0, 0, 0),
             HandleListRowDoubleClicked(self.contentlist_r.clone()),
@@ -931,7 +823,6 @@ impl StartupWithAppContext for GuiProcessor {
             &GuiEvents::WindowSizeChanged(0, 0),
             HandleWindowSizeChanged(self.configmanager_r.clone()),
         );
-        //    self.add_handler(                   &GuiEvents::DialogData(String::default(), Vec::default()),                   HandleDialogData2(                       gp_r.clone(),                   ),               );
         self.add_handler(
             &GuiEvents::DialogEditData(String::default(), AValue::None),
             HandleDialogEditData(self.feedsources_r.clone()),
@@ -960,14 +851,50 @@ impl StartupWithAppContext for GuiProcessor {
             &GuiEvents::ToolBarToggle(String::default(), false),
             HandleToolBarToggle(),
         );
-
         self.add_handler(
             &GuiEvents::ColumnWidth(0, 0),
             HandleColumnWidth(self.configmanager_r.clone()),
         );
         self.add_handler(
-            &GuiEvents::ToolBarToggle(String::default(), false),
+            &GuiEvents::ListSelected(0, Vec::default()),
             HandleListSelected(self.contentlist_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::ListSelectedAction(0, String::default(), Vec::default()),
+            HandleListSelected(self.contentlist_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::ListSortOrderChanged(0, 0, false),
+            HandleListSortOrderChanged(self.contentlist_r.clone()),
+        );
+        self.add_handler(&GuiEvents::KeyPressed(0, None), HandleKeyPressed());
+        self.add_handler(
+            &GuiEvents::SearchEntryTextChanged(0, String::default()),
+            HandleSearchEntryTextChanged(self.contentlist_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::WindowThemeChanged(String::default()),
+            HandleWindowThemeChanged(self.gui_context_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::WindowIconified(false),
+            HandleWindowIconified(
+                self.feedsources_r.clone(),
+                self.contentlist_r.clone(),
+                self.gui_context_r.clone(),
+            ),
+        );
+        self.add_handler(
+            &GuiEvents::Indicator(String::default(), 0),
+            HandleIndicator(),
+        );
+        self.add_handler(
+            &GuiEvents::DragDropUrlReceived(String::default()),
+            HandleDragDropUrlReceived(self.downloader_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::BrowserEvent(BrowserEventType::default(), 0),
+            HandleBrowserEvent(),
         );
     }
 }
@@ -1252,20 +1179,6 @@ impl HandleSingleEvent for HandleDialogData {
     }
 }
 
-/*
-struct HandleDialogData2();
-impl HandleSingleEvent for HandleDialogData2 {
-    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::DialogData(ref ident, ref payload) => {
-                gp.process_dialogdata(ident.clone(), payload.clone());
-            }
-            _ => (),
-        }
-    }
-}
- */
-
 struct HandleDialogEditData(Rc<RefCell<dyn ISourceTreeController>>);
 impl HandleSingleEvent for HandleDialogEditData {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
@@ -1437,6 +1350,137 @@ impl HandleSingleEvent for HandleListSelected {
                 self.0
                     .borrow()
                     .set_selected_content_ids(selected_list.clone());
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleListSelectedAction(Rc<RefCell<dyn IFeedContents>>);
+impl HandleSingleEvent for HandleListSelectedAction {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) => {
+                if list_idx == 0 {
+                    self.0
+                        .borrow()
+                        .process_list_action(action.clone(), repoid_list_pos.clone());
+                }
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleListSortOrderChanged(Rc<RefCell<dyn IFeedContents>>);
+impl HandleSingleEvent for HandleListSortOrderChanged {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) => {
+                if list_idx == 0 {
+                    self.0.borrow_mut().set_sort_order(col_id, ascending);
+                }
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleKeyPressed();
+impl HandleSingleEvent for HandleKeyPressed {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::KeyPressed(keycode, o_char) => {
+                gp.process_key_press(keycode, o_char);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleSearchEntryTextChanged(Rc<RefCell<dyn IFeedContents>>);
+impl HandleSingleEvent for HandleSearchEntryTextChanged {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::SearchEntryTextChanged(_idx, ref newtext) => {
+                self.0.borrow_mut().set_messages_filter(newtext);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleWindowThemeChanged(Rc<RefCell<GuiContext>>);
+impl HandleSingleEvent for HandleWindowThemeChanged {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::WindowThemeChanged(ref theme_name) => {
+                self.0.borrow().set_theme_name(theme_name);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleWindowIconified(
+    Rc<RefCell<dyn ISourceTreeController>>,
+    Rc<RefCell<dyn IFeedContents>>, // 6
+    Rc<RefCell<GuiContext>>,
+);
+impl HandleSingleEvent for HandleWindowIconified {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::WindowIconified(is_minimized) => {
+                gp.currently_minimized.replace(is_minimized);
+                self.0.borrow_mut().memory_conserve(is_minimized);
+                (*self.1).borrow_mut().memory_conserve(is_minimized);
+                (*self.2)
+                    .borrow()
+                    .get_values_adapter()
+                    .write()
+                    .unwrap()
+                    .memory_conserve(is_minimized);
+                (*self.2)
+                    .borrow()
+                    .get_updater_adapter()
+                    .borrow()
+                    .memory_conserve(is_minimized);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleIndicator();
+impl HandleSingleEvent for HandleIndicator {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::Indicator(ref cmd, _gtktime) => debug!(" indicator event {}", cmd),
+            _ => (),
+        }
+    }
+}
+
+struct HandleDragDropUrlReceived(Rc<RefCell<dyn IDownloader>>);
+impl HandleSingleEvent for HandleDragDropUrlReceived {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::DragDropUrlReceived(ref url) => {
+                self.0.borrow().browser_drag_request(url);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleBrowserEvent();
+impl HandleSingleEvent for HandleBrowserEvent {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::BrowserEvent(ref ev_type, value) => {
+                if ev_type == &BrowserEventType::LoadingProgress {
+                    gp.statusbar.borrow_mut().browser_loading_progress = value as u8;
+                }
             }
             _ => (),
         }

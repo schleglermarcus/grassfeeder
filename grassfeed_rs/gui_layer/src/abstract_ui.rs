@@ -241,15 +241,18 @@ pub enum WebViewUpdateResult {
     NeedRestartView,
 }
 
-#[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone, Serialize, Deserialize)]
+#[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone, Serialize, Deserialize, Default)]
 pub enum BrowserEventType {
+    #[default]
+    None,
     IsLoadingNotify,
     LoadingProgress,
 }
 
 //  Values Wrapper as intermediate for  glib::values
-#[derive(Serialize, Deserialize, PartialEq, Clone, Eq, Hash)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Eq, Hash, Default)]
 pub enum AValue {
+    #[default]
     None,
     AU32(u32),
     AI32(i32),
