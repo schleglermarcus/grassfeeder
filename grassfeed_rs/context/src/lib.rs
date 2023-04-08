@@ -71,11 +71,21 @@ impl TimerEvent {
 }
 
 pub trait TimerRegistry {
-    fn register(&mut self, te: &TimerEvent, observer: Rc<RefCell<dyn TimerReceiver + 'static>>);
+    fn register(
+        &mut self,
+        te: &TimerEvent,
+        observer: Rc<RefCell<dyn TimerReceiver + 'static>>,
+        call_mutable: bool,
+    );
 
     fn notify_all(&self, te: &TimerEvent);
 }
 
 pub trait TimerReceiver {
-    fn trigger(&mut self, event: &TimerEvent);
+    fn trigger_mut(&mut self, _ev: &TimerEvent) {
+        panic!("TimerReceiver-mut configured but not implemented!")
+    }
+    fn trigger(&self, _ev: &TimerEvent) {
+        panic!("TimerReceiver immutable configured but not implemented!")
+    }
 }

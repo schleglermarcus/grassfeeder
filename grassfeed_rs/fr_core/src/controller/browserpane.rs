@@ -2,7 +2,6 @@ use rust_i18n::t;
 
 use crate::config::configmanager::ConfigManager;
 use crate::controller::contentlist::FeedContents;
-use crate::controller::timer::Timer;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
@@ -14,8 +13,6 @@ use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
 use context::StartupWithAppContext;
-use context::TimerEvent;
-use context::TimerReceiver;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::gui_values::PropDef;
@@ -51,7 +48,6 @@ pub enum BrowserZoomCommand {
 }
 
 pub struct BrowserPane {
-    timer_r: Rc<RefCell<Timer>>,
     configmanager_r: Rc<RefCell<ConfigManager>>,
     feedcontents_w: Weak<RefCell<FeedContents>>, // YY
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
@@ -70,7 +66,6 @@ impl BrowserPane {
         let v_s_a = (*gc_r).borrow().get_values_adapter();
         let cm_r = (*ac).get_rc::<ConfigManager>().unwrap();
         BrowserPane {
-            timer_r: (*ac).get_rc::<Timer>().unwrap(),
             gui_updater: u_a,
             gui_val_store: v_s_a,
             configmanager_r: cm_r,
@@ -298,16 +293,7 @@ impl StartupWithAppContext for BrowserPane {
     fn startup(&mut self, ac: &AppContext) {
         self.feedcontents_w = Rc::downgrade(&(*ac).get_rc::<FeedContents>().unwrap());
         self.create_browser_dir();
-        let _browserpane_r = ac.get_rc::<BrowserPane>().unwrap();
-        if false {
-            let mut _t = (*self.timer_r).borrow_mut();
-            // t.register(&TimerEvent::Timer1s, fc_r.clone());
-        }
     }
-}
-
-impl TimerReceiver for BrowserPane {
-    fn trigger(&mut self, _event: &TimerEvent) {}
 }
 
 #[derive(Default, Clone, Debug)]

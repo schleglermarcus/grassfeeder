@@ -392,13 +392,13 @@ impl StartupWithAppContext for MessagesRepo {
         {
             (*timer_r)
                 .borrow_mut()
-                .register(&TimerEvent::Shutdown, mr_r);
+                .register(&TimerEvent::Shutdown, mr_r, false);
         }
     }
 }
 
 impl TimerReceiver for MessagesRepo {
-    fn trigger(&mut self, event: &TimerEvent) {
+    fn trigger(& self, event: &TimerEvent) {
         if event == &TimerEvent::Shutdown {
             self.ctx.cache_flush();
         }

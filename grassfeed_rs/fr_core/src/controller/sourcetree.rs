@@ -859,7 +859,7 @@ impl SourceTreeController {
 }
 
 impl TimerReceiver for SourceTreeController {
-    fn trigger(&mut self, event: &TimerEvent) {
+    fn trigger_mut(&mut self, event: &TimerEvent) {
         if self.currently_minimized {
             if event == &TimerEvent::Timer10s {
                 self.process_jobs();
@@ -915,10 +915,10 @@ impl StartupWithAppContext for SourceTreeController {
         let f_so_r = ac.get_rc::<SourceTreeController>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();
-            t.register(&TimerEvent::Timer100ms, f_so_r.clone());
-            t.register(&TimerEvent::Timer200ms, f_so_r.clone());
-            t.register(&TimerEvent::Timer1s, f_so_r.clone());
-            t.register(&TimerEvent::Timer10s, f_so_r);
+            t.register(&TimerEvent::Timer100ms, f_so_r.clone(), true);
+            t.register(&TimerEvent::Timer200ms, f_so_r.clone(), true);
+            t.register(&TimerEvent::Timer1s, f_so_r.clone(), true);
+            t.register(&TimerEvent::Timer10s, f_so_r, true);
         }
         (*self.subscriptionrepo_r)
             .borrow()

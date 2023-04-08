@@ -502,14 +502,14 @@ impl StartupWithAppContext for SubscriptionRepo {
         {
             (*timer_r)
                 .borrow_mut()
-                .register(&TimerEvent::Shutdown, sr_r);
+                .register(&TimerEvent::Shutdown, sr_r, false);
         }
         self.startup_int();
     }
 }
 
 impl TimerReceiver for SubscriptionRepo {
-    fn trigger(&mut self, event: &TimerEvent) {
+    fn trigger(&self, event: &TimerEvent) {
         if event == &TimerEvent::Shutdown {
             self.ctx.cache_flush();
         }

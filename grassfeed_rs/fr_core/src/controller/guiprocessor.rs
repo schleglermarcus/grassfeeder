@@ -94,9 +94,9 @@ pub struct GuiProcessor {
     subscriptionmove_r: Rc<RefCell<dyn ISubscriptionMove>>,
     subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
     iconrepo_r: Rc<RefCell<IconRepo>>,
-    statusbar: StatusBar,
+    statusbar: RefCell<StatusBar>,
     focus_by_tab: RefCell<FocusByTab>,
-    currently_minimized: bool,
+    currently_minimized: RefCell<bool>,
     event_handler_map: HashMap<Discriminant<GuiEvents>, Box<dyn HandleSingleEvent>>,
 }
 
@@ -113,15 +113,14 @@ impl GuiProcessor {
         let guirunner = (*guicontex_r).borrow().get_gui_runner();
         let dl_r = (*ac).get_rc::<contentdownloader::Downloader>().unwrap();
         let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
-
-        let status_bar = StatusBar::new(
+        let status_bar = RefCell::new(StatusBar::new(
             (*ac).get_rc::<SourceTreeController>().unwrap(),
             dl_r.clone(),
             u_a.clone(),
             (*ac).get_rc::<FeedContents>().unwrap(),
             (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
             v_s_a.clone(),
-        );
+        ));
 
         GuiProcessor {
             subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
@@ -142,13 +141,13 @@ impl GuiProcessor {
             erro_repo_r: err_rep,
             subscriptionmove_r: (*ac).get_rc::<SubscriptionMove>().unwrap(),
             focus_by_tab: RefCell::new(FocusByTab::None),
-            currently_minimized: false,
+            currently_minimized: RefCell::new(false),
             statusbar: status_bar,
             event_handler_map: Default::default(),
         }
     }
 
-    pub fn process_event(&mut self) {
+    pub fn process_event(&self) {
         let mut ev_set: HashSet<GuiEvents> = HashSet::new();
         let receiver = (*self.gui_runner).borrow().get_event_receiver();
         loop {
@@ -186,10 +185,7 @@ impl GuiProcessor {
                 match ev {
                     GuiEvents::None => {}
                     GuiEvents::ListRowActivated(_list_idx, _list_position, _msg_id) => {} // handled above
-
-                    // TODO:    double borrow of mutable GuiProcessor   will crash
                     // GuiEvents::WinDelete => {                        self.addjob(Job::StopApplication);                    }
-                    //
                     GuiEvents::AppWasAlreadyRunning => {
                         let _r = self.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
                         self.addjob(Job::StopApplication);
@@ -424,7 +420,7 @@ impl GuiProcessor {
                         (*self.gui_context_r).borrow().set_theme_name(theme_name);
                     }
                     GuiEvents::WindowIconified(is_minimized) => {
-                        self.currently_minimized = is_minimized;
+                        self.currently_minimized.replace(is_minimized);
                         (*self.feedsources_r)
                             .borrow_mut()
                             .memory_conserve(is_minimized);
@@ -443,10 +439,11 @@ impl GuiProcessor {
                         }
                         "show-window" => {
                             // trace!(                            "Indicator -> show-window!  cur-min {}  time:{}",                            self.currently_minimized, gtktime                        );
-                            self.currently_minimized = !self.currently_minimized;
+                            let cur_m = *self.currently_minimized.borrow();
+                            self.currently_minimized.replace(!cur_m);
                             (*self.gui_updater)
                                 .borrow()
-                                .update_window_minimized(self.currently_minimized, gtktime);
+                                .update_window_minimized(cur_m, gtktime);
                         }
                         _ => {
                             warn!("unknown indicator event");
@@ -457,7 +454,7 @@ impl GuiProcessor {
                     }
                     GuiEvents::BrowserEvent(ref ev_type, value) => {
                         if ev_type == &BrowserEventType::LoadingProgress {
-                            self.statusbar.browser_loading_progress = value as u8;
+                            self.statusbar.borrow_mut().browser_loading_progress = value as u8;
                         }
                     }
                     _ => {
@@ -474,7 +471,7 @@ impl GuiProcessor {
     }
 
     /// is run by  the timer
-    pub fn process_jobs(&mut self) {
+    pub fn process_jobs(&self) {
         let mut job_list: Vec<Job> = Vec::new();
         while let Ok(job) = self.job_queue_receiver.try_recv() {
             if !job_list.contains(&job) {
@@ -534,7 +531,7 @@ impl GuiProcessor {
                     // (*self.gui_updater)                        .borrow()                        .update_systray_indicator(self.is_systray_enabled());
                 }
                 Job::DownloaderJobStarted(threadnr, kind) => {
-                    self.statusbar.downloader_kind_new[threadnr as usize] = kind;
+                    self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = kind;
                 }
                 Job::DownloaderJobFinished(subs_id, threadnr, _kind, elapsed_ms, description) => {
                     if elapsed_ms > 5000 && subs_id > 0 {
@@ -547,7 +544,7 @@ impl GuiProcessor {
                         );
                     }
 
-                    self.statusbar.downloader_kind_new[threadnr as usize] = 0;
+                    self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = 0;
                 }
                 Job::CheckFocusMarker(num) => {
                     if num > 0 {
@@ -557,7 +554,7 @@ impl GuiProcessor {
                     }
                 }
                 Job::AddBottomDisplayErrorMessage(msg) => {
-                    self.statusbar.bottom_notices.push_back(msg);
+                    self.statusbar.borrow_mut().bottom_notices.push_back(msg);
                 }
 
                 _ => {
@@ -571,7 +568,7 @@ impl GuiProcessor {
         }
     }
 
-    pub fn process_dialogdata(&mut self, ident: String, payload: Vec<AValue>) {
+    pub fn process_dialogdata(&self, ident: String, payload: Vec<AValue>) {
         match ident.as_str() {
             "new-folder" => {
                 if let Some(AValue::ASTR(s)) = payload.get(0) {
@@ -712,7 +709,7 @@ impl GuiProcessor {
             });
     }
 
-    fn start_settings_dialog(&mut self) {
+    fn start_settings_dialog(&self) {
         let sources_conf = (*self.feedsources_r).borrow().get_config();
         if (sources_conf).borrow().feeds_fetch_interval_unit == 0 {
             (sources_conf).borrow_mut().feeds_fetch_interval_unit = 3; // set to days if it was not set before
@@ -770,12 +767,12 @@ impl GuiProcessor {
         self.job_queue_sender.clone()
     }
 
-    fn start_about_dialog(&mut self) {
+    fn start_about_dialog(&self) {
         (*self.gui_updater).borrow().show_dialog(DIALOG_ABOUT);
     }
 
     ///  for key codes look at selec.rs                           gdk_sys::GDK_KEY_Escape => KeyCodes::Escape,
-    fn process_key_press(&mut self, keycode: isize, _o_char: Option<char>) {
+    fn process_key_press(&self, keycode: isize, _o_char: Option<char>) {
         let mut new_focus_by_tab = self.focus_by_tab.borrow().clone();
         let kc: KeyCodes = ui_select::from_gdk_sys(keycode);
         let subscription_id: isize = match (*self.feedsources_r)
@@ -916,22 +913,22 @@ pub fn dl_char_for_kind(kind: u8) -> char {
 impl Buildable for GuiProcessor {
     type Output = GuiProcessor;
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
-        let mut gp = GuiProcessor::new(_appcontext);
-        gp.statusbar.mem_usage_vmrss_bytes = -1;
+        let gp = GuiProcessor::new(_appcontext);
+        gp.statusbar.borrow_mut().mem_usage_vmrss_bytes = -1;
         gp
     }
 }
 
 impl TimerReceiver for GuiProcessor {
-    fn trigger(&mut self, event: &TimerEvent) {
-        if self.currently_minimized {
+    fn trigger(&self, event: &TimerEvent) {
+        if *self.currently_minimized.borrow() {
             match event {
                 TimerEvent::Timer1s => {
                     self.process_event();
                     self.process_jobs();
                 }
                 TimerEvent::Timer10s => {
-                    self.statusbar.update();
+                    self.statusbar.borrow_mut().update();
                 }
                 _ => (),
             }
@@ -940,10 +937,10 @@ impl TimerReceiver for GuiProcessor {
                 TimerEvent::Timer100ms => {
                     self.process_event();
                     self.process_jobs();
-                    self.statusbar.update();
+                    self.statusbar.borrow_mut().update();
                 }
                 TimerEvent::Timer1s => {
-                    self.statusbar.update_memory_stats();
+                    self.statusbar.borrow_mut().update_memory_stats();
                 }
                 TimerEvent::Startup => {
                     self.process_jobs();
@@ -955,28 +952,37 @@ impl TimerReceiver for GuiProcessor {
     }
 }
 
-struct HandleWinDelete(Rc<RefCell<GuiProcessor>>);
+struct HandleWinDelete(Sender<Job>);
 impl HandleSingleEvent for HandleWinDelete {
     fn handle(&self, _ev: &GuiEvents) {
         debug!("H: windelete!");
-        (*self.0).borrow().addjob(Job::StopApplication);
+        let _r = self.0.send(Job::StopApplication);
     }
 }
+struct HandleWinDelete2(Rc<RefCell<GuiProcessor>>);
+impl HandleSingleEvent for HandleWinDelete2 {
+    fn handle(&self, _ev: &GuiEvents) {
+        debug!("H2: windelete!");
+        self.0.borrow().addjob(Job::StopApplication);
+    }
+}
+
+// GuiEvents::WinDelete => {                        self.addjob(Job::StopApplication);                    }
 
 impl StartupWithAppContext for GuiProcessor {
     fn startup(&mut self, ac: &AppContext) {
         let gp_r: Rc<RefCell<GuiProcessor>> = ac.get_rc::<GuiProcessor>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();
-            t.register(&TimerEvent::Timer100ms, gp_r.clone());
-            t.register(&TimerEvent::Timer1s, gp_r.clone());
-            t.register(&TimerEvent::Timer10s, gp_r.clone());
-            t.register(&TimerEvent::Startup, gp_r.clone());
+            t.register(&TimerEvent::Timer100ms, gp_r.clone(), false);
+            t.register(&TimerEvent::Timer1s, gp_r.clone(), false);
+            t.register(&TimerEvent::Timer10s, gp_r.clone(), false);
+            t.register(&TimerEvent::Startup, gp_r.clone(), false);
             self.timer_sender = Some((*t).get_ctrl_sender());
         }
         self.addjob(Job::StartApplication);
         self.addjob(Job::NotifyConfigChanged);
-        self.statusbar.num_downloader_threads = (*self.downloader_r)
+        self.statusbar.borrow_mut().num_downloader_threads = (*self.downloader_r)
             .borrow()
             .get_config()
             .num_downloader_threads;
@@ -986,13 +992,14 @@ impl StartupWithAppContext for GuiProcessor {
             .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
         {
             if let Ok(b) = s.parse::<bool>() {
-                self.statusbar.mode_debug = b;
+                self.statusbar.borrow_mut().mode_debug = b;
             }
         }
 
         // ---------------
+        // HandleWinDelete(self.get_job_sender()),
 
-        self.add_handler(&GuiEvents::WinDelete, HandleWinDelete(gp_r.clone()));
+        self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2(gp_r.clone()));
     }
 }
 

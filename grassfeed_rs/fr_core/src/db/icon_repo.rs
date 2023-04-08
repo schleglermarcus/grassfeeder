@@ -203,10 +203,10 @@ impl StartupWithAppContext for IconRepo {
         {
             (*timer_r)
                 .borrow_mut()
-                .register(&TimerEvent::Timer10s, su_r.clone());
+                .register(&TimerEvent::Timer10s, su_r.clone(), true);
             (*timer_r)
                 .borrow_mut()
-                .register(&TimerEvent::Shutdown, su_r);
+                .register(&TimerEvent::Shutdown, su_r, true);
         }
 
         self.startup();
@@ -214,7 +214,7 @@ impl StartupWithAppContext for IconRepo {
 }
 
 impl TimerReceiver for IconRepo {
-    fn trigger(&mut self, event: &TimerEvent) {
+    fn trigger_mut(&mut self, event: &TimerEvent) {
         match event {
             TimerEvent::Timer10s => {
                 self.check_or_store();

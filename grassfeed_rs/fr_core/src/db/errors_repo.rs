@@ -336,17 +336,17 @@ impl StartupWithAppContext for ErrorRepo {
         {
             (*timer_r)
                 .borrow_mut()
-                .register(&TimerEvent::Timer10s, su_r.clone());
+                .register(&TimerEvent::Timer10s, su_r.clone(), true);
             (*timer_r)
                 .borrow_mut()
-                .register(&TimerEvent::Shutdown, su_r);
+                .register(&TimerEvent::Shutdown, su_r, true);
         }
         self.startup_read();
     }
 }
 
 impl TimerReceiver for ErrorRepo {
-    fn trigger(&mut self, event: &TimerEvent) {
+    fn trigger_mut(&mut self, event: &TimerEvent) {
         match event {
             TimerEvent::Timer10s => {
                 self.check_or_store();

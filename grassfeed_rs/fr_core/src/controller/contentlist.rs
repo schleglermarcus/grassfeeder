@@ -1023,8 +1023,8 @@ impl StartupWithAppContext for FeedContents {
         let feedcontents_r = ac.get_rc::<FeedContents>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();
-            t.register(&TimerEvent::Timer100ms, feedcontents_r.clone());
-            t.register(&TimerEvent::Timer10s, feedcontents_r);
+            t.register(&TimerEvent::Timer100ms, feedcontents_r.clone(), true);
+            t.register(&TimerEvent::Timer10s, feedcontents_r, true);
         }
 
         if let Some(s) = (*self.configmanager_r)
@@ -1039,7 +1039,7 @@ impl StartupWithAppContext for FeedContents {
 }
 
 impl TimerReceiver for FeedContents {
-    fn trigger(&mut self, event: &TimerEvent) {
+    fn trigger_mut(&mut self, event: &TimerEvent) {
         if self.currently_minimized {
             if event == &TimerEvent::Timer10s {
                 self.process_jobs();

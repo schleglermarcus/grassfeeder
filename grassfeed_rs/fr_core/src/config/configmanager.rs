@@ -181,7 +181,7 @@ impl Buildable for ConfigManager {
 }
 
 impl TimerReceiver for ConfigManager {
-    fn trigger(&mut self, event: &TimerEvent) {
+    fn trigger_mut(&mut self, event: &TimerEvent) {
         match event {
             TimerEvent::Timer10s => {
                 self.store_if_modified();
@@ -200,9 +200,9 @@ impl StartupWithAppContext for ConfigManager {
         let configmanager_r = _ac.get_rc::<ConfigManager>().unwrap();
         {
             let mut t = (*timer_r).borrow_mut();
-            t.register(&TimerEvent::Timer1s, configmanager_r.clone());
-            t.register(&TimerEvent::Timer10s, configmanager_r.clone());
-            t.register(&TimerEvent::Shutdown, configmanager_r);
+            t.register(&TimerEvent::Timer1s, configmanager_r.clone(), true);
+            t.register(&TimerEvent::Timer10s, configmanager_r.clone(), true);
+            t.register(&TimerEvent::Shutdown, configmanager_r, true);
         }
     }
 }

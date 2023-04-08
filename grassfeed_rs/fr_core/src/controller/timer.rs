@@ -106,11 +106,16 @@ impl ITimer for Timer {
 #[derive(Default, Clone)]
 struct TimerSchedule {
     next_trigger_ms: u128,
-    receivers: Vec<Weak<RefCell<dyn TimerReceiver + 'static>>>,
+    receivers: Vec<(Weak<RefCell<dyn TimerReceiver + 'static>>, bool)>,
 }
 
 impl TimerRegistry for Timer {
-    fn register(&mut self, te: &TimerEvent, observer: Rc<RefCell<dyn TimerReceiver + 'static>>) {
+    fn register(
+        &mut self,
+        te: &TimerEvent,
+        observer: Rc<RefCell<dyn TimerReceiver + 'static>>,
+        call_mutable: bool,
+    ) {
         let index = te.clone() as usize;
         if index >= TimerEvent::len() {
             warn!("unknown event={:?}  ", &te);
@@ -118,7 +123,7 @@ impl TimerRegistry for Timer {
         }
         self.schedules[index]
             .receivers
-            .push(Rc::downgrade(&observer));
+            .push((Rc::downgrade(&observer), call_mutable));
     }
 
     fn notify_all(&self, te: &TimerEvent) {
@@ -131,9 +136,13 @@ impl TimerRegistry for Timer {
             .receivers
             .iter()
             .enumerate()
-            .for_each(|(_n, r)| {
-                if let Some(rc) = r.upgrade() {
-                    (*rc).borrow_mut().trigger(te);
+            .for_each(|(_n, (rec, call_mut))| {
+                if let Some(rc) = rec.upgrade() {
+                    if *call_mut {
+                        (*rc).borrow_mut().trigger_mut(te);
+                    } else {
+                        (*rc).borrow().trigger(te);
+                    }
                 }
             });
     }
@@ -203,14 +212,14 @@ mod appcontext_test {
             let gp_r = ac.get_rc::<GUIP>().unwrap();
             {
                 let mut timer = (*self.timer_r).borrow_mut();
-                timer.register(&TimerEvent::Timer100ms, gp_r);
+                timer.register(&TimerEvent::Timer100ms, gp_r, false);
                 self.timer_sender = Some(timer.get_ctrl_sender());
             }
         }
     }
 
     impl TimerReceiver for GUIP {
-        fn trigger(&mut self, _event: &TimerEvent) {}
+        fn trigger(&self, _event: &TimerEvent) {}
     }
 
     impl Buildable for GUIP {

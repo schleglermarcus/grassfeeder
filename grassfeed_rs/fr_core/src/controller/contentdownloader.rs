@@ -491,13 +491,13 @@ impl StartupWithAppContext for Downloader {
         let dl_r = ac.get_rc::<Downloader>().unwrap();
         (*timer_r)
             .borrow_mut()
-            .register(&TimerEvent::Shutdown, dl_r);
+            .register(&TimerEvent::Shutdown, dl_r, true);
         self.startup();
     }
 }
 
 impl TimerReceiver for Downloader {
-    fn trigger(&mut self, event: &TimerEvent) {
+    fn trigger_mut(&mut self, event: &TimerEvent) {
         if event == &TimerEvent::Shutdown {
             self.shutdown();
         }
