@@ -186,40 +186,6 @@ impl GuiProcessor {
                     GuiEvents::ListRowActivated(_l, _p, _m) => {} // handled above
 
                     /*
-                                       GuiEvents::WinDelete => {
-                                           self.addjob(Job::StopApplication);
-                                       }
-                    GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
-                        0 => {
-                            if pos < TREE_PANE1_MIN_WIDTH {
-                                (*self.gui_updater)
-                                    .borrow()
-                                    .update_paned_pos(PANED_1_LEFT, TREE_PANE1_MIN_WIDTH);
-                            } else {
-                                (*(self.configmanager_r.borrow_mut())).store_gui_pane1_pos(pos);
-                            }
-                        }
-                        1 => (*(self.configmanager_r.borrow_mut())).store_gui_pane2_pos(pos),
-                        _ => {}
-                    },
-                    */
-
-                    /*
-                    GuiEvents::DialogData(ref ident, ref payload) => {
-                        self.process_dialogdata(ident.clone(), payload.clone());
-                    }
-                    GuiEvents::DialogEditData(ref ident, ref payload) => match ident.as_str() {
-                        "feedsource-edit" => {
-                            if let Some(edit_url) = payload.str() {
-                                (*self.feedsources_r)
-                                    .borrow_mut()
-                                    .newsource_dialog_edit(edit_url);
-                            }
-                        }
-                        _ => {
-                            warn!(" other DialogEditData  {:?} {:?}", &ident, payload);
-                        }
-                    },
                     GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) => {
                         match command.as_str() {
                             "feedsource-delete-dialog" => {
@@ -266,8 +232,6 @@ impl GuiProcessor {
                             to_path.clone(),
                         );
                     }
-                    */
-
                     GuiEvents::TreeExpanded(_idx, repo_id) => {
                         self.feedsources_r
                             .borrow()
@@ -331,7 +295,6 @@ impl GuiProcessor {
                             warn!("unknown ToolBarToggle {} ", id);
                         }
                     },
-
                     GuiEvents::ColumnWidth(col_nr, width) => {
                         (*(self.configmanager_r.borrow_mut())).store_column_width(col_nr, width);
                     }
@@ -340,6 +303,7 @@ impl GuiProcessor {
                             .borrow()
                             .set_selected_content_ids(selected_list.clone());
                     }
+                    */
                     GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) => {
                         if list_idx == 0 {
                             (*self.contentlist_r)
@@ -439,7 +403,6 @@ impl GuiProcessor {
                         .unwrap()
                         .set_window_icon(gen_icons::ICON_04_GRASS_CUT_2.to_string());
                     (*self.gui_updater).borrow().update_window_icon();
-                    // (*self.gui_updater)                        .borrow()                        .update_systray_indicator(self.is_systray_enabled());
                 }
                 Job::StopApplication => {
                     match self
@@ -474,14 +437,12 @@ impl GuiProcessor {
                 Job::NotifyConfigChanged => {
                     (*self.contentlist_r).borrow_mut().notify_config_update();
                     (*self.feedsources_r).borrow_mut().notify_config_update();
-                    // (*self.gui_updater)                        .borrow()                        .update_systray_indicator(self.is_systray_enabled());
                 }
                 Job::DownloaderJobStarted(threadnr, kind) => {
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = kind;
                 }
                 Job::DownloaderJobFinished(subs_id, threadnr, _kind, elapsed_ms, description) => {
                     if elapsed_ms > 5000 && subs_id > 0 {
-                        //  trace!(                            "DL: {} {} took {} ms {}    ",                           threadnr,                            _kind,                            elapsed_ms,                            description                        );
                         (*self.erro_repo_r).borrow().add_error(
                             subs_id,
                             elapsed_ms as isize,
@@ -502,7 +463,6 @@ impl GuiProcessor {
                 Job::AddBottomDisplayErrorMessage(msg) => {
                     self.statusbar.borrow_mut().bottom_notices.push_back(msg);
                 }
-
                 _ => {
                     warn!("other job! {:?}", &job);
                 }
@@ -514,6 +474,7 @@ impl GuiProcessor {
         }
     }
 
+    #[deprecated]
     pub fn process_dialogdata(&self, ident: String, payload: Vec<AValue>) {
         match ident.as_str() {
             "new-folder" => {
@@ -983,6 +944,31 @@ impl StartupWithAppContext for GuiProcessor {
             &GuiEvents::TreeDragEvent(0, Vec::default(), Vec::default()),
             HandleTreeDragEvent(self.subscriptionmove_r.clone()),
         );
+        self.add_handler(
+            &GuiEvents::TreeExpanded(0, 0),
+            HandleTreeExpanded(self.feedsources_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::TreeCollapsed(0, 0),
+            HandleTreeCollapsed(self.feedsources_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::ToolBarButton(String::default()),
+            HandleToolBarButton(self.feedsources_r.clone(), self.browserpane_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::ToolBarToggle(String::default(), false),
+            HandleToolBarToggle(),
+        );
+
+        self.add_handler(
+            &GuiEvents::ColumnWidth(0, 0),
+            HandleColumnWidth(self.configmanager_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::ToolBarToggle(String::default(), false),
+            HandleListSelected(self.contentlist_r.clone()),
+        );
     }
 }
 
@@ -1266,6 +1252,7 @@ impl HandleSingleEvent for HandleDialogData {
     }
 }
 
+/*
 struct HandleDialogData2();
 impl HandleSingleEvent for HandleDialogData2 {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
@@ -1277,6 +1264,7 @@ impl HandleSingleEvent for HandleDialogData2 {
         }
     }
 }
+ */
 
 struct HandleDialogEditData(Rc<RefCell<dyn ISourceTreeController>>);
 impl HandleSingleEvent for HandleDialogEditData {
@@ -1349,6 +1337,106 @@ impl HandleSingleEvent for HandleTreeDragEvent {
                     from_path.clone(),
                     to_path.clone(),
                 );
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleTreeExpanded(Rc<RefCell<dyn ISourceTreeController>>);
+impl HandleSingleEvent for HandleTreeExpanded {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::TreeExpanded(_idx, repo_id) => {
+                self.0.borrow().set_tree_expanded(repo_id as isize, true);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleTreeCollapsed(Rc<RefCell<dyn ISourceTreeController>>);
+impl HandleSingleEvent for HandleTreeCollapsed {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::TreeCollapsed(_idx, repo_id) => {
+                self.0.borrow().set_tree_expanded(repo_id as isize, true);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleToolBarButton(
+    Rc<RefCell<dyn ISourceTreeController>>,
+    Rc<RefCell<dyn IBrowserPane>>,
+);
+impl HandleSingleEvent for HandleToolBarButton {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::ToolBarButton(ref id) => match id.as_str() {
+                "reload-feeds-all" => {
+                    self.0.borrow_mut().addjob(SJob::ScheduleFetchAllFeeds);
+                }
+                "browser-zoom-in" => {
+                    self.1.borrow().set_browser_zoom(BrowserZoomCommand::ZoomIn);
+                }
+                "browser-zoom-out" => {
+                    self.1
+                        .borrow()
+                        .set_browser_zoom(BrowserZoomCommand::ZoomOut);
+                }
+                "browser-zoom-default" => {
+                    self.1
+                        .borrow()
+                        .set_browser_zoom(BrowserZoomCommand::ZoomDefault);
+                }
+                _ => {
+                    warn!("unknown ToolBarButton {} ", id);
+                }
+            },
+            _ => (),
+        }
+    }
+}
+
+struct HandleToolBarToggle();
+impl HandleSingleEvent for HandleToolBarToggle {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::ToolBarToggle(ref id, active) => match id.as_str() {
+                "special1" => {
+                    debug!(" ToolBarToggle special1 {} {} ", id, active);
+                }
+                _ => {
+                    warn!("unknown ToolBarToggle {} ", id);
+                }
+            },
+            _ => (),
+        }
+    }
+}
+
+struct HandleColumnWidth(Rc<RefCell<ConfigManager>>);
+impl HandleSingleEvent for HandleColumnWidth {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::ColumnWidth(col_nr, width) => {
+                self.0.borrow_mut().store_column_width(col_nr, width);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleListSelected(Rc<RefCell<dyn IFeedContents>>);
+impl HandleSingleEvent for HandleListSelected {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::ListSelected(_list_idx, ref selected_list) => {
+                self.0
+                    .borrow()
+                    .set_selected_content_ids(selected_list.clone());
             }
             _ => (),
         }
