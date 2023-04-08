@@ -83,9 +83,9 @@ pub trait TimerRegistry {
 
 pub trait TimerReceiver {
     fn trigger_mut(&mut self, _ev: &TimerEvent) {
-        panic!("TimerReceiver-mut configured but not implemented!")
+        panic!("TimerReceiver-mut registered but not implemented!")
     }
     fn trigger(&self, _ev: &TimerEvent) {
-        panic!("TimerReceiver immutable configured but not implemented!")
+        panic!("TimerReceiver immutable registered but not implemented!")
     }
 }

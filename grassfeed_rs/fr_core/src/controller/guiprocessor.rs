@@ -176,20 +176,21 @@ impl GuiProcessor {
         }
 
         for ev in ev_set {
-            // trace!("GP: ev={:?} ", &ev);
             let now = Instant::now();
 
             if let Some(handler_b) = self.event_handler_map.get(&std::mem::discriminant(&ev)) {
+                // trace!("GP: ev={:?} ", &ev);
                 handler_b.handle(&ev);
             } else {
                 match ev {
                     GuiEvents::None => {}
-                    GuiEvents::ListRowActivated(_list_idx, _list_position, _msg_id) => {} // handled above
-                    // GuiEvents::WinDelete => {                        self.addjob(Job::StopApplication);                    }
-                    GuiEvents::AppWasAlreadyRunning => {
-                        let _r = self.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
-                        self.addjob(Job::StopApplication);
-                    }
+                    GuiEvents::ListRowActivated(_l, _p, _m) => {} // handled above
+                    /*
+                                       GuiEvents::WinDelete => {                        self.addjob(Job::StopApplication);                    }
+                                       GuiEvents::AppWasAlreadyRunning => {
+                                           let _r = self.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
+                                           self.addjob(Job::StopApplication);
+                                       }
                     GuiEvents::MenuActivate(ref s) => match s.as_str() {
                         "M_FILE_QUIT" => {
                             self.addjob(Job::StopApplication);
@@ -205,6 +206,8 @@ impl GuiProcessor {
                         }
                         _ => warn!("Menu Unprocessed:{:?} ", s),
                     },
+
+                    */
                     GuiEvents::ButtonClicked(ref b) => match b.as_str() {
                         "button1" => {
                             info!("ButtonClicked: button1");
@@ -952,23 +955,6 @@ impl TimerReceiver for GuiProcessor {
     }
 }
 
-struct HandleWinDelete(Sender<Job>);
-impl HandleSingleEvent for HandleWinDelete {
-    fn handle(&self, _ev: &GuiEvents) {
-        debug!("H: windelete!");
-        let _r = self.0.send(Job::StopApplication);
-    }
-}
-struct HandleWinDelete2(Rc<RefCell<GuiProcessor>>);
-impl HandleSingleEvent for HandleWinDelete2 {
-    fn handle(&self, _ev: &GuiEvents) {
-        debug!("H2: windelete!");
-        self.0.borrow().addjob(Job::StopApplication);
-    }
-}
-
-// GuiEvents::WinDelete => {                        self.addjob(Job::StopApplication);                    }
-
 impl StartupWithAppContext for GuiProcessor {
     fn startup(&mut self, ac: &AppContext) {
         let gp_r: Rc<RefCell<GuiProcessor>> = ac.get_rc::<GuiProcessor>().unwrap();
@@ -997,9 +983,16 @@ impl StartupWithAppContext for GuiProcessor {
         }
 
         // ---------------
-        // HandleWinDelete(self.get_job_sender()),
 
         self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2(gp_r.clone()));
+        self.add_handler(
+            &GuiEvents::AppWasAlreadyRunning,
+            HandleAppWasAlreadyRunning(gp_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::MenuActivate(String::default()),
+            HandleMenuActivate(gp_r.clone()),
+        );
     }
 }
 
@@ -1026,6 +1019,57 @@ impl FocusByTab {
             FocusByTab::FocusSubscriptions => FocusByTab::FocusBrowser,
             FocusByTab::FocusMessages => FocusByTab::FocusSubscriptions,
             FocusByTab::FocusBrowser => FocusByTab::FocusMessages,
+        }
+    }
+}
+
+/*
+struct HandleWinDelete(Sender<Job>);
+impl HandleSingleEvent for HandleWinDelete {
+    fn handle(&self, _ev: &GuiEvents) {
+        debug!("H: windelete!");
+        let _r = self.0.send(Job::StopApplication);
+    }
+}
+ */
+
+struct HandleWinDelete2(Rc<RefCell<GuiProcessor>>);
+impl HandleSingleEvent for HandleWinDelete2 {
+    fn handle(&self, _ev: &GuiEvents) {
+        self.0.borrow().addjob(Job::StopApplication);
+    }
+}
+
+struct HandleAppWasAlreadyRunning(Rc<RefCell<GuiProcessor>>);
+impl HandleSingleEvent for HandleAppWasAlreadyRunning {
+    fn handle(&self, _ev: &GuiEvents) {
+        let gp = (*self.0).borrow();
+        let _r = gp.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
+        gp.addjob(Job::StopApplication);
+    }
+}
+
+struct HandleMenuActivate(Rc<RefCell<GuiProcessor>>);
+impl HandleSingleEvent for HandleMenuActivate {
+    fn handle(&self, ev: &GuiEvents) {
+        match ev {
+            GuiEvents::MenuActivate(ref s) => match s.as_str() {
+                "M_FILE_QUIT" => {
+                    (self.0.borrow()).addjob(Job::StopApplication);
+                }
+                "M_SETTINGS" => {
+                    (self.0.borrow()).start_settings_dialog();
+                }
+                "M_ABOUT" => {
+                    (self.0.borrow()).start_about_dialog();
+                }
+                "M_SHORT_HELP" => {
+                    let br_r: &Rc<RefCell<dyn IBrowserPane>> = &(*self.0.borrow()).browserpane_r;
+                    br_r.borrow().display_short_help();
+                }
+                _ => warn!("Menu Unprocessed:{:?} ", s),
+            },
+            _ => (),
         }
     }
 }

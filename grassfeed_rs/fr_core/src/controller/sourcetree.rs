@@ -111,17 +111,15 @@ pub struct SourceTreeController {
     pub(super) current_edit_fse: Option<SubscriptionEntry>,
 
     //  Subscription,  Non-Folder-Child-IDs
-    pub(super) current_selected_subscription: Option<(SubscriptionEntry, Vec<i32>)>,
+    pub(super) current_selected_subscription: RefCell<Option<(SubscriptionEntry, Vec<i32>)>>,
     pub(super) currently_minimized: bool,
     pub(super) job_queue_sender: Sender<SJob>,
     job_queue_receiver: Receiver<SJob>,
     timer_r: Rc<RefCell<dyn ITimer>>,
     any_spinner_visible: RefCell<bool>,
-    pub(super) new_source: NewSourceTempData,
+    pub(super) new_source: RefCell<NewSourceTempData>,
     pub(super) statemap: Rc<RefCell<SubscriptionState>>, // moved over
     pub(super) current_new_folder_parent_id: Option<isize>,
-    // #[deprecated]
-    // need_check_fs_paths: RefCell<bool>,
 }
 
 impl SourceTreeController {
@@ -178,8 +176,8 @@ impl SourceTreeController {
             // feedsource_delete_id: None,
             current_edit_fse: None,
             config: confi,
-            new_source: NewSourceTempData::default(),
-            current_selected_subscription: None,
+            new_source: RefCell::new(NewSourceTempData::default()),
+            current_selected_subscription: RefCell::new(None),
             gui_context_w: Weak::new(),
             messagesrepo_w: Weak::new(),
             subscriptionmove_w: Weak::new(),
@@ -193,7 +191,7 @@ impl SourceTreeController {
     }
 
     /// is run by  the timer
-    pub fn process_jobs(&mut self) {
+    pub fn process_jobs(&self) {
         let mut job_list: Vec<SJob> = Vec::new();
         while let Ok(job) = self.job_queue_receiver.try_recv() {
             if !job_list.contains(&job) {
@@ -417,7 +415,7 @@ impl SourceTreeController {
     }
 
     ///  Read all sources   from db and put into ModelValueAdapter
-    pub fn feedsources_into_store_adapter(&mut self) {
+    pub fn feedsources_into_store_adapter(&self) {
         (*self.gui_val_store).write().unwrap().clear_tree(0);
         self.insert_tree_row(&Vec::<u16>::default(), 0);
         self.addjob(SJob::CheckSpinnerActive);
@@ -549,10 +547,10 @@ impl SourceTreeController {
         (*self.gui_val_store).write().unwrap().set_spinner_active(v);
     }
 
-    pub fn process_newsource_edit(&mut self) {
-        if self.new_source.state == NewSourceState::UrlChanged {
-            if self.new_source.edit_url.starts_with("http") {
-                self.new_source.state = NewSourceState::Requesting;
+    pub fn process_newsource_edit(&self) {
+        if self.new_source.borrow().state == NewSourceState::UrlChanged {
+            if self.new_source.borrow().edit_url.starts_with("http") {
+                self.new_source.borrow_mut().state = NewSourceState::Requesting;
                 let dd: Vec<AValue> = vec![
                     AValue::None,        // 0:display
                     AValue::None,        // 1:homepage
@@ -569,34 +567,34 @@ impl SourceTreeController {
                     .update_dialog(DIALOG_NEW_SUBSCRIPTION);
                 (*self.downloader_r)
                     .borrow()
-                    .new_feedsource_request(&self.new_source.edit_url);
+                    .new_feedsource_request(&self.new_source.borrow().edit_url);
             }
-            self.new_source.state = NewSourceState::Completed;
+            self.new_source.borrow_mut().state = NewSourceState::Completed;
         }
     }
 
     pub fn process_newsource_request_done(
-        &mut self,
+        &self,
         feed_url_edit: String,
         display_name: String,
         icon_id: isize,
         feed_homepage: String,
     ) {
-        self.new_source.state = NewSourceState::Completed;
-        self.new_source.edit_url = feed_url_edit;
-        self.new_source.display_name = display_name;
-        self.new_source.icon_id = icon_id;
-        self.new_source.feed_homepage = feed_homepage;
+        self.new_source.borrow_mut().state = NewSourceState::Completed;
+        self.new_source.borrow_mut().edit_url = feed_url_edit;
+        self.new_source.borrow_mut().display_name = display_name;
+        self.new_source.borrow_mut().icon_id = icon_id;
+        self.new_source.borrow_mut().feed_homepage = feed_homepage;
         let mut icon_str = String::default();
         if icon_id > 0 {
             if let Some(ie) = self.iconrepo_r.borrow().get_by_index(icon_id) {
                 icon_str = ie.icon;
             }
         };
-        self.new_source.icon_str = icon_str.clone();
+        self.new_source.borrow_mut().icon_str = icon_str.clone();
         let dd: Vec<AValue> = vec![
-            AValue::ASTR(self.new_source.display_name.clone()),
-            AValue::ASTR(self.new_source.feed_homepage.clone()),
+            AValue::ASTR(self.new_source.borrow().display_name.clone()),
+            AValue::ASTR(self.new_source.borrow().feed_homepage.clone()),
             AValue::ASTR(icon_str), // 2: icon_str
             AValue::ABOOL(false),   // 3: spinner
             AValue::None,           // 4: feed-url
@@ -610,7 +608,7 @@ impl SourceTreeController {
             .update_dialog(DIALOG_NEW_SUBSCRIPTION);
     }
 
-    fn check_feed_update_times(&mut self) {
+    fn check_feed_update_times(&self) {
         let interval_s = (*self.config).borrow().get_interval_seconds();
         if interval_s <= 0 {
             warn!(
@@ -675,19 +673,6 @@ impl SourceTreeController {
             }
         }
     }
-
-    /*
-       #[deprecated]
-       fn check_paths(&self) {
-           if *self.need_check_fs_paths.borrow() {
-               // self.update_cached_paths();
-               if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
-                   subs_mov.borrow_mut().update_cached_paths();
-               }
-               self.need_check_fs_paths.replace(false);
-           }
-       }
-    */
 
     pub fn get_by_path(&self, path: &[u16]) -> Option<SubscriptionEntry> {
         let o_subs_id = self.statemap.borrow().get_id_by_path(path);
@@ -859,7 +844,7 @@ impl SourceTreeController {
 }
 
 impl TimerReceiver for SourceTreeController {
-    fn trigger_mut(&mut self, event: &TimerEvent) {
+    fn trigger(&self, event: &TimerEvent) {
         if self.currently_minimized {
             if event == &TimerEvent::Timer10s {
                 self.process_jobs();
@@ -869,7 +854,6 @@ impl TimerReceiver for SourceTreeController {
                 if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
                     subs_mov.borrow_mut().check_paths();
                 }
-
                 self.check_feed_update_times();
             }
         } else {
@@ -915,10 +899,10 @@ impl StartupWithAppContext for SourceTreeController {
         let f_so_r = ac.get_rc::<SourceTreeController>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();
-            t.register(&TimerEvent::Timer100ms, f_so_r.clone(), true);
-            t.register(&TimerEvent::Timer200ms, f_so_r.clone(), true);
-            t.register(&TimerEvent::Timer1s, f_so_r.clone(), true);
-            t.register(&TimerEvent::Timer10s, f_so_r, true);
+            t.register(&TimerEvent::Timer100ms, f_so_r.clone(), false);
+            t.register(&TimerEvent::Timer200ms, f_so_r.clone(), false);
+            t.register(&TimerEvent::Timer1s, f_so_r.clone(), false);
+            t.register(&TimerEvent::Timer10s, f_so_r, false);
         }
         (*self.subscriptionrepo_r)
             .borrow()

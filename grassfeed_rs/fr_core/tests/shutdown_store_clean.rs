@@ -86,7 +86,7 @@ fn add_folder_and_feed() {
     let gp_r = appcontext.get_rc::<GuiProcessor>().unwrap();
     let _r = event_sender.send(GuiEvents::DialogData("new-feedsource".to_string(), payload));
     for _a in 0..2 {
-        let mut gp = (*gp_r).borrow_mut();
+        let gp = (*gp_r).borrow_mut();
         gp.process_event();
         gp.process_jobs();
     }

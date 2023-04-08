@@ -47,11 +47,10 @@ pub trait ISourceTreeController {
     fn start_new_fol_sub_dialog(&mut self, src_repo_id: isize, dialog_id: u8);
     fn start_delete_dialog(&mut self, src_repo_id: isize);
     fn newsource_dialog_edit(&mut self, edit_feed_url: String);
-    fn set_selected_feedsource(&mut self, src_repo_id: isize);
+    fn set_selected_feedsource(&self, src_repo_id: isize);
 
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
-    fn set_selected_message_id(&mut self, subs_id: isize, msg_id: isize);
-
+    fn set_selected_message_id(&self, subs_id: isize, msg_id: isize);
 }
 
 impl ISourceTreeController for SourceTreeController {
@@ -378,13 +377,13 @@ impl ISourceTreeController for SourceTreeController {
     }
 
     fn newsource_dialog_edit(&mut self, edit_feed_url: String) {
-        if edit_feed_url != self.new_source.edit_url {
-            self.new_source.edit_url = edit_feed_url.trim().to_string();
-            self.new_source.state = NewSourceState::UrlChanged;
-            if string_is_http_url(&self.new_source.edit_url) {
+        if edit_feed_url != self.new_source.borrow().edit_url {
+            self.new_source.borrow_mut().edit_url = edit_feed_url.trim().to_string();
+            self.new_source.borrow_mut().state = NewSourceState::UrlChanged;
+            if string_is_http_url(&self.new_source.borrow().edit_url) {
                 (*self.downloader_r)
                     .borrow()
-                    .new_feedsource_request(&self.new_source.edit_url);
+                    .new_feedsource_request(&self.new_source.borrow().edit_url);
             }
         }
     }
@@ -396,7 +395,7 @@ impl ISourceTreeController for SourceTreeController {
         self.addjob(SJob::GuiUpdateTreeAll);
     }
 
-    fn set_selected_feedsource(&mut self, src_repo_id: isize) {
+    fn set_selected_feedsource(&self, src_repo_id: isize) {
         let o_fse = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_index(src_repo_id);
@@ -415,12 +414,13 @@ impl ISourceTreeController for SourceTreeController {
                     .map(|fse| fse.subs_id as i32)
                     .collect::<Vec<i32>>();
             }
-            self.current_selected_subscription = Some((fse, child_ids));
+            self.current_selected_subscription
+                .replace(Some((fse, child_ids)));
         }
     }
 
-    fn set_selected_message_id(&mut self, subs_id: isize, msg_id: isize) {
-        if self.current_selected_subscription.is_none() {
+    fn set_selected_message_id(&self, subs_id: isize, msg_id: isize) {
+        if self.current_selected_subscription.borrow().is_none() {
             return;
         }
         if let Some((mut fse, childs)) = self.current_selected_subscription.take() {
@@ -432,12 +432,13 @@ impl ISourceTreeController for SourceTreeController {
                     fse.subs_id, subs_id
                 );
             }
-            self.current_selected_subscription.replace((fse, childs));
+            self.current_selected_subscription
+                .replace(Some((fse, childs)));
         }
     }
 
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)> {
-        self.current_selected_subscription.clone()
+        self.current_selected_subscription.borrow().clone()
     }
 
     fn get_state(&self, search_id: isize) -> Option<SubsMapEntry> {
