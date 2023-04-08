@@ -85,10 +85,10 @@ pub struct GuiProcessor {
     timer_sender: Option<Sender<TimerJob>>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_runner: Rc<RefCell<dyn GuiRunner>>,
+    gui_context_r: Rc<RefCell<GuiContext>>,
     feedsources_r: Rc<RefCell<dyn ISourceTreeController>>,
     contentlist_r: Rc<RefCell<dyn IFeedContents>>,
     downloader_r: Rc<RefCell<dyn IDownloader>>,
-    gui_context_r: Rc<RefCell<GuiContext>>,
     browserpane_r: Rc<RefCell<dyn IBrowserPane>>,
     erro_repo_r: Rc<RefCell<ErrorRepo>>,
     subscriptionmove_r: Rc<RefCell<dyn ISubscriptionMove>>,
@@ -101,25 +101,25 @@ pub struct GuiProcessor {
 }
 
 pub trait HandleSingleEvent {
-    fn handle(&self, _ev: GuiEvents) {}
+    fn handle(&self, _ev: GuiEvents, _gp: &GuiProcessor) {}
 }
 
 impl GuiProcessor {
     pub fn new(ac: &AppContext) -> Self {
         let (q_s, q_r) = flume::bounded::<Job>(JOBQUEUE_SIZE);
         let guicontex_r = (*ac).get_rc::<GuiContext>().unwrap();
-        let u_a = (*guicontex_r).borrow().get_updater_adapter();
-        let v_s_a = (*guicontex_r).borrow().get_values_adapter();
+        let gui_u_a = (*guicontex_r).borrow().get_updater_adapter();
+        let gui_v_a = (*guicontex_r).borrow().get_values_adapter();
         let guirunner = (*guicontex_r).borrow().get_gui_runner();
         let dl_r = (*ac).get_rc::<contentdownloader::Downloader>().unwrap();
         let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
         let status_bar = RefCell::new(StatusBar::new(
             (*ac).get_rc::<SourceTreeController>().unwrap(),
             dl_r.clone(),
-            u_a.clone(),
+            gui_u_a.clone(),
             (*ac).get_rc::<FeedContents>().unwrap(),
             (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
-            v_s_a.clone(),
+            gui_v_a.clone(),
         ));
 
         GuiProcessor {
@@ -133,8 +133,8 @@ impl GuiProcessor {
             job_queue_sender: q_s,
             job_queue_receiver: q_r,
             timer_sender: None,
-            gui_updater: u_a,
-            gui_val_store: v_s_a,
+            gui_updater: gui_u_a,
+            gui_val_store: gui_v_a,
             gui_runner: guirunner,
             downloader_r: dl_r,
             gui_context_r: guicontex_r,
@@ -179,34 +179,16 @@ impl GuiProcessor {
             let ev_ident = (Instant::now(), format!("{:?}", &ev));
             if let Some(handler_b) = self.event_handler_map.get(&std::mem::discriminant(&ev)) {
                 // trace!("GP: ev={:?} ", &ev);
-                handler_b.handle(ev);
+                handler_b.handle(ev, self);
             } else {
                 match ev {
                     GuiEvents::None => {}
                     GuiEvents::ListRowActivated(_l, _p, _m) => {} // handled above
+
                     /*
-                    GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
-                        self.focus_by_tab.replace(FocusByTab::FocusMessages);
-                        (*self.contentlist_r)
-                            .borrow()
-                            .launch_browser_single(vec![fc_repo_id]);
-                    }
-                    GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) => {
-                        self.focus_by_tab.replace(FocusByTab::FocusMessages);
-                        if sort_col_nr == LIST0_COL_ISREAD && msg_id >= 0 {
-                            (*self.contentlist_r)
-                                .borrow()
-                                .toggle_feed_item_read(msg_id as isize, list_position);
-                        } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
-                            (*self.contentlist_r).borrow().toggle_favorite(
-                                msg_id as isize,
-                                list_position,
-                                None,
-                            );
-                        } else {
-                            warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
-                        }
-                    }
+                                       GuiEvents::WinDelete => {
+                                           self.addjob(Job::StopApplication);
+                                       }
                     GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
                         0 => {
                             if pos < TREE_PANE1_MIN_WIDTH {
@@ -220,9 +202,9 @@ impl GuiProcessor {
                         1 => (*(self.configmanager_r.borrow_mut())).store_gui_pane2_pos(pos),
                         _ => {}
                     },
-                    GuiEvents::WindowSizeChanged(width, height) => {
-                        (*(self.configmanager_r.borrow_mut())).store_window_size(width, height);
-                    }
+                    */
+
+                    /*
                     GuiEvents::DialogData(ref ident, ref payload) => {
                         self.process_dialogdata(ident.clone(), payload.clone());
                     }
@@ -238,7 +220,6 @@ impl GuiProcessor {
                             warn!(" other DialogEditData  {:?} {:?}", &ident, payload);
                         }
                     },
-                    */
                     GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) => {
                         match command.as_str() {
                             "feedsource-delete-dialog" => {
@@ -279,14 +260,14 @@ impl GuiProcessor {
                         }
                     }
                     GuiEvents::TreeDragEvent(_tree_nr, ref from_path, ref to_path) => {
-                        // let _success = self.feedsources_r.borrow().on_fs_drag(_tree_nr,from_path.clone(),to_path.clone(),);
-
                         let _success = self.subscriptionmove_r.borrow().on_subscription_drag(
                             _tree_nr,
                             from_path.clone(),
                             to_path.clone(),
                         );
                     }
+                    */
+
                     GuiEvents::TreeExpanded(_idx, repo_id) => {
                         self.feedsources_r
                             .borrow()
@@ -533,7 +514,6 @@ impl GuiProcessor {
         }
     }
 
-    #[deprecated]
     pub fn process_dialogdata(&self, ident: String, payload: Vec<AValue>) {
         match ident.as_str() {
             "new-folder" => {
@@ -946,53 +926,11 @@ impl StartupWithAppContext for GuiProcessor {
         }
 
         // ---------------
-        // let sourcetree_r: Rc<RefCell<dyn ISourceTreeController>> =            ac.get_rc::<SourceTreeController>().unwrap();
-        // let feedcontents_r: Rc<RefCell<dyn IFeedContents>> = ac.get_rc::<FeedContents>().unwrap();
-        let guicontex_r = ac.get_rc::<GuiContext>().unwrap();
-        let updater_adapter: Rc<RefCell<dyn UIUpdaterAdapter>> =
-            (*guicontex_r).borrow().get_updater_adapter();
-        // let configmanager_r = ac.get_rc::<ConfigManager>().unwrap();
-        // let subscriptionmove_r = ac.get_rc::<SubscriptionMove>().unwrap();
-        // let feedsources_r = ac.get_rc::<SourceTreeController>().unwrap();
-        // let subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
-
-        self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2(gp_r.clone()));
-        self.add_handler(
-            &GuiEvents::AppWasAlreadyRunning,
-            HandleAppWasAlreadyRunning(gp_r.clone()),
-        );
-        self.add_handler(
-            &GuiEvents::MenuActivate(String::default()),
-            HandleMenuActivate(gp_r.clone()),
-        );
-        self.add_handler(
-            &GuiEvents::TreeRowActivated(0, Vec::default(), 0),
-            HandleTreeRowActivated(
-                gp_r.clone(),
-                self.feedsources_r.clone(),
-                self.contentlist_r.clone(),
-            ),
-        );
-        self.add_handler(
-            &GuiEvents::ListRowDoubleClicked(0, 0, 0),
-            HandleListRowDoubleClicked(gp_r.clone(), self.contentlist_r.clone()),
-        );
-        self.add_handler(
-            &GuiEvents::ListCellClicked(0, 0, 0, 0),
-            HandleListCellClicked(gp_r.clone(), self.contentlist_r.clone()),
-        );
-        self.add_handler(
-            &GuiEvents::PanedMoved(0, 0),
-            HandlePanedMoved(updater_adapter.clone(), self.configmanager_r.clone()),
-        );
-        self.add_handler(
-            &GuiEvents::WindowSizeChanged(0, 0),
-            HandleWindowSizeChanged(self.configmanager_r.clone()),
-        );
+        self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2 {});
         self.add_handler(
             &GuiEvents::DialogData(String::default(), Vec::default()),
             HandleDialogData(
-                gp_r.clone(),
+                self.browserpane_r.clone(),
                 self.configmanager_r.clone(),
                 self.subscriptionmove_r.clone(),
                 self.feedsources_r.clone(),
@@ -1000,12 +938,50 @@ impl StartupWithAppContext for GuiProcessor {
                 self.downloader_r.clone(),
                 self.contentlist_r.clone(), // 6
                 self.gui_context_r.clone(),
-                self.browserpane_r.clone(),
             ),
         );
+
+        self.add_handler(
+            &GuiEvents::PanedMoved(0, 0),
+            HandlePanedMoved(self.gui_context_r.clone(), self.configmanager_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::AppWasAlreadyRunning,
+            HandleAppWasAlreadyRunning(),
+        );
+        self.add_handler(
+            &GuiEvents::MenuActivate(String::default()),
+            HandleMenuActivate(),
+        );
+        self.add_handler(
+            &GuiEvents::TreeRowActivated(0, Vec::default(), 0),
+            HandleTreeRowActivated(self.contentlist_r.clone(), self.feedsources_r.clone()),
+        );
+
+        self.add_handler(
+            &GuiEvents::ListRowDoubleClicked(0, 0, 0),
+            HandleListRowDoubleClicked(self.contentlist_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::ListCellClicked(0, 0, 0, 0),
+            HandleListCellClicked(self.contentlist_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::WindowSizeChanged(0, 0),
+            HandleWindowSizeChanged(self.configmanager_r.clone()),
+        );
+        //    self.add_handler(                   &GuiEvents::DialogData(String::default(), Vec::default()),                   HandleDialogData2(                       gp_r.clone(),                   ),               );
         self.add_handler(
             &GuiEvents::DialogEditData(String::default(), AValue::None),
             HandleDialogEditData(self.feedsources_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::TreeEvent(0, 0, String::default()),
+            HandleTreeEvent(self.feedsources_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::TreeDragEvent(0, Vec::default(), Vec::default()),
+            HandleTreeDragEvent(self.subscriptionmove_r.clone()),
         );
     }
 }
@@ -1037,39 +1013,39 @@ impl FocusByTab {
     }
 }
 
-struct HandleWinDelete2(Rc<RefCell<GuiProcessor>>);
+// ---
+
+struct HandleWinDelete2();
 impl HandleSingleEvent for HandleWinDelete2 {
-    fn handle(&self, _ev: GuiEvents) {
-        self.0.borrow().addjob(Job::StopApplication);
+    fn handle(&self, _ev: GuiEvents, gp: &GuiProcessor) {
+        gp.addjob(Job::StopApplication);
     }
 }
 
-struct HandleAppWasAlreadyRunning(Rc<RefCell<GuiProcessor>>);
+struct HandleAppWasAlreadyRunning();
 impl HandleSingleEvent for HandleAppWasAlreadyRunning {
-    fn handle(&self, _ev: GuiEvents) {
-        let gp = (*self.0).borrow();
+    fn handle(&self, _ev: GuiEvents, gp: &GuiProcessor) {
         let _r = gp.timer_sender.as_ref().unwrap().send(TimerJob::Shutdown);
         gp.addjob(Job::StopApplication);
     }
 }
 
-struct HandleMenuActivate(Rc<RefCell<GuiProcessor>>);
+struct HandleMenuActivate();
 impl HandleSingleEvent for HandleMenuActivate {
-    fn handle(&self, ev: GuiEvents) {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         match ev {
             GuiEvents::MenuActivate(ref s) => match s.as_str() {
                 "M_FILE_QUIT" => {
-                    (self.0.borrow()).addjob(Job::StopApplication);
+                    gp.addjob(Job::StopApplication);
                 }
                 "M_SETTINGS" => {
-                    (self.0.borrow()).start_settings_dialog();
+                    gp.start_settings_dialog();
                 }
                 "M_ABOUT" => {
-                    (self.0.borrow()).start_about_dialog();
+                    gp.start_about_dialog();
                 }
                 "M_SHORT_HELP" => {
-                    let br_r: &Rc<RefCell<dyn IBrowserPane>> = &(*self.0.borrow()).browserpane_r;
-                    br_r.borrow().display_short_help();
+                    gp.browserpane_r.borrow().display_short_help();
                 }
                 _ => warn!("Menu Unprocessed:{:?} ", s),
             },
@@ -1079,61 +1055,49 @@ impl HandleSingleEvent for HandleMenuActivate {
 }
 
 struct HandleTreeRowActivated(
-    Rc<RefCell<GuiProcessor>>,
-    Rc<RefCell<dyn ISourceTreeController>>,
     Rc<RefCell<dyn IFeedContents>>,
+    Rc<RefCell<dyn ISourceTreeController>>,
 );
 impl HandleSingleEvent for HandleTreeRowActivated {
-    fn handle(&self, ev: GuiEvents) {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         match ev {
             GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) => {
-                // set it first into sources, we need that at contents for the focus
                 (*self.1)
                     .borrow_mut()
                     .set_selected_feedsource(subs_id as isize);
-                // trace!("GP:TreeRowActivated{}  {:?} ", subs_id, _path);
-                (*self.2).borrow().update_message_list_(subs_id as isize);
-                (*self.0)
-                    .borrow()
-                    .focus_by_tab
-                    .replace(FocusByTab::FocusSubscriptions);
+                (*self.0).borrow().update_message_list_(subs_id as isize);
+                gp.focus_by_tab.replace(FocusByTab::FocusSubscriptions);
             }
             _ => (),
         }
     }
 }
 
-struct HandleListRowDoubleClicked(Rc<RefCell<GuiProcessor>>, Rc<RefCell<dyn IFeedContents>>);
+struct HandleListRowDoubleClicked(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleListRowDoubleClicked {
-    fn handle(&self, ev: GuiEvents) {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         match ev {
             GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
-                (self.0)
-                    .borrow()
-                    .focus_by_tab
-                    .replace(FocusByTab::FocusMessages);
-                (*self.1).borrow().launch_browser_single(vec![fc_repo_id]);
+                gp.focus_by_tab.replace(FocusByTab::FocusMessages);
+                (*self.0).borrow().launch_browser_single(vec![fc_repo_id]);
             }
             _ => (),
         }
     }
 }
 
-struct HandleListCellClicked(Rc<RefCell<GuiProcessor>>, Rc<RefCell<dyn IFeedContents>>);
+struct HandleListCellClicked(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleListCellClicked {
-    fn handle(&self, ev: GuiEvents) {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         match ev {
             GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) => {
-                (*self.0)
-                    .borrow()
-                    .focus_by_tab
-                    .replace(FocusByTab::FocusMessages);
+                gp.focus_by_tab.replace(FocusByTab::FocusMessages);
                 if sort_col_nr == LIST0_COL_ISREAD && msg_id >= 0 {
-                    (*self.1)
+                    (*self.0)
                         .borrow()
                         .toggle_feed_item_read(msg_id as isize, list_position);
                 } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
-                    (*self.1)
+                    (*self.0)
                         .borrow()
                         .toggle_favorite(msg_id as isize, list_position, None);
                 } else {
@@ -1145,17 +1109,16 @@ impl HandleSingleEvent for HandleListCellClicked {
     }
 }
 
-struct HandlePanedMoved(
-    Rc<RefCell<dyn UIUpdaterAdapter>>,
-    Rc<RefCell<ConfigManager>>,
-);
+struct HandlePanedMoved(Rc<RefCell<GuiContext>>, Rc<RefCell<ConfigManager>>);
 impl HandleSingleEvent for HandlePanedMoved {
-    fn handle(&self, ev: GuiEvents) {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         match ev {
             GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
                 0 => {
                     if pos < TREE_PANE1_MIN_WIDTH {
-                        (*self.0)
+                        let u_a_r = (*self.0).borrow().get_updater_adapter();
+
+                        (*u_a_r)
                             .borrow()
                             .update_paned_pos(PANED_1_LEFT, TREE_PANE1_MIN_WIDTH);
                     } else {
@@ -1172,7 +1135,7 @@ impl HandleSingleEvent for HandlePanedMoved {
 
 struct HandleWindowSizeChanged(Rc<RefCell<ConfigManager>>);
 impl HandleSingleEvent for HandleWindowSizeChanged {
-    fn handle(&self, ev: GuiEvents) {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         match ev {
             GuiEvents::WindowSizeChanged(width, height) => {
                 (*self.0).borrow_mut().store_window_size(width, height);
@@ -1183,7 +1146,7 @@ impl HandleSingleEvent for HandleWindowSizeChanged {
 }
 
 struct HandleDialogData(
-    Rc<RefCell<GuiProcessor>>,
+    Rc<RefCell<dyn IBrowserPane>>, // 8->0
     Rc<RefCell<ConfigManager>>,
     Rc<RefCell<dyn ISubscriptionMove>>,
     Rc<RefCell<dyn ISourceTreeController>>,
@@ -1191,10 +1154,9 @@ struct HandleDialogData(
     Rc<RefCell<dyn IDownloader>>,
     Rc<RefCell<dyn IFeedContents>>, // 6
     Rc<RefCell<GuiContext>>,
-    Rc<RefCell<dyn IBrowserPane>>, // 8
 );
 impl HandleSingleEvent for HandleDialogData {
-    fn handle(&self, ev: GuiEvents) {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         match ev {
             GuiEvents::DialogData(ref ident, ref payload) => {
                 match ident.as_str() {
@@ -1274,7 +1236,7 @@ impl HandleSingleEvent for HandleDialogData {
                         (*self.7)
                             .borrow() // 8 : ManualFontSize
                             .set_conf_fontsize_manual(payload.get(8).unwrap().int().unwrap());
-                        (*self.8)
+                        (*self.0)
                             .borrow_mut() // 9 : browser bg
                             .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
                         (self.1).borrow().set_val(
@@ -1292,7 +1254,7 @@ impl HandleSingleEvent for HandleDialogData {
                                 systray_e.boo().to_string(), // 12 : enable systray
                             );
                         }
-                        (*self.0).borrow().addjob(Job::NotifyConfigChanged);
+                        gp.addjob(Job::NotifyConfigChanged);
                     }
                     _ => {
                         warn!("other DialogData: {:?}  {:?} ", &ident, payload);
@@ -1304,9 +1266,21 @@ impl HandleSingleEvent for HandleDialogData {
     }
 }
 
+struct HandleDialogData2();
+impl HandleSingleEvent for HandleDialogData2 {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::DialogData(ref ident, ref payload) => {
+                gp.process_dialogdata(ident.clone(), payload.clone());
+            }
+            _ => (),
+        }
+    }
+}
+
 struct HandleDialogEditData(Rc<RefCell<dyn ISourceTreeController>>);
 impl HandleSingleEvent for HandleDialogEditData {
-    fn handle(&self, ev: GuiEvents) {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         match ev {
             GuiEvents::DialogEditData(ref ident, ref payload) => match ident.as_str() {
                 "feedsource-edit" => {
@@ -1318,6 +1292,64 @@ impl HandleSingleEvent for HandleDialogEditData {
                     warn!(" other DialogEditData  {:?} {:?}", &ident, payload);
                 }
             },
+            _ => (),
+        }
+    }
+}
+
+struct HandleTreeEvent(Rc<RefCell<dyn ISourceTreeController>>);
+impl HandleSingleEvent for HandleTreeEvent {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) => match command.as_str() {
+                "feedsource-delete-dialog" => {
+                    (*self.0)
+                        .borrow_mut()
+                        .start_delete_dialog(src_repo_id as isize);
+                }
+                "feedsource-update" => {
+                    self.0
+                        .borrow_mut()
+                        .mark_schedule_fetch(src_repo_id as isize);
+                }
+                "feedsource-edit-dialog" => {
+                    (*self.0)
+                        .borrow_mut()
+                        .start_feedsource_edit_dialog(src_repo_id as isize);
+                }
+                "feedsource-mark-as-read" => {
+                    (*self.0).borrow_mut().mark_as_read(src_repo_id as isize);
+                }
+                "new-folder-dialog" => {
+                    (*self.0)
+                        .borrow_mut()
+                        .start_new_fol_sub_dialog(src_repo_id as isize, DIALOG_NEW_FOLDER);
+                }
+                "new-subscription-dialog" => {
+                    (*self.0)
+                        .borrow_mut()
+                        .start_new_fol_sub_dialog(src_repo_id as isize, DIALOG_NEW_SUBSCRIPTION);
+                }
+                _ => {
+                    warn!("unknown command for TreeEvent   {}", command);
+                }
+            },
+            _ => (),
+        }
+    }
+}
+
+struct HandleTreeDragEvent(Rc<RefCell<dyn ISubscriptionMove>>);
+impl HandleSingleEvent for HandleTreeDragEvent {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        match ev {
+            GuiEvents::TreeDragEvent(_tree_nr, ref from_path, ref to_path) => {
+                let _success = self.0.borrow().on_subscription_drag(
+                    _tree_nr,
+                    from_path.clone(),
+                    to_path.clone(),
+                );
+            }
             _ => (),
         }
     }

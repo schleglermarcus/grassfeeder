@@ -43,8 +43,8 @@ fn shutdown_store_ini() {
         let pane_pos = 192;
         let _r = event_sender.send(GuiEvents::PanedMoved(0, pane_pos));
         let _r = event_sender.send(GuiEvents::WinDelete);
-        (*gp_r).borrow_mut().process_event();
-        (*gp_r).borrow_mut().process_jobs();
+        (*gp_r).borrow().process_event();
+        (*gp_r).borrow().process_jobs();
         (*timer_r).borrow_mut().main_loop();
         let conf_filename = combine_config_path(&folder);
         let lines = std::fs::read_to_string(conf_filename).unwrap();
@@ -86,9 +86,8 @@ fn add_folder_and_feed() {
     let gp_r = appcontext.get_rc::<GuiProcessor>().unwrap();
     let _r = event_sender.send(GuiEvents::DialogData("new-feedsource".to_string(), payload));
     for _a in 0..2 {
-        let gp = (*gp_r).borrow_mut();
-        gp.process_event();
-        gp.process_jobs();
+        (*gp_r).borrow().process_event();
+        (*gp_r).borrow().process_jobs();
     }
     let entries = (*(subs_r.borrow_mut())).get_all_entries();
     // for e in &entries {        trace!("SUB={:?}", e);    }
