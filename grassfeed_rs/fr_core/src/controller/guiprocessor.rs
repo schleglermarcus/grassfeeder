@@ -185,38 +185,6 @@ impl GuiProcessor {
                     GuiEvents::None => {}
                     GuiEvents::ListRowActivated(_l, _p, _m) => {} // handled above
                     /*
-                    GuiEvents::MenuActivate(ref s) => match s.as_str() {
-                        "M_FILE_QUIT" => {
-                            self.addjob(Job::StopApplication);
-                        }
-                        "M_SETTINGS" => {
-                            self.start_settings_dialog();
-                        }
-                        "M_ABOUT" => {
-                            self.start_about_dialog();
-                        },
-                        "M_SHORT_HELP" => {
-                            (*self.browserpane_r).borrow().display_short_help();
-                        }
-                        _ => warn!("Menu Unprocessed:{:?} ", s),
-                    },
-
-                    GuiEvents::ButtonClicked(ref b) => match b.as_str() {
-                        "button1" => {
-                            info!("ButtonClicked: button1");
-                        }
-                        _ => debug!("GP2 Button:  {:?}", b),
-                    },
-                    GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) => {
-                        (*self.feedsources_r) // set it first into sources, we need that at contents for the focus
-                            .borrow_mut()
-                            .set_selected_feedsource(subs_id as isize);
-                        // trace!("GP:TreeRowActivated{}  {:?} ", subs_id, _path);
-                        (*self.contentlist_r)
-                            .borrow()
-                            .update_message_list_(subs_id as isize);
-                        self.focus_by_tab.replace(FocusByTab::FocusSubscriptions);
-                    }
                     GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
                         self.focus_by_tab.replace(FocusByTab::FocusMessages);
                         (*self.contentlist_r)
@@ -239,7 +207,6 @@ impl GuiProcessor {
                             warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
                         }
                     }
-                    */
                     GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
                         0 => {
                             if pos < TREE_PANE1_MIN_WIDTH {
@@ -271,6 +238,7 @@ impl GuiProcessor {
                             warn!(" other DialogEditData  {:?} {:?}", &ident, payload);
                         }
                     },
+                    */
                     GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) => {
                         match command.as_str() {
                             "feedsource-delete-dialog" => {
@@ -565,6 +533,7 @@ impl GuiProcessor {
         }
     }
 
+    #[deprecated]
     pub fn process_dialogdata(&self, ident: String, payload: Vec<AValue>) {
         match ident.as_str() {
             "new-folder" => {
@@ -977,9 +946,15 @@ impl StartupWithAppContext for GuiProcessor {
         }
 
         // ---------------
-        let sourcetree_r: Rc<RefCell<dyn ISourceTreeController>> =
-            ac.get_rc::<SourceTreeController>().unwrap();
-        let feedcontents_r: Rc<RefCell<dyn IFeedContents>> = ac.get_rc::<FeedContents>().unwrap();
+        // let sourcetree_r: Rc<RefCell<dyn ISourceTreeController>> =            ac.get_rc::<SourceTreeController>().unwrap();
+        // let feedcontents_r: Rc<RefCell<dyn IFeedContents>> = ac.get_rc::<FeedContents>().unwrap();
+        let guicontex_r = ac.get_rc::<GuiContext>().unwrap();
+        let updater_adapter: Rc<RefCell<dyn UIUpdaterAdapter>> =
+            (*guicontex_r).borrow().get_updater_adapter();
+        // let configmanager_r = ac.get_rc::<ConfigManager>().unwrap();
+        // let subscriptionmove_r = ac.get_rc::<SubscriptionMove>().unwrap();
+        // let feedsources_r = ac.get_rc::<SourceTreeController>().unwrap();
+        // let subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
 
         self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2(gp_r.clone()));
         self.add_handler(
@@ -992,15 +967,45 @@ impl StartupWithAppContext for GuiProcessor {
         );
         self.add_handler(
             &GuiEvents::TreeRowActivated(0, Vec::default(), 0),
-            HandleTreeRowActivated(gp_r.clone(), sourcetree_r.clone(), feedcontents_r.clone()),
+            HandleTreeRowActivated(
+                gp_r.clone(),
+                self.feedsources_r.clone(),
+                self.contentlist_r.clone(),
+            ),
         );
         self.add_handler(
             &GuiEvents::ListRowDoubleClicked(0, 0, 0),
-            HandleListRowDoubleClicked(gp_r.clone(), feedcontents_r.clone()),
+            HandleListRowDoubleClicked(gp_r.clone(), self.contentlist_r.clone()),
         );
         self.add_handler(
             &GuiEvents::ListCellClicked(0, 0, 0, 0),
-            HandleListCellClicked(gp_r.clone(), feedcontents_r.clone()),
+            HandleListCellClicked(gp_r.clone(), self.contentlist_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::PanedMoved(0, 0),
+            HandlePanedMoved(updater_adapter.clone(), self.configmanager_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::WindowSizeChanged(0, 0),
+            HandleWindowSizeChanged(self.configmanager_r.clone()),
+        );
+        self.add_handler(
+            &GuiEvents::DialogData(String::default(), Vec::default()),
+            HandleDialogData(
+                gp_r.clone(),
+                self.configmanager_r.clone(),
+                self.subscriptionmove_r.clone(),
+                self.feedsources_r.clone(),
+                self.subscriptionrepo_r.clone(), //4
+                self.downloader_r.clone(),
+                self.contentlist_r.clone(), // 6
+                self.gui_context_r.clone(),
+                self.browserpane_r.clone(),
+            ),
+        );
+        self.add_handler(
+            &GuiEvents::DialogEditData(String::default(), AValue::None),
+            HandleDialogEditData(self.feedsources_r.clone()),
         );
     }
 }
@@ -1135,6 +1140,184 @@ impl HandleSingleEvent for HandleListCellClicked {
                     warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
                 }
             }
+            _ => (),
+        }
+    }
+}
+
+struct HandlePanedMoved(
+    Rc<RefCell<dyn UIUpdaterAdapter>>,
+    Rc<RefCell<ConfigManager>>,
+);
+impl HandleSingleEvent for HandlePanedMoved {
+    fn handle(&self, ev: GuiEvents) {
+        match ev {
+            GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
+                0 => {
+                    if pos < TREE_PANE1_MIN_WIDTH {
+                        (*self.0)
+                            .borrow()
+                            .update_paned_pos(PANED_1_LEFT, TREE_PANE1_MIN_WIDTH);
+                    } else {
+                        (*self.1).borrow_mut().store_gui_pane1_pos(pos);
+                    }
+                }
+                1 => (*self.1).borrow_mut().store_gui_pane2_pos(pos),
+                _ => {}
+            },
+            _ => (),
+        }
+    }
+}
+
+struct HandleWindowSizeChanged(Rc<RefCell<ConfigManager>>);
+impl HandleSingleEvent for HandleWindowSizeChanged {
+    fn handle(&self, ev: GuiEvents) {
+        match ev {
+            GuiEvents::WindowSizeChanged(width, height) => {
+                (*self.0).borrow_mut().store_window_size(width, height);
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleDialogData(
+    Rc<RefCell<GuiProcessor>>,
+    Rc<RefCell<ConfigManager>>,
+    Rc<RefCell<dyn ISubscriptionMove>>,
+    Rc<RefCell<dyn ISourceTreeController>>,
+    Rc<RefCell<dyn ISubscriptionRepo>>, //4
+    Rc<RefCell<dyn IDownloader>>,
+    Rc<RefCell<dyn IFeedContents>>, // 6
+    Rc<RefCell<GuiContext>>,
+    Rc<RefCell<dyn IBrowserPane>>, // 8
+);
+impl HandleSingleEvent for HandleDialogData {
+    fn handle(&self, ev: GuiEvents) {
+        match ev {
+            GuiEvents::DialogData(ref ident, ref payload) => {
+                match ident.as_str() {
+                    "new-folder" => {
+                        if let Some(AValue::ASTR(s)) = payload.get(0) {
+                            (*self.2).borrow_mut().add_new_folder(s.to_string());
+                        }
+                    }
+                    "new-feedsource" => {
+                        if payload.len() < 2 {
+                            error!("new-feedsource, too few data ");
+                        } else if let (Some(AValue::ASTR(ref s0)), Some(AValue::ASTR(ref s1))) =
+                            (payload.get(0), payload.get(1))
+                        {
+                            let new_id = self
+                                .2
+                                .borrow_mut()
+                                .add_new_subscription(s0.clone(), s1.clone());
+                            if new_id > 0 {
+                                self.3.borrow_mut().addjob(SJob::ScheduleUpdateFeed(new_id));
+                            }
+                        }
+                    }
+                    "import-opml" => {
+                        if let Some(AValue::ASTR(ref s)) = payload.get(0) {
+                            self.2.borrow_mut().import_opml(s.to_string());
+                        }
+                    }
+                    "export-opml" => {
+                        if let Some(AValue::ASTR(ref s)) = payload.get(0) {
+                            let mut opmlreader = OpmlReader::new(self.4.clone());
+                            opmlreader.transfer_from_db();
+                            match opmlreader.write_to_file(s.to_string()) {
+                                Ok(()) => {
+                                    debug!("Writing {} success ", s);
+                                }
+                                Err(e) => {
+                                    warn!("Writing {} : {:?}", s, e);
+                                }
+                            }
+                        }
+                    }
+                    "feedsource-delete" => {
+                        self.2.borrow_mut().move_subscription_to_trash();
+                    }
+                    "subscription-edit-ok" => {
+                        self.3.borrow_mut().end_feedsource_edit_dialog(&payload);
+                    }
+                    "folder-edit" => {
+                        self.3.borrow_mut().end_feedsource_edit_dialog(&payload);
+                    }
+                    "settings" => {
+                        self.3
+                            .borrow_mut()
+                            .set_conf_load_on_start(payload.get(0).unwrap().boo());
+                        self.3
+                            .borrow_mut()
+                            .set_conf_fetch_interval(payload.get(1).unwrap().int().unwrap());
+                        self.3
+                            .borrow_mut()
+                            .set_conf_fetch_interval_unit(payload.get(2).unwrap().int().unwrap());
+                        self.5
+                            .borrow_mut()
+                            .set_conf_num_threads(payload.get(3).unwrap().int().unwrap() as u8);
+                        self.6
+                            .borrow_mut()
+                            .set_conf_focus_policy(payload.get(4).unwrap().int().unwrap() as u8);
+                        self.3
+                            .borrow_mut() // 5 : DisplayCountOfAllFeeds
+                            .set_conf_display_feedcount_all(payload.get(5).unwrap().boo());
+                        self.6
+                            .borrow_mut()
+                            .set_conf_msg_keep_count(payload.get(6).unwrap().int().unwrap());
+                        (*self.7)
+                            .borrow() // 7 : ManualFontSizeEnable
+                            .set_conf_fontsize_manual_enable(payload.get(7).unwrap().boo());
+                        (*self.7)
+                            .borrow() // 8 : ManualFontSize
+                            .set_conf_fontsize_manual(payload.get(8).unwrap().int().unwrap());
+                        (*self.8)
+                            .borrow_mut() // 9 : browser bg
+                            .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
+                        (self.1).borrow().set_val(
+                            &PropDef::BrowserClearCache.to_string(),
+                            payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
+                        );
+                        (self.1).borrow().set_val(
+                            contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
+                            payload.get(11).unwrap().boo().to_string(),
+                        );
+
+                        if let Some(systray_e) = payload.get(12) {
+                            (self.1).borrow().set_val(
+                                &PropDef::SystrayEnable.to_string(),
+                                systray_e.boo().to_string(), // 12 : enable systray
+                            );
+                        }
+                        (*self.0).borrow().addjob(Job::NotifyConfigChanged);
+                    }
+                    _ => {
+                        warn!("other DialogData: {:?}  {:?} ", &ident, payload);
+                    }
+                }
+            }
+            _ => (),
+        }
+    }
+}
+
+struct HandleDialogEditData(Rc<RefCell<dyn ISourceTreeController>>);
+impl HandleSingleEvent for HandleDialogEditData {
+    fn handle(&self, ev: GuiEvents) {
+        match ev {
+            GuiEvents::DialogEditData(ref ident, ref payload) => match ident.as_str() {
+                "feedsource-edit" => {
+                    if let Some(edit_url) = payload.str() {
+                        (*self.0).borrow_mut().newsource_dialog_edit(edit_url);
+                    }
+                }
+                _ => {
+                    warn!(" other DialogEditData  {:?} {:?}", &ident, payload);
+                }
+            },
             _ => (),
         }
     }
