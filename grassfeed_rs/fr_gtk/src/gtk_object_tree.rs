@@ -698,15 +698,6 @@ pub fn create_toolbar(
                 sw.is_active(),
             ));
         });
-        let ttb2: ToggleToolButton = ToggleToolButtonBuilder::new().label("Special2").build();
-        toolbar.insert(&ttb2, -1);
-        let esw = EvSenderWrapper(g_ev_se.clone());
-        ttb2.connect_active_notify(move |sw| {
-            esw.sendw(GuiEvents::ToolBarToggle(
-                "special2".to_string(),
-                sw.is_active(),
-            ));
-        });
     }
     // toolbar
     containing_box.add(&toolbar);

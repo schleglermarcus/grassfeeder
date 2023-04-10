@@ -222,7 +222,6 @@ pub fn create_new_subscription_dialog(
     }
     box3h.pack_end(&image_icon, false, false, 0);
     box1v.pack_start(&box3h, false, false, 1);
-    // let spinner_c = spinner.clone();
     let ev_se = g_ev_se.clone();
     entry_url.connect_text_notify(move |entry_url| {
         let e_text = entry_url.text().as_str().to_string();
@@ -844,12 +843,13 @@ fn create_settings_dialog(
         grid2.attach(&label2_5, 0, line, 1, 1);
         grid2.attach(&sw_browser_cache_clear, 1, line, 1, 1);
         sw_browser_cache_clear.set_halign(Align::Start);
-
-        line += 1;
-        let label2_5 = Label::new(Some(&t!("D_SETTINGS_SYSTRAY_ICON_ENABLE")));
-        grid2.attach(&label2_5, 0, line, 1, 1);
-        // grid2.attach(&sw_enable_systray, 1, line, 1, 1);
-        // sw_enable_systray.set_halign(Align::Start);
+        if false {
+            line += 1;
+            let label2_5 = Label::new(Some(&t!("D_SETTINGS_SYSTRAY_ICON_ENABLE")));
+            grid2.attach(&label2_5, 0, line, 1, 1);
+            //  grid2.attach(&sw_enable_systray, 1, line, 1, 1);
+            //  sw_enable_systray.set_halign(Align::Start);
+        }
     }
     let ev_se = g_ev_se;
     let sw_subs_update_onstart_c = sw_subs_update_onstart.clone();

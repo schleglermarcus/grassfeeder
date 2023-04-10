@@ -160,114 +160,34 @@ impl GuiProcessor {
             }
         }
         let mut list_row_activated_map: HashMap<i32, i32> = HashMap::default();
-        for ev in &ev_set {
+        for ev in ev_set {
             match ev {
+                GuiEvents::None => {}
                 GuiEvents::ListRowActivated(_list_idx, list_position, msg_id) => {
-                    list_row_activated_map.insert(*msg_id, *list_position);
+                    list_row_activated_map.insert(msg_id, list_position);
                 }
-                _ => (),
+                _ => {
+                    if let Some(handler_b) =
+                        self.event_handler_map.get(&std::mem::discriminant(&ev))
+                    {
+                        let ev_ident = (Instant::now(), format!("{:?}", &ev));
+                        handler_b.handle(ev, self);
+                        let elapsed_m = ev_ident.0.elapsed().as_millis();
+                        if elapsed_m > 100 {
+                            debug!("EV  {}   took {:?}", ev_ident.1, elapsed_m);
+                        }
+                    } else {
+                        warn!("EV not found: {:?}", &ev);
+                    }
+                }
             }
         }
+
         if !list_row_activated_map.is_empty() {
             self.focus_by_tab.replace(FocusByTab::FocusMessages);
             (*self.contentlist_r)
                 .borrow()
                 .process_list_row_activated(&list_row_activated_map);
-        }
-
-        for ev in ev_set {
-            let ev_ident = (Instant::now(), format!("{:?}", &ev));
-            if let Some(handler_b) = self.event_handler_map.get(&std::mem::discriminant(&ev)) {
-                // trace!("GP: ev={:?} ", &ev);
-                handler_b.handle(ev, self);
-            } else {
-                match ev {
-                    GuiEvents::None => {}
-                    GuiEvents::ListRowActivated(_l, _p, _m) => {} // handled above
-
-                    /*
-                    GuiEvents::ColumnWidth(col_nr, width) => {
-                        (*(self.configmanager_r.borrow_mut())).store_column_width(col_nr, width);
-                    }
-                    GuiEvents::ListSelected(_list_idx, ref selected_list) => {
-                        (*self.contentlist_r)
-                            .borrow()
-                            .set_selected_content_ids(selected_list.clone());
-                    }
-                    GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) => {
-                        if list_idx == 0 {
-                            (*self.contentlist_r)
-                                .borrow()
-                                .process_list_action(action.clone(), repoid_list_pos.clone());
-                        }
-                    }
-                    GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) => {
-                        if list_idx == 0 {
-                            (*self.contentlist_r)
-                                .borrow_mut()
-                                .set_sort_order(col_id, ascending);
-                        }
-                    }
-                    GuiEvents::KeyPressed(keycode, o_char) => {
-                        self.process_key_press(keycode, o_char);
-                    }
-                    GuiEvents::SearchEntryTextChanged(_idx, ref newtext) => {
-                        (*self.contentlist_r)
-                            .borrow_mut()
-                            .set_messages_filter(newtext);
-                    }
-                    GuiEvents::WindowThemeChanged(ref theme_name) => {
-                        (*self.gui_context_r).borrow().set_theme_name(theme_name);
-                    }
-                    GuiEvents::WindowIconified(is_minimized) => {
-                        self.currently_minimized.replace(is_minimized);
-                        (*self.feedsources_r)
-                            .borrow_mut()
-                            .memory_conserve(is_minimized);
-                        (*self.contentlist_r)
-                            .borrow_mut()
-                            .memory_conserve(is_minimized);
-                        (*self.gui_val_store)
-                            .write()
-                            .unwrap()
-                            .memory_conserve(is_minimized);
-                        (*self.gui_updater).borrow().memory_conserve(is_minimized);
-                    }
-                    GuiEvents::Indicator(ref cmd, gtktime) => match cmd.as_str() {
-                        "app-quit" => {
-                            self.addjob(Job::StopApplication);
-                        }
-                        "show-window" => {
-                            // trace!(                            "Indicator -> show-window!  cur-min {}  time:{}",                            self.currently_minimized, gtktime                        );
-                            let cur_m = *self.currently_minimized.borrow();
-                            self.currently_minimized.replace(!cur_m);
-                            (*self.gui_updater)
-                                .borrow()
-                                .update_window_minimized(cur_m, gtktime);
-                        }
-                        _ => {
-                            warn!("unknown indicator event");
-                        }
-                    },
-                    GuiEvents::DragDropUrlReceived(ref url) => {
-                        (*self.downloader_r).borrow().browser_drag_request(url);
-                    }
-                    GuiEvents::BrowserEvent(ref ev_type, value) => {
-                        if ev_type == &BrowserEventType::LoadingProgress {
-                            self.statusbar.borrow_mut().browser_loading_progress = value as u8;
-                        }
-                    }
-                    */
-                    _ => {
-                        warn!("other GuiEvents: {:?}", &ev);
-                    }
-                }
-            }
-
-            let elapsed_m = ev_ident.0.elapsed().as_millis();
-            if elapsed_m > 100 {
-                debug!("EV  {}   took {:?}", ev_ident.1, elapsed_m);
-            }
         }
     }
 
@@ -364,125 +284,6 @@ impl GuiProcessor {
             }
         }
     }
-
-    /*
-       #[deprecated]
-       pub fn process_dialogdata(&self, ident: String, payload: Vec<AValue>) {
-           match ident.as_str() {
-               "new-folder" => {
-                   if let Some(AValue::ASTR(s)) = payload.get(0) {
-                       (*self.subscriptionmove_r)
-                           .borrow_mut()
-                           .add_new_folder(s.to_string());
-                   }
-               }
-               "new-feedsource" => {
-                   if payload.len() < 2 {
-                       error!("new-feedsource, too few data ");
-                   } else if let (Some(AValue::ASTR(ref s0)), Some(AValue::ASTR(ref s1))) =
-                       (payload.get(0), payload.get(1))
-                   {
-                       let new_id = self
-                           .subscriptionmove_r
-                           .borrow_mut()
-                           .add_new_subscription(s0.clone(), s1.clone());
-                       if new_id > 0 {
-                           self.feedsources_r
-                               .borrow_mut()
-                               .addjob(SJob::ScheduleUpdateFeed(new_id));
-                       }
-                   }
-               }
-               "import-opml" => {
-                   if let Some(AValue::ASTR(ref s)) = payload.get(0) {
-                       (*self.subscriptionmove_r)
-                           .borrow_mut()
-                           .import_opml(s.to_string());
-                   }
-               }
-               "export-opml" => {
-                   if let Some(AValue::ASTR(ref s)) = payload.get(0) {
-                       let mut opmlreader = OpmlReader::new(self.subscriptionrepo_r.clone());
-                       opmlreader.transfer_from_db();
-                       match opmlreader.write_to_file(s.to_string()) {
-                           Ok(()) => {
-                               debug!("Writing {} success ", s);
-                           }
-                           Err(e) => {
-                               warn!("Writing {} : {:?}", s, e);
-                           }
-                       }
-                   }
-               }
-               "feedsource-delete" => {
-                   self.subscriptionmove_r
-                       .borrow_mut()
-                       .move_subscription_to_trash();
-               }
-               "subscription-edit-ok" => {
-                   self.feedsources_r
-                       .borrow_mut()
-                       .end_feedsource_edit_dialog(&payload);
-               }
-               "folder-edit" => {
-                   self.feedsources_r
-                       .borrow_mut()
-                       .end_feedsource_edit_dialog(&payload);
-               }
-               "settings" => {
-                   self.feedsources_r
-                       .borrow_mut()
-                       .set_conf_load_on_start(payload.get(0).unwrap().boo());
-                   self.feedsources_r
-                       .borrow_mut()
-                       .set_conf_fetch_interval(payload.get(1).unwrap().int().unwrap());
-                   self.feedsources_r
-                       .borrow_mut()
-                       .set_conf_fetch_interval_unit(payload.get(2).unwrap().int().unwrap());
-                   self.downloader_r
-                       .borrow_mut()
-                       .set_conf_num_threads(payload.get(3).unwrap().int().unwrap() as u8);
-                   self.contentlist_r
-                       .borrow_mut()
-                       .set_conf_focus_policy(payload.get(4).unwrap().int().unwrap() as u8);
-                   self.feedsources_r
-                       .borrow_mut() // 5 : DisplayCountOfAllFeeds
-                       .set_conf_display_feedcount_all(payload.get(5).unwrap().boo());
-                   self.contentlist_r
-                       .borrow_mut()
-                       .set_conf_msg_keep_count(payload.get(6).unwrap().int().unwrap());
-                   (*self.gui_context_r)
-                       .borrow() // 7 : ManualFontSizeEnable
-                       .set_conf_fontsize_manual_enable(payload.get(7).unwrap().boo());
-                   (*self.gui_context_r)
-                       .borrow() // 8 : ManualFontSize
-                       .set_conf_fontsize_manual(payload.get(8).unwrap().int().unwrap());
-                   (*self.browserpane_r)
-                       .borrow_mut() // 9 : browser bg
-                       .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
-                   (self.configmanager_r).borrow().set_val(
-                       &PropDef::BrowserClearCache.to_string(),
-                       payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
-                   );
-                   (self.configmanager_r).borrow().set_val(
-                       contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
-                       payload.get(11).unwrap().boo().to_string(),
-                   );
-
-                   if let Some(systray_e) = payload.get(12) {
-                       (self.configmanager_r).borrow().set_val(
-                           &PropDef::SystrayEnable.to_string(),
-                           systray_e.boo().to_string(), // 12 : enable systray
-                       );
-                   }
-                   self.addjob(Job::NotifyConfigChanged);
-               }
-               _ => {
-                   warn!("other DialogData: {:?}  {:?} ", &ident, payload);
-               }
-           }
-       }
-    */
 
     pub fn addjob(&self, nj: Job) {
         if self.job_queue_sender.is_full() {
@@ -690,6 +491,7 @@ impl GuiProcessor {
         self.event_handler_map
             .insert(std::mem::discriminant(&ev), Box::new(handler));
     }
+
     // GuiProcessor
 }
 

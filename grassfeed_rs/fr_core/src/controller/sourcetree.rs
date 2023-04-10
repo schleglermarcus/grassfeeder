@@ -158,7 +158,6 @@ impl SourceTreeController {
         err_rep: Rc<RefCell<ErrorRepo>>,
     ) -> Self {
         let (q_s, q_r) = flume::bounded::<SJob>(JOBQUEUE_SIZE);
-        // let statemap_ = Rc::new(RefCell::new(SubscriptionState::default()));
         let confi = Rc::new(RefCell::new(Config::default()));
         SourceTreeController {
             timer_r: timer_,
@@ -168,12 +167,10 @@ impl SourceTreeController {
             job_queue_sender: q_s,
             job_queue_receiver: q_r,
             gui_updater: upd_ad,
-
             gui_val_store: v_s_a,
             any_spinner_visible: RefCell::new(false),
             feedcontents_w: Weak::new(),
             downloader_r: downloader_,
-            // feedsource_delete_id: None,
             current_edit_fse: None,
             config: confi,
             new_source: RefCell::new(NewSourceTempData::default()),
@@ -185,8 +182,6 @@ impl SourceTreeController {
             erro_repo_r: err_rep,
             currently_minimized: false,
             current_new_folder_parent_id: None,
-            //
-            // need_check_fs_paths: RefCell::new(true),
         }
     }
 
@@ -202,31 +197,34 @@ impl SourceTreeController {
             let now = Instant::now();
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
-                    let o_subs_state = self
-                        .statemap
-                        .borrow_mut()
-                        .set_num_all_unread(subs_id, msg_all, msg_unread);
-                    if let Some(su_st) = o_subs_state {
-                        let subs_e = (*self.subscriptionrepo_r)
-                            .borrow()
-                            .get_by_index(subs_id)
-                            .unwrap();
-                        // trace!(                            "NotifyTreeReadCount {} {}/{} clearing parent {} ",                            subs_id,                            msg_unread,                            msg_all,                            subs_e.parent_subs_id                        );
-                        if subs_e.parent_subs_id > 0 {
-                            self.statemap
-                                .borrow_mut()
-                                .clear_num_all_unread(subs_e.parent_subs_id);
-                            self.addjob(SJob::ScanEmptyUnread);
-                        }
-                        if !self.tree_update_one(&subs_e, &su_st) {
-                            // self.need_check_fs_paths.replace(true);
-                            if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
-                                subs_mov.borrow_mut().request_check_paths(true);
-                            }
-                        }
-                    } else {
-                        warn!("could not store readcount for id {}", subs_id);
-                    }
+                    self.process_tree_read_count(subs_id, msg_all, msg_unread);
+                    /*
+                                       let o_subs_state = self
+                                           .statemap
+                                           .borrow_mut()
+                                           .set_num_all_unread(subs_id, msg_all, msg_unread);
+                                       if let Some(su_st) = o_subs_state {
+                                           let subs_e = (*self.subscriptionrepo_r)
+                                               .borrow()
+                                               .get_by_index(subs_id)
+                                               .unwrap();
+                                           // trace!(                            "NotifyTreeReadCount {} {}/{} clearing parent {} ",                            subs_id,                            msg_unread,                            msg_all,                            subs_e.parent_subs_id                        );
+                                           if subs_e.parent_subs_id > 0 {
+                                               self.statemap
+                                                   .borrow_mut()
+                                                   .clear_num_all_unread(subs_e.parent_subs_id);
+                                               self.addjob(SJob::ScanEmptyUnread);
+                                           }
+                                           if !self.tree_update_one(&subs_e, &su_st) {
+                                               // self.need_check_fs_paths.replace(true);
+                                               if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                                                   subs_mov.borrow_mut().request_check_paths(true);
+                                               }
+                                           }
+                                       } else {
+                                           warn!("could not store readcount for id {}", subs_id);
+                                       }
+                    */
                 }
                 SJob::UpdateTreePaths => {
                     if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
@@ -327,42 +325,13 @@ impl SourceTreeController {
                         subs_mov.borrow_mut().empty_create_default_subscriptions();
                     }
                 }
-                SJob::DragUrlEvaluated(
-                    ref drag_string,
-                    ref feed_url,
-                    ref err_msg,
-                    ref hp_title,
-                ) => {
-                    if !err_msg.is_empty() {
-                        debug!(
-                            "DragUrlEvaluated: {}  url:{}:   ERR  {} ",
-                            drag_string, feed_url, err_msg,
-                        );
-                    }
-                    let av_ti = if hp_title.is_empty() {
-                        AValue::None
-                    } else {
-                        AValue::ASTR(hp_title.clone())
-                    };
-                    if !feed_url.is_empty() {
-                        let dd: Vec<AValue> = vec![
-                            AValue::None,                   // 0:display
-                            av_ti,                          // 1: homepage
-                            AValue::None,                   // 2: icon_str
-                            AValue::ABOOL(true),            // 3 :spinner
-                            AValue::ASTR(feed_url.clone()), // 4: feed url
-                        ];
-                        (*self.gui_val_store)
-                            .write()
-                            .unwrap()
-                            .set_dialog_data(DIALOG_NEW_SUBSCRIPTION, &dd);
-                        (*self.gui_updater)
-                            .borrow()
-                            .update_dialog(DIALOG_NEW_SUBSCRIPTION);
-                        (*self.gui_updater)
-                            .borrow()
-                            .show_dialog(DIALOG_NEW_SUBSCRIPTION);
-                    }
+                SJob::DragUrlEvaluated(ref dragged, ref feed_url, ref err_msg, ref hp_title) => {
+                    self.process_drag_url_eval(
+                        dragged.to_string(),
+                        feed_url.to_string(),
+                        err_msg.to_string(),
+                        hp_title.to_string(),
+                    );
                 }
                 SJob::SetCursorToSubsID(subs_id) => {
                     if let Some(path) = self.get_path_for_src(subs_id) {
@@ -378,6 +347,73 @@ impl SourceTreeController {
                     debug!("   SJOB: {:?} took {:?}", &job, elapsed_m);
                 }
             }
+        }
+    }
+
+    fn process_drag_url_eval(
+        &self,
+        drag_text: String,
+        feed_url: String,
+        err_msg: String,
+        hp_title: String,
+    ) {
+        if !err_msg.is_empty() {
+            debug!(
+                "DragUrlEvaluated: {}  url:{}:   ERR  {} ",
+                drag_text, feed_url, err_msg,
+            );
+        }
+        let av_ti = if hp_title.is_empty() {
+            AValue::None
+        } else {
+            AValue::ASTR(hp_title.clone())
+        };
+        if !feed_url.is_empty() {
+            let dd: Vec<AValue> = vec![
+                AValue::None,                   // 0:display
+                av_ti,                          // 1: homepage
+                AValue::None,                   // 2: icon_str
+                AValue::ABOOL(true),            // 3 :spinner
+                AValue::ASTR(feed_url.clone()), // 4: feed url
+            ];
+            (*self.gui_val_store)
+                .write()
+                .unwrap()
+                .set_dialog_data(DIALOG_NEW_SUBSCRIPTION, &dd);
+            (*self.gui_updater)
+                .borrow()
+                .update_dialog(DIALOG_NEW_SUBSCRIPTION);
+            (*self.gui_updater)
+                .borrow()
+                .show_dialog(DIALOG_NEW_SUBSCRIPTION);
+        }
+    }
+
+    fn process_tree_read_count(&self, subs_id: isize, msg_all: isize, msg_unread: isize) {
+        let o_subs_state = self
+            .statemap
+            .borrow_mut()
+            .set_num_all_unread(subs_id, msg_all, msg_unread);
+        if let Some(su_st) = o_subs_state {
+            let subs_e = (*self.subscriptionrepo_r)
+                .borrow()
+                .get_by_index(subs_id)
+                .unwrap();
+            // trace!(                            "NotifyTreeReadCount {} {}/{} clearing parent {} ",                            subs_id,                            msg_unread,                            msg_all,                            subs_e.parent_subs_id                        );
+            if subs_e.parent_subs_id > 0 {
+                self.statemap
+                    .borrow_mut()
+                    .clear_num_all_unread(subs_e.parent_subs_id);
+                self.addjob(SJob::ScanEmptyUnread);
+            }
+            if !self.tree_update_one(&subs_e, &su_st) {
+                // self.need_check_fs_paths.replace(true);
+                if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+                    subs_mov.borrow_mut().request_check_paths(true);
+                }
+            }
+        } else {
+            warn!("could not store readcount for id {}", subs_id);
         }
     }
 
@@ -468,8 +504,6 @@ impl SourceTreeController {
             if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
                 subs_mov.borrow_mut().request_check_paths(true);
             }
-
-            // self.need_check_fs_paths.replace(true);
         }
     }
 

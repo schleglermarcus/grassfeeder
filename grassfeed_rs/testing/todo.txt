@@ -5,13 +5,12 @@ To Do List
 	https://www.debian.org/doc/manuals/debian-handbook/debian-packaging.en.html
 	https://wiki.debian.org/Packaging/Intro
 	https://wiki.debian.org/HowToPackageForDebian
-
-	 https://salsa.debian.org/rust-team/debcargo-conf/
-   https://www.debian.org/doc/manuals/developers-reference/pkgs.html#newpackage
-	 https://wiki.debian.org/DebianMentorsFaq
-	 https://wiki.debian.org/Teams/RustPackaging
-   https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
-   https://blog.hackeriet.no/packaging-rust-part-II/
+  https://salsa.debian.org/rust-team/debcargo-conf/
+  https://www.debian.org/doc/manuals/developers-reference/pkgs.html#newpackage
+	https://wiki.debian.org/DebianMentorsFaq
+	https://wiki.debian.org/Teams/RustPackaging
+  https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
+  https://blog.hackeriet.no/packaging-rust-part-II/
   https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
 
 
@@ -22,7 +21,8 @@ To Do List
 
 
 
-- https://launchpad.net/grassfeeder
+-
+https://launchpad.net/grassfeeder
 https://help.launchpad.net/Packaging/PPA/Uploading
 https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
 https://packaging.ubuntu.com/html/packaging-new-software.html

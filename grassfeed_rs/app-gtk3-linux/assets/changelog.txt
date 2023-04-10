@@ -1,7 +1,13 @@
 grassfeeder (0.1.9) bionic; urgency=low
 
+  * refactored gui-events processor
   
   - debian package
+  
+  
+  - drag feed on feed bug
+  
+  - change cleaning out too many messages while running
 
  -- Marcus der Schlegler <schleglermarcus@posteo.de>  Mon, 05 Apr 2023 00:18:00 +0000
 
