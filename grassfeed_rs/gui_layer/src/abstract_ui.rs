@@ -319,31 +319,3 @@ impl TreeRowExpand {
     }
 }
 
-#[allow(non_camel_case_types)]
-#[derive(Debug)]
-pub enum KeyCodes {
-    Nothing = 0,
-    Tab,
-    ShiftTab,
-    Space,
-    Escape,
-    Enter,
-    Delete,
-    CursorUp,
-    CursorDown,
-    CursorRight,
-    CursorLeft,
-    F1,
-    F2,
-    F3,
-    F4,
-    Key_A,
-    Key_a,
-    Key_B,
-    Key_b,
-    Key_N,
-    Key_n,
-    Key_s,
-    Key_v,
-    Key_x,
-}

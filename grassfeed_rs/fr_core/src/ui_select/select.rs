@@ -2,9 +2,9 @@
 pub mod ui_select {
     use fr_gtk::gtk_object_tree::GtkObjectTree;
     use gui_layer::abstract_ui::GuiRunner;
-    use gui_layer::abstract_ui::KeyCodes;
     use gui_layer::abstract_ui::UIAdapterValueStoreType;
     use gui_layer::abstract_ui::UIUpdaterAdapter;
+    use gui_layer::gui_values::KeyCodes;
     use gui_layer::gui_values::PropDef;
     use std::cell::RefCell;
     use std::collections::HashMap;
@@ -49,9 +49,9 @@ pub mod ui_select {
 
     use crate::ui_select::uimock::UIMock;
     use gui_layer::abstract_ui::GuiRunner;
-    use gui_layer::abstract_ui::KeyCodes;
     use gui_layer::abstract_ui::UIAdapterValueStoreType;
     use gui_layer::abstract_ui::UIUpdaterAdapter;
+    use gui_layer::gui_values::KeyCodes;
     use gui_layer::gui_values::PropDef;
     use std::cell::RefCell;
     use std::collections::HashMap;

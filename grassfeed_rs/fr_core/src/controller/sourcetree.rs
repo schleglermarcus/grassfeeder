@@ -198,33 +198,6 @@ impl SourceTreeController {
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
                     self.process_tree_read_count(subs_id, msg_all, msg_unread);
-                    /*
-                                       let o_subs_state = self
-                                           .statemap
-                                           .borrow_mut()
-                                           .set_num_all_unread(subs_id, msg_all, msg_unread);
-                                       if let Some(su_st) = o_subs_state {
-                                           let subs_e = (*self.subscriptionrepo_r)
-                                               .borrow()
-                                               .get_by_index(subs_id)
-                                               .unwrap();
-                                           // trace!(                            "NotifyTreeReadCount {} {}/{} clearing parent {} ",                            subs_id,                            msg_unread,                            msg_all,                            subs_e.parent_subs_id                        );
-                                           if subs_e.parent_subs_id > 0 {
-                                               self.statemap
-                                                   .borrow_mut()
-                                                   .clear_num_all_unread(subs_e.parent_subs_id);
-                                               self.addjob(SJob::ScanEmptyUnread);
-                                           }
-                                           if !self.tree_update_one(&subs_e, &su_st) {
-                                               // self.need_check_fs_paths.replace(true);
-                                               if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
-                                                   subs_mov.borrow_mut().request_check_paths(true);
-                                               }
-                                           }
-                                       } else {
-                                           warn!("could not store readcount for id {}", subs_id);
-                                       }
-                    */
                 }
                 SJob::UpdateTreePaths => {
                     if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {

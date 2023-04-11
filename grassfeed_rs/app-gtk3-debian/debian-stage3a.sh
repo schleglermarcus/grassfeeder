@@ -3,20 +3,18 @@ DIR=`pwd`
 VERSION=`cat Cargo.toml  |grep "^version"  |sed -e "s/.*= \"//" -e "s/\"//"`
 test -d target || mkdir target
 
+
+cargo deb
 DEBFILE=`find ../target/debian -iname grassfeeder_*.deb |head -n1`
 
 
 echo "VERSION=$VERSION	DEBFILE=$DEBFILE"
 (cd ../../ ; tar c --exclude=target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >$DIR/target/grassfeeder-${VERSION}.tar.gz )
 
-# ../target/debian/grassfeeder_0.1.8~B1_amd64.deb
-# DEBFILE="../target/grassfeeder-$VERSION-"
 
-
-#  using  $DIR/target/gf.tar.gz    from stage2
 WORK="$DIR/target/deb-sign"
 mkdir $WORK
-(cd $WORK ;    ar -x  "../../$DEBFILE"  )		#	../gf.deb
+(cd $WORK ;    ar -x  "../../$DEBFILE"  )		
 (cd $WORK ;  cat control.tar.xz | unxz -d |tar x )
 mkdir $WORK/grassfeeder-$VERSION
 (cd $WORK/grassfeeder-$VERSION ; cat  $DIR/target/grassfeeder-${VERSION}.tar.gz |gzip -d |tar x )

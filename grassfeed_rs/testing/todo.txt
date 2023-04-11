@@ -1,25 +1,13 @@
 To Do List
 
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
-
-	https://www.debian.org/doc/manuals/debian-handbook/debian-packaging.en.html
 	https://wiki.debian.org/Packaging/Intro
 	https://wiki.debian.org/HowToPackageForDebian
   https://salsa.debian.org/rust-team/debcargo-conf/
   https://www.debian.org/doc/manuals/developers-reference/pkgs.html#newpackage
 	https://wiki.debian.org/DebianMentorsFaq
 	https://wiki.debian.org/Teams/RustPackaging
-  https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
-  https://blog.hackeriet.no/packaging-rust-part-II/
   https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
-
-
-
-- Use different app-indicator  lib
-
-
-
-
 
 -
 https://launchpad.net/grassfeeder
@@ -28,16 +16,23 @@ https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
 https://packaging.ubuntu.com/html/packaging-new-software.html
 
 
+Hackerjet: This tool "debcargo" does not work wit submodules-by-path
+  https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
+  https://blog.hackeriet.no/packaging-rust-part-II/
+
+
+
+
 
 Later:
 
+- Use different app-indicator  lib
 - 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20
-
 - GTK4: block multiple instances
-- process both sets of cmd parameters:   application   AND gtk, see runner_internal
+- GTK4: process both sets of cmd parameters:   application   AND gtk, see runner_internal
 	https://docs.gtk.org/gio/method.Application.run.html
 - Systray Icon integration
-- Re-create WebView
+
 
 - Alternatives for Gui:
    https://wasmer.io/posts/wasm-as-universal-binary-format-part-1-native-executables
@@ -61,8 +56,6 @@ Perhaps:
 - Updating Sources:  prioritize by tree position, expanded flag
 - Http download stream api,   falschzitate_blogspot.xml     http://falschzitate.blogspot.com/feeds/posts/default
 - Feed-Opml-Import with progress bar ?
-- Do extra recognition  to process   invalid feed titles  containg  &     :      dieneuewelle.xml
-
 
 
 No more
@@ -72,6 +65,7 @@ No more
     www.extremnews.com: address provided is broken
 		therationalmale.com:  title in feed is empty
 - Reduce Size of Binary:   https://lifthrasiir.github.io/rustlog/why-is-a-rust-executable-large.html
+
 
 
 

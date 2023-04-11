@@ -36,10 +36,10 @@ use gui_layer::abstract_ui::AValue;
 use gui_layer::abstract_ui::BrowserEventType;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::abstract_ui::GuiRunner;
-use gui_layer::abstract_ui::KeyCodes;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
+use gui_layer::gui_values::KeyCodes;
 use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
 use resources::id::DIALOG_ABOUT;
@@ -182,7 +182,6 @@ impl GuiProcessor {
                 }
             }
         }
-
         if !list_row_activated_map.is_empty() {
             self.focus_by_tab.replace(FocusByTab::FocusMessages);
             (*self.contentlist_r)
