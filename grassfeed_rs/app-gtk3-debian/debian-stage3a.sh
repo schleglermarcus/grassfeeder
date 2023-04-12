@@ -6,15 +6,15 @@ test -d target || mkdir target
 
 cargo deb
 DEBFILE=`find ../target/debian -iname grassfeeder_*.deb |head -n1`
-
+DEBFILENAME=`basename $DEBFILE` 
 
 echo "VERSION=$VERSION	DEBFILE=$DEBFILE"
 (cd ../../ ; tar c --exclude=target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >$DIR/target/grassfeeder-${VERSION}.tar.gz )
 
-
 WORK="$DIR/target/deb-sign"
 mkdir $WORK
-(cd $WORK ;    ar -x  "../../$DEBFILE"  )		
+cp -v $DEBFILE  $WORK/
+(cd $WORK ;    ar -x  "$DEBFILENAME"  )		
 (cd $WORK ;  cat control.tar.xz | unxz -d |tar x )
 mkdir $WORK/grassfeeder-$VERSION
 (cd $WORK/grassfeeder-$VERSION ; cat  $DIR/target/grassfeeder-${VERSION}.tar.gz |gzip -d |tar x )
@@ -31,7 +31,7 @@ echo "Section: web" >>$CT
 echo "Priority: optional" >>$CT
 echo "Maintainer: Marcus <schlegler_marcus@posteo.de>" >>$CT
 echo "" >>$CT
-cat $WORK/control |grep  "Version:" |head -n1  >>$CT
+# cat $WORK/control |grep  "Version:" |head -n1  >>$CT
 cat $WORK/control |egrep  "Package:" |head -n1  >>$CT
 cat $WORK/control |egrep  "Architecture:"  |head -n1  >>$CT
 cat $WORK/control |egrep  "Depends:"  |head -n1  >>$CT

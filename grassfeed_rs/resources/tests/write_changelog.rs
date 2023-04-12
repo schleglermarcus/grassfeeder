@@ -22,7 +22,7 @@ pub fn write_changelog() {
         "grassfeeder",
         //  "unstable; urgency=low",
         &format!("{}; urgency=low", DISTRIBUTION_SOURCE),
-        "Marcus der Schlegler <schleglermarcus@posteo.de>",
+        "Marcus der Schlegler <schlegler_marcus@posteo.de>",
     );
     let mut e = GzEncoder::new(Vec::new(), Compression::best());
     e.write_all(changelog_text.as_bytes()).unwrap();
