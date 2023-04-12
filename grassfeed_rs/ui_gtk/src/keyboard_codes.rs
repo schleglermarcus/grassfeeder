@@ -1,5 +1,5 @@
 use gdk_sys;
-use gui_layer::abstract_ui::KeyCodes;
+use gui_layer::gui_values::KeyCodes;
 
 // https://gtk-rs.org/gtk3-rs/stable/latest/docs/gdk_sys/index.html
 #[allow(unused_variables)]
