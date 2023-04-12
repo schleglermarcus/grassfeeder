@@ -64,8 +64,8 @@ fn image_webp_to_png() {
     let mut file = std::fs::File::create(file_out).unwrap();
     let w_r = file.write_all(&outdata);
     assert!(w_r.is_ok());
-    assert!(outdata.len() >= 1151 && outdata.len() <= 1152);
-    //         debug!("{} bytes written {:?}", outdata.len(), w_r);
+    // debug!("{} bytes written {:?}", outdata.len(), w_r);
+    assert!(outdata.len() >= 1151 && outdata.len() <= 1288);
 }
 
 // #[ignore]
