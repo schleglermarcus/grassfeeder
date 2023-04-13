@@ -3,7 +3,6 @@ To Do List
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
 	https://wiki.debian.org/Packaging/Intro
 	https://wiki.debian.org/HowToPackageForDebian
-  https://salsa.debian.org/rust-team/debcargo-conf/
   https://www.debian.org/doc/manuals/developers-reference/pkgs.html#newpackage
 	https://wiki.debian.org/DebianMentorsFaq
 	https://wiki.debian.org/Teams/RustPackaging
@@ -11,14 +10,15 @@ To Do List
 
 -
 https://launchpad.net/grassfeeder
-https://help.launchpad.net/Packaging/PPA/Uploading
 https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
+https://help.launchpad.net/Packaging/PPA/Uploading
 https://packaging.ubuntu.com/html/packaging-new-software.html
 
 
 Hackerjet: This tool "debcargo" does not work wit submodules-by-path
   https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
   https://blog.hackeriet.no/packaging-rust-part-II/
+  https://salsa.debian.org/rust-team/debcargo-conf/
 
 
 
