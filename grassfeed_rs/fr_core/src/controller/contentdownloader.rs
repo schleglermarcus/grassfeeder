@@ -455,7 +455,6 @@ impl IDownloader for Downloader {
     }
 
     fn launch_webbrowser(&self, url: String, cl_id: isize, list_pos: u32) {
-        // trace!("LAUNCH:  {} {} {} ", cl_id, list_pos, url);
         let cl_sender: Sender<CJob> = self.contentlist_job_sender.as_ref().unwrap().clone();
         let inner = LaunchInner::new(url, cl_id, list_pos, cl_sender);
         self.add_to_queue(DLJob::LaunchWebBrowser(inner));

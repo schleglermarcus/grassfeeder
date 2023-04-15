@@ -1,4 +1,4 @@
-pub const DOWNLOADER_MAX_NUM_THREADS: usize = 9;
+pub const DOWNLOADER_MAX_NUM_THREADS: usize = 10;
 
 pub const ICON_SIZE_LIMIT_BYTES: usize = 10000;
 

@@ -1,5 +1,26 @@
 To Do List
 
+
+
+
+------ Create Ubuntu package
+	https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
+
+https://launchpad.net/grassfeeder
+
+
+	https://packaging.ubuntu.com/html/
+	https://packaging.ubuntu.com/html/packaging-new-software.html
+	https://shallowsky.com/blog/programming/packaging-launchpad-ppas.html
+	https://stackoverflow.com/questions/10994746/how-would-i-make-debian-package-with-dsc-with-dpkg-build
+  https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
+  https://help.launchpad.net/Packaging/PPA/Uploading
+  https://launchpad.net/ubuntu/focal/+source/rust-pad
+  https://packaging.ubuntu.com/html/packaging-new-software.html
+  https://ubuntuforums.org/showthread.php?t=1624438
+  https://blog.chmouel.com/2021/01/31/building-packages-for-multiple-distros-on-launchpad-with-docker/
+
+
 - Debian+Ubuntu+Mint, Suse, Arch,  MX-Linux, Manjaro, CentOs, , Gentoo
 	https://wiki.debian.org/Packaging/Intro
 	https://wiki.debian.org/HowToPackageForDebian
@@ -7,12 +28,11 @@ To Do List
 	https://wiki.debian.org/DebianMentorsFaq
 	https://wiki.debian.org/Teams/RustPackaging
   https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
+  https://www.systutorials.com/docs/linux/man/5-dsc/
+  https://www.debian.org/doc/devel-manuals#debmake-doc
+  https://medium.com/@mezgani/how-to-create-debian-package-cccef6e5175b
 
 -
-https://launchpad.net/grassfeeder
-https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
-https://help.launchpad.net/Packaging/PPA/Uploading
-https://packaging.ubuntu.com/html/packaging-new-software.html
 
 
 Hackerjet: This tool "debcargo" does not work wit submodules-by-path
@@ -165,21 +185,6 @@ https://distrowatch.com/table.php?distribution=mint
 
 
 
------- Create Ubuntu package
-  https://blog.chmouel.com/2021/01/31/building-packages-for-multiple-distros-on-launchpad-with-docker/
-  https://launchpad.net/ubuntu/focal/+source/rust-pad
-  https://www.debian.org/doc/devel-manuals#debmake-doc
-  https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
-  https://help.launchpad.net/Packaging/PPA/Uploading
-  https://ubuntuforums.org/showthread.php?t=1971978&page=2&s=37830a9f3283345f9a69d0e2aa865bea
-	https://shallowsky.com/blog/programming/packaging-launchpad-ppas.html
-  https://ubuntuforums.org/showthread.php?t=1624438
-	https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
-  https://www.systutorials.com/docs/linux/man/5-dsc/
-  https://medium.com/@mezgani/how-to-create-debian-package-cccef6e5175b
-	https://stackoverflow.com/questions/10994746/how-would-i-make-debian-package-with-dsc-with-dpkg-build
-	https://packaging.ubuntu.com/html/
-	https://packaging.ubuntu.com/html/packaging-new-software.html
 
 #  gpg --fingerprint schleglermarcus@posteo.de
 gpg: Die Benutzung der Hashmethode SHA256 ist im --compliance=pgp6 Modus nicht erlaubt.

@@ -251,8 +251,11 @@ impl GuiProcessor {
                 Job::DownloaderJobStarted(threadnr, kind) => {
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = kind;
                 }
-                Job::DownloaderJobFinished(subs_id, threadnr, _kind, elapsed_ms, description) => {
-                    if elapsed_ms > 5000 && subs_id > 0 {
+                Job::DownloaderJobFinished(subs_id, threadnr, kind, elapsed_ms, description) => {
+                    if kind == 6 {
+                        trace!("browser_launch:{}ms {}", elapsed_ms, &description);
+                    }
+                    if elapsed_ms > 1000 && subs_id > 0 {
                         (*self.erro_repo_r).borrow().add_error(
                             subs_id,
                             elapsed_ms as isize,
