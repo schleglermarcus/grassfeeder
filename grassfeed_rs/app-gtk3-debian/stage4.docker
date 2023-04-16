@@ -1,0 +1,17 @@
+FROM grassfeeder:debian-stage1
+
+WORKDIR /usr/src/
+COPY target/gf.tar.gz /usr/src/
+RUN cat gf.tar.gz |gzip -d |tar x
+
+WORKDIR /usr/src/grassfeed_rs
+RUN ./prepare-debian.sh
+WORKDIR /usr/src/grassfeed_rs/app-gtk3-debian
+RUN cargo deb
+RUN  debian-stage3a.sh
+
+
+WORKDIR /usr/src/grassfeed_rs/target
+RUN ls -l debian/*
+RUN mv debian/grass*.deb  gf.deb
+RUN lintian gf.deb

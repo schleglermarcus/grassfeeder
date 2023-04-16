@@ -1,26 +1,43 @@
-FROM rust:1.63-slim-bullseye
-run echo "deb     http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free"  >/etc/apt/sources.list
-run echo "deb-src http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free" >>/etc/apt/sources.list
+FROM rust:1.68-slim-bullseye
+## FROM debian:bullseye-slim ###  Rust version too old:  1.48
 
+
+RUN echo "deb     http://ftp.gwdg.de/debian/ bullseye main contrib non-free"  >/etc/apt/sources.list
+RUN echo "deb-src http://ftp.gwdg.de/debian/ bullseye main contrib non-free" >>/etc/apt/sources.list
+# RUN echo "deb     http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free"  >/etc/apt/sources.list
+# RUN echo "deb-src http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free" >>/etc/apt/sources.list
+COPY install-packages-list.txt /
+RUN cat /install-packages-list.txt |xargs
 
 RUN apt update
-RUN apt install -y wget git pkgconf  lintian rust-all cargo
 
-RUN apt install -y  libatk1.0-dev    libjavascriptcoregtk-4.0-dev    librust-aho-corasick-dev    librust-base64-dev    librust-bincode-dev
-RUN apt install -y  librust-cairo-rs-dev    librust-chrono-dev    librust-clap-dev    librust-color-quant-dev    librust-crossbeam-channel-dev
-RUN apt install -y  librust-crossbeam-deque-dev    librust-data-url-dev    librust-deflate-dev    librust-dtoa-short-dev
-RUN apt install -y  librust-encoding-dev    librust-encoding-rs-dev    librust-fallible-iterator-dev    librust-fallible-streaming-iterator-dev
-RUN apt install -y  librust-flate2-dev    librust-float-cmp-dev    librust-fxhash-dev    librust-gdk-dev    librust-gdk-pixbuf-dev
-RUN apt install -y  librust-gdk-sys-dev    librust-getrandom-dev    librust-gio-dev    librust-glib-dev    librust-glib-sys-dev     libwebkit2gtk-4.0-dev
-RUN apt install -y  librust-glob-dev    librust-gtk-dev    librust-hashbrown-dev    librust-idna-dev    librust-ignore-dev      librust-once-cell-dev
-RUN apt install -y  librust-indexmap-dev    librust-itertools-dev    librust-jpeg-decoder+default-dev   librust-kurbo-dev   librust-num-rational-dev
-RUN apt install -y  librust-log-dev    librust-lru-cache-dev    librust-memchr-dev    librust-mime-dev    librust-nodrop-dev    librust-num-iter-dev
-RUN apt install -y  librust-phf-codegen-dev    librust-phf-dev    librust-phf-macros-dev    librust-pin-project-lite-dev    librust-precomputed-hash-dev
-RUN apt install -y  librust-rayon-dev    librust-regex+default-dev    librust-regex-dev    librust-scoped-threadpool-dev    librust-sct-dev
-RUN apt install -y  librust-serde-dev    librust-serde-json-dev    librust-serde-yaml-dev    librust-servo-arc-dev    librust-signal-hook-dev
-RUN apt install -y  librust-simplecss-dev    librust-siphasher-dev    librust-svgtypes-dev    librust-syn-dev    librust-thiserror-dev
-RUN apt install -y  librust-tiff-dev    librust-tracing-core-dev    librust-unicode-bidi-dev    librust-unicode-normalization-dev    librust-unicode-segmentation-dev
-RUN apt install -y  librust-usvg-dev    librust-vcpkg-dev    librust-webbrowser-dev    librust-xdg-dev    librust-xmlparser-dev    libsoup2.4-dev
+run apt-cache search librust-webbrowser-dev
 
 
-RUN cargo install cargo-deb
+RUN apt install -y  rustc  cargo
+RUN rustc --version
+RUN cargo install  cargo-deb    # --version 1.33.0
+
+
+RUN apt install -y `cat /install-packages-list.txt |xargs`
+
+
+# pakete fehlt in bullseye !!
+#  librust-webbrowser-dev  librust-fallible-streaming-iterator-dev
+#  librust-num-rational-dev librust-servo-arc-dev   librust-tracing-core-dev
+#  librust-nodrop-dev  librust-pin-project-lite-dev    librust-sct-dev
+
+
+
+#RUN apt install -y wget git pkgconf  lintian rustc  cargo
+#RUN apt install -y  libatk1.0-dev    libjavascriptcoregtk-4.0-dev    librust-aho-corasick-dev    librust-base64-dev    librust-bincode-dev	librust-cairo-rs-dev    librust-chrono-dev    librust-clap-dev    librust-color-quant-dev    librust-crossbeam-channel-dev librust-crossbeam-deque-dev    librust-data-url-dev    librust-deflate-dev    librust-dtoa-short-dev	librust-encoding-dev    librust-encoding-rs-dev    librust-fallible-iterator-dev
+#RUN apt install -y  librust-xdg-dev    librust-xmlparser-dev    libsoup2.4-dev
+#RUN apt install -y  librust-flate2-dev    librust-float-cmp-dev    librust-fxhash-dev    librust-gdk-dev    librust-gdk-pixbuf-dev	librust-gdk-sys-dev    librust-getrandom-dev    librust-gio-dev    librust-glib-dev    librust-glib-sys-dev     libwebkit2gtk-4.0-dev	librust-vcpkg-dev
+#RUN apt install -y  librust-glob-dev    librust-gtk-dev    librust-hashbrown-dev    librust-idna-dev    librust-ignore-dev      librust-once-cell-dev	librust-indexmap-dev    librust-itertools-dev    librust-jpeg-decoder+default-dev   librust-kurbo-dev
+#RUN apt install -y  librust-log-dev    librust-lru-cache-dev    librust-memchr-dev    librust-mime-dev    librust-nodrop-dev    librust-num-iter-dev	librust-phf-codegen-dev    librust-phf-dev    librust-phf-macros-dev    librust-pin-project-lite-dev    librust-precomputed-hash-dev
+#RUN apt install -y  librust-rayon-dev    librust-regex+default-dev    librust-regex-dev    librust-scoped-threadpool-dev    librust-sct-dev	librust-serde-dev    librust-serde-json-dev    librust-serde-yaml-dev    librust-servo-arc-dev    librust-signal-hook-dev	librust-usvg-dev
+#RUN apt install -y  librust-simplecss-dev    librust-siphasher-dev    librust-svgtypes-dev    librust-syn-dev    librust-thiserror-dev	librust-tiff-dev    librust-tracing-core-dev    librust-unicode-bidi-dev    librust-unicode-normalization-dev    librust-unicode-segmentation-dev
+
+
+
+

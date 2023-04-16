@@ -3,19 +3,25 @@ DIR=`pwd`
 VERSION=`cat Cargo.toml  |grep "^version"  |sed -e "s/.*= \"//" -e "s/\"//"`
 test -d target || mkdir target
 
-
-cargo deb
-DEBFILE=`find ../target/debian -iname grassfeeder_*.deb |head -n1`
-DEBFILENAME=`basename $DEBFILE`
-
-echo "VERSION=$VERSION	DEBFILE=$DEBFILE"
 (cd ../../ ; tar c --exclude=target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >$DIR/target/grassfeeder-${VERSION}.tar.gz )
 
+
+#cargo deb
+#DEBFILE=`find ../target/debian -iname grassfeeder_*.deb |head -n1`
+
+# DEBFILENAME=`basename $DEBFILE`
+echo "VERSION=$VERSION	DEBFILE=$DEBFILE"
+
 WORK="$DIR/target/deb-sign"
-mkdir $WORK
-cp -v $DEBFILE  $WORK/
-(cd $WORK ;    ar -x  "$DEBFILENAME"  )
-(cd $WORK ;  cat control.tar.xz | unxz -d |tar x )
+test -d $WORK || mkdir $WORK
+
+
+# cp -v $DEBFILE  $WORK/
+
+
+# (cd $WORK ;    ar -x  "$DEBFILENAME"  )
+# (cd $WORK ;  cat control.tar.xz | unxz -d |tar x )
+
 mkdir $WORK/grassfeeder-$VERSION
 (cd $WORK/grassfeeder-$VERSION ; cat  $DIR/target/grassfeeder-${VERSION}.tar.gz |gzip -d |tar x )
 
@@ -31,12 +37,10 @@ echo "Section: web" >>$CT
 echo "Priority: optional" >>$CT
 echo "Maintainer: Marcus <schlegler_marcus@posteo.de>" >>$CT
 echo "" >>$CT
-# cat $WORK/control |grep  "Version:" |head -n1  >>$CT
-cat $WORK/control |egrep  "Package:" |head -n1  >>$CT
-cat $WORK/control |egrep  "Architecture:"  |head -n1  >>$CT
-cat $WORK/control |egrep  "Depends:"  |head -n1  >>$CT
-
-cat $CT
+cat assets/deb-control.txt |egrep  "Package:" |head -n1  >>$CT
+cat assets/deb-control.txt |egrep  "Architecture:"  |head -n1  >>$CT
+cat assets/deb-control.txt |egrep  "Depends:"  |head -n1  >>$CT
+# cat $CT
 
 
 R="debian/rules"
@@ -44,12 +48,10 @@ R="debian/rules"
 (cd $WORK/grassfeeder-$VERSION ;   echo "">>$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "clean:" >>$R )
 ## for ubuntu
-(cd $WORK/grassfeeder-$VERSION ;   echo "	apt update " >>$R )
-(cd $WORK/grassfeeder-$VERSION ;   echo "	apt install -y rust-all cargo   " >>$R )
-(cd $WORK/grassfeeder-$VERSION ;   echo "	apt install -y wget git pkgconf librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev " >>$R )
-#(cd $WORK/grassfeeder-$VERSION ;   echo "	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -sSf | sh -s -- -y	 " >>$R )
-#(cd $WORK/grassfeeder-$VERSION ;   echo "	export PATH=/root/.cargo/bin:$PATH " >>$R )
-# (cd $WORK/grassfeeder-$VERSION ;   echo "	cargo install cargo-deb " >>$R )
+# (cd $WORK/grassfeeder-$VERSION ;   echo "	apt update " >>$R )
+# (cd $WORK/grassfeeder-$VERSION ;   echo "	apt install -y rust-all cargo   " >>$R )
+# (cd $WORK/grassfeeder-$VERSION ;   echo "	apt install -y wget git pkgconf librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev " >>$R )
+
 (cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/ ; ./prepare-debian.sh ) " >>$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-debian/ ; cargo clean ) " >>$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "">>$R )
@@ -61,5 +63,8 @@ R="debian/rules"
 (cd $WORK/grassfeeder-$VERSION ;   debuild  -rfakeroot -S  )
 
 
-echo "----"
-echo dput ppa:schleglermarcus/ppa  grassfeeder_0.1.9_source.changes
+#echo "----"
+#echo dput ppa:schleglermarcus/ppa  grassfeeder_0.1.9_source.changes
+##(cd $WORK/grassfeeder-$VERSION ;   echo "	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -sSf | sh -s -- -y	 " >>$R )
+##(cd $WORK/grassfeeder-$VERSION ;   echo "	export PATH=/root/.cargo/bin:$PATH " >>$R )
+##(cd $WORK/grassfeeder-$VERSION ;   echo "	cargo install cargo-deb " >>$R )

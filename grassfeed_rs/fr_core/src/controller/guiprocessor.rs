@@ -665,7 +665,7 @@ impl StartupWithAppContext for GuiProcessor {
         );
         self.add_handler(
             &GuiEvents::ListSelectedAction(0, String::default(), Vec::default()),
-            HandleListSelected(self.contentlist_r.clone()),
+            HandleListSelectedAction(self.contentlist_r.clone()),
         );
         self.add_handler(
             &GuiEvents::ListSortOrderChanged(0, 0, false),
