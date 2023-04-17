@@ -1,9 +1,7 @@
 apt-utils
 lintian
 pkgconf
-rustc
 wget
-cargo
 git
 libatk1.0-dev
 libsoup2.4-dev
@@ -75,3 +73,12 @@ librust-xmlparser-dev
 librust-vcpkg-dev
 librust-fern-dev
 librust-gumdrop-dev
+librust-webbrowser-dev
+librust-fallible-streaming-iterator-dev
+librust-num-rational-dev
+librust-servo-arc-dev   
+librust-tracing-core-dev
+librust-nodrop-dev  
+librust-pin-project-lite-dev    
+librust-sct-dev
+

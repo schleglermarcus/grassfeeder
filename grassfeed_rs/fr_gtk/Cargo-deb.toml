@@ -18,7 +18,7 @@ gio = "=0.14.8"
 fern = { version = ">=0.6", features = ["colored", "chrono"] }
 # gtk = { package = "gtk",  version = "0.14.3", features = [  "v3_22_30",] } # downgrade for debian integration
 log = ">=0.4.11"
-once_cell = ">=1.9.0"
+once_cell = ">=1.3.1"
 gdk = ">=0.14.3"
 gtk = { package = "gtk", version = "0.14.3", features = ["v3_22_30"] }
 webkit2gtk = { version = "^0.16", path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0" }
@@ -26,8 +26,6 @@ pango = "^0.14.8"
 flume = { version = "0.10.14", path = "../app-gtk3-debian/target/flume-master" }
 gdk-sys = ">=0.14"
 itertools = "*"
-# chrono = ">=0.4.19"
-# itertools = "0.10.1"
 
 
 [[example]]

@@ -1,0 +1,50 @@
+#FROM ubuntu:20.04
+#RUN echo "deb     http://ftp.gwdg.de/ubuntu/ focal main restricted universe multiverse "  >/etc/apt/sources.list
+#RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ focal-updates main restricted universe multiverse"  >>/etc/apt/sources.list
+
+#FROM ubuntu:22.04
+#RUN echo "deb     http://ftp.gwdg.de/ubuntu/ jammy main restricted universe multiverse "  >/etc/apt/sources.list
+#RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ jammy main restricted universe multiverse"  >>/etc/apt/sources.list
+
+
+FROM ubuntu:22.10
+RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic main restricted universe multiverse "  >/etc/apt/sources.list
+RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ kinetic main restricted universe multiverse"  >>/etc/apt/sources.list
+
+
+
+RUN cat /etc/apt/sources.list
+RUN apt-get update
+
+RUN apt install -y  rustc  cargo
+RUN rustc --version
+RUN cargo install  cargo-deb   --version 1.33.0	# downgrading the version
+ENV PATH="$PATH:/root/.cargo/bin"
+
+
+RUN apt-get install -y apt-utils librust-fern-dev librust-gumdrop-dev librust-once-cell-dev
+
+#
+RUN apt-get install -y netbase
+RUN apt-get install -y --allow-downgrades  perl-base=5.34.0-5ubuntu1
+
+
+
+#RUN apt-get install -y pkg-config
+#RUN apt-get install -y libsoup2.4-dev
+#RUN apt-get install -y libwebkit2gtk-4.0-dev
+RUN apt-get install -y pkgconf      ##  Problem, cannot be installed due some per issues
+# RUN apt-get install -y lintian      ##  Problem, cannot be installed due some per issues
+# RUN apt-get install -y libatk1.0-dev     ##  Problem, cannot be installed due some per issues
+
+
+
+COPY install-packages-list.txt /
+
+RUN apt-get install -y `cat /install-packages-list.txt |xargs`
+
+
+
+#  package `rayon-core v1.11.0` cannot be built because it requires rustc 1.59 or newer, while the currently active rustc version is 1.58.1
+#
+

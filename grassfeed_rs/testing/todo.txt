@@ -1,6 +1,3 @@
-To Do List
-
-
 
 
 ------ Create Ubuntu package
@@ -302,7 +299,7 @@ Docker:  3 Phasen:  aus,   build, run
 	https://kerkour.com/rust-small-docker-image#/from-buster-slim
 	https://windsoilder.github.io/writing_dockerfile_in_rust_project.html
   https://middleware.io/blog/docker-cleanup/
-
+  https://www.appsloveworld.com/docker/100/3/copy-folder-with-wildcard-from-docker-container-to-host
 
 -------------------
 GTK_DEBUG=interactive
