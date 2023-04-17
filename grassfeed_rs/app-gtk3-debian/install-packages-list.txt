@@ -4,7 +4,7 @@ libatk1.0-dev
 libjavascriptcoregtk-4.0-dev
 librust-aho-corasick-dev
 librust-base64-dev
-librust-bincode-dev	
+librust-bincode-dev
 librust-cairo-rs-dev
 librust-chrono-dev
 librust-clap-dev
@@ -13,7 +13,7 @@ librust-crossbeam-channel-dev
 librust-crossbeam-deque-dev
 librust-data-url-dev
 librust-deflate-dev
-librust-dtoa-short-dev	
+librust-dtoa-short-dev
 librust-encoding-dev
 librust-encoding-rs-dev
 librust-fallible-iterator-dev
@@ -21,7 +21,7 @@ librust-flate2-dev
 librust-float-cmp-dev
 librust-fxhash-dev
 librust-gdk-dev
-librust-gdk-pixbuf-dev	
+librust-gdk-pixbuf-dev
 librust-gdk-sys-dev
 librust-getrandom-dev
 librust-gio-dev
@@ -54,7 +54,6 @@ librust-serde-dev
 librust-serde-json-dev
 librust-serde-yaml-dev
 librust-signal-hook-dev
-librust-usvg-dev
 librust-simplecss-dev
 librust-siphasher-dev
 librust-svgtypes-dev
@@ -73,3 +72,5 @@ lintian
 pkgconf
 rustc
 wget
+librust-fern-dev
+librust-gumdrop-dev

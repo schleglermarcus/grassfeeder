@@ -1,14 +1,22 @@
-FROM grassfeeder:debian-stage1
+FROM grassfeeder:debian-stage3
 
+RUN apt-get remove  -y librust-usvg-dev
+RUN apt-get install -y librust-fern-dev librust-gumdrop-dev librust-once-cell-dev
+
+RUN dpkg -l |egrep "librust-fern|gumdrop|once_cell"
+
+COPY target/grassfeeder-*.tar.gz /usr/src/
 WORKDIR /usr/src/
-COPY target/gf.tar.gz /usr/src/
-RUN cat gf.tar.gz |gzip -d |tar x
+RUN cat grassfeeder-*.tar.gz |gzip -d |tar x
 
 WORKDIR /usr/src/grassfeed_rs
 RUN ./prepare-debian.sh
 WORKDIR /usr/src/grassfeed_rs/app-gtk3-debian
+
+RUN cargo tree
+
 RUN cargo deb
-RUN  debian-stage3a.sh
+RUN ./deb-sign.sh
 
 
 WORKDIR /usr/src/grassfeed_rs/target

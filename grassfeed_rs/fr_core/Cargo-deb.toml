@@ -24,7 +24,7 @@ feed-rs = { version = "1.3.0", path = "../app-gtk3-debian/target/feed-rs-1.3.0/f
 gif = { version = ">=0.12", path = "../app-gtk3-debian/target/image-gif-0.12.0" }
 tl = { version = ">=0.7", path = "../app-gtk3-debian/target/tl-0.7.7" }
 usvg = { version = "0.29", path = "../app-gtk3-debian/target/resvg-0.29.0/usvg" }
-fern = { version = ">=0.6", features = ["colored"] }
+fern = { version = ">=0.5.8", features = ["colored"] , path = "../app-gtk3-debian/target/fern-fern-0.6.0" }
 log = ">=0.4.11"
 once_cell = ">=1.9.0"
 regex = { version = ">=1.6", path = "../app-gtk3-debian/target/regex-1.6.0" }
@@ -57,7 +57,6 @@ ico = { path = "../app-gtk3-debian/target/rust-ico-0.3.0" }
 [dev-dependencies]
 rand = "0.8.5"
 zip = "0.6.3"
-fern = { version = "=0.6.1", features = ["colored"] }
 
 [package.metadata.i18n]
 available-locales = ["en", "de"]

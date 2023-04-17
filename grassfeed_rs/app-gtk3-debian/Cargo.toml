@@ -18,7 +18,7 @@ resources = { path = "../resources" } #  , features = ["g3sources"]
 rust-i18n = { version = "1.1.1" , path = "../app-gtk3-debian/target/rust-i18n-1.1.1" }
 
 
-fern = { version = ">=0.6", features = ["colored", "chrono"] }
+fern = { version = ">=0.5.8", features = ["colored", "chrono"]  , path = "../app-gtk3-debian/target/fern-fern-0.6.0"  }
 syslog = ">=6.0.1"
 chrono = ">=0.4.19"
 gumdrop = ">=0.7.0"

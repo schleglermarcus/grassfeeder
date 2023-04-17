@@ -1,16 +1,15 @@
 #!/bin/bash
-DIR=`pwd`
-VERSION=`cat Cargo.toml  |grep "^version"  |sed -e "s/.*= \"//" -e "s/\"//"`
 test -d target || mkdir target
 
-(cd ../../ ; tar c --exclude=target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >$DIR/target/grassfeeder-${VERSION}.tar.gz )
+DIR=`pwd`
+VERSION=`cat Cargo.toml  |grep "^version"  |sed -e "s/.*= \"//" -e "s/\"//"`
+echo "VERSION=$VERSION	DEBFILE=$DEBFILE"
 
 
+# (cd ../../ ; tar c --exclude=target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >$DIR/target/grassfeeder-${VERSION}.tar.gz )
 #cargo deb
 #DEBFILE=`find ../target/debian -iname grassfeeder_*.deb |head -n1`
-
 # DEBFILENAME=`basename $DEBFILE`
-echo "VERSION=$VERSION	DEBFILE=$DEBFILE"
 
 WORK="$DIR/target/deb-sign"
 test -d $WORK || mkdir $WORK
@@ -22,8 +21,10 @@ test -d $WORK || mkdir $WORK
 # (cd $WORK ;    ar -x  "$DEBFILENAME"  )
 # (cd $WORK ;  cat control.tar.xz | unxz -d |tar x )
 
-mkdir $WORK/grassfeeder-$VERSION
-(cd $WORK/grassfeeder-$VERSION ; cat  $DIR/target/grassfeeder-${VERSION}.tar.gz |gzip -d |tar x )
+# mkdir "$WORK/grassfeeder-$VERSION"
+# (cd $WORK/grassfeeder-$VERSION ; cat  $DIR/target/grassfeeder-${VERSION}.tar.gz |gzip -d |tar x )
+
+(cd $WORK/grassfeeder-$VERSION ; cp -v /usr/src/grassfeeder-*.tar.gz . )
 
 mkdir $WORK/grassfeeder-$VERSION/debian
 cp -v assets/changelog.txt $WORK/grassfeeder-$VERSION/debian/changelog

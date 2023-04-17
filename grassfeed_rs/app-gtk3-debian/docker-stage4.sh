@@ -1,12 +1,13 @@
 #!/bin/bash
+test -d target || mkdir target
 DIR=`pwd`
 VERSION=`cat Cargo.toml  |grep "^version"  |sed -e "s/.*= \"//" -e "s/\"//"`
-test -d target || mkdir target
-
+echo "VERSION=$VERSION	DEBFILE=$DEBFILE"
 # the output file is used by the docker file
-(cd ../../ ; tar c --exclude=target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >$DIR/target/gf.tar.gz )
+(cd ../../ ; tar c --exclude=target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >$DIR/target/grassfeeder-${VERSION}.tar.gz )
 
-docker build -t grassfeeder:debian-stage4 -f  debian-stage4.docker .
+
+docker build -t grassfeeder:debian-stage4 -f  stage4.docker .
 
 
 
