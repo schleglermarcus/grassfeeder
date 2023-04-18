@@ -74,22 +74,11 @@ cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /"  \
 	|sed -e "s/, \"js\"//"	\
  	>$F
 
-
 F=target/image-png-0.17.5/Cargo.toml
 mv $F ${F}.0    #  downgrading deflate, miniz_oxide
 cat ${F}.0	| sed -e "s/deflate = \"1.0\"/deflate={version=\"1.0\", path=\"..\/deflate-1.0.0\"} /"	\
 	| sed -e "s/\"\0.5.1\"/{ version=\">=0.5.1\" , path=\"..\/miniz_oxide-0.5.1\/miniz_oxide\" } /"  \
 	>$F
-
-
-# 	|sed -e "s/deflate = \"1.0\"/deflate=\">=0.7.0\"  /" \
-#	|sed -e "s/\"\0.5.1\"/{ version=\"0.6.2\" , path=\"..\/miniz_oxide-0.6.2\/miniz_oxide\" } /"  \
-# 	|sed -e "s/\"\0.5.1\"/\">=0.3.5\"/"  \
-
-
-
-
-
 
 F=target/quick-xml-0.27.1/Cargo.toml
 mv $F ${F}.0
@@ -109,8 +98,12 @@ mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.12.0\"/{version=\"^0.12.0\", path=\"..\/hashbrown-0.12.0\" }/" 		>$F
 
 F=target/rust-i18n-1.1.1/Cargo.toml
-mv $F ${F}.0		#downgrading itertools, once_cell
-cat ${F}.0 |sed -e "s/\"0.10.3\"/\">=0.10.0\" /" 	 |sed -e "s/\"1.10.0\"/\">=1.3.1\" /" 		>$F
+mv $F ${F}.0		#downgrading itertools, once_cell, upgrading clap
+cat ${F}.0 \
+	|sed -e "s/\"0.10.3\"/\">=0.10.0\" /" 	 \
+	|sed -e "s/\"1.10.0\"/\">=1.3.1\" /" 	\
+	|sed -e "s/\"2.32\"/\">=2.32\" /" 	\
+	>$F
 
 F=target/rust-i18n-1.1.1/crates/macro/Cargo.toml
 mv $F ${F}.0		# once_cell, syn
@@ -316,8 +309,21 @@ F=target/ring-0.16.20/Cargo.toml
 mv $F ${F}.0	# downgrade     untrusted
 cat ${F}.0  	|sed -e "s/\"0.7.1\"/\">=0.7.0\"\n path=\"..\/untrusted-0.7.1\" /" 	>$F
 
-
 F=target/hashbrown-0.12.0/Cargo.toml
 mv $F ${F}.0	# downgrade ahash
 cat ${F}.0 |sed -e "s/\"0.7.0\"/\">=0.7\", path=\"..\/ahash-0.7.6\" /" 		>$F
+
+F=target/fern-fern-0.6.0/Cargo.toml
+mv $F ${F}.0	# upgrade colored, widen log
+cat ${F}.0 |sed -e "s/\"1.5\"/\">=1.5\", path=\"..\/colored-1.5.3\" /" 	\
+	 |sed -e "s/log = { version = \"0.4\"/log={version=\">=0.4\",  path=\"..\/log-0.4.17\" /"	>$F
+
+F=target/colored-1.5.3/Cargo.toml
+mv $F ${F}.0	# downgrade lazy_static
+cat ${F}.0 |sed -e "s/\"^0.2\"/{version=\"^0.2\", path=\"..\/lazy-static.rs-0.2.11\" } /" 	>$F
+
+F=target/spin-rs-0.9.2/Cargo.toml
+mv $F ${F}.0	# point to  lock_api
+cat ${F}.0 |sed -e "s/\"0.4\"/\">=0.4\", path=\"..\/parking_lot-lock_api-0.4.9\/lock_api\"  /" 	>$F
+
 

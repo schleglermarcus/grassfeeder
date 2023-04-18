@@ -79,3 +79,4 @@ librust-vcpkg-dev
 librust-webbrowser-dev
 librust-xdg-dev
 librust-xmlparser-dev
+librust-colored-dev

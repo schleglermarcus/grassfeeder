@@ -1,9 +1,1 @@
-[package]
-name = "context"
-version = "0.1.0"
-authors = ["marcus"]
-edition = "2021"
-
-
-[dependencies]
-log = ">=0.4.11"
+Cargo-std.toml

@@ -1,0 +1,9 @@
+[package]
+name = "context"
+version = "0.1.0"
+authors = ["marcus"]
+edition = "2021"
+
+
+[dependencies]
+log = { version=">=0.4.10" , path="../app-gtk3-debian/target/log-0.4.17" }

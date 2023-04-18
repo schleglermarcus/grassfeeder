@@ -13,5 +13,6 @@ exclude = [
   "testing",
   "app-gtk3-linux",
   "app-gtk3-debian",
+  "app-gtk3-ubuntu",
 ]
 

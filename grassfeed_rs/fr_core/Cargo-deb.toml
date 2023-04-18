@@ -24,12 +24,12 @@ feed-rs = { version = "1.3.0", path = "../app-gtk3-debian/target/feed-rs-1.3.0/f
 gif = { version = ">=0.12", path = "../app-gtk3-debian/target/image-gif-0.12.0" }
 tl = { version = ">=0.7", path = "../app-gtk3-debian/target/tl-0.7.7" }
 usvg = { version = "0.29", path = "../app-gtk3-debian/target/resvg-0.29.0/usvg" }
-fern = { version = ">=0.5.8", features = ["colored"] , path = "../app-gtk3-debian/target/fern-fern-0.6.0" }
-log = ">=0.4.11"
-once_cell = ">=1.3.1"
+fern = { version = ">=0.5.8", features = ["colored", "chrono"] , path = "../app-gtk3-debian/target/fern-fern-0.6.0" }
+log = { version=">=0.4.10" , path="../app-gtk3-debian/target/log-0.4.17" }
+once_cell = { version = ">=1.3.1", path = "../app-gtk3-debian/target/once_cell-1.10.0" }
 regex = { version = ">=1.6", path = "../app-gtk3-debian/target/regex-1.6.0" }
-serde = { version = ">=1.0.130" }
-serde_json = { version = ">=1.0.45" }
+serde = { version = ">=1.0.130" , path = "../app-gtk3-debian/target/serde-1.0.130/serde" }
+serde_json = { version = ">=1.0.45" , path = "../app-gtk3-debian/target/json-1.0.82" }
 chrono = ">=0.4.19"
 flume = { version = "0.10.14", path = "../app-gtk3-debian/target/flume-master" }
 image = { path = "../app-gtk3-debian/target/image-0.24.0" }
@@ -39,11 +39,8 @@ base64 = "^0.13.0"
 signal-hook = ">=0.3.13-2"
 opml = { path = "../app-gtk3-debian/target/opml/opml_api" }
 bincode = ">=1.3.3"
-# jpeg-decoder = ">=0.1.22"
 rayon = { path = "../app-gtk3-debian/target/rayon-1.5.1" }
-jpeg-decoder = { path = "../app-gtk3-debian/target/jpeg-decoder-0.3.0", features = [
-  "platform_independent",
-] }
+jpeg-decoder = { path = "../app-gtk3-debian/target/jpeg-decoder-0.3.0", features = [  "platform_independent",] }
 libwebp-image = { path = "../app-gtk3-debian/target/libwebp-image-rs-0.3.0" }
 png = { path = "../app-gtk3-debian/target/image-png-0.17.5"  }
 proc-status = { path = "../app-gtk3-debian/target/proc-status-0.1.1" }
