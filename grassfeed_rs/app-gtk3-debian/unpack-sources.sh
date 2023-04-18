@@ -48,7 +48,7 @@ cat ${F}.0 |sed -e "s/\"\^0.10.1\"/\{version=\"\^0.10.1\", path=\"..\/rust-bit-f
 	|sed -e "s/\"\^1.8.2\"/\{version=\"\^1.8.2\", path=\"..\/half-rs-1.8.2\"\}/" \
 	|sed -e "s/\"\^0.5.2\"/\{version=\">=0.5.0\", path=\"..\/lebe-0.5.2\"\}/" \
 	|sed -e "s/\"\^0.5.3\"/\">=0.4.0\"/" \
-	|sed -e "s/\"\^1.8.1\"/\">=1.7.0\"/" \
+	|sed -e "s/\"\^1.8.1\"/{version=\">=1.7.0\" , path=\"..\/rust-threadpool-1.8.1\" \} /" \
 	>$F
 # |sed -e "s/\"\0.5.1\"/{ version=\">=0.5.1\" , path=\"..\/miniz_oxide-0.6.2\/miniz_oxide\" } /" \
 
@@ -170,7 +170,7 @@ cat ${F}.0  |sed -e "s/\"0.13.5\"/{version=\"^0.13.5\", path=\"..\/xmlparser-0.1
 
 F=target/strict-num-0.1.0/Cargo.toml
 mv $F ${F}.0		#  downgrade of  float-cmp,   removing feature  "std"
-cat ${F}.0 |sed -e "s/\"0.9\"/\"0.6\" /" |sed -e "s/\"std\"//"	>$F
+cat ${F}.0 |sed -e "s/\"0.9\"/\">=0.6\", path=\"..\/float-cmp-0.9.0\" /" |sed -e "s/\"std\"//"	>$F
 
 F=target/webpki-roots-v-0.22.6/Cargo.toml
 mv $F ${F}.0
@@ -325,5 +325,14 @@ cat ${F}.0 |sed -e "s/\"^0.2\"/{version=\"^0.2\", path=\"..\/lazy-static.rs-0.2.
 F=target/spin-rs-0.9.2/Cargo.toml
 mv $F ${F}.0	# point to  lock_api
 cat ${F}.0 |sed -e "s/\"0.4\"/\">=0.4\", path=\"..\/parking_lot-lock_api-0.4.9\/lock_api\"  /" 	>$F
+
+F=target/libwebp-sys2-rs-0.1.2/Cargo.toml
+mv $F ${F}.0	# point to cfg-if
+cat ${F}.0 |sed -e "s/\"0.1.6\"/{ version=\">=0.1.6\", path=\"..\/cfg-if-0.1.7\" } /" 	>$F
+
+
+F=target/json-1.0.82/Cargo.toml
+mv $F ${F}.0	# point to cfg-if
+cat ${F}.0 |sed -e "s/itoa = \"1.0\"/itoa={version=\">=1.0\", path=\"..\/itoa-1.0.0\" } /" 	>$F
 
 
