@@ -1,7 +1,7 @@
 FROM grassfeeder:ubuntu-stage1
 # RUN apt-get install -y librust-fern-dev librust-gumdrop-dev librust-once-cell-dev
 
-RUN apt-get install -y  librust-colored-dev librust-clap-dev    librust-log-dev
+RUN apt-get install -y  librust-colored-dev librust-clap-dev    librust-log-dev librust-os-str-bytes-dev librust-autocfg-dev
 
 
 

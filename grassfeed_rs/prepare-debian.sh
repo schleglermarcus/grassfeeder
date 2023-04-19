@@ -1,6 +1,6 @@
 #!/bin/bash
 PF="-deb"
-for D in  resources ui_gtk  fr_core fr_gtk  context  ; do
+for D in  resources ui_gtk  fr_core fr_gtk  context gui_layer ; do
     (cd $D ;  ln -sf Cargo${PF}.toml Cargo.toml  )
 done
 test -f Cargo.lock && rm Cargo.lock

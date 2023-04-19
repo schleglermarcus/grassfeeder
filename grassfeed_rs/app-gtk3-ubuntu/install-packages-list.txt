@@ -1,17 +1,17 @@
-libsoup2.4-dev
-libwebkit2gtk-4.0-dev
-lintian
-pkg-config
 apt-utils
 libatk1.0-dev
 libjavascriptcoregtk-4.0-dev
 librust-aho-corasick-dev
+librust-autocfg-dev
 librust-base64-dev
 librust-bincode-dev
 librust-cairo-rs-dev
 librust-chrono-dev
 librust-clap-dev
+librust-clap-dev
 librust-color-quant-dev
+librust-colored-dev
+librust-colored-dev
 librust-crossbeam-channel-dev
 librust-crossbeam-deque-dev
 librust-data-url-dev
@@ -43,6 +43,7 @@ librust-itertools-dev
 librust-jpeg-decoder+default-dev
 librust-kurbo-dev
 librust-log-dev
+librust-log-dev
 librust-lru-cache-dev
 librust-memchr-dev
 librust-mime-dev
@@ -50,6 +51,7 @@ librust-nodrop-dev
 librust-num-iter-dev
 librust-num-rational-dev
 librust-once-cell-dev
+librust-os-str-bytes-dev
 librust-phf-codegen-dev
 librust-phf-dev
 librust-phf-macros-dev
@@ -79,4 +81,7 @@ librust-vcpkg-dev
 librust-webbrowser-dev
 librust-xdg-dev
 librust-xmlparser-dev
-librust-colored-dev
+libsoup2.4-dev
+libwebkit2gtk-4.0-dev
+lintian
+pkg-config

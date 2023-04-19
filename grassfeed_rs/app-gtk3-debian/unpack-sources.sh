@@ -98,12 +98,17 @@ mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.12.0\"/{version=\"^0.12.0\", path=\"..\/hashbrown-0.12.0\" }/" 		>$F
 
 F=target/rust-i18n-1.1.1/Cargo.toml
-mv $F ${F}.0		#downgrading itertools, once_cell, upgrading clap
+mv $F ${F}.0		#downgrading itertools, once_cell, upgrading clap, anyhow, regex
 cat ${F}.0 \
-	|sed -e "s/\"0.10.3\"/\">=0.10.0\" /" 	 \
-	|sed -e "s/\"1.10.0\"/\">=1.3.1\" /" 	\
-	|sed -e "s/\"2.32\"/\">=2.32\" /" 	\
+	|sed -e "s/anyhow = {version = \"1\"/anyhow={version=\">=1\", path=\"..\/anyhow-1.0.60\"   /" 	\
+	|sed -e "s/\"0.10.3\"/\">=0.10.0\"  , path=\"..\/itertools-0.10.3\"  /" 	 \
+	|sed -e "s/\"1.10.0\"/{version=\">=1.3.1\" , path=\"..\/once_cell-1.10.0\" }  /" 	\
+	|sed -e "s/\"2.32\"/\">=2.32\", path=\"..\/clap-3.2.20\"   /" 	\
+	|sed -e "s/serde = \"1\"/serde={version=\">=1.0.130\" , path=\"..\/serde-1.0.130\/serde\" }  /" 	\
+	|sed -e "s/serde_derive = \"1\"/serde_derive={version=\">=1.0.130\" , path=\"..\/serde-1.0.130\/serde_derive\" }  /" 	\
+	|sed -e "s/regex = \"1\"/regex={version=\">=1\" , path=\"..\/regex-1.6.0\" }  /" 	\
 	>$F
+
 
 F=target/rust-i18n-1.1.1/crates/macro/Cargo.toml
 mv $F ${F}.0		# once_cell, syn
@@ -314,9 +319,12 @@ mv $F ${F}.0	# downgrade ahash
 cat ${F}.0 |sed -e "s/\"0.7.0\"/\">=0.7\", path=\"..\/ahash-0.7.6\" /" 		>$F
 
 F=target/fern-fern-0.6.0/Cargo.toml
-mv $F ${F}.0	# upgrade colored, widen log
+mv $F ${F}.0	# upgrade colored, widen log, point fern
 cat ${F}.0 |sed -e "s/\"1.5\"/\">=1.5\", path=\"..\/colored-1.5.3\" /" 	\
-	 |sed -e "s/log = { version = \"0.4\"/log={version=\">=0.4\",  path=\"..\/log-0.4.17\" /"	>$F
+	 |sed -e "s/log = { version = \"0.4\"/log={version=\">=0.4\",  path=\"..\/log-0.4.17\" /" \
+	 |sed -e "s/chrono = {/chrono = { path=\"..\/chrono-0.4.19\", /" \
+	 |sed -e "s/chrono = \"0.4\"/chrono = { version=\"^0.4\", path=\"..\/chrono-0.4.19\" } /" \
+	 >$F
 
 F=target/colored-1.5.3/Cargo.toml
 mv $F ${F}.0	# downgrade lazy_static
@@ -330,9 +338,23 @@ F=target/libwebp-sys2-rs-0.1.2/Cargo.toml
 mv $F ${F}.0	# point to cfg-if
 cat ${F}.0 |sed -e "s/\"0.1.6\"/{ version=\">=0.1.6\", path=\"..\/cfg-if-0.1.7\" } /" 	>$F
 
-
 F=target/json-1.0.82/Cargo.toml
 mv $F ${F}.0	# point to cfg-if
 cat ${F}.0 |sed -e "s/itoa = \"1.0\"/itoa={version=\">=1.0\", path=\"..\/itoa-1.0.0\" } /" 	>$F
 
+F=target/clap-3.2.20/Cargo.toml
+mv $F ${F}.0	# downgrade strsim
+cat ${F}.0 |sed -e "s/\"0.10\"/\">=0.9\"/" |sed -e "s/\"0.15.0\"/\">=0.11.0\"/"  	>$F
+
+F=target/clap-3.2.20/Cargo.toml
+mv $F ${F}.0	# downgrade strsim
+cat ${F}.0 |sed -e "s/\"0.10\"/\">=0.9\"/" |sed -e "s/\"0.15.0\"/\">=0.11.0\"/"  	>$F
+
+F=target/parking_lot-lock_api-0.4.9/lock_api/Cargo.toml
+mv $F ${F}.0	#
+cat ${F}.0 |sed -e "s/autocfg = \"1.1.0\"/autocfg=\">=1.0\"  /" 	>$F
+
+F=target/chrono-0.4.19/Cargo.toml
+mv $F ${F}.0	# upgrade libc
+cat ${F}.0 |sed -e "s/\"0.2.69\"/\">=0.2.69\"/" 	>$F
 
