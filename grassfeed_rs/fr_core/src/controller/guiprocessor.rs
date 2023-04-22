@@ -389,6 +389,7 @@ impl GuiProcessor {
             KeyCodes::Tab => new_focus_by_tab = self.focus_by_tab.borrow().next(),
             KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.borrow().prev(),
             KeyCodes::Key_a => {
+                trace!("GP: key a subs_id:{} ",  &subscription_id);
                 if subscription_id > 0 {
                     (*self.feedsources_r).borrow().mark_as_read(subscription_id);
                 }

@@ -342,19 +342,17 @@ F=target/json-1.0.82/Cargo.toml
 mv $F ${F}.0	# point to cfg-if
 cat ${F}.0 |sed -e "s/itoa = \"1.0\"/itoa={version=\">=1.0\", path=\"..\/itoa-1.0.0\" } /" 	>$F
 
-F=target/clap-3.2.20/Cargo.toml
-mv $F ${F}.0	# downgrade strsim
-cat ${F}.0 |sed -e "s/\"0.10\"/\">=0.9\"/" |sed -e "s/\"0.15.0\"/\">=0.11.0\"/"  	>$F
-
-F=target/clap-3.2.20/Cargo.toml
-mv $F ${F}.0	# downgrade strsim
-cat ${F}.0 |sed -e "s/\"0.10\"/\">=0.9\"/" |sed -e "s/\"0.15.0\"/\">=0.11.0\"/"  	>$F
-
 F=target/parking_lot-lock_api-0.4.9/lock_api/Cargo.toml
 mv $F ${F}.0	#
 cat ${F}.0 |sed -e "s/autocfg = \"1.1.0\"/autocfg=\">=1.0\"  /" 	>$F
 
 F=target/chrono-0.4.19/Cargo.toml
-mv $F ${F}.0	# upgrade libc
-cat ${F}.0 |sed -e "s/\"0.2.69\"/\">=0.2.69\"/" 	>$F
+mv $F ${F}.0	# upgrade libc, num-traits
+cat ${F}.0 |sed -e "s/\"0.2.69\"/\">=0.2.69\" , path=\"..\/libc-0.2.103\"/" \
+	|sed -e "s/\"0.1.43\"/\">=0.1.43\" , path=\"..\/time-0.2.0\"/" \
+	|sed -e "s/num-traits = { version = \"0.2\"/num-traits={version=\">=0.2\" , path=\"..\/num-traits-num-traits-0.2.15\"/" \
+	>$F
 
+F=target/clap-3.2.20/Cargo.toml
+mv $F ${F}.0	# downgrade strsim , textwrap
+cat ${F}.0 |sed -e "s/\"0.10\"/\">=0.9\"/"  	  |sed -e "s/\"0.15.0\"/\">=0.15.0\", path=\"..\/textwrap-0.15.2\"/" 	>$F
