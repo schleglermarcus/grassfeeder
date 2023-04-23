@@ -10,13 +10,18 @@
 FROM ubuntu:22.10
 RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic main restricted universe multiverse "  >/etc/apt/sources.list
 RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ kinetic main restricted universe multiverse"  >>/etc/apt/sources.list
+RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic-updates main restricted universe multiverse "  >>/etc/apt/sources.list
+RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ kinetic-updates main restricted universe multiverse"  >>/etc/apt/sources.list
+# RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic-backports main restricted universe multiverse "  >>/etc/apt/sources.list
 
 
 
 RUN cat /etc/apt/sources.list
 RUN apt-get update
 
-RUN apt install -y  rustc  cargo
+RUN apt install -y  rustc
+
+RUN apt install -y  cargo
 RUN rustc --version
 RUN cargo install  cargo-deb   --version 1.33.0	# downgrading the version
 ENV PATH="$PATH:/root/.cargo/bin"

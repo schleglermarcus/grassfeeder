@@ -2,10 +2,11 @@ FROM grassfeeder:ubuntu-stage1
 # RUN apt-get install -y librust-fern-dev librust-gumdrop-dev librust-once-cell-dev
 
 RUN apt-get install -y  librust-colored-dev librust-clap-dev    librust-log-dev librust-os-str-bytes-dev librust-autocfg-dev
+RUN dpkg -l |egrep "librust-log-dev|rustc"
+RUN rustc --version
 
 
 
-RUN dpkg -l |egrep "librust-colored-dev|librust-clap|librust-log-dev"
 
 COPY target/gf.tar.gz /usr/src/
 WORKDIR /usr/src/
@@ -19,7 +20,6 @@ WORKDIR /usr/src/grassfeed_rs
 RUN ./prepare-debian.sh
 WORKDIR /usr/src/grassfeed_rs/app-gtk3-ubuntu
 
-RUN cargo tree
 
 RUN cargo deb
 RUN ./deb-sign.sh

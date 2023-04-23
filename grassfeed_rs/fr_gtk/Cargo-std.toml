@@ -31,7 +31,7 @@ webkit2gtk = { version = "=0.18.2", default-features = false, features = [
     "v2_36",
 ] }
 glib = "^0.15.5"
-chrono = ">=0.4.24"
+# chrono = ">=0.4.24"
 
 
 [[example]]

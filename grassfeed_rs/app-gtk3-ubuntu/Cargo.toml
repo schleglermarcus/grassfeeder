@@ -1,7 +1,7 @@
 [package]
 name = "app-gtk3-ubuntu"
 version = "0.1.9-B8"
-edition = "2021"
+edition = "2018"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
 
@@ -20,7 +20,7 @@ gumdrop = ">=0.7.0"
 log = { version=">=0.4.10" , path="../app-gtk3-debian/target/log-0.4.17" }
 once_cell = { version = ">=1.3.1", path = "../app-gtk3-debian/target/once_cell-1.10.0" }
 xdg = { version =">=2.2",  path = "../app-gtk3-debian/target/rust-xdg-2.2.0" }
-# libc={version="^0.2.103" ,   path = "../app-gtk3-debian/target/libc-0.2.103" }
+# libc = { version="^0.2.103" ,   path = "../app-gtk3-debian/target/libc-0.2.103" }
 
 
 [profile.release]

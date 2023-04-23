@@ -175,7 +175,7 @@ cat ${F}.0  |sed -e "s/\"0.13.5\"/{version=\"^0.13.5\", path=\"..\/xmlparser-0.1
 
 F=target/strict-num-0.1.0/Cargo.toml
 mv $F ${F}.0		#  downgrade of  float-cmp,   removing feature  "std"
-cat ${F}.0 |sed -e "s/\"0.9\"/\">=0.6\", path=\"..\/float-cmp-0.9.0\" /" |sed -e "s/\"std\"//"	>$F
+cat ${F}.0 |sed -e "s/\"0.9\"/\">=0.6\", path=\"..\/float-cmp-0.6.0\" /" |sed -e "s/\"std\"//"	>$F
 
 F=target/webpki-roots-v-0.22.6/Cargo.toml
 mv $F ${F}.0
@@ -203,12 +203,6 @@ cat ${F}.0 |sed -e "s/\"0.27\"/\{version=\">=0.27\" , path=\"..\/..\/..\/rust-cs
 	>$F
 
 
-# F=target/servo-selectors-v0.22.0/components/selectors/Cargo.toml
-# mv $F ${F}.0
-# cat ${F}.0 |sed -e "s/\"0.27\"/\{version=\">=0.27\" , path=\"..\/..\/..\/rust-cssparser-0.28.0\"  \}/"	\
-#  	|sed -e "s/\"0.99\"/\{version=\">=0.99\" , path=\"..\/..\/..\/derive_more-0.99.17\"  \}/"	\
-# 	|sed -e "s/\"0.1.0\"/\">=0.1.0\" /"	\
-# 	>$F
 
 F=target/convert_case-0.6.0/Cargo.toml
 mv $F ${F}.0
@@ -312,7 +306,8 @@ cat ${F}.0 	|sed -e "s/\"0.16.20\"/{ version=\"0.16.20\", path=\"..\/ring-0.16.2
 
 F=target/ring-0.16.20/Cargo.toml
 mv $F ${F}.0	# downgrade     untrusted
-cat ${F}.0  	|sed -e "s/\"0.7.1\"/\">=0.7.0\"\n path=\"..\/untrusted-0.7.1\" /" 	>$F
+cat ${F}.0  	|sed -e "s/\"0.7.1\"/\">=0.7.0\"\n path=\"..\/untrusted-0.7.1\" /"	\
+ 	|sed -e "s/\"0.3.37\"/\">=0.3.37\"\n path=\"..\/web-sys-0.3.37\" /" 	>$F
 
 F=target/hashbrown-0.12.0/Cargo.toml
 mv $F ${F}.0	# downgrade ahash
@@ -322,8 +317,8 @@ F=target/fern-fern-0.6.0/Cargo.toml
 mv $F ${F}.0	# upgrade colored, widen log, point fern
 cat ${F}.0 |sed -e "s/\"1.5\"/\">=1.5\", path=\"..\/colored-1.5.3\" /" 	\
 	 |sed -e "s/log = { version = \"0.4\"/log={version=\">=0.4\",  path=\"..\/log-0.4.17\" /" \
-	 |sed -e "s/chrono = {/chrono = { path=\"..\/chrono-0.4.19\", /" \
-	 |sed -e "s/chrono = \"0.4\"/chrono = { version=\"^0.4\", path=\"..\/chrono-0.4.19\" } /" \
+	 |sed -e "s/chrono = {/chrono = { path=\"..\/chrono-0.4.21\", /" \
+	 |sed -e "s/chrono = \"0.4\"/chrono = { version=\"^0.4\", path=\"..\/chrono-0.4.21\" } /" \
 	 >$F
 
 F=target/colored-1.5.3/Cargo.toml
@@ -346,13 +341,55 @@ F=target/parking_lot-lock_api-0.4.9/lock_api/Cargo.toml
 mv $F ${F}.0	#
 cat ${F}.0 |sed -e "s/autocfg = \"1.1.0\"/autocfg=\">=1.0\"  /" 	>$F
 
-F=target/chrono-0.4.19/Cargo.toml
-mv $F ${F}.0	# upgrade libc, num-traits
+F=target/chrono-0.4.21/Cargo.toml
+mv $F ${F}.0	# upgrade libc, num-traits , iana-time-zone
 cat ${F}.0 |sed -e "s/\"0.2.69\"/\">=0.2.69\" , path=\"..\/libc-0.2.103\"/" \
-	|sed -e "s/\"0.1.43\"/\">=0.1.43\" , path=\"..\/time-0.2.0\"/" \
+	|sed -e "s/\"0.1.43\"/\">=0.1.43\" , path=\"..\/time-0.1.43\"/" \
+	|sed -e "s/\"0.1.41\"/\">=0.1.41\" , path=\"..\/iana-time-zone-0.1.41\"/" \
 	|sed -e "s/num-traits = { version = \"0.2\"/num-traits={version=\">=0.2\" , path=\"..\/num-traits-num-traits-0.2.15\"/" \
+	|sed -e "s/\"0.2\"/\">=0.2\" , path=\"..\/wasm-bindgen-0.2.81\"  /" \
+	|sed -e "s/js-sys = { version = \"0.3\"/js-sys ={version=\">=0.3.58\", path=\"..\/js-sys-0.3.58\" /"	\
 	>$F
 
 F=target/clap-3.2.20/Cargo.toml
 mv $F ${F}.0	# downgrade strsim , textwrap
 cat ${F}.0 |sed -e "s/\"0.10\"/\">=0.9\"/"  	  |sed -e "s/\"0.15.0\"/\">=0.15.0\", path=\"..\/textwrap-0.15.2\"/" 	>$F
+
+F=target/iana-time-zone-0.1.41/Cargo.toml
+mv $F ${F}.0	# core-foundation,   wasm-bindgen , android_system_properties
+cat ${F}.0 \
+	|sed -e "s/\"0.9\"/{version=\">=0.9\", path=\"..\/core-foundation-rs-core-foundation-v0.9.1\/core-foundation\" }/"	\
+	|sed -e "s/\"0.3.58\"/{version=\">=0.3.58\", path=\"..\/js-sys-0.3.58\" }/"	\
+	|sed -e "s/\"0.2.81\"/{version=\">=0.2.78\"    , path=\"..\/wasm-bindgen-0.2.81\"  }/"	\
+	|sed -e "s/\"0.1.4\"/{version=\">=0.1.4\" , path=\"..\/android_system_properties-0.1.4\"  }/"	\
+	>$F
+
+F=target/bincode-1.3.3/Cargo.toml
+mv $F ${F}.0	# serde
+cat ${F}.0	|sed -e "s/\"1.0.63\"/{version=\">=1.0.63\" , path=\"..\/serde-1.0.130\/serde\" }  /" 	>$F
+
+F=target/js-sys-0.3.58/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0	|sed -e "s/\"0.2.81\"/\"0.2.81\" \npath=\"..\/wasm-bindgen-0.2.81\"  /" 	>$F
+
+
+F=target/android_system_properties-0.1.4/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0	|sed -e "s/\"0.2.126\"/\">=0.2.103\" \npath=\"..\/libc-0.2.103\"  /" 	>$F
+
+F=target/web-sys-0.3.37/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0	|sed -e "s/\"0.2.60\"/\"0.2.81\" \npath=\"..\/wasm-bindgen-0.2.81\"  /" \
+	|sed -e "s/\"0.3.37\"/\"0.3.58\" \npath=\"..\/js-sys-0.3.58\" /"	\
+	>$F
+##  TODO doppelte Ersetzung !! darf nur bei js-sys wirken
+
+
+
+
+# F=target/servo-selectors-v0.22.0/components/selectors/Cargo.toml
+# mv $F ${F}.0
+# cat ${F}.0 |sed -e "s/\"0.27\"/\{version=\">=0.27\" , path=\"..\/..\/..\/rust-cssparser-0.28.0\"  \}/"	\
+#  	|sed -e "s/\"0.99\"/\{version=\">=0.99\" , path=\"..\/..\/..\/derive_more-0.99.17\"  \}/"	\
+# 	|sed -e "s/\"0.1.0\"/\">=0.1.0\" /"	\
+# 	>$F
