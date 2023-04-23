@@ -18,6 +18,7 @@ use crate::util::StepResult;
 use crate::web::WebFetcherType;
 use chrono::DateTime;
 use chrono::Local;
+use chrono::Utc;
 use feed_rs::model::Entry;
 use feed_rs::parser::ParseFeedError;
 use flume::Sender;
@@ -197,7 +198,8 @@ pub fn feed_text_to_entries(
                 err_text.push_str(&err_t);
             }
             if let Some(utc_date) = feed.updated {
-                created_ts = timestamp_from_utc(utc_date);
+                let ts_utc: DateTime<Utc> = utc_date;
+                created_ts = timestamp_from_utc(ts_utc);
             }
         }
         Err(e) => {
@@ -282,10 +284,12 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
     let mut published_ts: i64 = 0;
     let mut error_text = String::default();
     if let Some(publis) = me.published {
-        published_ts = DateTime::<Local>::from(publis).timestamp();
+        let dt_utc: DateTime<Utc> = publis;
+        published_ts = DateTime::<Local>::from(dt_utc).timestamp();
     } else {
         if let Some(upd) = me.updated {
-            published_ts = DateTime::<Local>::from(upd).timestamp();
+            let dt_utc: DateTime<Utc> = upd;
+            published_ts = DateTime::<Local>::from(dt_utc).timestamp();
         }
         msg.entry_invalid_pubdate = true;
     }

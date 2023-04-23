@@ -26,9 +26,9 @@ fern = { version = ">=0.5.8" , path = "../app-gtk3-debian/target/fern-fern-0.6.0
 log = { version = ">=0.4.10", path = "../app-gtk3-debian/target/log-0.4.17" }
 once_cell = { version = ">=1.3.1", path = "../app-gtk3-debian/target/once_cell-1.10.0" }
 regex = { version = ">=1.6", path = "../app-gtk3-debian/target/regex-1.6.0" }
-serde = { version = ">=1.0.130", path = "../app-gtk3-debian/target/serde-1.0.130/serde" }
-serde_json = { version = ">=1.0.45", path = "../app-gtk3-debian/target/json-1.0.82" }
-chrono = { version = ">=0.4.19", path = "../app-gtk3-debian/target/chrono-0.4.21" }
+serde = { version = ">=1.0.130", path = "../app-gtk3-debian/target/serde-1.0.156/serde" }
+serde_json = { version = ">=1.0.45", path = "../app-gtk3-debian/target/json-1.0.93" }
+chrono = { version = ">=0.4.24", path = "../app-gtk3-debian/target/chrono-0.4.24" }
 flume = { version = "0.10.14", path = "../app-gtk3-debian/target/flume-master" }
 image = { path = "../app-gtk3-debian/target/image-0.24.0" }
 ureq = { path = "../app-gtk3-debian/target/ureq-2.6.2" }

@@ -9,9 +9,11 @@ done
 
 F=target/feed-rs-1.3.0/feed-rs/Cargo.toml
 mv $F ${F}.0	#  downgrading chrono, quick-xml
-cat ${F}.0 |sed -e "s/\"0.4.23\"/\">=0.4.19\"  /"  \
+cat ${F}.0 |sed -e "s/\"0.4.23\"/\"0.4.24\", path=\"..\/..\/chrono-0.4.24\"  /"  \
 	|sed -e "s/\"0.27.1\"/\"0.27.1\",  path=\"..\/..\/quick-xml-0.27.1\"/" \
-	|egrep -v "regex|url|uuid" 	>$F
+	|sed -e "s/serde_json = \"1.0\"/serde_json={version=\">=1\" , path=\"..\/..\/json-1.0.93\" }  /" 	\
+	|sed -e "s/serde = { version = \"1.0\"/serde={version=\">=1\" , path=\"..\/..\/serde-1.0.156\/serde\"   /" 	\
+	|egrep -v "regex|url|uuid" 		>$F
 echo "regex={ path=\"../../regex-1.6.0\" }  " >>$F
 echo "url={ path=\"../../rust-url-2.3.0/url\" }  " >>$F
 echo "uuid={ path=\"../../uuid-1.1.0\" , features=[\"v4\"] }  " >>$F
@@ -104,21 +106,30 @@ cat ${F}.0 \
 	|sed -e "s/\"0.10.3\"/\">=0.10.0\"  , path=\"..\/itertools-0.10.3\"  /" 	 \
 	|sed -e "s/\"1.10.0\"/{version=\">=1.3.1\" , path=\"..\/once_cell-1.10.0\" }  /" 	\
 	|sed -e "s/\"2.32\"/\">=2.32\", path=\"..\/clap-3.2.20\"   /" 	\
-	|sed -e "s/serde = \"1\"/serde={version=\">=1.0.130\" , path=\"..\/serde-1.0.130\/serde\" }  /" 	\
-	|sed -e "s/serde_derive = \"1\"/serde_derive={version=\">=1.0.130\" , path=\"..\/serde-1.0.130\/serde_derive\" }  /" 	\
+	|sed -e "s/serde = \"1\"/serde={version=\">=1.0.130\" , path=\"..\/serde-1.0.156\/serde\" }  /" 	\
+	|sed -e "s/serde_derive = \"1\"/serde_derive={version=\">=1.0.130\" , path=\"..\/serde-1.0.156\/serde_derive\" }  /" 	\
 	|sed -e "s/regex = \"1\"/regex={version=\">=1\" , path=\"..\/regex-1.6.0\" }  /" 	\
 	>$F
 
 
 F=target/rust-i18n-1.1.1/crates/macro/Cargo.toml
 mv $F ${F}.0		# once_cell, syn
-cat ${F}.0  |sed -e "s/\"1.10.0\"/\">=1.3.1\" /"  |sed -e "s/\"1.0.82\"/\">=1.0.76\" /" 		>$F
-
+cat ${F}.0  |sed -e "s/\"1.10.0\"/\">=1.3.1\" /"  |sed -e "s/\"1.0.82\"/\">=1.0.76\" /"		\
+	|sed -e "s/serde_json = \"1\"/serde_json={version=\">=1\" , path=\"..\/..\/..\/json-1.0.93\" }  /" 	\
+	>$F
 
 F=target/rust-i18n-1.1.1/crates/support/Cargo.toml
-mv $F ${F}.0		# once_cell
-cat ${F}.0  |sed -e "s/\"1.10.0\"/\">=1.3.1\" /"  		>$F
+mv $F ${F}.0		# once_cell, serde_json
+cat ${F}.0  |sed -e "s/\"1.10.0\"/\">=1.3.1\" /"  	\
+	|sed -e "s/serde_json = \"1\"/serde_json={version=\">=1\" , path=\"..\/..\/..\/json-1.0.93\" }  /" 	\
+	>$F
 
+F=target/rust-i18n-1.1.1/crates/extract/Cargo.toml
+mv $F ${F}.0		#  serde_json
+cat ${F}.0  	\
+	|sed -e "s/serde_json = \"1\"/serde_json={version=\">=1\" , path=\"..\/..\/..\/json-1.0.93\" }  /" 	\
+	|sed -e "s/serde = \"1\"/serde={version=\">=1\" , path=\"..\/..\/..\/serde-1.0.156\/serde\"  } /" 	\
+	>$F
 
 F=target/embedded-graphics-embedded-graphics-v0.7.1/Cargo.toml
 mv $F ${F}.0
@@ -161,7 +172,7 @@ cat ${F}.0 	|sed -e "s/\"0.21\"/\">=0.13\" /"\
 		|sed -e "s/\"0.9\"/\">=0.7\" /"	\
 		|sed -e "s/\"0.5\"/{version=\">=0.5\", path=\"..\/..\/rctree-0.5.0\"\}  /"	\
 		|sed -e "s/strict-num = \"0.1\"/strict-num={version=\">=0.1\", path=\"..\/..\/strict-num-0.1.0\"\}  /" \
-				>$F
+		>$F
 
 F=target/resvg-0.29.0/rosvgtree/Cargo.toml
 mv $F ${F}.0
@@ -232,9 +243,12 @@ cat ${F}.0 		|sed -e "s/\"0.8\"/\">=0.8\" /"	|sed -e "s/\"1.0.71\"/\">=1.0.50\" 
 F=target/opml/opml_api/Cargo.toml
 mv $F ${F}.0	#   serde , thiserror
 cat ${F}.0  |sed -e "s/\"1.13.0\"/\{version=\">=1.11\" , path=\"..\/..\/hard-xml-v1.19.0\/hard-xml\"  \} /" 	\
-	|sed -e "s/\"1.0.145\"/\">=1.0.130\"/" \
+	|sed -e "s/\"1.0.145\"/\">=1.0.145\" \npath=\"..\/..\/serde-1.0.156\/serde\" / " \
 	|sed -e "s/\"1.0.37\"/\">=1.0.20\"/" \
 	>$F
+
+#  	|sed -e "s/serde = { version = \"1.0.100\"/serde={version=\">=1\" , path=\"..\/serde-1.0.156\/serde\"   /" 	\
+
 
 F=target/rust-url-2.3.0/idna/Cargo.toml
 mv $F ${F}.0
@@ -317,8 +331,8 @@ F=target/fern-fern-0.6.0/Cargo.toml
 mv $F ${F}.0	# upgrade colored, widen log, point fern
 cat ${F}.0 |sed -e "s/\"1.5\"/\">=1.5\", path=\"..\/colored-1.5.3\" /" 	\
 	 |sed -e "s/log = { version = \"0.4\"/log={version=\">=0.4\",  path=\"..\/log-0.4.17\" /" \
-	 |sed -e "s/chrono = {/chrono = { path=\"..\/chrono-0.4.21\", /" \
-	 |sed -e "s/chrono = \"0.4\"/chrono = { version=\"^0.4\", path=\"..\/chrono-0.4.21\" } /" \
+	 |sed -e "s/chrono = { version = \"0.4\"/chrono = { version=\"0.4.24\", path=\"..\/chrono-0.4.24\"  /" \
+	 |sed -e "s/chrono = \"0.4\"/chrono = { version=\"0.4.24\", path=\"..\/chrono-0.4.24\" } /" \
 	 >$F
 
 F=target/colored-1.5.3/Cargo.toml
@@ -333,19 +347,21 @@ F=target/libwebp-sys2-rs-0.1.2/Cargo.toml
 mv $F ${F}.0	# point to cfg-if
 cat ${F}.0 |sed -e "s/\"0.1.6\"/{ version=\">=0.1.6\", path=\"..\/cfg-if-0.1.7\" } /" 	>$F
 
-F=target/json-1.0.82/Cargo.toml
-mv $F ${F}.0	# point to cfg-if
-cat ${F}.0 |sed -e "s/itoa = \"1.0\"/itoa={version=\">=1.0\", path=\"..\/itoa-1.0.0\" } /" 	>$F
+F=target/json-1.0.93/Cargo.toml
+mv $F ${F}.0	# point to cfg-if	serde
+cat ${F}.0 |sed -e "s/itoa = \"1.0\"/itoa={version=\">=1.0\", path=\"..\/itoa-1.0.0\" } /" \
+ 	|sed -e "s/serde = { version = \"1.0.100\"/serde={version=\">=1\" , path=\"..\/serde-1.0.156\/serde\"   /" 	\
+	>$F
 
 F=target/parking_lot-lock_api-0.4.9/lock_api/Cargo.toml
 mv $F ${F}.0	#
 cat ${F}.0 |sed -e "s/autocfg = \"1.1.0\"/autocfg=\">=1.0\"  /" 	>$F
 
-F=target/chrono-0.4.21/Cargo.toml
+F=target/chrono-0.4.24/Cargo.toml
 mv $F ${F}.0	# upgrade libc, num-traits , iana-time-zone
 cat ${F}.0 |sed -e "s/\"0.2.69\"/\">=0.2.69\" , path=\"..\/libc-0.2.103\"/" \
 	|sed -e "s/\"0.1.43\"/\">=0.1.43\" , path=\"..\/time-0.1.43\"/" \
-	|sed -e "s/\"0.1.41\"/\">=0.1.41\" , path=\"..\/iana-time-zone-0.1.41\"/" \
+	|sed -e "s/\"0.1.45\"/\">=0.1.41\" , path=\"..\/iana-time-zone-0.1.41\"/" \
 	|sed -e "s/num-traits = { version = \"0.2\"/num-traits={version=\">=0.2\" , path=\"..\/num-traits-num-traits-0.2.15\"/" \
 	|sed -e "s/\"0.2\"/\">=0.2\" , path=\"..\/wasm-bindgen-0.2.81\"  /" \
 	|sed -e "s/js-sys = { version = \"0.3\"/js-sys ={version=\">=0.3.58\", path=\"..\/js-sys-0.3.58\" /"	\
@@ -366,7 +382,7 @@ cat ${F}.0 \
 
 F=target/bincode-1.3.3/Cargo.toml
 mv $F ${F}.0	# serde
-cat ${F}.0	|sed -e "s/\"1.0.63\"/{version=\">=1.0.63\" , path=\"..\/serde-1.0.130\/serde\" }  /" 	>$F
+cat ${F}.0	|sed -e "s/\"1.0.63\"/{version=\">=1.0.63\" , path=\"..\/serde-1.0.156\/serde\" }  /" 	>$F
 
 F=target/js-sys-0.3.58/Cargo.toml
 mv $F ${F}.0
@@ -376,6 +392,19 @@ cat ${F}.0	|sed -e "s/\"0.2.81\"/\"0.2.81\" \npath=\"..\/wasm-bindgen-0.2.81\"  
 F=target/android_system_properties-0.1.4/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0	|sed -e "s/\"0.2.126\"/\">=0.2.103\" \npath=\"..\/libc-0.2.103\"  /" 	>$F
+
+F=target/serde-1.0.156/serde_derive/Cargo.toml
+mv $F ${F}.0	# syn
+cat ${F}.0	 |sed -e "s/\"1.0.104\"/{version=\">=1.0.104\", path=\"..\/..\/syn-1.0.109\"} /" \
+	>$F
+
+F=target/syn-1.0.109/Cargo.toml
+mv $F ${F}.0	# proc-macro2
+cat ${F}.0	 |sed -e "s/\"1.0.46\"/\">=1.0.28\" /" \
+	|sed -e "s/unicode-ident = \"1.0\"/unicode-ident={version=\">=1\", path=\"..\/unicode-ident-1.0.6\"} /" \
+	>$F
+
+
 
 F=target/web-sys-0.3.37/Cargo.toml
 mv $F ${F}.0
@@ -387,9 +416,3 @@ cat ${F}.0	|sed -e "s/\"0.2.60\"/\"0.2.81\" \npath=\"..\/wasm-bindgen-0.2.81\"  
 
 
 
-# F=target/servo-selectors-v0.22.0/components/selectors/Cargo.toml
-# mv $F ${F}.0
-# cat ${F}.0 |sed -e "s/\"0.27\"/\{version=\">=0.27\" , path=\"..\/..\/..\/rust-cssparser-0.28.0\"  \}/"	\
-#  	|sed -e "s/\"0.99\"/\{version=\">=0.99\" , path=\"..\/..\/..\/derive_more-0.99.17\"  \}/"	\
-# 	|sed -e "s/\"0.1.0\"/\">=0.1.0\" /"	\
-# 	>$F

@@ -139,6 +139,12 @@ note: the lint level is defined here			app-gtk3-debian/target/chrono-0.4.19/src/
 error: could not compile `chrono` due to previous error
 
 
+serde-1.0.150	/grassfeed_rs/fr_core/src/db/errors_repo.rs:363:33
+363  |     match serde_json::to_string(input) {
+     |           --------------------- ^^^^^ the trait `serde::ser::Serialize` is not implemented for `ErrorEntry`
+
+
+
 
 https://rust-lang-nursery.github.io/rust-cookbook/compression/tar.html
 https://users.rust-lang.org/t/easiest-way-to-manually-download-a-crate-from-crates-io/67338

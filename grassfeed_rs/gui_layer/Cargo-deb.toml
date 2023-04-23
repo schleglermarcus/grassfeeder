@@ -5,4 +5,4 @@ authors = ["marcus"]
 edition = "2021"
 
 [dependencies]
-serde = { version = ">=1.0.130", features = ["derive"] , path = "../app-gtk3-debian/target/serde-1.0.130/serde"  }
+serde = { version = ">=1.0.130", features = ["derive"] , path = "../app-gtk3-debian/target/serde-1.0.156/serde"  }
