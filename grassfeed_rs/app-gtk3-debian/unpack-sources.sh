@@ -90,11 +90,17 @@ cat ${F}.0 |sed -e "s/\"2.5\"/\">=2.4\" /" 		>$F
 
 F=target/regex-1.6.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"0.7.18\"/\">=0.7.10\" /" 		>$F
+cat ${F}.0 |sed -e "s/\"0.7.18\"/\">=0.7.10\" /" 	\
+	|sed -e "s/\"2.4.0\"/\">=2.4.0\" \n path=\"..\/memchr-2.5.0\"  /" \
+	>$F
 
 F=target/rusqlite-0.28.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/hashlink = \"0.8\"/hashlink=\{version=\">=0.7\" , path=\"..\/hashlink-0.8.0\"\}  /" 		>$F
+cat ${F}.0 |sed -e "s/hashlink = \"0.8\"/hashlink=\{version=\">=0.7\" , path=\"..\/hashlink-0.8.0\"\}  /" \
+	|sed -e "s/\"1.6.1\"/{version=\">=1.6.1\" ,path=\"..\/rust-smallvec-1.7.0\" } /" \
+	>$F
+
+
 
 F=target/hashlink-0.8.0/Cargo.toml
 mv $F ${F}.0
@@ -168,6 +174,8 @@ cat ${F}.0 |sed -e "s/rustls = { version = \"/rustls = \{path=\"..\/rustls-v-0.2
 		|sed -e "s/url = \"2\"/url=\{version=\">=2.0\", path=\"..\/rust-url-2.3.0\/url\"\} /"	\
 		|sed -e "s/webpki = { version = \"0.22\"/webpki=\{version=\">=0.21\" , path=\"..\/webpki-0.22.0\"  /"	\
 		|sed -e "s/webpki-roots = {/\webpki-roots={path=\"..\/webpki-roots-v-0.22.6\"\,  /"	\
+	    |sed -e "s/log = \"0.4\"/log={version=\">=0.4\",  path=\"..\/log-0.4.17\" }/" \
+		|sed -e "s/once_cell = \"1\"/once_cell={version=\">=1\" , path=\"..\/once_cell-1.10.0\" }  /" 	\
 	>$F
 
 F=target/resvg-0.29.0/usvg/Cargo.toml
@@ -281,6 +289,7 @@ cat ${F}.0 |sed -e "s/\"0.15\"/\"^0.14.0\"/g" \
 F=target/rayon-1.5.1/Cargo.toml
 mv $F ${F}.0	# downgrade   crossbeam-channel		crossbeam-deque
 cat ${F}.0 	 |sed -e "s/\"0.8.0\"/{version=\">=0.7.4\", path=\"..\/crossbeam-crossbeam-deque-0.8.1\/crossbeam-deque\" } /"	\
+ 		|sed -e "s/autocfg = \"1\"/autocfg={version=\"1\", path=\"..\/autocfg-1.1.0\" } /"	\
 		>$F
 
 F=target/rayon-1.5.1/rayon-core/Cargo.toml
@@ -426,5 +435,8 @@ cat ${F}.0	\
 	|sed -e "s/\"1.0\"/{version=\">=1.0.30\", path=\"..\/thiserror-1.0.30\" } /" \
  	>$F
 
+F=target/signal-hook-0.3.15/Cargo.toml
+mv $F ${F}.0	#  libc, num-traits , iana-time-zone
+cat ${F}.0 |sed -e "s/\"^0.2\"/{version=\">=0.2\" , path=\"..\/libc-0.2.103\" } /"  >$F
 
 
