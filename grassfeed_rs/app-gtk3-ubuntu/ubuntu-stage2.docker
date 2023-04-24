@@ -4,6 +4,7 @@ FROM grassfeeder:ubuntu-stage1
 RUN apt-get install -y  librust-colored-dev librust-clap-dev    librust-log-dev librust-os-str-bytes-dev librust-autocfg-dev
 RUN apt-get install -y librust-mime-dev librust-futures-core-dev    librust-color-quant-dev librust-num-traits-dev librust-thiserror-dev
 RUN apt-get install -y  librust-crc32fast-dev librust-crossbeam-deque-dev  librust-autocfg-dev librust-memchr-dev librust-smallvec-dev
+RUN apt-get install -y  librust-proc-macro2-dev librust-indexmap-dev librust-quote-dev
 RUN dpkg -l |egrep "crossbeam|crc32fast"
 RUN rustc --version
 

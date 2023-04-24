@@ -13,14 +13,13 @@ path = "src/main.rs"
 gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
 fr_core = { path = "../fr_core", features = ["ui-gtk", "legacy3gtk14"] }
-resources = { path = "../resources" }                                                 #  , features = ["g3sources"]
+resources = { path = "../resources" }
 rust-i18n = { version = "1.1.1", path = "../app-gtk3-debian/target/rust-i18n-1.1.1" }
-fern = { version = ">=0.5.8", features = [  "colored" , "chrono" ], path = "../app-gtk3-debian/target/fern-fern-0.6.0" }
-gumdrop = ">=0.7.0"
-log = { version=">=0.4.10" , path="../app-gtk3-debian/target/log-0.4.17" }
+fern = { version = ">=0.5.8", path = "../app-gtk3-debian/target/fern-fern-0.6.0" , features = [  "colored",  "chrono",]  }
+gumdrop = { version = "0.7.0", path = "../app-gtk3-debian/target/gumdrop-0.7.0" }
+log = { version = ">=0.4.10", path = "../app-gtk3-debian/target/log-0.4.17" }
 once_cell = { version = ">=1.3.1", path = "../app-gtk3-debian/target/once_cell-1.10.0" }
-xdg = { version =">=2.2",  path = "../app-gtk3-debian/target/rust-xdg-2.2.0" }
-# libc = { version="^0.2.103" ,   path = "../app-gtk3-debian/target/libc-0.2.103" }
+xdg = { version = ">=2.2", path = "../app-gtk3-debian/target/rust-xdg-2.2.0" }
 
 
 [profile.release]

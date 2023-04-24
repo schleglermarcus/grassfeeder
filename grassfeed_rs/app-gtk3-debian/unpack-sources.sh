@@ -5,8 +5,6 @@ for F in src-releases/*.tar.?? ; do
 	(cd target/  ; tar xf ../$F  )
 done
 
-# ls target/
-
 F=target/feed-rs-1.3.0/feed-rs/Cargo.toml
 mv $F ${F}.0	#  downgrading chrono, quick-xml
 cat ${F}.0 |sed -e "s/\"0.4.23\"/\"0.4.24\", path=\"..\/..\/chrono-0.4.24\"  /"  \
@@ -100,14 +98,12 @@ cat ${F}.0 |sed -e "s/hashlink = \"0.8\"/hashlink=\{version=\">=0.7\" , path=\".
 	|sed -e "s/\"1.6.1\"/{version=\">=1.6.1\" ,path=\"..\/rust-smallvec-1.7.0\" } /" \
 	>$F
 
-
-
 F=target/hashlink-0.8.0/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.12.0\"/{version=\"^0.12.0\", path=\"..\/hashbrown-0.12.0\" }/" 		>$F
 
 F=target/rust-i18n-1.1.1/Cargo.toml
-mv $F ${F}.0		#downgrading itertools, once_cell, upgrading clap, anyhow, regex
+mv $F ${F}.0		#downgrading itertools, once_cell, upgrading clap, anyhow, regex,  quote
 cat ${F}.0 \
 	|sed -e "s/anyhow = {version = \"1\"/anyhow={version=\">=1\", path=\"..\/anyhow-1.0.60\"   /" 	\
 	|sed -e "s/\"0.10.3\"/\"0.10.3\"  , path=\"..\/itertools-0.10.3\"  /" 	 \
@@ -117,6 +113,7 @@ cat ${F}.0 \
 	|sed -e "s/serde_derive = \"1\"/serde_derive={version=\"1.0.156\" , path=\"..\/serde-1.0.156\/serde_derive\" }  /" 	\
 	|sed -e "s/regex = \"1\"/regex={version=\">=1\" , path=\"..\/regex-1.6.0\" }  /" 	\
 	|sed -e "s/\"0.8\"/{version=\"0.8\", path=\"..\/..\/..\/serde-yaml-0.8.26\"  } /" 	\
+	|sed -e "s/quote = {version = \"1\"/quote={version=\">=1\" , path=\"..\/quote-1.0.26\"   /" 	\
 	>$F
 
 F=target/rust-i18n-1.1.1/crates/macro/Cargo.toml
@@ -141,6 +138,8 @@ cat ${F}.0  	\
 	|sed -e "s/serde_json = \"1\"/serde_json={version=\">=1\" , path=\"..\/..\/..\/json-1.0.94\" }  /" 	\
 	|sed -e "s/serde = \"1\"/serde={version=\"=1.0.156\" , path=\"..\/..\/..\/serde-1.0.156\/serde\"  } /" 	\
 	|sed -e "s/\"0.8\"/{version=\"0.8\", path=\"..\/..\/..\/serde-yaml-0.8.26\"  } /" 	\
+	|sed -e "s/anyhow = \"1\"/anyhow={version=\">=1\", path=\"..\/..\/..\/anyhow-1.0.60\"  } /" 	\
+	|sed -e "s/proc-macro2 = {version = \"1\"/proc-macro2={version=\"1\", path=\"..\/..\/..\/proc-macro2-1.0.40\"  /"	\
 	>$F
 
 F=target/embedded-graphics-embedded-graphics-v0.7.1/Cargo.toml
@@ -186,6 +185,7 @@ cat ${F}.0 	|sed -e "s/\"0.21\"/\">=0.13\" /"\
 		|sed -e "s/\"0.9\"/\">=0.7\" /"	\
 		|sed -e "s/\"0.5\"/{version=\">=0.5\", path=\"..\/..\/rctree-0.5.0\"\}  /"	\
 		|sed -e "s/strict-num = \"0.1\"/strict-num={version=\">=0.1\", path=\"..\/..\/strict-num-0.1.0\"\}  /" \
+	    |sed -e "s/log = \"0.4\"/log={version=\">=0.4\",  path=\"..\/..\/log-0.4.17\" }/" \
 		>$F
 
 F=target/resvg-0.29.0/rosvgtree/Cargo.toml
@@ -380,8 +380,10 @@ cat ${F}.0 |sed -e "s/\"0.2.69\"/\">=0.2.69\" , path=\"..\/libc-0.2.103\"/" \
 	>$F
 
 F=target/clap-3.2.20/Cargo.toml
-mv $F ${F}.0	# downgrade strsim , textwrap
-cat ${F}.0 |sed -e "s/\"0.10\"/\">=0.9\"/"  	  |sed -e "s/\"0.15.0\"/\">=0.15.0\", path=\"..\/textwrap-0.15.2\"/" 	>$F
+mv $F ${F}.0	# downgrade strsim , textwrap, indexmap
+cat ${F}.0 |sed -e "s/\"0.10\"/\">=0.9\"/"  	  |sed -e "s/\"0.15.0\"/\">=0.15.0\", path=\"..\/textwrap-0.15.2\"/" \
+	|sed -e "s/indexmap = \"1.0\"/indexmap={version=\">=1.0\", path=\"..\/indexmap-1.7.0\"} /" \
+	>$F
 
 F=target/iana-time-zone-0.1.41/Cargo.toml
 mv $F ${F}.0	# core-foundation,   wasm-bindgen , android_system_properties
@@ -423,7 +425,6 @@ cat ${F}.0	|sed -e "s/\"0.2.60\"/\"0.2.81\" \npath=\"..\/wasm-bindgen-0.2.81\"  
 	>$F
 ##  TODO doppelte Ersetzung !! darf nur bei js-sys wirken
 
-
 F=target/serde-yaml-0.8.26/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0	  	|sed -e "s/\"1.0.69\"/{version=\"1.0.156\" , path=\"..\/serde-1.0.156\/serde\"  } /" 	\
@@ -439,4 +440,22 @@ F=target/signal-hook-0.3.15/Cargo.toml
 mv $F ${F}.0	#  libc, num-traits , iana-time-zone
 cat ${F}.0 |sed -e "s/\"^0.2\"/{version=\">=0.2\" , path=\"..\/libc-0.2.103\" } /"  >$F
 
+F=target/gumdrop-0.7.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.7\"/\"=0.7\" \n path=\"..\/gumdrop_derive-0.7.0\"  /"  >$F
+
+F=target/gumdrop_derive-0.7.0/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0	\
+	|sed -e "35 s/version = \"1\"/version=\">=1\" \n path=\"..\/syn-1.0.109\" /" \
+	|sed -e "29 s/version = \"1\"/version=\"1\" \n path=\"..\/proc-macro2-1.0.40\"  /"	\
+	>$F
+
+F=target/proc-macro2-1.0.40/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/unicode-ident = \"1.0\"/unicode-ident={version=\"1\" , path=\"..\/unicode-ident-1.0.6\" } /"  >$F
+
+F=target/quote-1.0.26/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 	|sed -e "s/\"1.0.52\"/\">=1.0.40\" , path=\"..\/proc-macro2-1.0.40\"  /"		 >$F
 
