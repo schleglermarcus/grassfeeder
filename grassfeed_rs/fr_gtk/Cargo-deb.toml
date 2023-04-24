@@ -16,16 +16,16 @@ rust-i18n = { version = "^1.1.1", path = "../app-gtk3-debian/target/rust-i18n-1.
 ui_gtk = { path = "../ui_gtk", features = ["legacy3gtk14"] }
 gio = "=0.14.8"
 fern = { version = ">=0.5.8" , path = "../app-gtk3-debian/target/fern-fern-0.6.0" , features = [    "colored",    "chrono",] }
-log = ">=0.4.11"
-once_cell = ">=1.3.1"
+log = { version = ">=0.4.10", path = "../app-gtk3-debian/target/log-0.4.17" }
+once_cell = { version = ">=1.3.1", path = "../app-gtk3-debian/target/once_cell-1.10.0" }
 gdk = ">=0.14.3"
 gtk = { package = "gtk", version = "0.14.3", features = ["v3_22_30"] }
 webkit2gtk = { version = "^0.16", path = "../app-gtk3-debian/target/webkit2gtk-rs-webkit2gtk-rs-v0.16.0" }
 pango = "^0.14.8"
 flume = { version = "0.10.14", path = "../app-gtk3-debian/target/flume-master" }
 gdk-sys = ">=0.14"
-itertools = "*"
-# gtk = { package = "gtk",  version = "0.14.3", features = [  "v3_22_30",] } # downgrade for debian integration
+# itertools = "0.10.3"
+
 
 
 [[example]]

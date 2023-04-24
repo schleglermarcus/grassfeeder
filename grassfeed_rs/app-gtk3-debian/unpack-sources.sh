@@ -13,6 +13,7 @@ cat ${F}.0 |sed -e "s/\"0.4.23\"/\"0.4.24\", path=\"..\/..\/chrono-0.4.24\"  /" 
 	|sed -e "s/\"0.27.1\"/\"0.27.1\",  path=\"..\/..\/quick-xml-0.27.1\"/" \
 	|sed -e "s/serde_json = \"1.0\"/serde_json={version=\">=1\" , path=\"..\/..\/json-1.0.94\" }  /" 	\
 	|sed -e "s/serde = { version = \"1.0\"/serde={version=\"1.0.156\" , path=\"..\/..\/serde-1.0.156\/serde\"   /" 	\
+	|sed -e "s/mime = \"0.3\"/mime={version=\"0.3\" , path=\"..\/..\/mime-0.3.16\" }  /" 	\
 	|egrep -v "regex|url|uuid" 		>$F
 echo "regex={ path=\"../../regex-1.6.0\" }  " >>$F
 echo "url={ path=\"../../rust-url-2.3.0/url\" }  " >>$F
@@ -20,21 +21,26 @@ echo "uuid={ path=\"../../uuid-1.1.0\" , features=[\"v4\"] }  " >>$F
 
 F=target/flume-master/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/version = \"0.7\"/path=\"..\/nanorand-rs-0.7.0\"/"  -e "s/\"spin\"/\"spin\" , path=\"..\/spin-rs-0.9.2\" /" 	>$F
+cat ${F}.0 |sed -e "s/version = \"0.7\"/path=\"..\/nanorand-rs-0.7.0\"/"  -e "s/\"spin\"/\"spin\" , path=\"..\/spin-rs-0.9.2\" /" \
+	|sed -e "s/futures-core = { version = \"0.3\"/futures-core={version=\"0.3\" , path=\"..\/futures-rs-0.3.21\/futures-core\"  /" 	\
+	|sed -e "s/futures-sink = { version = \"0.3\"/futures-sink={version=\"0.3\" , path=\"..\/futures-rs-0.3.21\/futures-sink\"  /" 	\
+	>$F
 
 F=target/image-0.24.0/Cargo.toml	# upgrading  num-iter, num-rational, exr
-mv $F ${F}.0			# downgrading   jpeg_decoder color_quant, gif , png, tiff,
+mv $F ${F}.0			# downgrading   jpeg_decoder , gif , png, tiff  color_quant  num-traits
 cat ${F}.0 |sed -e "s/\"jpeg-decoder\", version = \"0.2.1\"/\"jpeg-decoder\", version=\">=0.2.1\", path=\"..\/jpeg-decoder-0.3.0\"/" \
 		|sed -e "s/\"0.1.22\"/\">=0.1\"  /"  \
 		|sed -e "s/\"0.11.1\"/\">=0.11.1\", path=\"..\/image-gif-0.12.0\"     /"  \
  		|sed -e "s/bytemuck = { version = \"1.7.0\"/bytemuck={version=\">=1\", path=\"..\/bytemuck-1.7.0\"  /"  \
- 		|sed -e "s/\"1.1\"/\"1.0\" /" \
     	|sed -e "s/\"1.4.1\"/\">=1.4.1\", path=\"..\/exrs-1.5.0\"   /" \
 		|sed -e "s/tiff = { version = \"0.7.1\"/tiff={version=\">=0.6\" , path=\"..\/image-tiff-0.8.0\" /" \
 		|sed -e "s/\"0.17.0\"/\">=0.16.5\", path=\"..\/image-png-0.17.5\"   /" \
  		|sed -e "s/\"0.1.32\"/\">=0.1.32\" /" \
  		|sed -e "s/\"0.3\"/\">=0.3\" /" \
+		|sed -e "s/\"1.1\"/{version=\"1.1\", path=\"..\/color_quant-1.1.0\" }  /" \
+ 		|sed -e "s/\"0.2.0\"/ {version=\">=0.2\" , path=\"..\/num-traits-num-traits-0.2.15\" } /" \
 		>$F
+# 		|sed -e "s/\"1.1\"/\"1.0\" /" \
 
 F=target/rust-ico-0.3.0/Cargo.toml
 mv $F ${F}.0
@@ -72,15 +78,15 @@ cat ${F}.0 |sed -e "s/\"0.2.5\"/\">=0.2.4\" /"  \
  	>$F
 
 F=target/image-png-0.17.5/Cargo.toml
-mv $F ${F}.0    #  downgrading deflate, miniz_oxide
+mv $F ${F}.0    #  downgrading deflate, miniz_oxide , crc32fast
 cat ${F}.0	| sed -e "s/deflate = \"1.0\"/deflate={version=\"1.0\", path=\"..\/deflate-1.0.0\"} /"	\
-	| sed -e "s/\"\0.5.1\"/{ version=\">=0.5.1\" , path=\"..\/miniz_oxide-0.5.1\/miniz_oxide\" } /"  \
+	| sed -e "s/\"0.5.1\"/{ version=\">=0.5.1\" , path=\"..\/miniz_oxide-0.5.1\/miniz_oxide\" } /"  \
+	| sed -e "s/\"1.2.0\"/{ version=\">=1.2.0\" , path=\"..\/rust-crc32fast-1.3.2\" } /"  \
 	>$F
 
 F=target/quick-xml-0.27.1/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"2.5\"/\">=2.4\" /" 		>$F
-
 
 F=target/regex-1.6.0/Cargo.toml
 mv $F ${F}.0
@@ -242,7 +248,7 @@ F=target/opml/opml_api/Cargo.toml
 mv $F ${F}.0	#   serde , thiserror
 cat ${F}.0  |sed -e "s/\"1.13.0\"/\{version=\">=1.11\" , path=\"..\/..\/hard-xml-v1.19.0\/hard-xml\"  \} /" 	\
 	|sed -e "s/\"1.0.145\"/\"1.0.156\" \npath=\"..\/..\/serde-1.0.156\/serde\" / " \
-	|sed -e "s/\"1.0.37\"/\">=1.0.20\"/" \
+	|sed -e "s/\"1.0.37\"/{version=\">=1.0.30\", path=\"..\/..\/thiserror-1.0.30\" } /" \
 	>$F
 
 F=target/rust-url-2.3.0/idna/Cargo.toml
@@ -274,7 +280,7 @@ cat ${F}.0 |sed -e "s/\"0.15\"/\"^0.14.0\"/g" \
 
 F=target/rayon-1.5.1/Cargo.toml
 mv $F ${F}.0	# downgrade   crossbeam-channel		crossbeam-deque
-cat ${F}.0 	 |sed -e "s/\"0.8.0\"/\">=0.7.4\"/"	\
+cat ${F}.0 	 |sed -e "s/\"0.8.0\"/{version=\">=0.7.4\", path=\"..\/crossbeam-crossbeam-deque-0.8.1\/crossbeam-deque\" } /"	\
 		>$F
 
 F=target/rayon-1.5.1/rayon-core/Cargo.toml
@@ -290,7 +296,9 @@ cat ${F}.0  	|sed -e "s/\"0.9\"/\">=0.7\"  /" 	>$F
 
 F=target/image-gif-0.12.0/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0  |sed -e "s/\"0.1.5\"/\{version=\">=0.1.5\" , path=\"..\/lzw-0.1.5\"  \} /"	>$F
+cat ${F}.0  |sed -e "s/\"0.1.5\"/\{version=\">=0.1.5\" , path=\"..\/lzw-0.1.5\"  \} /" \
+	|sed -e "s/\"1.0\"/ \">=1.0\" , path=\"..\/color_quant-1.1.0\"  /" \
+	>$F
 
 F=target/image-tiff-0.8.0/Cargo.toml
 mv $F ${F}.0
@@ -411,6 +419,12 @@ F=target/serde-yaml-0.8.26/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0	  	|sed -e "s/\"1.0.69\"/{version=\"1.0.156\" , path=\"..\/serde-1.0.156\/serde\"  } /" 	\
 	>$F
+
+F=target/proc-status-0.1.1/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0	\
+	|sed -e "s/\"1.0\"/{version=\">=1.0.30\", path=\"..\/thiserror-1.0.30\" } /" \
+ 	>$F
 
 
 
