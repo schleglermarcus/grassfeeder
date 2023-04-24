@@ -17,6 +17,6 @@ webkit2gtk = { version = "^0.16.0", path = "../app-gtk3-debian/target/webkit2gtk
 base64 = "<=0.13.0"                                                                                          # later
 gtk = { package = "gtk", version = "0.14.3", features = ["v3_22_30"] }
 log = ">=0.4.11"
-serde = { version = ">=1.0.130" }
+serde = { version = "1.0.156", path = "../app-gtk3-debian/target/serde-1.0.156/serde" }
 lz4-compression = { version = ">=0.7", path = "../app-gtk3-debian/target/lz4-compression-0.7" }
 
