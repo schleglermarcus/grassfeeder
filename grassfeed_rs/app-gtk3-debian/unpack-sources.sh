@@ -118,10 +118,14 @@ cat ${F}.0 \
 
 F=target/rust-i18n-1.1.1/crates/macro/Cargo.toml
 mv $F ${F}.0		# once_cell, syn
-cat ${F}.0  |sed -e "s/\"1.10.0\"/\">=1.3.1\" /"  |sed -e "s/\"1.0.82\"/\">=1.0.76\" /"		\
+cat ${F}.0 	\
 	|sed -e "s/serde_json = \"1\"/serde_json={version=\">=1\" , path=\"..\/..\/..\/json-1.0.94\" }  /" 	\
 	|sed -e "s/serde = \"1\"/serde={version=\"=1.0.156\" , path=\"..\/..\/..\/serde-1.0.156\/serde\"  } /" 	\
 	|sed -e "s/\"0.8\"/{version=\"0.8\", path=\"..\/..\/..\/serde-yaml-0.8.26\"  } /" 	\
+	|sed -e "s/\"1.10.0\"/{version=\">=1.3.1\", path=\"..\/..\/..\/once_cell-1.10.0\" } /" \
+	|sed -e "s/proc-macro2 = \"1.0\"/proc-macro2={version=\">=1.0\", path=\"..\/..\/..\/proc-macro2-1.0.52\" } /"	\
+ 	|sed -e "s/\"1.0.82\"/{version=\"1.0.109\", path=\"..\/..\/..\/syn-1.0.109\" } /" \
+	|sed -e "s/quote = \"1.0.2\"/quote={version=\">=1\" , path=\"..\/..\/..\/quote-1.0.26\"  } /"  	\
 	>$F
 
 F=target/rust-i18n-1.1.1/crates/support/Cargo.toml
@@ -130,6 +134,7 @@ cat ${F}.0  |sed -e "s/\"1.10.0\"/\">=1.3.1\" /"  	\
 	|sed -e "s/serde = \"1\"/serde={version=\"=1.0.156\", path=\"..\/..\/..\/serde-1.0.156\/serde\"  } /" 	\
 	|sed -e "s/serde_json = \"1\"/serde_json={version=\">=1\" , path=\"..\/..\/..\/json-1.0.94\" }  /" 	\
 	|sed -e "s/\"0.8\"/{version=\"0.8\", path=\"..\/..\/..\/serde-yaml-0.8.26\"  } /" 	\
+	|sed -e "s/proc-macro2 = \"1.0\"/proc-macro2={version=\">=1.0\", path=\"..\/..\/..\/proc-macro2-1.0.52\" } /"	\
 	>$F
 
 F=target/rust-i18n-1.1.1/crates/extract/Cargo.toml
@@ -139,7 +144,10 @@ cat ${F}.0  	\
 	|sed -e "s/serde = \"1\"/serde={version=\"=1.0.156\" , path=\"..\/..\/..\/serde-1.0.156\/serde\"  } /" 	\
 	|sed -e "s/\"0.8\"/{version=\"0.8\", path=\"..\/..\/..\/serde-yaml-0.8.26\"  } /" 	\
 	|sed -e "s/anyhow = \"1\"/anyhow={version=\">=1\", path=\"..\/..\/..\/anyhow-1.0.60\"  } /" 	\
-	|sed -e "s/proc-macro2 = {version = \"1\"/proc-macro2={version=\"1\", path=\"..\/..\/..\/proc-macro2-1.0.40\"  /"	\
+	|sed -e "s/proc-macro2 = {version = \"1\"/proc-macro2={version=\"1\", path=\"..\/..\/..\/proc-macro2-1.0.52\"  /"	\
+	|sed -e "s/regex = \"1\"/regex={version=\">=1\" , path=\"..\/..\/..\/regex-1.6.0\" }  /" 	\
+ 	|sed -e "s/syn = {version = \"1\"/syn={version=\">=1\", path=\"..\/..\/..\/syn-1.0.109\" /" \
+	|sed -e "s/quote = \"1\"/quote={version=\">=1\" , path=\"..\/..\/..\/quote-1.0.26\"  } /"  	\
 	>$F
 
 F=target/embedded-graphics-embedded-graphics-v0.7.1/Cargo.toml
@@ -246,7 +254,12 @@ rm target/hard-xml-v1.19.0/rust-toolchain.toml
 
 F=target/hard-xml-v1.19.0/hard-xml-derive/Cargo.toml
 mv $F ${F}.0		#  restoring the version number  here!
-cat ${F}.0 		|sed -e "s/\"0.0.0\"/\"1.19.0\"/" 	>$F
+cat ${F}.0 		|sed -e "s/\"0.0.0\"/\"1.19.0\"/" \
+	|sed -e "s/proc-macro2 = \"1.0\"/proc-macro2={version=\">=1.0\", path=\"..\/..\/proc-macro2-1.0.52\" } /"	\
+	|sed -e "s/quote = \"1.0\"/quote={version=\"^1.0\" , path=\"..\/..\/quote-1.0.26\"  } /" 	\
+ 	|sed -e "s/syn = \"1.0\"/syn={version=\">=1\", path=\"..\/..\/syn-1.0.109\" } /" \
+	>$F
+
 
 F=target/hard-xml-v1.19.0/test-suite/Cargo.toml
 mv $F ${F}.0		#   env_logger
@@ -409,13 +422,17 @@ cat ${F}.0	|sed -e "s/\"0.2.126\"/\">=0.2.103\" \npath=\"..\/libc-0.2.103\"  /" 
 
 F=target/serde-1.0.156/serde_derive/Cargo.toml
 mv $F ${F}.0	# syn
-cat ${F}.0	 |sed -e "s/\"1.0.104\"/{version=\">=1.0.104\", path=\"..\/..\/syn-1.0.109\"} /" \
+cat ${F}.0	 |sed -e "s/\"1.0.104\"/{version=\">=1.0.104\", path=\"..\/..\/syn-1.0.109\"} /" 	\
+	|sed -e "s/proc-macro2 = \"1.0\"/proc-macro2={version=\">=1.0\", path=\"..\/..\/proc-macro2-1.0.52\" } /"	\
+	|sed -e "s/quote = \"1.0\"/quote={version=\"^1.0\" , path=\"..\/..\/quote-1.0.26\"  } /" 	\
 	>$F
 
 F=target/syn-1.0.109/Cargo.toml
-mv $F ${F}.0	# proc-macro2
-cat ${F}.0	 |sed -e "s/\"1.0.46\"/\">=1.0.28\" /" \
+mv $F ${F}.0
+cat ${F}.0	  \
 	|sed -e "s/unicode-ident = \"1.0\"/unicode-ident={version=\">=1\", path=\"..\/unicode-ident-1.0.6\"} /" \
+	|sed -e "s/proc-macro2 = { version = \"1.0.46\"/proc-macro2={version=\"1.0.52\", path=\"..\/proc-macro2-1.0.52\"  /"	\
+	|sed -e "s/quote = { version = \"1.0\"/quote={version=\"^1.0\" , path=\"..\/quote-1.0.26\"   /" 	\
 	>$F
 
 F=target/web-sys-0.3.37/Cargo.toml
@@ -440,6 +457,10 @@ F=target/signal-hook-0.3.15/Cargo.toml
 mv $F ${F}.0	#  libc, num-traits , iana-time-zone
 cat ${F}.0 |sed -e "s/\"^0.2\"/{version=\">=0.2\" , path=\"..\/libc-0.2.103\" } /"  >$F
 
+F=target/signal-hook-0.3.15/signal-hook-registry/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"~0.2\"/{version=\">=0.2\" , path=\"..\/..\/libc-0.2.103\" } /"  >$F
+
 F=target/gumdrop-0.7.0/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.7\"/\"=0.7\" \n path=\"..\/gumdrop_derive-0.7.0\"  /"  >$F
@@ -448,14 +469,15 @@ F=target/gumdrop_derive-0.7.0/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0	\
 	|sed -e "35 s/version = \"1\"/version=\">=1\" \n path=\"..\/syn-1.0.109\" /" \
-	|sed -e "29 s/version = \"1\"/version=\"1\" \n path=\"..\/proc-macro2-1.0.40\"  /"	\
+	|sed -e "32 s/version = \"1\"/version=\">=1\" \n path=\"..\/quote-1.0.26\"   /" 	\
+	|sed -e "29 s/version = \"1\"/version=\"1\" \n path=\"..\/proc-macro2-1.0.52\"  /"	\
 	>$F
 
-F=target/proc-macro2-1.0.40/Cargo.toml
+F=target/proc-macro2-1.0.52/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/unicode-ident = \"1.0\"/unicode-ident={version=\"1\" , path=\"..\/unicode-ident-1.0.6\" } /"  >$F
 
 F=target/quote-1.0.26/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 	|sed -e "s/\"1.0.52\"/\">=1.0.40\" , path=\"..\/proc-macro2-1.0.40\"  /"		 >$F
+cat ${F}.0 	|sed -e "s/\"1.0.52\"/\">=1.0.40\" , path=\"..\/proc-macro2-1.0.52\"  /"		 >$F
 
