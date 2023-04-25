@@ -1,0 +1,34 @@
+#FROM ubuntu:20.04
+#RUN echo "deb     http://ftp.gwdg.de/ubuntu/ focal main restricted universe multiverse "  >/etc/apt/sources.list
+#RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ focal-updates main restricted universe multiverse"  >>/etc/apt/sources.list
+
+#FROM ubuntu:22.04
+#RUN echo "deb     http://ftp.gwdg.de/ubuntu/ jammy main restricted universe multiverse "  >/etc/apt/sources.list
+#RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ jammy main restricted universe multiverse"  >>/etc/apt/sources.list
+
+FROM ubuntu:22.10
+RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic main restricted universe multiverse "  >/etc/apt/sources.list
+RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ kinetic main restricted universe multiverse"  >>/etc/apt/sources.list
+RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic-updates main restricted universe multiverse "  >>/etc/apt/sources.list
+RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ kinetic-updates main restricted universe multiverse"  >>/etc/apt/sources.list
+# RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic-backports main restricted universe multiverse "  >>/etc/apt/sources.list
+
+
+RUN cat /etc/apt/sources.list
+RUN apt-get update
+RUN apt install -y  rustc
+RUN apt install -y  cargo
+RUN rustc --version
+RUN cargo install  cargo-deb   --version 1.33.0	# downgrading the version
+ENV PATH="$PATH:/root/.cargo/bin"
+
+RUN apt-get install -y apt-utils netbase
+RUN apt-get install -y --allow-downgrades  perl-base=5.34.0-5ubuntu1
+RUN apt-get install -y pkgconf      ##  Problem, cannot be installed due some per issues
+
+COPY install-packages-list.txt /
+RUN apt-get install -y `cat /install-packages-list.txt |xargs`
+
+RUN apt-get install -y librust-fern-dev librust-gumdrop-dev librust-once-cell-dev
+
+

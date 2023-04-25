@@ -864,7 +864,7 @@ impl HandleSingleEvent for HandleWindowSizeChanged {
 }
 
 struct HandleDialogData(
-    Rc<RefCell<dyn IBrowserPane>>, // 8->0
+    Rc<RefCell<dyn IBrowserPane>>, // 0
     Rc<RefCell<ConfigManager>>,
     Rc<RefCell<dyn ISubscriptionMove>>,
     Rc<RefCell<dyn ISourceTreeController>>,
