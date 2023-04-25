@@ -6,7 +6,7 @@ for F in src-releases/*.tar.?? ; do
 done
 
 F=target/feed-rs-1.3.0/feed-rs/Cargo.toml
-mv $F ${F}.0	#  downgrading chrono, quick-xml
+mv $F ${F}.0	#  downgrading chrono
 cat ${F}.0 |sed -e "s/\"0.4.23\"/\"0.4.24\", path=\"..\/..\/chrono-0.4.24\"  /"  \
 	|sed -e "s/\"0.27.1\"/\"0.27.1\",  path=\"..\/..\/quick-xml-0.27.1\"/" \
 	|sed -e "s/serde_json = \"1.0\"/serde_json={version=\">=1\" , path=\"..\/..\/json-1.0.94\" }  /" 	\
@@ -84,7 +84,12 @@ cat ${F}.0	| sed -e "s/deflate = \"1.0\"/deflate={version=\"1.0\", path=\"..\/de
 
 F=target/quick-xml-0.27.1/Cargo.toml
 mv $F ${F}.0
-cat ${F}.0 |sed -e "s/\"2.5\"/\">=2.4\" /" 		>$F
+cat ${F}.0	\
+	|sed -e "s/\"0.8\"/\">=0.8\" , path=\"..\/encoding_rs-0.8.31\"   /" 	\
+	|sed -e "s/\"1.0.100\"/\"=1.0.156\" , path=\"..\/serde-1.0.156\/serde\"   /" 	\
+	|sed -e "s/serde = { version = \"1.0\"/serde={version=\">=1.0\" , path=\"..\/serde-1.0.156\/serde\"   /" 	\
+	|sed -e "s/\"2.0\"/{version=\">=2.4.0\",  path=\"..\/memchr-2.5.0\" } /" \
+	>$F
 
 F=target/regex-1.6.0/Cargo.toml
 mv $F ${F}.0
@@ -114,6 +119,7 @@ cat ${F}.0 \
 	|sed -e "s/regex = \"1\"/regex={version=\">=1\" , path=\"..\/regex-1.6.0\" }  /" 	\
 	|sed -e "s/\"0.8\"/{version=\"0.8\", path=\"..\/..\/..\/serde-yaml-0.8.26\"  } /" 	\
 	|sed -e "s/quote = {version = \"1\"/quote={version=\">=1\" , path=\"..\/quote-1.0.26\"   /" 	\
+	|sed -e "s/\"0.5.8\"/{version=\"0.5.11\", path=\"..\/toml-toml-v0.5.11\/crates\/toml\"  } /" 	\
 	>$F
 
 F=target/rust-i18n-1.1.1/crates/macro/Cargo.toml
@@ -383,13 +389,14 @@ mv $F ${F}.0	#
 cat ${F}.0 |sed -e "s/autocfg = \"1.1.0\"/autocfg=\">=1.0\"  /" 	>$F
 
 F=target/chrono-0.4.24/Cargo.toml
-mv $F ${F}.0	# upgrade libc, num-traits , iana-time-zone
+mv $F ${F}.0	# upgrade libc, num-traits , iana-time-zone, num-integer
 cat ${F}.0 |sed -e "s/\"0.2.69\"/\">=0.2.69\" , path=\"..\/libc-0.2.103\"/" \
 	|sed -e "s/\"0.1.43\"/\">=0.1.43\" , path=\"..\/time-0.1.43\"/" \
 	|sed -e "s/\"0.1.45\"/\">=0.1.41\" , path=\"..\/iana-time-zone-0.1.41\"/" \
 	|sed -e "s/num-traits = { version = \"0.2\"/num-traits={version=\">=0.2\" , path=\"..\/num-traits-num-traits-0.2.15\"/" \
 	|sed -e "s/\"0.2\"/\">=0.2\" , path=\"..\/wasm-bindgen-0.2.81\"  /" \
 	|sed -e "s/js-sys = { version = \"0.3\"/js-sys ={version=\">=0.3.58\", path=\"..\/js-sys-0.3.58\" /"	\
+	|sed -e "s/\"0.1.36\"/\">=0.1.36\" , path=\"..\/num-integer-num-integer-0.1.45\"  /" \
 	>$F
 
 F=target/clap-3.2.20/Cargo.toml
@@ -480,4 +487,24 @@ cat ${F}.0 |sed -e "s/unicode-ident = \"1.0\"/unicode-ident={version=\"1\" , pat
 F=target/quote-1.0.26/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 	|sed -e "s/\"1.0.52\"/\">=1.0.40\" , path=\"..\/proc-macro2-1.0.52\"  /"		 >$F
+
+F=target/toml-toml-v0.5.11/crates/toml/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 	|sed -e "s/\"1.0.97\"/{ version=\">=1.0.97\" , path=\"..\/..\/..\/serde-1.0.156\/serde\" } /"		 >$F
+
+F=target/num-integer-num-integer-0.1.45/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 	|sed -e "s/\"0.2.11\"/\">=0.2.11\" \n path=\"..\/num-traits-num-traits-0.2.15\"  /"	\
+	|sed -e "s/autocfg = \"1\"/autocfg={version=\"1\", path=\"..\/autocfg-1.1.0\" } /"	\
+	>$F
+
+F=target/num-traits-num-traits-0.2.15/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 	|sed -e "s/autocfg = \"1\"/autocfg={version=\"1\", path=\"..\/autocfg-1.1.0\" } /"	>$F
+
+F=target/time-0.1.43/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"0.2.69\"/\">=0.2.69\" \n path=\"..\/libc-0.2.103\"  /"		>$F
+
+
 
