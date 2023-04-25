@@ -26,9 +26,8 @@ RUN apt-get install -y apt-utils netbase
 RUN apt-get install -y --allow-downgrades  perl-base=5.34.0-5ubuntu1
 RUN apt-get install -y pkgconf      ##  Problem, cannot be installed due some per issues
 
-COPY install-packages-list.txt /
-RUN apt-get install -y `cat /install-packages-list.txt |xargs`
+COPY install-packages.txt /
+RUN apt-get install -y `cat /install-packages.txt |xargs`
 
-RUN apt-get install -y librust-fern-dev librust-gumdrop-dev librust-once-cell-dev
 
 
