@@ -154,6 +154,7 @@ cat ${F}.0  	\
 	|sed -e "s/regex = \"1\"/regex={version=\">=1\" , path=\"..\/..\/..\/regex-1.6.0\" }  /" 	\
  	|sed -e "s/syn = {version = \"1\"/syn={version=\">=1\", path=\"..\/..\/..\/syn-1.0.109\" /" \
 	|sed -e "s/quote = \"1\"/quote={version=\">=1\" , path=\"..\/..\/..\/quote-1.0.26\"  } /"  	\
+	|sed -e "s/\"0.4\"/{version=\">=0.4\", path=\"..\/..\/..\/ignore-0.4.18\"  } /" 	\
 	>$F
 
 F=target/embedded-graphics-embedded-graphics-v0.7.1/Cargo.toml
@@ -275,7 +276,7 @@ F=target/opml/opml_api/Cargo.toml
 mv $F ${F}.0	#   serde , thiserror
 cat ${F}.0  |sed -e "s/\"1.13.0\"/\{version=\">=1.11\" , path=\"..\/..\/hard-xml-v1.19.0\/hard-xml\"  \} /" 	\
 	|sed -e "s/\"1.0.145\"/\"1.0.156\" \npath=\"..\/..\/serde-1.0.156\/serde\" / " \
-	|sed -e "s/\"1.0.37\"/{version=\">=1.0.30\", path=\"..\/..\/thiserror-1.0.30\" } /" \
+	|sed -e "s/\"1.0.37\"/{version=\">=1.0.30\", path=\"..\/..\/thiserror-1.0.31\" } /" \
 	>$F
 
 F=target/rust-url-2.3.0/idna/Cargo.toml
@@ -347,7 +348,7 @@ cat ${F}.0  |sed -e "s/\"1.13.0\"/\">=1.9.0\"   /" 	>$F
 
 F=target/sct.rs-v-0.7.0/Cargo.toml
 mv $F ${F}.0	# downgrade  ring
-cat ${F}.0 	|sed -e "s/\"0.16.20\"/{ version=\"0.16.20\", path=\"..\/ring-0.16.20\" } /" 	>$F
+cat ${F}.0 	|sed -e "s/\"0.16.20\"/{ version=\">=0.16.19\", path=\"..\/ring-0.16.20\" } /" 	>$F
 
 F=target/ring-0.16.20/Cargo.toml
 mv $F ${F}.0	# downgrade     untrusted
@@ -457,7 +458,7 @@ cat ${F}.0	  	|sed -e "s/\"1.0.69\"/{version=\"1.0.156\" , path=\"..\/serde-1.0.
 F=target/proc-status-0.1.1/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0	\
-	|sed -e "s/\"1.0\"/{version=\">=1.0.30\", path=\"..\/thiserror-1.0.30\" } /" \
+	|sed -e "s/\"1.0\"/{version=\">=1.0.10\", path=\"..\/thiserror-1.0.31\" } /" \
  	>$F
 
 F=target/signal-hook-0.3.15/Cargo.toml
@@ -506,5 +507,14 @@ F=target/time-0.1.43/Cargo.toml
 mv $F ${F}.0
 cat ${F}.0 |sed -e "s/\"0.2.69\"/\">=0.2.69\" \n path=\"..\/libc-0.2.103\"  /"		>$F
 
+F=target/ignore-0.4.18/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 	\
+	|sed -e "45 s/version = \"1.1\"/version=\">=1.1\"\n path=\"..\/regex-1.6.0\"  /"	\
+	|sed -e "33 s/\"0.4.7\"/\">=0.4.7\"\n path=\"..\/globset-0.4.8\"  /"	\
+	>$F
 
+F=target/globset-0.4.8/Cargo.toml
+mv $F ${F}.0
+cat ${F}.0 |sed -e "s/\"1.1.5\"/\">=1.1.5\" \n path=\"..\/regex-1.6.0\"  /"		>$F
 
