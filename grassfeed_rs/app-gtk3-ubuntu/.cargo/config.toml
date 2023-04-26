@@ -5,7 +5,7 @@ target-dir = "../target"
 [source.crates-io]
 replace-with = "vendored-sources"
 [source.vendored-sources]
-directory = "sources-vendored"
+directory = "target/sources-vendored"
 
 
 # Created a complete separate build environment for the debian package, due to

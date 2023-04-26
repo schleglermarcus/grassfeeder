@@ -52,11 +52,12 @@ R="debian/rules"
 # (cd $WORK/grassfeeder-$VERSION ;   echo "	apt install -y rust-all cargo   " >>$R )
 # (cd $WORK/grassfeeder-$VERSION ;   echo "	apt install -y wget git pkgconf librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev " >>$R )
 
-(cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/ ; ./prepare-debian.sh ) " >>$R )
-(cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-debian/ ; cargo clean ) " >>$R )
+# (cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/ ; ./prepare-debian.sh ) " >>$R )
+(cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; ./unpack-vendored.sh ) " >>$R )
+(cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; cargo clean ) " >>$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "">>$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "build: " >>$R )
-(cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-debian/ ; cargo deb ) " >>$R )
+(cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-debian/ ; cargo --offline deb ) " >>$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "">>$R )
 
 # (cd $WORK/grassfeeder-$VERSION ;  FAKEROOTKEY=1 LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libfakeroot/libfakeroot-0.so   dpkg-buildpackage -us -uc -ui -S -rfakeroot   )

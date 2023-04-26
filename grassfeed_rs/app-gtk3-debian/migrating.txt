@@ -9,6 +9,10 @@ https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
 https://ostechnix.com/how-to-build-debian-packages-from-source/
 
 
+https://github.com/mbrubeck/cargo-vendor-example
+
+
+
 - Debian packages for distribution, Downgrading
   - jpeg-decoder v0.3.0		=> 	librust-jpeg-decoder+default-dev  0.1.22.1
   - usvg v0.23.0		=> librust-usvg-dev	0.8.0-4			3years old
