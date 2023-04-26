@@ -14,15 +14,15 @@ WORKDIR /usr/src/grassfeed_rs/app-gtk3-ubuntu
 RUN ./unpack-vendored.sh
 
 ## RUN cargo --offline build
+## RUN cargo --offline deb
 
-RUN cargo --offline deb
-
-# spaeter
-#RUN ./deb-sign.sh
+RUN ./deb-sign.sh
 
 
-WORKDIR /usr/src/grassfeed_rs/target
-RUN ls -l
+WORKDIR /usr/src/grassfeed_rs
+RUN ls -l target
+RUN ls -l app-gtk3-ubuntu/target
+
 #RUN ls -l debian/*
 #RUN mv debian/grass*.deb  gf.deb
 #RUN lintian gf.deb

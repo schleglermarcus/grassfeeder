@@ -9,6 +9,8 @@ https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
 https://ostechnix.com/how-to-build-debian-packages-from-source/
 
 
+
+https://doc.rust-lang.org/cargo/commands/cargo-vendor.html
 https://github.com/mbrubeck/cargo-vendor-example
 
 

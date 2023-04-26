@@ -1,3 +1,4 @@
 #!/bin/bash
-test -d target || mkdir target
-(cd target ; cat ../src_vendored.tar.gz |gzip -d |tar x  )
+D="../target"
+test -d $D || mkdir $D
+(cd $D ; cat ../app-gtk3-ubuntu/src_vendored.tar.gz |gzip -d |tar x  )
