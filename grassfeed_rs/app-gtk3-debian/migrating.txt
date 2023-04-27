@@ -1,17 +1,5 @@
-https://lib.rs/crates/debian-packaging
-https://docs.rs/debian-packaging/latest/debian_packaging/index.html
-
-https://manpages.debian.org/bullseye/dpkg-dev/dpkg-source.1.de.html
-https://github.com/ian910297/deb-example
-https://wiki.debian.org/SimplePackagingTutorial
-https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
-https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
-https://ostechnix.com/how-to-build-debian-packages-from-source/
 
 
-
-https://doc.rust-lang.org/cargo/commands/cargo-vendor.html
-https://github.com/mbrubeck/cargo-vendor-example
 
 
 

@@ -1,6 +1,8 @@
 FROM grassfeeder:ubuntu-stage1
 
-RUN dpkg -l |egrep "crossbeam|crc32fast"
+RUN apt-get install -y  devscripts rustc cargo debcargo
+
+RUN dpkg -l |egrep "crossbeam|crc32fast|debcargo|devscripts "
 RUN rustc --version
 
 COPY target/gf.tar.gz /usr/src/

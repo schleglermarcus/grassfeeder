@@ -1,16 +1,16 @@
 #!/bin/bash
-test -d target || mkdir target
+PKGNAME="grassfeeder-gtk3"
+
 DIR=`pwd`
 VERSION=`cat Cargo.toml  |grep "^version"  |sed -e "s/.*= \"//" -e "s/\"//"`
 
+test -d target || mkdir target
 test -d ../target || mkdir ../target
+rm -rf target/deb-sign/*
 
 ## no-docker
 (cd ../../ ; tar c --exclude=target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >grassfeed_rs/target/grassfeeder-${VERSION}.tar.gz )
 
-#cargo deb
-#DEBFILE=`find ../target/debian -iname grassfeeder_*.deb |head -n1`
-# DEBFILENAME=`basename $DEBFILE`
 
 WORK="$DIR/target/deb-sign"
 echo "VERSION=$VERSION	    WORKDIR=$WORK"
@@ -38,20 +38,30 @@ echo "Source: grassfeeder" >$CT
 echo "Section: web" >>$CT
 echo "Priority: optional" >>$CT
 echo "Maintainer: Marcus <schlegler_marcus@posteo.de>" >>$CT
+echo "Build-Depends: rustc, cargo, debcargo, devscripts"  >>$CT
 echo "" >>$CT
-cat assets/deb-control.txt |egrep  "Package:" |head -n1  >>$CT
+echo "Package: $PKGNAME"  >>$CT
 cat assets/deb-control.txt |egrep  "Architecture:"  |head -n1  >>$CT
 cat assets/deb-control.txt |egrep  "Depends:"  |head -n1  >>$CT
 # cat $CT
 
+
+
+ISROOT=`id -u`
+echo "ISROOT=$ISROOT"
+if [  "$ISROOT" == "0" ] ; then
+    echo "##### installing devscripts "
+    apt-get install -y rustc cargo devscripts
+fi
 
 R="debian/rules"
 (cd $WORK/grassfeeder-$VERSION ;   echo "#!/usr/bin/make -f" >$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "">>$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "clean:" >>$R )
 ## for ubuntu
-# (cd $WORK/grassfeeder-$VERSION ;   echo "	apt update " >>$R )
-# (cd $WORK/grassfeeder-$VERSION ;   echo "	apt install -y rust-all cargo   " >>$R )
+#(cd $WORK/grassfeeder-$VERSION ;   echo "	apt update " >>$R )
+#(cd $WORK/grassfeeder-$VERSION ;   echo "	apt install -y rustc cargo   " >>$R )
+#(cd $WORK/grassfeeder-$VERSION ;   echo "	apt install -y devscripts " >>$R )
 # (cd $WORK/grassfeeder-$VERSION ;   echo "	apt install -y wget git pkgconf librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev " >>$R )
 
 # (cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/ ; ./prepare-debian.sh ) " >>$R )
@@ -59,7 +69,7 @@ R="debian/rules"
 (cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; cargo clean ) " >>$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "">>$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "build: " >>$R )
-(cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-debian/ ; cargo --offline deb ) " >>$R )
+(cd $WORK/grassfeeder-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; cargo --offline deb ) " >>$R )
 (cd $WORK/grassfeeder-$VERSION ;   echo "">>$R )
 
 # (cd $WORK/grassfeeder-$VERSION ;  FAKEROOTKEY=1 LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libfakeroot/libfakeroot-0.so   dpkg-buildpackage -us -uc -ui -S -rfakeroot   )
@@ -67,7 +77,5 @@ R="debian/rules"
 
 
 #echo "----"
-#echo dput ppa:schleglermarcus/ppa  grassfeeder_0.1.9_source.changes
-##(cd $WORK/grassfeeder-$VERSION ;   echo "	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -sSf | sh -s -- -y	 " >>$R )
-##(cd $WORK/grassfeeder-$VERSION ;   echo "	export PATH=/root/.cargo/bin:$PATH " >>$R )
-##(cd $WORK/grassfeeder-$VERSION ;   echo "	cargo install cargo-deb " >>$R )
+
+( cd $WORK ; echo "dput ppa:schleglermarcus/ppa  `ls -1 grassfeeder*source.changes`" )
