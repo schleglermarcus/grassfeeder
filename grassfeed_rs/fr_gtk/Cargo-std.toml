@@ -27,10 +27,12 @@ once_cell = ">=1.12.0"
 log = ">=0.4.11"    # "^0.4.17"
 pango = "^0.15.10"
 flume = ">=0.10.14"
-webkit2gtk = { version = "=0.18.2", default-features = false, features = [
-    "v2_36",
-] }
+webkit2gtk = { version = "=0.18.2", default-features = false, features = [    "v2_36",] }
 glib = "^0.15.5"
+
+
+[dev-dependencies]
+chrono = ">=0.4.24"
 
 
 [[example]]

@@ -1,0 +1,235 @@
+grassfeeder (0.1.9) jammy; urgency=low
+
+  * refactored gui-events processor
+  
+  - debian package
+  
+  
+  - drag feed on feed bug
+  
+  - change cleaning out too many messages while running
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 05 Apr 2023 00:18:00 +0000
+
+grassfeeder (0.1.8) jammy; urgency=low
+
+   * Downgrade due to compile issue on xmlem : no more formatted opml output, only simple line break.
+   * Prepared debian package build without network
+   * Database-close with signal-hook only without debug mode
+   * On creating  new folders or subscription: put focus to tree
+   * Browser start: launch delayed, prevent blocking the application
+   * Focus-Before-Oldest: put focus on earlies message, even if it was unread
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 04 Apr 2023 00:18:00 +0000
+
+grassfeeder (0.1.7) jammy; urgency=low
+
+  * Msg List Favorite+IsRead column sortable
+  * Charset Additions, Downloader Threads to 9
+  * Tab switch indicator: fade time shorter
+  * Bugfix: added slash when dragging www.phoronix.com
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sat, 04 Feb 2023 00:20:00 +0000
+
+grassfeeder (0.1.6) jammy; urgency=low
+
+  * Messages-DB: adding marker column on startup
+  * Added message favorite display
+  * Bugfix: Spinner Indicator on Drag Url Dialog not working
+  * Bugfix: Dragging an url twice did not work: now deleting input fields on cancel.
+  * Bugfix: Db cleanup shall not result in unnecessary tree update
+  * Bugfix: Reduced tree position jump on subscription move
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 02 Jan 2023 00:03:00 +0000
+
+grassfeeder (0.1.5) jammy; urgency=low
+
+  * Focus indicator for browser area: move down
+  * After deleting Message, set Cursor to next one
+  * Refactored SourceTreeController,  message_from_modelentry
+  * Bugfix: Focus on Folder, Minimize, Restore results in list content out of sync, no browser
+  * Bugfix: insert subscription by drag, set-read on messages, tree is not updated
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Thu, 13 Dec 2022 00:10:00 +0000
+
+grassfeeder (0.1.4) jammy; urgency=low
+
+  * Feed Error display sorted by time
+  * Error DB: limit entries by time, subscription
+  * Created debian updating repository
+  * Improved drag url recognition: www.netjstech.com
+  * Create gzipped changelog, added it to *.deb file
+  * rust-i18n update, yaml adapted
+  * Bugfix about-dialog reopen fail.
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 21 Nov 2022 00:22:00 +0000
+
+grassfeeder (0.1.3) jammy; urgency=low
+
+  * Unix termination signal handling
+  * Creating *.rpm:  retaining the appliation name
+  * Permitting apostroph in message titles
+  * Created rpm package, from debian, Suse, fedora
+  * Created AppImage, from debian, Suse, fedora
+  * Bugfix: new message does not show up in list
+  * Bugfix: Settings Dialog / Font Manual Switch:  height adapted
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Thu, 10 Nov 2022 00:22:00 +0000
+
+grassfeeder (0.1.2) jammy; urgency=low
+
+  * Message List: set scroll position to upper edge from Cursor
+  * Settings Dialog  : switches to even length
+  * AppImage: using auto_link  inflates the size from 4.3MB to 25MB, with some spared libs.
+  * Adding default icon 128x128
+  * Create rpm  package
+  * Bugfix: resolved crash on font size change
+  * Bugfix: don't update the list if we are there already
+  * Bugfix: mark-as-read shall update the list
+  * Bugfix: launch multiple messages in browser shall trigger the tree sum display
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sat, 05 Nov 2022 00:22:00 +0000
+
+grassfeeder (0.1.1) jammy; urgency=low
+
+  * DragAndDrop for Websites on Subscription Area
+  * Bugfix: parsed blogger.com - wrong element recognized as link
+  * Browser Progress display
+  * Zipped the test files
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 30 Oct 2022 00:18:00 +0000
+
+grassfeeder (0.1.0) jammy; urgency=low
+
+  * Application Icon for Systray
+  * Message List, new focus policy: before last unread
+  * Reduced timer generated load when minimized
+  * Importing opml: adding homepage address
+  * Keyboard: Space -> open in browser
+  * Opml export in pretty format
+  * Bugfix: List update - sorted after reconnecting the view
+  * Bugfix: tried to downscale an icon when there is none
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sun, 23 Oct 2022 00:00:00 +0000
+
+grassfeeder (0.0.9) jammy; urgency=low
+
+  * Aggregate Messages on Folder Selection
+  * Browser Display :  wrap over   title
+  * Browser: Modify  Font size
+  * Browser: Add Zoom Control
+  * React on Minimize, try memory usage reduction
+  * Scale down big icons  before going into database.
+  * Bugfix: Subscriptions Sanitize Folder shall have only folder icon
+  * Subscriptions Sanitize: untangle too deep nesting
+  * Bugfix: selected item in list jumps after minimize-restore
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sun, 16 Oct 2022 00:01:00 +0000
+
+grassfeeder (0.0.8) jammy; urgency=low
+
+  * Search Filter for messages
+  * Change Layout: wide bottom line.
+  * Delete Messages by delete key
+  * Flush Databases on Shutdown: subscr, msg, errors
+  * Subscription Tree: hide zeroes when all are read
+  * Create Backups for Subscriptions-DB
+  * Cleanup messages at configured upper limit
+  * Sanitize: cross-check icon ids of tree if they are present in icon db
+  * Bugfix: Subscription-edit  text fields are vertically expanding. Shall have fixed height
+  * Bugfix: Add-folder   leads to  expanding one that is closed
+  * Bugfix: Tree Drag Folders:  the parent items instead of all, don't jump to start
+  * Bugfix: Set unread by icon ->  is not processed in following set-read by cursor
+  * Workaround for wrong atom  declaration https:// -> http://   linuxcompatible.org
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 10 Oct 2022 00:15:00 +0000
+
+grassfeeder (0.0.7) jammy; urgency=low
+
+  * Error-DB of subscription updating errors, display in edit dialog
+  * Create  AppImage
+  * Databases consistency check  on startup configurable.
+  * Browser CleanUp Cache on startup, configurable
+  * Menu Item and  Help text into browser
+  * Copy Message address into clipboard
+  * Database sanitize: remove messages with deleted flag
+  * Workaround for WebView hangs occasionally on some feeds
+  * Workaround for feeds without message title
+  * Bugfix: Delete Messages shall update status bar
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Wed, 04 Oct 2022 00:12:00 +0000
+
+grassfeeder (0.0.6) jammy; urgency=low
+
+  * Added desktop icon
+  * Show message sums on folders
+  * Delete Messages
+  * Keyboard command for: mark-as-read a
+  * Keyboard command for: next unread message s, previous unread message x
+  * Memory usage display in debug mode
+  * Browser: get rid of white display on start
+  * added build for windows on fedora, no success.
+  * refactor messages / separate state_map
+  * rename previous log file to .old
+  * Bugfix: rename folder crash
+  * Bugfix messages with umlaut titles
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Tue, 27 Sep 2022 00:23:00 +0000
+
+grassfeeder (0.0.5) jammy; urgency=low
+
+  * StatusBar: copy Feed address into clipboard
+  * Multiple instances shall not be allowed
+  * Cleanup double same messages
+  * Build via Docker container
+  * On Shutdown:  Flush Databases
+  * Databases check via command line, no more automatic
+  * Databases check shall remove doubled messages
+  * Add default set of subscriptions on new configuration
+  * Bugfix: Fetch-All shall not include folder scheduling
+  * Bugfix: on start create logging folder
+  * Refactored test for new_entries_filter
+  * New-Feed allowed umlaut in name, deactivated iso8859 filter
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Wed, 21 Sep 2022 00:12:00 +0000
+
+grassfeeder (0.0.4) jammy; urgency=low
+
+  * Startup Commandline processing fixed:    -h shall remain on commandline
+  * Drag: Folder down - fixed
+  * GTK-Liststore for inserting switch off sorting, else slow. Solved by using pixbuf cache
+  * Created debian changelog
+  * Subscription_state: merge extra booleans
+  * Remove section_name, Remove Package Ini
+  * Shutdown Integration Test, gtk-updater: catching row-too-short nullpointer
+  * Subscription Edit Dialog: show Homepage
+  * Prevent simultaneous accesses for the same domain
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Fri, 16 Sep 2022 00:12:00 +0000
+
+grassfeeder (0.0.3) jammy; urgency=low
+
+  * Tree Unread-Calculation Speed increased, parallel web requests to 3
+  * SendToBrowser :   mark-as-read for all entries
+  * Cleaning out deleted subscriptions
+  * Refactored subscriptions to sqlite
+  * Bugfix: message tooltip needs escaping
+  * Removed icon dialog, leave it on  debug flag
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Tue, 13 Sep 2022 00:00:00 +0000
+
+grassfeeder (0.0.2) jammy; urgency=low
+
+  * Add version and branch info to about dialog,
+  * refacture initialisation and property loading, config  as json
+  * Web threads to 2
+  * added more message title conversion html entities
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Thu, 08 Sep 2022 00:00:00 +0000
+
+grassfeeder (0.0.1) jammy; urgency=low
+
+  * Initial release
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sun, 04 Sep 2022 00:00:00 +0000
+

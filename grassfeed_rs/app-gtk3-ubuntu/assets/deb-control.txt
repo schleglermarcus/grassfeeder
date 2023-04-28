@@ -1,0 +1,13 @@
+Package: grassfeeder
+Architecture: amd64
+Section: web
+Priority: optional
+Maintainer: Marcus <schlegler_marcus@posteo.de>
+Installed-Size: 7109
+Depends: libwebkit2gtk-4.0-37 (>= 2.33.1), libglib2.0-0 (>= 2.33.14), libc6 (>= 2.35), libgdk-pixbuf-2.0-0 (>= 2.22.0), libgtk-3-0 (>= 3.16.2), libpango-1.0-0 (>= 1.14.0)
+Build-Depends: rustc, cargo
+Description: Feed Reader Linux-Gtk3 Application
+ This application polls Feeds (Streams of messages) regularly and presents them
+ in a list of events. Browser Urls of blogs, news sites etc. can be dropped and
+ create a new subscription. It reads Atom and several RSS versions.
+

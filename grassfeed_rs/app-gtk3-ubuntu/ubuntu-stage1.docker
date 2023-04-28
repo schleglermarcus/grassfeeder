@@ -1,17 +1,21 @@
-#FROM ubuntu:20.04
+#FROM ubuntu:18.04      # bionic
+#RUN echo "deb     http://ftp.gwdg.de/ubuntu/ bionic main restricted universe multiverse "  >/etc/apt/sources.list
+#RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ bionic-updates main restricted universe multiverse"  >>/etc/apt/sources.list
+
+
+#FROM ubuntu:20.04      # focal
 #RUN echo "deb     http://ftp.gwdg.de/ubuntu/ focal main restricted universe multiverse "  >/etc/apt/sources.list
 #RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ focal-updates main restricted universe multiverse"  >>/etc/apt/sources.list
 
-#FROM ubuntu:22.04
+#FROM ubuntu:22.04      # jammy
 #RUN echo "deb     http://ftp.gwdg.de/ubuntu/ jammy main restricted universe multiverse "  >/etc/apt/sources.list
 #RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ jammy main restricted universe multiverse"  >>/etc/apt/sources.list
 
-FROM ubuntu:22.10
-RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic main restricted universe multiverse "  >/etc/apt/sources.list
-RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ kinetic main restricted universe multiverse"  >>/etc/apt/sources.list
-RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic-updates main restricted universe multiverse "  >>/etc/apt/sources.list
-RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ kinetic-updates main restricted universe multiverse"  >>/etc/apt/sources.list
-# RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic-backports main restricted universe multiverse "  >>/etc/apt/sources.list
+#FROM ubuntu:22.10       #
+#RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic main restricted universe multiverse "  >/etc/apt/sources.list
+#RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ kinetic main restricted universe multiverse"  >>/etc/apt/sources.list
+#RUN echo "deb     http://ftp.gwdg.de/ubuntu/ kinetic-updates main restricted universe multiverse "  >>/etc/apt/sources.list
+#RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ kinetic-updates main restricted universe multiverse"  >>/etc/apt/sources.list
 
 
 RUN cat /etc/apt/sources.list

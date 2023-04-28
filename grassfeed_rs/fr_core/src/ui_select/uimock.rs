@@ -247,7 +247,7 @@ impl UIUpdaterAdapter for UpdAda {
     fn web_view_remove(&self, _fs_man: Option<u8>) {}
 
     fn memory_conserve(&self, _act: bool) {}
-    fn update_systray_indicator(&self, _enable: bool) {}
+    // fn update_systray_indicator(&self, _enable: bool) {}
     fn update_window_minimized(&self, _mini: bool, _ev_time: u32) {}
 }
 

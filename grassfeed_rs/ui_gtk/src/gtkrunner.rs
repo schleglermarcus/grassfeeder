@@ -572,34 +572,6 @@ impl GtkObjects for GtkObjectsImpl {
         self.searchentries[idx as usize] = p.clone();
     }
 
-    /*  removed this for debian integration
-        fn set_indicator(&mut self, i: Option<libappindicator::AppIndicator>) {
-            self.indicator = i;
-        }
-
-        fn get_indicator(&self) -> Option<&libappindicator::AppIndicator> {
-            self.indicator.as_ref()
-        }
-
-        fn get_indicator_mut(&mut self) -> Option<&mut libappindicator::AppIndicator> {
-            self.indicator.as_mut()
-        }
-
-        fn set_create_systray_fn(
-            &mut self,
-            systray_fn: Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>,
-        ) {
-            self.create_systray_fn = Some(systray_fn);
-        }
-
-        fn get_create_systray_fn(
-            &self,
-        ) -> Option<&dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator> {
-            self.create_systray_fn.as_ref()?;
-            Some(self.create_systray_fn.as_ref().unwrap())
-        }
-    */
-
     fn set_gui_event_sender(&mut self, ev_se: Sender<GuiEvents>) {
         self.gui_event_sender = Some(ev_se);
     }
@@ -776,9 +748,9 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
         self.send_to_int(&IntCommands::MemoryConserve(act));
     }
 
-    fn update_systray_indicator(&self, _enable: bool) {
-        //  self.send_to_int(&IntCommands::TrayIconEnable(enable));
-    }
+    // fn update_systray_indicator(&self, _enable: bool) {
+    //       self.send_to_int(&IntCommands::TrayIconEnable(enable));
+    // }
 
     fn update_window_minimized(&self, mini: bool, ev_time: u32) {
         self.send_to_int(&IntCommands::UpdateWindowMinimized(mini, ev_time));

@@ -19,6 +19,7 @@ use context::BuildConfig;
 use context::Buildable;
 use context::StartupWithAppContext;
 use std::cell::RefCell;
+use std::collections::HashSet;
 use std::rc::Rc;
 use std::rc::Weak;
 
@@ -290,6 +291,29 @@ impl SubscriptionMove {
             (*subs_w).borrow().addjob(j);
         }
     }
+
+    fn get_siblings_ids(&self, f_path: &Vec<u16>) -> Vec<isize> {
+        let mut parent_path = f_path.clone();
+        if parent_path.len() > 0 {
+            parent_path.pop();
+        }
+        let mut child_ids: Vec<isize> = Vec::default();
+        let o_parent_id = self.statemap.borrow().get_id_by_path(&parent_path);
+        if o_parent_id.is_none() {
+            return child_ids;
+        }
+        let parent_id = o_parent_id.unwrap();
+        // if let Some(p_sub) = self.get_by_path(&parent_path) {
+        child_ids = (*self.subscriptionrepo_r)
+            .borrow()
+            .get_by_parent_repo_id(parent_id)
+            .iter()
+            .map(|fse| fse.subs_id)
+            .collect::<Vec<isize>>();
+        // }
+        debug!(" children:  {:?} ", &child_ids);
+        child_ids
+    }
 } // impl SubscriptionMove
 
 impl ISubscriptionMove for SubscriptionMove {
@@ -298,12 +322,12 @@ impl ISubscriptionMove for SubscriptionMove {
         let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
         let length_before = all1.len();
         let mut success: bool = false;
-        let mut from_parent_id: isize = -1;
-        let mut to_parent_subs_id: isize = -1;
+
+        let mut update_tree_ids: HashSet<isize> = HashSet::default();
+
         match self.drag_calc_positions(&from_path, &to_path) {
             Ok((from_entry, to_parent_id, to_folderpos)) => {
-                from_parent_id = from_entry.parent_subs_id;
-                to_parent_subs_id = to_parent_id;
+                let from_parent_id = from_entry.parent_subs_id;
                 self.drag_move(from_entry, to_parent_id, to_folderpos);
                 let all2 = (*self.subscriptionrepo_r).borrow().get_all_entries();
                 if all2.len() != length_before {
@@ -312,27 +336,40 @@ impl ISubscriptionMove for SubscriptionMove {
                 } else {
                     success = true;
                 }
+                update_tree_ids.insert(from_parent_id);
+                if to_parent_id > 0 {
+                    update_tree_ids.insert(to_parent_id);
+                }
             }
             Err(msg) => {
                 warn!("DragFail: {:?}=>{:?} --> {} ", from_path, to_path, msg);
                 (*self.subscriptionrepo_r)
                     .borrow()
                     .debug_dump_tree("dragfail");
+                for id in self.get_siblings_ids(&from_path) {
+                    update_tree_ids.insert(id);
+                }
+                for id in self.get_siblings_ids(&to_path) {
+                    update_tree_ids.insert(id);
+                }
             }
         }
+        debug!("UPD_IDS= {:?} ", &update_tree_ids);
         if let Some(subs_w) = self.feedsources_w.upgrade() {
             (*subs_w).borrow().addjob(SJob::UpdateTreePaths);
             (*subs_w).borrow().addjob(SJob::FillSubscriptionsAdapter);
-            if from_parent_id >= 0 {
-                (*subs_w)
-                    .borrow()
-                    .addjob(SJob::GuiUpdateTree(from_parent_id));
+            for id in update_tree_ids {
+                (*subs_w).borrow().addjob(SJob::GuiUpdateTree(id));
             }
-            if to_parent_subs_id >= 0 && to_parent_subs_id != from_parent_id {
-                (*subs_w)
-                    .borrow()
-                    .addjob(SJob::GuiUpdateTree(to_parent_subs_id));
-            }
+            /*
+                       if from_parent_id >= 0 {
+                       }
+                       if to_parent_subs_id >= 0 && to_parent_subs_id != from_parent_id {
+                           (*subs_w)
+                               .borrow()
+                               .addjob(SJob::GuiUpdateTree(to_parent_subs_id));
+                       }
+            */
         }
 
         success
@@ -555,7 +592,6 @@ impl ISubscriptionMove for SubscriptionMove {
             self.need_check_fs_paths.replace(false);
         }
     }
-
 } //  impl ISubscriptionMove
 
 impl Buildable for SubscriptionMove {
