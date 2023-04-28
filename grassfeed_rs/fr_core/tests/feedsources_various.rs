@@ -97,6 +97,7 @@ fn test_heise_svg() {
     assert_eq!(an_res.kind, IconKind::Svg);
 }
 
+/** remote  icon is gone
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_remote_redirect --lib -- --exact --nocapture"
 // #[ignore]
 #[test]
@@ -105,8 +106,11 @@ fn test_remote_redirect() {
     let web_fetcher = HttpFetcher {};
     let r = web_fetcher.request_url_bin("https://kodansha.us/favicon.ico".to_string());
     let an_res = icon_analyser(&r.content_bin);
+    debug!("test_remote_redirect  {:?}" , &an_res );
     assert_eq!(an_res.kind, IconKind::Ico);
 }
+ */
+
 
 // ----------------------------
 

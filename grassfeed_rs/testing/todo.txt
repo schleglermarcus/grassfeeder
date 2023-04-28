@@ -7,6 +7,11 @@ https://launchpad.net/grassfeeder
 https://launchpad.net/ubuntu/focal/+source/rust-pad
 https://packaging.ubuntu.com/html/packaging-new-software.html
 https://shallowsky.com/blog/programming/packaging-launchpad-ppas.html
+https://launchpad.net/~schleglermarcus/+archive/ubuntu/ppa/+edit-dependencies
+https://packages.ubuntu.com/bionic/rust-all
+
+
+# 18.04:bionic    20.04:focal
 
 
 * Debian Packaging specific

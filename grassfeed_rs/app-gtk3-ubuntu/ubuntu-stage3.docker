@@ -1,0 +1,48 @@
+# bionic
+FROM ubuntu:18.04
+RUN echo "deb     http://ftp.gwdg.de/ubuntu/ bionic main restricted universe multiverse devel "  >/etc/apt/sources.list
+RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ bionic-updates main restricted universe multiverse devel "  >>/etc/apt/sources.list
+
+
+RUN cat /etc/apt/sources.list
+RUN apt-get update
+
+
+
+RUN apt-get install -y  rust-all
+
+###  rustc is not in  ubuntu-bionic
+
+# RUN apt-get install -y  rustc
+# RUN rustc --version
+# RUN apt-get install -y  cargo
+# RUN apt-get install -y  debcargo
+# RUN cargo install  cargo-deb   --version 1.33.0	# downgrading the version
+
+
+ENV PATH="$PATH:/root/.cargo/bin"
+
+
+COPY target/gf.tar.gz /usr/src/
+WORKDIR /usr/src/
+RUN cat gf.tar.gz |gzip -d |tar x
+ARG GFTAR
+RUN mv -v gf.tar.gz $GFTAR
+RUN ls -l
+
+WORKDIR /usr/src/grassfeed_rs/app-gtk3-ubuntu
+RUN dpkg -i rust/rustc_1.65.0+dfsg0ubuntu1-0ubuntu0.22.04.1_amd64.deb
+
+RUN ./unpack-vendored.sh
+
+## RUN cargo --offline build
+## RUN cargo --offline deb
+
+RUN ./deb-sign.sh
+
+WORKDIR /usr/src/grassfeed_rs
+RUN ls -l target
+RUN ls -l app-gtk3-ubuntu/target
+
+
+
