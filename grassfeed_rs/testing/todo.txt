@@ -39,6 +39,7 @@ https://www.debian.org/doc/manuals/developers-reference/pkgs.html#newpackage
 
 
 
+- change cleaning out too many messages while running
 
 
 Later:

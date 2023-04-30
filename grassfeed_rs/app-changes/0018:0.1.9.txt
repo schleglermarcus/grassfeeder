@@ -1,9 +1,7 @@
 Mon, 05 Apr 2023 00:18:00 +0000
 * refactored gui-events processor
 
-- debian package
-
+- preparing for ubuntu ppa
 
 - drag feed on feed bug
 
-- change cleaning out too many messages while running

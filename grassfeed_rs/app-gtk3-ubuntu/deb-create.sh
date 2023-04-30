@@ -4,12 +4,11 @@ PKGNAME="grassfeeder-gtk3"
 DIR=`pwd`
 T_MAINT="Marcus <schlegler_marcus@posteo.de>"
 T_LICENSE="LGPL-3"
-VERSION=`cat assets/changelog.txt |head -n1 |sed -e "s/^.*(//" -e "s/).*$//"`
-
+# VERSION=`cat assets/changelog.txt |head -n1 |sed -e "s/^.*(//" -e "s/).*$//"`
+VERSION=`cat ../resources/version.txt`
 
 WORK="$DIR/target/$PKGNAME-$VERSION"
 echo "VERSION=$VERSION	    WORKDIR=$WORK"
-
 
 cargo test --release
 cargo build --release
@@ -25,11 +24,12 @@ cp  ../target/release/grassfeeder  $WORK/usr/bin/
 mkdir $WORK/usr/share
 mkdir $WORK/usr/share/doc
 mkdir $WORK/usr/share/doc/$PKGNAME
-cp assets/changelog.gz  $WORK/usr/share/doc/$PKGNAME/
+cat assets/changelog.txt |gzip >$WORK/usr/share/doc/$PKGNAME/changelog.gz
 mkdir $WORK/usr/share/applications
 cp assets/grassfeeder.desktop  $WORK/usr/share/applications/
 mkdir $WORK/usr/share/pixmaps
-cp assets/grassfeeder.xpm  $WORK/usr/share/pixmaps/
+mkdir $WORK/usr/share/pixmaps/grassfeeder
+cp assets/grassfeeder.xpm  $WORK/usr/share/pixmaps/grassfeeder/
 
 
 INST_SIZE=`(cd  $WORK ;  du -ks usr|cut -f 1)`

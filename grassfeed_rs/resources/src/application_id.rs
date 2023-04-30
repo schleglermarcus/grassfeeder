@@ -6,6 +6,9 @@ pub const APP_WEBSITE_LABEL: &str = "github.com / grassfeeder";
 
 pub const APP_LICENSE: &str = "LGPL-3";
 
+pub const VERSION: &str = include_str!("../version.txt");
+
+
 #[allow(dead_code)]
 pub const CARGO_PKG_NAME: &str = env!("CARGO_PKG_NAME");
 pub const CARGO_PKG_VERSION: &str = env!("CARGO_PKG_VERSION");

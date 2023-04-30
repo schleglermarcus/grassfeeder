@@ -7,7 +7,8 @@ mod args_lang;
 use fr_core::config::init_system;
 use fr_core::config::setup_logger_prod;
 use fr_core::db::check_consistency;
-use resources::application_id::*;
+use resources::application_id::APP_NAME;
+use resources::application_id::VERSION;
 
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
@@ -29,7 +30,9 @@ fn main() {
         .unwrap()
         .to_string();
 
-    let version_str = env!("CARGO_PKG_VERSION").to_string();
+    //  let version_str = env!("CARGO_PKG_VERSION").to_string();
+    let version_str = VERSION;
+
     let o_opts = args_lang::parse_args(&version_str);
     let mut debug_level = 0;
     if o_opts.is_none() {
@@ -62,7 +65,7 @@ fn main() {
         path_config: conf,
         path_cache: cache,
         debug_mode: opts.debug,
-        version: version_str,
+        version: version_str.to_string(),
     };
     let appcontext = init_system::start(gfconf);
     init_system::run(&appcontext);
