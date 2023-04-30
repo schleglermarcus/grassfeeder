@@ -18,7 +18,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 /// when there are messages with subscription_id=100, don't insert subscription with ID 99
-// #[ignore]
 #[test]
 fn add_subscription_with_existing_messages() {
     setup();
@@ -40,7 +39,6 @@ fn add_subscription_with_existing_messages() {
     assert_eq!(message.len(), 0); // the new created subscription may not have messages attached
 }
 
-// #[ignore]
 #[test]
 fn add_feed_empty() {
     setup();
@@ -53,7 +51,6 @@ fn add_feed_empty() {
     assert_eq!(entries.len(), 4); // plus 3 pre-existing entries
 }
 
-// #[ignore]
 #[test]
 fn delete_feed_v1() {
     setup();
@@ -110,7 +107,6 @@ fn test_remote_redirect() {
     assert_eq!(an_res.kind, IconKind::Ico);
 }
  */
-
 
 // ----------------------------
 
