@@ -8,13 +8,14 @@ T_LICENSE="LGPL-3"
 VERSION=`cat ../resources/version.txt`
 
 WORK="$DIR/target/$PKGNAME-$VERSION"
+test -d $DIR/target || mkdir $DIR/target
 echo "VERSION=$VERSION	    WORKDIR=$WORK"
 
-cargo test --release
-cargo build --release
+cargo --offline test --release
+cargo --offline build --release
 
 
-rm -rf $WORK
+rm -rf $WORK  ;
 mkdir $WORK
 test -d $WORK/DEBIAN || mkdir $WORK/DEBIAN
 
@@ -56,11 +57,19 @@ echo "License: $T_LICENSE" >>$CP
 
 # (cd $WORK ; find . -type f |grep -v DEBIAN |xargs md5sum >DEBIAN/md5sums )
 FILES=`(cd $WORK ; find . -type f |grep -v DEBIAN |sort) |xargs`
-echo "$FILES"
-for F in $FILES ; do
+echo "md5sum-FILES: $FILES"
+for F in $FILES
+do
     (cd $WORK ; md5sum $F >>DEBIAN/md5sums )
 done
 
+echo "RUN  dpkg-deb --root-owner-group --build $PKGNAME-$VERSION"
 (cd target ; dpkg-deb --root-owner-group --build $PKGNAME-$VERSION )
+echo "     dpkg-deb done. target/ "
+ls -l target/
+echo "     this folder: "
+ls -l .
+echo "     parent folder: "
+ls -l ../
 
 

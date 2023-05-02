@@ -1,25 +1,23 @@
-# bionic
-FROM ubuntu:18.04
-RUN echo "deb     http://ftp.gwdg.de/ubuntu/ bionic main restricted universe multiverse devel "  >/etc/apt/sources.list
-RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ bionic-updates main restricted universe multiverse devel "  >>/etc/apt/sources.list
+#FROM ubuntu:22.04
+#RUN echo "deb     http://ftp.gwdg.de/ubuntu/ jammy main restricted universe multiverse "  >/etc/apt/sources.list
+#RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ jammy main restricted universe multiverse"  >>/etc/apt/sources.list
+#RUN echo "deb     http://ftp.gwdg.de/ubuntu/ jammy-updates main restricted universe multiverse "  >>/etc/apt/sources.list
+#RUN echo "deb-src http://ftp.gwdg.de/ubuntu/ jammy-updates main restricted universe multiverse"  >>/etc/apt/sources.list
+
+FROM ubuntu:22.10
+RUN echo "deb     http://ftp.halifax.rwth-aachen.de/ubuntu/ kinetic main restricted universe multiverse "  >/etc/apt/sources.list
+RUN echo "deb-src http://ftp.halifax.rwth-aachen.de/ubuntu/ kinetic main restricted universe multiverse"  >>/etc/apt/sources.list
+RUN echo "deb     http://ftp.halifax.rwth-aachen.de/ubuntu/ kinetic-updates main restricted universe multiverse "  >>/etc/apt/sources.list
+RUN echo "deb-src http://ftp.halifax.rwth-aachen.de/ubuntu/ kinetic-updates main restricted universe multiverse"  >>/etc/apt/sources.list
 
 
 RUN cat /etc/apt/sources.list
 RUN apt-get update
 
-
-
-RUN apt-get install -y  rust-all
-
-###  rustc is not in  ubuntu-bionic
-
-# RUN apt-get install -y  rustc
-# RUN rustc --version
-# RUN apt-get install -y  cargo
-# RUN apt-get install -y  debcargo
-# RUN cargo install  cargo-deb   --version 1.33.0	# downgrading the version
-
-
+RUN apt-get install -y  rustc cargo
+RUN apt-get install -y  libc-dev   devscripts pkg-config
+RUN apt-get install -y  libatk1.0-dev libwebkit2gtk-4.0-dev libsoup2.4-dev
+RUN apt-get install -y  librust-glib-dev librust-glib-sys-dev librust-gobject-sys-dev
 ENV PATH="$PATH:/root/.cargo/bin"
 
 
@@ -31,14 +29,11 @@ RUN mv -v gf.tar.gz $GFTAR
 RUN ls -l
 
 WORKDIR /usr/src/grassfeed_rs/app-gtk3-ubuntu
-RUN dpkg -i rust/rustc_1.65.0+dfsg0ubuntu1-0ubuntu0.22.04.1_amd64.deb
+# RUN dpkg -i rust/rustc_1.65.0+dfsg0ubuntu1-0ubuntu0.22.04.1_amd64.deb
 
 RUN ./unpack-vendored.sh
-
-## RUN cargo --offline build
-## RUN cargo --offline deb
-
-RUN ./deb-sign.sh
+RUN ./deb-create.sh
+# RUN ./deb-sign.sh
 
 WORKDIR /usr/src/grassfeed_rs
 RUN ls -l target

@@ -1,8 +1,10 @@
 #!/bin/bash
 test -d target || mkdir target
 DIR=`pwd`
-VERSION=`cat Cargo.toml  |grep "^version"  |sed -e "s/.*= \"//" -e "s/\"//"`
+# VERSION=`cat Cargo.toml  |grep "^version"  |sed -e "s/.*= \"//" -e "s/\"//"`
+VERSION=`cat ../resources/version.txt`
 echo "VERSION=$VERSION	"
+
 # the output file is used by the docker file            >$DIR/target/grassfeeder-${VERSION}.tar.gz
 (cd ../../ ; tar c --exclude=target --exclude=grassfeed_rs/Cargo.lock   grassfeed_rs  |gzip --fast  >$DIR/target/gf.tar.gz )
 
