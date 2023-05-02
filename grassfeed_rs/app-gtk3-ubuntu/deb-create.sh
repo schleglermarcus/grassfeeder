@@ -21,7 +21,7 @@ test -d $WORK/DEBIAN || mkdir $WORK/DEBIAN
 
 mkdir $WORK/usr
 mkdir $WORK/usr/bin
-cp  ../target/release/grassfeeder  $WORK/usr/bin/
+cp -v  ../target/release/grassfeeder  $WORK/usr/bin/
 mkdir $WORK/usr/share
 mkdir $WORK/usr/share/doc
 mkdir $WORK/usr/share/doc/$PKGNAME
@@ -60,16 +60,12 @@ FILES=`(cd $WORK ; find . -type f |grep -v DEBIAN |sort) |xargs`
 echo "md5sum-FILES: $FILES"
 for F in $FILES
 do
-    (cd $WORK ; md5sum $F >>DEBIAN/md5sums )
+    (cd $WORK ; echo $F >> DEBIAN/files;  md5sum $F >>DEBIAN/md5sums )
 done
 
 echo "RUN  dpkg-deb --root-owner-group --build $PKGNAME-$VERSION"
 (cd target ; dpkg-deb --root-owner-group --build $PKGNAME-$VERSION )
 echo "     dpkg-deb done. target/ "
 ls -l target/
-echo "     this folder: "
-ls -l .
-echo "     parent folder: "
-ls -l ../
 
 

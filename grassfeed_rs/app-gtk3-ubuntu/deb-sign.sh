@@ -70,9 +70,9 @@ R="debian/rules"
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "binary: " >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "	cp -v grassfeed_rs/app-gtk3-ubuntu/target/grassfeeder*.deb .  " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	mkdir debian ; ls -1 grassfeeder*.deb >debian/files  " >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
 
-# (cd $WORK/grassfeeder-$VERSION ;  FAKEROOTKEY=1 LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libfakeroot/libfakeroot-0.so   dpkg-buildpackage -us -uc -ui -S -rfakeroot   )
 echo ">>  DEBUILD ...."
 (cd $WORK/${PKGNAME}-$VERSION ;   debuild  -rfakeroot -S  )
 echo ">>  DEBUILD done"
