@@ -1,7 +1,0 @@
-Origin: Marcus der Schlegler
-Label: RSS Feed Reader
-Codename: grassfeeder
-Architectures: amd64
-Components: binary
-Description: Apt repository for project GrassFeeder
-SignWith: 245790939B8FD40DC29D0EF9C28EBCE0F940E69F

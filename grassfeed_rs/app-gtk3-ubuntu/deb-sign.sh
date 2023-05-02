@@ -7,28 +7,21 @@
 #	dput requirements:
 #   {'allowed': ['release'], 'known': ['release', 'proposed', 'updates', 'backports', 'security']}
 #
-
-
 PKGNAME="grassfeeder-gtk3"
 T_MAINT="Marcus <schlegler_marcus@posteo.de>"
 BUILD_DEPENDS="rustc, cargo, devscripts, pkg-config, librust-glib-dev, librust-glib-sys-dev, librust-gobject-sys-dev, libatk1.0-dev, libwebkit2gtk-4.0-dev, libsoup2.4-dev "
-
-
 
 DIR=`pwd`
 VERSION=`cat ../resources/version.txt`
 
 (cd ../resources; cargo test )
-
-
-# find .. -name target -type d |xargs rm -rf
 rm -rf ../testing/target
 rm -rf ../target
+rm -rf target
 mkdir target
 
 WORK="$DIR/target/deb-sign"
 echo "VERSION=$VERSION	    WORKDIR=$WORK"
-# rm -rf ../target
 test -d ../target || mkdir ../target
 
 
@@ -57,6 +50,8 @@ echo "" >>$CT
 echo "Package: $PKGNAME"  >>$CT
 cat assets/deb-control.txt |egrep  "Architecture:"  |head -n1  >>$CT
 cat assets/deb-control.txt |egrep  "Depends:"  |head -n1  >>$CT
+cp -v $CT debian/
+
 
 R="debian/rules"
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "#!/usr/bin/make -f" >$R )
@@ -70,7 +65,8 @@ R="debian/rules"
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "binary: " >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "	cp -v grassfeed_rs/app-gtk3-ubuntu/target/grassfeeder*.deb .  " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	mkdir debian ; ls -1 grassfeeder*.deb >debian/files  " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	ls -1 grassfeeder*.deb >debian/files  " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	ls -lR debian/  " >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
 
 echo ">>  DEBUILD ...."
