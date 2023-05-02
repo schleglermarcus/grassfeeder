@@ -13,6 +13,9 @@ BUILD_DEPENDS="rustc, cargo, devscripts, pkg-config, librust-glib-dev, librust-g
 
 DIR=`pwd`
 VERSION=`cat ../resources/version.txt`
+SECTION="web"
+PRIORITY="optional"
+ARCHITECTURE="amd64"
 
 (cd ../resources; cargo test )
 
@@ -43,13 +46,14 @@ echo "1.0" >$WORK/${PKGNAME}-$VERSION/debian/source/format
 
 CT=$WORK/${PKGNAME}-$VERSION/debian/control
 echo "Source: $PKGNAME" >$CT
-echo "Section: web" >>$CT
-echo "Priority: optional" >>$CT
+echo "Section: $SECTION" >>$CT
+echo "Priority: $PRIORITY" >>$CT
 echo "Maintainer: $T_MAINT" >>$CT
 echo "Build-Depends: $BUILD_DEPENDS "  >>$CT
 echo "" >>$CT
 echo "Package: $PKGNAME"  >>$CT
-cat assets/deb-control.txt |egrep  "Architecture:"  |head -n1  >>$CT
+echo "Architecture: $ARCHITECTURE"  >>$CT
+# cat assets/deb-control.txt |egrep  "Architecture:"  |head -n1  >>$CT
 cat assets/deb-control.txt |egrep  "Depends:"  |head -n1  >>$CT
 cp -vR $CT debian/
 
@@ -65,13 +69,12 @@ R="debian/rules"
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; ./deb-create.sh ) " >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "binary: " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	cp -v grassfeed_rs/app-gtk3-ubuntu/target/grassfeeder*.deb ../${PKGNAME}-${VERSION}.deb  " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	cp -v grassfeed_rs/app-gtk3-ubuntu/target/grassfeeder*.deb ../${PKGNAME}_${VERSION}_${ARCHITECTURE}.deb  " >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "	find . -name \"files\"  " >>$R )
-# (cd $WORK/${PKGNAME}-$VERSION ;   echo "	F=`(cd .. ;ls -1 grassfeeder*.deb)` ; echo \"$F web optional\" >debian/files  " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	mv -v debian/files debian/files.1  " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	dpkg-distaddfile ${PKGNAME}-${VERSION}.deb web optional" >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	if test  -f debian/files ; then  mv -v debian/files debian/files.1 ; fi   " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	if ! test -d debian       ; then mkdir debian ; fi " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	dpkg-distaddfile ${PKGNAME}_${VERSION}_${ARCHITECTURE}.deb $SECTION $PRIORITY" >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "	ls -lR debian/  " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	cat debian/files  " >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
 
 echo ">>  DEBUILD ...."

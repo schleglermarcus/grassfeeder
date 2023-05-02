@@ -1,4 +1,4 @@
-grassfeeder-gtk3 (0.0.28) buster; urgency=low
+grassfeeder-gtk3 (0.0.34) buster; urgency=low
 
   * refactored gui-events processor
   
