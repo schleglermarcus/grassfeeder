@@ -15,6 +15,7 @@ DIR=`pwd`
 VERSION=`cat ../resources/version.txt`
 
 (cd ../resources; cargo test )
+
 rm -rf ../testing/target
 rm -rf ../target
 rm -rf target
@@ -50,7 +51,7 @@ echo "" >>$CT
 echo "Package: $PKGNAME"  >>$CT
 cat assets/deb-control.txt |egrep  "Architecture:"  |head -n1  >>$CT
 cat assets/deb-control.txt |egrep  "Depends:"  |head -n1  >>$CT
-cp -v $CT debian/
+cp -vR $CT debian/
 
 
 R="debian/rules"
@@ -64,9 +65,13 @@ R="debian/rules"
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; ./deb-create.sh ) " >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "binary: " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	cp -v grassfeed_rs/app-gtk3-ubuntu/target/grassfeeder*.deb .  " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	ls -1 grassfeeder*.deb >debian/files  " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	cp -v grassfeed_rs/app-gtk3-ubuntu/target/grassfeeder*.deb ../${PKGNAME}-${VERSION}.deb  " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	find . -name \"files\"  " >>$R )
+# (cd $WORK/${PKGNAME}-$VERSION ;   echo "	F=`(cd .. ;ls -1 grassfeeder*.deb)` ; echo \"$F web optional\" >debian/files  " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	mv -v debian/files debian/files.1  " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	dpkg-distaddfile ${PKGNAME}-${VERSION}.deb web optional" >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "	ls -lR debian/  " >>$R )
+(cd $WORK/${PKGNAME}-$VERSION ;   echo "	cat debian/files  " >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
 
 echo ">>  DEBUILD ...."

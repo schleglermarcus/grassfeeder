@@ -6,6 +6,9 @@ https://launchpad.net/grassfeeder
 https://packaging.ubuntu.com/html/debian-dir-overview.html#the-changelog
 https://packaging.ubuntu.com/html/packaging-new-software.html
 https://shallowsky.com/blog/programming/packaging-launchpad-ppas.html
+https://metebalci.com/blog/a-minimum-complete-example-of-debian-packaging-and-launchpad-ppa-hellodeb/
+https://unix.stackexchange.com/questions/710005/dpkg-genbuildinfo-error-badly-formed-line-in-files-list-file-line-1
+
 
 
 # 18.04:bionic    20.04:focal

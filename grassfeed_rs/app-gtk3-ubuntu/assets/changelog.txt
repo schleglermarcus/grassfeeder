@@ -1,4 +1,4 @@
-grassfeeder-gtk3 (0.0.26) jammy; urgency=low
+grassfeeder-gtk3 (0.0.28) jammy; urgency=low
 
   * refactored gui-events processor
   
