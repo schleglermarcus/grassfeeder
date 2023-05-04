@@ -1,7 +1,6 @@
 Mon, 05 Apr 2023 00:18:00 +0000
-* refactored gui-events processor
-
-- preparing for ubuntu ppa
+* Refactored gui-events processor
+* Building the debian package on launchpad
 
 - drag feed on feed bug
 

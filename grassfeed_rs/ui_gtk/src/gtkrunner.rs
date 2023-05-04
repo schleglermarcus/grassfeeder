@@ -665,6 +665,13 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
         ));
     }
 
+    fn update_tree_partial(&self, tree_index: u8, path: &[u16]) {
+        self.send_to_int(&IntCommands::UpdateTreeModelPartial(
+            tree_index,
+            path.to_vec(),
+        ));
+    }
+
     fn update_list(&self, list_index: u8) {
         self.send_to_int(&IntCommands::UpdateListModel(list_index));
     }

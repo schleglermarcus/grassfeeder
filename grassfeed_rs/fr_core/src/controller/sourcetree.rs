@@ -64,6 +64,9 @@ pub enum SJob {
     /// subscription_id
     GuiUpdateTree(isize),
 
+    /// path to be updated
+    GuiUpdateTreePartial(Vec<u16>),
+
     ScheduleFetchAllFeeds,
     CheckSpinnerActive,
     /// subscription_id
@@ -219,8 +222,13 @@ impl SourceTreeController {
                         warn!("GuiUpdateTree: No Path for id:{}", subs_id);
                     }
                 }
+
                 SJob::GuiUpdateTreeAll => {
                     (*self.gui_updater).borrow().update_tree(TREEVIEW0);
+                }
+
+                SJob::GuiUpdateTreePartial(ref path) => {
+                    (*self.gui_updater).borrow().update_tree_partial(0, &path);
                 }
 
                 SJob::ScheduleFetchAllFeeds => {

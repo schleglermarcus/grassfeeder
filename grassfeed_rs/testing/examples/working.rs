@@ -131,8 +131,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let url_r_foto = format!("{}/reddit-Fotografie.rss", addr);
     let url_insi = format!("{}/newsinsideout_com.rss", addr);
 
-    // let folder1 = feedsources.add_new_folder_at_parent("folder1".to_string(), 0);
-    let folder1 = subs_move.add_new_folder_at_parent("folder1".to_string(), 0);
+    let folder2 = subs_move.add_new_folder_at_parent("folder2".to_string(), 0);
+    let folder1 = subs_move.add_new_folder_at_parent("folder1".to_string(), folder2);
 
     (*subs_move).add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder1, false);
     let url_staseve = format!("{}/staseve-11.xml", addr);

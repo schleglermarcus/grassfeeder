@@ -176,6 +176,9 @@ impl GtkRunnerInternal {
                     IntCommands::UpdateTreeModelSingle(tree_nr, ref path) => {
                         upd_int.update_tree_model_single(tree_nr, path.clone())
                     }
+                    IntCommands::UpdateTreeModelPartial(tree_nr, ref path) => {
+                        upd_int.update_tree_model_partial(tree_nr, path.clone())
+                    }
                     IntCommands::TreeSetCursor(i, ref path) => {
                         upd_int.tree_set_cursor(i, path.clone())
                     }

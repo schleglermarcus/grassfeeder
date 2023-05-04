@@ -27,17 +27,12 @@ mkdir target
 WORK="$DIR/target/deb-sign"
 echo "VERSION=$VERSION	    WORKDIR=$WORK"
 test -d ../target || mkdir ../target
-
-
 EXCL="--exclude=grassfeed_rs/target --exclude=grassfeed_rs/app-gtk3-ubuntu/target --exclude=grassfeed_rs/Cargo.lock "
 (cd ../../ ; tar c $EXCL  grassfeed_rs |gzip --fast  >grassfeed_rs/target/${PKGNAME}-${VERSION}.tar.gz )
 test -d $WORK || mkdir $WORK
 mkdir $WORK/${PKGNAME}-${VERSION}
-
-
 UNPACK="../target/${PKGNAME}-${VERSION}.tar.gz"
 (cd $WORK/${PKGNAME}-$VERSION ;  cat  ../../../$UNPACK |gzip -d |tar x )
-
 mkdir $WORK/${PKGNAME}-$VERSION/debian
 cp -v assets/changelog.txt $WORK/${PKGNAME}-$VERSION/debian/changelog
 
@@ -53,10 +48,8 @@ echo "Build-Depends: $BUILD_DEPENDS "  >>$CT
 echo "" >>$CT
 echo "Package: $PKGNAME"  >>$CT
 echo "Architecture: $ARCHITECTURE"  >>$CT
-# cat assets/deb-control.txt |egrep  "Architecture:"  |head -n1  >>$CT
 cat assets/deb-control.txt |egrep  "Depends:"  |head -n1  >>$CT
 cp -vR $CT debian/
-
 
 R="debian/rules"
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "#!/usr/bin/make -f" >$R )
@@ -77,12 +70,7 @@ R="debian/rules"
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "	ls -lR debian/  " >>$R )
 (cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
 
-echo ">>  DEBUILD ...."
 (cd $WORK/${PKGNAME}-$VERSION ;   debuild  -rfakeroot -S  )
-echo ">>  DEBUILD done"
-
-
-#echo "----"
 
 ( cd $WORK ; echo "dput ppa:schleglermarcus/ppa  `ls -1 grassfeeder*source.changes |tail -n1`" )
 

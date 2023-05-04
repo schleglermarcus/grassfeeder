@@ -253,6 +253,62 @@ impl GtkModelUpdaterInt {
         }
     }
 
+    ///  replaces the tree, but from middle-out downwards
+    pub fn update_tree_model_partial(&self, tree_idx: u8, path: Vec<u16>) {
+        let max_columns;
+        let tree_store: TreeStore;
+        {
+            let g_o = (*self.g_o_a).read().unwrap();
+            max_columns = g_o.get_tree_store_max_columns(tree_idx as usize) as usize;
+            tree_store = g_o.get_tree_store(tree_idx as usize).unwrap().clone();
+        }
+        let mut gti: &GuiTreeItem = &(self.m_v_store).read().unwrap().get_tree_root();
+        for p_index in path.iter() {
+            if *p_index as usize >= gti.children.len() {
+                error!(
+                    "update_tree_model_single: BadPath1 {:?}    Index:{}   #children={}",
+                    &path,
+                    *p_index,
+                    gti.children.len()
+                );
+                return;
+            }
+            gti = &gti.children[*p_index as usize];
+        }
+        let path_cn = format!("{path:?}")
+            .replace(['[', ']', ' '], "")
+            .replace(',', ":");
+
+        let o_iter = tree_store.iter_from_string(&path_cn);
+        if o_iter.is_none() {
+            error!(
+                "update_tree_model_single: BadPath2 {:?} {:?} : TreeStore does not contain iter.  {:?}  ",
+                &path, &path_cn, gti
+            );
+            return;
+        }
+        let iter = o_iter.unwrap();
+        debug!("partial:     TS removing: {:?}  {:?}", path_cn, &gti);
+
+        let path_i32 = path.iter().map(|p| *p as i32).collect::<Vec<i32>>();
+
+        //  TODO:  remove all children, let the parent here.
+        tree_store.remove(&iter);
+        let mut expand_paths: Vec<TreePath> = Vec::default();
+
+        self.add_to_treestore(
+            tree_idx as usize,
+            &tree_store,
+            gti,
+            Some(&iter),
+            path_i32,
+            max_columns,
+            &mut expand_paths,
+        );
+
+        //        self.treestore_set_row(&tree_store, gti, &iter, max_columns);
+    }
+
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
     ///  Needs the same index for   ListStore  as for TreeView
     pub fn update_list_model(&self, list_index: u8) {

@@ -46,6 +46,10 @@ pub enum IntCommands {
     UpdateTreeModel(u8),
     ///  tree_index,   path
     UpdateTreeModelSingle(u8, Vec<u16>),
+
+    ///  tree_index,   path
+    UpdateTreeModelPartial(u8, Vec<u16>),
+
     ///  tree_index,   path
     TreeSetCursor(u8, Vec<u16>),
     UpdateListModel(u8),
