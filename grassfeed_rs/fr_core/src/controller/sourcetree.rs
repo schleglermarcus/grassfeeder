@@ -122,7 +122,7 @@ pub struct SourceTreeController {
     any_spinner_visible: RefCell<bool>,
     pub(super) new_source: RefCell<NewSourceTempData>,
     pub(super) statemap: Rc<RefCell<SubscriptionState>>, // moved over
-    pub(super) current_new_folder_parent_id: Option<isize>,
+
 }
 
 impl SourceTreeController {
@@ -184,7 +184,6 @@ impl SourceTreeController {
             statemap: Default::default(),
             erro_repo_r: err_rep,
             currently_minimized: false,
-            current_new_folder_parent_id: None,
         }
     }
 

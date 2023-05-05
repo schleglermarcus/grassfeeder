@@ -281,22 +281,27 @@ impl ISourceTreeController for SourceTreeController {
     }
 
     fn start_new_fol_sub_dialog(&mut self, src_repo_id: isize, dialog_id: u8) {
+        let mut new_parent_id = -1;
         match (*self.subscriptionrepo_r)
             .borrow()
             .get_by_index(src_repo_id)
         {
             None => {
                 debug!("subscription {} not found ", src_repo_id);
-                self.current_new_folder_parent_id = None;
             }
             Some(fse) => {
                 if fse.is_folder {
-                    self.current_new_folder_parent_id = Some(fse.subs_id);
+                    new_parent_id = fse.subs_id;
                 } else {
-                    self.current_new_folder_parent_id = Some(fse.parent_subs_id);
+                    new_parent_id = fse.parent_subs_id;
                 }
             }
         }
+
+        if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
+            subs_mov.borrow_mut().set_new_folder_parent(new_parent_id)
+        }
+
         (*self.gui_updater).borrow().update_dialog(dialog_id);
         (*self.gui_updater).borrow().show_dialog(dialog_id);
     }

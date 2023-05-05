@@ -1072,7 +1072,6 @@ impl HandleSingleEvent for HandleTreeDragEvent {
 }
 
 struct HandleTreeExpanded(
-    // Rc<RefCell<dyn ISourceTreeController>>
     Rc<RefCell<dyn ISubscriptionRepo>>,
     Rc<RefCell<dyn ISubscriptionMove>>,
 );
@@ -1080,7 +1079,6 @@ impl HandleSingleEvent for HandleTreeExpanded {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         match ev {
             GuiEvents::TreeExpanded(_idx, repo_id) => {
-                //  self.0.borrow().set_tree_expanded(repo_id as isize, true);
                 let statemap_rc = (*self.1).borrow().get_state_map();
                 (*statemap_rc).borrow_mut().set_status(
                     &vec![repo_id as isize],
@@ -1098,7 +1096,6 @@ impl HandleSingleEvent for HandleTreeExpanded {
 }
 
 struct HandleTreeCollapsed(
-    // Rc<RefCell<dyn ISourceTreeController>>
     Rc<RefCell<dyn ISubscriptionRepo>>,
     Rc<RefCell<dyn ISubscriptionMove>>,
 );
@@ -1106,7 +1103,6 @@ impl HandleSingleEvent for HandleTreeCollapsed {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         match ev {
             GuiEvents::TreeCollapsed(_idx, repo_id) => {
-                // self.0.borrow().set_tree_expanded(repo_id as isize, false);
                 let statemap_rc = (*self.1).borrow().get_state_map();
                 (*statemap_rc).borrow_mut().set_status(
                     &vec![repo_id as isize],

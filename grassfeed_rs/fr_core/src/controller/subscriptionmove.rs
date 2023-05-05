@@ -51,6 +51,9 @@ pub trait ISubscriptionMove {
 
     fn request_check_paths(&self, needs_check: bool);
     fn check_paths(&self);
+
+    ///  -1 for none
+    fn set_new_folder_parent(&mut self, p_id: isize);
 }
 
 pub struct SubscriptionMove {
@@ -397,6 +400,7 @@ impl ISubscriptionMove for SubscriptionMove {
     /// returns  source_repo_id
     fn add_new_folder(&mut self, folder_name: String) -> isize {
         let mut new_parent_id = 0;
+        // trace!(            "add_new_folder   curr={:?}",            self.current_new_folder_parent_id        );
         if self.current_new_folder_parent_id.is_some() {
             new_parent_id = self.current_new_folder_parent_id.take().unwrap();
         }
@@ -404,8 +408,6 @@ impl ISubscriptionMove for SubscriptionMove {
     }
 
     fn add_new_folder_at_parent(&self, folder_name: String, parent_id: isize) -> isize {
-       //  trace!("add_new_folder_at_parent  {}", parent_id);
-
         let mut fse = SubscriptionEntry::from_new_foldername(folder_name, parent_id);
         fse.expanded = true;
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
@@ -577,6 +579,14 @@ impl ISubscriptionMove for SubscriptionMove {
         if *self.need_check_fs_paths.borrow() {
             self.update_cached_paths();
             self.need_check_fs_paths.replace(false);
+        }
+    }
+
+    fn set_new_folder_parent(&mut self, p_id: isize) {
+        if p_id < 0 {
+            self.current_new_folder_parent_id = None;
+        } else {
+            self.current_new_folder_parent_id = Some(p_id);
         }
     }
 } //  impl ISubscriptionMove
