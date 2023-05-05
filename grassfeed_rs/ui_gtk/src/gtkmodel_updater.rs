@@ -297,34 +297,14 @@ impl GtkModelUpdaterInt {
             o_child_iter = tree_store.iter_children(Some(&parent_iter));
         }
 
-        /*
-
-                let mut tpath: TreePath = gtk::TreePath::from_indicesv(&path_i32);
-                let depth_parent = tpath.depth();
-                tpath.down();
-                let depth_child = tpath.depth();
-                if depth_child <= depth_parent {
-                    warn!("update_tree_model_partial: treepath cannot descend into children.");
-                    return;
-                }
-                let mut iter_depth = tpath.depth();
-                while iter_depth > depth_parent {
-                    tpath.next();
-
-                    iter_depth = tpath.depth();
-                    debug!("   iterating: {:?} ", tpath.indices());
-                }
-                // tree_store.iter()
-                tree_store.remove(&iter);
-        */
 
         let path_i32 = path.iter().map(|p| *p as i32).collect::<Vec<i32>>();
         let mut expand_paths: Vec<TreePath> = Vec::default();
-        debug!("   adding to:  {:?} ", &path_i32);
 
         for (path_index, child_gti) in gti.children.iter().enumerate() {
             let mut innerpath = path_i32.clone();
             innerpath.push(path_index as i32);
+            debug!("     adding to:  {:?} {:?}  ", &path_i32, &child_gti);
             self.add_to_treestore(
                 tree_idx as usize,
                 &tree_store,
@@ -335,19 +315,6 @@ impl GtkModelUpdaterInt {
                 &mut expand_paths,
             );
         }
-        /*
-               self.add_to_treestore(
-                   tree_idx as usize,
-                   &tree_store,
-                   gti,
-                   Some(&iter),
-                   path_i32,
-                   max_columns,
-                   &mut expand_paths,
-               );
-        */
-
-        //        self.treestore_set_row(&tree_store, gti, &iter, max_columns);
     }
 
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back

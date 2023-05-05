@@ -324,11 +324,24 @@ impl ISubscriptionMove for SubscriptionMove {
         let length_before = all1.len();
         let mut success: bool = false;
 
-        let mut update_tree_ids: HashSet<isize> = HashSet::default();
+        // let mut update_tree_ids: HashSet<isize> = HashSet::default();
+
+        let mut from_path_parent = from_path.clone();
+        if from_path_parent.len() > 0 {
+            from_path_parent.pop();
+        };
+        let mut to_path_parent = to_path.clone();
+        if to_path_parent.len() > 0 {
+            to_path_parent.pop();
+        };
+        debug!(
+            "FROM_parent={:?}  TO_parent={:?}",
+            from_path_parent, from_path_parent
+        );
 
         match self.drag_calc_positions(&from_path, &to_path) {
             Ok((from_entry, to_parent_id, to_folderpos)) => {
-                let from_parent_id = from_entry.parent_subs_id;
+                // let from_parent_id = from_entry.parent_subs_id;
                 self.drag_move(from_entry, to_parent_id, to_folderpos);
                 let all2 = (*self.subscriptionrepo_r).borrow().get_all_entries();
                 if all2.len() != length_before {
@@ -337,66 +350,25 @@ impl ISubscriptionMove for SubscriptionMove {
                 } else {
                     success = true;
                 }
-                update_tree_ids.insert(from_parent_id);
-                if to_parent_id > 0 {
-                    update_tree_ids.insert(to_parent_id);
-                }
-
-                if let Some(subs_w) = self.feedsources_w.upgrade() {
-                    for id in update_tree_ids {
-                        (*subs_w).borrow().addjob(SJob::GuiUpdateTree(id));
-                    }
-                }
             }
             Err(msg) => {
                 warn!("DragFail: {:?}=>{:?} --> {} ", from_path, to_path, msg);
                 //  (*self.subscriptionrepo_r)                    .borrow()                    .debug_dump_tree("DragFail");
 
-                let mut from_path_parent = from_path.clone();
-                if from_path_parent.len() > 0 {
-                    from_path_parent.pop();
-                };
-                let mut to_path_parent = to_path.clone();
-                if to_path_parent.len() > 0 {
-                    to_path_parent.pop();
-                };
+                //
+            }
+        }
+        if let Some(subs_w) = self.feedsources_w.upgrade() {
+            (*subs_w).borrow().addjob(SJob::UpdateTreePaths);
+            (*subs_w).borrow().addjob(SJob::FillSubscriptionsAdapter);
+            (*subs_w)
+                .borrow()
+                .addjob(SJob::GuiUpdateTreePartial(from_path_parent.clone()));
 
-                debug!(
-                    "FROM_parent={:?}  TO_parent={:?}",
-                    from_path_parent, from_path_parent
-                );
-                if let Some(subs_w) = self.feedsources_w.upgrade() {
-                    (*subs_w)
-                        .borrow()
-                        .addjob(SJob::GuiUpdateTreePartial(from_path_parent.clone()));
-
-                    if to_path_parent != from_path_parent {
-                        (*subs_w)
-                            .borrow()
-                            .addjob(SJob::GuiUpdateTreePartial(to_path_parent));
-                    }
-                }
-                /*
-                               for id in self.get_siblings_ids(&from_path) {
-                                   update_tree_ids.insert(id);
-                               }
-                               for id in self.get_siblings_ids(&to_path) {
-                                   update_tree_ids.insert(id);
-                               }
-
-                               debug!("UPD_IDS= {:?} ", &update_tree_ids);
-                               if let Some(subs_w) = self.feedsources_w.upgrade() {
-                                   (*subs_w).borrow().addjob(SJob::UpdateTreePaths);
-                                   (*subs_w).borrow().addjob(SJob::FillSubscriptionsAdapter);
-                                   for id in update_tree_ids {
-                                       if let Some(st) = self.statemap.borrow().get_state(id) {
-                                           if let Some(path) = st.tree_path {
-                                               (*subs_w).borrow().addjob(SJob::GuiUpdateTreePartial(path));
-                                           }
-                                       }
-                                   }
-                               }
-                */
+            if to_path_parent != from_path_parent {
+                (*subs_w)
+                    .borrow()
+                    .addjob(SJob::GuiUpdateTreePartial(to_path_parent));
             }
         }
 

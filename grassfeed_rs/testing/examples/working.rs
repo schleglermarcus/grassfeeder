@@ -106,7 +106,7 @@ fn write_feed(filename: &String) {
     let el2 = entry("statictitle", "link", "description", ts_now);
     file.write(el2.as_bytes()).unwrap();
     file.write(footer.as_bytes()).unwrap();
-    // debug!("written to {} {}", RSS_DYNAMIC_FILENAME, ts_now);
+    trace!("written to {} {}", filename, ts_now);
 }
 
 fn test_setup_values(acr: &AppContext, addr: String) {
@@ -163,7 +163,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         subs_move.add_new_folder_at_parent("5_0".to_string(), f5);
         subs_move.add_new_folder_at_parent("5_1".to_string(), f5);
     }
-    if false {
+    if true {
         let src = [
             ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
             ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
