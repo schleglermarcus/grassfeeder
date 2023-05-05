@@ -122,7 +122,6 @@ pub struct SourceTreeController {
     any_spinner_visible: RefCell<bool>,
     pub(super) new_source: RefCell<NewSourceTempData>,
     pub(super) statemap: Rc<RefCell<SubscriptionState>>, // moved over
-
 }
 
 impl SourceTreeController {
@@ -225,7 +224,7 @@ impl SourceTreeController {
                     (*self.gui_updater).borrow().update_tree(TREEVIEW0);
                 }
                 SJob::GuiUpdateTreePartial(ref path) => {
-                    (*self.gui_updater).borrow().update_tree_partial(0, &path);
+                    (*self.gui_updater).borrow().update_tree_partial(0, path);
                 }
                 SJob::ScheduleFetchAllFeeds => {
                     self.statemap.borrow_mut().set_schedule_fetch_all();
@@ -343,15 +342,15 @@ impl SourceTreeController {
         let av_ti = if hp_title.is_empty() {
             AValue::None
         } else {
-            AValue::ASTR(hp_title.clone())
+            AValue::ASTR(hp_title)
         };
         if !feed_url.is_empty() {
             let dd: Vec<AValue> = vec![
-                AValue::None,                   // 0:display
-                av_ti,                          // 1: homepage
-                AValue::None,                   // 2: icon_str
-                AValue::ABOOL(true),            // 3 :spinner
-                AValue::ASTR(feed_url.clone()), // 4: feed url
+                AValue::None,           // 0:display
+                av_ti,                  // 1: homepage
+                AValue::None,           // 2: icon_str
+                AValue::ABOOL(true),    // 3 :spinner
+                AValue::ASTR(feed_url), // 4: feed url
             ];
             (*self.gui_val_store)
                 .write()

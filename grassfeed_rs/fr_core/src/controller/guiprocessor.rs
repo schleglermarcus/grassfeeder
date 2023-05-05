@@ -494,7 +494,7 @@ impl GuiProcessor {
 
     pub fn add_handler<T: HandleSingleEvent + 'static>(&mut self, ev: &GuiEvents, handler: T) {
         self.event_handler_map
-            .insert(std::mem::discriminant(&ev), Box::new(handler));
+            .insert(std::mem::discriminant(ev), Box::new(handler));
     }
 
     // GuiProcessor
@@ -567,7 +567,7 @@ impl StartupWithAppContext for GuiProcessor {
             t.register(&TimerEvent::Timer100ms, gp_r.clone(), false);
             t.register(&TimerEvent::Timer1s, gp_r.clone(), false);
             t.register(&TimerEvent::Timer10s, gp_r.clone(), false);
-            t.register(&TimerEvent::Startup, gp_r.clone(), false);
+            t.register(&TimerEvent::Startup, gp_r, false);
             self.timer_sender = Some((*t).get_ctrl_sender());
         }
         self.addjob(Job::StartApplication);
@@ -761,8 +761,8 @@ impl HandleSingleEvent for HandleAppWasAlreadyRunning {
 struct HandleMenuActivate();
 impl HandleSingleEvent for HandleMenuActivate {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::MenuActivate(ref s) => match s.as_str() {
+        if let GuiEvents::MenuActivate(ref s) = ev {
+            match s.as_str() {
                 "M_FILE_QUIT" => {
                     gp.addjob(Job::StopApplication);
                 }
@@ -776,8 +776,7 @@ impl HandleSingleEvent for HandleMenuActivate {
                     gp.browserpane_r.borrow().display_short_help();
                 }
                 _ => warn!("Menu Unprocessed:{:?} ", s),
-            },
-            _ => (),
+            }
         }
     }
 }
@@ -788,15 +787,12 @@ struct HandleTreeRowActivated(
 );
 impl HandleSingleEvent for HandleTreeRowActivated {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) => {
-                (*self.1)
-                    .borrow_mut()
-                    .set_selected_feedsource(subs_id as isize);
-                (*self.0).borrow().update_message_list_(subs_id as isize);
-                gp.focus_by_tab.replace(FocusByTab::FocusSubscriptions);
-            }
-            _ => (),
+        if let GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) = ev {
+            (*self.1)
+                .borrow_mut()
+                .set_selected_feedsource(subs_id as isize);
+            (*self.0).borrow().update_message_list_(subs_id as isize);
+            gp.focus_by_tab.replace(FocusByTab::FocusSubscriptions);
         }
     }
 }
@@ -804,12 +800,9 @@ impl HandleSingleEvent for HandleTreeRowActivated {
 struct HandleListRowDoubleClicked(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleListRowDoubleClicked {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) => {
-                gp.focus_by_tab.replace(FocusByTab::FocusMessages);
-                (*self.0).borrow().launch_browser_single(vec![fc_repo_id]);
-            }
-            _ => (),
+        if let GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) = ev {
+            gp.focus_by_tab.replace(FocusByTab::FocusMessages);
+            (*self.0).borrow().launch_browser_single(vec![fc_repo_id]);
         }
     }
 }
@@ -817,22 +810,19 @@ impl HandleSingleEvent for HandleListRowDoubleClicked {
 struct HandleListCellClicked(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleListCellClicked {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) => {
-                gp.focus_by_tab.replace(FocusByTab::FocusMessages);
-                if sort_col_nr == LIST0_COL_ISREAD && msg_id >= 0 {
-                    (*self.0)
-                        .borrow()
-                        .toggle_feed_item_read(msg_id as isize, list_position);
-                } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
-                    (*self.0)
-                        .borrow()
-                        .toggle_favorite(msg_id as isize, list_position, None);
-                } else {
-                    warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
-                }
+        if let GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) = ev {
+            gp.focus_by_tab.replace(FocusByTab::FocusMessages);
+            if sort_col_nr == LIST0_COL_ISREAD && msg_id >= 0 {
+                (*self.0)
+                    .borrow()
+                    .toggle_feed_item_read(msg_id as isize, list_position);
+            } else if sort_col_nr == LIST0_COL_FAVICON && msg_id >= 0 {
+                (*self.0)
+                    .borrow()
+                    .toggle_favorite(msg_id as isize, list_position, None);
+            } else {
+                warn!("ListCellClicked msg{}  col{} ", msg_id, sort_col_nr);
             }
-            _ => (),
         }
     }
 }
@@ -840,8 +830,8 @@ impl HandleSingleEvent for HandleListCellClicked {
 struct HandlePanedMoved(Rc<RefCell<GuiContext>>, Rc<RefCell<ConfigManager>>);
 impl HandleSingleEvent for HandlePanedMoved {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::PanedMoved(pane_id, pos) => match pane_id {
+        if let GuiEvents::PanedMoved(pane_id, pos) = ev {
+            match pane_id {
                 0 => {
                     if pos < TREE_PANE1_MIN_WIDTH {
                         let u_a_r = (*self.0).borrow().get_updater_adapter();
@@ -855,8 +845,7 @@ impl HandleSingleEvent for HandlePanedMoved {
                 }
                 1 => (*self.1).borrow_mut().store_gui_pane2_pos(pos),
                 _ => {}
-            },
-            _ => (),
+            }
         }
     }
 }
@@ -864,11 +853,8 @@ impl HandleSingleEvent for HandlePanedMoved {
 struct HandleWindowSizeChanged(Rc<RefCell<ConfigManager>>);
 impl HandleSingleEvent for HandleWindowSizeChanged {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::WindowSizeChanged(width, height) => {
-                (*self.0).borrow_mut().store_window_size(width, height);
-            }
-            _ => (),
+        if let GuiEvents::WindowSizeChanged(width, height) = ev {
+            (*self.0).borrow_mut().store_window_size(width, height);
         }
     }
 }
@@ -885,111 +871,108 @@ struct HandleDialogData(
 );
 impl HandleSingleEvent for HandleDialogData {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::DialogData(ref ident, ref payload) => {
-                match ident.as_str() {
-                    "new-folder" => {
-                        if let Some(AValue::ASTR(s)) = payload.get(0) {
-                            (*self.2).borrow_mut().add_new_folder(s.to_string());
-                        }
-                    }
-                    "new-feedsource" => {
-                        if payload.len() < 2 {
-                            error!("new-feedsource, too few data ");
-                        } else if let (Some(AValue::ASTR(ref s0)), Some(AValue::ASTR(ref s1))) =
-                            (payload.get(0), payload.get(1))
-                        {
-                            let new_id = self
-                                .2
-                                .borrow_mut()
-                                .add_new_subscription(s0.clone(), s1.clone());
-                            if new_id > 0 {
-                                self.3.borrow_mut().addjob(SJob::ScheduleUpdateFeed(new_id));
-                            }
-                        }
-                    }
-                    "import-opml" => {
-                        if let Some(AValue::ASTR(ref s)) = payload.get(0) {
-                            self.2.borrow_mut().import_opml(s.to_string());
-                        }
-                    }
-                    "export-opml" => {
-                        if let Some(AValue::ASTR(ref s)) = payload.get(0) {
-                            let mut opmlreader = OpmlReader::new(self.4.clone());
-                            opmlreader.transfer_from_db();
-                            match opmlreader.write_to_file(s.to_string()) {
-                                Ok(()) => {
-                                    debug!("Writing {} success ", s);
-                                }
-                                Err(e) => {
-                                    warn!("Writing {} : {:?}", s, e);
-                                }
-                            }
-                        }
-                    }
-                    "feedsource-delete" => {
-                        self.2.borrow_mut().move_subscription_to_trash();
-                    }
-                    "subscription-edit-ok" => {
-                        self.3.borrow_mut().end_feedsource_edit_dialog(&payload);
-                    }
-                    "folder-edit" => {
-                        self.3.borrow_mut().end_feedsource_edit_dialog(&payload);
-                    }
-                    "settings" => {
-                        self.3
-                            .borrow_mut()
-                            .set_conf_load_on_start(payload.get(0).unwrap().boo());
-                        self.3
-                            .borrow_mut()
-                            .set_conf_fetch_interval(payload.get(1).unwrap().int().unwrap());
-                        self.3
-                            .borrow_mut()
-                            .set_conf_fetch_interval_unit(payload.get(2).unwrap().int().unwrap());
-                        self.5
-                            .borrow_mut()
-                            .set_conf_num_threads(payload.get(3).unwrap().int().unwrap() as u8);
-                        self.6
-                            .borrow_mut()
-                            .set_conf_focus_policy(payload.get(4).unwrap().int().unwrap() as u8);
-                        self.3
-                            .borrow_mut() // 5 : DisplayCountOfAllFeeds
-                            .set_conf_display_feedcount_all(payload.get(5).unwrap().boo());
-                        self.6
-                            .borrow_mut()
-                            .set_conf_msg_keep_count(payload.get(6).unwrap().int().unwrap());
-                        (*self.7)
-                            .borrow() // 7 : ManualFontSizeEnable
-                            .set_conf_fontsize_manual_enable(payload.get(7).unwrap().boo());
-                        (*self.7)
-                            .borrow() // 8 : ManualFontSize
-                            .set_conf_fontsize_manual(payload.get(8).unwrap().int().unwrap());
-                        (*self.0)
-                            .borrow_mut() // 9 : browser bg
-                            .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
-                        (self.1).borrow().set_val(
-                            &PropDef::BrowserClearCache.to_string(),
-                            payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
-                        );
-                        (self.1).borrow().set_val(
-                            contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
-                            payload.get(11).unwrap().boo().to_string(),
-                        );
-
-                        if let Some(systray_e) = payload.get(12) {
-                            (self.1).borrow().set_val(
-                                &PropDef::SystrayEnable.to_string(),
-                                systray_e.boo().to_string(), // 12 : enable systray
-                            );
-                        }
-                        gp.addjob(Job::NotifyConfigChanged);
-                    }
-                    _ => {
-                        warn!("other DialogData: {:?}  {:?} ", &ident, payload);
+        if let GuiEvents::DialogData(ref ident, ref payload) = ev {
+            match ident.as_str() {
+                "new-folder" => {
+                    if let Some(AValue::ASTR(s)) = payload.get(0) {
+                        (*self.2).borrow_mut().add_new_folder(s.to_string());
                     }
                 }
+                "new-feedsource" => {
+                    if payload.len() < 2 {
+                        error!("new-feedsource, too few data ");
+                    } else if let (Some(AValue::ASTR(ref s0)), Some(AValue::ASTR(ref s1))) =
+                        (payload.get(0), payload.get(1))
+                    {
+                        let new_id = self
+                            .2
+                            .borrow_mut()
+                            .add_new_subscription(s0.clone(), s1.clone());
+                        if new_id > 0 {
+                            self.3.borrow_mut().addjob(SJob::ScheduleUpdateFeed(new_id));
+                        }
+                    }
+                }
+                "import-opml" => {
+                    if let Some(AValue::ASTR(ref s)) = payload.get(0) {
+                        self.2.borrow_mut().import_opml(s.to_string());
+                    }
+                }
+                "export-opml" => {
+                    if let Some(AValue::ASTR(ref s)) = payload.get(0) {
+                        let mut opmlreader = OpmlReader::new(self.4.clone());
+                        opmlreader.transfer_from_db();
+                        match opmlreader.write_to_file(s.to_string()) {
+                            Ok(()) => {
+                                debug!("Writing {} success ", s);
+                            }
+                            Err(e) => {
+                                warn!("Writing {} : {:?}", s, e);
+                            }
+                        }
+                    }
+                }
+                "feedsource-delete" => {
+                    self.2.borrow_mut().move_subscription_to_trash();
+                }
+                "subscription-edit-ok" => {
+                    self.3.borrow_mut().end_feedsource_edit_dialog(payload);
+                }
+                "folder-edit" => {
+                    self.3.borrow_mut().end_feedsource_edit_dialog(payload);
+                }
+                "settings" => {
+                    self.3
+                        .borrow_mut()
+                        .set_conf_load_on_start(payload.get(0).unwrap().boo());
+                    self.3
+                        .borrow_mut()
+                        .set_conf_fetch_interval(payload.get(1).unwrap().int().unwrap());
+                    self.3
+                        .borrow_mut()
+                        .set_conf_fetch_interval_unit(payload.get(2).unwrap().int().unwrap());
+                    self.5
+                        .borrow_mut()
+                        .set_conf_num_threads(payload.get(3).unwrap().int().unwrap() as u8);
+                    self.6
+                        .borrow_mut()
+                        .set_conf_focus_policy(payload.get(4).unwrap().int().unwrap() as u8);
+                    self.3
+                        .borrow_mut() // 5 : DisplayCountOfAllFeeds
+                        .set_conf_display_feedcount_all(payload.get(5).unwrap().boo());
+                    self.6
+                        .borrow_mut()
+                        .set_conf_msg_keep_count(payload.get(6).unwrap().int().unwrap());
+                    (*self.7)
+                        .borrow() // 7 : ManualFontSizeEnable
+                        .set_conf_fontsize_manual_enable(payload.get(7).unwrap().boo());
+                    (*self.7)
+                        .borrow() // 8 : ManualFontSize
+                        .set_conf_fontsize_manual(payload.get(8).unwrap().int().unwrap());
+                    (*self.0)
+                        .borrow_mut() // 9 : browser bg
+                        .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
+                    (self.1).borrow().set_val(
+                        &PropDef::BrowserClearCache.to_string(),
+                        payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
+                    );
+                    (self.1).borrow().set_val(
+                        contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
+                        payload.get(11).unwrap().boo().to_string(),
+                    );
+
+                    if let Some(systray_e) = payload.get(12) {
+                        (self.1).borrow().set_val(
+                            &PropDef::SystrayEnable.to_string(),
+                            systray_e.boo().to_string(), // 12 : enable systray
+                        );
+                    }
+                    gp.addjob(Job::NotifyConfigChanged);
+                }
+                _ => {
+                    warn!("other DialogData: {:?}  {:?} ", &ident, payload);
+                }
             }
-            _ => (),
         }
     }
 }
@@ -997,8 +980,8 @@ impl HandleSingleEvent for HandleDialogData {
 struct HandleDialogEditData(Rc<RefCell<dyn ISourceTreeController>>);
 impl HandleSingleEvent for HandleDialogEditData {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::DialogEditData(ref ident, ref payload) => match ident.as_str() {
+        if let GuiEvents::DialogEditData(ref ident, ref payload) = ev {
+            match ident.as_str() {
                 "feedsource-edit" => {
                     if let Some(edit_url) = payload.str() {
                         (*self.0).borrow_mut().newsource_dialog_edit(edit_url);
@@ -1007,8 +990,7 @@ impl HandleSingleEvent for HandleDialogEditData {
                 _ => {
                     warn!(" other DialogEditData  {:?} {:?}", &ident, payload);
                 }
-            },
-            _ => (),
+            }
         }
     }
 }
@@ -1016,8 +998,8 @@ impl HandleSingleEvent for HandleDialogEditData {
 struct HandleTreeEvent(Rc<RefCell<dyn ISourceTreeController>>);
 impl HandleSingleEvent for HandleTreeEvent {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) => match command.as_str() {
+        if let GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) = ev {
+            match command.as_str() {
                 "feedsource-delete-dialog" => {
                     (*self.0)
                         .borrow_mut()
@@ -1049,8 +1031,7 @@ impl HandleSingleEvent for HandleTreeEvent {
                 _ => {
                     warn!("unknown command for TreeEvent   {}", command);
                 }
-            },
-            _ => (),
+            }
         }
     }
 }
@@ -1058,15 +1039,11 @@ impl HandleSingleEvent for HandleTreeEvent {
 struct HandleTreeDragEvent(Rc<RefCell<dyn ISubscriptionMove>>);
 impl HandleSingleEvent for HandleTreeDragEvent {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::TreeDragEvent(_tree_nr, ref from_path, ref to_path) => {
-                let _success = self.0.borrow().on_subscription_drag(
-                    _tree_nr,
-                    from_path.clone(),
-                    to_path.clone(),
-                );
-            }
-            _ => (),
+        if let GuiEvents::TreeDragEvent(_tree_nr, ref from_path, ref to_path) = ev {
+            let _success =
+                self.0
+                    .borrow()
+                    .on_subscription_drag(_tree_nr, from_path.clone(), to_path.clone());
         }
     }
 }
@@ -1077,20 +1054,16 @@ struct HandleTreeExpanded(
 );
 impl HandleSingleEvent for HandleTreeExpanded {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::TreeExpanded(_idx, repo_id) => {
-                let statemap_rc = (*self.1).borrow().get_state_map();
-                (*statemap_rc).borrow_mut().set_status(
-                    &vec![repo_id as isize],
-                    StatusMask::IsExpandedCopy,
-                    true,
-                );
-
-                (*self.0)
-                    .borrow()
-                    .update_expanded(vec![repo_id as isize], true);
-            }
-            _ => (),
+        if let GuiEvents::TreeExpanded(_idx, repo_id) = ev {
+            let statemap_rc = (*self.1).borrow().get_state_map();
+            (*statemap_rc).borrow_mut().set_status(
+                &[repo_id as isize],
+                StatusMask::IsExpandedCopy,
+                true,
+            );
+            (*self.0)
+                .borrow()
+                .update_expanded([repo_id as isize].to_vec(), true);
         }
     }
 }
@@ -1101,19 +1074,16 @@ struct HandleTreeCollapsed(
 );
 impl HandleSingleEvent for HandleTreeCollapsed {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::TreeCollapsed(_idx, repo_id) => {
-                let statemap_rc = (*self.1).borrow().get_state_map();
-                (*statemap_rc).borrow_mut().set_status(
-                    &vec![repo_id as isize],
-                    StatusMask::IsExpandedCopy,
-                    false,
-                );
-                (*self.0)
-                    .borrow()
-                    .update_expanded(vec![repo_id as isize], false);
-            }
-            _ => (),
+        if let GuiEvents::TreeCollapsed(_idx, repo_id) = ev {
+            let statemap_rc = (*self.1).borrow().get_state_map();
+            (*statemap_rc).borrow_mut().set_status(
+                &[repo_id as isize],
+                StatusMask::IsExpandedCopy,
+                false,
+            );
+            (*self.0)
+                .borrow()
+                .update_expanded(vec![repo_id as isize], false);
         }
     }
 }
@@ -1124,8 +1094,8 @@ struct HandleToolBarButton(
 );
 impl HandleSingleEvent for HandleToolBarButton {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::ToolBarButton(ref id) => match id.as_str() {
+        if let GuiEvents::ToolBarButton(ref id) = ev {
+            match id.as_str() {
                 "reload-feeds-all" => {
                     self.0.borrow_mut().addjob(SJob::ScheduleFetchAllFeeds);
                 }
@@ -1145,8 +1115,7 @@ impl HandleSingleEvent for HandleToolBarButton {
                 _ => {
                     warn!("unknown ToolBarButton {} ", id);
                 }
-            },
-            _ => (),
+            }
         }
     }
 }
@@ -1154,16 +1123,15 @@ impl HandleSingleEvent for HandleToolBarButton {
 struct HandleToolBarToggle();
 impl HandleSingleEvent for HandleToolBarToggle {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::ToolBarToggle(ref id, active) => match id.as_str() {
+        if let GuiEvents::ToolBarToggle(ref id, active) = ev {
+            match id.as_str() {
                 "special1" => {
                     debug!(" ToolBarToggle special1 {} {} ", id, active);
                 }
                 _ => {
                     warn!("unknown ToolBarToggle {} ", id);
                 }
-            },
-            _ => (),
+            }
         }
     }
 }
@@ -1171,11 +1139,8 @@ impl HandleSingleEvent for HandleToolBarToggle {
 struct HandleColumnWidth(Rc<RefCell<ConfigManager>>);
 impl HandleSingleEvent for HandleColumnWidth {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::ColumnWidth(col_nr, width) => {
-                self.0.borrow_mut().store_column_width(col_nr, width);
-            }
-            _ => (),
+        if let GuiEvents::ColumnWidth(col_nr, width) = ev {
+            self.0.borrow_mut().store_column_width(col_nr, width);
         }
     }
 }
@@ -1183,13 +1148,10 @@ impl HandleSingleEvent for HandleColumnWidth {
 struct HandleListSelected(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleListSelected {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::ListSelected(_list_idx, ref selected_list) => {
-                self.0
-                    .borrow()
-                    .set_selected_content_ids(selected_list.clone());
-            }
-            _ => (),
+        if let GuiEvents::ListSelected(_list_idx, ref selected_list) = ev {
+            self.0
+                .borrow()
+                .set_selected_content_ids(selected_list.clone());
         }
     }
 }
@@ -1197,15 +1159,15 @@ impl HandleSingleEvent for HandleListSelected {
 struct HandleListSelectedAction(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleListSelectedAction {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) => {
-                if list_idx == 0 {
-                    self.0
-                        .borrow()
-                        .process_list_action(action.clone(), repoid_list_pos.clone());
-                }
+        if let GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) = ev {
+            // match ev {            GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) => {
+            if list_idx == 0 {
+                self.0
+                    .borrow()
+                    .process_list_action(action.clone(), repoid_list_pos.clone());
             }
-            _ => (),
+            //          }
+            //            _ => (),
         }
     }
 }
@@ -1213,25 +1175,25 @@ impl HandleSingleEvent for HandleListSelectedAction {
 struct HandleListSortOrderChanged(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleListSortOrderChanged {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) => {
-                if list_idx == 0 {
-                    self.0.borrow_mut().set_sort_order(col_id, ascending);
-                }
+        if let GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) = ev {
+            // match ev {            GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) => {
+            if list_idx == 0 {
+                self.0.borrow_mut().set_sort_order(col_id, ascending);
             }
-            _ => (),
         }
+        // _ => (),        }
     }
 }
 
 struct HandleKeyPressed();
 impl HandleSingleEvent for HandleKeyPressed {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::KeyPressed(keycode, o_char) => {
-                gp.process_key_press(keycode, o_char);
-            }
-            _ => (),
+        if let GuiEvents::KeyPressed(keycode, o_char) = ev {
+            // match ev {
+            //     GuiEvents::KeyPressed(keycode, o_char) => {
+            gp.process_key_press(keycode, o_char);
+            // }
+            // _ => (),
         }
     }
 }
@@ -1239,11 +1201,12 @@ impl HandleSingleEvent for HandleKeyPressed {
 struct HandleSearchEntryTextChanged(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleSearchEntryTextChanged {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::SearchEntryTextChanged(_idx, ref newtext) => {
-                self.0.borrow_mut().set_messages_filter(newtext);
-            }
-            _ => (),
+        if let GuiEvents::SearchEntryTextChanged(_idx, ref newtext) = ev {
+            // match ev {
+            //     GuiEvents::SearchEntryTextChanged(_idx, ref newtext) => {
+            self.0.borrow_mut().set_messages_filter(newtext);
+            // }
+            // _ => (),
         }
     }
 }
@@ -1251,11 +1214,12 @@ impl HandleSingleEvent for HandleSearchEntryTextChanged {
 struct HandleWindowThemeChanged(Rc<RefCell<GuiContext>>);
 impl HandleSingleEvent for HandleWindowThemeChanged {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::WindowThemeChanged(ref theme_name) => {
-                self.0.borrow().set_theme_name(theme_name);
-            }
-            _ => (),
+        if let GuiEvents::WindowThemeChanged(ref theme_name) = ev {
+            // match ev {
+            //     GuiEvents::WindowThemeChanged(ref theme_name) => {
+            self.0.borrow().set_theme_name(theme_name);
+            // }
+            // _ => (),
         }
     }
 }
@@ -1267,24 +1231,25 @@ struct HandleWindowIconified(
 );
 impl HandleSingleEvent for HandleWindowIconified {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::WindowIconified(is_minimized) => {
-                gp.currently_minimized.replace(is_minimized);
-                self.0.borrow_mut().memory_conserve(is_minimized);
-                (*self.1).borrow_mut().memory_conserve(is_minimized);
-                (*self.2)
-                    .borrow()
-                    .get_values_adapter()
-                    .write()
-                    .unwrap()
-                    .memory_conserve(is_minimized);
-                (*self.2)
-                    .borrow()
-                    .get_updater_adapter()
-                    .borrow()
-                    .memory_conserve(is_minimized);
-            }
-            _ => (),
+        if let GuiEvents::WindowIconified(is_minimized) = ev {
+            // match ev {
+            //     GuiEvents::WindowIconified(is_minimized) => {
+            gp.currently_minimized.replace(is_minimized);
+            self.0.borrow_mut().memory_conserve(is_minimized);
+            (*self.1).borrow_mut().memory_conserve(is_minimized);
+            (*self.2)
+                .borrow()
+                .get_values_adapter()
+                .write()
+                .unwrap()
+                .memory_conserve(is_minimized);
+            (*self.2)
+                .borrow()
+                .get_updater_adapter()
+                .borrow()
+                .memory_conserve(is_minimized);
+            // }
+            // _ => (),
         }
     }
 }
@@ -1292,21 +1257,26 @@ impl HandleSingleEvent for HandleWindowIconified {
 struct HandleIndicator();
 impl HandleSingleEvent for HandleIndicator {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::Indicator(ref cmd, _gtktime) => debug!(" indicator event {}", cmd),
-            _ => (),
+        if let GuiEvents::Indicator(ref cmd, _gtktime) = ev {
+            debug!(" indicator event {}", cmd)
         }
+
+        // match ev {
+        //     GuiEvents::Indicator(ref cmd, _gtktime) => debug!(" indicator event {}", cmd),
+        //     _ => (),
+        // }
     }
 }
 
 struct HandleDragDropUrlReceived(Rc<RefCell<dyn IDownloader>>);
 impl HandleSingleEvent for HandleDragDropUrlReceived {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::DragDropUrlReceived(ref url) => {
-                self.0.borrow().browser_drag_request(url);
-            }
-            _ => (),
+        if let GuiEvents::DragDropUrlReceived(ref url) = ev {
+            // match ev {
+            //     GuiEvents::DragDropUrlReceived(ref url) => {
+            self.0.borrow().browser_drag_request(url);
+            // }
+            // _ => (),
         }
     }
 }
@@ -1314,13 +1284,13 @@ impl HandleSingleEvent for HandleDragDropUrlReceived {
 struct HandleBrowserEvent();
 impl HandleSingleEvent for HandleBrowserEvent {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        match ev {
-            GuiEvents::BrowserEvent(ref ev_type, value) => {
-                if ev_type == &BrowserEventType::LoadingProgress {
-                    gp.statusbar.borrow_mut().browser_loading_progress = value as u8;
-                }
+        if let GuiEvents::BrowserEvent(ref ev_type, value) = ev {
+            // match ev {
+            //     GuiEvents::BrowserEvent(ref ev_type, value) => {
+            if ev_type == &BrowserEventType::LoadingProgress {
+                gp.statusbar.borrow_mut().browser_loading_progress = value as u8;
             }
-            _ => (),
+            // }            _ => (),
         }
     }
 }

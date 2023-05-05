@@ -294,30 +294,34 @@ impl SubscriptionMove {
         }
     }
 
-    #[allow(dead_code)]
-    fn get_siblings_ids(&self, f_path: &Vec<u16>) -> Vec<isize> {
-        let mut parent_path = f_path.clone();
-        if parent_path.len() > 0 {
-            parent_path.pop();
-        }
-        let mut child_ids: Vec<isize> = Vec::default();
-        let o_parent_id = self.statemap.borrow().get_id_by_path(&parent_path);
-        if o_parent_id.is_none() {
-            return child_ids;
-        }
-        let parent_id = o_parent_id.unwrap();
-        // if let Some(p_sub) = self.get_by_path(&parent_path) {
-        child_ids = (*self.subscriptionrepo_r)
-            .borrow()
-            .get_by_parent_repo_id(parent_id)
-            .iter()
-            .map(|fse| fse.subs_id)
-            .collect::<Vec<isize>>();
-        // }
-        debug!(" children:  {:?} ", &child_ids);
-        child_ids
-    }
-} // impl SubscriptionMove
+    /*
+       #[allow(dead_code)]
+       fn get_siblings_ids(&self, f_path: &Vec<u16>) -> Vec<isize> {
+           let mut parent_path = f_path.clone();
+           if parent_path.len() > 0 {
+               parent_path.pop();
+           }
+           let mut child_ids: Vec<isize> = Vec::default();
+           let o_parent_id = self.statemap.borrow().get_id_by_path(&parent_path);
+           if o_parent_id.is_none() {
+               return child_ids;
+           }
+           let parent_id = o_parent_id.unwrap();
+           // if let Some(p_sub) = self.get_by_path(&parent_path) {
+           child_ids = (*self.subscriptionrepo_r)
+               .borrow()
+               .get_by_parent_repo_id(parent_id)
+               .iter()
+               .map(|fse| fse.subs_id)
+               .collect::<Vec<isize>>();
+           // }
+           debug!(" children:  {:?} ", &child_ids);
+           child_ids
+       }
+    */
+
+    // impl SubscriptionMove
+}
 
 impl ISubscriptionMove for SubscriptionMove {
     fn on_subscription_drag(&self, _tree_nr: u8, from_path: Vec<u16>, to_path: Vec<u16>) -> bool {
@@ -326,11 +330,11 @@ impl ISubscriptionMove for SubscriptionMove {
         let length_before = all1.len();
         let mut success: bool = false;
         let mut from_path_parent = from_path.clone();
-        if from_path_parent.len() > 0 {
+        if !from_path_parent.is_empty() {
             from_path_parent.pop();
         };
         let mut to_path_parent = to_path.clone();
-        if to_path_parent.len() > 0 {
+        if !to_path_parent.is_empty() {
             to_path_parent.pop();
         };
         match self.drag_calc_positions(&from_path, &to_path) {
