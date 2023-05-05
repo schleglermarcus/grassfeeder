@@ -278,7 +278,6 @@ impl GtkModelUpdaterInt {
         let path_cn = format!("{path:?}")
             .replace(['[', ']', ' '], "")
             .replace(',', ":");
-
         let o_iter = tree_store.iter_from_string(&path_cn);
         if o_iter.is_none() {
             error!(
@@ -287,8 +286,6 @@ impl GtkModelUpdaterInt {
             );
             return;
         }
-        debug!("partial:   removing from: {:?}", path,);
-
         let parent_iter = o_iter.unwrap();
         // 1: remove all children, let the parent here.
         let mut o_child_iter = tree_store.iter_children(Some(&parent_iter));
@@ -296,15 +293,12 @@ impl GtkModelUpdaterInt {
             tree_store.remove(&child_iter);
             o_child_iter = tree_store.iter_children(Some(&parent_iter));
         }
-
-
+        // 2: re-insert the children, recursive
         let path_i32 = path.iter().map(|p| *p as i32).collect::<Vec<i32>>();
         let mut expand_paths: Vec<TreePath> = Vec::default();
-
         for (path_index, child_gti) in gti.children.iter().enumerate() {
             let mut innerpath = path_i32.clone();
             innerpath.push(path_index as i32);
-            debug!("     adding to:  {:?} {:?}  ", &path_i32, &child_gti);
             self.add_to_treestore(
                 tree_idx as usize,
                 &tree_store,

@@ -222,15 +222,12 @@ impl SourceTreeController {
                         warn!("GuiUpdateTree: No Path for id:{}", subs_id);
                     }
                 }
-
                 SJob::GuiUpdateTreeAll => {
                     (*self.gui_updater).borrow().update_tree(TREEVIEW0);
                 }
-
                 SJob::GuiUpdateTreePartial(ref path) => {
                     (*self.gui_updater).borrow().update_tree_partial(0, &path);
                 }
-
                 SJob::ScheduleFetchAllFeeds => {
                     self.statemap.borrow_mut().set_schedule_fetch_all();
                 }
@@ -769,11 +766,13 @@ impl SourceTreeController {
         if fse.expanded {
             m_status |= TREE0_COL_STATUS_EXPANDED;
         }
+
         let displayname = if fse.display_name.is_empty() {
             String::from("--")
         } else {
             fse.display_name.clone()
         };
+        // trace!("treerow: {}  {} ", displayname, m_status);
         let mut tooltip_a = AValue::None;
         if su_st.is_err_on_fetch() {
             if let Some(last_e) = (*self.erro_repo_r).borrow().get_last_entry(fse.subs_id) {

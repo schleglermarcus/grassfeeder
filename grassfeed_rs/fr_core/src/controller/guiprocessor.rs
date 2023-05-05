@@ -21,6 +21,8 @@ use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
+use crate::db::subscription_state::ISubscriptionState;
+use crate::db::subscription_state::StatusMask;
 use crate::opml::opmlreader::OpmlReader;
 use crate::ui_select::gui_context::GuiContext;
 use crate::ui_select::select::ui_select;
@@ -389,7 +391,7 @@ impl GuiProcessor {
             KeyCodes::Tab => new_focus_by_tab = self.focus_by_tab.borrow().next(),
             KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.borrow().prev(),
             KeyCodes::Key_a => {
-                trace!("GP: key a subs_id:{} ",  &subscription_id);
+                trace!("GP: key a subs_id:{} ", &subscription_id);
                 if subscription_id > 0 {
                     (*self.feedsources_r).borrow().mark_as_read(subscription_id);
                 }
@@ -642,11 +644,19 @@ impl StartupWithAppContext for GuiProcessor {
         );
         self.add_handler(
             &GuiEvents::TreeExpanded(0, 0),
-            HandleTreeExpanded(self.feedsources_r.clone()),
+            HandleTreeExpanded(
+                // self.feedsources_r.clone()
+                self.subscriptionrepo_r.clone(),
+                self.subscriptionmove_r.clone(),
+            ),
         );
         self.add_handler(
             &GuiEvents::TreeCollapsed(0, 0),
-            HandleTreeCollapsed(self.feedsources_r.clone()),
+            HandleTreeCollapsed(
+                // self.feedsources_r.clone()
+                self.subscriptionrepo_r.clone(),
+                self.subscriptionmove_r.clone(),
+            ),
         );
         self.add_handler(
             &GuiEvents::ToolBarButton(String::default()),
@@ -1061,24 +1071,51 @@ impl HandleSingleEvent for HandleTreeDragEvent {
     }
 }
 
-struct HandleTreeExpanded(Rc<RefCell<dyn ISourceTreeController>>);
+struct HandleTreeExpanded(
+    // Rc<RefCell<dyn ISourceTreeController>>
+    Rc<RefCell<dyn ISubscriptionRepo>>,
+    Rc<RefCell<dyn ISubscriptionMove>>,
+);
 impl HandleSingleEvent for HandleTreeExpanded {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         match ev {
             GuiEvents::TreeExpanded(_idx, repo_id) => {
-                self.0.borrow().set_tree_expanded(repo_id as isize, true);
+                //  self.0.borrow().set_tree_expanded(repo_id as isize, true);
+                let statemap_rc = (*self.1).borrow().get_state_map();
+                (*statemap_rc).borrow_mut().set_status(
+                    &vec![repo_id as isize],
+                    StatusMask::IsExpandedCopy,
+                    true,
+                );
+
+                (*self.0)
+                    .borrow()
+                    .update_expanded(vec![repo_id as isize], true);
             }
             _ => (),
         }
     }
 }
 
-struct HandleTreeCollapsed(Rc<RefCell<dyn ISourceTreeController>>);
+struct HandleTreeCollapsed(
+    // Rc<RefCell<dyn ISourceTreeController>>
+    Rc<RefCell<dyn ISubscriptionRepo>>,
+    Rc<RefCell<dyn ISubscriptionMove>>,
+);
 impl HandleSingleEvent for HandleTreeCollapsed {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         match ev {
             GuiEvents::TreeCollapsed(_idx, repo_id) => {
-                self.0.borrow().set_tree_expanded(repo_id as isize, true);
+                // self.0.borrow().set_tree_expanded(repo_id as isize, false);
+                let statemap_rc = (*self.1).borrow().get_state_map();
+                (*statemap_rc).borrow_mut().set_status(
+                    &vec![repo_id as isize],
+                    StatusMask::IsExpandedCopy,
+                    false,
+                );
+                (*self.0)
+                    .borrow()
+                    .update_expanded(vec![repo_id as isize], false);
             }
             _ => (),
         }

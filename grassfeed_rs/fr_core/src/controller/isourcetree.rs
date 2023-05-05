@@ -129,7 +129,7 @@ impl ISourceTreeController for SourceTreeController {
     fn set_tree_expanded(&self, subs_id: isize, new_expanded: bool) {
         let src_vec = vec![subs_id];
         (*self.subscriptionrepo_r)
-            .borrow_mut()
+            .borrow()
             .update_expanded(src_vec, new_expanded);
     }
 

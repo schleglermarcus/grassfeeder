@@ -19,7 +19,6 @@ use context::BuildConfig;
 use context::Buildable;
 use context::StartupWithAppContext;
 use std::cell::RefCell;
-use std::collections::HashSet;
 use std::rc::Rc;
 use std::rc::Weak;
 
@@ -323,9 +322,6 @@ impl ISubscriptionMove for SubscriptionMove {
         let all1 = (*self.subscriptionrepo_r).borrow().get_all_entries();
         let length_before = all1.len();
         let mut success: bool = false;
-
-        // let mut update_tree_ids: HashSet<isize> = HashSet::default();
-
         let mut from_path_parent = from_path.clone();
         if from_path_parent.len() > 0 {
             from_path_parent.pop();
@@ -334,11 +330,6 @@ impl ISubscriptionMove for SubscriptionMove {
         if to_path_parent.len() > 0 {
             to_path_parent.pop();
         };
-        debug!(
-            "FROM_parent={:?}  TO_parent={:?}",
-            from_path_parent, from_path_parent
-        );
-
         match self.drag_calc_positions(&from_path, &to_path) {
             Ok((from_entry, to_parent_id, to_folderpos)) => {
                 // let from_parent_id = from_entry.parent_subs_id;
@@ -354,8 +345,6 @@ impl ISubscriptionMove for SubscriptionMove {
             Err(msg) => {
                 warn!("DragFail: {:?}=>{:?} --> {} ", from_path, to_path, msg);
                 //  (*self.subscriptionrepo_r)                    .borrow()                    .debug_dump_tree("DragFail");
-
-                //
             }
         }
         if let Some(subs_w) = self.feedsources_w.upgrade() {
@@ -364,14 +353,12 @@ impl ISubscriptionMove for SubscriptionMove {
             (*subs_w)
                 .borrow()
                 .addjob(SJob::GuiUpdateTreePartial(from_path_parent.clone()));
-
             if to_path_parent != from_path_parent {
                 (*subs_w)
                     .borrow()
                     .addjob(SJob::GuiUpdateTreePartial(to_path_parent));
             }
         }
-
         success
     }
 
@@ -407,7 +394,6 @@ impl ISubscriptionMove for SubscriptionMove {
         self.feedsource_delete_id = o_fs_id;
     }
 
-    // moving
     /// returns  source_repo_id
     fn add_new_folder(&mut self, folder_name: String) -> isize {
         let mut new_parent_id = 0;
@@ -417,8 +403,9 @@ impl ISubscriptionMove for SubscriptionMove {
         self.add_new_folder_at_parent(folder_name, new_parent_id)
     }
 
-    // moving
     fn add_new_folder_at_parent(&self, folder_name: String, parent_id: isize) -> isize {
+       //  trace!("add_new_folder_at_parent  {}", parent_id);
+
         let mut fse = SubscriptionEntry::from_new_foldername(folder_name, parent_id);
         fse.expanded = true;
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)

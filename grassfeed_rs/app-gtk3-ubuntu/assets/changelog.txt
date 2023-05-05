@@ -1,4 +1,4 @@
-grassfeeder-gtk3 (0.0.35) jammy; urgency=low
+grassfeeder-gtk3 (0.0.36) jammy; urgency=low
 
   * Refactored gui-events processor
   * Building the debian package on launchpad
