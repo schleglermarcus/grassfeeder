@@ -770,7 +770,6 @@ impl SourceTreeController {
         } else {
             fse.display_name.clone()
         };
-        // trace!("treerow: {}  {} ", displayname, m_status);
         let mut tooltip_a = AValue::None;
         if su_st.is_err_on_fetch() {
             if let Some(last_e) = (*self.erro_repo_r).borrow().get_last_entry(fse.subs_id) {

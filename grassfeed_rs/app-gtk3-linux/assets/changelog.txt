@@ -1,12 +1,10 @@
-grassfeeder-gtk3 (0.0.37) buster; urgency=low
+grassfeeder-gtk3 (0.0.38) buster; urgency=low
 
-  * Refactored gui-events processor
   * Building the debian package on launchpad
-  
-  - drag feed on feed bug
-  
+  * Refactored gui-events processor
+  * Bugfix: drag feed-onto-feed leads to partial tree update
 
- -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 05 Apr 2023 00:18:00 +0000
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sam, 06 May 2023 00:18:00 +0000
 
 grassfeeder-gtk3 (0.1.8) buster; urgency=low
 

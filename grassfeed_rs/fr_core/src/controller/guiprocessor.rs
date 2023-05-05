@@ -1160,14 +1160,11 @@ struct HandleListSelectedAction(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleListSelectedAction {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) = ev {
-            // match ev {            GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) => {
             if list_idx == 0 {
                 self.0
                     .borrow()
                     .process_list_action(action.clone(), repoid_list_pos.clone());
             }
-            //          }
-            //            _ => (),
         }
     }
 }
@@ -1176,12 +1173,10 @@ struct HandleListSortOrderChanged(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleListSortOrderChanged {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) = ev {
-            // match ev {            GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) => {
             if list_idx == 0 {
                 self.0.borrow_mut().set_sort_order(col_id, ascending);
             }
         }
-        // _ => (),        }
     }
 }
 
@@ -1189,11 +1184,7 @@ struct HandleKeyPressed();
 impl HandleSingleEvent for HandleKeyPressed {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::KeyPressed(keycode, o_char) = ev {
-            // match ev {
-            //     GuiEvents::KeyPressed(keycode, o_char) => {
             gp.process_key_press(keycode, o_char);
-            // }
-            // _ => (),
         }
     }
 }
@@ -1202,11 +1193,7 @@ struct HandleSearchEntryTextChanged(Rc<RefCell<dyn IFeedContents>>);
 impl HandleSingleEvent for HandleSearchEntryTextChanged {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::SearchEntryTextChanged(_idx, ref newtext) = ev {
-            // match ev {
-            //     GuiEvents::SearchEntryTextChanged(_idx, ref newtext) => {
             self.0.borrow_mut().set_messages_filter(newtext);
-            // }
-            // _ => (),
         }
     }
 }
@@ -1215,11 +1202,7 @@ struct HandleWindowThemeChanged(Rc<RefCell<GuiContext>>);
 impl HandleSingleEvent for HandleWindowThemeChanged {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::WindowThemeChanged(ref theme_name) = ev {
-            // match ev {
-            //     GuiEvents::WindowThemeChanged(ref theme_name) => {
             self.0.borrow().set_theme_name(theme_name);
-            // }
-            // _ => (),
         }
     }
 }
@@ -1232,8 +1215,6 @@ struct HandleWindowIconified(
 impl HandleSingleEvent for HandleWindowIconified {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::WindowIconified(is_minimized) = ev {
-            // match ev {
-            //     GuiEvents::WindowIconified(is_minimized) => {
             gp.currently_minimized.replace(is_minimized);
             self.0.borrow_mut().memory_conserve(is_minimized);
             (*self.1).borrow_mut().memory_conserve(is_minimized);
@@ -1248,8 +1229,6 @@ impl HandleSingleEvent for HandleWindowIconified {
                 .get_updater_adapter()
                 .borrow()
                 .memory_conserve(is_minimized);
-            // }
-            // _ => (),
         }
     }
 }
@@ -1260,11 +1239,6 @@ impl HandleSingleEvent for HandleIndicator {
         if let GuiEvents::Indicator(ref cmd, _gtktime) = ev {
             debug!(" indicator event {}", cmd)
         }
-
-        // match ev {
-        //     GuiEvents::Indicator(ref cmd, _gtktime) => debug!(" indicator event {}", cmd),
-        //     _ => (),
-        // }
     }
 }
 
@@ -1272,11 +1246,7 @@ struct HandleDragDropUrlReceived(Rc<RefCell<dyn IDownloader>>);
 impl HandleSingleEvent for HandleDragDropUrlReceived {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::DragDropUrlReceived(ref url) = ev {
-            // match ev {
-            //     GuiEvents::DragDropUrlReceived(ref url) => {
             self.0.borrow().browser_drag_request(url);
-            // }
-            // _ => (),
         }
     }
 }
@@ -1285,12 +1255,9 @@ struct HandleBrowserEvent();
 impl HandleSingleEvent for HandleBrowserEvent {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::BrowserEvent(ref ev_type, value) = ev {
-            // match ev {
-            //     GuiEvents::BrowserEvent(ref ev_type, value) => {
             if ev_type == &BrowserEventType::LoadingProgress {
                 gp.statusbar.borrow_mut().browser_loading_progress = value as u8;
             }
-            // }            _ => (),
         }
     }
 }

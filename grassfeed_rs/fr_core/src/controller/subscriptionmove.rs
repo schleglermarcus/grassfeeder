@@ -294,32 +294,6 @@ impl SubscriptionMove {
         }
     }
 
-    /*
-       #[allow(dead_code)]
-       fn get_siblings_ids(&self, f_path: &Vec<u16>) -> Vec<isize> {
-           let mut parent_path = f_path.clone();
-           if parent_path.len() > 0 {
-               parent_path.pop();
-           }
-           let mut child_ids: Vec<isize> = Vec::default();
-           let o_parent_id = self.statemap.borrow().get_id_by_path(&parent_path);
-           if o_parent_id.is_none() {
-               return child_ids;
-           }
-           let parent_id = o_parent_id.unwrap();
-           // if let Some(p_sub) = self.get_by_path(&parent_path) {
-           child_ids = (*self.subscriptionrepo_r)
-               .borrow()
-               .get_by_parent_repo_id(parent_id)
-               .iter()
-               .map(|fse| fse.subs_id)
-               .collect::<Vec<isize>>();
-           // }
-           debug!(" children:  {:?} ", &child_ids);
-           child_ids
-       }
-    */
-
     // impl SubscriptionMove
 }
 
