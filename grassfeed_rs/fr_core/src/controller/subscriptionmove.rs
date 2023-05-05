@@ -292,6 +292,7 @@ impl SubscriptionMove {
         }
     }
 
+    #[allow(dead_code)]
     fn get_siblings_ids(&self, f_path: &Vec<u16>) -> Vec<isize> {
         let mut parent_path = f_path.clone();
         if parent_path.len() > 0 {
@@ -351,16 +352,29 @@ impl ISubscriptionMove for SubscriptionMove {
                 warn!("DragFail: {:?}=>{:?} --> {} ", from_path, to_path, msg);
                 //  (*self.subscriptionrepo_r)                    .borrow()                    .debug_dump_tree("DragFail");
 
-                let mut  from_path_parent = from_path.clone();
+                let mut from_path_parent = from_path.clone();
                 if from_path_parent.len() > 0 {
                     from_path_parent.pop();
                 };
+                let mut to_path_parent = to_path.clone();
+                if to_path_parent.len() > 0 {
+                    to_path_parent.pop();
+                };
 
-                debug!("FROM_parent= {:?} ", from_path_parent);
+                debug!(
+                    "FROM_parent={:?}  TO_parent={:?}",
+                    from_path_parent, from_path_parent
+                );
                 if let Some(subs_w) = self.feedsources_w.upgrade() {
                     (*subs_w)
                         .borrow()
-                        .addjob(SJob::GuiUpdateTreePartial(from_path));
+                        .addjob(SJob::GuiUpdateTreePartial(from_path_parent.clone()));
+
+                    if to_path_parent != from_path_parent {
+                        (*subs_w)
+                            .borrow()
+                            .addjob(SJob::GuiUpdateTreePartial(to_path_parent));
+                    }
                 }
                 /*
                                for id in self.get_siblings_ids(&from_path) {

@@ -266,7 +266,7 @@ impl GtkModelUpdaterInt {
         for p_index in path.iter() {
             if *p_index as usize >= gti.children.len() {
                 error!(
-                    "update_tree_model_single: BadPath1 {:?}    Index:{}   #children={}",
+                    "update_tree_model_partial: BadPath1 {:?}    Index:{}   #children={}",
                     &path,
                     *p_index,
                     gti.children.len()
@@ -282,29 +282,70 @@ impl GtkModelUpdaterInt {
         let o_iter = tree_store.iter_from_string(&path_cn);
         if o_iter.is_none() {
             error!(
-                "update_tree_model_single: BadPath2 {:?} {:?} : TreeStore does not contain iter.  {:?}  ",
+                "update_tree_model_partial: BadPath2 {:?} {:?} : TreeStore does not contain iter.  {:?}  ",
                 &path, &path_cn, gti
             );
             return;
         }
-        let iter = o_iter.unwrap();
-        debug!("partial:     TS removing: {:?}  {:?}", path_cn, &gti);
+        debug!("partial:   removing from: {:?}", path,);
+
+        let parent_iter = o_iter.unwrap();
+        // 1: remove all children, let the parent here.
+        let mut o_child_iter = tree_store.iter_children(Some(&parent_iter));
+        while let Some(child_iter) = o_child_iter {
+            tree_store.remove(&child_iter);
+            o_child_iter = tree_store.iter_children(Some(&parent_iter));
+        }
+
+        /*
+
+                let mut tpath: TreePath = gtk::TreePath::from_indicesv(&path_i32);
+                let depth_parent = tpath.depth();
+                tpath.down();
+                let depth_child = tpath.depth();
+                if depth_child <= depth_parent {
+                    warn!("update_tree_model_partial: treepath cannot descend into children.");
+                    return;
+                }
+                let mut iter_depth = tpath.depth();
+                while iter_depth > depth_parent {
+                    tpath.next();
+
+                    iter_depth = tpath.depth();
+                    debug!("   iterating: {:?} ", tpath.indices());
+                }
+                // tree_store.iter()
+                tree_store.remove(&iter);
+        */
 
         let path_i32 = path.iter().map(|p| *p as i32).collect::<Vec<i32>>();
-
-        //  TODO:  remove all children, let the parent here.
-        tree_store.remove(&iter);
         let mut expand_paths: Vec<TreePath> = Vec::default();
+        debug!("   adding to:  {:?} ", &path_i32);
 
-        self.add_to_treestore(
-            tree_idx as usize,
-            &tree_store,
-            gti,
-            Some(&iter),
-            path_i32,
-            max_columns,
-            &mut expand_paths,
-        );
+        for (path_index, child_gti) in gti.children.iter().enumerate() {
+            let mut innerpath = path_i32.clone();
+            innerpath.push(path_index as i32);
+            self.add_to_treestore(
+                tree_idx as usize,
+                &tree_store,
+                child_gti,
+                Some(&parent_iter),
+                innerpath,
+                max_columns,
+                &mut expand_paths,
+            );
+        }
+        /*
+               self.add_to_treestore(
+                   tree_idx as usize,
+                   &tree_store,
+                   gti,
+                   Some(&iter),
+                   path_i32,
+                   max_columns,
+                   &mut expand_paths,
+               );
+        */
 
         //        self.treestore_set_row(&tree_store, gti, &iter, max_columns);
     }
