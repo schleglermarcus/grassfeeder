@@ -23,22 +23,24 @@ rm -rf ../testing/target
 rm -rf target
 mkdir target
 
-WORK="$DIR/target/deb-sign"
-echo "VERSION=$VERSION	    WORKDIR=$WORK"
+FOLDER_SIGN="$DIR/target/deb-sign"
+echo "VERSION=$VERSION	    FOLDER_SIGN=$FOLDER_SIGN"
 test -d ../target || mkdir ../target
 EXCL="--exclude=grassfeed_rs/target --exclude=grassfeed_rs/app-gtk3-ubuntu/target --exclude=grassfeed_rs/Cargo.lock "
 (cd ../../ ; tar c $EXCL  grassfeed_rs |gzip --fast  >grassfeed_rs/target/${PKGNAME}-${VERSION}.tar.gz )
-test -d $WORK || mkdir $WORK
-mkdir $WORK/${PKGNAME}-${VERSION}
+test -d $FOLDER_SIGN || mkdir $FOLDER_SIGN
+
+WORKDIR=${FOLDER_SIGN}/${PKGNAME}-${VERSION}
+mkdir $WORKDIR
 UNPACK="../target/${PKGNAME}-${VERSION}.tar.gz"
-(cd $WORK/${PKGNAME}-$VERSION ;  cat  ../../../$UNPACK |gzip -d |tar x )
-mkdir $WORK/${PKGNAME}-$VERSION/debian
-cp -v assets/changelog.txt $WORK/${PKGNAME}-$VERSION/debian/changelog
+(cd $WORKDIR ;  cat  ../../../$UNPACK |gzip -d |tar x )
+mkdir $WORKDIR/debian
+cp -v assets/changelog.txt $WORKDIR/debian/changelog
 
-mkdir $WORK/${PKGNAME}-$VERSION/debian/source
-echo "1.0" >$WORK/${PKGNAME}-$VERSION/debian/source/format
+mkdir $WORKDIR/debian/source
+echo "1.0" >$WORKDIR/debian/source/format
 
-CT=$WORK/${PKGNAME}-$VERSION/debian/control
+CT=${WORKDIR}/debian/control
 echo "Source: $PKGNAME" >$CT
 echo "Section: $SECTION" >>$CT
 echo "Priority: $PRIORITY" >>$CT
@@ -51,24 +53,24 @@ cat assets/deb-control.txt |egrep  "Depends:"  |head -n1  >>$CT
 cp -vR $CT debian/
 
 R="debian/rules"
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "#!/usr/bin/make -f" >$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "clean:" >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; cargo clean ) " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "build: " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; ./unpack-vendored.sh ) " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; ./deb-create.sh ) " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "binary: " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	cp -v grassfeed_rs/app-gtk3-ubuntu/target/grassfeeder*.deb ../${PKGNAME}_${VERSION}_${ARCHITECTURE}.deb  " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	find . -name \"files\"  " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	if test  -f debian/files ; then  mv -v debian/files debian/files.1 ; fi   " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	if ! test -d debian       ; then mkdir debian ; fi " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	dpkg-distaddfile ${PKGNAME}_${VERSION}_${ARCHITECTURE}.deb $SECTION $PRIORITY" >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "	ls -lR debian/  " >>$R )
-(cd $WORK/${PKGNAME}-$VERSION ;   echo "">>$R )
+(cd $WORKDIR ;   echo "#!/usr/bin/make -f" >$R )
+(cd $WORKDIR ;   echo "">>$R )
+(cd $WORKDIR ;   echo "clean:" >>$R )
+(cd $WORKDIR ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; cargo clean ) " >>$R )
+(cd $WORKDIR ;   echo "">>$R )
+(cd $WORKDIR ;   echo "build: " >>$R )
+(cd $WORKDIR ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; ./unpack-vendored.sh ) " >>$R )
+(cd $WORKDIR ;   echo "	(cd grassfeed_rs/app-gtk3-ubuntu/ ; ./deb-create.sh ) " >>$R )
+(cd $WORKDIR ;   echo "">>$R )
+(cd $WORKDIR ;   echo "binary: " >>$R )
+(cd $WORKDIR ;   echo "	cp -v grassfeed_rs/app-gtk3-ubuntu/target/grassfeeder*.deb ../${PKGNAME}_${VERSION}_${ARCHITECTURE}.deb  " >>$R )
+(cd $WORKDIR ;   echo "	find . -name \"files\"  " >>$R )
+(cd $WORKDIR ;   echo "	if test  -f debian/files ; then  mv -v debian/files debian/files.1 ; fi   " >>$R )
+(cd $WORKDIR ;   echo "	if ! test -d debian       ; then mkdir debian ; fi " >>$R )
+(cd $WORKDIR ;   echo "	dpkg-distaddfile ${PKGNAME}_${VERSION}_${ARCHITECTURE}.deb $SECTION $PRIORITY" >>$R )
+(cd $WORKDIR ;   echo "	ls -lR debian/  " >>$R )
+(cd $WORKDIR ;   echo "">>$R )
+(cd $WORKDIR ;   debuild  -rfakeroot -S  )
 
-(cd $WORK/${PKGNAME}-$VERSION ;   debuild  -rfakeroot -S  )
-
-( cd $WORK ; echo "# (cd target/deb-sign/ ; dput ppa:schleglermarcus/grassfeeder  `ls -1 grassfeeder*source.changes |tail -n1` )" )
+CHANGES=`( cd $FOLDER_SIGN ;  ls -1 grassfeeder*source.changes |tail -n1 ) `
+echo "# (cd target/deb-sign/ ; dput ppa:schleglermarcus/grassfeeder  $CHANGES )"

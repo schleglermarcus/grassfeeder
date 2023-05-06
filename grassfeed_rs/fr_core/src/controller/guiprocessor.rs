@@ -645,7 +645,6 @@ impl StartupWithAppContext for GuiProcessor {
         self.add_handler(
             &GuiEvents::TreeExpanded(0, 0),
             HandleTreeExpanded(
-                // self.feedsources_r.clone()
                 self.subscriptionrepo_r.clone(),
                 self.subscriptionmove_r.clone(),
             ),
@@ -653,7 +652,6 @@ impl StartupWithAppContext for GuiProcessor {
         self.add_handler(
             &GuiEvents::TreeCollapsed(0, 0),
             HandleTreeCollapsed(
-                // self.feedsources_r.clone()
                 self.subscriptionrepo_r.clone(),
                 self.subscriptionmove_r.clone(),
             ),
