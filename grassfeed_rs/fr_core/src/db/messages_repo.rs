@@ -398,7 +398,7 @@ impl StartupWithAppContext for MessagesRepo {
 }
 
 impl TimerReceiver for MessagesRepo {
-    fn trigger(& self, event: &TimerEvent) {
+    fn trigger(&self, event: &TimerEvent) {
         if event == &TimerEvent::Shutdown {
             self.ctx.cache_flush();
         }

@@ -11,7 +11,6 @@ use fr_core::db::subscription_repo::SubscriptionRepo;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 #[allow(dead_code)]
 pub fn prepare_subscription_move(
     fs_list: Vec<SubscriptionEntry>,

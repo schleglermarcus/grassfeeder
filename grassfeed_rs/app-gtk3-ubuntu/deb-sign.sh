@@ -8,7 +8,7 @@
 #   {'allowed': ['release'], 'known': ['release', 'proposed', 'updates', 'backports', 'security']}
 #
 PKGNAME="grassfeeder-gtk3"
-T_MAINT="Marcus <schlegler_marcus@posteo.de>"
+T_MAINT="Marcus der Schlegler <schlegler_marcus@posteo.de>"
 BUILD_DEPENDS="rustc, cargo, devscripts, pkg-config, librust-glib-dev, librust-glib-sys-dev, librust-gobject-sys-dev, libatk1.0-dev, libwebkit2gtk-4.0-dev, libsoup2.4-dev "
 
 DIR=`pwd`
@@ -20,7 +20,6 @@ ARCHITECTURE="amd64"
 (cd ../resources; cargo test )
 
 rm -rf ../testing/target
-rm -rf ../target
 rm -rf target
 mkdir target
 
@@ -72,5 +71,4 @@ R="debian/rules"
 
 (cd $WORK/${PKGNAME}-$VERSION ;   debuild  -rfakeroot -S  )
 
-( cd $WORK ; echo "dput ppa:schleglermarcus/ppa  `ls -1 grassfeeder*source.changes |tail -n1`" )
-
+( cd $WORK ; echo "# (cd target/deb-sign/ ; dput ppa:schleglermarcus/grassfeeder  `ls -1 grassfeeder*source.changes |tail -n1` )" )
