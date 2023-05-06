@@ -1,5 +1,7 @@
 # NEW but  the package won't work in Mint20
-FROM rust:1.63-slim-bullseye
+# 202305 : cargo-deb needs rust-1.64 
+
+FROM rust:1.64-slim-bullseye
 run echo "deb     http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free"  >/etc/apt/sources.list
 run echo "deb-src http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free" >>/etc/apt/sources.list
 
