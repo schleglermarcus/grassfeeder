@@ -1,10 +1,10 @@
-grassfeeder-gtk3 (0.0.38) jammy; urgency=low
+grassfeeder-gtk3 (0.1.9) jammy; urgency=low
 
   * Building the debian package on launchpad
   * Refactored gui-events processor
-  * Bugfix: drag feed-onto-feed leads to partial tree update
+  * Bugfix: drag feed-onto-feed effects now to partial tree update
 
- -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sat, 06 May 2023 00:18:00 +0000
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sat, 06 May 2023 00:21:00 +0000
 
 grassfeeder-gtk3 (0.1.8) jammy; urgency=low
 

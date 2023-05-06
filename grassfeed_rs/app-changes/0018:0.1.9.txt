@@ -1,4 +1,4 @@
-Sat, 06 May 2023 00:18:00 +0000
+Sat, 06 May 2023 00:21:00 +0000
 * Building the debian package on launchpad
 * Refactored gui-events processor
-* Bugfix: drag feed-onto-feed leads to partial tree update
+* Bugfix: drag feed-onto-feed effects now to partial tree update
