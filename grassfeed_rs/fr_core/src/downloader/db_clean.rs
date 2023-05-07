@@ -341,37 +341,49 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 .map(|fse| fse.subs_id)
                 .collect::<Vec<isize>>();
             for su_id in &subs_ids {
-                let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id, true);
-                let length_before = msg_per_subscription.len();
-                if length_before > inner.max_messages_per_subscription as usize {
-                    inner.need_update_messages = true;
-                    msg_per_subscription.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
-                    let (_stay, remove) =
-                        msg_per_subscription.split_at(inner.max_messages_per_subscription as usize);
-                    if !remove.is_empty() {
-                        let id_list: Vec<i32> = remove
-                            .iter()
-                            .filter(|e| !e.is_favorite())
-                            .map(|e| e.message_id as i32)
-                            .collect();
-                        inner.messgesrepo.update_is_deleted_many(&id_list, true);
-                    }
-                }
+                let (need_u, _n_removed, _n_all, _n_unread) = reduce_too_many_messages(
+                    &inner.messgesrepo,
+                    inner.max_messages_per_subscription as usize,
+                    *su_id,
+                );
+                inner.need_update_messages = need_u;
+                /*
+                               let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id, true);
+                               let length_before = msg_per_subscription.len();
+                               if length_before > inner.max_messages_per_subscription as usize {
+                                   inner.need_update_messages = true;
+                                   msg_per_subscription.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
+                                   let (_stay, remove) =
+                                       msg_per_subscription.split_at(inner.max_messages_per_subscription as usize);
+                                   if !remove.is_empty() {
+                                       let id_list: Vec<i32> = remove
+                                           .iter()
+                                           .filter(|e| !e.is_favorite())
+                                           .map(|e| e.message_id as i32)
+                                           .collect();
+                                       inner.messgesrepo.update_is_deleted_many(&id_list, true);
+                                   }
+                               }
+                */
             }
         }
         StepResult::Continue(Box::new(DeleteDoubleSameMessages(inner)))
     }
 }
 
-// returns   need-update
-pub fn reduce_too_many_messages(msg_r: &MessagesRepo, max_messages: usize, subs_id: isize) -> bool {
+// returns   need-update, #removed, num-all, num-unread
+pub fn reduce_too_many_messages(
+    msg_r: &MessagesRepo,
+    max_messages: usize,
+    subs_id: isize,
+) -> (bool, usize, usize, usize) {
     let mut all_messages = msg_r.get_by_src_id(subs_id, true);
     let length_before = all_messages.len();
     if length_before <= max_messages {
-        return false;
+        return (false, 0, 0, 0);
     }
     all_messages.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
-    let (_stay, remove) = all_messages.split_at(max_messages);
+    let (stay, remove) = all_messages.split_at(max_messages);
     if !remove.is_empty() {
         let id_list: Vec<i32> = remove
             .iter()
@@ -379,8 +391,15 @@ pub fn reduce_too_many_messages(msg_r: &MessagesRepo, max_messages: usize, subs_
             .map(|e| e.message_id as i32)
             .collect();
         msg_r.update_is_deleted_many(&id_list, true);
+
+        let num_unread = stay
+            .iter()
+            .filter(|msg| !msg.is_read && !msg.is_deleted)
+            .count();
+        let num_all = stay.iter().filter(|msg| !msg.is_deleted).count();
+        return (true, remove.len(), num_all, num_unread);
     }
-    true
+    return (false, 0, 0, 0);
 }
 
 pub struct DeleteDoubleSameMessages(pub CleanerInner);
