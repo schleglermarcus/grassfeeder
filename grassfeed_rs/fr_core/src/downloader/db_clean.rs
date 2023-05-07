@@ -363,6 +363,26 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
     }
 }
 
+// returns   need-update
+pub fn reduce_too_many_messages(msg_r: &MessagesRepo, max_messages: usize, subs_id: isize) -> bool {
+    let mut all_messages = msg_r.get_by_src_id(subs_id, true);
+    let length_before = all_messages.len();
+    if length_before <= max_messages {
+        return false;
+    }
+    all_messages.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
+    let (_stay, remove) = all_messages.split_at(max_messages);
+    if !remove.is_empty() {
+        let id_list: Vec<i32> = remove
+            .iter()
+            .filter(|e| !e.is_favorite())
+            .map(|e| e.message_id as i32)
+            .collect();
+        msg_r.update_is_deleted_many(&id_list, true);
+    }
+    true
+}
+
 pub struct DeleteDoubleSameMessages(pub CleanerInner);
 impl Step<CleanerInner> for DeleteDoubleSameMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {

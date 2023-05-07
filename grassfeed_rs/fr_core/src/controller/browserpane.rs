@@ -94,9 +94,7 @@ impl BrowserPane {
             }
         } else {
             error!("config is missing {}", PropDef::BrowserDir.to_string());
-            (*self.configmanager_r)
-                .borrow()
-                .debug_dump("create_browser_dir");
+            // (*self.configmanager_r)                .borrow()                .debug_dump("create_browser_dir");
         }
     }
 

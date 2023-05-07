@@ -84,12 +84,14 @@ impl MessagesRepo {
         format!("{foldername}messages.db")
     }
 
+/*
     #[deprecated]
     pub fn by_filename(filename: &str) -> Self {
         MessagesRepo {
             ctx: SqliteContext::new(filename.to_string()),
         }
     }
+ */
 
     pub fn new_by_connection(con_a: Arc<Mutex<Connection>>) -> Self {
         MessagesRepo {

@@ -1,1 +1,23 @@
-Cargo-std.toml
+[package]
+name = "ui_gtk"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+legacy3gtk14 = []
+
+[dependencies]
+gui_layer = { path = "../gui_layer" }
+resources = { path = "../resources" }
+log = ">=0.4.11"
+gdk-sys = "^0.15.1"
+gio = { version = "=0.15.5" }
+serde = ">=1.0.133"
+base64 = "<=0.20.0" #  0.21 wants code adaption
+flume = { version = ">=0.10.14" }
+webkit2gtk = { version = "=0.18.2", features = [
+    "v2_36",
+], default-features = false }
+# gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
+gtk = { version = ">=0.15.5", features = ["v3_22_30"] }
+lz4-compression = "0.7.0"

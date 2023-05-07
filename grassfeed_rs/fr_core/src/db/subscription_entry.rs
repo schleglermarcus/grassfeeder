@@ -1,9 +1,7 @@
 use crate::db::sqlite_context::TableInfo;
 use crate::db::sqlite_context::Wrap;
 use resources::gen_icons;
-
 use serde::Deserialize;
-
 use serde::Serialize;
 use std::fmt;
 

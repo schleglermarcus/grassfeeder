@@ -253,10 +253,8 @@ impl GuiProcessor {
                 Job::DownloaderJobStarted(threadnr, kind) => {
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = kind;
                 }
-                Job::DownloaderJobFinished(subs_id, threadnr, kind, elapsed_ms, description) => {
-                    if kind == 6 {
-                        trace!("browser_launch:{}ms {}", elapsed_ms, &description);
-                    }
+                Job::DownloaderJobFinished(subs_id, threadnr, _kind, elapsed_ms, description) => {
+                    // if kind == 6 {                        trace!("browser_launch:{}ms {}", elapsed_ms, &description);                    }
                     if elapsed_ms > 1000 && subs_id > 0 {
                         (*self.erro_repo_r).borrow().add_error(
                             subs_id,
@@ -265,7 +263,6 @@ impl GuiProcessor {
                             description,
                         );
                     }
-
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = 0;
                 }
                 Job::CheckFocusMarker(num) => {
@@ -420,7 +417,6 @@ impl GuiProcessor {
                     debug!("space key but unfocused");
                 }
             }
-
             _ => {
                 // trace!("key-pressed: other {} {:?} {:?}", keycode, _o_char, kc);
             }
@@ -429,7 +425,6 @@ impl GuiProcessor {
             self.focus_by_tab.replace(new_focus_by_tab);
             self.switch_focus_marker(true);
             self.addjob(Job::CheckFocusMarker(2));
-            // trace!("FOCUS:  {:?} ", &self.focus_by_tab );
             match *self.focus_by_tab.borrow() {
                 FocusByTab::FocusSubscriptions => {
                     (*self.gui_updater)
@@ -576,7 +571,6 @@ impl StartupWithAppContext for GuiProcessor {
             .borrow()
             .get_config()
             .num_downloader_threads;
-
         if let Some(s) = (*self.configmanager_r)
             .borrow()
             .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
