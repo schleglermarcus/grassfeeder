@@ -50,7 +50,7 @@ pub const DEFAULT_CONFIG_FETCH_FEED_UNIT: u8 = 2; // hours
 /// seven days
 const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
 
-const CHECK_MESSAGE_COUNTS_SET_SIZE: usize = 2;
+const CHECK_MESSAGE_COUNTS_SET_SIZE: usize = 4;
 
 // #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -321,7 +321,6 @@ impl SourceTreeController {
                         warn!("SetCursorToSubsID: No Path for id:{}", subs_id);
                     }
                 }
-
                 SJob::NotifyMessagesCountsChecked(subs_id, removed_some, msg_all, msg_unread) => {
                     self.statemap.borrow_mut().set_status(
                         &[subs_id],
@@ -329,29 +328,15 @@ impl SourceTreeController {
                         true,
                     );
                     if removed_some {
+                        trace!(
+                            "NotifyMessagesCountsChecked: {} all:{}  unread:{} ",
+                            subs_id,
+                            msg_all,
+                            msg_unread
+                        );
                         self.process_tree_read_count(subs_id, msg_all, msg_unread);
                     }
-                } /*
-                                 SJob::CheckMessageCounts(subs_id) => {
-                                     debug!("CheckMessageCounts: {}", subs_id);
-
-                                     let msg_keep_count: i32 = (*self.configmanager_r)
-                                         .borrow()
-                                         .get_val_int(FeedContents::CONF_MSG_KEEP_COUNT)
-                                         .unwrap_or(-1) as i32;
-
-                                     let msg_repo = MessagesRepo::new_by_connection(
-                                         (*self.messagesrepo_w).borrow().get_ctx().get_connection(),
-                                     );
-                                     let r = db_clean::reduce_too_many_messages(&msg_repo, msg_keep_count, subs_id);
-                                     debug!("CheckMessageCounts: {} {:?} ", subs_id, &r);
-                                     let (removed_some, num_removed, num_all, num_unread) = r;
-
-                                     if removed_some {
-                                         self.addjob(SJob::NotifyTreeReadCount(subs_id, num_all, num_unread));
-                                     }
-                                 }
-                  */
+                }
             }
             if (*self.config).borrow().mode_debug {
                 let elapsed_m = now.elapsed().as_millis();
@@ -695,56 +680,23 @@ impl SourceTreeController {
         if update_ids.is_empty() {
             let check_count_ids =
                 stm_b.get_ids_by_status(StatusMask::MessageCountsChecked, false, false);
-            debug!(
-                "check_update_times:   no updates - check counts! {:?} ",
-                &check_count_ids
-            );
-
-            if let Some(feedcontents) = self.feedcontents_w.upgrade() {
-                check_count_ids
-                    .iter()
-                    .take(CHECK_MESSAGE_COUNTS_SET_SIZE)
-                    .for_each(|id| {
-                        (*feedcontents)
-                            .borrow()
-                            .addjob(CJob::CheckMessageCounts(*id));
-                    });
+            if !check_count_ids.is_empty() {
+                trace!(
+                    "check_update_times:  MSG_COUNTS: {:?} ",
+                    &check_count_ids.len()
+                );
+                if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+                    check_count_ids
+                        .iter()
+                        .take(CHECK_MESSAGE_COUNTS_SET_SIZE)
+                        .for_each(|id| {
+                            (*feedcontents)
+                                .borrow()
+                                .addjob(CJob::CheckMessageCounts(*id));
+                        });
+                }
             }
         }
-
-        /*
-        check_feed_ids
-            .iter()
-            .filter(|(_subs_id, _, _, counts_ch)| !counts_ch)
-            .for_each(|(subs_id, _, _, _)| {
-                self.addjob(SJob::CheckMessageCounts(*subs_id));
-            });
-               if !update_feed_ids.is_empty() {
-                   update_feed_ids.into_iter().
-               } else {
-                   let entries: Vec<SubscriptionEntry> =
-                       self.subscriptionrepo_r.borrow().get_all_nonfolder();
-                   let check_feed_ids = entries
-                       .iter()
-                       .filter(|fse| !fse.is_folder)
-                       .map(|fse| {
-                           let mut counts_ch = false;
-                           if let Some(st) = stm_b.get_state(fse.subs_id) {
-                               counts_ch = st.is_messagecounts_checked();
-                           }
-                           (fse.subs_id, counts_ch)
-                       })
-                       .collect::<Vec<(isize, bool)>>();
-
-                   debug!("check_feed_ids:  # {:?} ", check_feed_ids);
-                   let check_counts_ids = check_feed_ids
-                       .iter()
-                       .filter(|(_, counts_ch)| !counts_ch)
-                       .map(|(subs_id, _)| *subs_id)
-                       .collect::<Vec<isize>>();
-                   debug!("check_counts_ids:  # {:?} ", check_counts_ids);
-               }
-        */
     }
 
     fn startup_read_config(&mut self) {

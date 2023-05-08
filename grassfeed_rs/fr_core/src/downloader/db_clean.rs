@@ -347,24 +347,6 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                     *su_id,
                 );
                 inner.need_update_messages = need_u;
-                /*
-                               let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id, true);
-                               let length_before = msg_per_subscription.len();
-                               if length_before > inner.max_messages_per_subscription as usize {
-                                   inner.need_update_messages = true;
-                                   msg_per_subscription.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
-                                   let (_stay, remove) =
-                                       msg_per_subscription.split_at(inner.max_messages_per_subscription as usize);
-                                   if !remove.is_empty() {
-                                       let id_list: Vec<i32> = remove
-                                           .iter()
-                                           .filter(|e| !e.is_favorite())
-                                           .map(|e| e.message_id as i32)
-                                           .collect();
-                                       inner.messgesrepo.update_is_deleted_many(&id_list, true);
-                                   }
-                               }
-                */
             }
         }
         StepResult::Continue(Box::new(DeleteDoubleSameMessages(inner)))
@@ -384,14 +366,13 @@ pub fn reduce_too_many_messages(
     }
     all_messages.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
     let (stay, remove) = all_messages.split_at(max_messages);
-    if !remove.is_empty() {
-        let id_list: Vec<i32> = remove
-            .iter()
-            .filter(|e| !e.is_favorite())
-            .map(|e| e.message_id as i32)
-            .collect();
-        msg_r.update_is_deleted_many(&id_list, true);
-
+    let remove_list: Vec<i32> = remove
+        .iter()
+        .filter(|e| !e.is_favorite())
+        .map(|e| e.message_id as i32)
+        .collect();
+    if !remove_list.is_empty() {
+        msg_r.update_is_deleted_many(&remove_list, true);
         let num_unread = stay
             .iter()
             .filter(|msg| !msg.is_read && !msg.is_deleted)

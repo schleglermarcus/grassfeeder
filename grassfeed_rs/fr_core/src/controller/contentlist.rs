@@ -475,13 +475,14 @@ impl FeedContents {
             .borrow()
             .get_val_int(FeedContents::CONF_MSG_KEEP_COUNT)
             .unwrap_or(-1);
-
         let msg_repo = MessagesRepo::new_by_connection(
             (*self.messagesrepo_r).borrow().get_ctx().get_connection(),
         );
         let r = db_clean::reduce_too_many_messages(&msg_repo, msg_keep_count as usize, subs_id);
-        debug!("check_message_counts: {} {:?} ", subs_id, &r);
         let (removed_some, _num_removed, num_all, num_unread) = r;
+        if removed_some {
+            trace!("check_message_counts: {} {:?} ", subs_id, &r);
+        }
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             (*feedsources)
                 .borrow()
@@ -593,7 +594,6 @@ impl IFeedContents for FeedContents {
                 CJob::LaunchBrowserSuccess(msg_id, list_position) => {
                     self.set_read_many(&vec![(msg_id as i32, list_position as i32)], true);
                 }
-
                 CJob::CheckMessageCounts(subs_id) => {
                     self.check_message_counts(subs_id);
                 }
