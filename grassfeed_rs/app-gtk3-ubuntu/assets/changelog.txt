@@ -1,7 +1,9 @@
-grassfeeder-gtk3 (0.0.23-beta) jammy; urgency=low
+grassfeeder-gtk3 (0.0.24-beta) jammy; urgency=low
 
   * Subscriptions tree adjusts message count column width
-  - Expiring old messages regularly
+  * Expiring old messages regularly
+  * Dragging Url, Subscription shall be inserted at current folder
+  
 
  -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sat, 06 May 2023 00:21:00 +0000
 

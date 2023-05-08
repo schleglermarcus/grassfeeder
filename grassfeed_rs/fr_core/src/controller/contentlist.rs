@@ -68,7 +68,7 @@ pub enum CJob {
     CheckMessageCounts(isize),
 }
 
-pub trait IFeedContents {
+pub trait IContentList {
     /// returns queue size
     fn addjob(&self, nj: CJob) -> usize;
 
@@ -494,7 +494,7 @@ impl FeedContents {
     }
 } // impl FeedContents
 
-impl IFeedContents for FeedContents {
+impl IContentList for FeedContents {
     /// returns queue size
     fn addjob(&self, nj: CJob) -> usize {
         if self.job_queue_sender.is_full() {
@@ -1019,7 +1019,7 @@ impl IFeedContents for FeedContents {
         }
     }
 
-    // impl IFeedContents
+    // impl IContentList
 }
 
 impl Buildable for FeedContents {

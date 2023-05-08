@@ -3,7 +3,7 @@ use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::CJob;
 use crate::controller::contentlist::FeedContents;
-use crate::controller::contentlist::IFeedContents;
+use crate::controller::contentlist::IContentList;
 use crate::controller::isourcetree::ISourceTreeController;
 use crate::controller::subscriptionmove::ISubscriptionMove;
 use crate::controller::subscriptionmove::SubscriptionMove;

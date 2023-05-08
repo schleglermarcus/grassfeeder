@@ -384,7 +384,7 @@ pub fn reduce_too_many_messages(
         let num_all = stay.iter().filter(|msg| !msg.is_deleted).count();
         return (true, remove_list.len(), num_all, num_unread);
     }
-    return (false, 0, length_before, num_unread);
+    (false, 0, length_before, num_unread)
 }
 
 pub struct DeleteDoubleSameMessages(pub CleanerInner);

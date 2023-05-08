@@ -1,6 +1,6 @@
 use crate::controller::contentlist::get_font_size_from_config;
 use crate::controller::contentlist::CJob;
-use crate::controller::contentlist::IFeedContents;
+use crate::controller::contentlist::IContentList;
 use crate::controller::sourcetree::Config;
 use crate::controller::sourcetree::NewSourceState;
 use crate::controller::sourcetree::SJob;

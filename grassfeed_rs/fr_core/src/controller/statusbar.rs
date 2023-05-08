@@ -1,6 +1,6 @@
 use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader::IDownloader;
-use crate::controller::contentlist::IFeedContents;
+use crate::controller::contentlist::IContentList;
 use crate::controller::guiprocessor::dl_char_for_kind;
 use crate::controller::isourcetree::ISourceTreeController;
 use crate::db::subscription_state::SubsMapEntry;
@@ -29,7 +29,7 @@ const VERTICAL_RISING_BAR_LEN: usize = VERTICAL_RISING_BAR.len() - 1;
 pub struct StatusBar {
     r_subscriptions_controller: Rc<RefCell<dyn ISourceTreeController>>,
     r_downloader: Rc<RefCell<dyn IDownloader>>,
-    r_messages: Rc<RefCell<dyn IFeedContents>>,
+    r_messages: Rc<RefCell<dyn IContentList>>,
     r_browserpane: Rc<RefCell<dyn IBrowserPane>>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_val_store: UIAdapterValueStoreType,
@@ -58,7 +58,7 @@ impl StatusBar {
         r_c_subs: Rc<RefCell<dyn ISourceTreeController>>,
         r_downloadr: Rc<RefCell<dyn IDownloader>>,
         gui_updatr: Rc<RefCell<dyn UIUpdaterAdapter>>,
-        r_msg_c: Rc<RefCell<dyn IFeedContents>>,
+        r_msg_c: Rc<RefCell<dyn IContentList>>,
         browser_pane: Rc<RefCell<dyn IBrowserPane>>,
         val_store: UIAdapterValueStoreType,
     ) -> Self {
