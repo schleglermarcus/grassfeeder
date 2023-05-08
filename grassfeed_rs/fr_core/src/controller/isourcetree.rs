@@ -379,6 +379,7 @@ impl ISourceTreeController for SourceTreeController {
             SourceTreeController::CONF_DISPLAY_FEECOUNT_ALL,
             a.to_string(),
         );
+        self.addjob(SJob::SetGuiTreeColumn1Width);
     }
 
     fn newsource_dialog_edit(&mut self, edit_feed_url: String) {

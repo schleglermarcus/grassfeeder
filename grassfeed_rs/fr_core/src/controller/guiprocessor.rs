@@ -175,7 +175,7 @@ impl GuiProcessor {
                         let ev_ident = (Instant::now(), format!("{:?}", &ev));
                         handler_b.handle(ev, self);
                         let elapsed_m = ev_ident.0.elapsed().as_millis();
-                        if elapsed_m > 100 {
+                        if elapsed_m > 160 {
                             debug!("EV  {}   took {:?}", ev_ident.1, elapsed_m);
                         }
                     } else {

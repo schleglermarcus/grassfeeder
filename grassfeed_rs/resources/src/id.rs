@@ -24,6 +24,8 @@ pub const DIALOG_OPML_IMPORT: u8 = 6;
 pub const DIALOG_OPML_EXPORT: u8 = 7;
 pub const DIALOG_SETTINGS: u8 = 8;
 pub const DIALOG_ABOUT: u8 = 9;
+pub const DIALOG_TREE0COL1: u8 = 10;
+
 
 pub const DIALOG_TEXTVIEW_ERR: u8 = 0;
 

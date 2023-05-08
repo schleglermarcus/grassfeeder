@@ -98,7 +98,6 @@ impl ISubscriptionState for SubscriptionState {
     }
 
     /// don't include deleted ones, sort folders to the end
-    /// Usability+Speed:  dispatch 2 subscriptions at one time for re-calculating
     /// returns    subs_id,  is_folder
     fn scan_num_all_unread(&self) -> Vec<(isize, bool)> {
         let mut unproc_ids: Vec<(isize, bool)> = self

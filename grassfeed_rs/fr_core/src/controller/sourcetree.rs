@@ -100,6 +100,8 @@ pub enum SJob {
     DragUrlEvaluated(String, String, String, String),
     /// subs_id
     SetCursorToSubsID(isize),
+
+    SetGuiTreeColumn1Width,
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -328,7 +330,7 @@ impl SourceTreeController {
                         true,
                     );
                     if removed_some {
-                        trace!(
+                        debug!(
                             "NotifyMessagesCountsChecked: {} all:{}  unread:{} ",
                             subs_id,
                             msg_all,
@@ -336,6 +338,19 @@ impl SourceTreeController {
                         );
                         self.process_tree_read_count(subs_id, msg_all, msg_unread);
                     }
+                }
+                SJob::SetGuiTreeColumn1Width => {
+                    let fc_all = (*self.configmanager_r)
+                        .borrow()
+                        .get_val_bool(Self::CONF_DISPLAY_FEECOUNT_ALL);
+
+                    debug!("SUBS:    SetGuiTreeColumn1Width: {} ", fc_all);
+                    let dd: Vec<AValue> = vec![AValue::ABOOL(fc_all)];
+                    (*self.gui_val_store)
+                        .write()
+                        .unwrap()
+                        .set_dialog_data(DIALOG_TREE0COL1, &dd);
+                    (*self.gui_updater).borrow().update_dialog(DIALOG_TREE0COL1);
                 }
             }
             if (*self.config).borrow().mode_debug {
@@ -703,9 +718,25 @@ impl SourceTreeController {
         (*self.config).borrow_mut().feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
             .get_val_bool(Self::CONF_FETCH_ON_START);
-        (*self.config).borrow_mut().display_feedcount_all = (*self.configmanager_r)
+
+        let fc_all = (*self.configmanager_r)
             .borrow()
             .get_val_bool(Self::CONF_DISPLAY_FEECOUNT_ALL);
+
+        (*self.config).borrow_mut().display_feedcount_all = fc_all;
+
+        // (*self.gui_val_store)            .write()            .unwrap()            .set_gui_property(PropDef::GuiTree0Col1Wide, display_feedcount_all.to_string());
+        //  (*self.gui_updater).borrow().update_property(            0,            PropDef::GuiTree0Col1Wide.to_string(),            if fc_all { 1 } else { 0 },        );
+        /*
+                debug!("SUBS:   store width: {} ", fc_all);
+                let dd: Vec<AValue> = vec![AValue::ABOOL(fc_all)];
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_dialog_data(DIALOG_TREE0COL1, &dd);
+                (*self.gui_updater).borrow().update_dialog(DIALOG_TREE0COL1);
+        */
+        //
         (*self.config).borrow_mut().feeds_fetch_interval = (*self.configmanager_r)
             .borrow()
             .get_val_int(Self::CONF_FETCH_INTERVAL)
@@ -988,6 +1019,7 @@ impl StartupWithAppContext for SourceTreeController {
         }
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::ScanEmptyUnread);
+        self.addjob(SJob::SetGuiTreeColumn1Width);
     }
 }
 

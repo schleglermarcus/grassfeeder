@@ -13,6 +13,7 @@ pub enum PropDef {
     GuiFontSizeManual,
     GuiList0SortColumn,
     GuiList0SortAscending,
+    GuiTree0Col1Wide,
     AppUrl,
     BrowserDir,
     BrowserBackgroundLevel,
@@ -24,7 +25,7 @@ pub enum PropDef {
 }
 
 #[allow(dead_code)]
-pub const PROPDEF_ARRAY: [PropDef; 18] = [
+pub const PROPDEF_ARRAY: [PropDef; 19] = [
     PropDef::GuiWindowWidth,
     PropDef::GuiWindowHeight,
     PropDef::GuiWindowTitle,
@@ -35,6 +36,7 @@ pub const PROPDEF_ARRAY: [PropDef; 18] = [
     PropDef::GuiFontSizeManual,
     PropDef::GuiList0SortColumn,
     PropDef::GuiList0SortAscending,
+    PropDef::GuiTree0Col1Wide,
     PropDef::AppUrl,
     PropDef::BrowserDir,
     PropDef::BrowserBackgroundLevel,
@@ -60,6 +62,7 @@ impl FromStr for PropDef {
             "GuiFontSizeManual" => Ok(PropDef::GuiFontSizeManual),
             "GuiList0SortColumn" => Ok(PropDef::GuiList0SortColumn),
             "GuiList0SortAscending" => Ok(PropDef::GuiList0SortAscending),
+            "GuiTree0Col1Wide" => Ok(PropDef::GuiTree0Col1Wide),
             "AppUrl" => Ok(PropDef::AppUrl),
             "BrowserDir" => Ok(PropDef::BrowserDir),
             "BrowserBackgroundLevel" => Ok(PropDef::BrowserBackgroundLevel),

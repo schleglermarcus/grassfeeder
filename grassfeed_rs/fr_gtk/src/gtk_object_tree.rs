@@ -123,7 +123,6 @@ impl GtkGuiBuilder for GtkObjectTree {
         crate::load_css::load_css();
         window.connect_size_allocate(move |_win, rectangle| {
             let (n_w, n_h) = get_width_height(rectangle);
-            // let n_w: i32 = (*rectangle).width();            let n_h: i32 = (*rectangle).height();
             let (last_w, last_h) =
                 GLOB_CACHE.with(|glob| (glob.borrow().window_width, glob.borrow().window_height));
             if n_w != last_w || n_h != last_h {
@@ -181,10 +180,15 @@ impl GtkGuiBuilder for GtkObjectTree {
         scrolledwindow_0.set_vexpand(true);
         scrolledwindow_0.set_shadow_type(ShadowType::EtchedIn);
         scrolledwindow_0.set_min_content_width(50);
+        let tree0col1wide = self.get_bool(PropDef::GuiTree0Col1Wide);
+
+        debug!(" tree0col1wide={} ", tree0col1wide);
+
         let sourcetree = crate::treeview2::create_treeview(
             gui_event_sender.clone(),
             drag_state,
             gtk_obj_a.clone(),
+            ddd,
         );
         scrolledwindow_0.add(&sourcetree);
         paned_1.pack1(&scrolledwindow_0, false, FRAME_SHRINK);

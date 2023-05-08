@@ -890,6 +890,7 @@ impl IFeedContents for FeedContents {
         }
     }
 
+
     fn set_sort_order(&mut self, sort_column: u8, ascending: bool) {
         self.config.list_sort_column = sort_column;
         self.config.list_sort_order_up = ascending;
