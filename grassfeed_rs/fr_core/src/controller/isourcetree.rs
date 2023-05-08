@@ -376,7 +376,7 @@ impl ISourceTreeController for SourceTreeController {
     fn set_conf_display_feedcount_all(&mut self, a: bool) {
         (*self.config).borrow_mut().display_feedcount_all = a;
         (*self.configmanager_r).borrow().set_val(
-            SourceTreeController::CONF_DISPLAY_FEECOUNT_ALL,
+            SourceTreeController::CONF_DISPLAY_FEEDCOUNT_ALL,
             a.to_string(),
         );
         self.addjob(SJob::SetGuiTreeColumn1Width);

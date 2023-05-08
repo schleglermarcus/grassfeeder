@@ -40,7 +40,7 @@ use std::rc::Rc;
 use std::rc::Weak;
 use std::sync::RwLock;
 
-const JOBQUEUE_SIZE: usize = 200;
+const JOBQUEUE_SIZE: usize = 1000; // at least as many jobs as there might be subscriptions
 const LIST_SCROLL_POS: i8 = 80; // to 70% of the upper list is visible, the cursor shall go to the lower 30%
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -480,9 +480,7 @@ impl FeedContents {
         );
         let r = db_clean::reduce_too_many_messages(&msg_repo, msg_keep_count as usize, subs_id);
         let (removed_some, _num_removed, num_all, num_unread) = r;
-        if removed_some {
-            trace!("check_message_counts: {} {:?} ", subs_id, &r);
-        }
+        // if removed_some {            debug!("check_message_counts: {} {:?} ", subs_id, &r);        }
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             (*feedsources)
                 .borrow()
@@ -889,7 +887,6 @@ impl IFeedContents for FeedContents {
             }
         }
     }
-
 
     fn set_sort_order(&mut self, sort_column: u8, ascending: bool) {
         self.config.list_sort_column = sort_column;

@@ -180,10 +180,7 @@ impl GtkGuiBuilder for GtkObjectTree {
         scrolledwindow_0.set_vexpand(true);
         scrolledwindow_0.set_shadow_type(ShadowType::EtchedIn);
         scrolledwindow_0.set_min_content_width(50);
-        let tree0col1wide = self.get_bool(PropDef::GuiTree0Col1Wide);
-
-        debug!(" tree0col1wide={} ", tree0col1wide);
-
+        // let tree0col1wide = self.get_bool(PropDef::GuiTree0Col1Wide);
         let sourcetree = crate::treeview2::create_treeview(
             gui_event_sender.clone(),
             drag_state,

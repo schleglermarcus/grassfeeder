@@ -29,8 +29,8 @@ use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::GtkObjectsType;
 
 const TREEVIEW_NAME: &str = "TREEVIEW1";
-const COL1WIDE_WIDTH: i32 = 64;
-const COL1NARROW_WIDTH: i32 = 32;
+const COL1WIDE_WIDTH: i32 = 72;
+const COL1NARROW_WIDTH: i32 = 30;
 
 // Later: check with gtk4:  if we don't fix the width of tree column1, the gtk system crashes on moving the pane-1
 
@@ -83,10 +83,7 @@ pub fn create_treeview(
     treeview1.set_enable_search(false);
     let cellrenderer_spinner = CellRendererSpinner::new();
     cellrenderer_spinner.set_active(true);
-    // let col1width = if col1_wide {        COL1WIDE_WIDTH    } else {        COL1NARROW_WIDTH    };
-
     let tree0column1 = TreeViewColumn::new();
-
     {
         let col = TreeViewColumn::new();
         let cellrendpixbuf = CellRendererPixbuf::new();
@@ -267,14 +264,12 @@ pub fn create_treeview(
     }
     // let t0col1 = tree0column1.clone();
     ddd.set_dialog_distribute(DIALOG_TREE0COL1, move |dialogdata| {
-        debug!("DD= {:?} ", dialogdata);
         let mut col0width = COL1NARROW_WIDTH;
         if dialogdata.get(0).unwrap().boo() {
             col0width = COL1WIDE_WIDTH;
         }
         tree0column1.set_fixed_width(col0width);
     });
-
     treeview1
 }
 

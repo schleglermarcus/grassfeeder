@@ -50,15 +50,16 @@ pub const DEFAULT_CONFIG_FETCH_FEED_UNIT: u8 = 2; // hours
 /// seven days
 const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
 
-const CHECK_MESSAGE_COUNTS_SET_SIZE: usize = 4;
+const CHECK_MESSAGE_COUNTS_SET_SIZE: usize = 10;
 
 // #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum SJob {
     /// only store into adapter
     FillSubscriptionsAdapter,
-    /// subscription_id
-    FillSourcesTreeSingle(isize),
+
+    /// subscription_id  CHECK IF NEEDED
+    // FillSourcesTreeSingle(isize),
 
     /// only update from adapter into TreeView
     GuiUpdateTreeAll,
@@ -90,10 +91,8 @@ pub enum SJob {
     UpdateTreePaths,
     /// subscription_id,  num_msg_all, num_msg_unread
     NotifyTreeReadCount(isize, isize, isize),
-
     /// subscription_id, removed_some  num_msg_all, num_msg_unread
     NotifyMessagesCountsChecked(isize, bool, isize, isize),
-
     ScanEmptyUnread,
     EmptyTreeCreateDefaultSubscriptions,
     ///  Drag-String   Feed-Url   Error-Message,   Home-Page-Title
@@ -135,7 +134,7 @@ impl SourceTreeController {
     pub const CONF_FETCH_ON_START: &'static str = "FetchFeedsOnStart";
     pub const CONF_FETCH_INTERVAL: &'static str = "FetchFeedsInterval";
     pub const CONF_FETCH_INTERVAL_UNIT: &'static str = "FetchFeedsIntervalUnit";
-    pub const CONF_DISPLAY_FEECOUNT_ALL: &'static str = "DisplayFeedCountAll";
+    pub const CONF_DISPLAY_FEEDCOUNT_ALL: &'static str = "DisplayFeedCountAll";
 
     pub fn new_ac(ac: &AppContext) -> Self {
         let gc_r = (*ac).get_rc::<GuiContext>().unwrap();
@@ -215,9 +214,8 @@ impl SourceTreeController {
                 SJob::FillSubscriptionsAdapter => {
                     self.feedsources_into_store_adapter();
                 }
-                SJob::FillSourcesTreeSingle(subs_id) => {
-                    self.insert_tree_row_single(subs_id);
-                }
+
+                // SJob::FillSourcesTreeSingle(subs_id) => {                    self.insert_tree_row_single(subs_id);                }
                 SJob::GuiUpdateTree(subs_id) => {
                     if let Some(path) = self.get_path_for_src(subs_id) {
                         (*self.gui_updater)
@@ -323,26 +321,34 @@ impl SourceTreeController {
                         warn!("SetCursorToSubsID: No Path for id:{}", subs_id);
                     }
                 }
-                SJob::NotifyMessagesCountsChecked(subs_id, removed_some, msg_all, msg_unread) => {
+                SJob::NotifyMessagesCountsChecked(subs_id, removed_some, a, u) => {
+                    self.statemap.borrow_mut().set_num_all_unread(subs_id, a, u);
                     self.statemap.borrow_mut().set_status(
                         &[subs_id],
                         StatusMask::MessageCountsChecked,
                         true,
                     );
                     if removed_some {
-                        debug!(
-                            "NotifyMessagesCountsChecked: {} all:{}  unread:{} ",
-                            subs_id,
-                            msg_all,
-                            msg_unread
-                        );
-                        self.process_tree_read_count(subs_id, msg_all, msg_unread);
+                        if let Some(sta) = self.get_state(subs_id) {
+                            trace!("Notify: {}   {} ST={:?} ", subs_id, removed_some, sta);
+                            let subs_e = (*self.subscriptionrepo_r)
+                                .borrow()
+                                .get_by_index(subs_id)
+                                .unwrap();
+                            self.tree_update_one(&subs_e, &sta);
+                            if subs_e.parent_subs_id > 0 {
+                                self.statemap
+                                    .borrow_mut()
+                                    .clear_num_all_unread(subs_e.parent_subs_id);
+                                self.addjob(SJob::ScanEmptyUnread);
+                            }
+                        }
                     }
                 }
                 SJob::SetGuiTreeColumn1Width => {
                     let fc_all = (*self.configmanager_r)
                         .borrow()
-                        .get_val_bool(Self::CONF_DISPLAY_FEECOUNT_ALL);
+                        .get_val_bool(Self::CONF_DISPLAY_FEEDCOUNT_ALL);
 
                     debug!("SUBS:    SetGuiTreeColumn1Width: {} ", fc_all);
                     let dd: Vec<AValue> = vec![AValue::ABOOL(fc_all)];
@@ -692,26 +698,26 @@ impl SourceTreeController {
         update_ids
             .iter()
             .for_each(|id| self.addjob(SJob::ScheduleUpdateFeed(*id)));
-        if update_ids.is_empty() {
-            let check_count_ids =
-                stm_b.get_ids_by_status(StatusMask::MessageCountsChecked, false, false);
-            if !check_count_ids.is_empty() {
-                trace!(
-                    "check_update_times:  MSG_COUNTS: {:?} ",
-                    &check_count_ids.len()
-                );
-                if let Some(feedcontents) = self.feedcontents_w.upgrade() {
-                    check_count_ids
-                        .iter()
-                        .take(CHECK_MESSAGE_COUNTS_SET_SIZE)
-                        .for_each(|id| {
-                            (*feedcontents)
-                                .borrow()
-                                .addjob(CJob::CheckMessageCounts(*id));
-                        });
-                }
+        let mut check_count_ids =
+            stm_b.get_ids_by_status(StatusMask::MessageCountsChecked, false, false);
+        if !check_count_ids.is_empty() {
+            let n_cc = check_count_ids.len();
+            check_count_ids.sort();
+            check_count_ids.truncate(CHECK_MESSAGE_COUNTS_SET_SIZE);
+            trace!(
+                "check_count_ids:  {:?}  now taking  {:?} ",
+                n_cc,
+                check_count_ids
+            );
+            if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+                check_count_ids.iter().for_each(|id| {
+                    (*feedcontents)
+                        .borrow()
+                        .addjob(CJob::CheckMessageCounts(*id));
+                });
             }
         }
+        // }
     }
 
     fn startup_read_config(&mut self) {
@@ -721,22 +727,8 @@ impl SourceTreeController {
 
         let fc_all = (*self.configmanager_r)
             .borrow()
-            .get_val_bool(Self::CONF_DISPLAY_FEECOUNT_ALL);
-
+            .get_val_bool(Self::CONF_DISPLAY_FEEDCOUNT_ALL);
         (*self.config).borrow_mut().display_feedcount_all = fc_all;
-
-        // (*self.gui_val_store)            .write()            .unwrap()            .set_gui_property(PropDef::GuiTree0Col1Wide, display_feedcount_all.to_string());
-        //  (*self.gui_updater).borrow().update_property(            0,            PropDef::GuiTree0Col1Wide.to_string(),            if fc_all { 1 } else { 0 },        );
-        /*
-                debug!("SUBS:   store width: {} ", fc_all);
-                let dd: Vec<AValue> = vec![AValue::ABOOL(fc_all)];
-                (*self.gui_val_store)
-                    .write()
-                    .unwrap()
-                    .set_dialog_data(DIALOG_TREE0COL1, &dd);
-                (*self.gui_updater).borrow().update_dialog(DIALOG_TREE0COL1);
-        */
-        //
         (*self.config).borrow_mut().feeds_fetch_interval = (*self.configmanager_r)
             .borrow()
             .get_val_int(Self::CONF_FETCH_INTERVAL)
@@ -753,7 +745,6 @@ impl SourceTreeController {
             (*self.config).borrow_mut().feeds_fetch_interval_unit =
                 DEFAULT_CONFIG_FETCH_FEED_UNIT as u32;
         } // Hours
-
         (*self.config).borrow_mut().feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
             .get_val_bool(Self::CONF_FETCH_ON_START);

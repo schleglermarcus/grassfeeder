@@ -361,8 +361,12 @@ pub fn reduce_too_many_messages(
 ) -> (bool, usize, usize, usize) {
     let mut all_messages = msg_r.get_by_src_id(subs_id, true);
     let length_before = all_messages.len();
+    let num_unread = all_messages
+        .iter()
+        .filter(|msg| !msg.is_read && !msg.is_deleted)
+        .count();
     if length_before <= max_messages {
-        return (false, 0, 0, 0);
+        return (false, 0, length_before, num_unread);
     }
     all_messages.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
     let (stay, remove) = all_messages.split_at(max_messages);
@@ -378,9 +382,9 @@ pub fn reduce_too_many_messages(
             .filter(|msg| !msg.is_read && !msg.is_deleted)
             .count();
         let num_all = stay.iter().filter(|msg| !msg.is_deleted).count();
-        return (true, remove.len(), num_all, num_unread);
+        return (true, remove_list.len(), num_all, num_unread);
     }
-    return (false, 0, 0, 0);
+    return (false, 0, length_before, num_unread);
 }
 
 pub struct DeleteDoubleSameMessages(pub CleanerInner);
