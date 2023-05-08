@@ -50,7 +50,7 @@ pub const DEFAULT_CONFIG_FETCH_FEED_UNIT: u8 = 2; // hours
 /// seven days
 const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
 
-const CHECK_MESSAGE_COUNTS_SET_SIZE: usize = 10;
+const CHECK_MESSAGE_COUNTS_SET_SIZE: usize = 20;
 
 // #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -214,8 +214,6 @@ impl SourceTreeController {
                 SJob::FillSubscriptionsAdapter => {
                     self.feedsources_into_store_adapter();
                 }
-
-                // SJob::FillSourcesTreeSingle(subs_id) => {                    self.insert_tree_row_single(subs_id);                }
                 SJob::GuiUpdateTree(subs_id) => {
                     if let Some(path) = self.get_path_for_src(subs_id) {
                         (*self.gui_updater)
@@ -349,8 +347,6 @@ impl SourceTreeController {
                     let fc_all = (*self.configmanager_r)
                         .borrow()
                         .get_val_bool(Self::CONF_DISPLAY_FEEDCOUNT_ALL);
-
-                    debug!("SUBS:    SetGuiTreeColumn1Width: {} ", fc_all);
                     let dd: Vec<AValue> = vec![AValue::ABOOL(fc_all)];
                     (*self.gui_val_store)
                         .write()
@@ -701,14 +697,7 @@ impl SourceTreeController {
         let mut check_count_ids =
             stm_b.get_ids_by_status(StatusMask::MessageCountsChecked, false, false);
         if !check_count_ids.is_empty() {
-            let n_cc = check_count_ids.len();
-            check_count_ids.sort();
             check_count_ids.truncate(CHECK_MESSAGE_COUNTS_SET_SIZE);
-            trace!(
-                "check_count_ids:  {:?}  now taking  {:?} ",
-                n_cc,
-                check_count_ids
-            );
             if let Some(feedcontents) = self.feedcontents_w.upgrade() {
                 check_count_ids.iter().for_each(|id| {
                     (*feedcontents)
@@ -717,7 +706,6 @@ impl SourceTreeController {
                 });
             }
         }
-        // }
     }
 
     fn startup_read_config(&mut self) {

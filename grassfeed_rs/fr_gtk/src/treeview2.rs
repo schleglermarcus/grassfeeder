@@ -29,8 +29,8 @@ use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::GtkObjectsType;
 
 const TREEVIEW_NAME: &str = "TREEVIEW1";
-const COL1WIDE_WIDTH: i32 = 72;
-const COL1NARROW_WIDTH: i32 = 30;
+const COL1WIDE_WIDTH: i32 = 80;
+const COL1NARROW_WIDTH: i32 = 44;
 
 // Later: check with gtk4:  if we don't fix the width of tree column1, the gtk system crashes on moving the pane-1
 

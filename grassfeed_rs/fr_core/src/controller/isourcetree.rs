@@ -49,6 +49,7 @@ pub trait ISourceTreeController {
     fn newsource_dialog_edit(&mut self, edit_feed_url: String);
     fn set_selected_feedsource(&self, src_repo_id: isize);
 
+    /// returns  Subscription,  Non-Folder-Child-IDs
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
     fn set_selected_message_id(&self, subs_id: isize, msg_id: isize);
 }
@@ -297,11 +298,9 @@ impl ISourceTreeController for SourceTreeController {
                 }
             }
         }
-
         if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
             subs_mov.borrow_mut().set_new_folder_parent(new_parent_id)
         }
-
         (*self.gui_updater).borrow().update_dialog(dialog_id);
         (*self.gui_updater).borrow().show_dialog(dialog_id);
     }

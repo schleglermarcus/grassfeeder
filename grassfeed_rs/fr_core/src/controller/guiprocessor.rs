@@ -582,6 +582,8 @@ impl StartupWithAppContext for GuiProcessor {
 
         // ---------------
         self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2 {});
+
+        /// TODO
         self.add_handler(
             &GuiEvents::DialogData(String::default(), Vec::default()),
             HandleDialogData(
@@ -697,7 +699,11 @@ impl StartupWithAppContext for GuiProcessor {
         );
         self.add_handler(
             &GuiEvents::DragDropUrlReceived(String::default()),
-            HandleDragDropUrlReceived(self.downloader_r.clone()),
+            HandleDragDropUrlReceived(
+                self.downloader_r.clone(),
+                self.subscriptionmove_r.clone(),
+                self.feedsources_r.clone(),
+            ),
         );
         self.add_handler(
             &GuiEvents::BrowserEvent(BrowserEventType::default(), 0),
@@ -876,6 +882,7 @@ impl HandleSingleEvent for HandleDialogData {
                     } else if let (Some(AValue::ASTR(ref s0)), Some(AValue::ASTR(ref s1))) =
                         (payload.get(0), payload.get(1))
                     {
+                        /// TODO
                         let new_id = self
                             .2
                             .borrow_mut()
@@ -1234,10 +1241,23 @@ impl HandleSingleEvent for HandleIndicator {
     }
 }
 
-struct HandleDragDropUrlReceived(Rc<RefCell<dyn IDownloader>>);
+
+struct HandleDragDropUrlReceived(
+    Rc<RefCell<dyn IDownloader>>,
+    Rc<RefCell<dyn ISubscriptionMove>>,
+    Rc<RefCell<dyn ISourceTreeController>>,
+);
 impl HandleSingleEvent for HandleDragDropUrlReceived {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::DragDropUrlReceived(ref url) = ev {
+            if let Some((subs_e, _nf_childs)) = self.2.borrow().get_current_selected_subscription()
+            {
+                self.1
+                    .borrow_mut()
+                    .set_new_folder_parent(subs_e.parent_subs_id);
+            } else {
+                debug!("Drag, having no  parent folder! ");
+            }
             self.0.borrow().browser_drag_request(url);
         }
     }

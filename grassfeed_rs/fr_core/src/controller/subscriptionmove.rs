@@ -423,6 +423,7 @@ impl ISubscriptionMove for SubscriptionMove {
     }
 
     fn add_new_subscription(&mut self, newsource: String, display: String) -> isize {
+        // debug!(" current_new_folder_parent_id={:?}  ", self.current_new_folder_parent_id );
         let p_id = self.current_new_folder_parent_id.unwrap_or(0);
         self.add_new_subscription_at_parent(newsource, display, p_id, false)
     }
