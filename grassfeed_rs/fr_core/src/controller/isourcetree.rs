@@ -313,14 +313,11 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let fse = o_fse.unwrap();
-
-        // self.set_fs_delete_id(Some(src_repo_id as usize));
         if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
             subs_mov
                 .borrow_mut()
                 .set_fs_delete_id(Some(src_repo_id as usize));
         }
-
         let dd: Vec<AValue> = vec![
             AValue::ABOOL(fse.is_folder),           // 0
             AValue::ASTR(fse.display_name.clone()), // 1

@@ -265,23 +265,43 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
             .filter(|fse| !fse.is_folder)
             .collect();
         let mut reset_icon_subs_ids: Vec<i32> = Vec::default();
+
+        let all_icon_ids: Vec<isize> = inner
+            .iconrepo
+            .get_all_entries()
+            .iter()
+            .map(|ie| ie.icon_id as isize)
+            .collect::<Vec<isize>>();
+        if all_icon_ids.len() < 5 {
+            error!("no icons found, skipping CorrectIconsOnSubscriptions! ");
+            return StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)));
+        }
         for se in all_folders {
             if se.icon_id < ICON_LIST.len() && se.icon_id != gen_icons::IDX_05_RSS_FEEDS_GREY_64_D {
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
             }
-            let o_icon = inner.iconrepo.get_by_index(se.icon_id as isize);
-            if o_icon.is_none() {
+            if !all_icon_ids.contains(&(se.icon_id as isize)) {
+                trace!(
+                    "CorrectIcons: subscr {}  not-in-icon-db: {:?}  ",
+                    se.subs_id,
+                    se.icon_id
+                );
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
             }
         }
         reset_icon_subs_ids.sort();
         if !reset_icon_subs_ids.is_empty() {
-            trace!("CorrectIconsOnSubscriptions : {:?}", reset_icon_subs_ids);
+            debug!(
+                "CorrectIconsOnSubscriptions : {:?}   #icons={} ",
+                reset_icon_subs_ids,
+                all_icon_ids.len()
+            );
             inner
                 .subscriptionrepo
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_05_RSS_FEEDS_GREY_64_D);
+
             inner.need_update_subscriptions = true;
         }
         StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)))

@@ -99,7 +99,6 @@ pub enum SJob {
     DragUrlEvaluated(String, String, String, String),
     /// subs_id
     SetCursorToSubsID(isize),
-
     SetGuiTreeColumn1Width,
 }
 

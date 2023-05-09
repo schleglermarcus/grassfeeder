@@ -582,7 +582,6 @@ impl StartupWithAppContext for GuiProcessor {
 
         // ---------------
         self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2 {});
-
         self.add_handler(
             &GuiEvents::DialogData(String::default(), Vec::default()),
             HandleDialogData {
@@ -596,7 +595,6 @@ impl StartupWithAppContext for GuiProcessor {
                 r_gc: self.gui_context_r.clone(),
             },
         );
-
         self.add_handler(
             &GuiEvents::PanedMoved(0, 0),
             HandlePanedMoved(self.gui_context_r.clone(), self.configmanager_r.clone()),
@@ -855,18 +853,7 @@ impl HandleSingleEvent for HandleWindowSizeChanged {
         }
     }
 }
-/*
-struct HandleDialogData(
-    Rc<RefCell<dyn IBrowserPane>>, // 0
-    Rc<RefCell<ConfigManager>>,
-    Rc<RefCell<dyn ISubscriptionMove>>,
-    Rc<RefCell<dyn ISourceTreeController>>,
-    Rc<RefCell<dyn ISubscriptionRepo>>, //4
-    Rc<RefCell<dyn IDownloader>>,
-    Rc<RefCell<dyn IContentList>>, // 6
-    Rc<RefCell<GuiContext>>,
-);
- */
+
 struct HandleDialogData {
     r_brow: Rc<RefCell<dyn IBrowserPane>>, // 0
     r_conf: Rc<RefCell<ConfigManager>>,
@@ -877,7 +864,6 @@ struct HandleDialogData {
     r_cl: Rc<RefCell<dyn IContentList>>, // 6
     r_gc: Rc<RefCell<GuiContext>>,
 }
-
 impl HandleSingleEvent for HandleDialogData {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::DialogData(ref ident, ref payload) = ev {
