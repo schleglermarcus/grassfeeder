@@ -21,6 +21,7 @@ use crate::db::subscription_state::StatusMask;
 use crate::db::subscription_state::SubsMapEntry;
 use crate::db::subscription_state::SubscriptionState;
 use crate::ui_select::gui_context::GuiContext;
+use crate::util::db_time_to_display_nonnull;
 use crate::util::timestamp_now;
 use context::appcontext::AppContext;
 use context::BuildConfig;
@@ -47,6 +48,7 @@ pub const TREE_STATUS_COLUMN: usize = 7;
 
 pub const DEFAULT_CONFIG_FETCH_FEED_INTERVAL: u8 = 2;
 pub const DEFAULT_CONFIG_FETCH_FEED_UNIT: u8 = 2; // hours
+
 /// seven days
 const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
 
@@ -248,14 +250,17 @@ impl SourceTreeController {
                 SJob::SetFetchFinished(fs_id, error_happened) => {
                     self.set_fetch_finished(fs_id, error_happened)
                 }
-                SJob::SetIconId(fs_id, icon_id) => {
+                SJob::SetIconId(subs_id, icon_id) => {
                     let ts_now = timestamp_now();
-                    (*self.subscriptionrepo_r).borrow().update_icon_id(
-                        fs_id,
+// TODO 
+                    trace!("SetIconId  {} {}", subs_id, icon_id);
+
+                    (*self.subscriptionrepo_r).borrow().update_icon_id_time(
+                        subs_id,
                         icon_id as usize,
                         ts_now,
                     );
-                    self.tree_store_update_one(fs_id);
+                    self.tree_store_update_one(subs_id);
                 }
                 SJob::SanitizeSources => {
                     (*self.downloader_r).borrow().cleanup_db();
@@ -327,7 +332,12 @@ impl SourceTreeController {
                     );
                     if removed_some {
                         if let Some(sta) = self.get_state(subs_id) {
-                            trace!("Notify: {}   {} ST={:?} ", subs_id, removed_some, sta);
+                            trace!(
+                                "MessagesCountsChecked: {}   {} ST={:?} ",
+                                subs_id,
+                                removed_some,
+                                sta
+                            );
                             let subs_e = (*self.subscriptionrepo_r)
                                 .borrow()
                                 .get_by_index(subs_id)
@@ -576,15 +586,28 @@ impl SourceTreeController {
             .set_status(&[source_id], StatusMask::FetchScheduled, false);
     }
 
-    fn check_icon(&self, fs_id: isize) {
-        if let Some(fse) = self.subscriptionrepo_r.borrow().get_by_index(fs_id) {
-            let now_seconds = timestamp_now();
-            let time_outdated = now_seconds - (fse.updated_icon + ICON_RELOAD_TIME_S);
-            if time_outdated > 0 || fse.icon_id < ICON_LIST.len() {
-                (*self.downloader_r)
-                    .borrow()
-                    .load_icon(fse.subs_id, fse.url, fse.icon_id);
-            }
+    fn check_icon(&self, subs_id: isize) {
+        let o_subs = self.subscriptionrepo_r.borrow().get_by_index(subs_id);
+        if o_subs.is_none() {
+            return;
+        }
+        let subs = o_subs.unwrap();
+        let now_seconds = timestamp_now();
+        let time_outdated = now_seconds - (subs.updated_icon + ICON_RELOAD_TIME_S);
+        if time_outdated > 0 || subs.icon_id < ICON_LIST.len() {
+            trace!(
+                "check_icon:  ID:{}  icon-id:{} icontime:{} time_outdated={}h   now:{}  icontime:{} ",
+                subs_id,
+                subs.icon_id,
+                subs.updated_icon,
+                time_outdated / 3600,
+                db_time_to_display_nonnull(now_seconds),
+                db_time_to_display_nonnull(subs.updated_icon),
+            );
+
+            (*self.downloader_r)
+                .borrow()
+                .load_icon(subs.subs_id, subs.url, subs.icon_id);
         }
     }
 

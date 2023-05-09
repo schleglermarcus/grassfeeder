@@ -11,10 +11,43 @@ use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::db_clean::CleanerInner;
 use fr_core::downloader::db_clean::CleanerStart;
+use fr_core::downloader::db_clean::CorrectIconsDoublettes;
 use fr_core::util::timestamp_now;
+use fr_core::util::Step;
 use fr_core::util::StepResult;
 use fr_core::TD_BASE;
 use std::collections::HashSet;
+
+// #[ignore]
+#[test]
+fn clean_icon_doublettes() {
+    setup();
+    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
+    let subsrepo = SubscriptionRepo::new_inmem();
+    subsrepo.scrub_all_subscriptions();
+    let msgrepo1 = MessagesRepo::new_in_mem();
+    let err_repo = ErrorRepo::new("../target/");
+    msgrepo1.get_ctx().create_table();
+    prepare_db_with_errors_1(&msgrepo1, &subsrepo);
+    let _r = std::fs::create_dir("../target/iconc");
+    let r = std::fs::copy(
+        "tests/data/icons_list.json",
+        "../target/iconc/icons_list.json",
+    );
+    assert!(r.is_ok());
+    let mut iconrepo = IconRepo::new("../target/iconc");
+    iconrepo.startup();
+    let cleaner_i = CleanerInner::new(
+        c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 1000, err_repo,
+    );
+    let cib = Box::new(CorrectIconsDoublettes(cleaner_i));
+    cib.step();
+    let mut iconrepo = IconRepo::new("../target/iconc");
+    iconrepo.startup();
+    let all = iconrepo.get_all_entries();
+    assert_eq!(all.len(), 3);
+}
 
 // #[ignore]
 #[test]
@@ -25,10 +58,11 @@ fn cleanup_message_doublettes() {
     let subsrepo = SubscriptionRepo::new_inmem();
     subsrepo.scrub_all_subscriptions();
     let msgrepo1 = MessagesRepo::new_in_mem();
-    let iconrepo = IconRepo::new("");
-    let err_repo = ErrorRepo::new("../target/"); // ErrorRepo::by_existing_list(Arc::new(RwLock::new(MapAndId::default()))); //   new("");
+    let err_repo = ErrorRepo::new("../target/");
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
+    let mut iconrepo = IconRepo::new("../target/");
+    iconrepo.startup();
     let cleaner_i = CleanerInner::new(
         c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 1000, err_repo,
     );
@@ -47,10 +81,11 @@ fn db_cleanup_too_many_messages() {
     subsrepo.scrub_all_subscriptions();
     let msgrepo1 = MessagesRepo::new_in_mem();
     let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
-    let iconrepo = IconRepo::new("");
     let err_repo = ErrorRepo::new("../target/");
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
+    let mut iconrepo = IconRepo::new("../target/");
+    iconrepo.startup();
     let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5, err_repo);
     let _inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let msg1 = msgrepo2.get_by_src_id(5, false);
@@ -91,7 +126,6 @@ fn clean_phase1(subs_repo: &SubscriptionRepo) {
         .for_each(|id| subs_repo.delete_by_index(*id));
 }
 
-// #[ignore]
 #[test]
 fn db_cleanup_remove_deleted() {
     setup();
@@ -118,7 +152,6 @@ fn db_cleanup_remove_deleted() {
     assert_eq!(all_entries.len(), 309);
 }
 
-// #[ignore]
 #[test]
 fn t_db_cleanup_1() {
     setup();
@@ -131,7 +164,8 @@ fn t_db_cleanup_1() {
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
-    let iconrepo = IconRepo::new("");
+    let mut iconrepo = IconRepo::new("../target/");
+    iconrepo.startup();
     let err_repo = ErrorRepo::new("../target/");
     let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5, err_repo);
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
@@ -148,23 +182,25 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
     let mut se = SubscriptionEntry::default();
     se.is_folder = true;
     se.display_name = "folder1".to_string();
+    se.icon_id = 30;
     assert!(subsrepo.store_entry(&se).is_ok()); // id 1
     se.is_folder = false;
     se.parent_subs_id = 1;
-    assert!(subsrepo.store_entry(&se).is_ok());
+    se.icon_id = 31;
+    assert!(subsrepo.store_entry(&se).is_ok()); // id 2
     se.parent_subs_id = 1; // unchanged folder pos, that's an error
     se.display_name = "Japan 無料ダウンロード".to_string();
     se.expanded = true;
-    assert!(subsrepo.store_entry(&se).is_ok());
+    se.icon_id = 32;
+    assert!(subsrepo.store_entry(&se).is_ok()); // id 3
     se.display_name = "fourth".to_string();
     se.expanded = false;
     se.folder_position = 3;
-    assert!(subsrepo.store_entry(&se).is_ok());
-
+    assert!(subsrepo.store_entry(&se).is_ok()); // id 4
     se.display_name = "fifth".to_string();
     se.expanded = false;
     se.folder_position = 4;
-    assert!(subsrepo.store_entry(&se).is_ok()); // 5
+    assert!(subsrepo.store_entry(&se).is_ok()); // id 5
     let mut m1 = MessageRow::default();
     m1.fetch_date = timestamp_now();
     m1.subscription_id = 1;
@@ -188,6 +224,8 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
         m1.entry_src_date = 1000000000_i64 + 100000 * i;
         let _r = msgrepo.insert(&m1);
     }
+    let r = std::fs::copy("tests/data/icons_sane.json", "../target/icons_list.json");
+    assert!(r.is_ok());
 }
 
 // ------------------------------------

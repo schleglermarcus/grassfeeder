@@ -16,6 +16,8 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
+use super::contentdownloader::DLKIND_MAX;
+
 const BOTTOM_MSG_SHOW_TIME_S: u8 = 10;
 
 // https://www.w3schools.com/charsets/ref_utf_block.asp
@@ -51,6 +53,7 @@ pub struct StatusBar {
     bottom_notice_current: Option<(i64, String)>,
     pub browser_loading_progress: u8,
     browser_loading_progress_int: u8,
+    downloader_stats: [u32; DLKIND_MAX],
 }
 
 impl StatusBar {
@@ -86,6 +89,7 @@ impl StatusBar {
             bottom_notice_current: Default::default(),
             browser_loading_progress: Default::default(),
             browser_loading_progress_int: Default::default(),
+            downloader_stats: [0; DLKIND_MAX],
         }
     }
 
@@ -105,11 +109,10 @@ impl StatusBar {
             repo_id_new = fse.subs_id;
             last_fetch_time = fse.updated_int;
             feed_src_link = fse.url.clone();
-            self.num_downloader_threads = (*self.r_downloader)
-                .borrow()
-                .get_config()
-                .num_downloader_threads;
             is_folder = fse.is_folder;
+            let dl_r_b = (*self.r_downloader).borrow();
+            self.num_downloader_threads = dl_r_b.get_config().num_downloader_threads;
+            self.downloader_stats = dl_r_b.get_statistics();
         } else {
             repo_id_new = -1;
         }
@@ -217,8 +220,21 @@ impl StatusBar {
                 downloader_display.push(nc);
             }
             let unread_all = format!("{:5} / {:5}", self.num_msg_unread, self.num_msg_all);
+
             let memdisplay = if self.mode_debug {
-                format!("  {}MB ", self.mem_usage_vmrss_bytes / 1048576,)
+                let mut dl_line = String::default();
+                self.downloader_stats
+                    .iter()
+                    .enumerate()
+                    .filter(|(_n, s)| **s > 0)
+                    .map(|(n, s)| format!("{}{} ", dl_char_for_kind(n as u8), s))
+                    .for_each(|s| dl_line.push_str(&s));
+
+                format!(
+                    "  {}MB  {}  ",
+                    self.mem_usage_vmrss_bytes / 1048576,
+                    dl_line
+                )
             } else {
                 String::default()
             };

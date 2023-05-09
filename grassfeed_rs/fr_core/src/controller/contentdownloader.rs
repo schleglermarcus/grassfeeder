@@ -68,6 +68,8 @@ pub trait IDownloader {
     fn get_queue_size(&self) -> usize;
     fn browser_drag_request(&self, dragged_url: &str);
     fn launch_webbrowser(&self, url: String, cl_id: isize, list_pos: u32);
+
+    fn get_statistics(&self) -> [u32; DLKIND_MAX];
 }
 
 #[derive(Debug, PartialEq)]
@@ -81,7 +83,9 @@ pub enum DLJob {
     LaunchWebBrowser(LaunchInner),
 }
 
-trait DLKind {
+pub const DLKIND_MAX: usize = 7;
+
+pub trait DLKind {
     fn kind(&self) -> u8;
     fn hostname(&self) -> Option<String> {
         None
@@ -138,6 +142,7 @@ pub struct Downloader {
     messagesrepo: Rc<RefCell<MessagesRepo>>,
     job_queue: Arc<RwLock<VecDeque<DLJob>>>,
     erro_repo: Rc<RefCell<ErrorRepo>>,
+    call_statistic: RefCell<[u32; DLKIND_MAX]>,
 }
 
 impl Downloader {
@@ -163,6 +168,7 @@ impl Downloader {
             messagesrepo: msgrepo,
             job_queue: Arc::new(RwLock::new(VecDeque::default())),
             erro_repo: err_repo,
+            call_statistic: RefCell::new([0; DLKIND_MAX]),
         }
     }
 
@@ -233,6 +239,7 @@ impl Downloader {
     }
 
     fn add_to_queue(&self, dljob: DLJob) {
+        self.call_statistic.borrow_mut()[dljob.kind() as usize] += 1;
         if !(*self.job_queue).read().unwrap().contains(&dljob) {
             (*self.job_queue).write().unwrap().push_back(dljob);
         }
@@ -341,15 +348,16 @@ impl IDownloader for Downloader {
         self.add_to_queue(DLJob::Feed(new_fetch_job));
     }
 
-    fn load_icon(&self, fs_id: isize, fs_url: String, old_icon_id: usize) {
+    fn load_icon(&self, subsid: isize, url: String, old_icon_id: usize) {
+        trace!("load_icon: {} {} {} ", subsid, old_icon_id, url);
         let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
         let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
         let dl_inner = IconInner {
-            subs_id: fs_id,
-            feed_url: fs_url,
+            subs_id: subsid,
+            feed_url: url,
             icon_url: String::default(),
             iconrepo: icon_repo,
             web_fetcher: self.web_fetcher.clone(),
@@ -362,6 +370,7 @@ impl IDownloader for Downloader {
             subscriptionrepo: subscription_repo,
             erro_repo: errors_rep,
             image_icon_kind: Default::default(),
+            compressed_icon: Default::default(),
         };
         self.add_to_queue(DLJob::Icon(dl_inner));
     }
@@ -458,6 +467,10 @@ impl IDownloader for Downloader {
         let cl_sender: Sender<CJob> = self.contentlist_job_sender.as_ref().unwrap().clone();
         let inner = LaunchInner::new(url, cl_id, list_pos, cl_sender);
         self.add_to_queue(DLJob::LaunchWebBrowser(inner));
+    }
+
+    fn get_statistics(&self) -> [u32; DLKIND_MAX] {
+        self.call_statistic.borrow().clone()
     }
 }
 

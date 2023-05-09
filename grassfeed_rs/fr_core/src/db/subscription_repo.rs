@@ -50,7 +50,8 @@ pub trait ISubscriptionRepo {
     ) -> Result<SubscriptionEntry, Box<dyn std::error::Error>>;
 
     ///   store IconID into feed source
-    fn update_icon_id(&self, src_id: isize, icon_id: usize, timestamp_s: i64);
+    fn update_icon_id_time(&self, src_id: isize, icon_id: usize, timestamp_s: i64);
+    fn update_icon_id_(&self, src_id: isize, icon_id: usize);
     fn update_icon_id_many(&self, src_ids: Vec<i32>, icon_id: usize);
 
     fn update_folder_position(&self, src_id: isize, new_folder_pos: isize);
@@ -246,12 +247,24 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     ///   store IconID into subscription entry
-    fn update_icon_id(&self, subs_id: isize, icon_id: usize, timestamp_s: i64) {
+    fn update_icon_id_time(&self, subs_id: isize, icon_id: usize, timestamp_s: i64) {
         let sql = format!(
             "UPDATE {}  SET  icon_id={}, updated_icon={} WHERE {}={} ",
             SubscriptionEntry::table_name(),
             icon_id,
             timestamp_s,
+            SubscriptionEntry::index_column_name(),
+            subs_id
+        );
+        self.ctx.execute(sql);
+    }
+
+    ///   store IconID into subscription entry
+    fn update_icon_id_(&self, subs_id: isize, icon_id: usize) {
+        let sql = format!(
+            "UPDATE {}  SET  icon_id={}  WHERE {}={} ",
+            SubscriptionEntry::table_name(),
+            icon_id,
             SubscriptionEntry::index_column_name(),
             subs_id
         );
@@ -616,8 +629,7 @@ mod ut {
         let mut sr = SubscriptionRepo::new_inmem();
         sr.startup_int();
         assert!(sr.store_entry(&SubscriptionEntry::default()).is_ok());
-        sr.update_icon_id(10, 2, 3);
-
+        sr.update_icon_id_time(10, 2, 3);
         let e = sr.get_by_index(10).unwrap();
         assert_eq!(e.icon_id, 2);
         assert_eq!(e.updated_icon, 3);

@@ -2,6 +2,7 @@ use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorEntry;
 use crate::db::errors_repo::ErrorRepo;
+use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::db::message::MessageRow;
 use crate::db::messages_repo::IMessagesRepo;
@@ -18,6 +19,7 @@ use flume::Sender;
 use resources::gen_icons;
 use resources::gen_icons::ICON_LIST;
 use std::borrow::Borrow;
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::Mutex;
 
@@ -250,6 +252,56 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_08_GNOME_FOLDER_48);
             inner.need_update_subscriptions = true;
         }
+        StepResult::Continue(Box::new(CorrectIconsDoublettes(inner)))
+    }
+}
+
+pub struct CorrectIconsDoublettes(pub CleanerInner);
+impl Step<CleanerInner> for CorrectIconsDoublettes {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let mut inner = self.0;
+        let all_icons: Vec<IconEntry> = inner.iconrepo.get_all_entries();
+        let all_icons_len = all_icons.len();
+        let mut ic_first: HashMap<String, isize> = HashMap::new();
+        let mut replace_ids: HashMap<isize, isize> = HashMap::new(); // subsequent-icon-id =>  previous icon-id
+        all_icons
+            .into_iter()
+            .for_each(|e| match ic_first.get(&e.icon) {
+                None => {
+                    ic_first.insert(e.icon, e.icon_id);
+                }
+                Some(id) => {
+                    replace_ids.insert(e.icon_id, *id);
+                }
+            });
+        let all_subs = inner.subscriptionrepo.get_all_nonfolder();
+        trace!(            "IconsDoublettes:  icon_uniq:{}    replace_icons:{}   all_subscriptions:{}  all_icons:{} ",           ic_first.len(),            replace_ids.len(),            all_subs.len(), all_icons_len        );
+        replace_ids.iter().for_each(|(repl, dest)| {
+            all_subs
+                .iter()
+                .filter(|subs| subs.icon_id == *repl as usize)
+                .for_each(|subs| {
+                    trace!(
+                        "modifiying icon id {} {}=>{} ",
+                        subs.subs_id,
+                        subs.icon_id,
+                        dest
+                    );
+                    inner
+                        .subscriptionrepo
+                        .update_icon_id_(subs.subs_id, *dest as usize)
+                });
+        });
+        if !replace_ids.is_empty() {
+            trace!(
+                "IconsDoublettes:  removing double icons: {:?} ",
+                replace_ids.keys()
+            );
+            replace_ids.iter().for_each(|(repl, _dest)| {
+                inner.iconrepo.remove_icon(*repl);
+            });
+            inner.iconrepo.check_or_store();
+        }
         StepResult::Continue(Box::new(CorrectIconsOnSubscriptions(inner)))
     }
 }
@@ -265,15 +317,17 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
             .filter(|fse| !fse.is_folder)
             .collect();
         let mut reset_icon_subs_ids: Vec<i32> = Vec::default();
-
         let all_icon_ids: Vec<isize> = inner
             .iconrepo
             .get_all_entries()
             .iter()
             .map(|ie| ie.icon_id as isize)
             .collect::<Vec<isize>>();
-        if all_icon_ids.len() < 5 {
-            error!("no icons found, skipping CorrectIconsOnSubscriptions! ");
+        if all_icon_ids.len() < 2 {
+            error!(
+                "no icons found, skipping CorrectIconsOnSubscriptions!  {} ",
+                all_icon_ids.len()
+            );
             return StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)));
         }
         for se in all_folders {
