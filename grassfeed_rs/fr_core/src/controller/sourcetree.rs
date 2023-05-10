@@ -252,9 +252,6 @@ impl SourceTreeController {
                 }
                 SJob::SetIconId(subs_id, icon_id) => {
                     let ts_now = timestamp_now();
-// TODO 
-                    trace!("SetIconId  {} {}", subs_id, icon_id);
-
                     (*self.subscriptionrepo_r).borrow().update_icon_id_time(
                         subs_id,
                         icon_id as usize,
@@ -604,7 +601,6 @@ impl SourceTreeController {
                 db_time_to_display_nonnull(now_seconds),
                 db_time_to_display_nonnull(subs.updated_icon),
             );
-
             (*self.downloader_r)
                 .borrow()
                 .load_icon(subs.subs_id, subs.url, subs.icon_id);

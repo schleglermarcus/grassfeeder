@@ -321,7 +321,7 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
             .iconrepo
             .get_all_entries()
             .iter()
-            .map(|ie| ie.icon_id as isize)
+            .map(|ie| ie.icon_id)
             .collect::<Vec<isize>>();
         if all_icon_ids.len() < 2 {
             error!(
@@ -576,7 +576,6 @@ impl Step<CleanerInner> for Notify {
                 .sourcetree_job_sender
                 .send(SJob::FillSubscriptionsAdapter);
         }
-        // later: refresh message display
         StepResult::Stop(inner)
     }
 }
@@ -642,13 +641,10 @@ pub fn check_layer(
     if !entries.is_empty() {
         subs_active_parents.lock().unwrap().push(parent_subs_id);
     }
-    // debug!("check_layer: {:?} {:?}", &localpath, &entries);
     entries.iter().enumerate().for_each(|(folderpos, fse)| {
         let mut path: Vec<u16> = Vec::new();
         path.extend_from_slice(localpath);
         if fse.folder_position != (folderpos as isize) {
-            // debug!(                "check_layer: unequal folderpos {:?} {:?}",                fse.folder_position, folderpos            );
-
             let mut fpc = fp_correct_subs_parent.lock().unwrap();
             if !fpc.contains(&(fse.parent_subs_id as i32)) {
                 fpc.push(fse.parent_subs_id as i32);

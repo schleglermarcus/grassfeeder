@@ -348,8 +348,8 @@ impl IDownloader for Downloader {
         self.add_to_queue(DLJob::Feed(new_fetch_job));
     }
 
-    fn load_icon(&self, subsid: isize, url: String, old_icon_id: usize) {
-        trace!("load_icon: {} {} {} ", subsid, old_icon_id, url);
+    fn load_icon(&self, subsid: isize, feedurl: String, old_icon_id: usize) {
+        // trace!("load_icon: {} {}  ", subsid, old_icon_id);
         let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
@@ -357,7 +357,7 @@ impl IDownloader for Downloader {
         let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
         let dl_inner = IconInner {
             subs_id: subsid,
-            feed_url: url,
+            feed_url: feedurl,
             icon_url: String::default(),
             iconrepo: icon_repo,
             web_fetcher: self.web_fetcher.clone(),
@@ -470,7 +470,7 @@ impl IDownloader for Downloader {
     }
 
     fn get_statistics(&self) -> [u32; DLKIND_MAX] {
-        self.call_statistic.borrow().clone()
+        *self.call_statistic.borrow()
     }
 }
 

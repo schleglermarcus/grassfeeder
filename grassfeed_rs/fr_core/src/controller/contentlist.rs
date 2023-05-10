@@ -479,14 +479,16 @@ impl FeedContents {
             (*self.messagesrepo_r).borrow().get_ctx().get_connection(),
         );
         let r = db_clean::reduce_too_many_messages(&msg_repo, msg_keep_count as usize, subs_id);
-        let (removed_some, _num_removed, num_all, num_unread) = r;
-        // if removed_some {            debug!("check_message_counts: {} {:?} ", subs_id, &r);        }
+        let (rm_some, n_rm, num_all, num_unread) = r;
+        if rm_some {
+            debug!("checkMessageCounts {} {:?} removed:{} ", subs_id, &r, n_rm);
+        }
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             (*feedsources)
                 .borrow()
                 .addjob(SJob::NotifyMessagesCountsChecked(
                     subs_id,
-                    removed_some,
+                    rm_some,
                     num_all as isize,
                     num_unread as isize,
                 ));

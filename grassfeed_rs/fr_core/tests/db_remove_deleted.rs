@@ -49,7 +49,6 @@ fn clean_icon_doublettes() {
     assert_eq!(all.len(), 3);
 }
 
-// #[ignore]
 #[test]
 fn cleanup_message_doublettes() {
     setup();
@@ -71,7 +70,6 @@ fn cleanup_message_doublettes() {
     assert_eq!(msg4.len(), 1); // the other 10 are set deleted
 }
 
-// #[ignore]
 #[test]
 fn db_cleanup_too_many_messages() {
     setup();
