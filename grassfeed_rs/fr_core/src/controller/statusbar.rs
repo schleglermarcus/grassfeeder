@@ -1,5 +1,6 @@
 use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader::IDownloader;
+use crate::controller::contentdownloader::DLKIND_MAX;
 use crate::controller::contentlist::IContentList;
 use crate::controller::guiprocessor::dl_char_for_kind;
 use crate::controller::isourcetree::ISourceTreeController;
@@ -15,8 +16,6 @@ use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
-
-use super::contentdownloader::DLKIND_MAX;
 
 const BOTTOM_MSG_SHOW_TIME_S: u8 = 10;
 
@@ -220,7 +219,6 @@ impl StatusBar {
                 downloader_display.push(nc);
             }
             let unread_all = format!("{:5} / {:5}", self.num_msg_unread, self.num_msg_all);
-
             let memdisplay = if self.mode_debug {
                 let mut dl_line = String::default();
                 self.downloader_stats

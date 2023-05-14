@@ -1,5 +1,5 @@
-use fr_core::controller::contentdownloader::DLKIND_MAX;
 use fr_core::controller::contentdownloader::IDownloader;
+use fr_core::controller::contentdownloader::DLKIND_MAX;
 use fr_core::controller::subscriptionmove::ISubscriptionMove;
 use fr_core::controller::subscriptionmove::SubscriptionMove;
 use fr_core::db::errors_repo::ErrorRepo;

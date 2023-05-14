@@ -51,7 +51,7 @@ pub trait ISubscriptionRepo {
 
     ///   store IconID into feed source
     fn update_icon_id_time(&self, src_id: isize, icon_id: usize, timestamp_s: i64);
-    fn update_icon_id_(&self, src_id: isize, icon_id: usize);
+    fn update_icon_id(&self, src_id: isize, icon_id: usize);
     fn update_icon_id_many(&self, src_ids: Vec<i32>, icon_id: usize);
 
     fn update_folder_position(&self, src_id: isize, new_folder_pos: isize);
@@ -260,7 +260,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
     }
 
     ///   store IconID into subscription entry
-    fn update_icon_id_(&self, subs_id: isize, icon_id: usize) {
+    fn update_icon_id(&self, subs_id: isize, icon_id: usize) {
         let sql = format!(
             "UPDATE {}  SET  icon_id={}  WHERE {}={} ",
             SubscriptionEntry::table_name(),

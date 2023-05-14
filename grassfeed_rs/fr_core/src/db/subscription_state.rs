@@ -192,7 +192,6 @@ impl ISubscriptionState for SubscriptionState {
             .for_each(|(k, v)| debug!("SSD {} {:?}", k, v));
         // debug!("subscription_state::dump() {:#?}", self.statemap);
     }
-
 }
 
 #[allow(dead_code)]

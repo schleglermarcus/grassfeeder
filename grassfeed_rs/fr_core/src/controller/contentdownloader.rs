@@ -54,6 +54,7 @@ pub const DOWNLOADER_THREADS_DEFAULT: u8 = 2;
 pub const DOWNLOADER_LOOP_DELAY_S: u8 = 1;
 pub const DOWNLOADER_LOOP_WAIT_MS: u64 = 200; // between downloader queue requests
 pub const DOWNLOADER_JOB_QUEUE: usize = 2000;
+pub const DLKIND_MAX: usize = 7;
 
 pub trait IDownloader {
     fn shutdown(&mut self);
@@ -82,8 +83,6 @@ pub enum DLJob {
     BrowserDragEvaluation(DragInner),
     LaunchWebBrowser(LaunchInner),
 }
-
-pub const DLKIND_MAX: usize = 7;
 
 pub trait DLKind {
     fn kind(&self) -> u8;
@@ -528,6 +527,3 @@ impl Default for Config {
         }
     }
 }
-
-// ---
-// #[cfg(test)]mod downloader_test {     use super::*;  }

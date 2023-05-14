@@ -34,9 +34,8 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
 
     let mut iconrepo = IconRepo::new(config_folder);
     iconrepo.startup();
-
     let all_messages = msgrepo1.get_all_messages();
-    debug!(
+    trace!(
         "Messages  {}  #{}  CACHE: {}",
         &msg_fn,
         &all_messages.len(),
@@ -44,15 +43,12 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
     );
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let (c_q_s, c_q_r) = flume::bounded::<CJob>(9);
-
     let cleaner_i = CleanerInner::new(
         c_q_s, stc_job_s, subsrepo1, msgrepo1, iconrepo, 100000, err_repo,
     );
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
-
     c_q_r.drain().for_each(|cjob| debug!("CJOB: {:?}", cjob));
     let sjobs = stc_job_r.drain().collect::<Vec<SJob>>();
-    // .for_each(|sjob| trace!("SJOB: {:?}", sjob));
     let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
     if !parent_ids_to_correct.is_empty() {
         debug!(" to_correct: {:?} {:?} ", parent_ids_to_correct, sjobs);

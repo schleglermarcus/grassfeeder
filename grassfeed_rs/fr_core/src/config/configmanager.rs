@@ -54,17 +54,6 @@ impl ConfigManager {
         self.cconf_modified.replace(false);
     }
 
-    /*
-       pub fn debug_dump(&self, prefix: &str) {
-           debug!(
-               "{} DD-system= {:#?} ",
-               prefix,
-               (*self.system_config).borrow()
-           );
-           debug!("{} DD-user= {:#?} ", prefix, (*self.user_config).borrow());
-       }
-    */
-
     pub fn get_user_conf(&self) -> Rc<RefCell<HashMap<String, String>>> {
         self.user_config.clone()
     }
@@ -114,7 +103,7 @@ impl ConfigManager {
     }
 
     pub fn get_val(&self, key: &str) -> Option<String> {
-        (*self.user_config).borrow().get(key).cloned() // map(|r| r.clone())
+        (*self.user_config).borrow().get(key).cloned()
     }
 
     pub fn get_val_int(&self, key: &str) -> Option<isize> {

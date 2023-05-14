@@ -289,7 +289,7 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
                     );
                     inner
                         .subscriptionrepo
-                        .update_icon_id_(subs.subs_id, *dest as usize)
+                        .update_icon_id(subs.subs_id, *dest as usize)
                 });
         });
         if !replace_ids.is_empty() {
