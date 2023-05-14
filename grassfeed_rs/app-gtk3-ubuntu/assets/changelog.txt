@@ -1,3 +1,13 @@
+grassfeeder-gtk3 (0.2.0) jammy; urgency=low
+
+  * Subscriptions tree adjusts message count column width
+  * Expiring old messages regularly
+  * Dragging Url, Subscription shall be inserted at current folder
+  * Improved Subscriptions Icon handling, less requests
+  * Bugfix: DB-check reads the icon location.
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sun, 14 May 2023 00:12:00 +0000
+
 grassfeeder-gtk3 (0.1.9) jammy; urgency=low
 
   * Building the debian package on launchpad

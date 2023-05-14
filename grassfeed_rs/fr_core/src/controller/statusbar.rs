@@ -1,6 +1,7 @@
 use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader::IDownloader;
-use crate::controller::contentlist::IFeedContents;
+use crate::controller::contentdownloader::DLKIND_MAX;
+use crate::controller::contentlist::IContentList;
 use crate::controller::guiprocessor::dl_char_for_kind;
 use crate::controller::isourcetree::ISourceTreeController;
 use crate::db::subscription_state::SubsMapEntry;
@@ -29,7 +30,7 @@ const VERTICAL_RISING_BAR_LEN: usize = VERTICAL_RISING_BAR.len() - 1;
 pub struct StatusBar {
     r_subscriptions_controller: Rc<RefCell<dyn ISourceTreeController>>,
     r_downloader: Rc<RefCell<dyn IDownloader>>,
-    r_messages: Rc<RefCell<dyn IFeedContents>>,
+    r_messages: Rc<RefCell<dyn IContentList>>,
     r_browserpane: Rc<RefCell<dyn IBrowserPane>>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_val_store: UIAdapterValueStoreType,
@@ -51,6 +52,7 @@ pub struct StatusBar {
     bottom_notice_current: Option<(i64, String)>,
     pub browser_loading_progress: u8,
     browser_loading_progress_int: u8,
+    downloader_stats: [u32; DLKIND_MAX],
 }
 
 impl StatusBar {
@@ -58,7 +60,7 @@ impl StatusBar {
         r_c_subs: Rc<RefCell<dyn ISourceTreeController>>,
         r_downloadr: Rc<RefCell<dyn IDownloader>>,
         gui_updatr: Rc<RefCell<dyn UIUpdaterAdapter>>,
-        r_msg_c: Rc<RefCell<dyn IFeedContents>>,
+        r_msg_c: Rc<RefCell<dyn IContentList>>,
         browser_pane: Rc<RefCell<dyn IBrowserPane>>,
         val_store: UIAdapterValueStoreType,
     ) -> Self {
@@ -86,6 +88,7 @@ impl StatusBar {
             bottom_notice_current: Default::default(),
             browser_loading_progress: Default::default(),
             browser_loading_progress_int: Default::default(),
+            downloader_stats: [0; DLKIND_MAX],
         }
     }
 
@@ -105,11 +108,10 @@ impl StatusBar {
             repo_id_new = fse.subs_id;
             last_fetch_time = fse.updated_int;
             feed_src_link = fse.url.clone();
-            self.num_downloader_threads = (*self.r_downloader)
-                .borrow()
-                .get_config()
-                .num_downloader_threads;
             is_folder = fse.is_folder;
+            let dl_r_b = (*self.r_downloader).borrow();
+            self.num_downloader_threads = dl_r_b.get_config().num_downloader_threads;
+            self.downloader_stats = dl_r_b.get_statistics();
         } else {
             repo_id_new = -1;
         }
@@ -218,7 +220,19 @@ impl StatusBar {
             }
             let unread_all = format!("{:5} / {:5}", self.num_msg_unread, self.num_msg_all);
             let memdisplay = if self.mode_debug {
-                format!("  {}MB ", self.mem_usage_vmrss_bytes / 1048576,)
+                let mut dl_line = String::default();
+                self.downloader_stats
+                    .iter()
+                    .enumerate()
+                    .filter(|(_n, s)| **s > 0)
+                    .map(|(n, s)| format!("{}{} ", dl_char_for_kind(n as u8), s))
+                    .for_each(|s| dl_line.push_str(&s));
+
+                format!(
+                    "  {}MB  {}  ",
+                    self.mem_usage_vmrss_bytes / 1048576,
+                    dl_line
+                )
             } else {
                 String::default()
             };

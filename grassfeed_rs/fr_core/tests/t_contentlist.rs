@@ -5,7 +5,7 @@ use fr_core::config::init_system::GrassFeederConfig;
 use fr_core::controller::contentlist::match_new_entries_to_existing;
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::contentlist::FeedContents;
-use fr_core::controller::contentlist::IFeedContents;
+use fr_core::controller::contentlist::IContentList;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;

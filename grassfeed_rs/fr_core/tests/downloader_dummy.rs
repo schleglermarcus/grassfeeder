@@ -1,4 +1,5 @@
 use fr_core::controller::contentdownloader::IDownloader;
+use fr_core::controller::contentdownloader::DLKIND_MAX;
 
 #[derive(Default)]
 pub struct DownloaderDummy {}
@@ -43,6 +44,10 @@ impl IDownloader for DownloaderDummy {
     }
 
     fn launch_webbrowser(&self, _url: String, _cl_id: isize, _list_pos: u32) {
+        unimplemented!()
+    }
+
+    fn get_statistics(&self) -> [u32; DLKIND_MAX] {
         unimplemented!()
     }
 }

@@ -1,9 +1,6 @@
 use resources::parameter::SCAN_EMPTY_UNREAD_GROUP;
 use std::collections::HashMap;
 
-/// on each scan attempt, how many unread-jobs do we create.
-// pub const SCAN_EMPTY_UNREAD_GROUP: u8 = 6;
-
 pub trait ISubscriptionState {
     fn get_state(&self, id: isize) -> Option<SubsMapEntry>;
     fn get_id_by_path(&self, path: &[u16]) -> Option<isize>;
@@ -43,7 +40,8 @@ pub trait ISubscriptionState {
 
     fn dump(&self);
 
-    fn clear(&mut self);
+    //     #[deprecated]
+    //     fn clear(&mut self);
 }
 
 #[derive(Default)]
@@ -100,7 +98,6 @@ impl ISubscriptionState for SubscriptionState {
     }
 
     /// don't include deleted ones, sort folders to the end
-    /// Usability+Speed:  dispatch 2 subscriptions at one time for re-calculating
     /// returns    subs_id,  is_folder
     fn scan_num_all_unread(&self) -> Vec<(isize, bool)> {
         let mut unproc_ids: Vec<(isize, bool)> = self
@@ -195,10 +192,6 @@ impl ISubscriptionState for SubscriptionState {
             .for_each(|(k, v)| debug!("SSD {} {:?}", k, v));
         // debug!("subscription_state::dump() {:#?}", self.statemap);
     }
-
-    fn clear(&mut self) {
-        self.statemap.clear();
-    }
 }
 
 #[allow(dead_code)]
@@ -212,6 +205,7 @@ pub enum StatusMask {
     IsFolderCopy = 256,
     IsDeletedCopy = 512,
     IsExpandedCopy = 1024,
+    MessageCountsChecked = 2048,
 }
 
 #[allow(dead_code)]
@@ -249,6 +243,9 @@ pub trait FeedSourceState {
 
     fn is_folder(&self) -> bool;
     fn set_folder(&mut self, n: bool);
+
+    fn is_messagecounts_checked(&self) -> bool;
+    fn set_messagecounts_checked(&mut self, n: bool);
 }
 
 #[allow(dead_code)]
@@ -324,6 +321,14 @@ impl FeedSourceState for SubsMapEntry {
 
     fn set_folder(&mut self, n: bool) {
         self.change_bitmask(StatusMask::IsFolderCopy as usize, n);
+    }
+
+    fn is_messagecounts_checked(&self) -> bool {
+        self.check_bitmask(StatusMask::MessageCountsChecked as usize)
+    }
+
+    fn set_messagecounts_checked(&mut self, n: bool) {
+        self.change_bitmask(StatusMask::MessageCountsChecked as usize, n)
     }
 }
 

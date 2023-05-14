@@ -1,54 +1,12 @@
 
-*  Ubuntu package specific
-https://help.launchpad.net/Packaging/PPA/BuildingASourcePackage
-https://help.launchpad.net/Packaging/PPA/Uploading
-https://launchpad.net/grassfeeder
-https://packaging.ubuntu.com/html/debian-dir-overview.html#the-changelog
-https://packaging.ubuntu.com/html/packaging-new-software.html
-https://shallowsky.com/blog/programming/packaging-launchpad-ppas.html
-https://metebalci.com/blog/a-minimum-complete-example-of-debian-packaging-and-launchpad-ppa-hellodeb/
-https://unix.stackexchange.com/questions/710005/dpkg-genbuildinfo-error-badly-formed-line-in-files-list-file-line-1
-
-
-
-# 18.04:bionic    20.04:focal
-
-
-* Debian Packaging specific
-https://blog.packagecloud.io/buildling-debian-packages-with-debuild/
-https://docs.rs/debian-packaging/latest/debian_packaging/index.html
-https://github.com/ian910297/deb-example
-https://medium.com/@mezgani/how-to-create-debian-package-cccef6e5175b
-https://ostechnix.com/how-to-build-debian-packages-from-source/
-https://wiki.debian.org/HowToPackageForDebian
-https://wiki.debian.org/Packaging/Intro
-https://wiki.debian.org/SimplePackagingTutorial
-https://www.debian.org/doc/manuals/developers-reference/pkgs.html#newpackage
-
-
-* Multiple Distro + Docker
-  https://blog.chmouel.com/2021/01/31/building-packages-for-multiple-distros-on-launchpad-with-docker/
-  https://doc.rust-lang.org/cargo/commands/cargo-vendor.html
-  https://github.com/mbrubeck/cargo-vendor-example
-
-
-* Hackerjet: This tool "debcargo" does not work wit submodules-by-path
-  https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
-  https://blog.hackeriet.no/packaging-rust-part-II/
-  https://salsa.debian.org/rust-team/debcargo-conf/
-
-
-
-- change cleaning out too many messages while running
 
 
 Later:
-
-- Use different app-indicator  lib
 - 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20
 - GTK4: block multiple instances
 - GTK4: process both sets of cmd parameters:   application   AND gtk, see runner_internal
 	https://docs.gtk.org/gio/method.Application.run.html
+- Use different app-indicator  lib
 - Systray Icon integration
 
 
@@ -141,11 +99,11 @@ Linux Iso download:
   https://mirrorcache.opensuse.org/download/distribution/leap/15.2/iso/
 	https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/33/
 
+
+
+
 ------ Gnome Desktop:
-
 appimage /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_ABI_DT_RELR' not found (required by /tmp/.mount /lib64/libm.so.6)
-
-
 
 Samba mount:
 #  apt-get install cifs-utils
@@ -155,9 +113,7 @@ Samba mount:
 
 # sudo chmod u+s   /bin/mount /bin/umount   /usr/sbin/mount.cifs 	/sbin/mount.cifs
 
-
 # nano ~/.bashrc
-
 gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
 test -s ~/.alias && . ~/.alias || true
 alias l="ls -l --color"
@@ -196,88 +152,6 @@ gpg: Die Benutzung der Hashmethode SHA256 ist im --compliance=pgp6 Modus nicht e
 gpg: Diese Botschaft könnte für PGP 6.x unbrauchbar sein
 gpg: sende Schlüssel C28EBCE0F940E69F auf hkp://keyserver.ubuntu.com
 
-Uploading grassfeeder using ftp to ppa (host: ppa.launchpad.net; directory: ~schleglermarcus/grassfeeder-ppa)
-running supported-distribution: check whether the target distribution is currently supported (using distro-info)
-{'allowed': ['release'], 'known': ['release', 'proposed', 'updates', 'backports', 'security']}
-running required-fields: check whether a field is present and non-empty in the changes file
-running checksum: verify checksums before uploading
-running suite-mismatch: check the target distribution for common errors
-running check-debs: makes sure the upload contains a binary package
-running gpg: check GnuPG signatures before the upload
-Uploading grassfeeder_0.1.7.dsc
-Uploading grassfeeder_0.1.7.tar.gz
-Uploading grassfeeder_0.1.7_source.buildinfo
-Uploading grassfeeder_0.1.7_source.changes
-
-
-
-
-
-
-
---------------- Create debian packages
-<marcus_der_schlegler> Hello, I am new here
-<marcus_der_schlegler> I try to run the debcargo-conf  to publish my desktop application. But I am stuck with the requirement of it being "published on crates.i"
-<marcus_der_schlegler> My application is a rust+gtk3  desktop application, that relies on several components and path dependencies.  Those shall not be published by 'cargo publish'.
-<marcus_der_schlegler> I can create working debian packages already with cargo-deb.  Any next ideas how to proceed?
-<noctis> hi, debcargo has basically no support for "off grid" crates. you likely need to follow the old manual path
-
-<capitol> check how many of them that we already have packaged with debcargo
-<capitol> https://crates.io/crates/debcargo
-<capitol> sorry, cargo-debstatus i meant: https://crates.io/crates/cargo-debstatus
-<capitol> it's getting late here
-
-<capitol> check how many of them that we already have packaged with debcargo
-<capitol> https://crates.io/crates/debcargo
-<capitol> sorry, cargo-debstatus i meant: https://crates.io/crates/cargo-debstatus
-<capitol> it's getting late here
-
-
-<count_omega> that is being worked on by bastif and myself
-<count_omega> may I ask which program you're trying to package ?
-<count_omega> cargo-debstatus shows you conveniently which packes/crates are
-missing. just run it against the cloned repo of the program.
-<count_omega> https://paste.debian.net/1272973/
-<marcus_der_schlegler> i see it.  2nd chapter are local repos, directly available.
-<marcus_der_schlegler> for the other chapters, I am not sure what you mean with
-   "from scratch". I guess they are not in the debian repo yet
-<count_omega> didn't check 100% but I deleted all gtk-related stuff and packages
-skipped by cargo-debstatus where a newer version is in debian. I'd suggest to
-begin with with qname* , unic* and i18n stuff since that is the biggest chunk imho
-<count_omega> yeah, they need packaging from scratch
-
-<count_omega> didn't check 100% but I deleted all gtk-related stuff and packages
-skipped by cargo-debstatus where a newer version is in debian. I'd suggest
-to begin with with qname* , unic* and i18n stuff since that is the biggest chunk imho
-<count_omega> yeah, they need packaging from scratch
-<count_omega> It's a lot of packages, granted, even sans the gtk stuff. But
-packaging a crate is straightforward and faster than a regular debian package
-imho. if you want to dive in. I'd suggest thsi red
-<count_omega> https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
-<count_omega> I'm sure most of the packages missing will be packaged by the
-rust team, but likely not all of them
-<count_omega> well the qname* stuff for instance would be an easy start
-for packaging a rust crate
-
-<count_omega> I meant since a big chuck of the crates your program uses are not in debian an official debian package will less likely happen cargo-deb is a good way to distribute it in the meantime. it's not an issur if you don't want to maintain all those crates
-<count_omega> *issue
-<count_omega> You could file a RPF (request for packaging bug ) againt the wnpp package
-<count_omega> *against
-
-
-
-
-<pabs> the rust team workflow relies on crates.io
-<pabs> Jonas Smedegaard <dr@jones.dk> is the main person packaging
-Rust stuff outside the Rust team, so maybe ask him about his workflow
-<marcus_> Thanks @pabs. You mean I shall write him an e-mail directly? Is he expecting that? Or is there some other manual page that I could read ?
-<pabs> yeah, send an email. should be fine. don't think he documented his setup yet
-<pabs> tell him I sent you if you want
-
-
-: needs crates.io
-https://blog.hackeriet.no/packaging-a-rust-project-for-debian/
-https://blog.hackeriet.no/packaging-rust-part-II/
 
 
 

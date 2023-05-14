@@ -25,10 +25,14 @@ use rust_i18n;
 use rust_i18n::t;
 use std::rc::Rc;
 use std::sync::RwLock;
+use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::GtkObjectsType;
 
 const TREEVIEW_NAME: &str = "TREEVIEW1";
-// const DRAG_TARGET_NAME: &str = "text/html";
+const COL1WIDE_WIDTH: i32 = 80;
+const COL1NARROW_WIDTH: i32 = 44;
+
+// Later: check with gtk4:  if we don't fix the width of tree column1, the gtk system crashes on moving the pane-1
 
 pub fn create_tree_store() -> (TreeStore, usize) {
     let tree_store_types: &[gtk::glib::Type] = &[
@@ -64,6 +68,8 @@ pub fn create_treeview(
     g_ev_se: Sender<GuiEvents>,
     drag_state: Rc<RwLock<DragState>>,
     gtk_obj_a: GtkObjectsType,
+    // col1_wide: bool,
+    ddd: &mut DialogDataDistributor,
 ) -> TreeView {
     let (tree_store, num_store_types) = create_tree_store( /* drag_state.clone() */);
     let treeview1 = TreeView::new();
@@ -77,6 +83,7 @@ pub fn create_treeview(
     treeview1.set_enable_search(false);
     let cellrenderer_spinner = CellRendererSpinner::new();
     cellrenderer_spinner.set_active(true);
+    let tree0column1 = TreeViewColumn::new();
     {
         let col = TreeViewColumn::new();
         let cellrendpixbuf = CellRendererPixbuf::new();
@@ -96,7 +103,7 @@ pub fn create_treeview(
         treeview1.append_column(&col);
     }
     {
-        let col = TreeViewColumn::new();
+        let col = tree0column1.clone();
         let cellrendtext = CellRendererText::new();
         col.pack_start(&cellrendtext, false);
         col.add_attribute(&cellrendtext, "text", 2_i32); // unread-text
@@ -113,7 +120,7 @@ pub fn create_treeview(
         col.pack_end(&cellrenderer_spinner, false);
         col.add_attribute(&cellrenderer_spinner, "active", 9_i32);
         col.add_attribute(&cellrenderer_spinner, "visible", 9_i32);
-        col.set_fixed_width(DIALOG_ICON_SIZE * 2); // if we don't fix the size, the gtk system crashes on moving the pane-1
+        col.set_fixed_width(9); // If we don't fix the width, the gtk system crashes on moving the pane-1
         treeview1.append_column(&col);
     }
     let drag_s7 = drag_state.clone();
@@ -255,6 +262,14 @@ pub fn create_treeview(
             ret.set_spinner_w((cellrenderer_spinner, col1));
         }
     }
+    // let t0col1 = tree0column1.clone();
+    ddd.set_dialog_distribute(DIALOG_TREE0COL1, move |dialogdata| {
+        let mut col0width = COL1NARROW_WIDTH;
+        if dialogdata.get(0).unwrap().boo() {
+            col0width = COL1WIDE_WIDTH;
+        }
+        tree0column1.set_fixed_width(col0width);
+    });
     treeview1
 }
 

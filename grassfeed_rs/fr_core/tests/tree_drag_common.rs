@@ -1,4 +1,5 @@
 use fr_core::controller::contentdownloader::IDownloader;
+use fr_core::controller::contentdownloader::DLKIND_MAX;
 use fr_core::controller::subscriptionmove::ISubscriptionMove;
 use fr_core::controller::subscriptionmove::SubscriptionMove;
 use fr_core::db::errors_repo::ErrorRepo;
@@ -169,6 +170,9 @@ impl IDownloader for DownloaderDummy {
         unimplemented!()
     }
     fn launch_webbrowser(&self, _url: String, _cl_id: isize, _list_pos: u32) {
+        unimplemented!()
+    }
+    fn get_statistics(&self) -> [u32; DLKIND_MAX] {
         unimplemented!()
     }
 }

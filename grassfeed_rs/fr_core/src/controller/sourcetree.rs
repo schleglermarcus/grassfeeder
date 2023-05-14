@@ -3,7 +3,7 @@ use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::CJob;
 use crate::controller::contentlist::FeedContents;
-use crate::controller::contentlist::IFeedContents;
+use crate::controller::contentlist::IContentList;
 use crate::controller::isourcetree::ISourceTreeController;
 use crate::controller::subscriptionmove::ISubscriptionMove;
 use crate::controller::subscriptionmove::SubscriptionMove;
@@ -51,13 +51,16 @@ pub const DEFAULT_CONFIG_FETCH_FEED_UNIT: u8 = 2; // hours
 /// seven days
 const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
 
+const CHECK_MESSAGE_COUNTS_SET_SIZE: usize = 20;
+
 // #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum SJob {
     /// only store into adapter
     FillSubscriptionsAdapter,
-    /// subscription_id
-    FillSourcesTreeSingle(isize),
+
+    /// subscription_id  CHECK IF NEEDED
+    // FillSourcesTreeSingle(isize),
 
     /// only update from adapter into TreeView
     GuiUpdateTreeAll,
@@ -89,12 +92,15 @@ pub enum SJob {
     UpdateTreePaths,
     /// subscription_id,  num_msg_all, num_msg_unread
     NotifyTreeReadCount(isize, isize, isize),
+    /// subscription_id, removed_some  num_msg_all, num_msg_unread
+    NotifyMessagesCountsChecked(isize, bool, isize, isize),
     ScanEmptyUnread,
     EmptyTreeCreateDefaultSubscriptions,
     ///  Drag-String   Feed-Url   Error-Message,   Home-Page-Title
     DragUrlEvaluated(String, String, String, String),
     /// subs_id
     SetCursorToSubsID(isize),
+    SetGuiTreeColumn1Width,
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -128,7 +134,7 @@ impl SourceTreeController {
     pub const CONF_FETCH_ON_START: &'static str = "FetchFeedsOnStart";
     pub const CONF_FETCH_INTERVAL: &'static str = "FetchFeedsInterval";
     pub const CONF_FETCH_INTERVAL_UNIT: &'static str = "FetchFeedsIntervalUnit";
-    pub const CONF_DISPLAY_FEECOUNT_ALL: &'static str = "DisplayFeedCountAll";
+    pub const CONF_DISPLAY_FEEDCOUNT_ALL: &'static str = "DisplayFeedCountAll";
 
     pub fn new_ac(ac: &AppContext) -> Self {
         let gc_r = (*ac).get_rc::<GuiContext>().unwrap();
@@ -208,9 +214,6 @@ impl SourceTreeController {
                 SJob::FillSubscriptionsAdapter => {
                     self.feedsources_into_store_adapter();
                 }
-                SJob::FillSourcesTreeSingle(subs_id) => {
-                    self.insert_tree_row_single(subs_id);
-                }
                 SJob::GuiUpdateTree(subs_id) => {
                     if let Some(path) = self.get_path_for_src(subs_id) {
                         (*self.gui_updater)
@@ -246,14 +249,14 @@ impl SourceTreeController {
                 SJob::SetFetchFinished(fs_id, error_happened) => {
                     self.set_fetch_finished(fs_id, error_happened)
                 }
-                SJob::SetIconId(fs_id, icon_id) => {
+                SJob::SetIconId(subs_id, icon_id) => {
                     let ts_now = timestamp_now();
-                    (*self.subscriptionrepo_r).borrow().update_icon_id(
-                        fs_id,
+                    (*self.subscriptionrepo_r).borrow().update_icon_id_time(
+                        subs_id,
                         icon_id as usize,
                         ts_now,
                     );
-                    self.tree_store_update_one(fs_id);
+                    self.tree_store_update_one(subs_id);
                 }
                 SJob::SanitizeSources => {
                     (*self.downloader_r).borrow().cleanup_db();
@@ -316,6 +319,46 @@ impl SourceTreeController {
                         warn!("SetCursorToSubsID: No Path for id:{}", subs_id);
                     }
                 }
+                SJob::NotifyMessagesCountsChecked(subs_id, removed_some, a, u) => {
+                    self.statemap.borrow_mut().set_num_all_unread(subs_id, a, u);
+                    self.statemap.borrow_mut().set_status(
+                        &[subs_id],
+                        StatusMask::MessageCountsChecked,
+                        true,
+                    );
+                    if removed_some {
+                        if let Some(sta) = self.get_state(subs_id) {
+                            trace!(
+                                "MessagesCountsChecked: {}   {} ST={:?} ",
+                                subs_id,
+                                removed_some,
+                                sta
+                            );
+                            let subs_e = (*self.subscriptionrepo_r)
+                                .borrow()
+                                .get_by_index(subs_id)
+                                .unwrap();
+                            self.tree_update_one(&subs_e, &sta);
+                            if subs_e.parent_subs_id > 0 {
+                                self.statemap
+                                    .borrow_mut()
+                                    .clear_num_all_unread(subs_e.parent_subs_id);
+                                self.addjob(SJob::ScanEmptyUnread);
+                            }
+                        }
+                    }
+                }
+                SJob::SetGuiTreeColumn1Width => {
+                    let fc_all = (*self.configmanager_r)
+                        .borrow()
+                        .get_val_bool(Self::CONF_DISPLAY_FEEDCOUNT_ALL);
+                    let dd: Vec<AValue> = vec![AValue::ABOOL(fc_all)];
+                    (*self.gui_val_store)
+                        .write()
+                        .unwrap()
+                        .set_dialog_data(DIALOG_TREE0COL1, &dd);
+                    (*self.gui_updater).borrow().update_dialog(DIALOG_TREE0COL1);
+                }
             }
             if (*self.config).borrow().mode_debug {
                 let elapsed_m = now.elapsed().as_millis();
@@ -375,7 +418,7 @@ impl SourceTreeController {
                 .borrow()
                 .get_by_index(subs_id)
                 .unwrap();
-            // trace!(                            "NotifyTreeReadCount {} {}/{} clearing parent {} ",                            subs_id,                            msg_unread,                            msg_all,                            subs_e.parent_subs_id                        );
+            // trace!(                "process_tree_read_count {} {}/{}  parent: {} ",                subs_id,                msg_unread,                msg_all,                subs_e.parent_subs_id            );
             if subs_e.parent_subs_id > 0 {
                 self.statemap
                     .borrow_mut()
@@ -383,7 +426,6 @@ impl SourceTreeController {
                 self.addjob(SJob::ScanEmptyUnread);
             }
             if !self.tree_update_one(&subs_e, &su_st) {
-                // self.need_check_fs_paths.replace(true);
                 if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
                     subs_mov.borrow_mut().request_check_paths(true);
                 }
@@ -540,15 +582,19 @@ impl SourceTreeController {
             .set_status(&[source_id], StatusMask::FetchScheduled, false);
     }
 
-    fn check_icon(&self, fs_id: isize) {
-        if let Some(fse) = self.subscriptionrepo_r.borrow().get_by_index(fs_id) {
-            let now_seconds = timestamp_now();
-            let time_outdated = now_seconds - (fse.updated_icon + ICON_RELOAD_TIME_S);
-            if time_outdated > 0 || fse.icon_id < ICON_LIST.len() {
-                (*self.downloader_r)
-                    .borrow()
-                    .load_icon(fse.subs_id, fse.url, fse.icon_id);
-            }
+    fn check_icon(&self, subs_id: isize) {
+        let o_subs = self.subscriptionrepo_r.borrow().get_by_index(subs_id);
+        if o_subs.is_none() {
+            return;
+        }
+        let subs = o_subs.unwrap();
+        let now_seconds = timestamp_now();
+        let time_outdated = now_seconds - (subs.updated_icon + ICON_RELOAD_TIME_S);
+        if time_outdated > 0 || subs.icon_id < ICON_LIST.len() {
+            // trace!(                "check_icon:  ID:{}  icon-id:{} icontime:{} time_outdated={}h   now:{}  icontime:{} ",                subs_id,                subs.icon_id,                subs.updated_icon,                time_outdated / 3600,                db_time_to_display_nonnull(now_seconds),               db_time_to_display_nonnull(subs.updated_icon),            );
+            (*self.downloader_r)
+                .borrow()
+                .load_icon(subs.subs_id, subs.url, subs.icon_id);
         }
     }
 
@@ -633,27 +679,53 @@ impl SourceTreeController {
             .subscriptionrepo_r
             .borrow()
             .get_by_fetch_time(time_limit_s);
-        entries
+        let stm_b = self.statemap.borrow();
+        let check_feed_ids = entries
             .iter()
             .filter(|fse| !fse.is_folder)
-            .filter(|fse| {
-                if let Some(st) = self.statemap.borrow().get_state(fse.subs_id) {
-                    return !st.is_fetch_scheduled() && !st.is_fetch_in_progress();
+            .map(|fse| {
+                let mut fetch_sch = false;
+                let mut fetch_pro = false;
+                let mut counts_ch = false;
+                if let Some(st) = stm_b.get_state(fse.subs_id) {
+                    fetch_sch = st.is_fetch_scheduled();
+                    fetch_pro = st.is_fetch_in_progress();
+                    counts_ch = st.is_messagecounts_checked();
                 }
-                false
+                (fse.subs_id, fetch_sch, fetch_pro, counts_ch)
             })
-            .for_each(|fse| {
-                self.addjob(SJob::ScheduleUpdateFeed(fse.subs_id));
-            });
+            .collect::<Vec<(isize, bool, bool, bool)>>();
+        let update_ids = check_feed_ids
+            .iter()
+            .filter(|(_subs_id, fetch_sch, fetch_pro, _)| !fetch_sch && !fetch_pro)
+            .map(|(subs_id, _, _, _)| *subs_id)
+            .collect::<Vec<isize>>();
+        update_ids
+            .iter()
+            .for_each(|id| self.addjob(SJob::ScheduleUpdateFeed(*id)));
+        let mut check_count_ids =
+            stm_b.get_ids_by_status(StatusMask::MessageCountsChecked, false, false);
+        if !check_count_ids.is_empty() {
+            check_count_ids.truncate(CHECK_MESSAGE_COUNTS_SET_SIZE);
+            if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+                check_count_ids.iter().for_each(|id| {
+                    (*feedcontents)
+                        .borrow()
+                        .addjob(CJob::CheckMessageCounts(*id));
+                });
+            }
+        }
     }
 
     fn startup_read_config(&mut self) {
         (*self.config).borrow_mut().feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
             .get_val_bool(Self::CONF_FETCH_ON_START);
-        (*self.config).borrow_mut().display_feedcount_all = (*self.configmanager_r)
+
+        let fc_all = (*self.configmanager_r)
             .borrow()
-            .get_val_bool(Self::CONF_DISPLAY_FEECOUNT_ALL);
+            .get_val_bool(Self::CONF_DISPLAY_FEEDCOUNT_ALL);
+        (*self.config).borrow_mut().display_feedcount_all = fc_all;
         (*self.config).borrow_mut().feeds_fetch_interval = (*self.configmanager_r)
             .borrow()
             .get_val_int(Self::CONF_FETCH_INTERVAL)
@@ -670,7 +742,6 @@ impl SourceTreeController {
             (*self.config).borrow_mut().feeds_fetch_interval_unit =
                 DEFAULT_CONFIG_FETCH_FEED_UNIT as u32;
         } // Hours
-
         (*self.config).borrow_mut().feeds_fetch_at_start = (*self.configmanager_r)
             .borrow()
             .get_val_bool(Self::CONF_FETCH_ON_START);
@@ -936,6 +1007,7 @@ impl StartupWithAppContext for SourceTreeController {
         }
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::ScanEmptyUnread);
+        self.addjob(SJob::SetGuiTreeColumn1Width);
     }
 }
 

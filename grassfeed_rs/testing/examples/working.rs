@@ -150,17 +150,23 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("http://lisahaven.news/feed/", "lisa_haven"), // original icon too big, scaled down.
             ("http://rss.slashdot.org/Slashdot/slashdot", "slashdot"), // sometimes delivers 403
             ("http://henrymakow.com/index.xml", "makow"),
-            ("http://www.peopleofwalmart.com/feed/", "walmart-500"), // why error ?
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
-            ("https://www.ksta.de/feed/index.rss", "Kö & ßtüdtänzêiger"),
+            (
+                "https://feed.ksta.de/feed/rss/politik/index.rss",
+                "Kößtüdtänzêiger politik",
+            ),
+            (
+                "https://feed.ksta.de/feed/rss/panorama/index.rss",
+                "panorama Kößtüdtänzêiger",
+            ),
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),
             ("https://www.headlinesoftoday.com/feed", "headlinesof"),
             ("https://linuxnews.de/feed/", "linuxnews"),
             ("https://linuxnews.de/comments/feed/", "linuxnews-comm"),
             ("https://www.linuxtoday.com/feed/", "linuxtoday"),
-            ("https://news.itsfoss.com/feed/", "itsfoss"),
+            ("https://itsfoss.com/rss/", "itsfoss"),
             ("https://www.openpr.de/rss/openpr.xml", "openpr"),
             ("https://www.reddit.com/r/funny.rss", "reddit-funny"),
             ("https://www.reddit.com/r/gaming.rss", "reddit-gaming"),
@@ -174,7 +180,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("http://www.wissensmanufaktur.net/rss.xml", "wissensm"),
             ("http://newsinsideout.com/feed/", "newsinsideout"),
             ("https://sciencefiles.org/feed/", "science"),
-            ("http://www.watergate.tv/feed/", "watergate"),
             ("http://www.guidograndt.de/feed/", "guido"),
             ("https://readrust.net/all/feed.rss", "readrust"),
             ("https://www.relay.fm/rd/feed", "rel_rd"),

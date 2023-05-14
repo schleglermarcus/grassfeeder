@@ -20,7 +20,9 @@ use std::sync::RwLock;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
 pub const FILENAME: &str = "icons_list.json";
-pub const CONV_TO: &dyn Fn(String) -> Option<IconEntry> = &json_to_icon_entry;
+
+/// line to convert, line number
+pub const CONV_TO: &dyn Fn(String, usize) -> Option<IconEntry> = &json_to_icon_entry;
 pub const CONV_FROM: &dyn Fn(&IconEntry) -> Option<String> = &icon_entry_to_json;
 
 ///
@@ -83,7 +85,7 @@ impl IconRepo {
                 hm.insert(id, se);
             });
         } else {
-            trace!("subscription file not found: {}", &self.filename);
+            warn!("subscription file not found: {}", &self.filename);
         }
 
         true
@@ -175,6 +177,11 @@ impl IconRepo {
         Ok(store_entry)
     }
 
+    pub fn remove_icon(&self, icon_id: isize) {
+        let o_r = (*self.list).write().unwrap().remove(&icon_id);
+        assert!(o_r.is_some());
+    }
+
     pub fn get_list(&self) -> Arc<RwLock<HashMap<isize, IconEntry>>> {
         self.list.clone()
     }
@@ -250,12 +257,17 @@ fn icon_entry_to_txt(input: &IconEntry) -> Option<String> {
 }
 
 #[allow(dead_code)]
-fn json_to_icon_entry(line: String) -> Option<IconEntry> {
+fn json_to_icon_entry(line: String, linenumber: usize) -> Option<IconEntry> {
     let dec_r: serde_json::Result<IconEntry> = serde_json::from_str(&line);
     match dec_r {
         Ok(dec_se) => Some(dec_se),
         Err(e) => {
-            error!("serde_json:from_str {:?}   {:?} ", e, &line);
+            error!(
+                "serde_json:from_str {:?} {:?}  on line:{} ",
+                e,
+                &line,
+                (linenumber + 1)
+            );
             None
         }
     }
@@ -302,13 +314,17 @@ fn write_to(
     Ok(bytes_written)
 }
 
-fn read_from(filename: String, converter: &dyn Fn(String) -> Option<IconEntry>) -> Vec<IconEntry> {
+fn read_from(
+    filename: String,
+    converter: &dyn Fn(String, usize) -> Option<IconEntry>,
+) -> Vec<IconEntry> {
     let mut subscriptions_list: Vec<IconEntry> = Vec::default();
     match std::fs::read_to_string(filename.clone()) {
         Ok(f_str) => {
             subscriptions_list = f_str
                 .lines()
-                .filter_map(|line| converter(line.to_string()))
+                .enumerate()
+                .filter_map(|(num, line)| converter(line.to_string(), num))
                 .collect();
         }
         Err(e) => {

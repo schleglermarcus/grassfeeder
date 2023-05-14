@@ -169,6 +169,7 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
         image_icon_kind: Default::default(),
+        compressed_icon: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     if let Ok(ev) = stc_job_r.recv_timeout(std::time::Duration::from_millis(1)) {
@@ -203,6 +204,7 @@ fn icon_too_big() {
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
         image_icon_kind: Default::default(),
+        compressed_icon: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     assert!(!last.download_error_happened);
@@ -235,6 +237,7 @@ fn stop_on_nonexistent() {
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
         image_icon_kind: Default::default(),
+        compressed_icon: Default::default(),
     };
     let ic = IconCheckIsImage(dl_inner);
     let r: StepResult<IconInner> = Box::new(ic).step();

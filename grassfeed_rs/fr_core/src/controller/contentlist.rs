@@ -12,6 +12,7 @@ use crate::db::message::MessageRow;
 use crate::db::message_state::MessageStateMap;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
+use crate::downloader::db_clean;
 use crate::ui_select::gui_context::GuiContext;
 use crate::util::db_time_to_display;
 use context::appcontext::AppContext;
@@ -39,7 +40,7 @@ use std::rc::Rc;
 use std::rc::Weak;
 use std::sync::RwLock;
 
-const JOBQUEUE_SIZE: usize = 200;
+const JOBQUEUE_SIZE: usize = 1000; // at least as many jobs as there might be subscriptions
 const LIST_SCROLL_POS: i8 = 80; // to 70% of the upper list is visible, the cursor shall go to the lower 30%
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -63,9 +64,11 @@ pub enum CJob {
     SetFavoriteSome(Vec<(u32, u32)>, bool),
     ///  db-id,   list-position
     LaunchBrowserSuccess(isize, u32),
+    /// subs_id
+    CheckMessageCounts(isize),
 }
 
-pub trait IFeedContents {
+pub trait IContentList {
     /// returns queue size
     fn addjob(&self, nj: CJob) -> usize;
 
@@ -466,9 +469,34 @@ impl FeedContents {
             .borrow()
             .update_list_some(TREEVIEW1, &vec_listpos);
     }
+
+    fn check_message_counts(&self, subs_id: isize) {
+        let msg_keep_count: isize = (*self.configmanager_r)
+            .borrow()
+            .get_val_int(FeedContents::CONF_MSG_KEEP_COUNT)
+            .unwrap_or(-1);
+        let msg_repo = MessagesRepo::new_by_connection(
+            (*self.messagesrepo_r).borrow().get_ctx().get_connection(),
+        );
+        let r = db_clean::reduce_too_many_messages(&msg_repo, msg_keep_count as usize, subs_id);
+        let (rm_some, n_rm, num_all, num_unread) = r;
+        if rm_some {
+            debug!("checkMessageCounts {} {:?} removed:{} ", subs_id, &r, n_rm);
+        }
+        if let Some(feedsources) = self.feedsources_w.upgrade() {
+            (*feedsources)
+                .borrow()
+                .addjob(SJob::NotifyMessagesCountsChecked(
+                    subs_id,
+                    rm_some,
+                    num_all as isize,
+                    num_unread as isize,
+                ));
+        }
+    }
 } // impl FeedContents
 
-impl IFeedContents for FeedContents {
+impl IContentList for FeedContents {
     /// returns queue size
     fn addjob(&self, nj: CJob) -> usize {
         if self.job_queue_sender.is_full() {
@@ -565,6 +593,9 @@ impl IFeedContents for FeedContents {
                 }
                 CJob::LaunchBrowserSuccess(msg_id, list_position) => {
                     self.set_read_many(&vec![(msg_id as i32, list_position as i32)], true);
+                }
+                CJob::CheckMessageCounts(subs_id) => {
+                    self.check_message_counts(subs_id);
                 }
             }
             let elapsed_m = now.elapsed().as_millis();
@@ -990,7 +1021,7 @@ impl IFeedContents for FeedContents {
         }
     }
 
-    // impl IFeedContents
+    // impl IContentList
 }
 
 impl Buildable for FeedContents {

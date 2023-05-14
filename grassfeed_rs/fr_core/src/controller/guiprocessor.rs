@@ -5,7 +5,7 @@ use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::FeedContents;
-use crate::controller::contentlist::IFeedContents;
+use crate::controller::contentlist::IContentList;
 use crate::controller::contentlist::ListMoveCommand;
 use crate::controller::isourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
@@ -89,7 +89,7 @@ pub struct GuiProcessor {
     gui_runner: Rc<RefCell<dyn GuiRunner>>,
     gui_context_r: Rc<RefCell<GuiContext>>,
     feedsources_r: Rc<RefCell<dyn ISourceTreeController>>,
-    contentlist_r: Rc<RefCell<dyn IFeedContents>>,
+    contentlist_r: Rc<RefCell<dyn IContentList>>,
     downloader_r: Rc<RefCell<dyn IDownloader>>,
     browserpane_r: Rc<RefCell<dyn IBrowserPane>>,
     erro_repo_r: Rc<RefCell<ErrorRepo>>,
@@ -175,7 +175,7 @@ impl GuiProcessor {
                         let ev_ident = (Instant::now(), format!("{:?}", &ev));
                         handler_b.handle(ev, self);
                         let elapsed_m = ev_ident.0.elapsed().as_millis();
-                        if elapsed_m > 100 {
+                        if elapsed_m > 160 {
                             debug!("EV  {}   took {:?}", ev_ident.1, elapsed_m);
                         }
                     } else {
@@ -253,10 +253,8 @@ impl GuiProcessor {
                 Job::DownloaderJobStarted(threadnr, kind) => {
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = kind;
                 }
-                Job::DownloaderJobFinished(subs_id, threadnr, kind, elapsed_ms, description) => {
-                    if kind == 6 {
-                        trace!("browser_launch:{}ms {}", elapsed_ms, &description);
-                    }
+                Job::DownloaderJobFinished(subs_id, threadnr, _kind, elapsed_ms, description) => {
+                    // if kind == 6 {                        trace!("browser_launch:{}ms {}", elapsed_ms, &description);                    }
                     if elapsed_ms > 1000 && subs_id > 0 {
                         (*self.erro_repo_r).borrow().add_error(
                             subs_id,
@@ -265,7 +263,6 @@ impl GuiProcessor {
                             description,
                         );
                     }
-
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = 0;
                 }
                 Job::CheckFocusMarker(num) => {
@@ -420,7 +417,6 @@ impl GuiProcessor {
                     debug!("space key but unfocused");
                 }
             }
-
             _ => {
                 // trace!("key-pressed: other {} {:?} {:?}", keycode, _o_char, kc);
             }
@@ -429,7 +425,6 @@ impl GuiProcessor {
             self.focus_by_tab.replace(new_focus_by_tab);
             self.switch_focus_marker(true);
             self.addjob(Job::CheckFocusMarker(2));
-            // trace!("FOCUS:  {:?} ", &self.focus_by_tab );
             match *self.focus_by_tab.borrow() {
                 FocusByTab::FocusSubscriptions => {
                     (*self.gui_updater)
@@ -576,7 +571,6 @@ impl StartupWithAppContext for GuiProcessor {
             .borrow()
             .get_config()
             .num_downloader_threads;
-
         if let Some(s) = (*self.configmanager_r)
             .borrow()
             .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
@@ -590,18 +584,17 @@ impl StartupWithAppContext for GuiProcessor {
         self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2 {});
         self.add_handler(
             &GuiEvents::DialogData(String::default(), Vec::default()),
-            HandleDialogData(
-                self.browserpane_r.clone(),
-                self.configmanager_r.clone(),
-                self.subscriptionmove_r.clone(),
-                self.feedsources_r.clone(),
-                self.subscriptionrepo_r.clone(), //4
-                self.downloader_r.clone(),
-                self.contentlist_r.clone(), // 6
-                self.gui_context_r.clone(),
-            ),
+            HandleDialogData {
+                r_brow: self.browserpane_r.clone(),
+                r_conf: self.configmanager_r.clone(),
+                r_subm: self.subscriptionmove_r.clone(),
+                r_stc: self.feedsources_r.clone(),
+                r_subr: self.subscriptionrepo_r.clone(), //4
+                r_dl: self.downloader_r.clone(),
+                r_cl: self.contentlist_r.clone(), // 6
+                r_gc: self.gui_context_r.clone(),
+            },
         );
-
         self.add_handler(
             &GuiEvents::PanedMoved(0, 0),
             HandlePanedMoved(self.gui_context_r.clone(), self.configmanager_r.clone()),
@@ -703,7 +696,11 @@ impl StartupWithAppContext for GuiProcessor {
         );
         self.add_handler(
             &GuiEvents::DragDropUrlReceived(String::default()),
-            HandleDragDropUrlReceived(self.downloader_r.clone()),
+            HandleDragDropUrlReceived(
+                self.downloader_r.clone(),
+                self.subscriptionmove_r.clone(),
+                self.feedsources_r.clone(),
+            ),
         );
         self.add_handler(
             &GuiEvents::BrowserEvent(BrowserEventType::default(), 0),
@@ -780,7 +777,7 @@ impl HandleSingleEvent for HandleMenuActivate {
 }
 
 struct HandleTreeRowActivated(
-    Rc<RefCell<dyn IFeedContents>>,
+    Rc<RefCell<dyn IContentList>>,
     Rc<RefCell<dyn ISourceTreeController>>,
 );
 impl HandleSingleEvent for HandleTreeRowActivated {
@@ -795,7 +792,7 @@ impl HandleSingleEvent for HandleTreeRowActivated {
     }
 }
 
-struct HandleListRowDoubleClicked(Rc<RefCell<dyn IFeedContents>>);
+struct HandleListRowDoubleClicked(Rc<RefCell<dyn IContentList>>);
 impl HandleSingleEvent for HandleListRowDoubleClicked {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::ListRowDoubleClicked(_list_idx, _list_position, fc_repo_id) = ev {
@@ -805,7 +802,7 @@ impl HandleSingleEvent for HandleListRowDoubleClicked {
     }
 }
 
-struct HandleListCellClicked(Rc<RefCell<dyn IFeedContents>>);
+struct HandleListCellClicked(Rc<RefCell<dyn IContentList>>);
 impl HandleSingleEvent for HandleListCellClicked {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::ListCellClicked(_list_idx, list_position, sort_col_nr, msg_id) = ev {
@@ -857,23 +854,23 @@ impl HandleSingleEvent for HandleWindowSizeChanged {
     }
 }
 
-struct HandleDialogData(
-    Rc<RefCell<dyn IBrowserPane>>, // 0
-    Rc<RefCell<ConfigManager>>,
-    Rc<RefCell<dyn ISubscriptionMove>>,
-    Rc<RefCell<dyn ISourceTreeController>>,
-    Rc<RefCell<dyn ISubscriptionRepo>>, //4
-    Rc<RefCell<dyn IDownloader>>,
-    Rc<RefCell<dyn IFeedContents>>, // 6
-    Rc<RefCell<GuiContext>>,
-);
+struct HandleDialogData {
+    r_brow: Rc<RefCell<dyn IBrowserPane>>, // 0
+    r_conf: Rc<RefCell<ConfigManager>>,
+    r_subm: Rc<RefCell<dyn ISubscriptionMove>>, // 2
+    r_stc: Rc<RefCell<dyn ISourceTreeController>>,
+    r_subr: Rc<RefCell<dyn ISubscriptionRepo>>, // 4
+    r_dl: Rc<RefCell<dyn IDownloader>>,
+    r_cl: Rc<RefCell<dyn IContentList>>, // 6
+    r_gc: Rc<RefCell<GuiContext>>,
+}
 impl HandleSingleEvent for HandleDialogData {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::DialogData(ref ident, ref payload) = ev {
             match ident.as_str() {
                 "new-folder" => {
                     if let Some(AValue::ASTR(s)) = payload.get(0) {
-                        (*self.2).borrow_mut().add_new_folder(s.to_string());
+                        (*self.r_subm).borrow_mut().add_new_folder(s.to_string());
                     }
                 }
                 "new-feedsource" => {
@@ -883,22 +880,24 @@ impl HandleSingleEvent for HandleDialogData {
                         (payload.get(0), payload.get(1))
                     {
                         let new_id = self
-                            .2
+                            .r_subm
                             .borrow_mut()
                             .add_new_subscription(s0.clone(), s1.clone());
                         if new_id > 0 {
-                            self.3.borrow_mut().addjob(SJob::ScheduleUpdateFeed(new_id));
+                            self.r_stc
+                                .borrow_mut()
+                                .addjob(SJob::ScheduleUpdateFeed(new_id));
                         }
                     }
                 }
                 "import-opml" => {
                     if let Some(AValue::ASTR(ref s)) = payload.get(0) {
-                        self.2.borrow_mut().import_opml(s.to_string());
+                        self.r_subm.borrow_mut().import_opml(s.to_string());
                     }
                 }
                 "export-opml" => {
                     if let Some(AValue::ASTR(ref s)) = payload.get(0) {
-                        let mut opmlreader = OpmlReader::new(self.4.clone());
+                        let mut opmlreader = OpmlReader::new(self.r_subr.clone());
                         opmlreader.transfer_from_db();
                         match opmlreader.write_to_file(s.to_string()) {
                             Ok(()) => {
@@ -911,56 +910,56 @@ impl HandleSingleEvent for HandleDialogData {
                     }
                 }
                 "feedsource-delete" => {
-                    self.2.borrow_mut().move_subscription_to_trash();
+                    self.r_subm.borrow_mut().move_subscription_to_trash();
                 }
                 "subscription-edit-ok" => {
-                    self.3.borrow_mut().end_feedsource_edit_dialog(payload);
+                    self.r_stc.borrow_mut().end_feedsource_edit_dialog(payload);
                 }
                 "folder-edit" => {
-                    self.3.borrow_mut().end_feedsource_edit_dialog(payload);
+                    self.r_stc.borrow_mut().end_feedsource_edit_dialog(payload);
                 }
                 "settings" => {
-                    self.3
+                    self.r_stc
                         .borrow_mut()
                         .set_conf_load_on_start(payload.get(0).unwrap().boo());
-                    self.3
+                    self.r_stc
                         .borrow_mut()
                         .set_conf_fetch_interval(payload.get(1).unwrap().int().unwrap());
-                    self.3
+                    self.r_stc
                         .borrow_mut()
                         .set_conf_fetch_interval_unit(payload.get(2).unwrap().int().unwrap());
-                    self.5
+                    self.r_dl
                         .borrow_mut()
                         .set_conf_num_threads(payload.get(3).unwrap().int().unwrap() as u8);
-                    self.6
+                    self.r_cl
                         .borrow_mut()
                         .set_conf_focus_policy(payload.get(4).unwrap().int().unwrap() as u8);
-                    self.3
+                    self.r_stc
                         .borrow_mut() // 5 : DisplayCountOfAllFeeds
                         .set_conf_display_feedcount_all(payload.get(5).unwrap().boo());
-                    self.6
+                    self.r_cl
                         .borrow_mut()
                         .set_conf_msg_keep_count(payload.get(6).unwrap().int().unwrap());
-                    (*self.7)
+                    (*self.r_gc)
                         .borrow() // 7 : ManualFontSizeEnable
                         .set_conf_fontsize_manual_enable(payload.get(7).unwrap().boo());
-                    (*self.7)
+                    (*self.r_gc)
                         .borrow() // 8 : ManualFontSize
                         .set_conf_fontsize_manual(payload.get(8).unwrap().int().unwrap());
-                    (*self.0)
+                    (*self.r_brow)
                         .borrow_mut() // 9 : browser bg
                         .set_conf_browser_bg(payload.get(9).unwrap().uint().unwrap());
-                    (self.1).borrow().set_val(
+                    self.r_conf.borrow().set_val(
                         &PropDef::BrowserClearCache.to_string(),
                         payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
                     );
-                    (self.1).borrow().set_val(
+                    self.r_conf.borrow().set_val(
                         contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
                         payload.get(11).unwrap().boo().to_string(),
                     );
 
                     if let Some(systray_e) = payload.get(12) {
-                        (self.1).borrow().set_val(
+                        self.r_conf.borrow().set_val(
                             &PropDef::SystrayEnable.to_string(),
                             systray_e.boo().to_string(), // 12 : enable systray
                         );
@@ -1143,7 +1142,7 @@ impl HandleSingleEvent for HandleColumnWidth {
     }
 }
 
-struct HandleListSelected(Rc<RefCell<dyn IFeedContents>>);
+struct HandleListSelected(Rc<RefCell<dyn IContentList>>);
 impl HandleSingleEvent for HandleListSelected {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::ListSelected(_list_idx, ref selected_list) = ev {
@@ -1154,7 +1153,7 @@ impl HandleSingleEvent for HandleListSelected {
     }
 }
 
-struct HandleListSelectedAction(Rc<RefCell<dyn IFeedContents>>);
+struct HandleListSelectedAction(Rc<RefCell<dyn IContentList>>);
 impl HandleSingleEvent for HandleListSelectedAction {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::ListSelectedAction(list_idx, ref action, ref repoid_list_pos) = ev {
@@ -1167,7 +1166,7 @@ impl HandleSingleEvent for HandleListSelectedAction {
     }
 }
 
-struct HandleListSortOrderChanged(Rc<RefCell<dyn IFeedContents>>);
+struct HandleListSortOrderChanged(Rc<RefCell<dyn IContentList>>);
 impl HandleSingleEvent for HandleListSortOrderChanged {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::ListSortOrderChanged(list_idx, col_id, ascending) = ev {
@@ -1187,7 +1186,7 @@ impl HandleSingleEvent for HandleKeyPressed {
     }
 }
 
-struct HandleSearchEntryTextChanged(Rc<RefCell<dyn IFeedContents>>);
+struct HandleSearchEntryTextChanged(Rc<RefCell<dyn IContentList>>);
 impl HandleSingleEvent for HandleSearchEntryTextChanged {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::SearchEntryTextChanged(_idx, ref newtext) = ev {
@@ -1207,7 +1206,7 @@ impl HandleSingleEvent for HandleWindowThemeChanged {
 
 struct HandleWindowIconified(
     Rc<RefCell<dyn ISourceTreeController>>,
-    Rc<RefCell<dyn IFeedContents>>, // 6
+    Rc<RefCell<dyn IContentList>>, // 6
     Rc<RefCell<GuiContext>>,
 );
 impl HandleSingleEvent for HandleWindowIconified {
@@ -1240,10 +1239,22 @@ impl HandleSingleEvent for HandleIndicator {
     }
 }
 
-struct HandleDragDropUrlReceived(Rc<RefCell<dyn IDownloader>>);
+struct HandleDragDropUrlReceived(
+    Rc<RefCell<dyn IDownloader>>,
+    Rc<RefCell<dyn ISubscriptionMove>>,
+    Rc<RefCell<dyn ISourceTreeController>>,
+);
 impl HandleSingleEvent for HandleDragDropUrlReceived {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::DragDropUrlReceived(ref url) = ev {
+            if let Some((subs_e, _nf_childs)) = self.2.borrow().get_current_selected_subscription()
+            {
+                self.1
+                    .borrow_mut()
+                    .set_new_folder_parent(subs_e.parent_subs_id);
+            } else {
+                debug!("Drag, having no  parent folder! ");
+            }
             self.0.borrow().browser_drag_request(url);
         }
     }

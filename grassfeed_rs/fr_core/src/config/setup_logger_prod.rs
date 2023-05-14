@@ -36,6 +36,7 @@ pub fn setup_logger(
             .level_for("rustls", log::LevelFilter::Info)
             .level_for("ureq", log::LevelFilter::Info)
             .level_for("webbrowser", log::LevelFilter::Debug)
+            .level_for("webbrowser::common", log::LevelFilter::Info)
             .format(move |out, message, record| {
                 let target: &str = record.target();
                 let t_short = if target.len() > TARGET_WIDTH {

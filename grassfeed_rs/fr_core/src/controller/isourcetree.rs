@@ -1,6 +1,6 @@
 use crate::controller::contentlist::get_font_size_from_config;
 use crate::controller::contentlist::CJob;
-use crate::controller::contentlist::IFeedContents;
+use crate::controller::contentlist::IContentList;
 use crate::controller::sourcetree::Config;
 use crate::controller::sourcetree::NewSourceState;
 use crate::controller::sourcetree::SJob;
@@ -49,6 +49,7 @@ pub trait ISourceTreeController {
     fn newsource_dialog_edit(&mut self, edit_feed_url: String);
     fn set_selected_feedsource(&self, src_repo_id: isize);
 
+    /// returns  Subscription,  Non-Folder-Child-IDs
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
     fn set_selected_message_id(&self, subs_id: isize, msg_id: isize);
 }
@@ -297,11 +298,9 @@ impl ISourceTreeController for SourceTreeController {
                 }
             }
         }
-
         if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
             subs_mov.borrow_mut().set_new_folder_parent(new_parent_id)
         }
-
         (*self.gui_updater).borrow().update_dialog(dialog_id);
         (*self.gui_updater).borrow().show_dialog(dialog_id);
     }
@@ -314,14 +313,11 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let fse = o_fse.unwrap();
-
-        // self.set_fs_delete_id(Some(src_repo_id as usize));
         if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
             subs_mov
                 .borrow_mut()
                 .set_fs_delete_id(Some(src_repo_id as usize));
         }
-
         let dd: Vec<AValue> = vec![
             AValue::ABOOL(fse.is_folder),           // 0
             AValue::ASTR(fse.display_name.clone()), // 1
@@ -376,9 +372,10 @@ impl ISourceTreeController for SourceTreeController {
     fn set_conf_display_feedcount_all(&mut self, a: bool) {
         (*self.config).borrow_mut().display_feedcount_all = a;
         (*self.configmanager_r).borrow().set_val(
-            SourceTreeController::CONF_DISPLAY_FEECOUNT_ALL,
+            SourceTreeController::CONF_DISPLAY_FEEDCOUNT_ALL,
             a.to_string(),
         );
+        self.addjob(SJob::SetGuiTreeColumn1Width);
     }
 
     fn newsource_dialog_edit(&mut self, edit_feed_url: String) {

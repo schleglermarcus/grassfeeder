@@ -31,6 +31,7 @@ pub struct IconInner {
     pub subscriptionrepo: SubscriptionRepo,
     pub erro_repo: ErrorRepo,
     pub image_icon_kind: IconKind,
+    pub compressed_icon: String,
 }
 
 impl std::fmt::Debug for IconInner {
@@ -232,7 +233,7 @@ impl Step<IconInner> for IconCheckIsImage {
             );
             return StepResult::Stop(inner);
         }
-        StepResult::Continue(Box::new(IconStore(inner)))
+        StepResult::Continue(Box::new(IconCheckPresent(inner)))
     }
 }
 
@@ -260,16 +261,20 @@ impl Step<IconInner> for IconDownscale {
             return StepResult::Stop(inner);
         }
         inner.icon_bytes = r.unwrap();
-        StepResult::Continue(Box::new(IconStore(inner)))
+        StepResult::Continue(Box::new(IconCheckPresent(inner)))
     }
 }
 
-struct IconStore(IconInner);
-impl Step<IconInner> for IconStore {
+struct IconCheckPresent(IconInner);
+impl Step<IconInner> for IconCheckPresent {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
-        let inner: IconInner = self.0;
+        let mut inner: IconInner = self.0;
         if inner.icon_bytes.len() < 10 {
-            panic!("icon_too_small!");
+            error!(
+                "downloaded icon_too_small! {:?} {:?}",
+                inner.icon_bytes, inner.icon_url
+            );
+            return StepResult::Stop(inner);
         }
         if inner.icon_bytes.len() > 10000 {
             debug!(
@@ -279,39 +284,44 @@ impl Step<IconInner> for IconStore {
                 inner.icon_bytes.len() / 1024
             );
         }
-        let comp_st = util::compress_vec_to_string(&inner.icon_bytes);
-        let existing_icons: Vec<IconEntry> = inner.iconrepo.get_by_icon(comp_st.clone());
-        if existing_icons.is_empty() {
-            let ie = IconEntry {
-                icon: comp_st,
-                ..Default::default()
-            };
-            match inner.iconrepo.store_entry(&ie) {
-                Ok(entry) => {
-                    let _r = inner
-                        .sourcetree_job_sender
-                        .send(SJob::SetIconId(inner.subs_id, entry.icon_id));
-                }
-                Err(e) => {
-                    error!("Storing Icon from {}  failed {:?}", inner.icon_url, e);
-                }
-            }
-        } else {
+        inner.compressed_icon = util::compress_vec_to_string(&inner.icon_bytes);
+        let existing_icons: Vec<IconEntry> =
+            inner.iconrepo.get_by_icon(inner.compressed_icon.clone());
+        if !existing_icons.is_empty() {
             let existing_id = existing_icons[0].icon_id;
+            //  trace!(                "icon already there. {}=>{}   ",                inner.fs_icon_id_old,                existing_id            );
             if existing_id != inner.fs_icon_id_old {
                 let _r = inner
                     .sourcetree_job_sender
                     .send(SJob::SetIconId(inner.subs_id, existing_icons[0].icon_id));
+                return StepResult::Stop(inner);
             }
         }
-        StepResult::Stop(inner)
+        StepResult::Continue(Box::new(IconStore(inner)))
     }
 }
 
-struct IconStop(IconInner);
-impl Step<IconInner> for IconStop {
+struct IconStore(IconInner);
+impl Step<IconInner> for IconStore {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
-        StepResult::Stop(self.0)
+        let inner: IconInner = self.0;
+        assert!(!inner.compressed_icon.is_empty());
+        let ie = IconEntry {
+            icon: inner.compressed_icon.clone(),
+            ..Default::default()
+        };
+        // trace!("icons-storing:  {:?} ", &ie);
+        match inner.iconrepo.store_entry(&ie) {
+            Ok(entry) => {
+                let _r = inner
+                    .sourcetree_job_sender
+                    .send(SJob::SetIconId(inner.subs_id, entry.icon_id));
+            }
+            Err(e) => {
+                error!("Storing Icon from {}  failed {:?}", inner.icon_url, e);
+            }
+        }
+        StepResult::Stop(inner)
     }
 }
 

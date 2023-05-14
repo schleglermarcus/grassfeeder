@@ -2,6 +2,7 @@ use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorEntry;
 use crate::db::errors_repo::ErrorRepo;
+use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::db::message::MessageRow;
 use crate::db::messages_repo::IMessagesRepo;
@@ -18,6 +19,7 @@ use flume::Sender;
 use resources::gen_icons;
 use resources::gen_icons::ICON_LIST;
 use std::borrow::Borrow;
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::Mutex;
 
@@ -250,6 +252,56 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_08_GNOME_FOLDER_48);
             inner.need_update_subscriptions = true;
         }
+        StepResult::Continue(Box::new(CorrectIconsDoublettes(inner)))
+    }
+}
+
+pub struct CorrectIconsDoublettes(pub CleanerInner);
+impl Step<CleanerInner> for CorrectIconsDoublettes {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let mut inner = self.0;
+        let all_icons: Vec<IconEntry> = inner.iconrepo.get_all_entries();
+        let all_icons_len = all_icons.len();
+        let mut ic_first: HashMap<String, isize> = HashMap::new();
+        let mut replace_ids: HashMap<isize, isize> = HashMap::new(); // subsequent-icon-id =>  previous icon-id
+        all_icons
+            .into_iter()
+            .for_each(|e| match ic_first.get(&e.icon) {
+                None => {
+                    ic_first.insert(e.icon, e.icon_id);
+                }
+                Some(id) => {
+                    replace_ids.insert(e.icon_id, *id);
+                }
+            });
+        let all_subs = inner.subscriptionrepo.get_all_nonfolder();
+        trace!(            "IconsDoublettes:  icon_uniq:{}    replace_icons:{}   all_subscriptions:{}  all_icons:{} ",           ic_first.len(),            replace_ids.len(),            all_subs.len(), all_icons_len        );
+        replace_ids.iter().for_each(|(repl, dest)| {
+            all_subs
+                .iter()
+                .filter(|subs| subs.icon_id == *repl as usize)
+                .for_each(|subs| {
+                    trace!(
+                        "modifiying icon id {} {}=>{} ",
+                        subs.subs_id,
+                        subs.icon_id,
+                        dest
+                    );
+                    inner
+                        .subscriptionrepo
+                        .update_icon_id(subs.subs_id, *dest as usize)
+                });
+        });
+        if !replace_ids.is_empty() {
+            trace!(
+                "IconsDoublettes:  removing double icons: {:?} ",
+                replace_ids.keys()
+            );
+            replace_ids.iter().for_each(|(repl, _dest)| {
+                inner.iconrepo.remove_icon(*repl);
+            });
+            inner.iconrepo.check_or_store();
+        }
         StepResult::Continue(Box::new(CorrectIconsOnSubscriptions(inner)))
     }
 }
@@ -265,23 +317,45 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
             .filter(|fse| !fse.is_folder)
             .collect();
         let mut reset_icon_subs_ids: Vec<i32> = Vec::default();
+        let all_icon_ids: Vec<isize> = inner
+            .iconrepo
+            .get_all_entries()
+            .iter()
+            .map(|ie| ie.icon_id)
+            .collect::<Vec<isize>>();
+        if all_icon_ids.len() < 2 {
+            error!(
+                "no icons found, skipping CorrectIconsOnSubscriptions!  {} ",
+                all_icon_ids.len()
+            );
+            return StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)));
+        }
         for se in all_folders {
             if se.icon_id < ICON_LIST.len() && se.icon_id != gen_icons::IDX_05_RSS_FEEDS_GREY_64_D {
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
             }
-            let o_icon = inner.iconrepo.get_by_index(se.icon_id as isize);
-            if o_icon.is_none() {
+            if !all_icon_ids.contains(&(se.icon_id as isize)) {
+                trace!(
+                    "CorrectIcons: subscr {}  not-in-icon-db: {:?}  ",
+                    se.subs_id,
+                    se.icon_id
+                );
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
             }
         }
         reset_icon_subs_ids.sort();
         if !reset_icon_subs_ids.is_empty() {
-            trace!("CorrectIconsOnSubscriptions : {:?}", reset_icon_subs_ids);
+            debug!(
+                "CorrectIconsOnSubscriptions : {:?}   #icons={} ",
+                reset_icon_subs_ids,
+                all_icon_ids.len()
+            );
             inner
                 .subscriptionrepo
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_05_RSS_FEEDS_GREY_64_D);
+
             inner.need_update_subscriptions = true;
         }
         StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)))
@@ -341,26 +415,50 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 .map(|fse| fse.subs_id)
                 .collect::<Vec<isize>>();
             for su_id in &subs_ids {
-                let mut msg_per_subscription = inner.messgesrepo.get_by_src_id(*su_id, true);
-                let length_before = msg_per_subscription.len();
-                if length_before > inner.max_messages_per_subscription as usize {
-                    inner.need_update_messages = true;
-                    msg_per_subscription.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
-                    let (_stay, remove) =
-                        msg_per_subscription.split_at(inner.max_messages_per_subscription as usize);
-                    if !remove.is_empty() {
-                        let id_list: Vec<i32> = remove
-                            .iter()
-                            .filter(|e| !e.is_favorite())
-                            .map(|e| e.message_id as i32)
-                            .collect();
-                        inner.messgesrepo.update_is_deleted_many(&id_list, true);
-                    }
-                }
+                let (need_u, _n_removed, _n_all, _n_unread) = reduce_too_many_messages(
+                    &inner.messgesrepo,
+                    inner.max_messages_per_subscription as usize,
+                    *su_id,
+                );
+                inner.need_update_messages = need_u;
             }
         }
         StepResult::Continue(Box::new(DeleteDoubleSameMessages(inner)))
     }
+}
+
+// returns   need-update, #removed, num-all, num-unread
+pub fn reduce_too_many_messages(
+    msg_r: &MessagesRepo,
+    max_messages: usize,
+    subs_id: isize,
+) -> (bool, usize, usize, usize) {
+    let mut all_messages = msg_r.get_by_src_id(subs_id, true);
+    let length_before = all_messages.len();
+    let num_unread = all_messages
+        .iter()
+        .filter(|msg| !msg.is_read && !msg.is_deleted)
+        .count();
+    if length_before <= max_messages {
+        return (false, 0, length_before, num_unread);
+    }
+    all_messages.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
+    let (stay, remove) = all_messages.split_at(max_messages);
+    let remove_list: Vec<i32> = remove
+        .iter()
+        .filter(|e| !e.is_favorite())
+        .map(|e| e.message_id as i32)
+        .collect();
+    if !remove_list.is_empty() {
+        msg_r.update_is_deleted_many(&remove_list, true);
+        let num_unread = stay
+            .iter()
+            .filter(|msg| !msg.is_read && !msg.is_deleted)
+            .count();
+        let num_all = stay.iter().filter(|msg| !msg.is_deleted).count();
+        return (true, remove_list.len(), num_all, num_unread);
+    }
+    (false, 0, length_before, num_unread)
 }
 
 pub struct DeleteDoubleSameMessages(pub CleanerInner);
@@ -478,7 +576,6 @@ impl Step<CleanerInner> for Notify {
                 .sourcetree_job_sender
                 .send(SJob::FillSubscriptionsAdapter);
         }
-        // later: refresh message display
         StepResult::Stop(inner)
     }
 }
@@ -544,13 +641,10 @@ pub fn check_layer(
     if !entries.is_empty() {
         subs_active_parents.lock().unwrap().push(parent_subs_id);
     }
-    // debug!("check_layer: {:?} {:?}", &localpath, &entries);
     entries.iter().enumerate().for_each(|(folderpos, fse)| {
         let mut path: Vec<u16> = Vec::new();
         path.extend_from_slice(localpath);
         if fse.folder_position != (folderpos as isize) {
-            // debug!(                "check_layer: unequal folderpos {:?} {:?}",                fse.folder_position, folderpos            );
-
             let mut fpc = fp_correct_subs_parent.lock().unwrap();
             if !fpc.contains(&(fse.parent_subs_id as i32)) {
                 fpc.push(fse.parent_subs_id as i32);

@@ -26,7 +26,6 @@ impl std::fmt::Debug for ComprehensiveInner {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("")
             .field("url", &self.feed_url_edit)
-            // .field("DL", &self.url_download_text)
             .field("title", &self.feed_title)
             .field("homepage", &self.feed_homepage)
             .field("icon_url", &self.icon_url)
@@ -59,7 +58,7 @@ impl Step<ComprehensiveInner> for ComprStart {
             }
             _ => {
                 inner.download_error_happened = true;
-                debug!(
+                trace!(
                     "Feed download:  '{}' => {} {} {:?}",
                     &url,
                     result.get_status(),
