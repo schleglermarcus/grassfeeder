@@ -21,7 +21,6 @@ use crate::db::subscription_state::StatusMask;
 use crate::db::subscription_state::SubsMapEntry;
 use crate::db::subscription_state::SubscriptionState;
 use crate::ui_select::gui_context::GuiContext;
-use crate::util::db_time_to_display_nonnull;
 use crate::util::timestamp_now;
 use context::appcontext::AppContext;
 use context::BuildConfig;
@@ -592,15 +591,7 @@ impl SourceTreeController {
         let now_seconds = timestamp_now();
         let time_outdated = now_seconds - (subs.updated_icon + ICON_RELOAD_TIME_S);
         if time_outdated > 0 || subs.icon_id < ICON_LIST.len() {
-            trace!(
-                "check_icon:  ID:{}  icon-id:{} icontime:{} time_outdated={}h   now:{}  icontime:{} ",
-                subs_id,
-                subs.icon_id,
-                subs.updated_icon,
-                time_outdated / 3600,
-                db_time_to_display_nonnull(now_seconds),
-                db_time_to_display_nonnull(subs.updated_icon),
-            );
+            // trace!(                "check_icon:  ID:{}  icon-id:{} icontime:{} time_outdated={}h   now:{}  icontime:{} ",                subs_id,                subs.icon_id,                subs.updated_icon,                time_outdated / 3600,                db_time_to_display_nonnull(now_seconds),               db_time_to_display_nonnull(subs.updated_icon),            );
             (*self.downloader_r)
                 .borrow()
                 .load_icon(subs.subs_id, subs.url, subs.icon_id);
