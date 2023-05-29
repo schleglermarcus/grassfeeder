@@ -15,7 +15,7 @@ pub fn setup_logger(
     app_name: &str,
 ) -> Result<(), fern::InitError> {
     let filter_level: log::LevelFilter = levelfilter_for_num(debug_level);
-    let mut colors = ColoredLevelConfig::new().info(Color::Green);
+    let mut colors = ColoredLevelConfig::new();
     colors.trace = Color::Blue;
     colors.debug = Color::Cyan;
     colors.info = Color::Green;

@@ -229,7 +229,7 @@ impl GtkRunnerInternal {
                     IntCommands::UpdateWindowMinimized(mini, ev_time) => {
                         upd_int.update_window_minimized(mini, ev_time)
                     }
-
+                    IntCommands::StoreImage(idx,  ref img) => upd_int.store_image(idx, img.clone()),
                     _ => {
                         warn!("GTKS other cmd {:?}", command);
                     }

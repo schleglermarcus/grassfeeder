@@ -25,6 +25,7 @@ Later:
 	  reddit -> feed url
 		bitchute:   https://www.bitchute.com/feeds/rss/channel/CHANNELNAME
 
+- UML Diagramme:  https://docs.rs/crate/mdbook-plantuml/0.3.0
 
 
 Perhaps:
@@ -59,9 +60,8 @@ No more
   cd grassfeed_rs/app-gtk3-linux/ ; ./debian-stage2.sh
 
 * Put the work folder back to main
-  git checkout main
-  git pull
-  git status
+git checkout main ;    git pull ;  git status
+
 
 * Create new Branch
 	git branch v0_0_4

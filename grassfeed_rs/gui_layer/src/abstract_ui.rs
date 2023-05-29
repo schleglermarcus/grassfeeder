@@ -227,6 +227,8 @@ pub trait UIUpdaterAdapter {
     fn memory_conserve(&self, act: bool);
     // fn update_systray_indicator(&self, enable: bool);
     fn update_window_minimized(&self, mini: bool, ev_time: u32);
+    fn store_image(&self, idx: i32, img:String) ;
+
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]
@@ -259,6 +261,7 @@ pub enum AValue {
     AI32(i32),
     ASTR(String),
     AIMG(String),
+    IIMG(i32),
     ABOOL(bool),
 }
 
@@ -270,6 +273,7 @@ impl std::fmt::Debug for AValue {
             AValue::AI32(n) => r = f.debug_struct("I32:").field("", n).finish(),
             AValue::ASTR(s) => r = f.debug_struct("STR:").field("", s).finish(),
             AValue::AIMG(s) => r = f.debug_struct("IMG:#").field("", &s.len()).finish(),
+            AValue::IIMG(i) => r = f.debug_struct("IIMG:").field("", i).finish(),
             AValue::ABOOL(b) => r = f.debug_struct("B:#").field("", b).finish(),
             _ => {}
         };
@@ -285,6 +289,7 @@ impl AValue {
             AValue::ASTR(s) => Some(s.clone()),
             AValue::AIMG(s) => Some(s.clone()),
             AValue::ABOOL(b) => Some((*b).to_string()),
+            AValue::IIMG(i) => Some(i.to_string()),
             _ => None,
         }
     }

@@ -165,6 +165,10 @@ impl GtkModelUpdaterInt {
                         }
                     }
                 }
+                AValue::IIMG(i) => {
+                    warn!("IIMG: {}  TODO ", i)
+                }
+
                 AValue::None => (),
             }
         }
@@ -408,6 +412,10 @@ impl GtkModelUpdaterInt {
                         }
                     }
                 }
+                AValue::IIMG(i) => {
+                    warn!("IIMG {} ", i);
+                }
+
                 AValue::None => (),
             }
         }
@@ -740,6 +748,12 @@ impl GtkModelUpdaterInt {
             }
         }
     }
+
+    pub fn store_image(&self, idx: i32, img: String) {
+        warn!(" TODO store_image : {} ", idx);
+    }
+
+
 } // GtkModelUpdaterInt
 
 /// outsourcing this due to  the gtk 0.14  incompatible api

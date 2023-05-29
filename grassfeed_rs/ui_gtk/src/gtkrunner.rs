@@ -575,7 +575,8 @@ impl GtkObjects for GtkObjectsImpl {
     fn set_gui_event_sender(&mut self, ev_se: Sender<GuiEvents>) {
         self.gui_event_sender = Some(ev_se);
     }
-    fn fet_gui_event_sender(&mut self) -> Option<Sender<GuiEvents>> {
+
+    fn get_gui_event_sender(&mut self) -> Option<Sender<GuiEvents>> {
         self.gui_event_sender.clone()
     }
 }
@@ -762,4 +763,9 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     fn tree_set_cursor(&self, tree_idx: u8, path: Vec<u16>) {
         self.send_to_int(&IntCommands::TreeSetCursor(tree_idx, path));
     }
+
+    fn store_image(&self, idx: i32, img: String) {
+        self.send_to_int(&IntCommands::StoreImage(idx, img));
+    }
+
 } //

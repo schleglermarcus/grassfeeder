@@ -81,6 +81,7 @@ pub enum IntCommands {
     MemoryConserve(bool),
     TrayIconEnable(bool),
     UpdateWindowMinimized(bool, u32),
+    StoreImage(i32, String),
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;
@@ -168,7 +169,7 @@ pub trait GtkObjects {
     fn get_searchentry(&self, idx: u8) -> Option<&gtk::SearchEntry>;
 
     fn set_gui_event_sender(&mut self, ev_se: Sender<GuiEvents>);
-    fn fet_gui_event_sender(&mut self) -> Option<Sender<GuiEvents>>;
+    fn get_gui_event_sender(&mut self) -> Option<Sender<GuiEvents>>;
 }
 
 #[derive(Clone, Debug)]

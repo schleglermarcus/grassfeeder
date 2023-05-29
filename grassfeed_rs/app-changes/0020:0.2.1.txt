@@ -1,0 +1,7 @@
+Sun, 14 May 2023 00:12:00 +0000
+
+- UI  Layer:   Icons  mit ID ausstatten.  treestore_set_row()
+
+- Test icon extraction with https://www.greyblake.com/blog/property-based-testing-in-rust-with-arbitrary/
+
+- Aggregate View:  use favorite colum for feed icon
