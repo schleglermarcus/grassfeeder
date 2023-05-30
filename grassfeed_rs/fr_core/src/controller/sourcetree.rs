@@ -64,7 +64,6 @@ pub enum SJob {
     /// subscription_id  CHECK IF NEEDED
     // FillSourcesTreeSingle(isize),
 
-
     // take all needed icons and put it into the updater
     GuiStoreIcons,
 
@@ -256,6 +255,14 @@ impl SourceTreeController {
                     self.set_fetch_finished(fs_id, error_happened)
                 }
                 SJob::SetIconId(subs_id, icon_id) => {
+                    if let Some(icon_e) = (*self.iconrepo_r).borrow().get_by_index(icon_id as isize)
+                    {
+                        trace!("SetIconId   {} {} ", subs_id, icon_id);
+                        (*self.gui_updater)
+                            .borrow()
+                            .store_image(icon_id as i32, icon_e.icon);
+                    }
+
                     let ts_now = timestamp_now();
                     (*self.subscriptionrepo_r).borrow().update_icon_id_time(
                         subs_id,
@@ -601,8 +608,7 @@ impl SourceTreeController {
         let now_seconds = timestamp_now();
         let time_outdated = now_seconds - (subs.updated_icon + ICON_RELOAD_TIME_S);
         if time_outdated > 0 || subs.icon_id < ICON_LIST.len() {
-            trace!(                "check_icon:  ID:{}  icon-id:{} icontime:{} time_outdated={}h   now:{}  icontime:{} ",
-                           subs_id,                subs.icon_id,                subs.updated_icon,                time_outdated / 3600,                crate::util::db_time_to_display_nonnull(now_seconds),               crate::util::db_time_to_display_nonnull(subs.updated_icon),            );
+            // trace!(                "check_icon:  ID:{}  icon-id:{} icontime:{} time_outdated={}h   now:{}  icontime:{} ",                           subs_id,                subs.icon_id,                subs.updated_icon,                time_outdated / 3600,                crate::util::db_time_to_display_nonnull(now_seconds),               crate::util::db_time_to_display_nonnull(subs.updated_icon),            );
             (*self.downloader_r)
                 .borrow()
                 .load_icon(subs.subs_id, subs.url, subs.icon_id);
@@ -942,9 +948,7 @@ impl SourceTreeController {
             self.statemap
                 .borrow()
                 .get_ids_by_status(StatusMask::IsDeletedCopy, false, true);
-
         src_ids.sort();
-        debug!(" TODO icons_store_to_gui ! SRC={:?} ", src_ids);
         let mut icon_ids = src_ids
             .iter()
             .filter_map(|subs_id| {
@@ -954,13 +958,14 @@ impl SourceTreeController {
                     return None;
                 }
                 let subs = o_subs.unwrap();
-                // debug!("subs:{} => icon:{} ", subs_id, subs.icon_id);
                 Some(subs.icon_id)
             })
             .collect::<HashSet<usize>>();
         icon_ids.insert(IDX_04_GRASS_CUT_2); // main window icon
-
-        debug!("icons_store_to_gui  icon_ids= {:?} ", icon_ids);
+        debug!(
+            "icons_store_to_gui  SRC={:?}   icon_ids= {:?} ",
+            src_ids, icon_ids
+        );
         for ii in icon_ids {
             let o_icon = (*self.iconrepo_r).borrow().get_by_index(ii as isize);
             if o_icon.is_none() {
