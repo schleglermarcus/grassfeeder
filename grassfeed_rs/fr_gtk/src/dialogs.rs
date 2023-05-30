@@ -215,7 +215,7 @@ pub fn create_new_subscription_dialog(
 
     let mut image_icon = Image::new();
     if let Ok(image_icon_prep) = prepare_icon(
-        gen_icons::ICON_LIST[gen_icons::IDX_03_IDX_TRANSPARENT_48],
+        gen_icons::ICON_LIST[gen_icons::IDX_03_ICON_TRANSPARENT_48],
         icon_size_pixel,
     ) {
         image_icon = image_icon_prep;

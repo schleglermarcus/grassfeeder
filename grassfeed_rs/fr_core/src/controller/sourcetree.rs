@@ -36,7 +36,18 @@ use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::gui_values::FontAttributes;
 use resources::gen_icons;
 use resources::gen_icons::ICON_LIST;
+use resources::gen_icons::IDX_01_BORDER_RED;
+use resources::gen_icons::IDX_02_ICON_MISSING_BROWN;
+use resources::gen_icons::IDX_03_ICON_TRANSPARENT_48;
 use resources::gen_icons::IDX_04_GRASS_CUT_2;
+use resources::gen_icons::IDX_05_RSS_FEEDS_GREY_64_D;
+use resources::gen_icons::IDX_06_CENTER_POINT_GREEN;
+use resources::gen_icons::IDX_08_GNOME_FOLDER_48;
+use resources::gen_icons::IDX_14_ICON_DOWNLOAD_64;
+use resources::gen_icons::IDX_16_DOCUMENT_PROPERTIES_48;
+use resources::gen_icons::IDX_30_ERROR_24X24;
+use resources::gen_icons::IDX_32_FLAG_RED_32;
+use resources::gen_icons::IDX_44_ICON_GREEN_D;
 use resources::id::*;
 use std::cell::RefCell;
 use std::collections::HashSet;
@@ -257,7 +268,7 @@ impl SourceTreeController {
                 SJob::SetIconId(subs_id, icon_id) => {
                     if let Some(icon_e) = (*self.iconrepo_r).borrow().get_by_index(icon_id as isize)
                     {
-                        trace!("SetIconId   {} {} ", subs_id, icon_id);
+                        // trace!("SetIconId   {} {} ", subs_id, icon_id);
                         (*self.gui_updater)
                             .borrow()
                             .store_image(icon_id as i32, icon_e.icon);
@@ -835,13 +846,17 @@ impl SourceTreeController {
             fs_iconstr = ie.icon;
         }
         let mut show_status_icon = false;
+
         let mut status_icon = gen_icons::ICON_03_ICON_TRANSPARENT_48;
+        let mut n_status_icon = IDX_03_ICON_TRANSPARENT_48;
 
         if su_st.is_fetch_scheduled() || su_st.is_fetch_scheduled_jobcreated() {
             status_icon = gen_icons::ICON_14_ICON_DOWNLOAD_64;
+            n_status_icon = IDX_14_ICON_DOWNLOAD_64;
             show_status_icon = true;
         } else if su_st.is_err_on_fetch() {
             status_icon = gen_icons::ICON_32_FLAG_RED_32;
+            n_status_icon = IDX_32_FLAG_RED_32;
             show_status_icon = true;
         }
         let tp = match &su_st.tree_path {
@@ -892,7 +907,10 @@ impl SourceTreeController {
 
         tv.push(AValue::ASTR(displayname)); // 1:
         tv.push(AValue::ASTR(rightcol_text));
-        tv.push(AValue::AIMG(status_icon.to_string()));
+
+        // tv.push(AValue::AIMG(status_icon.to_string()));
+        tv.push(AValue::IIMG(n_status_icon as i32));
+
         tv.push(AValue::AU32(0)); // 4: is-folder
         tv.push(AValue::AU32(fse.subs_id as u32)); // 5: db-id
         tv.push(AValue::AU32(FontAttributes::to_activation_bits(
@@ -961,17 +979,25 @@ impl SourceTreeController {
                 Some(subs.icon_id)
             })
             .collect::<HashSet<usize>>();
+
+        icon_ids.insert(IDX_01_BORDER_RED);
+        icon_ids.insert(IDX_02_ICON_MISSING_BROWN);
+        icon_ids.insert(IDX_03_ICON_TRANSPARENT_48);
         icon_ids.insert(IDX_04_GRASS_CUT_2); // main window icon
-        debug!(
-            "icons_store_to_gui  SRC={:?}   icon_ids= {:?} ",
-            src_ids, icon_ids
-        );
+        icon_ids.insert(IDX_05_RSS_FEEDS_GREY_64_D);
+        icon_ids.insert(IDX_06_CENTER_POINT_GREEN);
+        icon_ids.insert(IDX_08_GNOME_FOLDER_48);
+        icon_ids.insert(IDX_14_ICON_DOWNLOAD_64);
+        icon_ids.insert(IDX_16_DOCUMENT_PROPERTIES_48);
+        icon_ids.insert(IDX_30_ERROR_24X24);
+        icon_ids.insert(IDX_32_FLAG_RED_32);
+        icon_ids.insert(IDX_44_ICON_GREEN_D);
+                                             // trace!(            "icons_store_to_gui  SRC={:?}   icon_ids= {:?} ",            src_ids, icon_ids        );
         for ii in icon_ids {
             let o_icon = (*self.iconrepo_r).borrow().get_by_index(ii as isize);
             if o_icon.is_none() {
                 continue;
             };
-            // trace!("icons_store_to_gui  icon_id= {:?} ", ii);
             (*self.gui_updater)
                 .borrow()
                 .store_image(ii as i32, o_icon.unwrap().icon);

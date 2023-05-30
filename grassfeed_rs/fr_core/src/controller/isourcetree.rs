@@ -16,6 +16,7 @@ use crate::util::db_time_to_display_nonnull;
 use crate::util::string_is_http_url;
 use flume::Sender;
 use gui_layer::abstract_ui::AValue;
+// use resources::gen_icons::IDX_05_RSS_FEEDS_GREY_64_D;
 use resources::id::DIALOG_FOLDER_EDIT;
 use resources::id::DIALOG_FS_DELETE;
 use resources::id::DIALOG_FS_EDIT;
@@ -218,16 +219,20 @@ impl ISourceTreeController for SourceTreeController {
         }
         let mut dd: Vec<AValue> = Vec::default();
         let mut fs_iconstr: String = String::default();
-        if let Some(ie) = self.iconrepo_r.borrow().get_by_index(fse.icon_id as isize) {
-            fs_iconstr = ie.icon;
-        }
 
+        let mut n_icon: i32 = fse.icon_id as i32;
+        /*
+               if let Some(ie) = self.iconrepo_r.borrow().get_by_index(fse.icon_id as isize) {
+                   fs_iconstr = ie.icon;
+               }
+        */
         dd.push(AValue::ASTR(fse.display_name.clone())); // 0
         if fse.is_folder {
             dialog_id = DIALOG_FOLDER_EDIT;
         } else {
             dd.push(AValue::ASTR(fse.url.clone())); // 1
-            dd.push(AValue::AIMG(fs_iconstr)); // 2
+                                                    // dd.push(AValue::AIMG(fs_iconstr)); // 2
+            dd.push(AValue::IIMG(n_icon)); // 2
             dd.push(AValue::AI32(num_all)); // 3
             dd.push(AValue::AI32(num_unread)); // 4
             dd.push(AValue::ASTR(fse.website_url)); // 5

@@ -87,15 +87,15 @@ pub const ICON_LIST: [&str; 20] = [
 
 
 pub const IDX_01_BORDER_RED: usize = 0;
-pub const IDX_02_IDX_MISSING_BROWN: usize = 1;
-pub const IDX_03_IDX_TRANSPARENT_48: usize = 2;
+pub const IDX_02_ICON_MISSING_BROWN: usize = 1;
+pub const IDX_03_ICON_TRANSPARENT_48: usize = 2;
 pub const IDX_04_GRASS_CUT_2: usize = 3;
 pub const IDX_05_RSS_FEEDS_GREY_64_D: usize = 4;
 pub const IDX_06_CENTER_POINT_GREEN: usize = 5;
 pub const IDX_08_GNOME_FOLDER_48: usize = 6;
 pub const IDX_10_RSS_ADD_32: usize = 7;
 pub const IDX_12_RSS_ADD_B_32: usize = 8;
-pub const IDX_14_IDX_DOWNLOAD_64: usize = 9;
+pub const IDX_14_ICON_DOWNLOAD_64: usize = 9;
 pub const IDX_16_DOCUMENT_PROPERTIES_48: usize = 10;
 pub const IDX_18_RELOAD_32: usize = 11;
 pub const IDX_20_FOLDER_NEW_48: usize = 12;
@@ -105,6 +105,6 @@ pub const IDX_34_DATA_XP2: usize = 15;
 pub const IDX_36_ZOOM_IN: usize = 16;
 pub const IDX_38_ZOOM_OUT: usize = 17;
 pub const IDX_40_ZOOM_FIT_BEST: usize = 18;
-pub const IDX_44_IDX_GREEN_D: usize = 19;
+pub const IDX_44_ICON_GREEN_D: usize = 19;
 
 

@@ -34,21 +34,16 @@ pub struct GtkModelUpdaterInt {
     m_v_store: UIAdapterValueStoreType,
     g_o_a: GtkObjectsType,
     pixbuf_cache: RefCell<HashMap<i32, Pixbuf>>,
-
-    #[deprecated]
-    pixbufcache: RefCell<HashMap<String, Pixbuf>>,
+    // #[deprecated]
+    // pixbufcache: RefCell<HashMap<String, Pixbuf>>,
 }
 
 impl GtkModelUpdaterInt {
-    pub fn new(
-        g_m_v_s: UIAdapterValueStoreType,
-        gtkobjects_a: GtkObjectsType,
-        // _ev_se_w: Arc<dyn UISenderWrapper + Send + Sync + 'static>,
-    ) -> Self {
+    pub fn new(g_m_v_s: UIAdapterValueStoreType, gtkobjects_a: GtkObjectsType) -> Self {
         GtkModelUpdaterInt {
             m_v_store: g_m_v_s,
             g_o_a: gtkobjects_a,
-            pixbufcache: RefCell::new(HashMap::new()),
+            // pixbufcache: RefCell::new(HashMap::new()),
             pixbuf_cache: RefCell::new(HashMap::new()),
         }
     }
@@ -154,19 +149,22 @@ impl GtkModelUpdaterInt {
                 AValue::ASTR(s) => tree_store.set(t_iter, &[(c as u32, &s)]),
                 AValue::ABOOL(b) => tree_store.set(t_iter, &[(c as u32, &b)]),
                 AValue::AIMG(s) => {
-                    let contained = self.pixbufcache.borrow().contains_key(s);
-                    if !contained {
-                        let pb: Pixbuf = Self::icon_for_string(s, &debuginfo);
-                        self.pixbufcache.borrow_mut().insert(s.clone(), pb);
-                    }
-                    match self.pixbufcache.borrow().get(s) {
-                        Some(e_pb) => {
-                            tree_store.set(t_iter, &[(c as u32, &e_pb)]);
-                        }
-                        None => {
-                            error!("     treestore_set_row: {}  pixbuf was inserted, but is not there ", debuginfo);
-                        }
-                    }
+                    error!("     treestore_set_row: ::AIMG  {} ", debuginfo);
+                    /*
+                                       let contained = self.pixbufcache.borrow().contains_key(s);
+                                       if !contained {
+                                           let pb: Pixbuf = Self::icon_for_string(s, &debuginfo);
+                                           self.pixbufcache.borrow_mut().insert(s.clone(), pb);
+                                       }
+                                       match self.pixbufcache.borrow().get(s) {
+                                           Some(e_pb) => {
+                                               tree_store.set(t_iter, &[(c as u32, &e_pb)]);
+                                           }
+                                           None => {
+                                               error!("     treestore_set_row: {}  pixbuf was inserted, but is not there ", debuginfo);
+                                           }
+                                       }
+                    */
                 }
                 AValue::IIMG(i) => {
                     // trace!("treestore_set_row   IIMG: {}  ", i);
@@ -368,7 +366,7 @@ impl GtkModelUpdaterInt {
                 &append_iter,
                 maxcols,
                 row,
-                &self.pixbufcache,
+                // &self.pixbufcache,
                 &self.pixbuf_cache,
             );
             num_lines += 1;
@@ -391,7 +389,7 @@ impl GtkModelUpdaterInt {
         iter: &TreeIter,
         maxcols: u32,
         row: &[AValue],
-        pixbufcache: &RefCell<HashMap<String, Pixbuf>>,
+        // pixbufcache: &RefCell<HashMap<String, Pixbuf>>,
         pixbuf_cache: &RefCell<HashMap<i32, Pixbuf>>,
     ) {
         for column in 0..maxcols {
@@ -418,19 +416,22 @@ impl GtkModelUpdaterInt {
                     list_store.set_value(iter, column, &glib::Value::from(&b));
                 }
                 AValue::AIMG(s) => {
-                    let contained = pixbufcache.borrow().contains_key(s);
-                    if !contained {
-                        let pb: Pixbuf = Self::icon_for_string(s, "put_into_store");
-                        pixbufcache.borrow_mut().insert(s.clone(), pb);
-                    }
-                    match pixbufcache.borrow().get(s) {
-                        Some(e_pb) => {
-                            list_store.set(iter, &[(column, &e_pb)]);
-                        }
-                        None => {
-                            error!("list,put_into_store:   pixbuf was inserted, but is not there ");
-                        }
-                    }
+                    error!("list,put_into_store:   AIMG ! ");
+                    /*
+                                       let contained = pixbufcache.borrow().contains_key(s);
+                                       if !contained {
+                                           let pb: Pixbuf = Self::icon_for_string(s, "put_into_store");
+                                           pixbufcache.borrow_mut().insert(s.clone(), pb);
+                                       }
+                                       match pixbufcache.borrow().get(s) {
+                                           Some(e_pb) => {
+                                               list_store.set(iter, &[(column, &e_pb)]);
+                                           }
+                                           None => {
+                                               error!("list,put_into_store:   pixbuf was inserted, but is not there ");
+                                           }
+                                       }
+                    */
                 }
                 AValue::IIMG(i) => {
                     // trace!("put_into_store :   IIMG {} ", &i);
@@ -473,7 +474,7 @@ impl GtkModelUpdaterInt {
                 &iter,
                 maxcols,
                 &row,
-                &self.pixbufcache,
+                // &self.pixbufcache,
                 &self.pixbuf_cache,
             );
         }
@@ -505,7 +506,7 @@ impl GtkModelUpdaterInt {
                         &iter,
                         maxcols,
                         &row,
-                        &self.pixbufcache,
+                        // &self.pixbufcache,
                         &self.pixbuf_cache,
                     );
                 }
@@ -814,11 +815,7 @@ impl GtkModelUpdaterInt {
         }
         let pb: Pixbuf = Self::icon_for_string(&img, &format!("store_image {} ", idx));
         self.pixbuf_cache.borrow_mut().insert(idx, pb);
-        debug!(
-            "GMU: store_image  {}   len={}",
-            idx,
-            self.pixbuf_cache.borrow().len()
-        );
+        //  trace!(            "GMU: store_image  {}   len={}",            idx,            self.pixbuf_cache.borrow().len()        );
     }
 } // GtkModelUpdaterInt
 

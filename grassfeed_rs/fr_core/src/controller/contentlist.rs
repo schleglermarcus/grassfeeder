@@ -191,12 +191,22 @@ impl FeedContents {
         debug_mode: bool,
     ) -> Vec<AValue> {
         let mut newrow: Vec<AValue> = Vec::default();
-        let ifav = if fc.is_favorite() {
-            gen_icons::ICON_44_ICON_GREEN_D
+        /*
+               let ifav = if fc.is_favorite() {
+                   gen_icons::ICON_44_ICON_GREEN_D
+               } else {
+                   gen_icons::ICON_03_ICON_TRANSPARENT_48
+               };
+              newrow.push(AValue::AIMG(ifav.to_string())); // 0
+        */
+
+        let nfav = if fc.is_favorite() {
+            gen_icons::IDX_44_ICON_GREEN_D
         } else {
-            gen_icons::ICON_03_ICON_TRANSPARENT_48
+            gen_icons::IDX_03_ICON_TRANSPARENT_48
         };
-        newrow.push(AValue::AIMG(ifav.to_string())); // 0
+        newrow.push(AValue::IIMG(nfav as i32)); // 0
+
         newrow.push(AValue::ASTR(title_d)); // 1: message title
         if fc.entry_src_date > 0 {
             let mut displaytime = db_time_to_display(fc.entry_src_date);
@@ -207,10 +217,19 @@ impl FeedContents {
         } else {
             newrow.push(AValue::None);
         }
-        newrow.push(AValue::AIMG(match fc.is_read {
-            true => gen_icons::ICON_06_CENTER_POINT_GREEN.to_string(),
-            _ => gen_icons::ICON_16_DOCUMENT_PROPERTIES_48.to_string(),
-        })); //  3
+        /*
+               let s_icon = match fc.is_read {
+                   true => gen_icons::ICON_06_CENTER_POINT_GREEN.to_string(),
+                   _ => gen_icons::ICON_16_DOCUMENT_PROPERTIES_48.to_string(),
+               };
+               newrow.push(AValue::AIMG(s_icon)); //  3
+        */
+        let n_icon = match fc.is_read {
+            true => gen_icons::IDX_06_CENTER_POINT_GREEN,
+            _ => gen_icons::IDX_16_DOCUMENT_PROPERTIES_48,
+        };
+        newrow.push(AValue::IIMG(n_icon as i32)); //  3
+
         newrow.push(AValue::AU32(FontAttributes::to_activation_bits(
             fontsize, fc.is_read, false, false,
         ))); // 4
