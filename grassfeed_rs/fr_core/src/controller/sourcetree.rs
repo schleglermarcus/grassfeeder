@@ -36,8 +36,10 @@ use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::gui_values::FontAttributes;
 use resources::gen_icons;
 use resources::gen_icons::ICON_LIST;
+use resources::gen_icons::IDX_04_GRASS_CUT_2;
 use resources::id::*;
 use std::cell::RefCell;
+use std::collections::HashSet;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::time::Instant;
@@ -61,6 +63,10 @@ pub enum SJob {
 
     /// subscription_id  CHECK IF NEEDED
     // FillSourcesTreeSingle(isize),
+
+
+    // take all needed icons and put it into the updater
+    GuiStoreIcons,
 
     /// only update from adapter into TreeView
     GuiUpdateTreeAll,
@@ -359,6 +365,10 @@ impl SourceTreeController {
                         .set_dialog_data(DIALOG_TREE0COL1, &dd);
                     (*self.gui_updater).borrow().update_dialog(DIALOG_TREE0COL1);
                 }
+
+                SJob::GuiStoreIcons => {
+                    self.icons_store_to_gui();
+                }
             }
             if (*self.config).borrow().mode_debug {
                 let elapsed_m = now.elapsed().as_millis();
@@ -591,7 +601,8 @@ impl SourceTreeController {
         let now_seconds = timestamp_now();
         let time_outdated = now_seconds - (subs.updated_icon + ICON_RELOAD_TIME_S);
         if time_outdated > 0 || subs.icon_id < ICON_LIST.len() {
-            // trace!(                "check_icon:  ID:{}  icon-id:{} icontime:{} time_outdated={}h   now:{}  icontime:{} ",                subs_id,                subs.icon_id,                subs.updated_icon,                time_outdated / 3600,                db_time_to_display_nonnull(now_seconds),               db_time_to_display_nonnull(subs.updated_icon),            );
+            trace!(                "check_icon:  ID:{}  icon-id:{} icontime:{} time_outdated={}h   now:{}  icontime:{} ",
+                           subs_id,                subs.icon_id,                subs.updated_icon,                time_outdated / 3600,                crate::util::db_time_to_display_nonnull(now_seconds),               crate::util::db_time_to_display_nonnull(subs.updated_icon),            );
             (*self.downloader_r)
                 .borrow()
                 .load_icon(subs.subs_id, subs.url, subs.icon_id);
@@ -870,7 +881,9 @@ impl SourceTreeController {
             rightcol_visible = false;
         }
 
-        tv.push(AValue::AIMG(fs_iconstr)); // 0
+        // tv.push(AValue::AIMG(fs_iconstr)); // 0
+        tv.push(AValue::IIMG(fse.icon_id as i32)); // 0
+
         tv.push(AValue::ASTR(displayname)); // 1:
         tv.push(AValue::ASTR(rightcol_text));
         tv.push(AValue::AIMG(status_icon.to_string()));
@@ -922,6 +935,42 @@ impl SourceTreeController {
         (*self.gui_updater)
             .borrow()
             .tree_set_cursor(TREEVIEW0, path);
+    }
+
+    fn icons_store_to_gui(&self) {
+        let mut src_ids =
+            self.statemap
+                .borrow()
+                .get_ids_by_status(StatusMask::IsDeletedCopy, false, true);
+
+        src_ids.sort();
+        debug!(" TODO icons_store_to_gui ! SRC={:?} ", src_ids);
+        let mut icon_ids = src_ids
+            .iter()
+            .filter_map(|subs_id| {
+                let o_subs = self.subscriptionrepo_r.borrow().get_by_index(*subs_id);
+                if o_subs.is_none() {
+                    debug!(" No subscription for {} ", subs_id);
+                    return None;
+                }
+                let subs = o_subs.unwrap();
+                // debug!("subs:{} => icon:{} ", subs_id, subs.icon_id);
+                Some(subs.icon_id)
+            })
+            .collect::<HashSet<usize>>();
+        icon_ids.insert(IDX_04_GRASS_CUT_2); // main window icon
+
+        debug!("icons_store_to_gui  icon_ids= {:?} ", icon_ids);
+        for ii in icon_ids {
+            let o_icon = (*self.iconrepo_r).borrow().get_by_index(ii as isize);
+            if o_icon.is_none() {
+                continue;
+            };
+            // trace!("icons_store_to_gui  icon_id= {:?} ", ii);
+            (*self.gui_updater)
+                .borrow()
+                .store_image(ii as i32, o_icon.unwrap().icon);
+        }
     }
 }
 
@@ -992,6 +1041,7 @@ impl StartupWithAppContext for SourceTreeController {
         self.startup_read_config();
         self.addjob(SJob::EmptyTreeCreateDefaultSubscriptions);
         self.addjob(SJob::UpdateTreePaths);
+        self.addjob(SJob::GuiStoreIcons);
         self.addjob(SJob::FillSubscriptionsAdapter);
         self.addjob(SJob::GuiUpdateTreeAll);
         if (*self.config).borrow().feeds_fetch_at_start {

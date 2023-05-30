@@ -225,10 +225,8 @@ pub trait UIUpdaterAdapter {
     fn web_view_remove(&self, fontsizemanual: Option<u8>);
     fn clipboard_set_text(&self, s: String);
     fn memory_conserve(&self, act: bool);
-    // fn update_systray_indicator(&self, enable: bool);
     fn update_window_minimized(&self, mini: bool, ev_time: u32);
-    fn store_image(&self, idx: i32, img:String) ;
-
+    fn store_image(&self, idx: i32, img: String);
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]

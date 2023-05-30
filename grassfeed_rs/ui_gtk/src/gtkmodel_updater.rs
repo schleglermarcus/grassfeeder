@@ -1,3 +1,4 @@
+use resources::gen_icons::IDX_04_GRASS_CUT_2;
 #[cfg(feature = "legacy3gtk14")]
 use webkit2gtk::traits::WebViewExt;
 #[cfg(not(feature = "legacy3gtk14"))]
@@ -22,18 +23,19 @@ use gtk::Widget;
 use gui_layer::abstract_ui::AValue;
 use gui_layer::abstract_ui::GuiTreeItem;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
-use gui_layer::abstract_ui::UISenderWrapper;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::PropDef;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;
-use std::sync::Arc;
 use webkit2gtk::WebView;
 
 pub struct GtkModelUpdaterInt {
     m_v_store: UIAdapterValueStoreType,
     g_o_a: GtkObjectsType,
+    pixbuf_cache: RefCell<HashMap<i32, Pixbuf>>,
+
+    #[deprecated]
     pixbufcache: RefCell<HashMap<String, Pixbuf>>,
 }
 
@@ -41,12 +43,13 @@ impl GtkModelUpdaterInt {
     pub fn new(
         g_m_v_s: UIAdapterValueStoreType,
         gtkobjects_a: GtkObjectsType,
-        _ev_se_w: Arc<dyn UISenderWrapper + Send + Sync + 'static>,
+        // _ev_se_w: Arc<dyn UISenderWrapper + Send + Sync + 'static>,
     ) -> Self {
         GtkModelUpdaterInt {
             m_v_store: g_m_v_s,
             g_o_a: gtkobjects_a,
             pixbufcache: RefCell::new(HashMap::new()),
+            pixbuf_cache: RefCell::new(HashMap::new()),
         }
     }
 
@@ -153,7 +156,7 @@ impl GtkModelUpdaterInt {
                 AValue::AIMG(s) => {
                     let contained = self.pixbufcache.borrow().contains_key(s);
                     if !contained {
-                        let pb: Pixbuf = Self::icon_for_string(s, debuginfo.clone());
+                        let pb: Pixbuf = Self::icon_for_string(s, &debuginfo);
                         self.pixbufcache.borrow_mut().insert(s.clone(), pb);
                     }
                     match self.pixbufcache.borrow().get(s) {
@@ -166,7 +169,15 @@ impl GtkModelUpdaterInt {
                     }
                 }
                 AValue::IIMG(i) => {
-                    warn!("IIMG: {}  TODO ", i)
+                    // trace!("treestore_set_row   IIMG: {}  ", i);
+                    match self.pixbuf_cache.borrow().get(i) {
+                        Some(e_pb) => {
+                            tree_store.set(t_iter, &[(c as u32, &e_pb)]);
+                        }
+                        None => {
+                            error!("treestore_set_row:  pixbuf {} missing! {}  ", i, debuginfo);
+                        }
+                    }
                 }
 
                 AValue::None => (),
@@ -174,7 +185,8 @@ impl GtkModelUpdaterInt {
         }
     }
 
-    fn icon_for_string(s: &String, debug_info: String) -> gtk::gdk_pixbuf::Pixbuf {
+    // TODO  later  remove debug_info
+    fn icon_for_string(s: &String, debug_info: &str) -> gtk::gdk_pixbuf::Pixbuf {
         if s.is_empty() {
             debug!("tree inserting empty icon: no-data  ");
             return crate::iconloader::get_missing_icon();
@@ -351,7 +363,14 @@ impl GtkModelUpdaterInt {
                 );
                 continue;
             }
-            Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbufcache);
+            Self::put_into_store(
+                list_store,
+                &append_iter,
+                maxcols,
+                row,
+                &self.pixbufcache,
+                &self.pixbuf_cache,
+            );
             num_lines += 1;
         }
         if let Some((sort_col, sort_type)) = o_last_sort_column_id {
@@ -373,6 +392,7 @@ impl GtkModelUpdaterInt {
         maxcols: u32,
         row: &[AValue],
         pixbufcache: &RefCell<HashMap<String, Pixbuf>>,
+        pixbuf_cache: &RefCell<HashMap<i32, Pixbuf>>,
     ) {
         for column in 0..maxcols {
             let o_column = row.get(column as usize);
@@ -400,7 +420,7 @@ impl GtkModelUpdaterInt {
                 AValue::AIMG(s) => {
                     let contained = pixbufcache.borrow().contains_key(s);
                     if !contained {
-                        let pb: Pixbuf = Self::icon_for_string(s, String::default());
+                        let pb: Pixbuf = Self::icon_for_string(s, "put_into_store");
                         pixbufcache.borrow_mut().insert(s.clone(), pb);
                     }
                     match pixbufcache.borrow().get(s) {
@@ -413,7 +433,15 @@ impl GtkModelUpdaterInt {
                     }
                 }
                 AValue::IIMG(i) => {
-                    warn!("IIMG {} ", i);
+                    // trace!("put_into_store :   IIMG {} ", &i);
+                    match pixbuf_cache.borrow().get(i) {
+                        Some(e_pb) => {
+                            list_store.set(iter, &[(column, &e_pb)]);
+                        }
+                        None => {
+                            error!("put_into_store:   pixbuf  for {} not found! ", i);
+                        }
+                    }
                 }
 
                 AValue::None => (),
@@ -440,7 +468,14 @@ impl GtkModelUpdaterInt {
                 );
                 return;
             }
-            Self::put_into_store(list_store, &iter, maxcols, &row, &self.pixbufcache);
+            Self::put_into_store(
+                list_store,
+                &iter,
+                maxcols,
+                &row,
+                &self.pixbufcache,
+                &self.pixbuf_cache,
+            );
         }
     }
 
@@ -465,7 +500,14 @@ impl GtkModelUpdaterInt {
 		                );
                         continue;
                     }
-                    Self::put_into_store(list_store, &iter, maxcols, &row, &self.pixbufcache);
+                    Self::put_into_store(
+                        list_store,
+                        &iter,
+                        maxcols,
+                        &row,
+                        &self.pixbufcache,
+                        &self.pixbuf_cache,
+                    );
                 }
             }
         }
@@ -705,26 +747,42 @@ impl GtkModelUpdaterInt {
 
     pub fn update_window_icon(&self) {
         if let Some(window) = (*self.g_o_a).read().unwrap().get_window() {
-            let icon_str = (self.m_v_store).write().unwrap().get_window_icon();
-            let contained = self.pixbufcache.borrow().contains_key(&icon_str);
+            let contained = self
+                .pixbuf_cache
+                .borrow()
+                .contains_key(&(IDX_04_GRASS_CUT_2 as i32));
             if !contained {
-                let pb: Pixbuf = Self::icon_for_string(&icon_str, "window_icon".to_string());
-                self.pixbufcache.borrow_mut().insert(icon_str.clone(), pb);
+                let icon_str = (self.m_v_store).write().unwrap().get_window_icon();
+                let pb: Pixbuf = Self::icon_for_string(&icon_str, "update_window_icon");
+                self.pixbuf_cache
+                    .borrow_mut()
+                    .insert(IDX_04_GRASS_CUT_2 as i32, pb);
             }
-            match self.pixbufcache.borrow().get(&icon_str) {
-                Some(e_pb) => {
-                    window.set_icon(Some(e_pb));
-                }
-                None => {
-                    panic!("update_window_icon: pixbuf was inserted, but is not there ");
-                }
+            if let Some(e_pb) = self.pixbuf_cache.borrow().get(&(IDX_04_GRASS_CUT_2 as i32)) {
+                window.set_icon(Some(e_pb));
             }
+
+            /*
+                       let contained = self.pixbufcache.borrow().contains_key(&icon_str);
+                       if !contained {
+                           let pb: Pixbuf = Self::icon_for_string(&icon_str, "window_icon".to_string());
+                           self.pixbufcache.borrow_mut().insert(icon_str.clone(), pb);
+                       }
+                       match self.pixbufcache.borrow().get(&icon_str) {
+                           Some(e_pb) => {
+                               window.set_icon(Some(e_pb));
+                           }
+                           None => {
+                               panic!("update_window_icon: pixbuf was inserted, but is not there ");
+                           }
+                       }
+            */
         }
     }
 
     pub fn memory_conserve(&self, active: bool) {
         if active {
-            self.pixbufcache.borrow_mut().clear();
+            // self.pixbufcache.borrow_mut().clear();
             (*self.g_o_a).write().unwrap().set_web_view(None, None);
         }
         (self.m_v_store).write().unwrap().memory_conserve(active);
@@ -750,10 +808,18 @@ impl GtkModelUpdaterInt {
     }
 
     pub fn store_image(&self, idx: i32, img: String) {
-        warn!(" TODO store_image : {} ", idx);
+        let contained = self.pixbuf_cache.borrow().contains_key(&idx);
+        if contained {
+            warn!("  store_image: {} already contained ", idx);
+        }
+        let pb: Pixbuf = Self::icon_for_string(&img, &format!("store_image {} ", idx));
+        self.pixbuf_cache.borrow_mut().insert(idx, pb);
+        debug!(
+            "GMU: store_image  {}   len={}",
+            idx,
+            self.pixbuf_cache.borrow().len()
+        );
     }
-
-
 } // GtkModelUpdaterInt
 
 /// outsourcing this due to  the gtk 0.14  incompatible api

@@ -37,11 +37,13 @@ pub trait GtkGuiBuilder: 'static {
     );
 }
 
+// order is important, upper items will be prioritized
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum IntCommands {
     NONE,
     START,
     STOP,
+    StoreImage(i32, String),
     UpdateTextEntry(u8),
     UpdateTreeModel(u8),
     ///  tree_index,   path
@@ -81,7 +83,6 @@ pub enum IntCommands {
     MemoryConserve(bool),
     TrayIconEnable(bool),
     UpdateWindowMinimized(bool, u32),
-    StoreImage(i32, String),
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;

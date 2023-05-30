@@ -136,12 +136,11 @@ impl GtkRunnerInternal {
         g_com_rec: Receiver<IntCommands>,
         gtk_objects: GtkObjectsType,
         model_value_store: UIAdapterValueStoreType,
-        ev_se_w: UiSenderWrapperType,
+        _ev_se_w: UiSenderWrapperType,
     ) {
         let gtk_objects_a = gtk_objects.clone();
-        // let gtk_objects_b = gtk_objects.clone();
         let m_v_st_a = model_value_store.clone();
-        let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects, ev_se_w);
+        let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects /*, ev_se_w  */);
         let is_minimized: AtomicBool = AtomicBool::new(false);
         g14m_guard!();
         gtk::glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
@@ -223,13 +222,11 @@ impl GtkRunnerInternal {
                         is_minimized.store(act, Ordering::Relaxed);
                         upd_int.memory_conserve(act);
                     }
-                    IntCommands::TrayIconEnable(_act) => {
-                        //  upd_int.update_tray_icon(act);
-                    }
+                    IntCommands::TrayIconEnable(_act) => {}
                     IntCommands::UpdateWindowMinimized(mini, ev_time) => {
                         upd_int.update_window_minimized(mini, ev_time)
                     }
-                    IntCommands::StoreImage(idx,  ref img) => upd_int.store_image(idx, img.clone()),
+                    IntCommands::StoreImage(idx, ref img) => upd_int.store_image(idx, img.clone()),
                     _ => {
                         warn!("GTKS other cmd {:?}", command);
                     }
