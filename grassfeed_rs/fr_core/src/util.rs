@@ -243,8 +243,10 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#160;", " ");
     ret = ret.replace("&#164;", " ");
     ret = ret.replace("&#166;", " ... ");
+    ret = ret.replace("&#177;", "±");
     ret = ret.replace("&#190;", "¾");
     ret = ret.replace("&#194;", "Â");
+    ret = ret.replace("&#195;", "ñ");
     ret = ret.replace("&#196;", "Ä");
     ret = ret.replace("&#220;", "Ü");
     ret = ret.replace("&#214;", "Ö");

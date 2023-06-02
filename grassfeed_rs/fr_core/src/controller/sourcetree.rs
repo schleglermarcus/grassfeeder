@@ -34,7 +34,6 @@ use gui_layer::abstract_ui::AValue;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::gui_values::FontAttributes;
-// use resources::gen_icons;
 use resources::gen_icons::ICON_LIST;
 use resources::gen_icons::IDX_01_BORDER_RED;
 use resources::gen_icons::IDX_02_ICON_MISSING_BROWN;
@@ -349,12 +348,7 @@ impl SourceTreeController {
                     );
                     if removed_some {
                         if let Some(sta) = self.get_state(subs_id) {
-                            trace!(
-                                "MessagesCountsChecked: {}   {} ST={:?} ",
-                                subs_id,
-                                removed_some,
-                                sta
-                            );
+                            // trace!(                                "MessagesCountsChecked: {}   {} ST={:?} ",                                subs_id,                                removed_some,                                sta                            );
                             let subs_e = (*self.subscriptionrepo_r)
                                 .borrow()
                                 .get_by_index(subs_id)
@@ -434,6 +428,8 @@ impl SourceTreeController {
     }
 
     fn process_tree_read_count(&self, subs_id: isize, msg_all: isize, msg_unread: isize) {
+        let now = Instant::now();
+
         let o_subs_state = self
             .statemap
             .borrow_mut()
@@ -443,7 +439,6 @@ impl SourceTreeController {
                 .borrow()
                 .get_by_index(subs_id)
                 .unwrap();
-            // trace!(                "process_tree_read_count {} {}/{}  parent: {} ",                subs_id,                msg_unread,                msg_all,                subs_e.parent_subs_id            );
             if subs_e.parent_subs_id > 0 {
                 self.statemap
                     .borrow_mut()
@@ -454,6 +449,17 @@ impl SourceTreeController {
                 if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
                     subs_mov.borrow_mut().request_check_paths(true);
                 }
+            }
+
+            let elapsed_m = now.elapsed().as_millis();
+            if elapsed_m > 100 {
+                trace!(
+                    "process_tree_read_count {} {}/{}  parent: {} ",
+                    subs_id,
+                    msg_unread,
+                    msg_all,
+                    subs_e.parent_subs_id
+                );
             }
         } else {
             warn!("could not store readcount for id {}", subs_id);
