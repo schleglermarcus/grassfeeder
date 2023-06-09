@@ -344,6 +344,15 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
             }
+            if se.icon_id < gen_icons::IDX_05_RSS_FEEDS_GREY_64_D {
+                trace!(
+                    "CorrectIcons: subscr {}  icon id too low: {:?}  ",
+                    se.subs_id,
+                    se.icon_id
+                );
+                reset_icon_subs_ids.push(se.subs_id as i32);
+                continue;
+            }
         }
         reset_icon_subs_ids.sort();
         if !reset_icon_subs_ids.is_empty() {

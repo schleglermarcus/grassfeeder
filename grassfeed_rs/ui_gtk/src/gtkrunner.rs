@@ -22,9 +22,11 @@ use gtk::Paned;
 use gtk::ScrolledWindow;
 use gtk::SearchEntry;
 use gtk::TextView;
+use gtk::ToolButton;
 use gtk::TreeStore;
 use gtk::TreeView;
 use gtk::TreeViewColumn;
+use gtk::Widget;
 use gtk::Window;
 use gui_layer::abstract_ui::GuiEvents;
 use gui_layer::abstract_ui::GuiRunner;
@@ -196,9 +198,8 @@ pub struct GtkObjectsImpl {
     create_webview_fn: CreateWebViewFnType,
     browser_config: CreateBrowserConfig,
     pub searchentries: Vec<SearchEntry>,
-    // pub indicator: Option<libappindicator::AppIndicator>,
-    //  create_systray_fn: CreateSystrayFnType,
     gui_event_sender: Option<Sender<GuiEvents>>,
+    pub toolbuttons: Vec<ToolButton>,
 }
 
 impl GtkObjectsImpl {
@@ -231,7 +232,7 @@ impl GtkObjectsImpl {
                         self.browser_config.font_size_manual,
                         ev_se.clone(),
                     );
-                    dest_box.pack_start(&w_view, true, true, 0);
+                    dest_box.pack_start(&w_view, true, true, 10);
                     w_view.show();
                     self.web_view.borrow_mut().replace(w_view);
                 }
@@ -579,6 +580,26 @@ impl GtkObjects for GtkObjectsImpl {
     fn get_gui_event_sender(&mut self) -> Option<Sender<GuiEvents>> {
         self.gui_event_sender.clone()
     }
+
+    fn get_toolbutton(&self, idx: u8) -> Option<&ToolButton> {
+        if self.toolbuttons.len() < idx as usize + 1 {
+            error!("ToolButton not there yet: {}", idx);
+            return None;
+        }
+        self.toolbuttons.get(idx as usize)
+    }
+
+    // fn add_linkbutton(&mut self, e: &LinkButton) {
+    //     self.linkbuttons.push(e.clone());
+    // }
+    fn set_toolbutton(&mut self, idx: u8, l: &ToolButton) {
+        if self.toolbuttons.len() < idx as usize + 1 {
+            let nowidget: Option<&Widget> = None;
+            self.toolbuttons
+                .resize(idx as usize + 1, ToolButton::new(nowidget, None));
+        }
+        self.toolbuttons[idx as usize] = l.clone();
+    }
 }
 
 #[derive(Default, Clone, Debug)]
@@ -767,5 +788,4 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     fn store_image(&self, idx: i32, img: String) {
         self.send_to_int(&IntCommands::StoreImage(idx, img));
     }
-
 } //

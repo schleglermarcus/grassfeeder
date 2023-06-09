@@ -110,7 +110,6 @@ impl GtkGuiBuilder for GtkObjectTree {
                 let is_icon = (state_bits & gdk::WindowState::ICONIFIED.bits()) > 0;
                 let last_iconified = GLOB_CACHE.with(|glob| glob.borrow().window_is_iconified);
                 if is_icon != last_iconified {
-                    // trace!("win-state-bits: {:#06x}   is-icon:{}", state_bits, is_icon);
                     GLOB_CACHE.with(|glob| {
                         glob.borrow_mut().window_is_iconified = is_icon;
                     });
@@ -416,7 +415,7 @@ pub fn create_webview(
     }
     let webview_settings = wvs_b.build();
     webview1.set_settings(&webview_settings);
-    // webview1.connect_web_process_crashed(|wv: &WebView| {        warn!("WebView Crashed! going back ...");        true     });
+    // webview1.connect_web_process_crashed(|_wv: &WebView| {        warn!("WebView Crashed! going back ...");        true    });
     let esw = EvSenderWrapper(ev_se);
     webview1.connect_estimated_load_progress_notify(move |wv: &WebView| {
         let progress = (wv.estimated_load_progress() * 256.0) as i32;
@@ -663,10 +662,23 @@ pub fn create_toolbar(
             .tooltip_text(&t!("TB_REFRESH_ALL"))
             .build();
         toolbar.insert(&but, -1);
+
+
         let esw = EvSenderWrapper(g_ev_se.clone());
         but.connect_clicked(move |_b| {
-            esw.sendw(GuiEvents::ToolBarButton("reload-feeds-all".to_string()));
+            esw.sendw(GuiEvents::ToolBarButton(
+                "reload-subscriptions-all".to_string(),
+            ));
         });
+
+    // TODO switch the button sensitive dependent on selection
+
+        (*gtk_obj_a)
+            .write()
+            .unwrap()
+            .set_toolbutton(TOOLBUTTON_RELOAD_ALL, &but);
+        // but.set_sensitive(false);
+
     }
     if false {
         let image = Image::new();

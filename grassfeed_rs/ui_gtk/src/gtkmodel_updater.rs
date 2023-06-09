@@ -735,8 +735,18 @@ impl GtkModelUpdaterInt {
         if contained {
             debug!("  store_image: {} already contained ", idx);
         }
+        // if idx == 3173 {            debug!("  store_image: idx {}  {} ", idx, img);        }
         let pb: Pixbuf = Self::icon_for_string(&img, &format!("store_image {} ", idx));
         self.pixbuf_cache.borrow_mut().insert(idx, pb);
+    }
+
+    pub fn button_set_sensitive(&self, idx: u8, sens: bool) {
+        let g_o = (*self.g_o_a).read().unwrap();
+        if let Some(tb) = g_o.get_toolbutton(idx) {
+            tb.set_sensitive(sens);
+        } else {
+            warn!("ToolButton {} not found! ", idx);
+        }
     }
 } // GtkModelUpdaterInt
 

@@ -388,7 +388,7 @@ impl GuiProcessor {
             KeyCodes::Tab => new_focus_by_tab = self.focus_by_tab.borrow().next(),
             KeyCodes::ShiftTab => new_focus_by_tab = self.focus_by_tab.borrow().prev(),
             KeyCodes::Key_a => {
-                // trace!("GP: key a subs_id:{} ", &subscription_id);
+                trace!("GP:  key a subs_id:{} ", &subscription_id);
                 if subscription_id > 0 {
                     (*self.feedsources_r).borrow().mark_as_read(subscription_id);
                 }
@@ -1093,8 +1093,19 @@ impl HandleSingleEvent for HandleToolBarButton {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::ToolBarButton(ref id) = ev {
             match id.as_str() {
-                "reload-feeds-all" => {
-                    self.0.borrow_mut().addjob(SJob::ScheduleFetchAllFeeds);
+                "reload-subscriptions-all" => {
+                    let o_c = (*self.0).borrow().get_current_selected_subscription();
+                    debug!("RELOAD-ALL {:?} ", o_c);
+                    match o_c {
+                        Some((subs_e, _)) => {
+                            self.0
+                                .borrow_mut()
+                                .addjob(SJob::ScheduleUpdateFeed(subs_e.subs_id));
+                        }
+                        None => {
+                            trace!("no current id found, cannot update ")
+                        }
+                    };
                 }
                 "browser-zoom-in" => {
                     self.1.borrow().set_browser_zoom(BrowserZoomCommand::ZoomIn);

@@ -1,5 +1,13 @@
 
 
+- Aggregate View:  use favorite colum for subscription icon
+
+- Test icon extraction with https://www.greyblake.com/blog/property-based-testing-in-rust-with-arbitrary/
+
+
+
+
+
 
 Later:
 - 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20

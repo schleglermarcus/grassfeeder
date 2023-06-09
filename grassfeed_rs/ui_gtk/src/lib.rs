@@ -83,6 +83,7 @@ pub enum IntCommands {
     MemoryConserve(bool),
     TrayIconEnable(bool),
     UpdateWindowMinimized(bool, u32),
+    ButtonSetSensitive(u8, bool),
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;
@@ -171,6 +172,10 @@ pub trait GtkObjects {
 
     fn set_gui_event_sender(&mut self, ev_se: Sender<GuiEvents>);
     fn get_gui_event_sender(&mut self) -> Option<Sender<GuiEvents>>;
+
+    fn get_toolbutton(&self, idx: u8) -> Option<&gtk::ToolButton>;
+    fn set_toolbutton(&mut self, idx: u8, e: &gtk::ToolButton);
+
 }
 
 #[derive(Clone, Debug)]

@@ -71,9 +71,6 @@ pub enum SJob {
     /// only store into adapter
     FillSubscriptionsAdapter,
 
-    /// subscription_id  CHECK IF NEEDED
-    // FillSourcesTreeSingle(isize),
-
     // take all needed icons and put it into the updater
     GuiStoreIcons,
 
@@ -89,6 +86,7 @@ pub enum SJob {
     CheckSpinnerActive,
     /// subscription_id
     ScheduleUpdateFeed(isize),
+
     /// subscription_id
     SetFetchInProgress(isize),
     /// subscription_id, error_happened
@@ -429,7 +427,6 @@ impl SourceTreeController {
 
     fn process_tree_read_count(&self, subs_id: isize, msg_all: isize, msg_unread: isize) {
         let now = Instant::now();
-
         let o_subs_state = self
             .statemap
             .borrow_mut()
@@ -445,20 +442,25 @@ impl SourceTreeController {
                     .clear_num_all_unread(subs_e.parent_subs_id);
                 self.addjob(SJob::ScanEmptyUnread);
             }
+            let elapsed1 = now.elapsed().as_millis();
+            let mut elapsed2 = 0;
             if !self.tree_update_one(&subs_e, &su_st) {
+                elapsed2 = now.elapsed().as_millis();
                 if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
                     subs_mov.borrow_mut().request_check_paths(true);
                 }
             }
-
-            let elapsed_m = now.elapsed().as_millis();
-            if elapsed_m > 100 {
+            let elapsed3 = now.elapsed().as_millis();
+            if elapsed3 > 100 {
                 trace!(
-                    "process_tree_read_count {} {}/{}  parent: {} ",
+                    "process_tree_read_count {} {}/{}  parent:{}  E1:{} E2:{} E3:{} ",
                     subs_id,
                     msg_unread,
                     msg_all,
-                    subs_e.parent_subs_id
+                    subs_e.parent_subs_id,
+                    elapsed1,
+                    elapsed2,
+                    elapsed3
                 );
             }
         } else {
@@ -844,23 +846,12 @@ impl SourceTreeController {
             }
             num_msg_unread = num_unread;
         }
-        /*
-               let mut fs_iconstr: String = String::default();
-               if let Some(ie) = self.iconrepo_r.borrow().get_by_index(fse.icon_id as isize) {
-                   fs_iconstr = ie.icon;
-               }
-               let mut status_icon = gen_icons::ICON_03_ICON_TRANSPARENT_48;
-        */
         let mut show_status_icon = false;
-
         let mut n_status_icon = IDX_03_ICON_TRANSPARENT_48;
-
         if su_st.is_fetch_scheduled() || su_st.is_fetch_scheduled_jobcreated() {
-            // status_icon = gen_icons::ICON_14_ICON_DOWNLOAD_64;
             n_status_icon = IDX_14_ICON_DOWNLOAD_64;
             show_status_icon = true;
         } else if su_st.is_err_on_fetch() {
-            // status_icon = gen_icons::ICON_32_FLAG_RED_32;
             n_status_icon = IDX_32_FLAG_RED_32;
             show_status_icon = true;
         }
@@ -905,6 +896,10 @@ impl SourceTreeController {
         let mut rightcol_visible = !(show_status_icon | show_spinner);
         if !(*self.config).borrow().display_feedcount_all && num_msg_unread == 0 {
             rightcol_visible = false;
+        }
+
+        if fse.icon_id < 4 {
+            warn!("icon_id {}  for {:?} ", fse.icon_id, fse.display_name);
         }
         tv.push(AValue::IIMG(fse.icon_id as i32)); // 0
 
@@ -1008,18 +1003,19 @@ impl SourceTreeController {
 impl TimerReceiver for SourceTreeController {
     fn trigger(&self, event: &TimerEvent) {
         if self.currently_minimized {
-            if event == &TimerEvent::Timer10s {
-                self.process_jobs();
-                self.process_fetch_scheduled();
-                self.process_newsource_edit();
-
-                if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
-                    subs_mov.borrow_mut().check_paths();
+            match &event {
+                TimerEvent::Timer1s => {
+                    self.process_jobs();
                 }
-                self.check_feed_update_times();
+                TimerEvent::Timer10s => {
+                    self.process_fetch_scheduled();
+                    self.process_newsource_edit();
+                    self.check_feed_update_times();
+                }
+                _ => (),
             }
         } else {
-            match event {
+            match &event {
                 TimerEvent::Timer200ms => {
                     self.process_jobs();
                     self.process_fetch_scheduled();
