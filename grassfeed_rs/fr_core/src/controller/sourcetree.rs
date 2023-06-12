@@ -442,25 +442,31 @@ impl SourceTreeController {
                     .clear_num_all_unread(subs_e.parent_subs_id);
                 self.addjob(SJob::ScanEmptyUnread);
             }
-            let elapsed1 = now.elapsed().as_millis();
             let mut elapsed2 = 0;
+            let mut elapsed3 = 0;
+            let mut elapsed4 = 0;
             if !self.tree_update_one(&subs_e, &su_st) {
                 elapsed2 = now.elapsed().as_millis();
                 if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
-                    subs_mov.borrow_mut().request_check_paths(true);
+                    elapsed3 = now.elapsed().as_millis();
+                    let smb = subs_mov.borrow();
+                    elapsed4 = now.elapsed().as_millis();
+                    smb.request_check_paths(true);
                 }
             }
-            let elapsed3 = now.elapsed().as_millis();
-            if elapsed3 > 100 {
+            let elapsed5 = now.elapsed().as_millis();
+            if elapsed5 > 100 {
                 trace!(
-                    "process_tree_read_count {} {}/{}  parent:{}  E1:{} E2:{} E3:{} ",
+                    "process_tree_read_count {} {}/{}  parent:{}  E2:{} E3:{} E4:{} E5:{} ",
                     subs_id,
                     msg_unread,
                     msg_all,
                     subs_e.parent_subs_id,
-                    elapsed1,
+
                     elapsed2,
-                    elapsed3
+                    elapsed3,
+                    elapsed4,
+                    elapsed5
                 );
             }
         } else {

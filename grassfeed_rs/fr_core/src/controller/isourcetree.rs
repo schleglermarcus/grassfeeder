@@ -16,10 +16,10 @@ use crate::util::db_time_to_display_nonnull;
 use crate::util::string_is_http_url;
 use flume::Sender;
 use gui_layer::abstract_ui::AValue;
-// use resources::gen_icons::IDX_05_RSS_FEEDS_GREY_64_D;
 use resources::id::DIALOG_FOLDER_EDIT;
 use resources::id::DIALOG_FS_DELETE;
 use resources::id::DIALOG_FS_EDIT;
+use resources::id::TOOLBUTTON_RELOAD_ALL;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -414,6 +414,12 @@ impl ISourceTreeController for SourceTreeController {
                     .map(|fse| fse.subs_id as i32)
                     .collect::<Vec<i32>>();
             }
+
+            let activate_reloadbutton = !fse.is_folder || !child_ids.is_empty();
+            // trace!(                "isfolder{}  #childs{}  act{}  ",                fse.is_folder,                child_ids.len(),                activate_reloadbutton            );
+            (*self.gui_updater)
+                .borrow()
+                .toolbutton_set_sensitive(TOOLBUTTON_RELOAD_ALL, activate_reloadbutton);
             self.current_selected_subscription
                 .replace(Some((fse, child_ids)));
         }

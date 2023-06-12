@@ -735,7 +735,6 @@ impl GtkModelUpdaterInt {
         if contained {
             debug!("  store_image: {} already contained ", idx);
         }
-        // if idx == 3173 {            debug!("  store_image: idx {}  {} ", idx, img);        }
         let pb: Pixbuf = Self::icon_for_string(&img, &format!("store_image {} ", idx));
         self.pixbuf_cache.borrow_mut().insert(idx, pb);
     }

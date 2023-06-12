@@ -153,14 +153,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             ("http://henrymakow.com/index.xml", "makow"),
             ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
             ("https://www.gistpaper.com/feed", "gistpaper"),
-            (
-                "https://feed.ksta.de/feed/rss/politik/index.rss",
-                "Kößtüdtänzêiger politik",
-            ),
-            (
-                "https://feed.ksta.de/feed/rss/panorama/index.rss",
-                "panorama Kößtüdtänzêiger",
-            ),
             ("https://www.blacklistednews.com/rss.php", "blacklisted"), // hour-minute-seconds are all set to 0
             ("https://xkcd.com/atom.xml", "Xkcd-no-pubdate"),
             ("https://www.headlinesoftoday.com/feed", "headlinesof"),
@@ -206,6 +198,14 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            (
+                "https://feed.ksta.de/feed/rss/politik/index.rss",
+                "Kößtüdtänzêig politi",
+            ),
+            (
+                "https://feed.ksta.de/feed/rss/panorama/index.rss",
+                "Kößtüdtänzêiger panora",
+            ),
             (
                 "http://antifeministsite.blogspot.com/feeds/posts/default",
                 "antife",

@@ -788,4 +788,8 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     fn store_image(&self, idx: i32, img: String) {
         self.send_to_int(&IntCommands::StoreImage(idx, img));
     }
+
+    fn toolbutton_set_sensitive(&self, idx: u8, sens: bool) {
+        self.send_to_int(&IntCommands::ButtonSetSensitive(idx, sens));
+    }
 } //

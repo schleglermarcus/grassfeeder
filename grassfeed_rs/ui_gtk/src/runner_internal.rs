@@ -230,7 +230,6 @@ impl GtkRunnerInternal {
                     IntCommands::ButtonSetSensitive(idx, sens) => {
                         upd_int.button_set_sensitive(idx, sens)
                     }
-
                     _ => {
                         warn!("GTKS other cmd {:?}", command);
                     }

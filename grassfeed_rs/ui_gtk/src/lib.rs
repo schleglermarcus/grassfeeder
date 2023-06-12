@@ -175,7 +175,6 @@ pub trait GtkObjects {
 
     fn get_toolbutton(&self, idx: u8) -> Option<&gtk::ToolButton>;
     fn set_toolbutton(&mut self, idx: u8, e: &gtk::ToolButton);
-
 }
 
 #[derive(Clone, Debug)]

@@ -663,22 +663,16 @@ pub fn create_toolbar(
             .build();
         toolbar.insert(&but, -1);
 
-
         let esw = EvSenderWrapper(g_ev_se.clone());
         but.connect_clicked(move |_b| {
             esw.sendw(GuiEvents::ToolBarButton(
                 "reload-subscriptions-all".to_string(),
             ));
         });
-
-    // TODO switch the button sensitive dependent on selection
-
         (*gtk_obj_a)
             .write()
             .unwrap()
             .set_toolbutton(TOOLBUTTON_RELOAD_ALL, &but);
-        // but.set_sensitive(false);
-
     }
     if false {
         let image = Image::new();

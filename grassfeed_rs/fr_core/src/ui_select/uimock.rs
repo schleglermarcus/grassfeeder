@@ -251,6 +251,10 @@ impl UIUpdaterAdapter for UpdAda {
     // fn update_systray_indicator(&self, _enable: bool) {}
     fn update_window_minimized(&self, _mini: bool, _ev_time: u32) {}
     fn store_image(&self, _idx: i32, _img: String) {}
+
+    fn toolbutton_set_sensitive(&self, _idx: u8, _sens: bool) {
+        unimplemented!()
+    }
 }
 
 struct MockRunner {
