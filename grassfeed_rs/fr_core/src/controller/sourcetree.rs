@@ -426,7 +426,6 @@ impl SourceTreeController {
     }
 
     fn process_tree_read_count(&self, subs_id: isize, msg_all: isize, msg_unread: isize) {
-        let now = Instant::now();
         let o_subs_state = self
             .statemap
             .borrow_mut()
@@ -442,32 +441,20 @@ impl SourceTreeController {
                     .clear_num_all_unread(subs_e.parent_subs_id);
                 self.addjob(SJob::ScanEmptyUnread);
             }
-            let mut elapsed2 = 0;
-            let mut elapsed3 = 0;
-            let mut elapsed4 = 0;
             if !self.tree_update_one(&subs_e, &su_st) {
-                elapsed2 = now.elapsed().as_millis();
                 if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
-                    elapsed3 = now.elapsed().as_millis();
                     let smb = subs_mov.borrow();
-                    elapsed4 = now.elapsed().as_millis();
+                    let now = Instant::now();
                     smb.request_check_paths(true);
+                    let elapsed5 = now.elapsed().as_millis();
+                    if elapsed5 > 100 {
+                        trace!(
+                            "process_tree_read_count {}  call request_check_paths  took  {} ",
+                            subs_id,
+                            elapsed5
+                        );
+                    }
                 }
-            }
-            let elapsed5 = now.elapsed().as_millis();
-            if elapsed5 > 100 {
-                trace!(
-                    "process_tree_read_count {} {}/{}  parent:{}  E2:{} E3:{} E4:{} E5:{} ",
-                    subs_id,
-                    msg_unread,
-                    msg_all,
-                    subs_e.parent_subs_id,
-
-                    elapsed2,
-                    elapsed3,
-                    elapsed4,
-                    elapsed5
-                );
             }
         } else {
             warn!("could not store readcount for id {}", subs_id);

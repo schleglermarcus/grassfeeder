@@ -480,11 +480,10 @@ impl FeedContents {
         let msg_repo = MessagesRepo::new_by_connection(
             (*self.messagesrepo_r).borrow().get_ctx().get_connection(),
         );
-        let r = db_clean::reduce_too_many_messages(&msg_repo, msg_keep_count as usize, subs_id);
-        let (rm_some, n_rm, num_all, num_unread) = r;
-        if rm_some {
-            debug!("checkMessageCounts {} {:?} removed:{} ", subs_id, &r, n_rm);
-        }
+
+        let (rm_some, _n_rm, num_all, num_unread) =
+            db_clean::reduce_too_many_messages(&msg_repo, msg_keep_count as usize, subs_id);
+        // if rm_some {            trace!(                "checkMessageCounts {} unread:{} removed:{} ",                subs_id,                num_unread,                n_rm            );        }
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             (*feedsources)
                 .borrow()

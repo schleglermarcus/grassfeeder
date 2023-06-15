@@ -565,7 +565,6 @@ fn create_subscription_edit_dialog(
         if let Some(s) = dialogdata.get(7).unwrap().str() {
             label5b_c.set_text(&s); // update-ext
         }
-        // debug!("DD8={:?}", dialogdata.get(8));
         if let Some(s) = dialogdata.get(8).unwrap().str() {
             let buffer = textview_c.buffer().unwrap(); // error lines
             buffer.set_text(&s);
@@ -606,11 +605,11 @@ fn create_folder_edit_dialog(
     grid1.set_column_spacing(2);
     let label_nb1 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB1")));
     notebook.append_page(&grid1, Some(&label_nb1));
-
     let label1 = Label::new(Some(&t!("D_NEW_SUBSCRIPTION_NAME")));
     grid1.attach(&label1, 0, 0, 1, 1);
     let entry1 = Entry::new();
     entry1.set_expand(true);
+    entry1.set_activates_default(true);
     grid1.attach(&entry1, 1, 0, 1, 1);
     let box2v = gtk::Box::new(Orientation::Vertical, 0);
     let label_nb2 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB2")));

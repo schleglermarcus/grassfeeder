@@ -718,7 +718,6 @@ impl GtkModelUpdaterInt {
             } else {
                 window.show();
                 let _r = window.is_resizable();
-                // trace!("win visible1 true {}", _r);
                 window.set_visible(true);
                 std::thread::sleep(std::time::Duration::from_millis(10));
                 window.present();
@@ -731,10 +730,7 @@ impl GtkModelUpdaterInt {
     }
 
     pub fn store_image(&self, idx: i32, img: String) {
-        let contained = self.pixbuf_cache.borrow().contains_key(&idx);
-        if contained {
-            debug!("  store_image: {} already contained ", idx);
-        }
+        // if self.pixbuf_cache.borrow().contains_key(&idx) {            debug!("  store_image: {} already contained ", idx);        }
         let pb: Pixbuf = Self::icon_for_string(&img, &format!("store_image {} ", idx));
         self.pixbuf_cache.borrow_mut().insert(idx, pb);
     }

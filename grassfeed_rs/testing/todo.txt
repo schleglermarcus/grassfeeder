@@ -6,9 +6,6 @@
 
 
 
-
-
-
 Later:
 - 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20
 - GTK4: block multiple instances
