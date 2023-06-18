@@ -1,4 +1,4 @@
-Sun, 14 May 2023 00:12:00 +0000
+Sun, 19 Jun 2023 00:12:00 +0000
 * Speedup: control icons for gtk tree, lists only via ID
 * Reload icon shall only reload the current subscription or folder
 * Folder Edit: accepting dialog upon enter key
