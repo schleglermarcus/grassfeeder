@@ -218,7 +218,6 @@ impl ISourceTreeController for SourceTreeController {
             (num_all, num_unread) = (*feedcontents).borrow().get_counts(src_repo_id).unwrap();
         }
         let mut dd: Vec<AValue> = Vec::default();
-        // let mut fs_iconstr: String = String::default();
         let n_icon: i32 = fse.icon_id as i32;
         dd.push(AValue::ASTR(fse.display_name.clone())); // 0
         if fse.is_folder {

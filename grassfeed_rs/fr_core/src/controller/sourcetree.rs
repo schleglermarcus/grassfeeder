@@ -444,16 +444,10 @@ impl SourceTreeController {
             if !self.tree_update_one(&subs_e, &su_st) {
                 if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
                     let smb = subs_mov.borrow();
-                    let now = Instant::now();
+                    // let now = Instant::now();
                     smb.request_check_paths(true);
-                    let elapsed5 = now.elapsed().as_millis();
-                    if elapsed5 > 100 {
-                        trace!(
-                            "process_tree_read_count {}  call request_check_paths  took  {} ",
-                            subs_id,
-                            elapsed5
-                        );
-                    }
+                    // let elapsed5 = now.elapsed().as_millis();
+                    // if elapsed5 > 100 {  trace!( "process_tree_read_count {}  call request_check_paths  took  {} ",                            subs_id,                            elapsed5                       );                    }
                 }
             }
         } else {
@@ -482,7 +476,6 @@ impl SourceTreeController {
         if one_missing {
             return false;
         }
-        // trace!(            "SUM UP {} {:?}  => {} / {} ",            folder_subs_id,            &child_subs_ids,            sum_all,            sum_unread        );
         self.statemap
             .borrow_mut()
             .set_num_all_unread(folder_subs_id, sum_all, sum_unread);
@@ -890,12 +883,7 @@ impl SourceTreeController {
         if !(*self.config).borrow().display_feedcount_all && num_msg_unread == 0 {
             rightcol_visible = false;
         }
-
-        if fse.icon_id < 4 {
-            warn!("icon_id {}  for {:?} ", fse.icon_id, fse.display_name);
-        }
         tv.push(AValue::IIMG(fse.icon_id as i32)); // 0
-
         tv.push(AValue::ASTR(displayname)); // 1:
         tv.push(AValue::ASTR(rightcol_text));
         tv.push(AValue::IIMG(n_status_icon as i32));

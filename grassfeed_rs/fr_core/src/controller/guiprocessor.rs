@@ -579,8 +579,6 @@ impl StartupWithAppContext for GuiProcessor {
                 self.statusbar.borrow_mut().mode_debug = b;
             }
         }
-
-        // ---------------
         self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2 {});
         self.add_handler(
             &GuiEvents::DialogData(String::default(), Vec::default()),
