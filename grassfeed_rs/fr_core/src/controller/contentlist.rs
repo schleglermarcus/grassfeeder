@@ -75,8 +75,8 @@ pub trait IContentList {
     fn process_jobs(&mut self);
 
     /// Sets those entries read, updates the  gui-store
-    //  If the list entries are already read, don't update them
-    ///  Map<  repo-id  ,   list-position >
+    /// If the list entries are already read, don't update them
+    /// Map<  repo-id  ,   list-position >
     fn process_list_row_activated(&self, act_dbid_listpos: &HashMap<i32, i32>);
 
     // check if the old subs_id has changed before
