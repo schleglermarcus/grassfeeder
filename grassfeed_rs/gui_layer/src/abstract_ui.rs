@@ -222,7 +222,7 @@ pub trait UIUpdaterAdapter {
     fn update_window_icon(&self);
     fn update_web_view(&self, nr: u8);
     fn update_web_view_plain(&self, nr: u8);
-    fn web_view_remove(&self, fontsizemanual: Option<u8>);
+    fn web_view_remove(&self, idx: u8, fontsizemanual: Option<u8>);
     fn clipboard_set_text(&self, s: String);
     fn memory_conserve(&self, act: bool);
     fn update_window_minimized(&self, mini: bool, ev_time: u32);

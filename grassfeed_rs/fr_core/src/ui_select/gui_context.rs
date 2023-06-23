@@ -24,6 +24,8 @@ use std::sync::Arc;
 const TITLE_LENGTH_MAX: usize = 20;
 pub static IN_USE: AtomicBool = AtomicBool::new(false);
 
+const WEBVIEW_REGULAR: u8 = 0;
+
 pub struct GuiContext {
     values_store_adapter: UIAdapterValueStoreType,
     updater_adapter: Rc<RefCell<dyn UIUpdaterAdapter>>,
@@ -100,7 +102,9 @@ impl GuiContext {
             }
             o_fs_man = Some(fs_man);
         }
-        (*self.updater_adapter).borrow().web_view_remove(o_fs_man);
+        (*self.updater_adapter)
+            .borrow()
+            .web_view_remove(WEBVIEW_REGULAR, o_fs_man);
     }
 
     pub fn set_window_title(&mut self, current_title: String) {

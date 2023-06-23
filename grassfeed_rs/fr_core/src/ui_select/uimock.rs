@@ -245,7 +245,7 @@ impl UIUpdaterAdapter for UpdAda {
     fn update_web_view(&self, _nr: u8) {}
     fn update_web_view_plain(&self, _nr: u8) {}
     fn clipboard_set_text(&self, _s: String) {}
-    fn web_view_remove(&self, _fs_man: Option<u8>) {}
+    fn web_view_remove(&self, _idx: u8, _fs_man: Option<u8>) {}
 
     fn memory_conserve(&self, _act: bool) {}
     // fn update_systray_indicator(&self, _enable: bool) {}

@@ -68,6 +68,7 @@ const TOOLBAR_ICON_SIZE: i32 = 28;
 const TOOLBAR_BORDER_WIDTH: u32 = 0;
 const TOOLBAR_MARGIN: i32 = 0;
 const RATIO_BROWSER_FONTSIZE_PERCENT: u32 = 140;
+const WEBVIEW_BORDER_WIDTH: u32 = 0;
 
 pub const ICON_PATH: &str = "/usr/share/pixmaps/grassfeeder/";
 pub const ICON2: &str = "grassfeeder-indicator2";
@@ -371,6 +372,7 @@ impl GtkObjectTree {
                 clear_cache,
                 o_fontsize_man,
             );
+
             ret.set_create_webview_fn(Some(Box::new(create_webview)));
         }
         box1_v.upcast()
@@ -397,10 +399,10 @@ pub fn create_webview(
     w_context: &WebContext,
     manual_fontsize: Option<u8>,
     ev_se: Sender<GuiEvents>,
-) -> WebView {
+) -> (WebView, WebView) {
     let webview1: WebView = WebView::with_context(w_context);
     webview1.set_widget_name("webview_0");
-    webview1.set_border_width(1);
+    webview1.set_border_width(WEBVIEW_BORDER_WIDTH);
     let mut wvs_b = webkit2gtk::SettingsBuilder::new()
         .enable_java(false)
         .enable_html5_local_storage(false)
@@ -415,7 +417,6 @@ pub fn create_webview(
     }
     let webview_settings = wvs_b.build();
     webview1.set_settings(&webview_settings);
-    // webview1.connect_web_process_crashed(|_wv: &WebView| {        warn!("WebView Crashed! going back ...");        true    });
     let esw = EvSenderWrapper(ev_se);
     webview1.connect_estimated_load_progress_notify(move |wv: &WebView| {
         let progress = (wv.estimated_load_progress() * 256.0) as i32;
@@ -425,9 +426,14 @@ pub fn create_webview(
         ));
     });
     webview1.connect_ready_to_show(|_wv: &WebView| {
-        trace!("ready_to_show: {}", 0);
+        debug!("ready_to_show: {}", 0);
     });
-    webview1
+
+    let webview2: WebView = WebView::with_context(w_context);
+    webview2.set_widget_name("webview_1");
+    webview2.set_border_width(WEBVIEW_BORDER_WIDTH);
+    debug!("ObjTree: create_webview : {:?} {:?} ", webview1, webview2);
+    (webview1, webview2)
 }
 
 // gdk_sys::GDK_KEY_space			 gdk-sys / src / lib.rs

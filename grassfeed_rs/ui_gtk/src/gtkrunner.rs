@@ -47,6 +47,7 @@ use webkit2gtk::WebView;
 const EVENT_QUEUE_SIZE: usize = 1000;
 const INTERNAL_QUEUE_SIZE: usize = 2000;
 const INTERNAL_QUEUE_SEND_DURATION: Duration = Duration::from_millis(200);
+const NUM_WEBVIEWS: usize = 2;
 
 pub struct GtkRunner {
     thread_gui_handle: Option<thread::JoinHandle<()>>,
@@ -193,7 +194,7 @@ pub struct GtkObjectsImpl {
     pub scrolledwindows: Vec<ScrolledWindow>,
     dialogdata_dist: Option<DialogDataDistributor>,
     pub web_context: RefCell<Option<WebContext>>, // allow only one browser in the application
-    pub web_view: RefCell<Option<WebView>>,
+    pub web_views: RefCell<[Option<WebView>; NUM_WEBVIEWS]>,
     create_webcontext_fn: WebContentType,
     create_webview_fn: CreateWebViewFnType,
     browser_config: CreateBrowserConfig,
@@ -214,31 +215,43 @@ impl GtkObjectsImpl {
                 self.web_context.borrow_mut().replace(w_context);
             }
         }
-        if self.web_view.borrow().is_none() {
-            if self.create_webview_fn.is_none() {
-                warn!("cannot create WebView, no create function here!");
-                return;
+        let has_webview = !self.web_views.borrow()[0].is_none();
+        debug!(
+            "check_or_create_browser1: VIEWS= {:?}  {} ",
+            self.web_views.borrow(),
+            has_webview
+        );
+        if has_webview {
+            return;
+        }
+        if self.create_webview_fn.is_none() {
+            warn!("cannot create WebView, no create function here!");
+            return;
+        }
+        let o_dest_box = self.get_box(self.browser_config.attach_box_index);
+        if o_dest_box.is_none() {
+            warn!("should not create browser, no gtk-box to attach to !");
+            return;
+        }
+        let dest_box = o_dest_box.unwrap();
+        if let Some(ev_se) = &self.gui_event_sender {
+            if let Some(create_fn) = &self.create_webview_fn {
+                let (w_view1, w_view2) = (create_fn)(
+                    self.web_context.borrow().as_ref().unwrap(),
+                    self.browser_config.font_size_manual,
+                    ev_se.clone(),
+                );
+                dest_box.pack_start(&w_view1, true, true, 10);
+                w_view1.show();
+                self.web_views.borrow_mut()[0].replace(w_view1);
+                self.web_views.borrow_mut()[1].replace(w_view2);
+                warn!(
+                    "check_or_create_browser2: VIEWS= {:?}  ",
+                    self.web_views.borrow()
+                );
             }
-            let o_dest_box = self.get_box(self.browser_config.attach_box_index);
-            if o_dest_box.is_none() {
-                warn!("should not create browser, no gtk-box to attach to !");
-                return;
-            }
-            let dest_box = o_dest_box.unwrap();
-            if let Some(ev_se) = &self.gui_event_sender {
-                if let Some(create_fn) = &self.create_webview_fn {
-                    let w_view = (create_fn)(
-                        self.web_context.borrow().as_ref().unwrap(),
-                        self.browser_config.font_size_manual,
-                        ev_se.clone(),
-                    );
-                    dest_box.pack_start(&w_view, true, true, 10);
-                    w_view.show();
-                    self.web_view.borrow_mut().replace(w_view);
-                }
-            } else {
-                error!("gtkrunner:  event sender not here !! ");
-            }
+        } else {
+            error!("gtkrunner:  event sender not here !! ");
         }
     }
 
@@ -360,13 +373,18 @@ impl GtkObjects for GtkObjectsImpl {
         self.text_views[list_index as usize] = tv.clone();
     }
 
-    fn get_web_view(&self) -> Option<WebView> {
+    fn get_web_view(&self, idx: u8) -> Option<WebView> {
         self.check_or_create_browser();
-        self.web_view.borrow().clone()
+        self.web_views.borrow()[idx as usize].clone()
     }
 
-    fn set_web_view(&mut self, o_wv: Option<WebView>, font_size_man: Option<u8>) {
+    // TODO: determine which goes to the gtk-box
+    fn set_web_view(&mut self, idx: u8, o_wv: Option<WebView>, font_size_man: Option<u8>) {
         self.browser_config.font_size_manual = font_size_man;
+        debug!(
+            " set_web_view {}  webView:{:?}  fontsize:{:?} ",
+            idx, o_wv, font_size_man
+        );
         match o_wv {
             None => {
                 let o_dest_box = self
@@ -377,14 +395,14 @@ impl GtkObjects for GtkObjectsImpl {
                     return;
                 }
                 let dest_box = o_dest_box.unwrap();
-                if self.web_view.borrow().is_some() {
-                    dest_box.remove(self.web_view.borrow().as_ref().unwrap());
+                if self.web_views.borrow()[idx as usize].is_some() {
+                    dest_box.remove(self.web_views.borrow()[idx as usize].as_ref().unwrap());
                 }
-                self.web_view = RefCell::new(None);
+                self.web_views.borrow_mut()[idx as usize] = None;
             }
             Some(wv) => {
                 debug!("runner:setting webView");
-                let _r = self.web_view.borrow_mut().replace(wv);
+                let _r = self.web_views.borrow_mut()[idx as usize].replace(wv);
             }
         };
     }
@@ -552,8 +570,12 @@ impl GtkObjects for GtkObjectsImpl {
 
     fn set_create_webview_fn(
         &mut self,
-        cb_fn: Option<Box<dyn Fn(&WebContext, Option<u8>, Sender<GuiEvents>) -> WebView>>,
+        cb_fn: Option<
+            Box<dyn Fn(&WebContext, Option<u8>, Sender<GuiEvents>) -> (WebView, WebView)>,
+        >,
     ) {
+        debug!("set_create_webview_fn");
+
         self.create_webview_fn = cb_fn;
     }
 
@@ -769,8 +791,8 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
         self.send_to_int(&IntCommands::ClipBoardSetText(s));
     }
 
-    fn web_view_remove(&self, fs_man: Option<u8>) {
-        self.send_to_int(&IntCommands::WebViewRemove(fs_man));
+    fn web_view_remove(&self, idx: u8, fs_man: Option<u8>) {
+        self.send_to_int(&IntCommands::WebViewRemove(idx, fs_man));
     }
 
     fn memory_conserve(&self, act: bool) {

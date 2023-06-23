@@ -1,6 +1,5 @@
 
 
-- Aggregate View:  use favorite colum for subscription icon
 
 - Test icon extraction with https://www.greyblake.com/blog/property-based-testing-in-rust-with-arbitrary/
 
@@ -62,7 +61,10 @@ No more
   git merge origin/v0_0_3
   git commit
   git push origin main
-  cd grassfeed_rs/app-gtk3-linux/ ; ./debian-stage2.sh
+  (cd grassfeed_rs/app-gtk3-linux/ ; ./debian-stage2.sh )
+  (grassfeed_rs/app-gtk3-ubuntu/ ; ./deb-sign.sh )
+
+
 
 * Put the work folder back to main
 git checkout main ;    git pull ;  git status

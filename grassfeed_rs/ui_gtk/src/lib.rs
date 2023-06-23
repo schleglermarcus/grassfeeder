@@ -61,6 +61,8 @@ pub enum IntCommands {
     ///  list_index,   db-id, column,   scroll-pos
     ListSetCursor(u8, isize, u8, i8),
     UpdateTextView(u8),
+
+    // webView_index
     UpdateWebView(u8),
     UpdateWebViewPlain(u8),
 
@@ -79,7 +81,7 @@ pub enum IntCommands {
     UpdateWindowIcon,
     ClipBoardSetText(String),
     // font size manual
-    WebViewRemove(Option<u8>),
+    WebViewRemove(u8, Option<u8>),
     MemoryConserve(bool),
     TrayIconEnable(bool),
     UpdateWindowMinimized(bool, u32),
@@ -90,9 +92,7 @@ pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>
 
 ///  WebContext,   FontSizeManual, GuiEventSender
 pub type CreateWebViewFnType =
-    Option<Box<dyn Fn(&WebContext, Option<u8>, Sender<GuiEvents>) -> WebView>>;
-
-// pub type CreateSystrayFnType =    Option<Box<dyn Fn(UiSenderWrapperType, String) -> libappindicator::AppIndicator>>;
+    Option<Box<dyn Fn(&WebContext, Option<u8>, Sender<GuiEvents>) -> (WebView, WebView)>>;
 
 pub trait GtkObjects {
     fn get_window(&self) -> Option<Window>;
@@ -118,8 +118,8 @@ pub trait GtkObjects {
     fn get_text_view(&self, list_index: u8) -> Option<&gtk::TextView>;
     fn set_text_view(&mut self, list_index: u8, tv: &gtk::TextView);
 
-    fn get_web_view(&self) -> Option<WebView>;
-    fn set_web_view(&mut self, wv: Option<WebView>, font_size_man: Option<u8>);
+    fn get_web_view(&self, idx: u8) -> Option<WebView>;
+    fn set_web_view(&mut self, idx: u8, wv: Option<WebView>, font_size_man: Option<u8>);
 
     fn get_web_context(&self) -> Option<WebContext>;
     fn set_web_context(&mut self, wc: Option<WebContext>);

@@ -472,10 +472,10 @@ impl GtkModelUpdaterInt {
 
     // This contains a workaround for:  WebView hangs occasionally on some feed contents.
     // return false if webView hangs
-    pub fn update_web_view(&self) -> bool {
-        let webviewtext_index = 0;
+    pub fn update_web_view(&self, idx: u8) -> bool {
+        // let webviewtext_index = 0;
         let g_o = (*self.g_o_a).read().unwrap();
-        if let Some(webview) = g_o.get_web_view() {
+        if let Some(webview) = g_o.get_web_view(idx) {
             if webview.is_loading() {
                 webview.stop_loading();
                 std::thread::sleep(std::time::Duration::from_millis(3));
@@ -488,12 +488,12 @@ impl GtkModelUpdaterInt {
                 }
             }
         } else {
-            error!("update_web_view: NO VIEW! ");
+            error!("update_web_view({idx}):  NO VIEW! ");
             return false;
         }
-        if let Some(webview) = g_o.get_web_view() {
+        if let Some(webview) = g_o.get_web_view(idx) {
             let store = (self.m_v_store).read().unwrap();
-            let o_wv_t = store.get_web_view_text(webviewtext_index);
+            let o_wv_t = store.get_web_view_text(idx);
             if let Some(text) = o_wv_t {
                 if webview.is_loading() {
                     webview.stop_loading();
@@ -505,12 +505,14 @@ impl GtkModelUpdaterInt {
                 let browser_zoom_pc = store.get_gui_int_or(PropDef::BrowserZoomPercent, 100);
                 webview.set_zoom_level(browser_zoom_pc as f64 / 100.0);
             }
+        } else {
+            warn!("gui_objects has no webView {idx} ");
         }
         true
     }
 
-    pub fn update_web_view_plain(&self) {
-        if let Some(webview) = (*self.g_o_a).read().unwrap().get_web_view() {
+    pub fn update_web_view_plain(&self, idx: u8) {
+        if let Some(webview) = (*self.g_o_a).read().unwrap().get_web_view(idx) {
             let store = (self.m_v_store).read().unwrap();
             let o_wv_t = store.get_web_view_text(0);
             if let Some(text) = o_wv_t {
@@ -670,7 +672,7 @@ impl GtkModelUpdaterInt {
                 }
             }
             UIUpdaterMarkWidgetType::WebView => {
-                if let Some(wv) = g_o.get_web_view() {
+                if let Some(wv) = g_o.get_web_view(idx) {
                     return Some(wv.upcast::<Widget>());
                 }
             }
@@ -705,9 +707,13 @@ impl GtkModelUpdaterInt {
     }
 
     pub fn memory_conserve(&self, active: bool) {
+        /*  TODO  check back later if this has an effect on memory consumption
+         */
         if active {
-            (*self.g_o_a).write().unwrap().set_web_view(None, None);
+            (*self.g_o_a).write().unwrap().set_web_view(0, None, None);
+            (*self.g_o_a).write().unwrap().set_web_view(1, None, None);
         }
+
         (self.m_v_store).write().unwrap().memory_conserve(active);
     }
 
