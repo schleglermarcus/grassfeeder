@@ -372,7 +372,6 @@ impl GtkObjectTree {
                 clear_cache,
                 o_fontsize_man,
             );
-
             ret.set_create_webview_fn(Some(Box::new(create_webview)));
         }
         box1_v.upcast()

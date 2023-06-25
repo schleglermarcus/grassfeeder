@@ -215,13 +215,7 @@ impl GtkObjectsImpl {
                 self.web_context.borrow_mut().replace(w_context);
             }
         }
-        let has_webview = !self.web_views.borrow()[0].is_none();
-        debug!(
-            "check_or_create_browser1: VIEWS= {:?}  {} ",
-            self.web_views.borrow(),
-            has_webview
-        );
-        if has_webview {
+        if self.web_views.borrow()[0].is_some() {
             return;
         }
         if self.create_webview_fn.is_none() {
@@ -245,7 +239,7 @@ impl GtkObjectsImpl {
                 w_view1.show();
                 self.web_views.borrow_mut()[0].replace(w_view1);
                 self.web_views.borrow_mut()[1].replace(w_view2);
-                warn!(
+                debug!(
                     "check_or_create_browser2: VIEWS= {:?}  ",
                     self.web_views.borrow()
                 );
@@ -381,9 +375,11 @@ impl GtkObjects for GtkObjectsImpl {
     // TODO: determine which goes to the gtk-box
     fn set_web_view(&mut self, idx: u8, o_wv: Option<WebView>, font_size_man: Option<u8>) {
         self.browser_config.font_size_manual = font_size_man;
-        debug!(
+        trace!(
             " set_web_view {}  webView:{:?}  fontsize:{:?} ",
-            idx, o_wv, font_size_man
+            idx,
+            o_wv,
+            font_size_man
         );
         match o_wv {
             None => {
@@ -401,7 +397,7 @@ impl GtkObjects for GtkObjectsImpl {
                 self.web_views.borrow_mut()[idx as usize] = None;
             }
             Some(wv) => {
-                debug!("runner:setting webView");
+                trace!("runner:setting webView");
                 let _r = self.web_views.borrow_mut()[idx as usize].replace(wv);
             }
         };
@@ -574,8 +570,6 @@ impl GtkObjects for GtkObjectsImpl {
             Box<dyn Fn(&WebContext, Option<u8>, Sender<GuiEvents>) -> (WebView, WebView)>,
         >,
     ) {
-        debug!("set_create_webview_fn");
-
         self.create_webview_fn = cb_fn;
     }
 

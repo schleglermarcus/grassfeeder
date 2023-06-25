@@ -1,7 +1,5 @@
 Wed, 21 Jun 2023 00:00:00 +0000
-
-
-- second webView to pre-load pages
+* Speeding up the web page display by pre-loading the pages in second webView
 
 - Aggregate View:  use favorite colum for subscription icon
 

@@ -24,6 +24,9 @@ use std::rc::Weak;
 const BROWSER_ZOOM_LIMIT_UPPER: u32 = 300;
 const BROWSER_ZOOM_LIMIT_LOWER: u32 = 20;
 
+const WEBVIEW_REGULAR: u8 = 0;
+const WEBVIEW_PRELOAD: u8 = 1;
+
 pub trait IBrowserPane {
     fn switch_browsertab_content(
         &self,
@@ -31,6 +34,7 @@ pub trait IBrowserPane {
         title: String,
         co_au_ca: Option<(String, String, String)>,
     );
+    fn browser_pre_load(&self, msg_id: i32, co_au_ca_su: Option<(String, String, String)>);
 
     fn get_config(&self) -> Config;
     fn set_conf_browser_bg(&mut self, c: u32);
@@ -94,16 +98,15 @@ impl BrowserPane {
             }
         } else {
             error!("config is missing {}", PropDef::BrowserDir.to_string());
-            // (*self.configmanager_r)                .borrow()                .debug_dump("create_browser_dir");
         }
     }
 
-    fn set_browser_contents_html(&self, msg: String) {
+    fn set_browser_contents_html(&self, msg: String, webview_idx: u8) {
         (*self.gui_val_store)
             .write()
             .unwrap()
-            .set_web_view_text(0, msg);
-        (*self.gui_updater).borrow().update_web_view(0);
+            .set_web_view_text(webview_idx, msg);
+        (*self.gui_updater).borrow().update_web_view(webview_idx);
     }
 
     /// load plain text into the browser display
@@ -193,7 +196,7 @@ impl IBrowserPane for BrowserPane {
         if o_msg.is_none() {
             return;
         }
-        let fce = o_msg.unwrap();
+        let message = o_msg.unwrap();
         let mut content = String::default();
         let mut author = String::default();
         let mut categories = String::default();
@@ -203,20 +206,41 @@ impl IBrowserPane for BrowserPane {
         }
         if let Some(sub_e) = (self.subscriptionrepo_r)
             .borrow()
-            .get_by_index(fce.subscription_id)
+            .get_by_index(message.subscription_id)
         {
             su_title = sub_e.display_name;
         }
-
         let mut display = title;
         if let Some(_pos) = display.find("http") {
             display = display.split("http").next().unwrap().to_string();
             display = display.trim().to_string();
         }
-        self.last_selected_link_text.replace(fce.link.clone()); //;
-        let srcdate = util::db_time_to_display(fce.entry_src_date);
-        self.set_browser_contents_html(content);
-        self.set_browser_info_area(display, fce.link, srcdate, author, categories, su_title)
+        self.last_selected_link_text.replace(message.link.clone()); //;
+        let srcdate = util::db_time_to_display(message.entry_src_date);
+        self.set_browser_contents_html(content, WEBVIEW_REGULAR);
+        self.set_browser_info_area(display, message.link, srcdate, author, categories, su_title)
+    }
+
+    fn browser_pre_load(&self, msg_id: i32, co_au_ca_su: Option<(String, String, String)>) {
+        if msg_id < 0 {
+            error!("browser_pre_load  repo_id<0");
+            return;
+        }
+        let o_msg = (*self.messagesrepo_r)
+            .borrow()
+            .get_by_index(msg_id as isize);
+        if o_msg.is_none() {
+            return;
+        }
+        let mut content = String::default();
+        if let Some(triplet) = co_au_ca_su {
+            (content, _, _) = triplet;
+        }
+        trace!(
+            "browser_pre_load : {msg_id}  length_of_content:{} ",
+            content.len()
+        );
+        self.set_browser_contents_html(content, WEBVIEW_PRELOAD);
     }
 
     fn get_config(&self) -> Config {
@@ -233,7 +257,9 @@ impl IBrowserPane for BrowserPane {
             .unwrap()
             .set_gui_property(PropDef::BrowserBackgroundLevel, c.to_string());
 
-        (*self.gui_updater).borrow().update_web_view(0);
+        (*self.gui_updater)
+            .borrow()
+            .update_web_view(WEBVIEW_REGULAR);
     }
 
     fn get_last_selected_link(&self) -> String {
@@ -264,7 +290,6 @@ impl IBrowserPane for BrowserPane {
         new_zoom = std::cmp::max(new_zoom, BROWSER_ZOOM_LIMIT_LOWER);
         self.last_zoom_level_percent.replace(new_zoom);
         if new_zoom != cur_zoom {
-            // trace!("ZOOM:   {} -> {}", cur_zoom, new_zoom);
             (*self.gui_val_store)
                 .write()
                 .unwrap()
@@ -297,7 +322,6 @@ impl StartupWithAppContext for BrowserPane {
 #[derive(Default, Clone, Debug)]
 pub struct Config {
     pub browser_bg: u8,
-    // pub cache_cleanup: bool,
 }
 
 //------------------------------------------------------

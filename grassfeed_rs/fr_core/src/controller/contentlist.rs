@@ -665,7 +665,6 @@ impl IContentList for FeedContents {
             .borrow_mut()
             .update_is_read_all(src_repo_id, true);
         let (current_subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
-        //        debug!(            "set_read_complete_subscription: {} != {}",            current_subs_id, src_repo_id        );
         if current_subs_id == src_repo_id {
             self.update_message_list_(src_repo_id);
             self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
@@ -983,13 +982,18 @@ impl IContentList for FeedContents {
             .read()
             .unwrap()
             .find_unread_message(first_selected_msg, select_later);
-        if let Some(dest_id) = o_dest_subs_id {
+        // trace!("move_list_cursor: dest_ids= {:?} ", o_dest_subs_id);
+        if let Some((dest_id, next_dest_id)) = o_dest_subs_id {
             (*self.gui_updater).borrow().list_set_cursor(
                 TREEVIEW1,
                 dest_id,
                 LIST0_COL_MSG_ID,
                 LIST_SCROLL_POS,
             );
+            let o_co_au_ca = self.get_msg_content_author_categories(next_dest_id, None);
+            (*self.browserpane_r)
+                .borrow()
+                .browser_pre_load(next_dest_id as i32, Some(o_co_au_ca));
         }
     }
 

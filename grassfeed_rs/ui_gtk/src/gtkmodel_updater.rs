@@ -707,13 +707,10 @@ impl GtkModelUpdaterInt {
     }
 
     pub fn memory_conserve(&self, active: bool) {
-        /*  TODO  check back later if this has an effect on memory consumption
-         */
         if active {
             (*self.g_o_a).write().unwrap().set_web_view(0, None, None);
             (*self.g_o_a).write().unwrap().set_web_view(1, None, None);
         }
-
         (self.m_v_store).write().unwrap().memory_conserve(active);
     }
 

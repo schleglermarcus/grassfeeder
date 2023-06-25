@@ -163,7 +163,12 @@ impl MessageStateMap {
 
     /// Searches the next unread message.
     ///  message-id,  seek-to:  true:higher timestamps, false: lower_timestamps
-    pub fn find_unread_message(&self, current_msg_id: isize, seek_to_later: bool) -> Option<isize> {
+    ///  returns  next unread message id,  the subsequent next unread message id
+    pub fn find_unread_message(
+        &self,
+        current_msg_id: isize,
+        seek_to_later: bool,
+    ) -> Option<(isize, isize)> {
         if !self.msgmap.contains_key(&current_msg_id) {
             return None;
         }
@@ -194,7 +199,14 @@ impl MessageStateMap {
         if new_index == current_index {
             None
         } else {
-            Some(vals[new_index as usize].msg_id)
+            let mut ni2: isize = if seek_to_later {
+                new_index + 1
+            } else {
+                new_index - 1
+            };
+            ni2 = ni2.max(0);
+            ni2 = ni2.min(vals.len() as isize - 1);
+            Some((vals[new_index as usize].msg_id, vals[ni2 as usize].msg_id))
         }
     }
 
@@ -276,8 +288,8 @@ pub mod t {
             );
         }
         // msm.dump();
-        assert_eq!(msm.find_unread_message(4, true), Some(2));
-        assert_eq!(msm.find_unread_message(4, false), Some(6));
+        assert_eq!(msm.find_unread_message(4, true), Some((2, 1)));
+        assert_eq!(msm.find_unread_message(4, false), Some((6, 7)));
     }
 
     //cargo watch -s "cargo test db::message_state::t::t_find_unread_message_simple --lib -- --exact --nocapture"
