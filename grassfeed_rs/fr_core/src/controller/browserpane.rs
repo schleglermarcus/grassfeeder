@@ -236,10 +236,7 @@ impl IBrowserPane for BrowserPane {
         if let Some(triplet) = co_au_ca_su {
             (content, _, _) = triplet;
         }
-        trace!(
-            "browser_pre_load : {msg_id}  length_of_content:{} ",
-            content.len()
-        );
+        // trace!(            "browser_pre_load : {msg_id}  length_of_content:{} ",            content.len()        );
         self.set_browser_contents_html(content, WEBVIEW_PRELOAD);
     }
 

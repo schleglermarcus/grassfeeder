@@ -37,6 +37,14 @@ pub trait GtkGuiBuilder: 'static {
     );
 }
 
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
+pub enum UpdateListMode {
+    None,
+    FirstPart,
+    MiddlePart,
+    LastPart,
+}
+
 // order is important, upper items will be prioritized
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum IntCommands {
@@ -55,8 +63,13 @@ pub enum IntCommands {
     ///  tree_index,   path
     TreeSetCursor(u8, Vec<u16>),
     UpdateListModel(u8),
+    /// list_idx,  Detach/Attach View,  List-Start, Count.
+    /// On too large lists, we use this paginated commands to split the update into several steps
+    UpdateListModelPaginate(u8, UpdateListMode, usize, usize),
+
     ///  list_index,   list_position
     UpdateListModelSingle(u8, u32),
+    ///  list_index,   list_positions
     UpdateListModelSome(u8, Vec<u32>),
     ///  list_index,   db-id, column,   scroll-pos
     ListSetCursor(u8, isize, u8, i8),

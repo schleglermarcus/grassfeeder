@@ -115,7 +115,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
-            ("http://vkjehannum.wordpress.com/feed/", "vkjehannum"),
+            ("https://www.heise.de/rss/heise-atom.xml", "heise-atom"),
+
         ];
         src.iter().for_each(|(url, desc)| {
             subs_move.add_new_subscription_at_parent(
@@ -137,6 +138,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     }
     if false {
         let src = [
+            ("http://vkjehannum.wordpress.com/feed/", "vkjehannum"),
             ("http://feeds.feedburner.com/blogspot/cwWR", "financearmag"),
             ("http://feeds.bbci.co.uk/news/rss.xml", "bbc"),
             ("http://xbustyx.xxxlog.co/feed/", "xbust_browser_hangs"),

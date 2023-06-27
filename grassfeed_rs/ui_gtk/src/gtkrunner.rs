@@ -85,7 +85,7 @@ impl GuiRunner for GtkRunner {
         let co_re2 = self.gui_command_receiver.clone();
         let co_se2 = self.gui_command_sender.clone();
         let builder_c = self.gtk_builder.clone();
-        let ev_se_wc = self.get_event_sender();
+        // let ev_se_wc = self.get_event_sender();
         let win_title;
         let win_width;
         let win_height;
@@ -113,9 +113,9 @@ impl GuiRunner for GtkRunner {
                 ev_se2.send(GuiEvents::InternalStarted).unwrap();
                 GtkRunnerInternal::add_timeout_loop(
                     co_re2.clone(),
+                    co_se2.clone(),
                     runner_i.gtk_objects.clone(),
                     m_v_st_c,
-                    ev_se_wc,
                 );
                 if let Ok(cmd) = co_re2.recv() {
                     if cmd == IntCommands::START {
@@ -710,8 +710,8 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
         ));
     }
 
-    fn update_list(&self, list_index: u8) {
-        self.send_to_int(&IntCommands::UpdateListModel(list_index));
+    fn update_list(&self, list_idx: u8) {
+        self.send_to_int(&IntCommands::UpdateListModel(list_idx));
     }
     fn update_list_single(&self, list_index: u8, list_position: u32) {
         self.send_to_int(&IntCommands::UpdateListModelSingle(

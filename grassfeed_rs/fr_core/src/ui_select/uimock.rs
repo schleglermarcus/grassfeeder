@@ -192,6 +192,10 @@ impl UIAdapterValueStore for AdValSto {
     fn get_label_tooltip(&self, _index: u8) -> Option<&String> {
         None
     }
+
+    fn get_list_length(&self, _list_index: u8) -> usize {
+        0
+    }
 }
 
 // #[derive(Default)]

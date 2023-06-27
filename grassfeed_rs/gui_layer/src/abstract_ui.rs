@@ -120,7 +120,8 @@ pub trait UIAdapterValueStore {
     fn insert_list_item(&mut self, list_index: u8, list_position: i32, values: &[AValue]);
     fn clear_list(&mut self, list_index: u8);
     fn get_list_item(&self, list_index: u8, list_position: i32) -> Option<Vec<AValue>>;
-    fn get_list_iter(&self, _list_index: u8) -> Iter<Vec<AValue>>;
+    fn get_list_iter(&self, list_index: u8) -> Iter<Vec<AValue>>;
+    fn get_list_length(&self, list_index: u8) -> usize;
 
     fn set_text_view(&mut self, index: u8, newtext: String);
     fn get_text_view(&self, index: u8) -> Option<String>;

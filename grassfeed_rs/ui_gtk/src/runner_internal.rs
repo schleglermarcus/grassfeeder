@@ -4,8 +4,10 @@ use crate::gtkmodel_updater::GtkModelUpdaterInt;
 use crate::gtkrunner::GtkObjectsImpl;
 use crate::DialogDataDistributor;
 use crate::GtkBuilderType;
+use crate::GtkObjects;
 use crate::GtkObjectsType;
 use crate::IntCommands;
+use crate::UpdateListMode;
 use flume::Receiver;
 use flume::Sender;
 use gtk::gio::ApplicationFlags;
@@ -21,8 +23,8 @@ use gtk::traits::SettingsExt;
 use gtk::ApplicationWindow;
 use gtk::Settings;
 use gui_layer::abstract_ui::GuiEvents;
+use gui_layer::abstract_ui::UIAdapterValueStore;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
-use gui_layer::abstract_ui::UiSenderWrapperType;
 use std::collections::HashSet;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicU8;
@@ -33,6 +35,7 @@ use std::time::Duration;
 use std::time::Instant;
 
 const GTK_MAIN_INTERVAL: std::time::Duration = Duration::from_millis(100);
+const GTK_LIST_MAX_LINES: usize = 100;
 static INTERVAL_COUNTER: AtomicU8 = AtomicU8::new(0);
 
 // https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/glib/struct.MainContext.html
@@ -134,13 +137,13 @@ impl GtkRunnerInternal {
 
     pub fn add_timeout_loop(
         g_com_rec: Receiver<IntCommands>,
+        g_com_se: Sender<IntCommands>,
         gtk_objects: GtkObjectsType,
         model_value_store: UIAdapterValueStoreType,
-        _ev_se_w: UiSenderWrapperType,
     ) {
         let gtk_objects_a = gtk_objects.clone();
         let m_v_st_a = model_value_store.clone();
-        let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects /*, ev_se_w  */);
+        let upd_int = GtkModelUpdaterInt::new(model_value_store, gtk_objects);
         let is_minimized: AtomicBool = AtomicBool::new(false);
         g14m_guard!();
         gtk::glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
@@ -148,104 +151,29 @@ impl GtkRunnerInternal {
             if is_minimized.load(Ordering::Relaxed) && (prev_count & 7 != 0) {
                 return gtk::glib::Continue(true);
             }
+
             let mut rec_set: HashSet<IntCommands> = HashSet::new();
             while let Ok(command) = g_com_rec.try_recv() {
-                rec_set.insert(command);
-            }
-            let mut rec_list = rec_set.iter().collect::<Vec<_>>();
-            rec_list.sort();
-            for command in rec_list {
-                let now = Instant::now();
-                match *command {
-                    IntCommands::START => {
-                        error!("glib loop: unexpected START ");
-                    }
-                    IntCommands::STOP => {
-                        match (gtk_objects_a).read().unwrap().get_window() {
-                            Some(win) => {
-                                win.close();
-                            }
-                            None => {
-                                error!("glib loop: STOP cannot close application window ");
-                            }
-                        };
-                    }
-                    IntCommands::UpdateTextEntry(i) => upd_int.update_text_entry(i),
-                    IntCommands::UpdateTreeModel(i) => upd_int.update_tree_model(i),
-                    IntCommands::UpdateTreeModelSingle(tree_nr, ref path) => {
-                        upd_int.update_tree_model_single(tree_nr, path.clone())
-                    }
-                    IntCommands::UpdateTreeModelPartial(tree_nr, ref path) => {
-                        upd_int.update_tree_model_partial(tree_nr, path.clone())
-                    }
-                    IntCommands::TreeSetCursor(i, ref path) => {
-                        upd_int.tree_set_cursor(i, path.clone())
-                    }
-                    IntCommands::UpdateListModel(i) => upd_int.update_list_model(i),
-                    IntCommands::UpdateListModelSingle(i, list_pos) => {
-                        upd_int.update_list_model_single(i, list_pos)
-                    }
-                    IntCommands::UpdateListModelSome(i, ref list_pos) => {
-                        upd_int.update_list_model_some(i, list_pos.clone())
-                    }
-                    IntCommands::ListSetCursor(i, pos, column, scroll_pos) => {
-                        upd_int.list_set_cursor(i, pos, column, scroll_pos)
-                    }
-                    IntCommands::UpdateTextView(i) => upd_int.update_text_view(i),
-                    IntCommands::UpdateLabel(i) => upd_int.update_label(i),
-                    IntCommands::UpdateLabelMarkup(i) => upd_int.update_label_markup(i),
-                    IntCommands::UpdateDialog(i) => upd_int.update_dialog(i),
-                    IntCommands::UpdateLinkButton(i) => upd_int.update_linkbutton(i),
-                    IntCommands::ShowDialog(i) => upd_int.show_dialog(i),
-                    IntCommands::UpdatePanedPos(i, pos) => upd_int.update_paned_pos(i, pos),
-                    IntCommands::WidgetMark(ref typ, i, mark) => {
-                        upd_int.widget_mark(typ.clone(), i, mark);
-                    }
-                    IntCommands::GrabFocus(ref typ, i) => {
-                        upd_int.grab_focus(typ.clone(), i);
-                    }
-                    IntCommands::UpdateWindowTitle => upd_int.update_window_title(),
-                    IntCommands::UpdateWindowIcon => upd_int.update_window_icon(),
-                    IntCommands::UpdateWebView(idx) => {
-                        if !upd_int.update_web_view(idx) {
-                            warn!("updating webView {idx} failed ");
-                            (gtk_objects_a)
-                                .write()
-                                .unwrap()
-                                .set_web_view(idx, None, None);
-                        }
-                    } // only one view
-                    IntCommands::UpdateWebViewPlain(idx) => upd_int.update_web_view_plain(idx),
-                    IntCommands::ClipBoardSetText(ref s) => {
-                        gtk::Clipboard::get(&gtk::gdk::SELECTION_CLIPBOARD).set_text(s);
-                    }
-                    IntCommands::WebViewRemove(idx, fs_man) => {
-                        (gtk_objects_a)
-                            .write()
-                            .unwrap()
-                            .set_web_view(idx, None, fs_man);
-                    }
+                match command {
                     IntCommands::MemoryConserve(act) => {
                         is_minimized.store(act, Ordering::Relaxed);
                         upd_int.memory_conserve(act);
                     }
-                    IntCommands::TrayIconEnable(_act) => {}
-                    IntCommands::UpdateWindowMinimized(mini, ev_time) => {
-                        upd_int.update_window_minimized(mini, ev_time)
-                    }
-                    IntCommands::StoreImage(idx, ref img) => upd_int.store_image(idx, img.clone()),
-                    IntCommands::ButtonSetSensitive(idx, sens) => {
-                        upd_int.button_set_sensitive(idx, sens)
-                    }
                     _ => {
-                        warn!("GTKS other cmd {:?}", command);
+                        rec_set.insert(command);
                     }
-                }
-                let elapsed_ms = now.elapsed().as_millis();
-                if elapsed_ms > 250 {
-                    warn!("R_INT: {:?} took {:?}", &command, elapsed_ms);
                 }
             }
+            let mut rec_list: Vec<IntCommands> = rec_set.into_iter().collect::<Vec<IntCommands>>();
+            rec_list.sort();
+            loop_proc_int_commands(
+                &rec_list,
+                gtk_objects_a.clone(),
+                &upd_int,
+                m_v_st_a.clone(),
+                g_com_se.clone(),
+            );
+
             if prev_count & 1 == 0 {
                 if let Some((cr_spinner, tv_col)) = (*gtk_objects_a).read().unwrap().get_spinner_w()
                 {
@@ -263,9 +191,131 @@ impl GtkRunnerInternal {
                     }
                 }
             }
+
             gtk::glib::Continue(true)
         });
     } // timeout
+}
+
+fn loop_proc_int_commands(
+    cmd_list: &Vec<IntCommands>,
+    gtk_objects_a: Arc<RwLock<dyn GtkObjects>>,
+    upd_int: &GtkModelUpdaterInt,
+    m_v_st_a: Arc<RwLock<dyn UIAdapterValueStore + Send + Sync>>,
+    g_com_se: Sender<IntCommands>,
+) {
+    for command in cmd_list {
+        let now = Instant::now();
+
+        match command.clone() {
+            IntCommands::START => {
+                error!("glib loop: unexpected START ");
+            }
+            IntCommands::STOP => {
+                match (gtk_objects_a).read().unwrap().get_window() {
+                    Some(win) => {
+                        win.close();
+                    }
+                    None => {
+                        error!("glib loop: STOP cannot close application window ");
+                    }
+                };
+            }
+            IntCommands::UpdateTextEntry(i) => upd_int.update_text_entry(i),
+            IntCommands::UpdateTreeModel(i) => upd_int.update_tree_model(i),
+            IntCommands::UpdateTreeModelSingle(ref tree_nr, ref path) => {
+                upd_int.update_tree_model_single(*tree_nr, path.clone())
+            }
+            IntCommands::UpdateTreeModelPartial(ref tree_nr, ref path) => {
+                upd_int.update_tree_model_partial(*tree_nr, path.clone())
+            }
+            IntCommands::TreeSetCursor(i, ref path) => upd_int.tree_set_cursor(i, path.clone()),
+            IntCommands::UpdateListModel(i) => {
+                let list_length = m_v_st_a.read().unwrap().get_list_length(i);
+                if list_length > GTK_LIST_MAX_LINES {
+                    let parts: usize = (list_length / GTK_LIST_MAX_LINES) + 1;
+                    let step: usize = ((list_length + 1) / parts) + 1;
+                    debug!(" UpdateListModel len:{list_length}  parts:{parts}  step:{step} ");
+
+                    let mut lpos: usize = 0;
+                    let mut lmode: UpdateListMode = UpdateListMode::FirstPart;
+                    while lpos < list_length {
+                        debug!("POS {lpos} {lmode:?} ");
+                        let _r = g_com_se
+                            .send(IntCommands::UpdateListModelPaginate(i, lmode, lpos, step));
+
+                        lpos += step;
+                        lmode = if lpos > list_length - step {
+                            UpdateListMode::LastPart
+                        } else {
+                            UpdateListMode::MiddlePart
+                        };
+                    }
+                } else {
+                    upd_int.update_list_model_full(i);
+                }
+            }
+            IntCommands::UpdateListModelPaginate(i, update_mode, lstart, lcount) => {
+                upd_int.update_list_model_paginated(i, lstart, lcount, update_mode);
+            }
+            IntCommands::UpdateListModelSingle(i, list_pos) => {
+                upd_int.update_list_model_single(i, list_pos)
+            }
+            IntCommands::UpdateListModelSome(i, ref list_pos) => {
+                upd_int.update_list_model_some(i, list_pos.clone())
+            }
+            IntCommands::ListSetCursor(i, pos, column, scroll_pos) => {
+                upd_int.list_set_cursor(i, pos, column, scroll_pos)
+            }
+            IntCommands::UpdateTextView(i) => upd_int.update_text_view(i),
+            IntCommands::UpdateLabel(i) => upd_int.update_label(i),
+            IntCommands::UpdateLabelMarkup(i) => upd_int.update_label_markup(i),
+            IntCommands::UpdateDialog(i) => upd_int.update_dialog(i),
+            IntCommands::UpdateLinkButton(i) => upd_int.update_linkbutton(i),
+            IntCommands::ShowDialog(i) => upd_int.show_dialog(i),
+            IntCommands::UpdatePanedPos(i, pos) => upd_int.update_paned_pos(i, pos),
+            IntCommands::WidgetMark(ref typ, i, mark) => {
+                upd_int.widget_mark(typ.clone(), i, mark);
+            }
+            IntCommands::GrabFocus(ref typ, i) => {
+                upd_int.grab_focus(typ.clone(), i);
+            }
+            IntCommands::UpdateWindowTitle => upd_int.update_window_title(),
+            IntCommands::UpdateWindowIcon => upd_int.update_window_icon(),
+            IntCommands::UpdateWebView(idx) => {
+                if !upd_int.update_web_view(idx) {
+                    warn!("updating webView {idx} failed ");
+                    (gtk_objects_a)
+                        .write()
+                        .unwrap()
+                        .set_web_view(idx, None, None);
+                }
+            } // only one view
+            IntCommands::UpdateWebViewPlain(idx) => upd_int.update_web_view_plain(idx),
+            IntCommands::ClipBoardSetText(ref s) => {
+                gtk::Clipboard::get(&gtk::gdk::SELECTION_CLIPBOARD).set_text(s);
+            }
+            IntCommands::WebViewRemove(idx, fs_man) => {
+                (gtk_objects_a)
+                    .write()
+                    .unwrap()
+                    .set_web_view(idx, None, fs_man);
+            }
+            IntCommands::TrayIconEnable(_act) => {}
+            IntCommands::UpdateWindowMinimized(mini, ev_time) => {
+                upd_int.update_window_minimized(mini, ev_time)
+            }
+            IntCommands::StoreImage(idx, ref img) => upd_int.store_image(idx, img.clone()),
+            IntCommands::ButtonSetSensitive(idx, sens) => upd_int.button_set_sensitive(idx, sens),
+            _ => {
+                warn!("GTKS other cmd {:?}", command);
+            }
+        }
+        let elapsed_ms = now.elapsed().as_millis();
+        if elapsed_ms > 250 {
+            warn!("R_INT: {:?} took {:?}", &command, elapsed_ms);
+        }
+    }
 }
 
 fn build_window(

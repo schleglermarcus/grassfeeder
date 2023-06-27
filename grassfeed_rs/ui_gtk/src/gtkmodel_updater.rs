@@ -6,6 +6,7 @@ use webkit2gtk::WebViewExt;
 
 use crate::iconloader::IconLoader;
 use crate::GtkObjectsType;
+use crate::UpdateListMode;
 use gtk::gdk::RGBA;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::glib;
@@ -306,7 +307,7 @@ impl GtkModelUpdaterInt {
 
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
     ///  Needs the same index for   ListStore  as for TreeView
-    pub fn update_list_model(&self, list_index: u8) {
+    pub fn update_list_model_full(&self, list_index: u8) {
         let now = std::time::Instant::now();
         let g_o = (*self.g_o_a).read().unwrap();
         let o_list_store = g_o.get_list_store(list_index as usize);
@@ -322,9 +323,9 @@ impl GtkModelUpdaterInt {
         }
         let list_view: &TreeView = o_list_view.unwrap();
         let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
+        let o_last_sort_column_id: Option<(SortColumn, SortType)> = list_store.sort_column_id();
         let empty_view_option: Option<&ListStore> = None;
         list_view.set_model(empty_view_option);
-        let o_last_sort_column_id: Option<(SortColumn, SortType)> = list_store.sort_column_id();
         if o_last_sort_column_id.is_some() {
             list_store.set_unsorted();
         }
@@ -348,9 +349,61 @@ impl GtkModelUpdaterInt {
         }
         list_view.set_model(Some(list_store));
         let elapsed = now.elapsed().as_millis();
-        if elapsed > 300 {
+        if elapsed > 100 {
             debug!(
                 "update_list_model took {:?}ms #lines:{} ",
+                elapsed, num_lines
+            );
+        }
+    }
+
+    /// deconnects the list store,  refills it, reconnects it,   puts cursor back
+    ///  Needs the same index for   ListStore  as for TreeView
+    pub fn update_list_model_paginated(
+        &self,
+        list_index: u8,
+        listpos_start: usize,
+        list_length: usize,
+        updatemode: UpdateListMode,
+    ) {
+        let now = std::time::Instant::now();
+        debug!("u_list_pg      {listpos_start} {list_length} {updatemode:?} ");
+        let g_o = (*self.g_o_a).read().unwrap();
+        let o_list_store = g_o.get_list_store(list_index as usize);
+        assert!(o_list_store.is_some());
+        let list_store: &ListStore = o_list_store.unwrap();
+        let o_list_view = g_o.get_tree_view(list_index as usize);
+        assert!(o_list_view.is_some());
+        let list_view: &TreeView = o_list_view.unwrap();
+        let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
+        let o_last_sort_column_id: Option<(SortColumn, SortType)> = list_store.sort_column_id();
+        if updatemode == UpdateListMode::FirstPart {
+            let empty_view_option: Option<&ListStore> = None;
+            list_view.set_model(empty_view_option);
+            if o_last_sort_column_id.is_some() {
+                list_store.set_unsorted();
+            }
+            list_store.clear();
+        }
+        let mut num_lines = 0;
+        let listpos_end = listpos_start + list_length;
+        for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
+            if num_lines >= listpos_start && num_lines < listpos_end {
+                let append_iter = list_store.insert(-1);
+                Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbuf_cache);
+            }
+            num_lines += 1;
+        }
+        if updatemode == UpdateListMode::LastPart {
+            if let Some((sort_col, sort_type)) = o_last_sort_column_id {
+                list_store.set_sort_column_id(sort_col, sort_type);
+            }
+            list_view.set_model(Some(list_store));
+        }
+        let elapsed = now.elapsed().as_millis();
+        if elapsed > 100 {
+            debug!(
+                "update_list_model_paginated took {:?}ms #lines:{} ",
                 elapsed, num_lines
             );
         }

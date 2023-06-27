@@ -360,4 +360,8 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
     fn get_label_tooltip(&self, index: u8) -> Option<&String> {
         self.gui_label_tooltips.get(index as usize)
     }
+
+    fn get_list_length(&self, _list_index: u8) -> usize {
+        self.gui_list.len()
+    }
 }
