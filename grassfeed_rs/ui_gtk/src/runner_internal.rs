@@ -1,5 +1,4 @@
 // use dd::flume;
-
 use crate::gtkmodel_updater::GtkModelUpdaterInt;
 use crate::gtkrunner::GtkObjectsImpl;
 use crate::DialogDataDistributor;
@@ -7,7 +6,6 @@ use crate::GtkBuilderType;
 use crate::GtkObjects;
 use crate::GtkObjectsType;
 use crate::IntCommands;
-use crate::UpdateListMode;
 use flume::Receiver;
 use flume::Sender;
 use gtk::gio::ApplicationFlags;
@@ -23,7 +21,6 @@ use gtk::traits::SettingsExt;
 use gtk::ApplicationWindow;
 use gtk::Settings;
 use gui_layer::abstract_ui::GuiEvents;
-use gui_layer::abstract_ui::UIAdapterValueStore;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use std::collections::HashSet;
 use std::sync::atomic::AtomicBool;
@@ -35,7 +32,6 @@ use std::time::Duration;
 use std::time::Instant;
 
 const GTK_MAIN_INTERVAL: std::time::Duration = Duration::from_millis(100);
-const GTK_LIST_MAX_LINES: usize = 100;
 static INTERVAL_COUNTER: AtomicU8 = AtomicU8::new(0);
 
 // https://gtk-rs.org/gtk-rs-core/stable/0.14/docs/glib/struct.MainContext.html
@@ -135,9 +131,9 @@ impl GtkRunnerInternal {
         }
     }
 
+    // g_com_se: Sender<IntCommands>,
     pub fn add_timeout_loop(
         g_com_rec: Receiver<IntCommands>,
-        g_com_se: Sender<IntCommands>,
         gtk_objects: GtkObjectsType,
         model_value_store: UIAdapterValueStoreType,
     ) {
@@ -166,14 +162,8 @@ impl GtkRunnerInternal {
             }
             let mut rec_list: Vec<IntCommands> = rec_set.into_iter().collect::<Vec<IntCommands>>();
             rec_list.sort();
-            loop_proc_int_commands(
-                &rec_list,
-                gtk_objects_a.clone(),
-                &upd_int,
-                m_v_st_a.clone(),
-                g_com_se.clone(),
-            );
-
+            loop_proc_int_commands(&rec_list, gtk_objects_a.clone(), &upd_int);
+            // m_v_st_a.clone(),                // g_com_se.clone(),
             if prev_count & 1 == 0 {
                 if let Some((cr_spinner, tv_col)) = (*gtk_objects_a).read().unwrap().get_spinner_w()
                 {
@@ -197,12 +187,12 @@ impl GtkRunnerInternal {
     } // timeout
 }
 
+// m_v_st_a: Arc<RwLock<dyn UIAdapterValueStore + Send + Sync>>,
+// g_com_se: Sender<IntCommands>,
 fn loop_proc_int_commands(
     cmd_list: &Vec<IntCommands>,
     gtk_objects_a: Arc<RwLock<dyn GtkObjects>>,
     upd_int: &GtkModelUpdaterInt,
-    m_v_st_a: Arc<RwLock<dyn UIAdapterValueStore + Send + Sync>>,
-    g_com_se: Sender<IntCommands>,
 ) {
     for command in cmd_list {
         let now = Instant::now();
@@ -231,29 +221,7 @@ fn loop_proc_int_commands(
             }
             IntCommands::TreeSetCursor(i, ref path) => upd_int.tree_set_cursor(i, path.clone()),
             IntCommands::UpdateListModel(i) => {
-                let list_length = m_v_st_a.read().unwrap().get_list_length(i);
-                if list_length > GTK_LIST_MAX_LINES {
-                    let parts: usize = (list_length / GTK_LIST_MAX_LINES) + 1;
-                    let step: usize = ((list_length + 1) / parts) + 1;
-                    debug!(" UpdateListModel len:{list_length}  parts:{parts}  step:{step} ");
-
-                    let mut lpos: usize = 0;
-                    let mut lmode: UpdateListMode = UpdateListMode::FirstPart;
-                    while lpos < list_length {
-                        debug!("POS {lpos} {lmode:?} ");
-                        let _r = g_com_se
-                            .send(IntCommands::UpdateListModelPaginate(i, lmode, lpos, step));
-
-                        lpos += step;
-                        lmode = if lpos > list_length - step {
-                            UpdateListMode::LastPart
-                        } else {
-                            UpdateListMode::MiddlePart
-                        };
-                    }
-                } else {
-                    upd_int.update_list_model_full(i);
-                }
+                upd_int.update_list_model_full(i);
             }
             IntCommands::UpdateListModelPaginate(i, update_mode, lstart, lcount) => {
                 upd_int.update_list_model_paginated(i, lstart, lcount, update_mode);
@@ -265,6 +233,7 @@ fn loop_proc_int_commands(
                 upd_int.update_list_model_some(i, list_pos.clone())
             }
             IntCommands::ListSetCursor(i, pos, column, scroll_pos) => {
+                // trace!("INT:  ListSetCursor {pos} {column} {scroll_pos}  ");
                 upd_int.list_set_cursor(i, pos, column, scroll_pos)
             }
             IntCommands::UpdateTextView(i) => upd_int.update_text_view(i),
@@ -373,3 +342,33 @@ pub fn dbus_register(app: &gtk::Application) {
     let none_cancellable: Option<&Cancellable> = Option::None;
     let _r = app.register(none_cancellable);
 }
+
+/*
+
+use gui_layer::abstract_ui::UIAdapterValueStore;
+const GTK_LIST_MAX_LINES: usize = 100;
+
+                if false {
+                    let list_length = m_v_st_a.read().unwrap().get_list_length(i);
+                    if list_length > GTK_LIST_MAX_LINES {
+                        let parts: usize = (list_length / GTK_LIST_MAX_LINES) + 1;
+                        let step: usize = ((list_length + 1) / parts) + 1;
+                        trace!(" UpdateListModel len:{list_length}  parts:{parts}  step:{step} ");
+                        let mut lpos: usize = 0;
+                        let mut lmode: UpdateListMode = UpdateListMode::FirstPart;
+                        while lpos < list_length {
+                            let _r = g_com_se
+                                .send(IntCommands::UpdateListModelPaginate(i, lmode, lpos, step));
+
+                            lpos += step;
+                            lmode = if lpos > list_length - step {
+                                UpdateListMode::LastPart
+                            } else {
+                                UpdateListMode::MiddlePart
+                            };
+                        }
+                    } else {
+                        upd_int.update_list_model_full(i);
+                    }
+                }
+*/

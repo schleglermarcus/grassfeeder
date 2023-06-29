@@ -110,10 +110,9 @@ impl GuiRunner for GtkRunner {
                     let _r = ev_se2.send(GuiEvents::AppWasAlreadyRunning);
                     return;
                 }
-                ev_se2.send(GuiEvents::InternalStarted).unwrap();
+                ev_se2.send(GuiEvents::InternalStarted).unwrap(); // co_se2.clone(),
                 GtkRunnerInternal::add_timeout_loop(
                     co_re2.clone(),
-                    co_se2.clone(),
                     runner_i.gtk_objects.clone(),
                     m_v_st_c,
                 );
@@ -239,10 +238,6 @@ impl GtkObjectsImpl {
                 w_view1.show();
                 self.web_views.borrow_mut()[0].replace(w_view1);
                 self.web_views.borrow_mut()[1].replace(w_view2);
-                debug!(
-                    "check_or_create_browser2: VIEWS= {:?}  ",
-                    self.web_views.borrow()
-                );
             }
         } else {
             error!("gtkrunner:  event sender not here !! ");
@@ -372,15 +367,10 @@ impl GtkObjects for GtkObjectsImpl {
         self.web_views.borrow()[idx as usize].clone()
     }
 
-    // TODO: determine which goes to the gtk-box
+    // Later: determine which one goes to the gtk-box
     fn set_web_view(&mut self, idx: u8, o_wv: Option<WebView>, font_size_man: Option<u8>) {
         self.browser_config.font_size_manual = font_size_man;
-        trace!(
-            " set_web_view {}  webView:{:?}  fontsize:{:?} ",
-            idx,
-            o_wv,
-            font_size_man
-        );
+        // trace!(            " set_web_view {}  webView:{:?}  fontsize:{:?} ",            idx,            o_wv,            font_size_man        );
         match o_wv {
             None => {
                 let o_dest_box = self

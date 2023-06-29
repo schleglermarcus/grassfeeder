@@ -1,4 +1,4 @@
-grassfeeder-gtk3 (0.0.2212) buster; urgency=low
+grassfeeder-gtk3 (0.0.2221) buster; urgency=low
 
   * Speeding up the web page display by pre-loading the pages in second webView
   

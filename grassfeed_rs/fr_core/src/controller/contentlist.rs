@@ -66,6 +66,8 @@ pub enum CJob {
     LaunchBrowserSuccess(isize, u32),
     /// subs_id
     CheckMessageCounts(isize),
+    // millseconds
+    Pause(usize),
 }
 
 pub trait IContentList {
@@ -597,6 +599,9 @@ impl IContentList for FeedContents {
                 }
                 CJob::CheckMessageCounts(subs_id) => {
                     self.check_message_counts(subs_id);
+                }
+                CJob::Pause(t_ms) => {
+                    std::thread::sleep(std::time::Duration::from_millis(t_ms as u64));
                 }
             }
             let elapsed_m = now.elapsed().as_millis();

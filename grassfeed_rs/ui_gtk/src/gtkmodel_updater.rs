@@ -1,4 +1,5 @@
-use resources::gen_icons::IDX_04_GRASS_CUT_2;
+// https://gtk-rs.org/gtk3-rs/stable/0.15/docs/gtk/prelude/trait.GtkListStoreExt.html
+
 #[cfg(feature = "legacy3gtk14")]
 use webkit2gtk::traits::WebViewExt;
 #[cfg(not(feature = "legacy3gtk14"))]
@@ -26,6 +27,7 @@ use gui_layer::abstract_ui::GuiTreeItem;
 use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::PropDef;
+use resources::gen_icons::IDX_04_GRASS_CUT_2;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::From;
@@ -163,19 +165,15 @@ impl GtkModelUpdaterInt {
         }
     }
 
-    // TODO  later  remove debug_info
     fn icon_for_string(s: &String, debug_info: &str) -> gtk::gdk_pixbuf::Pixbuf {
         if s.is_empty() {
-            debug!("tree inserting empty icon: no-data  ");
             return crate::iconloader::get_missing_icon();
         }
         let buf = IconLoader::decompress_string_to_vec(s);
         if buf.is_empty() {
-            debug!("tree inserting empty icon: buf.len=0 {} ", s);
             return crate::iconloader::get_missing_icon();
         }
         match IconLoader::vec_to_pixbuf(&buf) {
-            Ok(pb) => pb,
             Err(e) => {
                 warn!(
                     "tree inserting empty icon: cannot convert  {:?} {} {:?} ",
@@ -183,6 +181,7 @@ impl GtkModelUpdaterInt {
                 );
                 crate::iconloader::get_missing_icon()
             }
+            Ok(pb) => pb,
         }
     }
 
@@ -309,7 +308,24 @@ impl GtkModelUpdaterInt {
     ///  Needs the same index for   ListStore  as for TreeView
     pub fn update_list_model_full(&self, list_index: u8) {
         let now = std::time::Instant::now();
+
         let g_o = (*self.g_o_a).read().unwrap();
+        let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
+        if let Some(row0) = (self.m_v_store)
+            .read()
+            .unwrap()
+            .get_list_iter(list_index)
+            .next()
+        {
+            if row0.len() < maxcols as usize {
+                error!(
+                    "update_list_model  #row:{} < columns:{} !",
+                    row0.len(),
+                    maxcols
+                );
+                return;
+            }
+        }
         let o_list_store = g_o.get_list_store(list_index as usize);
         if o_list_store.is_none() {
             error!("update_list_model: liststore {} not found", list_index);
@@ -322,25 +338,16 @@ impl GtkModelUpdaterInt {
             return;
         }
         let list_view: &TreeView = o_list_view.unwrap();
-        let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
         let o_last_sort_column_id: Option<(SortColumn, SortType)> = list_store.sort_column_id();
         let empty_view_option: Option<&ListStore> = None;
         list_view.set_model(empty_view_option);
         if o_last_sort_column_id.is_some() {
             list_store.set_unsorted();
         }
-        list_store.clear();
         let mut num_lines = 0;
+        list_store.clear();
         for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
             let append_iter = list_store.insert(-1);
-            if row.len() < maxcols as usize {
-                error!(
-                    " update_list_model row shorter that columns #row:{}  columns:{}  SKIPPING",
-                    row.len(),
-                    maxcols
-                );
-                continue;
-            }
             Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbuf_cache);
             num_lines += 1;
         }
@@ -359,6 +366,7 @@ impl GtkModelUpdaterInt {
 
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
     ///  Needs the same index for   ListStore  as for TreeView
+    /// Problem: Sort marker gets lost,  is not stored in between
     pub fn update_list_model_paginated(
         &self,
         list_index: u8,
@@ -376,6 +384,7 @@ impl GtkModelUpdaterInt {
         assert!(o_list_view.is_some());
         let list_view: &TreeView = o_list_view.unwrap();
         let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
+
         let o_last_sort_column_id: Option<(SortColumn, SortType)> = list_store.sort_column_id();
         if updatemode == UpdateListMode::FirstPart {
             let empty_view_option: Option<&ListStore> = None;

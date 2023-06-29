@@ -60,8 +60,6 @@ pub enum IntCommands {
     ///  tree_index,   path
     UpdateTreeModelPartial(u8, Vec<u16>),
 
-    ///  tree_index,   path
-    TreeSetCursor(u8, Vec<u16>),
     UpdateListModel(u8),
     /// list_idx,  Detach/Attach View,  List-Start, Count.
     /// On too large lists, we use this paginated commands to split the update into several steps
@@ -71,8 +69,12 @@ pub enum IntCommands {
     UpdateListModelSingle(u8, u32),
     ///  list_index,   list_positions
     UpdateListModelSome(u8, Vec<u32>),
+
     ///  list_index,   db-id, column,   scroll-pos
     ListSetCursor(u8, isize, u8, i8),
+    ///  tree_index,   path
+    TreeSetCursor(u8, Vec<u16>),
+
     UpdateTextView(u8),
 
     // webView_index
