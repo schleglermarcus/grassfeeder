@@ -364,4 +364,5 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
     fn get_list_length(&self, _list_index: u8) -> usize {
         self.gui_list.len()
     }
+
 }

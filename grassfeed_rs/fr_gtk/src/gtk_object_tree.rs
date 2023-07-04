@@ -135,7 +135,7 @@ impl GtkGuiBuilder for GtkObjectTree {
         });
 
         create_dialogs(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
-        let drag_state = Rc::new(RwLock::new(DragState::default()));
+        let drag_state: Rc<RwLock<DragState>> = Rc::new(RwLock::new(DragState::default()));
         let box_top = gtk::Box::new(Orientation::Vertical, 0);
         box_top.set_widget_name("box_top");
         window.add(&box_top);

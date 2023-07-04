@@ -311,9 +311,10 @@ impl ISubscriptionMove for SubscriptionMove {
         if !to_path_parent.is_empty() {
             to_path_parent.pop();
         };
+        let mut from_entry_id : isize= -1;
         match self.drag_calc_positions(&from_path, &to_path) {
             Ok((from_entry, to_parent_id, to_folderpos)) => {
-                // let from_parent_id = from_entry.parent_subs_id;
+                from_entry_id = from_entry.subs_id;
                 self.drag_move(from_entry, to_parent_id, to_folderpos);
                 let all2 = (*self.subscriptionrepo_r).borrow().get_all_entries();
                 if all2.len() != length_before {
@@ -329,15 +330,15 @@ impl ISubscriptionMove for SubscriptionMove {
             }
         }
         if let Some(subs_w) = self.feedsources_w.upgrade() {
-            (*subs_w).borrow().addjob(SJob::UpdateTreePaths);
-            (*subs_w).borrow().addjob(SJob::FillSubscriptionsAdapter);
-            (*subs_w)
-                .borrow()
-                .addjob(SJob::GuiUpdateTreePartial(from_path_parent.clone()));
+            let subs_wb = (*subs_w).borrow();
+            subs_wb.addjob(SJob::UpdateTreePaths);
+            subs_wb.addjob(SJob::FillSubscriptionsAdapter);
+            subs_wb.addjob(SJob::GuiUpdateTreePartial(from_path_parent.clone()));
             if to_path_parent != from_path_parent {
-                (*subs_w)
-                    .borrow()
-                    .addjob(SJob::GuiUpdateTreePartial(to_path_parent));
+                subs_wb.addjob(SJob::GuiUpdateTreePartial(to_path_parent));
+            }
+            if from_entry_id > 0 {
+                subs_wb.addjob(SJob::SetCursorToSubsID(from_entry_id));
             }
         }
         success

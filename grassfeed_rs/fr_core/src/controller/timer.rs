@@ -31,12 +31,12 @@ pub enum TimerJob {
 }
 
 pub trait ITimer: TimerRegistry {
-    fn main_loop(&mut self);
+    fn main_loop(&self);
     fn get_ctrl_sender(&self) -> Sender<TimerJob>;
 }
 
 pub struct Timer {
-    schedules: [TimerSchedule; TIMER_EVENT_TABLE.len()],
+    schedules: RefCell<[TimerSchedule; TIMER_EVENT_TABLE.len()]>,
     timer_receiver: Receiver<TimerJob>,
     timer_sender: Sender<TimerJob>,
     signal_term: Arc<AtomicBool>,
@@ -60,25 +60,23 @@ pub fn build_timer() -> Timer {
 }
 
 impl ITimer for Timer {
-    fn main_loop(&mut self) {
+    fn main_loop(&self) {
         let mut keeprunning = true;
         let start_time = Instant::now();
         self.notify_all(&TimerEvent::Startup);
         while keeprunning {
             thread::sleep(Duration::from_millis(MAINLOOP_SLEEP_MS));
             let elapsed_ms = Instant::now().duration_since(start_time).as_millis();
-            for (i, _t_ev) in TIMER_EVENT_TABLE
-                .iter()
-                .enumerate()
-                .take(self.schedules.len())
-            {
+            let schedules_length = self.schedules.borrow().len();
+            for (i, _t_ev) in TIMER_EVENT_TABLE.iter().enumerate().take(schedules_length) {
                 if _t_ev.1 == 0 {
                     continue;
                 }
                 let te: TimerEvent = TimerEvent::from_int(i);
-                if elapsed_ms > self.schedules[i].next_trigger_ms {
+                let trigger_time = self.schedules.borrow()[i].next_trigger_ms;
+                if elapsed_ms > trigger_time {
                     let next_trigger = elapsed_ms + TimerEvent::delay(i) as u128;
-                    self.schedules[i].next_trigger_ms = next_trigger;
+                    self.schedules.borrow_mut()[i].next_trigger_ms = next_trigger;
                     self.notify_all(&te);
                 }
             }
@@ -121,7 +119,7 @@ impl TimerRegistry for Timer {
             warn!("unknown event={:?}  ", &te);
             return;
         }
-        self.schedules[index]
+        self.schedules.borrow_mut()[index]
             .receivers
             .push((Rc::downgrade(&observer), call_mutable));
     }
@@ -132,7 +130,7 @@ impl TimerRegistry for Timer {
             error!("notify_all: unknown event={:?}  ", &te);
             return;
         }
-        self.schedules[index]
+        self.schedules.borrow()[index]
             .receivers
             .iter()
             .enumerate()

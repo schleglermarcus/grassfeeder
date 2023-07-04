@@ -115,28 +115,28 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
-            ("https://www.heise.de/rss/heise-atom.xml", "heise-atom"),
-            ("http://thehighersidechats.com/feed/", "higherside-300"),
-            ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
-            ("https://de.rt.com/feeds/news/", "RT DE"),
-            (
-                "https://feed.ksta.de/feed/rss/politik/index.rss",
-                "Kößtüdtänzêig politi",
-            ),
-            (
-                "https://feed.ksta.de/feed/rss/panorama/index.rss",
-                "Kößtüdtänzêiger panora",
-            ),
-            (
-                "http://feeds.feedburner.com/TechmemeRideHome",
-                "techmeme-NoLinksInMessages Big-Icon 4,7MB !! ",
-            ),
-            (
-                "http://feeds.feedburner.com/RichardHerringLSTPodcast",
-                "RichardHerring-560",
-            ),
-
-
+            /*
+                       ("https://www.heise.de/rss/heise-atom.xml", "heise-atom"),
+                       ("http://thehighersidechats.com/feed/", "higherside-300"),
+                       ("https://feeds.megaphone.fm/stuffyoushouldknow", "megaphone"),
+                       ("https://de.rt.com/feeds/news/", "RT DE"),
+                       (
+                           "https://feed.ksta.de/feed/rss/politik/index.rss",
+                           "Kößtüdtänzêig politi",
+                       ),
+                       (
+                           "https://feed.ksta.de/feed/rss/panorama/index.rss",
+                           "Kößtüdtänzêiger panora",
+                       ),
+                       (
+                           "http://feeds.feedburner.com/TechmemeRideHome",
+                           "techmeme-NoLinksInMessages Big-Icon 4,7MB !! ",
+                       ),
+                       (
+                           "http://feeds.feedburner.com/RichardHerringLSTPodcast",
+                           "RichardHerring-560",
+                       ),
+            */
         ];
         src.iter().for_each(|(url, desc)| {
             subs_move.add_new_subscription_at_parent(

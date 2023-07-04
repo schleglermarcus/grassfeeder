@@ -42,6 +42,13 @@ pub struct DragState {
     pub inserted: Option<Vec<u16>>, //  ID not delivered on drag
     pub deleted: Option<Vec<u16>>,
     pub drag_start_path: Option<TreePath>,
+    // pub in_store_update: bool,
+}
+
+impl DragState {
+    pub fn block_row_activated(&self) -> bool {
+        self.drag_start_path.is_some()  // || self.in_store_update
+    }
 }
 
 pub fn process_icon_to_image(

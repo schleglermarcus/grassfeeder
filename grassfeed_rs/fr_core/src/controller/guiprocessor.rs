@@ -607,7 +607,11 @@ impl StartupWithAppContext for GuiProcessor {
         );
         self.add_handler(
             &GuiEvents::TreeRowActivated(0, Vec::default(), 0),
-            HandleTreeRowActivated(self.contentlist_r.clone(), self.feedsources_r.clone()),
+            HandleTreeRowActivated(
+                self.contentlist_r.clone(),
+                self.feedsources_r.clone(),
+                self.subscriptionmove_r.clone(),
+            ),
         );
         self.add_handler(
             &GuiEvents::ListRowDoubleClicked(0, 0, 0),
@@ -777,13 +781,28 @@ impl HandleSingleEvent for HandleMenuActivate {
 struct HandleTreeRowActivated(
     Rc<RefCell<dyn IContentList>>,
     Rc<RefCell<dyn ISourceTreeController>>,
+    Rc<RefCell<dyn ISubscriptionMove>>, // 2
 );
 impl HandleSingleEvent for HandleTreeRowActivated {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        if let GuiEvents::TreeRowActivated(_tree_idx, ref _path, subs_id) = ev {
+        if let GuiEvents::TreeRowActivated(_tree_idx, ref path_u16, subs_id) = ev {
+            // trace!("TreeRowActivated : {:?} {:?} ", subs_id, path_u16);
+            let statemap_rc = (*self.2).borrow().get_state_map();
+            if let Some(subs_map) = statemap_rc.borrow().get_state(subs_id as isize) {
+                if let Some(tp) = subs_map.tree_path {
+                    if tp != *path_u16 {
+                        debug!(
+                            "TreeRowActivated : {:?}   unequal STATE_PATH: {:?} ",
+                            subs_id,
+                            tp
+                        );
+                        return;
+                    }
+                }
+            }
             (*self.1)
                 .borrow_mut()
-                .set_selected_feedsource(subs_id as isize);
+                .set_ctx_subscription(subs_id as isize);
             (*self.0).borrow().update_message_list_(subs_id as isize);
             gp.focus_by_tab.replace(FocusByTab::FocusSubscriptions);
         }

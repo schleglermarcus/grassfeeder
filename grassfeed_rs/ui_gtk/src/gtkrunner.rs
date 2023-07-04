@@ -48,6 +48,7 @@ const EVENT_QUEUE_SIZE: usize = 1000;
 const INTERNAL_QUEUE_SIZE: usize = 2000;
 const INTERNAL_QUEUE_SEND_DURATION: Duration = Duration::from_millis(200);
 const NUM_WEBVIEWS: usize = 2;
+const NUM_TREES: usize = 2;
 
 pub struct GtkRunner {
     thread_gui_handle: Option<thread::JoinHandle<()>>,
@@ -200,6 +201,7 @@ pub struct GtkObjectsImpl {
     pub searchentries: Vec<SearchEntry>,
     gui_event_sender: Option<Sender<GuiEvents>>,
     pub toolbuttons: Vec<ToolButton>,
+    pub tree_update_block: [bool; NUM_TREES],
 }
 
 impl GtkObjectsImpl {
@@ -605,6 +607,14 @@ impl GtkObjects for GtkObjectsImpl {
                 .resize(idx as usize + 1, ToolButton::new(nowidget, None));
         }
         self.toolbuttons[idx as usize] = l.clone();
+    }
+
+    fn set_block_tree_updates(&mut self, idx: u8, block: bool) {
+        self.tree_update_block[idx as usize] = block;
+    }
+
+    fn get_block_tree_updates(&self, idx: u8) -> bool {
+        self.tree_update_block[idx as usize]
     }
 }
 

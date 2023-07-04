@@ -190,6 +190,10 @@ pub trait GtkObjects {
 
     fn get_toolbutton(&self, idx: u8) -> Option<&gtk::ToolButton>;
     fn set_toolbutton(&mut self, idx: u8, e: &gtk::ToolButton);
+
+    fn set_block_tree_updates(&mut self, idx: u8, block: bool);
+    fn get_block_tree_updates(&self, idx: u8) -> bool;
+
 }
 
 #[derive(Clone, Debug)]

@@ -48,7 +48,7 @@ pub trait ISourceTreeController {
     fn start_new_fol_sub_dialog(&mut self, src_repo_id: isize, dialog_id: u8);
     fn start_delete_dialog(&mut self, src_repo_id: isize);
     fn newsource_dialog_edit(&mut self, edit_feed_url: String);
-    fn set_selected_feedsource(&self, src_repo_id: isize);
+    fn set_ctx_subscription(&self, src_repo_id: isize);
 
     /// returns  Subscription,  Non-Folder-Child-IDs
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
@@ -394,7 +394,7 @@ impl ISourceTreeController for SourceTreeController {
         self.addjob(SJob::GuiUpdateTreeAll);
     }
 
-    fn set_selected_feedsource(&self, src_repo_id: isize) {
+    fn set_ctx_subscription(&self, src_repo_id: isize) {
         let o_fse = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_index(src_repo_id);

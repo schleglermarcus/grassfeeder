@@ -1,5 +1,6 @@
 Wed, 21 Jun 2023 00:00:00 +0000
 * Speeding up the web page display by pre-loading the pages in second webView
+* Bugfix: Tree cursor jumped after moving a subscription entry. Fixed by setting the cursor on moved item.
 
 - Aggregate View:  use favorite colum for subscription icon
 

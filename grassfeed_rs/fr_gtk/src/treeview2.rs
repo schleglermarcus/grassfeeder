@@ -68,10 +68,9 @@ pub fn create_treeview(
     g_ev_se: Sender<GuiEvents>,
     drag_state: Rc<RwLock<DragState>>,
     gtk_obj_a: GtkObjectsType,
-    // col1_wide: bool,
     ddd: &mut DialogDataDistributor,
 ) -> TreeView {
-    let (tree_store, num_store_types) = create_tree_store( /* drag_state.clone() */);
+    let (tree_store, num_store_types) = create_tree_store();
     let treeview1 = TreeView::new();
     treeview1.set_widget_name(TREEVIEW_NAME);
     treeview1.set_model(Some(&tree_store));
@@ -125,11 +124,16 @@ pub fn create_treeview(
     }
     let drag_s7 = drag_state.clone();
     let esw = EvSenderWrapper(g_ev_se.clone());
+    let g_o_a_c = gtk_obj_a.clone();
     treeview1.connect_cursor_changed(move |treeview: &TreeView| {
         let (o_tp, _tree_view_column) = treeview.cursor();
         if let Some(mut treepath) = o_tp {
-            let in_drag = (*drag_s7).read().unwrap().drag_start_path.is_some();
-            if !in_drag {
+            let tree_blocked = (*g_o_a_c).read().unwrap().get_block_tree_updates(0);
+            if tree_blocked {
+                debug!("tree cursor changed, but event send blocked ");
+            }
+            let in_drag = (*drag_s7).read().unwrap().block_row_activated();
+            if !in_drag && !tree_blocked {
                 let mut repo_id: i32 = -1;
                 let selection = treeview.selection();
                 if let Some((model, iter)) = selection.selected() {
@@ -137,7 +141,7 @@ pub fn create_treeview(
                 }
                 let indices = treepath.indices_with_depth();
                 let ind_u16: Vec<u16> = indices.iter().map(|v| *v as u16).collect::<Vec<u16>>();
-                //  trace!("TreeRowActivated : {} {:?}", repo_id, ind_u16);
+                // debug!("send   TreeRowActivated : {} {:?}", repo_id, ind_u16);
                 esw.sendw(GuiEvents::TreeRowActivated(0, ind_u16, repo_id));
             }
         }
@@ -162,7 +166,6 @@ pub fn create_treeview(
         }
         gtk::Inhibit(false)
     });
-
     // Drag Events:
     let drag_s4 = drag_state.clone();
     tree_store.connect_row_inserted(move |_t_model, t_path, _t_iter| {
@@ -204,7 +207,7 @@ pub fn create_treeview(
             let start_path = w_state.drag_start_path.take().unwrap();
             drop(w_state);
             if inserted != deleted {
-                // debug!("Dragged  {:?} ==> {:?}  ", &deleted, &inserted);
+                debug!("Dragged   {:?} ==> {:?}  End  ", &deleted, &inserted);
                 esw.sendw(GuiEvents::TreeDragEvent(0, deleted, inserted));
             }
             let focus_column: Option<&TreeViewColumn> = None;

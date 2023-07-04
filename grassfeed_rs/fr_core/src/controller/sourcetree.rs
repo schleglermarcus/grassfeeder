@@ -98,8 +98,10 @@ pub enum SJob {
     StoreFeedCreateUpdate(isize, i64, i64),
     ///  feed-url,  Display-Name, icon-id, Feed-Homepage
     NewFeedSourceEdit(String, String, isize, String),
+
     /// subscription_id  - setting window title
-    SetSelectedFeedSource(isize),
+    //  SetSelectedFeedSource(isize),
+
     /// subscription_id, content_repo_id
     UpdateLastSelectedMessageId(isize, isize),
     UpdateTreePaths,
@@ -215,6 +217,7 @@ impl SourceTreeController {
         }
         for job in job_list {
             let now = Instant::now();
+            //  trace!("ST: {:?} ", job);
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
                     self.process_tree_read_count(subs_id, msg_all, msg_unread);
@@ -293,9 +296,9 @@ impl SourceTreeController {
                         homepage.clone(),
                     );
                 }
-                SJob::SetSelectedFeedSource(src_repo_id) => {
-                    self.set_selected_feedsource(src_repo_id)
-                }
+
+                // SJob::SetSelectedFeedSource(src_repo_id) => {                    self.set_selected_feedsource(src_repo_id)                }
+
                 SJob::UpdateLastSelectedMessageId(fs_id, fc_id) => {
                     (*self.subscriptionrepo_r)
                         .borrow()
