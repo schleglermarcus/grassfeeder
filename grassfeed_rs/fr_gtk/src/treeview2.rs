@@ -129,9 +129,6 @@ pub fn create_treeview(
         let (o_tp, _tree_view_column) = treeview.cursor();
         if let Some(mut treepath) = o_tp {
             let tree_blocked = (*g_o_a_c).read().unwrap().get_block_tree_updates(0);
-            if tree_blocked {
-                debug!("tree cursor changed, but event send blocked ");
-            }
             let in_drag = (*drag_s7).read().unwrap().block_row_activated();
             if !in_drag && !tree_blocked {
                 let mut repo_id: i32 = -1;
@@ -141,7 +138,6 @@ pub fn create_treeview(
                 }
                 let indices = treepath.indices_with_depth();
                 let ind_u16: Vec<u16> = indices.iter().map(|v| *v as u16).collect::<Vec<u16>>();
-                // debug!("send   TreeRowActivated : {} {:?}", repo_id, ind_u16);
                 esw.sendw(GuiEvents::TreeRowActivated(0, ind_u16, repo_id));
             }
         }
@@ -187,7 +183,6 @@ pub fn create_treeview(
         let (o_t_path, _) = _t_view.cursor();
 
         if let Some(t_path) = o_t_path {
-            // debug!("drag_begin  {:?}", t_path.indices());
             (*drag_s2).write().unwrap().drag_start_path = Some(t_path);
             let _makeitempty = (*drag_s2).write().unwrap().inserted.take();
         }
@@ -340,7 +335,6 @@ fn show_context_menu_source(ev_button: u32, source_repo_id: i32, g_ev_se: Sender
         menu.append(&mi_edit);
         menu.append(&mi_del);
     }
-    // if source_repo_id >= 0 {    }
     menu.append(&mi_addfeed);
     menu.append(&mi_afo);
     menu.show_all();

@@ -239,7 +239,6 @@ impl GtkModelUpdaterInt {
         if let Some(iter) = tree_store.iter_from_string(&path_cn) {
             if let Some(t_path) = tree_store.path(&iter) {
                 let focus_column: Option<&TreeViewColumn> = None;
-                info!("UPD: tree_set_cursor  {:?} ", path_cn);
                 tree_view.set_cursor(&t_path, focus_column, false);
             }
         } else {
@@ -249,11 +248,9 @@ impl GtkModelUpdaterInt {
 
     ///  Disconnects the treeview,  Replaces the tree, but from middle-out downwards.  Reconnects the view
     pub fn update_tree_model_partial(&self, tree_idx: u8, path: Vec<u16>) {
-        // debug!("update_tree_model_partial START {:?} ", path);
         let max_columns;
         let tree_store: TreeStore;
         {
-            let g_o = (*self.g_o_a).read().unwrap();
             let mut g_o = (*self.g_o_a).write().unwrap();
             max_columns = g_o.get_tree_store_max_columns(tree_idx as usize) as usize;
             tree_store = g_o.get_tree_store(tree_idx as usize).unwrap().clone();
@@ -311,7 +308,6 @@ impl GtkModelUpdaterInt {
             let mut g_o = (*self.g_o_a).write().unwrap();
             g_o.set_block_tree_updates(tree_idx, false);
         }
-        // debug!("update_tree_model_partial END  {:?} ", path);
     }
 
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back

@@ -84,7 +84,7 @@ pub trait IContentList {
     // check if the old subs_id has changed before
     fn update_message_list_(&self, subscription_id: isize);
 
-    /// Read from db and put into the list view,
+    /// Read from db and put into the list view
     fn update_messagelist_only(&self /*, feed_source_id: isize*/);
 
     ///  Vec < list_position,   feed_content_id >
@@ -149,7 +149,7 @@ pub struct FeedContents {
     msg_filter: Option<String>,
     ///  subscription-id, number-of-lines, is_folder
     current_subscription: RefCell<(isize, isize, bool)>,
-    currently_minimized: bool,
+    window_minimized: bool,
 }
 
 impl FeedContents {
@@ -181,7 +181,7 @@ impl FeedContents {
             msg_state: Default::default(),
             msg_filter: None,
             current_subscription: RefCell::new((-1, -1, false)),
-            currently_minimized: false,
+            window_minimized: false,
             downloader_r: dl_r,
         }
     }
@@ -1018,7 +1018,7 @@ impl IContentList for FeedContents {
     }
 
     fn memory_conserve(&mut self, act: bool) {
-        self.currently_minimized = act;
+        self.window_minimized = act;
         if act {
             self.msg_state.write().unwrap().clear();
         } else {
@@ -1065,7 +1065,7 @@ impl StartupWithAppContext for FeedContents {
         {
             let mut t = (*self.timer_r).borrow_mut();
             t.register(&TimerEvent::Timer100ms, feedcontents_r.clone(), true);
-            t.register(&TimerEvent::Timer10s, feedcontents_r, true);
+            t.register(&TimerEvent::Timer2s, feedcontents_r, true);
         }
 
         if let Some(s) = (*self.configmanager_r)
@@ -1081,8 +1081,8 @@ impl StartupWithAppContext for FeedContents {
 
 impl TimerReceiver for FeedContents {
     fn trigger_mut(&mut self, event: &TimerEvent) {
-        if self.currently_minimized {
-            if event == &TimerEvent::Timer10s {
+        if self.window_minimized {
+            if event == &TimerEvent::Timer2s {
                 self.process_jobs();
             }
         } else if event == &TimerEvent::Timer100ms {

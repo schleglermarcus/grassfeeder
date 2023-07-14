@@ -175,7 +175,7 @@ impl GuiProcessor {
                         let ev_ident = (Instant::now(), format!("{:?}", &ev));
                         handler_b.handle(ev, self);
                         let elapsed_m = ev_ident.0.elapsed().as_millis();
-                        if elapsed_m > 160 {
+                        if elapsed_m > 200 {
                             debug!("EV  {}   took {:?}", ev_ident.1, elapsed_m);
                         }
                     } else {
@@ -786,16 +786,11 @@ struct HandleTreeRowActivated(
 impl HandleSingleEvent for HandleTreeRowActivated {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::TreeRowActivated(_tree_idx, ref path_u16, subs_id) = ev {
-            // trace!("TreeRowActivated : {:?} {:?} ", subs_id, path_u16);
             let statemap_rc = (*self.2).borrow().get_state_map();
             if let Some(subs_map) = statemap_rc.borrow().get_state(subs_id as isize) {
                 if let Some(tp) = subs_map.tree_path {
                     if tp != *path_u16 {
-                        debug!(
-                            "TreeRowActivated : {:?}   unequal STATE_PATH: {:?} ",
-                            subs_id,
-                            tp
-                        );
+                        warn!("TreeRowActivated {:?}   {:?}!={:?} ", subs_id, tp, path_u16);
                         return;
                     }
                 }

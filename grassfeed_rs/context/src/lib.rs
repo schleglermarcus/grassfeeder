@@ -32,6 +32,7 @@ pub trait StartupWithAppContext {
 pub enum TimerEvent {
     Timer100s = 0,
     Timer10s,
+    Timer2s,
     Timer1s,
     Timer200ms,
     Timer100ms,
@@ -44,9 +45,10 @@ pub enum TimerEvent {
     None,
 }
 
-pub const TIMER_EVENT_TABLE: [(TimerEvent, u64); 11] = [
+pub const TIMER_EVENT_TABLE: [(TimerEvent, u64); 12] = [
     (TimerEvent::Timer100s, 100000),
     (TimerEvent::Timer10s, 10000),
+    (TimerEvent::Timer2s, 2000),
     (TimerEvent::Timer1s, 1000),
     (TimerEvent::Timer200ms, 200),
     (TimerEvent::Timer100ms, 100),

@@ -16,7 +16,6 @@ pub const MOUSE_BUTTON_MID: u32 = 2;
 pub const MOUSE_BUTTON_RIGHT: u32 = 3;
 pub const MOUSE_BUTTON_LEFT: u32 = 1;
 
-// pub const ICON_SIZE : i32 = 24;
 pub const DIALOG_ICON_SIZE: i32 = 24;
 
 pub struct EvSenderWrapper(pub Sender<GuiEvents>);
@@ -42,12 +41,11 @@ pub struct DragState {
     pub inserted: Option<Vec<u16>>, //  ID not delivered on drag
     pub deleted: Option<Vec<u16>>,
     pub drag_start_path: Option<TreePath>,
-    // pub in_store_update: bool,
 }
 
 impl DragState {
     pub fn block_row_activated(&self) -> bool {
-        self.drag_start_path.is_some()  // || self.in_store_update
+        self.drag_start_path.is_some()
     }
 }
 

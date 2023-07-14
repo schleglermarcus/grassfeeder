@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.0.2226"
+version = "0.0.2229"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -31,6 +31,11 @@ fern = { version = ">=0.6", features = ["colored", "chrono"] }
 opt-level = 's' # Optimize for size.
 lto = true      # Enable Link Time Optimization
 strip = true    # Strip symbols from binary*
+
+[profile.dev]
+opt-level = 1
+lto = false
+strip = false
 
 
 [package.metadata.deb]

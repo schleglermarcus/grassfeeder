@@ -1,5 +1,6 @@
+- Aggregate View:  use favorite colum for subscription icon
 
-
+- Database Check with separate Dialog
 
 - Test icon extraction with https://www.greyblake.com/blog/property-based-testing-in-rust-with-arbitrary/
 

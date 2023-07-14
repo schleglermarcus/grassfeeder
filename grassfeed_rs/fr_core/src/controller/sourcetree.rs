@@ -98,10 +98,6 @@ pub enum SJob {
     StoreFeedCreateUpdate(isize, i64, i64),
     ///  feed-url,  Display-Name, icon-id, Feed-Homepage
     NewFeedSourceEdit(String, String, isize, String),
-
-    /// subscription_id  - setting window title
-    //  SetSelectedFeedSource(isize),
-
     /// subscription_id, content_repo_id
     UpdateLastSelectedMessageId(isize, isize),
     UpdateTreePaths,
@@ -298,7 +294,6 @@ impl SourceTreeController {
                 }
 
                 // SJob::SetSelectedFeedSource(src_repo_id) => {                    self.set_selected_feedsource(src_repo_id)                }
-
                 SJob::UpdateLastSelectedMessageId(fs_id, fc_id) => {
                     (*self.subscriptionrepo_r)
                         .borrow()
