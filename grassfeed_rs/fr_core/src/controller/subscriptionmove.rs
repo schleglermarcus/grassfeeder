@@ -311,7 +311,7 @@ impl ISubscriptionMove for SubscriptionMove {
         if !to_path_parent.is_empty() {
             to_path_parent.pop();
         };
-        let mut from_entry_id : isize= -1;
+        let mut from_entry_id: isize = -1;
         match self.drag_calc_positions(&from_path, &to_path) {
             Ok((from_entry, to_parent_id, to_folderpos)) => {
                 from_entry_id = from_entry.subs_id;
@@ -326,7 +326,6 @@ impl ISubscriptionMove for SubscriptionMove {
             }
             Err(msg) => {
                 warn!("DragFail: {:?}=>{:?} --> {} ", from_path, to_path, msg);
-                //  (*self.subscriptionrepo_r)                    .borrow()                    .debug_dump_tree("DragFail");
             }
         }
         if let Some(subs_w) = self.feedsources_w.upgrade() {
@@ -379,7 +378,6 @@ impl ISubscriptionMove for SubscriptionMove {
     /// returns  source_repo_id
     fn add_new_folder(&mut self, folder_name: String) -> isize {
         let mut new_parent_id = 0;
-        // trace!(            "add_new_folder   curr={:?}",            self.current_new_folder_parent_id        );
         if self.current_new_folder_parent_id.is_some() {
             new_parent_id = self.current_new_folder_parent_id.take().unwrap();
         }

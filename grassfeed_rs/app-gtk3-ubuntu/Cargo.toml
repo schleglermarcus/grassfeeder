@@ -17,12 +17,12 @@ gui_layer = { path = "../gui_layer" }
 context = { path = "../context" }
 fr_core = { path = "../fr_core", features = ["ui_gtk", "fr_gtk"] }
 resources = { path = "../resources" }
-xdg = ">=2.4.1"
 gumdrop = ">=0.8.1"
 log = ">=0.4.10"
 once_cell = ">=1.12.0"
 rust-i18n = "1.1.1"                                                # 1.1.4 seems to attract files from outside
 fern = { version = ">=0.6", features = ["colored", "chrono"] }
+directories = ">=5.0.1"
 
 
 [profile.release]

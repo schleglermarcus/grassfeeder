@@ -1,4 +1,4 @@
-extern crate xdg;
+// extern crate xdg;
 #[macro_use]
 extern crate rust_i18n;
 
@@ -16,23 +16,8 @@ use log::{debug, error, info, trace, warn};
 i18n!("../resources/locales");
 
 fn main() {
-    let xdg_dirs = xdg::BaseDirectories::with_prefix(APP_NAME).unwrap();
-    let conf: String = xdg_dirs
-        .get_config_home()
-        .as_path()
-        .to_str()
-        .unwrap()
-        .to_string();
-    let cache: String = xdg_dirs
-        .get_cache_home()
-        .as_path()
-        .to_str()
-        .unwrap()
-        .to_string();
-
-    //  let version_str = env!("CARGO_PKG_VERSION").to_string();
+    let (conf, cache) = args_lang::get_dirs_conf_cache();
     let version_str = VERSION;
-
     let o_opts = args_lang::parse_args(&version_str);
     let mut debug_level = 0;
     if o_opts.is_none() {

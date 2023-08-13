@@ -1,7 +1,8 @@
-grassfeeder-gtk3 (0.0.2229) jammy; urgency=low
+grassfeeder-gtk3 (0.0.2231) jammy; urgency=low
 
   * Speeding up the web page display by pre-loading the pages in second webView
   * Requesting more subscriptions while being minimized
+  * Libraries update
   * Bugfix: Tree cursor jumped after moving a subscription entry. Fixed by setting the cursor on moved item.
   
   

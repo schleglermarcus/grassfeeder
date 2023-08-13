@@ -1,10 +1,10 @@
+use directories::BaseDirs;
 use gumdrop::Options;
 use resources::application_id::*;
 
 const CARGO_PKG_DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 
 const LOCALES_LIST: [&str; 2] = ["en", "de"]; // later into environment variable ?
-
 
 #[derive(Debug, Options)]
 pub struct MyOptions {
@@ -20,9 +20,8 @@ pub struct MyOptions {
     #[options(help = "Language selection.")]
     lang: Option<String>,
 
-	#[options(help = "Databases consistency check")]
+    #[options(help = "Databases consistency check")]
     pub check: bool,
-
 }
 
 /// 1. Set the desired language, if available
@@ -64,7 +63,7 @@ pub fn parse_args(version_str: &str) -> Option<MyOptions> {
     }
     let opts = o_opts.unwrap();
     if opts.help_requested() {
-        println!("{} ", MyOptions::usage());  //  gumdrop 0.8   has  self_usage() 
+        println!("{} ", MyOptions::usage()); //  gumdrop 0.8   has  self_usage()
         println!("\t\t\tAvailable Languages: {:?}", LOCALES_LIST,);
         return None;
     }
@@ -78,3 +77,21 @@ pub fn parse_args(version_str: &str) -> Option<MyOptions> {
     let _selected_lang = init_locales(opts.lang.clone());
     Some(opts)
 }
+
+pub fn get_dirs_conf_cache() -> (String, String) {
+    let mut username: String = String::from("none");
+    if let Ok(un) = std::env::var("USER") {
+        username = un;
+    }
+    let homedir: String = format!("/home/{}", username);
+    let mut conf = format!("{}/.config/{}/ ", homedir, APP_NAME);
+    let mut cache = format!("{}/.cache/{}/", homedir, APP_NAME);
+    if let Some(base_dirs) = BaseDirs::new() {
+        let d_o: String = base_dirs.config_dir().to_str().unwrap().to_string();
+        conf = format!("{}/{}/", d_o, APP_NAME);
+        let d_a: String = base_dirs.cache_dir().to_str().unwrap().to_string();
+        cache = format!("{}/{}/", d_a, APP_NAME);
+    }
+    (conf, cache)
+}
+

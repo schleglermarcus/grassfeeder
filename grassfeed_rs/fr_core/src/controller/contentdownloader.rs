@@ -42,7 +42,7 @@ use std::collections::VecDeque;
 use std::rc::Rc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::Arc;
+use std::sync::Arc; 
 use std::sync::RwLock;
 use std::thread;
 use std::time::Duration;
@@ -69,7 +69,6 @@ pub trait IDownloader {
     fn get_queue_size(&self) -> usize;
     fn browser_drag_request(&self, dragged_url: &str);
     fn launch_webbrowser(&self, url: String, cl_id: isize, list_pos: u32);
-
     fn get_statistics(&self) -> [u32; DLKIND_MAX];
 }
 

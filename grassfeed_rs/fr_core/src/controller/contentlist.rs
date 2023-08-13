@@ -300,7 +300,6 @@ impl FeedContents {
             4 => {
                 let o_before_earliest_unread_id =
                     self.msg_state.read().unwrap().find_before_earliest_unread();
-                // trace!(                    "BeforeOldestUnread {}  earliest:{:?} ",                    fp,                    o_before_earliest_unread_id                );
                 if let Some(id) = o_before_earliest_unread_id {
                     self.set_cursor_to_message(id);
                 }
@@ -974,10 +973,12 @@ impl IContentList for FeedContents {
         };
         let (last_subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         if last_subs_id <= 0 {
+            trace!("move_list_cursor last_subs_id={} ", last_subs_id);
             return;
         }
         let selected = self.list_selected_ids.read().unwrap().clone();
         if selected.is_empty() {
+            trace!("move_list_cursor selected:none! ");
             return;
         }
         let first_selected_msg: isize = selected[0] as isize;
@@ -987,7 +988,6 @@ impl IContentList for FeedContents {
             .read()
             .unwrap()
             .find_unread_message(first_selected_msg, select_later);
-        // trace!("move_list_cursor: dest_ids= {:?} ", o_dest_subs_id);
         if let Some((dest_id, next_dest_id)) = o_dest_subs_id {
             (*self.gui_updater).borrow().list_set_cursor(
                 TREEVIEW1,
@@ -995,6 +995,7 @@ impl IContentList for FeedContents {
                 LIST0_COL_MSG_ID,
                 LIST_SCROLL_POS,
             );
+            // trace!("move_list_cursor dest_id: {} ", dest_id);
             let o_co_au_ca = self.get_msg_content_author_categories(next_dest_id, None);
             (*self.browserpane_r)
                 .borrow()
@@ -1020,13 +1021,15 @@ impl IContentList for FeedContents {
     fn memory_conserve(&mut self, act: bool) {
         self.window_minimized = act;
         if act {
-            self.msg_state.write().unwrap().clear();
+            // self.msg_state.write().unwrap().clear();
         } else {
-            self.fill_state_map(&Vec::default());
-            let (_, _, isfolder) = *self.current_subscription.borrow();
-            if isfolder {
-                self.addjob(CJob::UpdateMessageList); // when folder is selected, we would have no messages synced else
-            }
+            // self.fill_state_map(&Vec::default());
+            /*
+                        let (_, _, isfolder) = *self.current_subscription.borrow();
+                        if isfolder {
+                            self.addjob(CJob::UpdateMessageList); // when folder is selected, we would have no messages synced else
+                        }
+            */
             self.addjob(CJob::ListSetCursorToPolicy);
         }
     }

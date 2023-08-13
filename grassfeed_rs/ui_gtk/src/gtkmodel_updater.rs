@@ -380,8 +380,6 @@ impl GtkModelUpdaterInt {
         list_length: usize,
         updatemode: UpdateListMode,
     ) {
-        let now = std::time::Instant::now();
-        debug!("u_list_pg      {listpos_start} {list_length} {updatemode:?} ");
         let g_o = (*self.g_o_a).read().unwrap();
         let o_list_store = g_o.get_list_store(list_index as usize);
         assert!(o_list_store.is_some());
@@ -414,13 +412,6 @@ impl GtkModelUpdaterInt {
                 list_store.set_sort_column_id(sort_col, sort_type);
             }
             list_view.set_model(Some(list_store));
-        }
-        let elapsed = now.elapsed().as_millis();
-        if elapsed > 100 {
-            debug!(
-                "update_list_model_paginated took {:?}ms #lines:{} ",
-                elapsed, num_lines
-            );
         }
     }
 
@@ -541,7 +532,6 @@ impl GtkModelUpdaterInt {
     // This contains a workaround for:  WebView hangs occasionally on some feed contents.
     // return false if webView hangs
     pub fn update_web_view(&self, idx: u8) -> bool {
-        // let webviewtext_index = 0;
         let g_o = (*self.g_o_a).read().unwrap();
         if let Some(webview) = g_o.get_web_view(idx) {
             if webview.is_loading() {
@@ -682,7 +672,6 @@ impl GtkModelUpdaterInt {
             }
         }
         if let Some(t_path) = matching_path {
-            // trace!(                "list_set_cursor :  {:?} scroll: {}",                &t_path.indices(),                scroll_pos            );
             let focus_column: Option<&TreeViewColumn> = None;
             (*treeview).set_cursor(&t_path, focus_column, false);
             if scroll_pos >= 0 {
@@ -694,6 +683,11 @@ impl GtkModelUpdaterInt {
                     0.0,
                 );
             }
+        } else {
+            warn!(
+                "list_set_cursor :  no-matching-path {:?} for db-id {}",
+                matching_path, db_id
+            );
         }
     }
 

@@ -37,10 +37,8 @@ UNPACK="../target/${PKGNAME}-${VERSION}.tar.gz"
 (cd $WORKDIR ;  cat  ../../../$UNPACK |gzip -d |tar x )
 mkdir $WORKDIR/debian
 cp -v assets/changelog.txt $WORKDIR/debian/changelog
-
 mkdir $WORKDIR/debian/source
 echo "1.0" >$WORKDIR/debian/source/format
-
 CT=${WORKDIR}/debian/control
 echo "Source: $PKGNAME" >$CT
 echo "Section: $SECTION" >>$CT
@@ -51,8 +49,8 @@ echo "" >>$CT
 echo "Package: $PKGNAME"  >>$CT
 echo "Architecture: $ARCHITECTURE"  >>$CT
 cat assets/deb-control.txt |egrep  "Depends:"  |head -n1  >>$CT
-cp -vR $CT debian/
-
+# echo "####### PWD=`pwd`    WORKDIR=$WORKDIR  #### cp -vR $CT debian/  "
+# cp -vR $CT debian/
 R="debian/rules"
 (cd $WORKDIR ;   echo "#!/usr/bin/make -f" >$R )
 (cd $WORKDIR ;   echo "">>$R )
