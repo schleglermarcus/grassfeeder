@@ -1,7 +1,6 @@
-Wed, 21 Jun 2023 00:00:00 +0000
+Sun, 27 Aug 2023 20:00:00 +0000
 * Speeding up the web page display by pre-loading the pages in second webView
 * Requesting more subscriptions while being minimized
-* Libraries update
 * removed Package   xdg, get rid of windows library for linux build. Replaced by Package "directories".
+* Libraries update
 * Bugfix: Tree cursor jumped after moving a subscription entry. Fixed by setting the cursor on moved item.
-

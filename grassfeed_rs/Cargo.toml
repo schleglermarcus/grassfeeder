@@ -8,6 +8,8 @@ members = [
   "fr_core",
 
 ]
+resolver = "2"
+
 
 exclude = [
   "testing",

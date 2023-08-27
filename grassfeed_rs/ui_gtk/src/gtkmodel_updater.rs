@@ -362,7 +362,7 @@ impl GtkModelUpdaterInt {
         }
         list_view.set_model(Some(list_store));
         let elapsed = now.elapsed().as_millis();
-        if elapsed > 100 {
+        if elapsed > 150 {
             debug!(
                 "update_list_model took {:?}ms #lines:{} ",
                 elapsed, num_lines
@@ -388,7 +388,6 @@ impl GtkModelUpdaterInt {
         assert!(o_list_view.is_some());
         let list_view: &TreeView = o_list_view.unwrap();
         let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
-
         let o_last_sort_column_id: Option<(SortColumn, SortType)> = list_store.sort_column_id();
         if updatemode == UpdateListMode::FirstPart {
             let empty_view_option: Option<&ListStore> = None;

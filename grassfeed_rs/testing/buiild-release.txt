@@ -1,0 +1,24 @@
+* Get the branch and test it:
+  git clone -b  v0_0_5  https://github.com/schleglermarcus/grassfeeder gf-v005
+
+
+* Merge Branch and build release
+  git checkout main
+  git merge origin/v0_0_3
+  git commit
+  git push origin main
+  (cd grassfeed_rs/app-gtk3-linux/ ; ./debian-stage2.sh )
+  (grassfeed_rs/app-gtk3-ubuntu/ ; ./deb-sign.sh )
+
+
+* Put the work folder back to main
+git checkout main ;    git pull ;  git status
+
+
+* Create new Branch
+	git branch v0_0_4
+	git checkout v0_0_4
+  git push -u origin v0_0_4
+  git branch --set-upstream-to=origin/v0_0_4 v0_0_4
+
+
