@@ -116,23 +116,6 @@ https://distrowatch.com/table.php?distribution=mint
 
 
 
-
-
-#  gpg --fingerprint schleglermarcus@posteo.de
-gpg: Die Benutzung der Hashmethode SHA256 ist im --compliance=pgp6 Modus nicht erlaubt.
-gpg: Diese Botschaft könnte für PGP 6.x unbrauchbar sein
-pub   rsa4096 2022-11-12 [SC] [verfällt: 2024-11-11]
-      2457 9093 9B8F D40D C29D  0EF9 C28E BCE0 F940 E69F
-uid        [uneingeschränkt] schleglermarcus <schleglermarcus@posteo.de>
-
-#  gpg --keyserver keyserver.ubuntu.com --send-keys "2457 9093 9B8F D40D C29D  0EF9 C28E BCE0 F940 E69F"
-gpg: Die Benutzung der Hashmethode SHA256 ist im --compliance=pgp6 Modus nicht erlaubt.
-gpg: Diese Botschaft könnte für PGP 6.x unbrauchbar sein
-gpg: sende Schlüssel C28EBCE0F940E69F auf hkp://keyserver.ubuntu.com
-
-
-
-
 ------ dylib
 https://prog.world/building-and-using-dynamic-link-libraries-in-rust/
 https://zicklag.github.io/rust-tutorials/rust-plugins.html
