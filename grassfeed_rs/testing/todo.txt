@@ -16,8 +16,10 @@ Later:
 - GTK4: block multiple instances
 - GTK4: process both sets of cmd parameters:   application   AND gtk, see runner_internal
 	https://docs.gtk.org/gio/method.Application.run.html
-- Use different app-indicator  lib
-- Systray Icon integration
+- gtk_objects  with arc-mutex instead of arc-rwlock, due to clippy warning
+
+- Systray Icon integration, Use different app-indicator  lib
+
 
 
 - Alternatives for Gui:

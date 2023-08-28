@@ -116,7 +116,6 @@ pub trait UIAdapterValueStore {
     fn replace_tree_item(&mut self, path: &[u16], treevalues: &[AValue]);
     fn clear_tree(&mut self, tree_index: u8);
 
-
     ///  insert a new list item
     fn insert_list_item(&mut self, list_index: u8, list_position: i32, values: &[AValue]);
     fn clear_list(&mut self, list_index: u8);

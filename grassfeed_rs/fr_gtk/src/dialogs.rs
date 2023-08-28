@@ -1014,11 +1014,9 @@ fn create_about_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
     let pb: Pixbuf = IconLoader::vec_to_pixbuf(&buf).unwrap();
     dialog.set_logo(Some(&pb));
     dialog.set_transient_for((*gtk_obj_a).read().unwrap().get_window().as_ref());
-    dialog.connect_response(move |dialog, resp_t| {
-        if resp_t == ResponseType::Ok {}
+    dialog.connect_response(move |dialog, _r_type| {
         dialog.hide();
     });
-
     dialog.connect_delete_event(|dia, _| {
         dia.hide();
         gtk::Inhibit(true)

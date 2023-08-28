@@ -42,7 +42,7 @@ use std::collections::VecDeque;
 use std::rc::Rc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::Arc; 
+use std::sync::Arc;
 use std::sync::RwLock;
 use std::thread;
 use std::time::Duration;

@@ -61,7 +61,7 @@ fn generate_icons() {
     });
     lines.push("];\n\n".to_string());
     names.iter().enumerate().for_each(|(i, n)| {
-        let n_r = n.replacen("ICON_", "IDX_",1);
+        let n_r = n.replacen("ICON_", "IDX_", 1);
         lines.push(format!("pub const {}: usize = {};", n_r, i));
     });
     lines.push("\n".to_string());

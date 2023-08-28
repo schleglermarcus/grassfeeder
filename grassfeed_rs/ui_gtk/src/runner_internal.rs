@@ -59,6 +59,8 @@ pub struct GtkRunnerInternal {
 }
 
 impl GtkRunnerInternal {
+    // later: check if we change this from rwlock to mutex
+    #[allow(clippy::arc_with_non_send_sync)]
     pub fn new(ev_se: Sender<GuiEvents>) -> GtkRunnerInternal {
         GtkRunnerInternal {
             gui_event_sender: ev_se,

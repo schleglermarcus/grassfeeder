@@ -397,14 +397,21 @@ impl GtkModelUpdaterInt {
             }
             list_store.clear();
         }
-        let mut num_lines = 0;
+        // let mut num_lines = 0;
         let listpos_end = listpos_start + list_length;
-        for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
+
+        for (num_lines, row) in (self.m_v_store)
+            .read()
+            .unwrap()
+            .get_list_iter(list_index)
+            .enumerate()
+        {
+            // for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
             if num_lines >= listpos_start && num_lines < listpos_end {
                 let append_iter = list_store.insert(-1);
                 Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbuf_cache);
             }
-            num_lines += 1;
+            // num_lines += 1;
         }
         if updatemode == UpdateListMode::LastPart {
             if let Some((sort_col, sort_type)) = o_last_sort_column_id {

@@ -25,6 +25,8 @@ use std::sync::RwLock;
 use webkit2gtk::WebContext;
 use webkit2gtk::WebView;
 
+// warning: usage of an `Arc` that is not `Send` or `Sync`
+//   the trait `Send` is not implemented for `RwLock<GtkObjectsImpl>`
 pub type GtkObjectsType = Arc<RwLock<dyn GtkObjects>>;
 pub type GtkBuilderType = Arc<Box<dyn GtkGuiBuilder + Send + Sync + 'static>>;
 
@@ -193,7 +195,6 @@ pub trait GtkObjects {
 
     fn set_block_tree_updates(&mut self, idx: u8, block: bool);
     fn get_block_tree_updates(&self, idx: u8) -> bool;
-
 }
 
 #[derive(Clone, Debug)]
