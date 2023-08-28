@@ -1,4 +1,3 @@
-use directories::BaseDirs;
 use gumdrop::Options;
 use resources::application_id::*;
 
@@ -83,15 +82,19 @@ pub fn get_dirs_conf_cache() -> (String, String) {
     if let Ok(un) = std::env::var("USER") {
         username = un;
     }
-    let homedir: String = format!("/home/{}", username);
-    let mut conf = format!("{}/.config/{}/ ", homedir, APP_NAME);
+    let mut homedir: String = format!("/home/{}", username);
+    if let Ok(s) = std::env::var("HOME") {
+        homedir = s;
+    }
+    let mut conf = format!("{}/.config/{}/", homedir, APP_NAME);
     let mut cache = format!("{}/.cache/{}/", homedir, APP_NAME);
-    if let Some(base_dirs) = BaseDirs::new() {
-        let d_o: String = base_dirs.config_dir().to_str().unwrap().to_string();
-        conf = format!("{}/{}/", d_o, APP_NAME);
-        let d_a: String = base_dirs.cache_dir().to_str().unwrap().to_string();
-        cache = format!("{}/{}/", d_a, APP_NAME);
+    if let Some(pb) = dirs_next::config_dir() {
+        let i_conf = pb.to_str().unwrap();
+        conf = format!("{}/{}/", i_conf, APP_NAME);
+    }
+    if let Some(pb) = dirs_next::cache_dir() {
+        let i_cache = pb.to_str().unwrap();
+        cache = format!("{}/{}/", i_cache, APP_NAME);
     }
     (conf, cache)
 }
-

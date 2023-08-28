@@ -1,6 +1,11 @@
 
-- Aggregate View:  use favorite colum for subscription icon
+- statemachine testing  with take()
+
+
 - Database Check with separate Dialog
+
+
+- Aggregate View:  use favorite colum for subscription icon
 
 - Test icon extraction with https://www.greyblake.com/blog/property-based-testing-in-rust-with-arbitrary/
 

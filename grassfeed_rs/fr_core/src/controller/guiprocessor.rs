@@ -968,7 +968,6 @@ impl HandleSingleEvent for HandleDialogData {
                         contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
                         payload.get(11).unwrap().boo().to_string(),
                     );
-
                     if let Some(systray_e) = payload.get(12) {
                         self.r_conf.borrow().set_val(
                             &PropDef::SystrayEnable.to_string(),

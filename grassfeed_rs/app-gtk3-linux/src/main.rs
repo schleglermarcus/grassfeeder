@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate rust_i18n;
+extern crate dirs_next;
 
 mod args_lang;
 
@@ -38,7 +39,7 @@ fn main() {
         return; // no gui
     }
     info!(
-        "Starting {} with {} {}  locale={:?} V={}",
+        "Starting {}  conf:'{}'  cache:'{}'  locale={:?}  V={}",
         APP_NAME,
         &conf,
         &cache,

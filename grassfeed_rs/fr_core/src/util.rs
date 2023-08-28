@@ -273,7 +273,13 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
 // --- mini state machine
 
 pub trait Step<S> {
+    /// for advancing regularly
     fn step(self: Box<Self>) -> StepResult<S>;
+
+    /// for testing the individual steps
+    fn take(self: Box<Self>) -> S {
+        unimplemented!()
+    }
 }
 
 pub enum StepResult<I> {

@@ -1,0 +1,2 @@
+Mon, 28 Aug 2023 18:00:00 +0000
+* Using dirs_next for folder lookup, need to use the large source package with windows libs due to cargo-vendor
