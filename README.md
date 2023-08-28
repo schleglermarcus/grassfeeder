@@ -20,6 +20,7 @@ RSS Feed Reader anno 2022
 ```
 sudo add-apt-repository ppa:schleglermarcus/grassfeeder
 sudo apt update
+sudo apt-get install grassfeeder-gtk3
 ```
 
 
