@@ -1,3 +1,9 @@
+grassfeeder-gtk3 (0.2.4) buster; urgency=low
+
+  * Version bump, repaired library script
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 28 Aug 2023 18:00:00 +0000
+
 grassfeeder-gtk3 (0.2.3) buster; urgency=low
 
   * Using dirs_next for folder lookup, need to use the large source package with windows libs due to cargo-vendor
