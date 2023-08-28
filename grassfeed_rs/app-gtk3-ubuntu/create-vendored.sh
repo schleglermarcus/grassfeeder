@@ -6,12 +6,17 @@
 test -f Cargo.lock && rm -rf Cargo.lock
 test -f vendor && rm -rf vendor
 cargo vendor
-find vendor/windows* -name src -type d |xargs rm -rfv
-find vendor/windows* -name lib -type d |xargs rm -rfv
-find vendor/winapi* -name lib -type d |xargs rm -rfv
-find vendor/winapi* -name src -type d |xargs rm -rfv
-find vendor/winnow -name src -type d |xargs rm -rfv
-find vendor/winnow -name examples -type d |xargs rm -rfv
+
+find vendor/windows/src      -name Windows -type d |xargs rm -rf
+find vendor/windows-sys/src  -name Windows -type d |xargs rm -rfv
+find vendor/windows-sys*     -name Windows -type d |xargs rm -rfv
+
+find vendor/windows* -name lib -type d |xargs rm -rf
+find vendor/winapi* -name lib -type d |xargs rm -rf
+
+# find vendor/winapi* -name src -type d |xargs rm -rfv
+# find vendor/winnow -name src -type d |xargs rm -rfv
+# find vendor/winnow -name examples -type d |xargs rm -rfv
 
 mv vendor sources-vendored
 tar c sources-vendored |gzip >src_vendored.tar.gz
