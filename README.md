@@ -10,9 +10,9 @@ RSS Feed Reader anno 2022
 * Translations: english, german.
 
 
-![V0.1.1 DND1](web/v011-c-a1.jpg)
-![V0.1.1 DND2](web/v011-d.jpg)
-![V0.1.1 DND3](web/v011-e.jpg)
+![DragAndDrop-1](web/v024-a2.jpg)
+![DragAndDrop-2](web/v024-b.jpg)
+![DragAndDrop-3](web/v024-c.jpg)
 ![Version 0.0.9 dark](web/screenshot-v009-dark.jpg)
 
 

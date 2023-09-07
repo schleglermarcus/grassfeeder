@@ -1,0 +1,7 @@
+Mon, 28 Aug 2023 18:00:00 +0000
+
+- mehrfaches drop einer quelle
+
+- statemachine testing  with take()
+
+- Database Check with separate Dialog

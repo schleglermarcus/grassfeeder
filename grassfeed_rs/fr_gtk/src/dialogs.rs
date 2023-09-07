@@ -251,9 +251,10 @@ pub fn create_new_subscription_dialog(
                     AValue::ASTR(f2txt),
                 ];
                 let _r = ev_se.send(GuiEvents::DialogData("new-feedsource".to_string(), payload));
+                ent1_c.buffer().set_text("");
+                ent2_c.buffer().set_text("");
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {
-                debug!("cancel-> deleting entry1 entry2");
                 ent1_c.buffer().set_text("");
                 ent2_c.buffer().set_text("");
             }
