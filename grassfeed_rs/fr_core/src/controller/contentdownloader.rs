@@ -327,7 +327,8 @@ impl IDownloader for Downloader {
         let msgrepo = MessagesRepo::new_by_connection(
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
-        let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
+        // let errors_rep =   ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
+        let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
         let new_fetch_job = FetchInner {
             fs_repo_id: f_source_repo_id,
             url: fse.url,
@@ -347,12 +348,11 @@ impl IDownloader for Downloader {
     }
 
     fn load_icon(&self, subsid: isize, feedurl: String, old_icon_id: usize) {
-        // trace!("load_icon: {} {}  ", subsid, old_icon_id);
         let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
-        let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
+        let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
         let dl_inner = IconInner {
             subs_id: subsid,
             feed_url: feedurl,
@@ -403,7 +403,7 @@ impl IDownloader for Downloader {
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
         let iconrepo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
-        let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
+        let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
         let cleaner_i = CleanerInner::new(
             self.contentlist_job_sender.as_ref().unwrap().clone(),
             self.source_c_sender.as_ref().unwrap().clone(),
@@ -449,7 +449,7 @@ impl IDownloader for Downloader {
     }
 
     fn browser_drag_request(&self, dragged_url: &str) {
-        let errors_rep = ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
+        let errors_rep =   ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
         let gp_sender: Sender<Job> = self.gp_job_sender.as_ref().unwrap().clone();
         let drag_i = DragInner::new(
             dragged_url.to_string(),

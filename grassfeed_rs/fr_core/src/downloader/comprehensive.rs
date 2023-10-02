@@ -177,10 +177,11 @@ impl Step<ComprehensiveInner> for ComprStoreIcon {
             };
             match inner.iconrepo.store_entry(&ie) {
                 Ok(entry) => {
+                    info!("compr: stored icon {} {} ", entry.icon_id, inner.icon_url);
                     inner.icon_id = entry.icon_id;
                 }
                 Err(e) => {
-                    warn!("Storing Icon from {}  failed {:?}", inner.icon_url, e);
+                    warn!("Storing Icon from {}  failed {:?} ", inner.icon_url, e);
                 }
             }
         } else {

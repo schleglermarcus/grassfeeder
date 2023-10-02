@@ -1,5 +1,11 @@
+- errors logging to Database
+
 - statemachine testing  with take()
 - Database Check with separate Dialog
+
+
+   Compiling rustls-webpki v0.101.4
+   Compiling rustls-webpki v0.100.2
 
 
 - Aggregate View:  use favorite colum for subscription icon

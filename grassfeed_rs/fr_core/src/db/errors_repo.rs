@@ -1,6 +1,9 @@
 use crate::controller::timer::Timer;
 use crate::db::message::compress;
 use crate::db::message::decompress;
+use crate::db::sqlite_context::SqliteContext;
+use crate::db::sqlite_context::TableInfo;
+use crate::db::sqlite_context::Wrap;
 use crate::util::db_time_to_display;
 use context::appcontext::AppContext;
 use context::BuildConfig;
@@ -9,21 +12,20 @@ use context::StartupWithAppContext;
 use context::TimerEvent;
 use context::TimerReceiver;
 use context::TimerRegistry;
+use rusqlite::Connection;
 use serde::Deserialize;
 use serde::Serialize;
 use std::cell::RefCell;
-use std::collections::HashMap;
-use std::fs::File;
-use std::fs::OpenOptions;
-use std::io::BufWriter;
-use std::io::Write;
 use std::rc::Rc;
 use std::sync::Arc;
-use std::sync::RwLock;
+use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "cache_folder";
 pub const FILENAME: &str = "errors.json.txt";
+
+#[deprecated]
 pub const CONV_TO: &dyn Fn(String) -> Option<ErrorEntry> = &json_to_error_entry;
+#[deprecated]
 pub const CONV_FROM: &dyn Fn(&ErrorEntry) -> Option<String> = &error_entry_to_json;
 
 ///
@@ -71,41 +73,128 @@ impl ErrorEntry {
     }
 }
 
-pub struct ErrorRepo {
-    ///  ID -> Entry
-    list_unstored: Arc<RwLock<MapAndId>>,
-    // folder_name: String,
-    unstored_list_count: RwLock<usize>,
-    list_stored: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
+impl TableInfo for ErrorEntry {
+    fn table_name() -> String {
+        "errors".to_string()
+    }
+
+    // https://www.tutorialspoint.com/sqlite/sqlite_data_types.htm
+    // INTEGER REAL  TEXT  BLOB		BOOLEAN
+    fn create_string() -> String {
+        String::from(
+            "err_id  INTEGER  PRIMARY KEY, subs_id  INTEGER, date  INTEGER, err_code  INTEGER,  \
+		remote_address TEXT, err_text TEXT ",
+        )
+    }
+
+    fn create_indices() -> Vec<String> {
+        vec![
+            "CREATE INDEX IF NOT EXISTS idx_err_id  ON errors (err_id) ; ".to_string(),
+            "CREATE INDEX IF NOT EXISTS idx_subs_id ON errors (subs_id) ; ".to_string(),
+        ]
+    }
+
+    fn index_column_name() -> String {
+        "err_id".to_string()
+    }
+
+    fn get_insert_columns(&self) -> Vec<String> {
+        vec![
+            String::from("err_id"), // 1
+            String::from("subs_id"),
+            String::from("date"),
+            String::from("err_code"), // 5
+            String::from("remote_address"),
+            String::from("err_text"),
+        ]
+    }
+
+    fn get_insert_values(&self) -> Vec<Wrap> {
+        vec![
+            Wrap::INT(self.err_id), // 1
+            Wrap::INT(self.subs_id),
+            Wrap::I64(self.date),
+            Wrap::INT(self.err_code),
+            Wrap::STR(self.remote_address.clone()), // 5
+            Wrap::STR(self.text.clone()),
+        ]
+    }
+
+    fn from_row(row: &rusqlite::Row) -> Self {
+        ErrorEntry {
+            err_id: row.get(0).unwrap(),
+            subs_id: row.get(1).unwrap(),
+            date: row.get(2).unwrap(),
+            err_code: row.get(3).unwrap(),
+            remote_address: row.get(4).unwrap(),
+            text: row.get(5).unwrap(),
+            ..Default::default()
+        }
+    }
+
+    fn get_index_value(&self) -> isize {
+        self.err_id
+    }
 }
 
-#[derive(Default, Debug)]
-pub struct MapAndId {
-    map: HashMap<isize, ErrorEntry>,
-    highest_id: isize,
-    folder_name: String,
+pub struct ErrorRepo {
+    ctx: SqliteContext<ErrorEntry>,
+    // folder_name: String,
+    //    list_unstored: Arc<RwLock<MapAndId>>,
+    //    unstored_list_count: RwLock<usize>,
+    //    list_stored: Arc<RwLock<HashMap<isize, ErrorEntry>>>,
 }
+
+// #[derive(Default, Debug)]
+// pub struct MapAndId {
+//     map: HashMap<isize, ErrorEntry>,
+//     highest_id: isize,
+//     folder_name: String,
+// }
 
 impl ErrorRepo {
-    pub fn new(folder_name_: &str) -> Self {
+    pub fn new(folder_n: &str) -> Self {
+        let filename = ErrorRepo::filename(folder_n.clone());
+        let dbctx = SqliteContext::new(filename.to_string());
+
+        trace!("new   ErrorRepo: {} ", folder_n);
+
         ErrorRepo {
-            list_unstored: Arc::new(RwLock::new(MapAndId {
-                map: Default::default(),
-                highest_id: -1,
-                folder_name: folder_name_.to_string(),
-            })),
-            unstored_list_count: Default::default(),
-            list_stored: Arc::new(RwLock::new(HashMap::new())),
+            ctx: dbctx,
+            // folder_name: folder_n.to_string(),
+            // list_unstored: Arc::new(RwLock::new(MapAndId {
+            //     map: Default::default(),
+            //     highest_id: -1,
+            //     folder_name: folder_name_.to_string(),
+            // })),
+            // unstored_list_count: Default::default(),
+            // list_stored: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
-    pub fn by_existing_list(existing: Arc<RwLock<MapAndId>>) -> Self {
+    pub fn filename(foldername: &str) -> String {
+        format!("{foldername}errors.db")
+    }
+
+    pub fn by_connection(ex_con: Arc<Mutex<Connection>>) -> Self {
         ErrorRepo {
-            list_unstored: existing,
-            unstored_list_count: Default::default(),
-            list_stored: Arc::new(RwLock::new(HashMap::new())),
+            ctx: SqliteContext::new_by_connection(ex_con),
+            // folder_name: String::default(),
         }
     }
+
+    pub fn get_connection(&self) -> Arc<Mutex<Connection>> {
+        self.ctx.get_connection()
+    }
+
+    /*
+       pub fn by_existing_list(existing: Arc<RwLock<MapAndId>>) -> Self {
+           ErrorRepo {
+               list_unstored: existing,
+               unstored_list_count: Default::default(),
+               list_stored: Arc::new(RwLock::new(HashMap::new())),
+           }
+       }
 
     pub fn get_list(&self) -> Arc<RwLock<MapAndId>> {
         self.list_unstored.clone()
@@ -116,6 +205,8 @@ impl ErrorRepo {
         let slash = if folder.ends_with('/') { "" } else { "/" };
         format!("{folder}{slash}{FILENAME}")
     }
+
+
 
     /// make sure the file exists
     pub fn check_file(&self) -> std::io::Result<()> {
@@ -134,6 +225,7 @@ impl ErrorRepo {
         }
         self.read_stored();
     }
+
 
     pub fn check_or_store(&mut self) {
         let unstored_len = (*self.list_unstored).read().unwrap().map.len();
@@ -167,148 +259,129 @@ impl ErrorRepo {
         }
         true
     }
+    */
 
     pub fn add_error(&self, subs_id_: isize, error_code_: isize, http_url: String, msg: String) {
         let en = ErrorEntry {
             subs_id: subs_id_,
             err_code: error_code_,
-            text: msg,
+            text: msg.clone(),
             remote_address: http_url,
             date: crate::util::timestamp_now(),
             ..Default::default()
         };
-        self.store_error(&en);
-    }
 
-    pub fn store_error(&self, entry: &ErrorEntry) {
-        *self.unstored_list_count.write().unwrap() += 1;
-        let n_id = self.next_id();
-        let mut entrym = entry.clone();
-        entrym.date = crate::util::timestamp_now();
-        entrym.err_id = n_id;
-        (*self.list_unstored)
-            .write()
-            .unwrap()
-            .map
-            .insert(n_id, entrym);
-    }
-
-    pub fn next_id(&self) -> isize {
-        let mut highest_id = (*self.list_unstored).read().unwrap().highest_id;
-        if highest_id <= 0 {
-            error!("need to call startup_read");
-            return 7;
+        let _r = self.ctx.insert(&en, false);
+        if let Err(e) = _r {
+            warn!("add_error: {:?} {} {} {} ", e, subs_id_, error_code_, msg);
         }
-        highest_id += 1;
-        (*self.list_unstored).write().unwrap().highest_id = highest_id;
-        highest_id
+        // self.store_error(&en);
     }
 
-    pub fn read_stored(&self) {
-        let slist = read_from(self.filename(), CONV_TO);
-        let mut st = (*self.list_stored).write().unwrap();
-        let mut highest: isize = 9;
-        slist.into_iter().for_each(|se| {
-            highest = std::cmp::max(highest, se.err_id);
-            st.insert(se.err_id, se);
-        });
-        let highest_cur = (*self.list_unstored).read().unwrap().highest_id;
-        if highest > highest_cur {
-            (*self.list_unstored).write().unwrap().highest_id = highest;
+    /*
+        pub fn store_error(&self, entry: &ErrorEntry) {
+            *self.unstored_list_count.write().unwrap() += 1;
+            let n_id = self.next_id();
+            let mut entrym = entry.clone();
+            entrym.date = crate::util::timestamp_now();
+            entrym.err_id = n_id;
+            (*self.list_unstored)
+                .write()
+                .unwrap()
+                .map
+                .insert(n_id, entrym);
         }
-    }
 
-    fn check_stored_are_present(&self) {
-        let numstored = (*self.list_stored).read().unwrap().len();
-        if numstored == 0 {
-            self.read_stored();
+        pub fn next_id(&self) -> isize {
+            let mut highest_id = (*self.list_unstored).read().unwrap().highest_id;
+            if highest_id <= 0 {
+                error!("need to call startup_read");
+                return 7;
+            }
+            highest_id += 1;
+            (*self.list_unstored).write().unwrap().highest_id = highest_id;
+            highest_id
         }
-    }
+
+
+        pub fn read_stored(&self) {
+            let slist = read_from(self.filename(), CONV_TO);
+            let mut st = (*self.list_stored).write().unwrap();
+            let mut highest: isize = 9;
+            slist.into_iter().for_each(|se| {
+                highest = std::cmp::max(highest, se.err_id);
+                st.insert(se.err_id, se);
+            });
+            let highest_cur = (*self.list_unstored).read().unwrap().highest_id;
+            if highest > highest_cur {
+                (*self.list_unstored).write().unwrap().highest_id = highest;
+            }
+        }
+
+        fn check_stored_are_present(&self) {
+            let numstored = (*self.list_stored).read().unwrap().len();
+            if numstored == 0 {
+                self.read_stored();
+            }
+        }
+    */
 
     pub fn get_by_subscription(&self, subs_id: isize) -> Vec<ErrorEntry> {
-        self.check_stored_are_present();
-        let mut err_list: Vec<ErrorEntry> = (*self.list_stored)
-            .read()
-            .unwrap()
-            .iter()
-            .filter_map(|(_id, se)| {
-                if se.subs_id == subs_id {
-                    Some(se)
-                } else {
-                    None
+        let prepared = format!(
+            "SELECT * FROM {} WHERE subs_id={}  ORDER BY date DESC ",
+            ErrorEntry::table_name(),
+            subs_id,
+        );
+        let mut list: Vec<ErrorEntry> = Vec::default();
+        if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(&prepared) {
+            match stmt.query_map([], |row| {
+                list.push(ErrorEntry::from_row(row));
+                Ok(())
+            }) {
+                Ok(mr) => {
+                    mr.count(); // seems to be necessary
                 }
-            })
-            .cloned()
-            .collect();
-        err_list.sort_by(|a, b| b.date.cmp(&a.date));
-        err_list
+                Err(e) => error!("{} {:?}", &prepared, e),
+            }
+        }
+        list
     }
 
+    // TODO needs test
     pub fn get_last_entry(&self, subs_id: isize) -> Option<ErrorEntry> {
-        self.check_stored_are_present();
-        let mut ret_list: Vec<ErrorEntry> = (*self.list_unstored)
-            .read()
-            .unwrap()
-            .map
-            .iter()
-            .filter_map(|(_id, se)| {
-                if se.subs_id == subs_id {
-                    Some(se)
-                } else {
-                    None
-                }
-            })
-            .cloned()
-            .collect();
-        if ret_list.is_empty() {
-            self.check_stored_are_present();
-            ret_list = (*self.list_stored)
-                .read()
-                .unwrap()
-                .iter()
-                .filter_map(|(_id, se)| {
-                    if se.subs_id == subs_id {
-                        Some(se)
-                    } else {
-                        None
-                    }
-                })
-                .cloned()
-                .collect()
-        }
-        ret_list.sort_by(|a, b| a.date.cmp(&b.date));
-        ret_list.get(0).cloned()
+        let prepared = format!(
+            "SELECT * FROM {} WHERE subs_id={}  ORDER BY date DESC LIMIT 1 ",
+            ErrorEntry::table_name(),
+            subs_id,
+        );
+        let o_ee = self.ctx.get_one(prepared);
+        o_ee
     }
 
     pub fn get_all_stored_entries(&self) -> Vec<ErrorEntry> {
-        self.check_stored_are_present();
-        let ret_list: Vec<ErrorEntry> = (*self.list_stored)
-            .read()
-            .unwrap()
-            .values()
-            .cloned()
-            .collect();
-        ret_list
+        self.ctx.get_all()
     }
 
-    pub fn replace_errors_file(&self, new_errs: Vec<ErrorEntry>) {
-        let filename = self.filename();
-        let old_filename = format!("{filename}.old");
-        let r = std::fs::rename(&filename, &old_filename);
-        if r.is_err() {
-            error!("cannot rename log file: {filename} -> {old_filename}");
-            return;
-        }
-        self.store_all_to_file(new_errs, &filename);
-    }
+    /*
+       pub fn replace_errors_file(&self, new_errs: Vec<ErrorEntry>) {
+           let filename = self.filename();
+           let old_filename = format!("{filename}.old");
+           let r = std::fs::rename(&filename, &old_filename);
+           if r.is_err() {
+               error!("cannot rename log file: {filename} -> {old_filename}");
+               return;
+           }
+           self.store_all_to_file(new_errs, &filename);
+       }
 
-    pub fn store_all_to_file(&self, new_errs: Vec<ErrorEntry>, new_filename: &str) {
-        let _r = File::create(new_filename);
-        let _r = append_to_file(new_filename, new_errs.as_slice(), CONV_FROM);
-        if _r.is_err() {
-            error!("Writing to {} --> {:?}", new_filename, _r.err());
-        }
-    }
+       pub fn store_all_to_file(&self, new_errs: Vec<ErrorEntry>, new_filename: &str) {
+           let _r = File::create(new_filename);
+           let _r = append_to_file(new_filename, new_errs.as_slice(), CONV_FROM);
+           if _r.is_err() {
+               error!("Writing to {} --> {:?}", new_filename, _r.err());
+           }
+       }
+    */
 }
 
 //-------------------
@@ -334,25 +407,22 @@ impl StartupWithAppContext for ErrorRepo {
         let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
         let su_r = ac.get_rc::<ErrorRepo>().unwrap();
         {
-            (*timer_r)
-                .borrow_mut()
-                .register(&TimerEvent::Timer10s, su_r.clone(), true);
+            // (*timer_r)                .borrow_mut()                .register(&TimerEvent::Timer10s, su_r.clone(), true);
             (*timer_r)
                 .borrow_mut()
                 .register(&TimerEvent::Shutdown, su_r, true);
         }
-        self.startup_read();
+        // self.startup_read();
     }
 }
 
 impl TimerReceiver for ErrorRepo {
     fn trigger_mut(&mut self, event: &TimerEvent) {
         match event {
-            TimerEvent::Timer10s => {
-                self.check_or_store();
-            }
+            // TimerEvent::Timer10s => {                self.check_or_store();            }
             TimerEvent::Shutdown => {
-                self.check_or_store();
+                self.ctx.cache_flush();
+                // self.check_or_store();
             }
             _ => (),
         }
@@ -405,6 +475,7 @@ fn txt_to_error_entry(line: String) -> Option<ErrorEntry> {
     }
 }
 
+/*
 fn append_to_file(
     filename: &str,
     input: &[ErrorEntry],
@@ -454,6 +525,7 @@ fn read_from(
     }
     e_list
 }
+ */
 
 #[cfg(test)]
 mod t {

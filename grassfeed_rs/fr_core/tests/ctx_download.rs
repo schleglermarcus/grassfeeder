@@ -71,10 +71,8 @@ fn downloader_load_message_into_db() {
     fse.subs_id = 1;
     fse.folder_position = 0;
     let _r = f_src_repo.store_entry(&fse);
-
     let fsrc_r: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(f_src_repo));
     let icon_repo_r = Rc::new(RefCell::new(IconRepo::new("")));
-
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
     let msgrepo_r = Rc::new(RefCell::new(msgrepo));

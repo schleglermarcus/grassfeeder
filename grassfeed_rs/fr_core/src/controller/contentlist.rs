@@ -199,7 +199,6 @@ impl FeedContents {
             gen_icons::IDX_03_ICON_TRANSPARENT_48
         };
         newrow.push(AValue::IIMG(nfav as i32)); // 0
-
         newrow.push(AValue::ASTR(title_d)); // 1: message title
         if fc.entry_src_date > 0 {
             let mut displaytime = db_time_to_display(fc.entry_src_date);

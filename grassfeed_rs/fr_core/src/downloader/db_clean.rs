@@ -555,7 +555,7 @@ impl Step<CleanerInner> for CheckErrorLog {
             .filter(|se| !se.isdeleted())
             .map(|se| se.subs_id)
             .collect::<HashSet<isize>>();
-        inner.error_repo.startup_read();
+        //  inner.error_repo.startup_read();
         let list: Vec<ErrorEntry> = inner.error_repo.get_all_stored_entries();
         let num_errors_before = list.len();
         let subs_ids: Vec<isize> = parent_ids_active.into_iter().collect();
@@ -568,7 +568,11 @@ impl Step<CleanerInner> for CheckErrorLog {
                 msg
             );
             new_errors.sort_by(|a, b| a.err_id.cmp(&b.err_id));
-            inner.error_repo.replace_errors_file(new_errors);
+
+
+warn!("TODO:   remove some errors in DB !!");
+
+            // inner.error_repo.replace_errors_file(new_errors);
         }
         StepResult::Continue(Box::new(Notify(inner)))
     }

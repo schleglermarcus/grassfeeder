@@ -310,7 +310,7 @@ impl Step<IconInner> for IconStore {
             icon: inner.compressed_icon.clone(),
             ..Default::default()
         };
-        // trace!("icons-storing:  {:?} ", &ie);
+        info!("IconStore:   {:?} ", &ie);
         match inner.iconrepo.store_entry(&ie) {
             Ok(entry) => {
                 let _r = inner
