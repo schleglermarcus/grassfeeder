@@ -1,4 +1,5 @@
 use crate::controller::sourcetree::SJob;
+use crate::db::errorentry::ESRC;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
@@ -80,8 +81,9 @@ impl Step<IconInner> for FeedTextDownload {
                 inner.feed_download_text = result.content;
             }
             _ => {
-                inner.erro_repo.add_error(
+                let _r = inner.erro_repo.add_error(
                     inner.subs_id,
+                    ESRC::IconsFeedtext,
                     result.status as isize,
                     inner.feed_url.clone(),
                     result.error_description,
@@ -149,8 +151,9 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 }
                 Err(e_descr) => {
-                    inner.erro_repo.add_error(
+                    let _r = inner.erro_repo.add_error(
                         inner.subs_id,
+                        ESRC::IconsAHEx,
                         r.status as isize,
                         inner.feed_homepage.clone(),
                         e_descr,
@@ -159,8 +162,9 @@ impl Step<IconInner> for IconAnalyzeHomepage {
             },
             _ => {
                 let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
-                inner.erro_repo.add_error(
+                let _r = inner.erro_repo.add_error(
                     inner.subs_id,
+                    ESRC::IconsAHMain,
                     r.status as isize,
                     inner.feed_homepage.clone(),
                     r.error_description,
@@ -198,11 +202,12 @@ impl Step<IconInner> for IconDownload {
             }
             _ => {
                 inner.download_error_happened = true;
-                inner.erro_repo.add_error(
+                let _r = inner.erro_repo.add_error(
                     inner.subs_id,
+                    ESRC::IconsDownload,
                     r.get_status() as isize,
                     inner.icon_url.clone(),
-                    format!("kind:{}   {}", r.get_kind(), r.error_description),
+                    format!("IconDownload K:{}  {}", r.get_kind(), r.error_description),
                 );
                 StepResult::Stop(inner)
             }
@@ -225,8 +230,9 @@ impl Step<IconInner> for IconCheckIsImage {
             return StepResult::Continue(Box::new(IconDownscale(inner)));
         }
         if an_res.kind == IconKind::UnknownType || an_res.kind == IconKind::TooSmall {
-            inner.erro_repo.add_error(
+            let _r = inner.erro_repo.add_error(
                 inner.subs_id,
+                ESRC::IconsCheckimg,
                 inner.icon_bytes.len() as isize,
                 inner.icon_url.clone(),
                 an_res.message,
@@ -255,9 +261,13 @@ impl Step<IconInner> for IconDownscale {
                 r.err()
             );
             trace!("{msg}");
-            inner
-                .erro_repo
-                .add_error(inner.subs_id, 0, inner.icon_url.clone(), msg);
+            let _r = inner.erro_repo.add_error(
+                inner.subs_id,
+                ESRC::IconsDownscale,
+                0,
+                inner.icon_url.clone(),
+                msg,
+            );
             return StepResult::Stop(inner);
         }
         inner.icon_bytes = r.unwrap();

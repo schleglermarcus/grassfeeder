@@ -1,6 +1,7 @@
 use crate::controller::isourcetree::ISourceTreeController;
 use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
+use crate::db::errorentry::ESRC;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
@@ -448,9 +449,13 @@ impl ISubscriptionMove for SubscriptionMove {
         fse.parent_subs_id = parent_id;
         if was_truncated {
             let msg = format!("Found non-ISO chars in Subscription Title: {}", &display);
-            (*self.erro_repo_r)
-                .borrow()
-                .add_error(fse.subs_id, 0, newsource, msg);
+            let _r = (*self.erro_repo_r).borrow().add_error(
+                fse.subs_id,
+                ESRC::SubsmoveTruncated,
+                0,
+                newsource,
+                msg,
+            );
         }
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()

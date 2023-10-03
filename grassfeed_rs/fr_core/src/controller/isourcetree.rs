@@ -234,7 +234,14 @@ impl ISourceTreeController for SourceTreeController {
                 .borrow()
                 .get_by_subscription(src_repo_id)
                 .iter()
-                .map(|ee| ee.to_line(fse.display_name.clone()))
+                .map(|ee| {
+                    format!(
+                        " {:} {:} {:} ",
+                        ee.text,
+                        fse.display_name.clone(),
+                        ee.remote_address
+                    )
+                })
                 .collect();
             let joined = lines.join("\n");
             dd.push(AValue::ASTR(joined)); // 8
@@ -415,7 +422,7 @@ impl ISourceTreeController for SourceTreeController {
             }
 
             let activate_reloadbutton = !fse.is_folder || !child_ids.is_empty();
-            // trace!(                "isfolder{}  #childs{}  act{}  ",                fse.is_folder,                child_ids.len(),                activate_reloadbutton            );
+            // trace!(                "isfolder{}  #childs{}  act {}  ",                fse.is_folder,                child_ids.len(),                activate_reloadbutton            );
             (*self.gui_updater)
                 .borrow()
                 .toolbutton_set_sensitive(TOOLBUTTON_RELOAD_ALL, activate_reloadbutton);

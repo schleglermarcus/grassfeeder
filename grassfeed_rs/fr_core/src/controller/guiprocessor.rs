@@ -16,6 +16,7 @@ use crate::controller::subscriptionmove::SubscriptionMove;
 use crate::controller::timer::ITimer;
 use crate::controller::timer::Timer;
 use crate::controller::timer::TimerJob;
+use crate::db::errorentry;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
@@ -68,8 +69,8 @@ pub enum Job {
     NotifyConfigChanged,
     /// thread-nr,  job-kind
     DownloaderJobStarted(u8, u8),
-    /// thread-nr, job-kind, elapsed_ms , job-description
-    DownloaderJobFinished(isize, u8, u8, u32, String),
+    /// thread-nr, job-kind, elapsed_ms , job-description, remote-addr
+    DownloaderJobFinished(isize, u8, u8, u32, String, String),
     CheckFocusMarker(u8),
     AddBottomDisplayErrorMessage(String),
 }
@@ -253,14 +254,21 @@ impl GuiProcessor {
                 Job::DownloaderJobStarted(threadnr, kind) => {
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = kind;
                 }
-                Job::DownloaderJobFinished(subs_id, threadnr, _kind, elapsed_ms, description) => {
-                    // if kind == 6 {                        trace!("browser_launch:{}ms {}", elapsed_ms, &description);                    }
+                Job::DownloaderJobFinished(
+                    subs_id,
+                    threadnr,
+                    _kind,
+                    elapsed_ms,
+                    description,
+                    remote_addr,
+                ) => {
                     if elapsed_ms > 1000 && subs_id > 0 {
-                        (*self.erro_repo_r).borrow().add_error(
+                        let _r = (*self.erro_repo_r).borrow().add_error(
                             subs_id,
+                            errorentry::ESRC::GpDlFinished,
                             elapsed_ms as isize,
-                            String::default(),
-                            description,
+                            remote_addr,
+                            format!("{} T{} K{}", description, threadnr, _kind),
                         );
                     }
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = 0;

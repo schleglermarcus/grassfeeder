@@ -250,6 +250,7 @@ impl Downloader {
         let subs_id = dljob.subscription_id();
         let _r = gp_sender.send(Job::DownloaderJobStarted(proc_num, job_kind));
         let job_description = format!("{}  {:?}", std::thread::current().name().unwrap(), &dljob);
+        let job_hostname = dljob.hostname().unwrap_or_default();
         match dljob {
             DLJob::None => {}
             DLJob::Feed(i) => {
@@ -278,6 +279,7 @@ impl Downloader {
             job_kind,
             elapsedms as u32,
             job_description,
+            job_hostname,
         ));
         elapsedms as u64
     }
@@ -449,7 +451,7 @@ impl IDownloader for Downloader {
     }
 
     fn browser_drag_request(&self, dragged_url: &str) {
-        let errors_rep =   ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
+        let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
         let gp_sender: Sender<Job> = self.gp_job_sender.as_ref().unwrap().clone();
         let drag_i = DragInner::new(
             dragged_url.to_string(),

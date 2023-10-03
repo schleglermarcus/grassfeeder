@@ -73,7 +73,7 @@ impl<T: TableInfo> SqliteContext<T> {
             T::table_name(),
             T::create_string()
         );
-        self.execute(create_str);
+        let _num_rows  = self.execute(create_str);
         for cr_idx in T::create_indices() {
             self.execute(cr_idx);
         }
@@ -110,6 +110,7 @@ impl<T: TableInfo> SqliteContext<T> {
             questionmarks
         );
         // trace!("insert:{:?}=>{:?} Idx:{}", &prepared, &wrap_vec, with_index);
+        // println!("insert:{:?}=>{:?} Idx:{}", &prepared, &wrap_vec, with_index);
         let vec_dyn_tosql: Vec<&dyn ToSql> = wrap_vec
             .iter()
             .map(|w| w.to_dyn_tosql())

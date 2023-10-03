@@ -1,6 +1,6 @@
 use crate::controller::contentlist::CJob;
 use crate::controller::sourcetree::SJob;
-use crate::db::errors_repo::ErrorEntry;
+use crate::db::errorentry::ErrorEntry;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;

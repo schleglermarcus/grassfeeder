@@ -1,5 +1,6 @@
 use crate::controller::guiprocessor::Job;
 use crate::controller::sourcetree::SJob;
+use crate::db::errorentry::ESRC;
 use crate::db::errors_repo::ErrorRepo;
 use crate::downloader::util::extract_feed_from_website;
 use crate::downloader::util::go_to_homepage;
@@ -75,8 +76,9 @@ impl Step<DragInner> for BrowserEvalStart {
             return StepResult::Continue(Box::new(ParseWebpage(inner)));
         }
         inner.error_message = format!("{} {}", result.status, &result.error_description);
-        inner.erro_repo.add_error(
+        let _r = inner.erro_repo.add_error(
             -1,
+            ESRC::DragEvalstart,
             result.status as isize,
             inner.dragged_url.clone(),
             result.error_description,

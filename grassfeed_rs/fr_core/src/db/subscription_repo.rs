@@ -174,7 +174,7 @@ impl SubscriptionRepo {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(lpath);
             path.push(n as u16);
-            trace!("{}\t{:?}\t{} ", ident, path, fse);
+            trace!("{}\t{:?}  {} ", ident, path, fse);
             self.dump_tree_rec(&path, fse.subs_id, ident);
         });
     }
