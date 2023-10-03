@@ -46,8 +46,10 @@ fn t_extract_url() {
         "https://www.naturalnews.com/rss.xml",
     ) 	];
     for (filename, request_page, url) in pairs {
+
+        // TODO  in-mem 
         let erro_rep = ErrorRepo::new(&ERR_REPO_BASE.to_string());
-        erro_rep.startup_read();
+        //  erro_rep.startup_read();
         let mut drag_i = DragInner::new(
             filename.to_string(),
             stc_job_s.clone(),

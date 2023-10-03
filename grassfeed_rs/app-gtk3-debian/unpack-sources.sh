@@ -448,7 +448,6 @@ mv $F ${F}.0
 cat ${F}.0	|sed -e "s/\"0.2.60\"/\"0.2.81\" \npath=\"..\/wasm-bindgen-0.2.81\"  /" \
 	|sed -e "s/\"0.3.37\"/\"0.3.58\" \npath=\"..\/js-sys-0.3.58\" /"	\
 	>$F
-##  TODO doppelte Ersetzung !! darf nur bei js-sys wirken
 
 F=target/serde-yaml-0.8.26/Cargo.toml
 mv $F ${F}.0

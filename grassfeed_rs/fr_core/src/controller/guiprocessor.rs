@@ -16,7 +16,6 @@ use crate::controller::subscriptionmove::SubscriptionMove;
 use crate::controller::timer::ITimer;
 use crate::controller::timer::Timer;
 use crate::controller::timer::TimerJob;
-use crate::db::errorentry;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
@@ -262,13 +261,10 @@ impl GuiProcessor {
                     description,
                     remote_addr,
                 ) => {
-                    if elapsed_ms > 1000 && subs_id > 0 {
-                        let _r = (*self.erro_repo_r).borrow().add_error(
-                            subs_id,
-                            errorentry::ESRC::GpDlFinished,
-                            elapsed_ms as isize,
-                            remote_addr,
-                            format!("{} T{} K{}", description, threadnr, _kind),
+                    if elapsed_ms > 2000 && subs_id > 0 {
+                        debug!(
+                            "JF {} {} T{} K{}  {}ms    {} ",
+                            subs_id, description, threadnr, _kind, elapsed_ms, remote_addr
                         );
                     }
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = 0;
@@ -794,6 +790,14 @@ impl HandleSingleEvent for HandleTreeRowActivated {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::TreeRowActivated(_tree_idx, ref path_u16, subs_id) = ev {
             let statemap_rc = (*self.2).borrow().get_state_map();
+
+            trace!(
+                "HandleTreeRowActivated: {:?} {:?} {:?} ",
+                _tree_idx,
+                path_u16,
+                subs_id
+            );
+
             if let Some(subs_map) = statemap_rc.borrow().get_state(subs_id as isize) {
                 if let Some(tp) = subs_map.tree_path {
                     if tp != *path_u16 {

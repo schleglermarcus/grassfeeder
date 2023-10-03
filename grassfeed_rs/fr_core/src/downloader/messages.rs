@@ -24,6 +24,7 @@ use feed_rs::model::Entry;
 use feed_rs::parser::ParseFeedError;
 use flume::Sender;
 use regex::Regex;
+use std::time::Instant;
 
 pub struct FetchInner {
     pub fs_repo_id: isize,
@@ -81,17 +82,28 @@ struct DownloadStart(FetchInner);
 impl Step<FetchInner> for DownloadStart {
     fn step(self: Box<Self>) -> StepResult<FetchInner> {
         let mut inner = self.0;
+        let now = Instant::now();
         let r = (*inner.web_fetcher).request_url(inner.url.clone());
+        let elapsedms = now.elapsed().as_millis();
         match r.status {
             200 => {
                 inner.download_text = r.content;
+                if elapsedms > 1000 {
+                    let _r = inner.erro_repo.add_error(
+                        inner.fs_repo_id,
+                        ESRC::MsgDownloadTooLong,
+                        elapsedms as isize,
+                        inner.url.to_string(),
+                        String::default(),
+                    );
+                }
                 StepResult::Continue(Box::new(EvalStringAndFilter(inner)))
             }
             _ => {
                 inner.download_error_happened = true;
                 let _r = inner.erro_repo.add_error(
                     inner.fs_repo_id,
-                    ESRC::MsgDlStart,
+                    ESRC::MsgDlStartErr,
                     r.status as isize,
                     inner.url.to_string(),
                     r.error_description,

@@ -559,6 +559,9 @@ impl Step<CleanerInner> for CheckErrorLog {
         let list: Vec<ErrorEntry> = inner.error_repo.get_all_stored_entries();
         let num_errors_before = list.len();
         let subs_ids: Vec<isize> = parent_ids_active.into_iter().collect();
+
+// TODO 
+
         let (mut new_errors, msg) = filter_error_entries(&list, subs_ids);
         if new_errors.len() < num_errors_before {
             debug!(
@@ -591,6 +594,10 @@ impl Step<CleanerInner> for Notify {
                 .send(SJob::FillSubscriptionsAdapter);
         }
         StepResult::Stop(inner)
+    }
+
+    fn take(self: Box<Self>) -> CleanerInner {
+        self.0
     }
 }
 

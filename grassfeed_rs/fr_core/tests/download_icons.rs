@@ -22,7 +22,8 @@ use fr_core::TD_BASE;
 use std::io::Write;
 use std::sync::Arc;
 
-const ERRORS_FOLDER: &str = "../target/download_icons";
+// const ERRORS_FOLDER: &str = "../target/download_icons";
+// use fr_core::db::errorentry::ErrorEntry;
 
 // #[ignore]
 #[test]
@@ -152,8 +153,8 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry
         ..Default::default()
     };
     let _r = subscr_r.store_entry(&se);
-    let erro_rep = ErrorRepo::new(ERRORS_FOLDER);
-    erro_rep.startup_read();
+    let erro_rep = ErrorRepo::new_in_mem();
+    //  erro_rep.startup_read();
     let icon_inner = IconInner {
         subs_id: 1,
         feed_url: feed_url.clone(),
@@ -187,8 +188,8 @@ fn icon_too_big() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let subscr_r = SubscriptionRepo::new_inmem();
-    let erro_rep = ErrorRepo::new(ERRORS_FOLDER);
-    erro_rep.startup_read();
+    let erro_rep = ErrorRepo::new_in_mem();
+    // erro_rep.startup_read();
     let icon_inner = IconInner {
         subs_id: 1,
         feed_url: "http://lisahaven.news/feed/".to_string(),
@@ -220,8 +221,8 @@ fn stop_on_nonexistent() {
     setup(); // This test issues a stop signal upon a nonexistant icon
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let subscr_r = SubscriptionRepo::new_inmem();
-    let erro_rep = ErrorRepo::new(ERRORS_FOLDER);
-    erro_rep.startup_read();
+    let erro_rep = ErrorRepo::new_in_mem();
+    // erro_rep.startup_read();
     let dl_inner = IconInner {
         subs_id: 5,
         feed_url: "http://localhorst/none.xml".to_string(),
@@ -317,8 +318,7 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            logger_config::QuietFlags::Downloader as u64,
-            //  0,
+            logger_config::QuietFlags::Downloader as u64, //  0,
         );
         unzipper::unzip_some();
     });

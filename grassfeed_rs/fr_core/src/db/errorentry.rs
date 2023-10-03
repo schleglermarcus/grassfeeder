@@ -14,11 +14,14 @@ pub enum ESRC {
     IconsAHEx = 5,
     IconsAHMain = 6,
     IconsDownload = 7,
-    IconsCheckimg= 8,
-    IconsDownscale= 9,
-    MsgDlStart= 10,
-    MsgEvalFltEmpty= 11,
-    MsgEvalFltStrange= 12,
+    IconsCheckimg = 8,
+    IconsDownscale = 9,
+    MsgEvalFltEmpty = 11,
+    MsgEvalFltStrange = 12,
+    MsgDownloadTooLong = 13,
+    MsgDlStartErr = 14,
+    IconDLDuration = 15,
+    IconFeedTextDur = 16,
 }
 
 ///

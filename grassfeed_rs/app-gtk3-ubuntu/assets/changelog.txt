@@ -1,3 +1,23 @@
+grassfeeder-gtk3 (0.0.2405) jammy; urgency=low
+
+  - Bugfix: multiple drop of Urls caused unresponsive dialog.
+  
+  
+  - errors logging to Database, no more text file
+  
+  - statemachine testing  with take()
+  
+  
+  - watch icons creation, check when too many
+  
+  
+  - Database Check with separate Dialog
+  
+  
+  
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 28 Aug 2023 18:00:00 +0000
+
 grassfeeder-gtk3 (0.2.4) jammy; urgency=low
 
   * Version bump, repaired library script

@@ -1,16 +1,15 @@
 Mon, 28 Aug 2023 18:00:00 +0000
 - Bugfix: multiple drop of Urls caused unresponsive dialog.
 
+--> Errors logging to database
 
-- errors logging to Database, no more text file
 
 - statemachine testing  with take()
 
+- Database Check with separate Dialog
+
 
 - watch icons creation, check when too many
-
-
-- Database Check with separate Dialog
 
 
 

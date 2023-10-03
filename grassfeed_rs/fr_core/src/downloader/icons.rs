@@ -14,6 +14,7 @@ use crate::util::StepResult;
 use crate::web::WebFetcherType;
 use flume::Sender;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
+use std::time::Instant;
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;
 
@@ -75,9 +76,20 @@ struct FeedTextDownload(IconInner);
 impl Step<IconInner> for FeedTextDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
+        let now = Instant::now();
         let result = (*inner.web_fetcher).request_url(inner.feed_url.clone());
+        let elapsedms = now.elapsed().as_millis();
         match result.status {
             200 => {
+                if elapsedms > 100 {
+                    let _r = inner.erro_repo.add_error(
+                        inner.subs_id,
+                        ESRC::IconFeedTextDur,
+                        elapsedms as isize,
+                        inner.feed_url.to_string(),
+                        String::default(),
+                    );
+                }
                 inner.feed_download_text = result.content;
             }
             _ => {
@@ -194,10 +206,21 @@ struct IconDownload(IconInner);
 impl Step<IconInner> for IconDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
+        let now = Instant::now();
         let r = (*inner.web_fetcher).request_url_bin(inner.icon_url.clone());
+        let elapsedms = now.elapsed().as_millis();
         match r.status {
             200 => {
                 inner.icon_bytes = r.content_bin;
+                if elapsedms > 100 {
+                    let _r = inner.erro_repo.add_error(
+                        inner.subs_id,
+                        ESRC::IconDLDuration,
+                        elapsedms as isize,
+                        inner.icon_url.to_string(),
+                        String::default(),
+                    );
+                }
                 StepResult::Continue(Box::new(IconCheckIsImage(inner)))
             }
             _ => {
@@ -320,7 +343,7 @@ impl Step<IconInner> for IconStore {
             icon: inner.compressed_icon.clone(),
             ..Default::default()
         };
-        info!("IconStore:   {:?} ", &ie);
+        debug!("IconStore:   {:?} ", &ie);
         match inner.iconrepo.store_entry(&ie) {
             Ok(entry) => {
                 let _r = inner

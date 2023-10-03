@@ -43,6 +43,12 @@ impl ErrorRepo {
         ErrorRepo { ctx: dbctx }
     }
 
+    pub fn new_in_mem() -> Self {
+        let cx = SqliteContext::new_in_memory();
+        cx.create_table();
+        ErrorRepo { ctx: cx }
+    }
+
     pub fn filename(foldername: &str) -> String {
         format!("{foldername}errors.db")
     }
@@ -100,7 +106,6 @@ impl ErrorRepo {
         list
     }
 
-    // TODO needs test
     pub fn get_last_entry(&self, subs_id: isize) -> Option<ErrorEntry> {
         let prepared = format!(
             "SELECT * FROM {} WHERE subs_id={}  ORDER BY date DESC LIMIT 1 ",
@@ -211,20 +216,39 @@ fn txt_to_error_entry(line: String) -> Option<ErrorEntry> {
 mod t {
 
     use super::*;
+    use crate::db::errorentry::ESRC;
+
+
+// TODO :  in-mem  
 
     // RUST_BACKTRACE=1 cargo watch -s "cargo test  db::errors_repo::t::t_error_repo_store     --lib -- --exact --nocapture"
     #[test]
     fn t_error_repo_store() {
-        let e_repo = ErrorRepo::new("../target/err_rep/");
+        let e_repo = ErrorRepo::new("../target/e_rep_store/");
         let _ = e_repo.ctx.delete_table();
         e_repo.ctx.create_table();
         let r0 = e_repo.add_error(12, ESRC::NONE, 0, String::default(), String::from("E_0"));
+        assert!(r0.is_ok());
         let r1 = e_repo.add_error(12, ESRC::NONE, 0, String::default(), String::from("E_1"));
-
+        assert!(r1.is_ok());
         let subs_list = e_repo.get_by_subscription(12);
         // println!(" {:?} ", subs_list);
         assert_eq!(subs_list.len(), 2);
         assert_eq!(subs_list.get(0).unwrap().err_id, 1);
         assert_eq!(subs_list.get(1).unwrap().err_id, 2);
+    }
+
+    #[test]
+    fn t_error_repo_last() {
+        let e_repo = ErrorRepo::new("../target/e_rep_last/");
+        let _ = e_repo.ctx.delete_table();
+        e_repo.ctx.create_table();
+        let _r = e_repo.add_error(12, ESRC::NONE, 0, String::default(), String::from("E_0"));
+        std::thread::sleep(std::time::Duration::from_secs(1));
+        let timestamp1 = crate::util::timestamp_now();
+        let _r = e_repo.add_error(12, ESRC::NONE, 0, String::default(), String::from("E_1"));
+        let last_one = e_repo.get_last_entry(12).unwrap();
+        assert_eq!(last_one.err_id, 2);
+        assert_eq!(last_one.date, timestamp1);
     }
 }

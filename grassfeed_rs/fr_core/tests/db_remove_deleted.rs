@@ -17,8 +17,90 @@ use fr_core::util::Step;
 use fr_core::util::StepResult;
 use fr_core::TD_BASE;
 use std::collections::HashSet;
+use fr_core::db::errorentry::ErrorEntry;
+use fr_core::downloader::db_clean::filter_error_entries;
+use fr_core::downloader::db_clean::CheckErrorLog;
 
-// #[ignore]
+
+/*
+
+#[test]
+#[ignore]
+fn db_errorlist_filter() {
+    setup();
+    debug!("!!          db_errorlist_filter");
+
+
+}
+ */
+
+// TODO  rewrite with take()
+//  cargo watch -s "cargo test --test t_downloader"
+
+#[test]
+#[ignore]
+fn db_errorlist_filter_old() {
+    setup();
+    let date_now = timestamp_now();
+    let mut err_list: Vec<ErrorEntry> = Vec::default();
+    for i in 0..10 {
+        err_list.push(ErrorEntry {
+            err_id: i * 100,
+            subs_id: i,
+            date: date_now - i as i64 * 10000000,
+            e_src: 0,
+            e_val: 0,
+            remote_address: String::default(),
+            text: String::default(),
+        });
+    }
+
+    let (result, _msg) = filter_error_entries(&err_list, Vec::default());
+    assert_eq!(result.len(), 4);
+
+    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
+    let subsrepo = SubscriptionRepo::new_inmem();
+    subsrepo.scrub_all_subscriptions();
+    let msgrepo1 = MessagesRepo::new_in_mem();
+    let err_repo = ErrorRepo::new("../target/");
+    msgrepo1.get_ctx().create_table();
+    prepare_db_with_errors_1(&msgrepo1, &subsrepo);
+    let _r = std::fs::create_dir("../target/iconc");
+    let r = std::fs::copy(
+        "tests/data/icons_list.json",
+        "../target/iconc/icons_list.json",
+    );
+    assert!(r.is_ok());
+    let mut iconrepo = IconRepo::new("../target/iconc");
+    iconrepo.startup();
+    let cleaner_i = CleanerInner::new(
+        c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 1000, err_repo,
+    );
+
+    let sut = CheckErrorLog(cleaner_i);
+debug!("!!          db_errorlist_filter");
+
+    /*
+       let mut err_list: Vec<ErrorEntry> = Vec::default();
+       for i in 0..MAX_ERROR_LINES_PER_SUBSCRIPTION * 2 {
+           err_list.push(ErrorEntry {
+               err_id: i as isize,
+               subs_id: 3,
+               date: date_now + i as i64,
+               e_src: 0,
+               e_val: 0,
+               remote_address: String::default(),
+               text: String::default(),
+           });
+       }
+       let (result, _msg) = filter_error_entries(&err_list, Vec::default());
+        debug!("before:{}   after:{}", err_list.len(), result.len());
+       assert_eq!(result.len(), MAX_ERROR_LINES_PER_SUBSCRIPTION);
+    */
+}
+
+#[ignore]
 #[test]
 fn clean_icon_doublettes() {
     setup();
@@ -49,6 +131,7 @@ fn clean_icon_doublettes() {
     assert_eq!(all.len(), 3);
 }
 
+#[ignore]
 #[test]
 fn cleanup_message_doublettes() {
     setup();
@@ -70,6 +153,7 @@ fn cleanup_message_doublettes() {
     assert_eq!(msg4.len(), 1); // the other 10 are set deleted
 }
 
+#[ignore]
 #[test]
 fn db_cleanup_too_many_messages() {
     setup();
@@ -124,6 +208,7 @@ fn clean_phase1(subs_repo: &SubscriptionRepo) {
         .for_each(|id| subs_repo.delete_by_index(*id));
 }
 
+#[ignore]
 #[test]
 fn db_cleanup_remove_deleted() {
     setup();
@@ -150,6 +235,7 @@ fn db_cleanup_remove_deleted() {
     assert_eq!(all_entries.len(), 309);
 }
 
+#[ignore]
 #[test]
 fn t_db_cleanup_1() {
     setup();

@@ -126,8 +126,7 @@ fn prepare_subscription_move(
     mr1.subscription_id = 20;
     let _mr1id = msgrepo.insert(&mr1).unwrap() as isize;
     let msg_r_r = Rc::new(RefCell::new(msgrepo));
-    let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
-
+    let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new_in_mem() ));
     let subs_move = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r, r_error_repo);
     (subs_move, r_subscriptions_repo.clone())
 }
