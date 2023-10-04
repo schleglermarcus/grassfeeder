@@ -1,6 +1,8 @@
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::sourcetree::SJob;
+use fr_core::db::errorentry::ESRC;
 use fr_core::db::errors_repo::ErrorRepo;
+use fr_core::db::icon_repo::IconEntry;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::compress;
 use fr_core::db::message::MessageRow;
@@ -9,126 +11,54 @@ use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
+use fr_core::downloader::db_clean::CheckErrorLog;
 use fr_core::downloader::db_clean::CleanerInner;
 use fr_core::downloader::db_clean::CleanerStart;
 use fr_core::downloader::db_clean::CorrectIconsDoublettes;
+use fr_core::downloader::db_clean::RemoveNonConnectedSubscriptions;
+use fr_core::downloader::db_clean::MAX_ERROR_LINES_PER_SUBSCRIPTION;
+use fr_core::downloader::db_clean::MAX_ERROR_LINE_AGE_S;
 use fr_core::util::timestamp_now;
 use fr_core::util::Step;
 use fr_core::util::StepResult;
 use fr_core::TD_BASE;
+use std::collections::HashMap;
 use std::collections::HashSet;
-use fr_core::db::errorentry::ErrorEntry;
-use fr_core::downloader::db_clean::filter_error_entries;
-use fr_core::downloader::db_clean::CheckErrorLog;
+use std::sync::Arc;
+use std::sync::RwLock;
 
-
-/*
-
+// #[ignore]
 #[test]
-#[ignore]
-fn db_errorlist_filter() {
+fn db_cleanup_nonconnected() {
     setup();
-    debug!("!!          db_errorlist_filter");
-
-
-}
- */
-
-// TODO  rewrite with take()
-//  cargo watch -s "cargo test --test t_downloader"
-
-#[test]
-#[ignore]
-fn db_errorlist_filter_old() {
-    setup();
-    let date_now = timestamp_now();
-    let mut err_list: Vec<ErrorEntry> = Vec::default();
-    for i in 0..10 {
-        err_list.push(ErrorEntry {
-            err_id: i * 100,
-            subs_id: i,
-            date: date_now - i as i64 * 10000000,
-            e_src: 0,
-            e_val: 0,
-            remote_address: String::default(),
-            text: String::default(),
-        });
-    }
-
-    let (result, _msg) = filter_error_entries(&err_list, Vec::default());
-    assert_eq!(result.len(), 4);
-
-    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
-    let subsrepo = SubscriptionRepo::new_inmem();
-    subsrepo.scrub_all_subscriptions();
-    let msgrepo1 = MessagesRepo::new_in_mem();
-    let err_repo = ErrorRepo::new("../target/");
-    msgrepo1.get_ctx().create_table();
-    prepare_db_with_errors_1(&msgrepo1, &subsrepo);
-    let _r = std::fs::create_dir("../target/iconc");
-    let r = std::fs::copy(
-        "tests/data/icons_list.json",
-        "../target/iconc/icons_list.json",
-    );
-    assert!(r.is_ok());
-    let mut iconrepo = IconRepo::new("../target/iconc");
-    iconrepo.startup();
-    let cleaner_i = CleanerInner::new(
-        c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 1000, err_repo,
-    );
-
-    let sut = CheckErrorLog(cleaner_i);
-debug!("!!          db_errorlist_filter");
-
     /*
-       let mut err_list: Vec<ErrorEntry> = Vec::default();
-       for i in 0..MAX_ERROR_LINES_PER_SUBSCRIPTION * 2 {
-           err_list.push(ErrorEntry {
-               err_id: i as isize,
-               subs_id: 3,
-               date: date_now + i as i64,
-               e_src: 0,
-               e_val: 0,
-               remote_address: String::default(),
-               text: String::default(),
-           });
-       }
-       let (result, _msg) = filter_error_entries(&err_list, Vec::default());
-        debug!("before:{}   after:{}", err_list.len(), result.len());
-       assert_eq!(result.len(), MAX_ERROR_LINES_PER_SUBSCRIPTION);
+       let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+       let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
+       let subsrepo = SubscriptionRepo::new_inmem();
+       subsrepo.scrub_all_subscriptions();
+       let msgrepo1 = MessagesRepo::new_in_mem();
+       let err_repo = ErrorRepo::new("../target/");
+       msgrepo1.get_ctx().create_table();
+       prepare_db_with_errors_1(&msgrepo1, &subsrepo);
+       let mut iconrepo = IconRepo::new("../target/");
+       iconrepo.startup();
+       let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5, err_repo);
     */
-}
+    let cleaner_i = prepare_cleaner_inner(None);
+    prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
+    // cleaner_i.subscriptionrepo.create_table();
 
-#[ignore]
-#[test]
-fn clean_icon_doublettes() {
-    setup();
-    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
-    let subsrepo = SubscriptionRepo::new_inmem();
-    subsrepo.scrub_all_subscriptions();
-    let msgrepo1 = MessagesRepo::new_in_mem();
-    let err_repo = ErrorRepo::new("../target/");
-    msgrepo1.get_ctx().create_table();
-    prepare_db_with_errors_1(&msgrepo1, &subsrepo);
-    let _r = std::fs::create_dir("../target/iconc");
-    let r = std::fs::copy(
-        "tests/data/icons_list.json",
-        "../target/iconc/icons_list.json",
-    );
-    assert!(r.is_ok());
-    let mut iconrepo = IconRepo::new("../target/iconc");
-    iconrepo.startup();
-    let cleaner_i = CleanerInner::new(
-        c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 1000, err_repo,
-    );
-    let cib = Box::new(CorrectIconsDoublettes(cleaner_i));
-    cib.step();
-    let mut iconrepo = IconRepo::new("../target/iconc");
-    iconrepo.startup();
-    let all = iconrepo.get_all_entries();
-    assert_eq!(all.len(), 3);
+    // let msgrepo2 =        MessagesRepo::new_by_connection(cleaner_i.messagesrepo.get_ctx().get_connection());
+
+    let sut = RemoveNonConnectedSubscriptions(cleaner_i);
+    // let inner = Box::new(sut).step();  //  = StepResult::start(Box::new());
+
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+
+        let msg1 = inner.messagesrepo.get_by_src_id(5, false);
+        assert_eq!(msg1.len(), 5);
+    }
 }
 
 #[ignore]
@@ -149,29 +79,8 @@ fn cleanup_message_doublettes() {
         c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 1000, err_repo,
     );
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
-    let msg4 = inner.messgesrepo.get_by_src_id(4, false);
+    let msg4 = inner.messagesrepo.get_by_src_id(4, false);
     assert_eq!(msg4.len(), 1); // the other 10 are set deleted
-}
-
-#[ignore]
-#[test]
-fn db_cleanup_too_many_messages() {
-    setup();
-    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
-    let subsrepo = SubscriptionRepo::new_inmem();
-    subsrepo.scrub_all_subscriptions();
-    let msgrepo1 = MessagesRepo::new_in_mem();
-    let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
-    let err_repo = ErrorRepo::new("../target/");
-    msgrepo1.get_ctx().create_table();
-    prepare_db_with_errors_1(&msgrepo1, &subsrepo);
-    let mut iconrepo = IconRepo::new("../target/");
-    iconrepo.startup();
-    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5, err_repo);
-    let _inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
-    let msg1 = msgrepo2.get_by_src_id(5, false);
-    assert_eq!(msg1.len(), 5);
 }
 
 fn clean_phase1(subs_repo: &SubscriptionRepo) {
@@ -312,6 +221,163 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
     assert!(r.is_ok());
 }
 
+// ----------------------
+
+#[ignore]
+#[test]
+fn clean_icon_doublettes() {
+    setup();
+    /*
+
+       let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+       let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
+       let subsrepo = SubscriptionRepo::new_inmem();
+       subsrepo.scrub_all_subscriptions();
+       let msgrepo1 = MessagesRepo::new_in_mem();
+       let err_repo = ErrorRepo::new("../target/");
+       msgrepo1.get_ctx().create_table();
+       prepare_db_with_errors_1(&msgrepo1, &subsrepo);
+       let _r = std::fs::create_dir("../target/iconc");
+       let r = std::fs::copy(
+           "tests/data/icons_list.json",
+           "../target/iconc/icons_list.json",
+       );
+       assert!(r.is_ok());
+       let mut iconrepo = IconRepo::new("../target/iconc");
+       iconrepo.startup();
+
+       let cleaner_i = CleanerInner::new(
+           c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 1000, err_repo,
+       );
+    */
+    let cleaner_i = prepare_cleaner_inner(Some("../target/iconc"));
+
+    let sut = CorrectIconsDoublettes(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+
+        // let mut iconrepo = IconRepo::new("../target/iconc");
+        // iconrepo.startup();
+        let all = inner.iconrepo.get_all_entries();
+        assert_eq!(all.len(), 3);
+    }
+
+    // let cib = Box::new(CorrectIconsDoublettes(cleaner_i));
+    // cib.step();
+}
+
+#[ignore]
+#[test]
+fn clean_errorlist_too_old() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(None);
+    let date_now = timestamp_now();
+    let timediff: usize = MAX_ERROR_LINE_AGE_S / 5;
+    for i in 0..11 {
+        let _r = cleaner_i.error_repo.add_error_ts(
+            2,
+            ESRC::None,
+            0,
+            String::default(),
+            String::default(),
+            date_now - (i * timediff) as i64,
+        );
+    }
+    let sut = CheckErrorLog(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let list = inner.error_repo.get_by_subscription(2);
+        assert_eq!(list.len(), 6);
+    }
+}
+
+#[ignore]
+#[test]
+fn clean_errorlist_too_many() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(None);
+    let date_now = timestamp_now();
+    for i in 0..(MAX_ERROR_LINES_PER_SUBSCRIPTION * 2) {
+        let _r = cleaner_i.error_repo.add_error_ts(
+            2,
+            ESRC::None,
+            0,
+            String::default(),
+            String::default(),
+            date_now + i as i64,
+        );
+    }
+    let sut = CheckErrorLog(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let list = inner.error_repo.get_by_subscription(2);
+        assert_eq!(list.len(), MAX_ERROR_LINES_PER_SUBSCRIPTION); // retain the upper half
+        assert!(list[0].date > (date_now + MAX_ERROR_LINES_PER_SUBSCRIPTION as i64));
+    }
+}
+
+#[ignore]
+#[test]
+fn clean_errorlist_no_subscription() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(None);
+    for i in 1..9 {
+        let _r = cleaner_i.error_repo.add_error_ts(
+            (1 + i) as isize,
+            ESRC::None,
+            0,
+            String::default(),
+            String::default(),
+            0,
+        );
+    }
+    let sut = CheckErrorLog(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let list = inner.error_repo.get_all_stored_entries();
+        assert_eq!(list.len(), 4); //  	subs_ids [5, 3, 2, 4]
+    } else {
+        panic!()
+    }
+}
+
+fn prepare_cleaner_inner(copy_icons: Option<&str>) -> CleanerInner {
+    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
+    let subsrepo = SubscriptionRepo::new_inmem();
+    subsrepo.scrub_all_subscriptions();
+    let msgrepo1 = MessagesRepo::new_in_mem();
+
+    let err_repo = ErrorRepo::new_in_mem();
+    msgrepo1.get_ctx().create_table();
+    prepare_db_with_errors_1(&msgrepo1, &subsrepo);
+    let mut iconrepo: IconRepo;
+    if let Some(i_p) = copy_icons {
+        copy_icon_json(i_p); //  "../target/iconc"
+        iconrepo = IconRepo::new(i_p);
+        iconrepo.startup();
+    } else {
+        let dummy_icon_list: Arc<RwLock<HashMap<isize, IconEntry>>> =
+            Arc::new(RwLock::new(HashMap::default()));
+        iconrepo = IconRepo::by_existing_list(dummy_icon_list);
+    }
+    let cleaner_i = CleanerInner::new(
+        c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 100, err_repo,
+    );
+    cleaner_i
+}
+
+fn copy_icon_json(icn_path: &str) {
+    let _r = std::fs::create_dir(icn_path);
+    let r = std::fs::copy(
+        "tests/data/icons_list.json",
+        format!("{}/icons_list.json", icn_path),
+    );
+    assert!(r.is_ok());
+    let mut iconrepo = IconRepo::new(icn_path);
+    iconrepo.startup();
+}
+
 // ------------------------------------
 
 mod logger_config;
@@ -325,7 +391,10 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_fern_logger(logger_config::QuietFlags::Downloader as u64);
+        let _r = logger_config::setup_fern_logger(
+            // logger_config::QuietFlags::Downloader as u64
+            0,
+        );
         unzipper::unzip_some();
     });
 }

@@ -53,7 +53,7 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
     if !parent_ids_to_correct.is_empty() {
         debug!(" to_correct: {:?} {:?} ", parent_ids_to_correct, sjobs);
     }
-    let all_messages = inner.messgesrepo.get_all_messages();
+    let all_messages = inner.messagesrepo.get_all_messages();
     let count_not_deleted = all_messages.iter().filter(|m| !m.is_deleted).count();
     debug!("After cleanup  #MESSAGES= #{}", count_not_deleted);
 }

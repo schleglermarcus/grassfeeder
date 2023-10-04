@@ -6,7 +6,7 @@ use serde::Serialize;
 
 // pub const ESRC_DEFAULT: isize = 0;
 pub enum ESRC {
-    NONE = 0,
+    None = 0,
     GpDlFinished = 1,
     SubsmoveTruncated = 2,
     DragEvalstart = 3,

@@ -23,16 +23,18 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::Mutex;
 
-///  sanity in case of recursion
+///  deadlock protection in case of recursion in database
 pub const MAX_PATH_DEPTH: usize = 30;
+
 pub const MAX_ERROR_LINES_PER_SUBSCRIPTION: usize = 100;
+
 pub const MAX_ERROR_LINE_AGE_S: usize = 60 * 60 * 24 * 360;
 
 pub struct CleanerInner {
     pub cjob_sender: Sender<CJob>,
     pub sourcetree_job_sender: Sender<SJob>,
     pub subscriptionrepo: SubscriptionRepo,
-    pub messgesrepo: MessagesRepo,
+    pub messagesrepo: MessagesRepo,
     pub iconrepo: IconRepo,
     pub error_repo: ErrorRepo,
     pub fp_correct_subs_parent: Mutex<Vec<i32>>,
@@ -57,7 +59,7 @@ impl CleanerInner {
             cjob_sender: c_se,
             sourcetree_job_sender: s_se,
             subscriptionrepo: sub_re,
-            messgesrepo: msg_re,
+            messagesrepo: msg_re,
             iconrepo: ico_re,
             fp_correct_subs_parent: Mutex::new(Vec::default()),
             subs_parents_active: Mutex::new(Vec::default()),
@@ -91,21 +93,19 @@ impl CleanerStart {
 pub struct CleanerStart(pub CleanerInner);
 impl Step<CleanerInner> for CleanerStart {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
-        StepResult::Continue(Box::new(RemoveNonConnected(self.0)))
+        StepResult::Continue(Box::new(RemoveNonConnectedSubscriptions(self.0)))
     }
 }
 
-pub struct RemoveNonConnected(pub CleanerInner);
-impl Step<CleanerInner> for RemoveNonConnected {
+pub struct RemoveNonConnectedSubscriptions(pub CleanerInner);
+impl Step<CleanerInner> for RemoveNonConnectedSubscriptions {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         let all_subs = inner.subscriptionrepo.get_all_entries();
         let mut connected_child_list: HashSet<isize> = HashSet::default();
         let mut folder_work: Vec<isize> = Vec::default();
         folder_work.push(0);
-        // while !folder_work.is_empty() {
         while let Some(parent_subs_id) = folder_work.pop() {
-            // let parent_subs_id = folder_work.pop().unwrap();
             let childs = inner.subscriptionrepo.get_by_parent_repo_id(parent_subs_id);
             childs.iter().for_each(|se| {
                 connected_child_list.insert(se.subs_id);
@@ -159,6 +159,10 @@ impl Step<CleanerInner> for AnalyzeFolderPositions {
             inner.need_update_subscriptions = true;
             StepResult::Continue(Box::new(ReSortParentId(inner)))
         }
+    }
+
+    fn take(self: Box<Self>) -> CleanerInner {
+        self.0
     }
 }
 
@@ -370,6 +374,10 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
         }
         StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)))
     }
+
+    fn take(self: Box<Self>) -> CleanerInner {
+        self.0
+    }
 }
 
 pub struct MarkUnconnectedMessages(pub CleanerInner);
@@ -384,7 +392,7 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
             .map(|se| se.subs_id as i32)
             .collect();
         let noncon_ids = inner
-            .messgesrepo
+            .messagesrepo
             .get_src_not_contained(&parent_ids_active)
             .iter()
             .filter(|se| !se.is_deleted)
@@ -405,7 +413,7 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
                 );
             }
             inner.need_update_messages = true;
-            inner.messgesrepo.update_is_deleted_many(&noncon_ids, true);
+            inner.messagesrepo.update_is_deleted_many(&noncon_ids, true);
         }
 
         StepResult::Continue(Box::new(ReduceTooManyMessages(inner)))
@@ -426,7 +434,7 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 .collect::<Vec<isize>>();
             for su_id in &subs_ids {
                 let (need_u, _n_removed, _n_all, _n_unread) = reduce_too_many_messages(
-                    &inner.messgesrepo,
+                    &inner.messagesrepo,
                     inner.max_messages_per_subscription as usize,
                     *su_id,
                 );
@@ -483,7 +491,7 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
             .collect();
         for subs_id in subs_ids_active {
             let mut msglist: Vec<MessageRow> =
-                inner.messgesrepo.get_by_src_id(subs_id as isize, true);
+                inner.messagesrepo.get_by_src_id(subs_id as isize, true);
             if msglist.is_empty() {
                 continue;
             }
@@ -501,7 +509,7 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
                 let del_indices: Vec<i32> =
                     delete_list.iter().map(|m| m.message_id as i32).collect();
                 inner
-                    .messgesrepo
+                    .messagesrepo
                     .update_is_deleted_many(del_indices.as_slice(), true);
             }
         }
@@ -513,7 +521,7 @@ pub struct PurgeMessages(pub CleanerInner);
 impl Step<CleanerInner> for PurgeMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
-        let allmsg = inner.messgesrepo.get_all_messages();
+        let allmsg = inner.messagesrepo.get_all_messages();
         let all_count = allmsg.len();
         let to_delete: Vec<i32> = allmsg
             .into_iter()
@@ -525,7 +533,7 @@ impl Step<CleanerInner> for PurgeMessages {
                 }
             })
             .collect();
-        let num_deleted = inner.messgesrepo.delete_by_index(&to_delete);
+        let num_deleted = inner.messagesrepo.delete_by_index(&to_delete);
         if to_delete.len() != num_deleted {
             warn!(
                 "PurgeMessages: #all={}   TO_DELETE: {}  DELETED:{}",
@@ -555,28 +563,40 @@ impl Step<CleanerInner> for CheckErrorLog {
             .filter(|se| !se.isdeleted())
             .map(|se| se.subs_id)
             .collect::<HashSet<isize>>();
-        //  inner.error_repo.startup_read();
-        let list: Vec<ErrorEntry> = inner.error_repo.get_all_stored_entries();
-        let num_errors_before = list.len();
         let subs_ids: Vec<isize> = parent_ids_active.into_iter().collect();
+        let list: Vec<ErrorEntry> = inner.error_repo.get_all_stored_entries();
+        let mut delete_list: Vec<isize> = Vec::default();
+        list.iter()
+            .filter(|e| !subs_ids.contains(&e.subs_id))
+            .for_each(|e| delete_list.push(e.err_id));
+        let timestamp_earliest = timestamp_now() - (MAX_ERROR_LINE_AGE_S as i64);
+        for subs_id in subs_ids {
+            let mut all_per_subs_id: Vec<&ErrorEntry> = list
+                .iter()
+                .filter(|e| e.subs_id == subs_id)
+                .collect::<Vec<&ErrorEntry>>();
 
-// TODO 
+            all_per_subs_id.sort_by(|a, b| (*a).date.cmp(&(*b).date));
 
-        let (mut new_errors, msg) = filter_error_entries(&list, subs_ids);
-        if new_errors.len() < num_errors_before {
-            debug!(
-                "reduced error lines: {}->{}  {}",
-                num_errors_before,
-                new_errors.len(),
-                msg
-            );
-            new_errors.sort_by(|a, b| a.err_id.cmp(&b.err_id));
-
-
-warn!("TODO:   remove some errors in DB !!");
-
-            // inner.error_repo.replace_errors_file(new_errors);
+            if all_per_subs_id.len() > MAX_ERROR_LINES_PER_SUBSCRIPTION {
+                let (left, right) = all_per_subs_id.split_at(MAX_ERROR_LINES_PER_SUBSCRIPTION);
+                left.iter().for_each(|el| {
+                    debug!("tooMany: {:?} ", el);
+                    delete_list.push(el.err_id);
+                });
+                all_per_subs_id = right.to_vec();
+            }
+            all_per_subs_id
+                .iter()
+                .filter(|el| el.date < timestamp_earliest)
+                .for_each(|el| {
+                    debug!("tooOld: {:?} ", el);
+                    delete_list.push(el.err_id);
+                });
         }
+
+        inner.error_repo.delete_by_index(&delete_list);
+
         StepResult::Continue(Box::new(Notify(inner)))
     }
 }
@@ -586,7 +606,7 @@ impl Step<CleanerInner> for Notify {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
         inner.subscriptionrepo.db_vacuum();
-        inner.messgesrepo.db_vacuum();
+        inner.messagesrepo.db_vacuum();
         if inner.need_update_subscriptions {
             let _r = inner.sourcetree_job_sender.send(SJob::UpdateTreePaths);
             let _r = inner
@@ -601,6 +621,7 @@ impl Step<CleanerInner> for Notify {
     }
 }
 
+#[deprecated]
 pub fn filter_error_entries(
     existing: &[ErrorEntry],
     subs_ids: Vec<isize>,

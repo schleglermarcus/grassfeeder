@@ -63,7 +63,6 @@ impl ErrorRepo {
         self.ctx.get_connection()
     }
 
-    // -> Result<ErrorEntry, String>
     pub fn add_error(
         &self,
         subsid: isize,
@@ -79,6 +78,29 @@ impl ErrorRepo {
             text: msg.clone(),
             remote_address: http_url,
             date: crate::util::timestamp_now(),
+            ..Default::default()
+        };
+        // println!(" EN: {:?} ", en);
+        self.ctx.insert(&en, false).map_err(rusqlite_error_to_boxed)
+    }
+
+    pub fn add_error_ts(
+        &self,
+        subsid: isize,
+        esrc: errorentry::ESRC,
+        eval: isize,
+        http_url: String,
+        msg: String,
+        timestamp: i64,
+    ) -> Result<i64, Box<dyn std::error::Error>> {
+        // let ts = timestamp.unwrap_or(crate::util::timestamp_now());
+        let en = ErrorEntry {
+            subs_id: subsid,
+            e_src: esrc as isize,
+            e_val: eval,
+            text: msg.clone(),
+            remote_address: http_url,
+            date: timestamp,
             ..Default::default()
         };
         // println!(" EN: {:?} ", en);
@@ -118,6 +140,21 @@ impl ErrorRepo {
 
     pub fn get_all_stored_entries(&self) -> Vec<ErrorEntry> {
         self.ctx.get_all()
+    }
+
+    pub fn delete_by_index(&self, indices: &[isize]) -> usize {
+        let joined = indices
+            .iter()
+            .map(|r| r.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+        let sql = format!(
+            "DELETE FROM {}   WHERE {} in  ( {} ) ",
+            ErrorEntry::table_name(),
+            ErrorEntry::index_column_name(),
+            joined
+        );
+        self.ctx.execute(sql)
     }
 }
 
@@ -218,8 +255,7 @@ mod t {
     use super::*;
     use crate::db::errorentry::ESRC;
 
-
-// TODO :  in-mem  
+    // TODO :  in-mem
 
     // RUST_BACKTRACE=1 cargo watch -s "cargo test  db::errors_repo::t::t_error_repo_store     --lib -- --exact --nocapture"
     #[test]
@@ -227,9 +263,9 @@ mod t {
         let e_repo = ErrorRepo::new("../target/e_rep_store/");
         let _ = e_repo.ctx.delete_table();
         e_repo.ctx.create_table();
-        let r0 = e_repo.add_error(12, ESRC::NONE, 0, String::default(), String::from("E_0"));
+        let r0 = e_repo.add_error(12, ESRC::None, 0, String::default(), String::from("E_0"));
         assert!(r0.is_ok());
-        let r1 = e_repo.add_error(12, ESRC::NONE, 0, String::default(), String::from("E_1"));
+        let r1 = e_repo.add_error(12, ESRC::None, 0, String::default(), String::from("E_1"));
         assert!(r1.is_ok());
         let subs_list = e_repo.get_by_subscription(12);
         // println!(" {:?} ", subs_list);
@@ -243,10 +279,10 @@ mod t {
         let e_repo = ErrorRepo::new("../target/e_rep_last/");
         let _ = e_repo.ctx.delete_table();
         e_repo.ctx.create_table();
-        let _r = e_repo.add_error(12, ESRC::NONE, 0, String::default(), String::from("E_0"));
+        let _r = e_repo.add_error(12, ESRC::None, 0, String::default(), String::from("E_0"));
         std::thread::sleep(std::time::Duration::from_secs(1));
         let timestamp1 = crate::util::timestamp_now();
-        let _r = e_repo.add_error(12, ESRC::NONE, 0, String::default(), String::from("E_1"));
+        let _r = e_repo.add_error(12, ESRC::None, 0, String::default(), String::from("E_1"));
         let last_one = e_repo.get_last_entry(12).unwrap();
         assert_eq!(last_one.err_id, 2);
         assert_eq!(last_one.date, timestamp1);
