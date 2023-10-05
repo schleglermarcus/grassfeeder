@@ -14,7 +14,7 @@ use std::sync::Arc;
 use xmlparser::Token;
 use xmlparser::Tokenizer;
 
-const ERR_REPO_BASE: &str = "../target/";
+// const ERR_REPO_BASE: &str = "../target/";
 
 // #[ignore]
 #[test]
@@ -66,7 +66,7 @@ fn t_extract_url() {
 fn stateful_download() {
     setup();
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-    let erro_rep = ErrorRepo::new(&String::default());
+    let erro_rep = ErrorRepo::new_in_mem();
     let html_base = format!("{}websites/", TD_BASE);
     let web_fetch: WebFetcherType = Arc::new(Box::new(FileFetcher::new(html_base))); // "../fr_core/tests/websites/".to_string(),
     let (gp_sender, _gp_rec) = flume::bounded::<Job>(2);
@@ -94,7 +94,6 @@ fn analyse_nn_sloppy() {
     let pagetext = o_page.unwrap();
     let found_feed_urls = extract_feed_urls_sloppy(&pagetext);
     assert_eq!(found_feed_urls.len(), 3);
-    // debug!("URLS {:?}", found_feed_urls);
 }
 
 // -------------------------------

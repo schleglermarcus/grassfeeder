@@ -76,7 +76,7 @@ fn downloader_load_message_into_db() {
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
     let msgrepo_r = Rc::new(RefCell::new(msgrepo));
-    let erro_rep = ErrorRepo::new(&String::default());
+    let erro_rep = ErrorRepo::new_in_mem();
     let erro_r = Rc::new(RefCell::new(erro_rep));
     let mut downloader = Downloader::new(
         fetcher,

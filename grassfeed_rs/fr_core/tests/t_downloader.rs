@@ -1,22 +1,7 @@
-use fr_core::controller::contentlist::CJob;
-use fr_core::controller::sourcetree::SJob;
-use fr_core::db::errorentry::ErrorEntry;
-use fr_core::db::errors_repo::ErrorRepo;
-use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::MessageRow;
-use fr_core::db::messages_repo::MessagesRepo;
-use fr_core::db::subscription_repo::ISubscriptionRepo;
-use fr_core::db::subscription_repo::SubscriptionRepo;
-use fr_core::downloader::db_clean::filter_error_entries;
-use fr_core::downloader::db_clean::CheckErrorLog;
-use fr_core::downloader::db_clean::CleanerInner;
-use fr_core::downloader::db_clean::MAX_ERROR_LINES_PER_SUBSCRIPTION;
 use fr_core::downloader::messages::feed_text_to_entries;
 use fr_core::downloader::util::extract_icon_from_homepage;
-use fr_core::util::timestamp_now;
 use fr_core::TD_BASE;
-
-
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test   downloader::messages::t_:feed_text_to_entries_tages  --lib -- --exact --nocapture "
 // A date entry is not contained here
@@ -33,7 +18,6 @@ fn feed_text_to_entries_tages() {
     );
 }
 
-// #[ignore]
 #[test]
 fn test_extract_icon_relay_rd() {
     setup();

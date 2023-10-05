@@ -22,10 +22,6 @@ use fr_core::TD_BASE;
 use std::io::Write;
 use std::sync::Arc;
 
-// const ERRORS_FOLDER: &str = "../target/download_icons";
-// use fr_core::db::errorentry::ErrorEntry;
-
-// #[ignore]
 #[test]
 fn test_extract_icon_neweurop() {
     setup();
@@ -38,7 +34,6 @@ fn test_extract_icon_neweurop() {
     );
 }
 
-// #[ignore]
 #[test]
 fn test_extract_icon_nn() {
     setup();
@@ -54,7 +49,6 @@ fn test_extract_icon_nn() {
     );
 }
 
-// #[ignore]
 #[test]
 fn image_webp_to_png() {
     setup();
@@ -69,7 +63,6 @@ fn image_webp_to_png() {
     assert!(outdata.len() >= 1151 && outdata.len() <= 1288);
 }
 
-// #[ignore]
 #[test]
 fn test_extract_icon_kolkata() {
     setup();
@@ -112,8 +105,6 @@ fn multiple_icons_location() {
             "https://www.ft.com/news-feed?format=rss".to_string(),
             "https://www.ft.com/".to_string(),
         ),
-        // currently offline
-        //  (            "https://www.neweurope.eu/category/world/feed/".to_string(),            "https://www.neweurope.eu".to_string(),        ),
         (
             "https://www.naturalnews.com/rss.xml".to_string(),
             "https://www.naturalnews.com/".to_string(),
@@ -132,9 +123,7 @@ fn multiple_icons_location() {
         ),
     ];
     for u_h in urls {
-        // let now = std::time::Instant::now();
         let (ie_list, err_happened) = download_icon_one_url(&u_h.0, &u_h.1);
-        // trace!(            "downloaded: {}  Icons:{}  err:{}  time:{}",            &u_h.0,            ie_list.len(),            err_happened,            now.elapsed().as_millis()        );
         assert_eq!(ie_list.len(), 1);
         assert!(!err_happened);
     }
@@ -222,7 +211,7 @@ fn stop_on_nonexistent() {
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let subscr_r = SubscriptionRepo::new_inmem();
     let erro_rep = ErrorRepo::new_in_mem();
-    // erro_rep.startup_read();
+                // erro_rep.startup_read();
     let dl_inner = IconInner {
         subs_id: 5,
         feed_url: "http://localhorst/none.xml".to_string(),
@@ -262,7 +251,6 @@ fn test_retrieve_homepages() {
     ];
     files_urls.iter().for_each(|(f, u)| {
         let filename = format!("{}feeds/{}", TD_BASE, f);
-        //  trace!("{}", filename);
         let buffer: Vec<u8> = file_to_bin(&filename).unwrap();
         let (hp, title, err_msg) = retrieve_homepage_from_feed_text(&buffer, "test-dl_icon");
         if hp.is_empty() {
@@ -272,7 +260,6 @@ fn test_retrieve_homepages() {
     });
 }
 
-// #[ignore]
 #[test]
 fn test_retrieve_titles() {
     setup();
@@ -281,7 +268,6 @@ fn test_retrieve_titles() {
         let filename = format!("{}feeds/{}", TD_BASE, f);
         let buffer: Vec<u8> = file_to_bin(&filename).unwrap();
         let (_hp, title, err_msg) = retrieve_homepage_from_feed_text(&buffer, f);
-        // debug!("{}  {} {} {:?}", filename, _hp, title, err_msg);
         if title.is_empty() {
             error!("{} {:?}", title, err_msg);
         }
@@ -289,7 +275,6 @@ fn test_retrieve_titles() {
     });
 }
 
-// #[ignore]
 #[test]
 fn t_host_for_url() {
     setup();

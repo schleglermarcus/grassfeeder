@@ -29,23 +29,51 @@ use std::sync::RwLock;
 
 // #[ignore]
 #[test]
-fn t_subscr_parent_ids_correction() {
+fn clean_errorlist_no_subscription() {
     setup();
-
+    let date_now = timestamp_now();
     let cleaner_i = prepare_cleaner_inner(None, -1);
-    prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
-
-    let sut = AnalyzeFolderPositions(cleaner_i);
+    for i in 1..9 {
+        let _r = cleaner_i.error_repo.add_error_ts(
+            (1 + i) as isize,
+            ESRC::None,
+            0,
+            String::default(),
+            String::default(),
+            date_now + i,
+        );
+    }
+    let sut = CheckErrorLog(cleaner_i);
     if let StepResult::Continue(s) = Box::new(sut).step() {
         let inner: CleanerInner = s.take();
-        let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
-        // info!("  B:  parent_ids_to_correct  {:?}", parent_ids_to_correct);
-        assert_eq!(parent_ids_to_correct[0], 1);
-        assert_eq!(parent_ids_to_correct[1], 0);
+        let errlist = inner.error_repo.get_all_stored_entries();
+        assert_eq!(errlist.len(), 4); //  	subs_ids [5, 3, 2, 4]
+    } else {
+        panic!()
     }
 }
 
-#[ignore]
+// #[ignore]
+#[test]
+fn clean_subscriptions_names_expanded() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(None, -1);
+    prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
+    let sut = AnalyzeFolderPositions(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let subsc1 = inner.subscriptionrepo.get_by_index(1).unwrap();
+        // debug!("  sub1 {:?}", subsc1);
+        assert!(subsc1.display_name.starts_with("folder1"));
+        let subsc2 = inner.subscriptionrepo.get_by_index(2).unwrap();
+        assert!(subsc2.display_name.len() < 10);
+        assert!(!subsc2.expanded);
+        let msg2 = inner.messagesrepo.get_by_index(2).unwrap();
+        assert_eq!(msg2.is_deleted, false); // belongs to subscription, keep it
+    }
+}
+
+// #[ignore]
 #[test]
 fn t_db_cleanup_1() {
     setup();
@@ -60,13 +88,12 @@ fn t_db_cleanup_1() {
     let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
     let mut iconrepo = IconRepo::new("../target/");
     iconrepo.startup();
-    let err_repo = ErrorRepo::new_in_mem(); // ErrorRepo::new("../target/");
+    let err_repo = ErrorRepo::new_in_mem();
     let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5, err_repo);
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
-    debug!("  A:  parent_ids_to_correct  {:?}", parent_ids_to_correct);
+    // trace!("  A:  parent_ids_to_correct  {:?}", parent_ids_to_correct);
     assert_eq!(parent_ids_to_correct.len(), 1);
-
     let sub1 = subsrepo1.get_by_index(1).unwrap();
     assert!(sub1.display_name.starts_with("folder1"));
     assert!(subsrepo1.get_by_index(2).unwrap().display_name.len() < 10);
@@ -74,7 +101,110 @@ fn t_db_cleanup_1() {
     assert_eq!(msgrepo2.get_by_index(2).unwrap().is_deleted, false); // belongs to subscription, keep it
 }
 
-// -----------------------------------------------------------------
+// #[ignore]
+#[test]
+fn t_subscr_parent_ids_correction() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(None, -1);
+    prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
+    let sut = AnalyzeFolderPositions(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
+        // info!("  B:  parent_ids_to_correct  {:?}", parent_ids_to_correct);
+        assert_eq!(parent_ids_to_correct[0], 1);
+        assert_eq!(parent_ids_to_correct[1], 0);
+    }
+}
+
+#[test]
+fn clean_message_doublettes() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(None, -1);
+    prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
+    let sut = DeleteDoubleSameMessages(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let msg4 = inner.messagesrepo.get_by_src_id(4, false);
+        assert_eq!(msg4.len(), 1); // the other 10 are set deleted
+    }
+}
+
+#[test]
+fn clean_too_many_messages() {
+    setup();
+    let c_max_messages: i32 = 5;
+    let cleaner_i = prepare_cleaner_inner(None, c_max_messages);
+    prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
+    let sut = ReduceTooManyMessages(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let msg1 = inner.messagesrepo.get_by_src_id(5, false);
+        assert_eq!(msg1.len(), c_max_messages as usize);
+    }
+}
+
+#[test]
+fn clean_icon_doublettes() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(Some("../target/iconc"), -1);
+    let sut = CorrectIconsDoublettes(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let all = inner.iconrepo.get_all_entries();
+        assert_eq!(all.len(), 3);
+    }
+}
+
+// #[ignore]
+#[test]
+fn clean_errorlist_too_old() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(None, -1);
+    let date_now = timestamp_now();
+    let timediff: usize = MAX_ERROR_LINE_AGE_S / 5;
+    for i in 0..11 {
+        let _r = cleaner_i.error_repo.add_error_ts(
+            2,
+            ESRC::None,
+            0,
+            String::default(),
+            String::default(),
+            date_now - (i * timediff) as i64,
+        );
+    }
+    let sut = CheckErrorLog(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let list = inner.error_repo.get_by_subscription(2);
+        assert_eq!(list.len(), 6);
+    }
+}
+
+// #[ignore]
+#[test]
+fn clean_errorlist_too_many() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(None, -1);
+    let date_now = timestamp_now();
+    for i in 0..(MAX_ERROR_LINES_PER_SUBSCRIPTION * 2) {
+        let _r = cleaner_i.error_repo.add_error_ts(
+            2,
+            ESRC::None,
+            0,
+            String::default(),
+            String::default(),
+            date_now + i as i64,
+        );
+    }
+    let sut = CheckErrorLog(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let list = inner.error_repo.get_by_subscription(2);
+        assert_eq!(list.len(), MAX_ERROR_LINES_PER_SUBSCRIPTION); // retain the upper half
+        assert!(list[0].date > (date_now + MAX_ERROR_LINES_PER_SUBSCRIPTION as i64));
+    }
+}
 
 fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo) {
     let mut se = SubscriptionEntry::default();
@@ -125,123 +255,6 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
     }
     let r = std::fs::copy("tests/data/icons_sane.json", "../target/icons_list.json");
     assert!(r.is_ok());
-}
-
-#[ignore]
-#[test]
-fn clean_message_doublettes() {
-    setup();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
-    prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
-    let sut = DeleteDoubleSameMessages(cleaner_i);
-    if let StepResult::Continue(s) = Box::new(sut).step() {
-        let inner: CleanerInner = s.take();
-        let msg4 = inner.messagesrepo.get_by_src_id(4, false);
-        assert_eq!(msg4.len(), 1); // the other 10 are set deleted
-    }
-}
-
-#[ignore]
-#[test]
-fn clean_too_many_messages() {
-    setup();
-    let c_max_messages: i32 = 5;
-    let cleaner_i = prepare_cleaner_inner(None, c_max_messages);
-    prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
-    let sut = ReduceTooManyMessages(cleaner_i);
-    if let StepResult::Continue(s) = Box::new(sut).step() {
-        let inner: CleanerInner = s.take();
-        let msg1 = inner.messagesrepo.get_by_src_id(5, false);
-        assert_eq!(msg1.len(), c_max_messages as usize);
-    }
-}
-
-#[ignore]
-#[test]
-fn clean_icon_doublettes() {
-    setup();
-    let cleaner_i = prepare_cleaner_inner(Some("../target/iconc"), -1);
-    let sut = CorrectIconsDoublettes(cleaner_i);
-    if let StepResult::Continue(s) = Box::new(sut).step() {
-        let inner: CleanerInner = s.take();
-        let all = inner.iconrepo.get_all_entries();
-        assert_eq!(all.len(), 3);
-    }
-}
-
-#[ignore]
-#[test]
-fn clean_errorlist_too_old() {
-    setup();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
-    let date_now = timestamp_now();
-    let timediff: usize = MAX_ERROR_LINE_AGE_S / 5;
-    for i in 0..11 {
-        let _r = cleaner_i.error_repo.add_error_ts(
-            2,
-            ESRC::None,
-            0,
-            String::default(),
-            String::default(),
-            date_now - (i * timediff) as i64,
-        );
-    }
-    let sut = CheckErrorLog(cleaner_i);
-    if let StepResult::Continue(s) = Box::new(sut).step() {
-        let inner: CleanerInner = s.take();
-        let list = inner.error_repo.get_by_subscription(2);
-        assert_eq!(list.len(), 6);
-    }
-}
-
-#[ignore]
-#[test]
-fn clean_errorlist_too_many() {
-    setup();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
-    let date_now = timestamp_now();
-    for i in 0..(MAX_ERROR_LINES_PER_SUBSCRIPTION * 2) {
-        let _r = cleaner_i.error_repo.add_error_ts(
-            2,
-            ESRC::None,
-            0,
-            String::default(),
-            String::default(),
-            date_now + i as i64,
-        );
-    }
-    let sut = CheckErrorLog(cleaner_i);
-    if let StepResult::Continue(s) = Box::new(sut).step() {
-        let inner: CleanerInner = s.take();
-        let list = inner.error_repo.get_by_subscription(2);
-        assert_eq!(list.len(), MAX_ERROR_LINES_PER_SUBSCRIPTION); // retain the upper half
-        assert!(list[0].date > (date_now + MAX_ERROR_LINES_PER_SUBSCRIPTION as i64));
-    }
-}
-
-#[ignore]
-#[test]
-fn clean_errorlist_no_subscription() {
-    setup();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
-    for i in 1..9 {
-        let _r = cleaner_i.error_repo.add_error_ts(
-            (1 + i) as isize,
-            ESRC::None,
-            0,
-            String::default(),
-            String::default(),
-            0,
-        );
-    }
-    let sut = CheckErrorLog(cleaner_i);
-    if let StepResult::Continue(s) = Box::new(sut).step() {
-        let inner: CleanerInner = s.take();
-        let list = inner.error_repo.get_all_stored_entries();
-        assert_eq!(list.len(), 4); //  	subs_ids [5, 3, 2, 4]
-    } else {
-        panic!()
-    }
 }
 
 fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> CleanerInner {
@@ -301,8 +314,7 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            // logger_config::QuietFlags::Downloader as u64
-            0,
+            logger_config::QuietFlags::Downloader as u64, // 0,
         );
         unzipper::unzip_some();
     });

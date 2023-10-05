@@ -4,7 +4,7 @@ use crate::util::db_time_to_display;
 use serde::Deserialize;
 use serde::Serialize;
 
-// pub const ESRC_DEFAULT: isize = 0;
+// Error entry Source / Location / Reason
 pub enum ESRC {
     None = 0,
     GpDlFinished = 1,
@@ -22,6 +22,8 @@ pub enum ESRC {
     MsgDlStartErr = 14,
     IconDLDuration = 15,
     IconFeedTextDur = 16,
+    HttpFeedDownload = 17,
+    HttpIconDownload = 18,
 }
 
 ///
@@ -129,7 +131,6 @@ impl TableInfo for ErrorEntry {
             date: row.get(4).unwrap(),
             remote_address: row.get(5).unwrap(),
             text: row.get(6).unwrap(),
-            ..Default::default()
         }
     }
 

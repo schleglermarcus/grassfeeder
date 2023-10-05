@@ -587,13 +587,11 @@ impl Step<CleanerInner> for CheckErrorLog {
                 .iter()
                 .filter(|e| e.subs_id == subs_id)
                 .collect::<Vec<&ErrorEntry>>();
-
-            all_per_subs_id.sort_by(|a, b| (*a).date.cmp(&(*b).date));
-
+            all_per_subs_id.sort_by(|a, b| a.date.cmp(&b.date));
             if all_per_subs_id.len() > MAX_ERROR_LINES_PER_SUBSCRIPTION {
                 let (left, right) = all_per_subs_id.split_at(MAX_ERROR_LINES_PER_SUBSCRIPTION);
                 left.iter().for_each(|el| {
-                    debug!("tooMany: {:?} ", el);
+                    trace!("tooMany: {:?} ", el);
                     delete_list.push(el.err_id);
                 });
                 all_per_subs_id = right.to_vec();
@@ -602,13 +600,11 @@ impl Step<CleanerInner> for CheckErrorLog {
                 .iter()
                 .filter(|el| el.date < timestamp_earliest)
                 .for_each(|el| {
-                    debug!("tooOld: {:?} ", el);
+                    trace!("tooOld: {:?} ", el);
                     delete_list.push(el.err_id);
                 });
         }
-
         inner.error_repo.delete_by_index(&delete_list);
-
         StepResult::Continue(Box::new(Notify(inner)))
     }
 }
@@ -703,7 +699,6 @@ pub fn check_layer(
             let mut fpc = fp_correct_subs_parent.lock().unwrap();
             if !fpc.contains(&(fse.parent_subs_id as i32)) {
                 fpc.push(fse.parent_subs_id as i32);
-                // trace!("correct: {:?}", fpc);
             }
         }
         path.push(fse.folder_position as u16);

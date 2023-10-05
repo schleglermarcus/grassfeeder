@@ -295,21 +295,18 @@ fn write_to(
     let mut bytes_written: usize = 0;
     let out = std::fs::File::create(filename)?;
     let mut buf = BufWriter::new(out);
-    input
-        .iter()
-        .filter_map(|se| converter(se))
-        .for_each(|line| {
-            let bbuf = line.as_bytes();
-            match buf.write(bbuf) {
-                Ok(bytes) => {
-                    let _r = buf.write(&[b'\n']);
-                    bytes_written += bytes + 1;
-                }
-                Err(e) => {
-                    error!("{:?}", e);
-                }
+    input.iter().filter_map(converter).for_each(|line| {
+        let bbuf = line.as_bytes();
+        match buf.write(bbuf) {
+            Ok(bytes) => {
+                let _r = buf.write(&[b'\n']);
+                bytes_written += bytes + 1;
             }
-        });
+            Err(e) => {
+                error!("{:?}", e);
+            }
+        }
+    });
     buf.flush()?;
     Ok(bytes_written)
 }

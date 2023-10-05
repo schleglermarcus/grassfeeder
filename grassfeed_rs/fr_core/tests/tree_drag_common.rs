@@ -16,7 +16,7 @@ use std::rc::Rc;
 pub fn prepare_subscription_move(
     fs_list: Vec<SubscriptionEntry>,
 ) -> (SubscriptionMove, Rc<RefCell<dyn ISubscriptionRepo>>) {
-    let subscrip_repo = SubscriptionRepo::new_inmem(); // new("");
+    let subscrip_repo = SubscriptionRepo::new_inmem(); 
     subscrip_repo.scrub_all_subscriptions();
     fs_list.iter().for_each(|e| {
         let _r = subscrip_repo.store_entry(e);
@@ -29,7 +29,10 @@ pub fn prepare_subscription_move(
     mr1.subscription_id = 20;
     let _mr1id = msgrepo.insert(&mr1).unwrap() as isize;
     let msg_r_r = Rc::new(RefCell::new(msgrepo));
-    let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new(&String::default())));
+    let r_error_repo = Rc::new(RefCell::new(
+        // ErrorRepo::new(&String::default()
+        ErrorRepo::new_in_mem(),
+    ));
     let fs = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r, r_error_repo);
     fs.update_cached_paths();
     (fs, r_subscriptions_repo)

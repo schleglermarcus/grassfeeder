@@ -29,11 +29,9 @@ fn add_subscription_with_existing_messages() {
     mr1.subscription_id = 20;
     let _mr1id = msgrepo.insert(&mr1).unwrap() as isize;
     let msg_r_r = Rc::new(RefCell::new(msgrepo));
-    subscription_controller.messagesrepo_r = msg_r_r.clone(); //  Rc::downgrade(&msg_r_r);
-
+    subscription_controller.messagesrepo_r = msg_r_r.clone();
     let subs_id = subscription_controller
         .add_new_subscription("some-url-3".to_string(), "name-proc3".to_string());
-
     assert_eq!(subs_id, mr1.subscription_id + 1);
     let message = (*(msg_r_r.borrow())).get_by_src_id(subs_id, false);
     assert_eq!(message.len(), 0); // the new created subscription may not have messages attached
@@ -55,17 +53,14 @@ fn add_feed_empty() {
 fn delete_feed_v1() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
-    // let (mut fsc, r_fsource) = prepare_stc(fs_list);
     let (mut fsc, r_fsource) = prepare_subscription_move(fs_list);
     fsc.set_delete_subscription_id(Some(2));
     fsc.move_subscription_to_trash();
     let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
-    // debug!("{:?}", &result);
     assert_eq!(result.get(0).unwrap().folder_position, 0);
     assert_eq!(result.get(1).unwrap().folder_position, 1);
 }
 
-// #[ignore]
 #[test]
 fn update_folder_pos() {
     setup();
@@ -75,14 +70,12 @@ fn update_folder_pos() {
         .borrow()
         .update_parent_and_folder_position(1, 22, 33);
     let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_all_entries();
-    // result.iter().for_each(|fs| debug!("##  {}", fs));
     assert_eq!(result.get(2).unwrap().subs_id, 1);
     assert_eq!(result.get(2).unwrap().parent_subs_id, 22);
     assert_eq!(result.get(2).unwrap().folder_position, 33);
 }
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_heise_svg  --lib -- --exact --nocapture"
-// #[ignore]
 #[test]
 fn test_heise_svg() {
     setup();
@@ -93,20 +86,6 @@ fn test_heise_svg() {
     let an_res = icon_analyser(&r.content_bin);
     assert_eq!(an_res.kind, IconKind::Svg);
 }
-
-/** remote  icon is gone
-//RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_remote_redirect --lib -- --exact --nocapture"
-// #[ignore]
-#[test]
-fn test_remote_redirect() {
-    setup();
-    let web_fetcher = HttpFetcher {};
-    let r = web_fetcher.request_url_bin("https://kodansha.us/favicon.ico".to_string());
-    let an_res = icon_analyser(&r.content_bin);
-    debug!("test_remote_redirect  {:?}" , &an_res );
-    assert_eq!(an_res.kind, IconKind::Ico);
-}
- */
 
 // ----------------------------
 
@@ -126,7 +105,7 @@ fn prepare_subscription_move(
     mr1.subscription_id = 20;
     let _mr1id = msgrepo.insert(&mr1).unwrap() as isize;
     let msg_r_r = Rc::new(RefCell::new(msgrepo));
-    let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new_in_mem() ));
+    let r_error_repo = Rc::new(RefCell::new(ErrorRepo::new_in_mem()));
     let subs_move = SubscriptionMove::new(r_subscriptions_repo.clone(), msg_r_r, r_error_repo);
     (subs_move, r_subscriptions_repo.clone())
 }

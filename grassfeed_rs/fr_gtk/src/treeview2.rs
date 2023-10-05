@@ -138,7 +138,13 @@ pub fn create_treeview(
                 }
                 let indices = treepath.indices_with_depth();
                 let ind_u16: Vec<u16> = indices.iter().map(|v| *v as u16).collect::<Vec<u16>>();
+                // trace!("TreeRowActivated : {:?}  {:?} ", ind_u16, repo_id);
                 esw.sendw(GuiEvents::TreeRowActivated(0, ind_u16, repo_id));
+            } else {
+                warn!(
+                    " in-drag   tree-blocked   {in_drag}  {tree_blocked}  TreeRowActivated  {:?} ",
+                    treepath.indices_with_depth()
+                );
             }
         }
     });

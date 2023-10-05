@@ -31,7 +31,6 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
     std::fs::copy(&msg_fn, msg_copy).unwrap();
     let msgrepo1 = MessagesRepo::new_by_filename_add_column(&msg_fn);
     let err_repo = ErrorRepo::new(cache_folder);
-
     let mut iconrepo = IconRepo::new(config_folder);
     iconrepo.startup();
     let all_messages = msgrepo1.get_all_messages();

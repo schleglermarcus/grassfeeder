@@ -31,7 +31,7 @@ fn single_dl_regular() {
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
     let msgrepo_req = MessagesRepo::new_by_connection(msgrepo.get_ctx().get_connection());
-    let erro_rep = ErrorRepo::new(&String::default());
+    let erro_rep = ErrorRepo::new_in_mem();
     let inner = FetchInner {
         fs_repo_id: 1,
         url: "gui_proc_rss2_v1.rss".to_string(),
@@ -69,7 +69,6 @@ fn single_dl_regular() {
     assert_eq!(all.len(), 2);
 }
 
-// #[ignore]
 #[test]
 fn download_with_create_date() {
     setup();
@@ -81,7 +80,7 @@ fn download_with_create_date() {
     let msgrepo = MessagesRepo::new_in_mem();
     let msgrepo_req = MessagesRepo::new_by_connection(msgrepo.get_ctx().get_connection());
     msgrepo.get_ctx().create_table();
-    let erro_rep = ErrorRepo::new(&String::default());
+    let erro_rep = ErrorRepo::new_in_mem();
     let inner = FetchInner {
         fs_repo_id: 3,
         url: "gui_proc_rss2_v1.rss".to_string(),
@@ -116,7 +115,6 @@ fn download_with_create_date() {
 
 fn get_file_fetcher() -> WebFetcherType {
     Arc::new(Box::new(FileFetcher::new(
-        // "../fr_core/tests/feeds/".to_string(),
         "../target/td/feeds/".to_string(),
     )))
 }

@@ -329,7 +329,6 @@ impl IDownloader for Downloader {
         let msgrepo = MessagesRepo::new_by_connection(
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
-        // let errors_rep =   ErrorRepo::by_existing_list((*self.erro_repo).borrow().get_list());
         let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
         let new_fetch_job = FetchInner {
             fs_repo_id: f_source_repo_id,

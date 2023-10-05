@@ -271,7 +271,7 @@ impl FeedContents {
         assert!(fp < FOCUS_POLICY_NAMES.len());
         match fp {
             1 => {
-                self.set_cursor_to_message(-1); // None
+                //  self.set_cursor_to_message(-1); // None
             }
             2 => {
                 let mut last_selected_msg_id: isize = -1; // Last Selected

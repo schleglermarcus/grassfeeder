@@ -20,33 +20,35 @@ use std::sync::Mutex;
 pub const KEY_FOLDERNAME: &str = "cache_folder";
 pub const FILENAME: &str = "errors.json.txt";
 
-// #[deprecated]
-// pub const CONV_TO: &dyn Fn(String) -> Option<ErrorEntry> = &json_to_error_entry;
-// #[deprecated]
-// pub const CONV_FROM: &dyn Fn(&ErrorEntry) -> Option<String> = &error_entry_to_json;
-
 pub struct ErrorRepo {
     ctx: SqliteContext<ErrorEntry>,
+    errorlines_cache: Mutex<Vec<ErrorEntry>>,
 }
 
 impl ErrorRepo {
     pub fn new(folder_n: &str) -> Self {
-        match std::fs::create_dir_all(&folder_n) {
+        match std::fs::create_dir_all(folder_n) {
             Ok(()) => (),
             Err(e) => {
                 println!("ErrorRepo cannot create folder {} {:?}", &folder_n, e);
                 error!("ErrorRepo cannot create folder {} {:?}", &folder_n, e);
             }
         }
-        let filename = ErrorRepo::filename(folder_n.clone());
+        let filename = ErrorRepo::filename(folder_n);
         let dbctx = SqliteContext::new(filename.to_string());
-        ErrorRepo { ctx: dbctx }
+        ErrorRepo {
+            ctx: dbctx,
+            errorlines_cache: Default::default(),
+        }
     }
 
     pub fn new_in_mem() -> Self {
         let cx = SqliteContext::new_in_memory();
         cx.create_table();
-        ErrorRepo { ctx: cx }
+        ErrorRepo {
+            ctx: cx,
+            errorlines_cache: Default::default(),
+        }
     }
 
     pub fn filename(foldername: &str) -> String {
@@ -56,6 +58,7 @@ impl ErrorRepo {
     pub fn by_connection(ex_con: Arc<Mutex<Connection>>) -> Self {
         ErrorRepo {
             ctx: SqliteContext::new_by_connection(ex_con),
+            errorlines_cache: Default::default(),
         }
     }
 
@@ -70,7 +73,18 @@ impl ErrorRepo {
         eval: isize,
         http_url: String,
         msg: String,
-    ) -> Result<i64, Box<dyn std::error::Error>> {
+    ) {
+        /*
+                self.add_error_ts(
+                    subsid,
+                    esrc,
+                    eval,
+                    http_url,
+                    msg,
+                    crate::util::timestamp_now(),
+                );
+        */
+
         let en = ErrorEntry {
             subs_id: subsid,
             e_src: esrc as isize,
@@ -80,8 +94,12 @@ impl ErrorRepo {
             date: crate::util::timestamp_now(),
             ..Default::default()
         };
-        // println!(" EN: {:?} ", en);
-        self.ctx.insert(&en, false).map_err(rusqlite_error_to_boxed)
+        if let Ok(mut list_g) = self.errorlines_cache.lock() {
+            (*list_g).push(en);
+        } else {
+            error!("Cannot lock Error cache! {:?} ", en);
+        }
+        // let _r = self.add_error_entry(&en);
     }
 
     pub fn add_error_ts(
@@ -93,7 +111,6 @@ impl ErrorRepo {
         msg: String,
         timestamp: i64,
     ) -> Result<i64, Box<dyn std::error::Error>> {
-        // let ts = timestamp.unwrap_or(crate::util::timestamp_now());
         let en = ErrorEntry {
             subs_id: subsid,
             e_src: esrc as isize,
@@ -103,8 +120,12 @@ impl ErrorRepo {
             date: timestamp,
             ..Default::default()
         };
-        // println!(" EN: {:?} ", en);
-        self.ctx.insert(&en, false).map_err(rusqlite_error_to_boxed)
+        // self.ctx.insert(&en, false).map_err(rusqlite_error_to_boxed)
+        self.add_error_entry(&en)
+    }
+
+    fn add_error_entry(&self, en: &ErrorEntry) -> Result<i64, Box<dyn std::error::Error>> {
+        self.ctx.insert(en, false).map_err(rusqlite_error_to_boxed)
     }
 
     pub fn get_by_subscription(&self, subs_id: isize) -> Vec<ErrorEntry> {
@@ -134,8 +155,7 @@ impl ErrorRepo {
             ErrorEntry::table_name(),
             subs_id,
         );
-        let o_ee = self.ctx.get_one(prepared);
-        o_ee
+        self.ctx.get_one(prepared)
     }
 
     pub fn get_all_stored_entries(&self) -> Vec<ErrorEntry> {
@@ -155,6 +175,20 @@ impl ErrorRepo {
             joined
         );
         self.ctx.execute(sql)
+    }
+
+    fn flush_dirty(&self) {
+        if let Ok(mut lg) = self.errorlines_cache.lock() {
+            if lg.len() > 0 {
+                debug!("flush error lines    # {} ", lg.len());
+                while let Some(entry) = lg.pop() {
+                    let r = self.add_error_entry(&entry);
+                    if r.is_err() {
+                        error!("while storing error lines : {:?} {:?}", r.err(), &entry);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -184,6 +218,9 @@ impl StartupWithAppContext for ErrorRepo {
         {
             (*timer_r)
                 .borrow_mut()
+                .register(&TimerEvent::Timer10s, su_r.clone(), true);
+            (*timer_r)
+                .borrow_mut()
                 .register(&TimerEvent::Shutdown, su_r, true);
         }
     }
@@ -192,62 +229,17 @@ impl StartupWithAppContext for ErrorRepo {
 impl TimerReceiver for ErrorRepo {
     fn trigger_mut(&mut self, event: &TimerEvent) {
         match event {
+            TimerEvent::Timer10s => {
+                self.flush_dirty();
+            }
             TimerEvent::Shutdown => {
+                self.flush_dirty();
                 self.ctx.cache_flush();
             }
             _ => (),
         }
     }
 }
-
-/*
-fn error_entry_to_json(input: &ErrorEntry) -> Option<String> {
-    match serde_json::to_string(input) {
-        Ok(encoded) => Some(encoded),
-        Err(er) => {
-            error!("serde_json {:?} \n {:?}", er, &input.err_id);
-            None
-        }
-    }
-}
-
-
-
-fn error_entry_to_txt(input: &ErrorEntry) -> Option<String> {
-    match bincode::serialize(input) {
-        Ok(encoded) => Some(compress(String::from_utf8(encoded).unwrap().as_str())),
-        Err(er) => {
-            error!("bincode_serizalize {:?} \n {:?}", er, &input.err_id);
-            None
-        }
-    }
-}
-
-
-fn json_to_error_entry(line: String) -> Option<ErrorEntry> {
-    let dec_r: serde_json::Result<ErrorEntry> = serde_json::from_str(&line);
-    match dec_r {
-        Ok(dec_se) => Some(dec_se),
-        Err(e) => {
-            error!("serde_json:from_str {:?}   {:?} ", e, &line);
-            None
-        }
-    }
-}
-
-
-fn txt_to_error_entry(line: String) -> Option<ErrorEntry> {
-    let dc_bytes: String = decompress(&line);
-    let dec_r: bincode::Result<ErrorEntry> = bincode::deserialize(dc_bytes.as_bytes());
-    match dec_r {
-        Ok(dec_se) => Some(dec_se),
-        Err(e) => {
-            error!("bincode:deserialize {:?}   {:?} ", e, &line);
-            None
-        }
-    }
-}
- */
 
 #[cfg(test)]
 mod t {
