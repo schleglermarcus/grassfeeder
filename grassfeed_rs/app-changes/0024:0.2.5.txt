@@ -4,7 +4,9 @@ Mon, 28 Aug 2023 18:00:00 +0000
 --> Errors logging to database
 
 
-- statemachine testing  with take()
+-- statemachine testing  with take()
+
+--  Tree Expand - When closed and activated, do not fill the list with the aggregate
 
 - Database Check with separate Dialog
 

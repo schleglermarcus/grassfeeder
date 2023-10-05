@@ -181,6 +181,10 @@ impl Step<CleanerInner> for ReSortParentId {
         }
         StepResult::Continue(Box::new(CorrectNames(inner)))
     }
+
+    fn take(self: Box<Self>) -> CleanerInner {
+        self.0
+    }
 }
 
 ///  Correct all Folder names that are empty
@@ -266,7 +270,7 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         let all_icons: Vec<IconEntry> = inner.iconrepo.get_all_entries();
-        let all_icons_len = all_icons.len();
+        // let all_icons_len = all_icons.len();
         let mut ic_first: HashMap<String, isize> = HashMap::new();
         let mut replace_ids: HashMap<isize, isize> = HashMap::new(); // subsequent-icon-id =>  previous icon-id
         all_icons
@@ -280,7 +284,7 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
                 }
             });
         let all_subs = inner.subscriptionrepo.get_all_nonfolder();
-        trace!(            "IconsDoublettes:  icon_uniq:{}    replace_icons:{}   all_subscriptions:{}  all_icons:{} ",           ic_first.len(),            replace_ids.len(),            all_subs.len(), all_icons_len        );
+        // trace!(            "IconsDoublettes:  icon_uniq:{}    replace_icons:{}   all_subscriptions:{}  all_icons:{} ",           ic_first.len(),            replace_ids.len(),            all_subs.len(), all_icons_len        );
         replace_ids.iter().for_each(|(repl, dest)| {
             all_subs
                 .iter()
@@ -457,6 +461,7 @@ pub fn reduce_too_many_messages(
         .iter()
         .filter(|msg| !msg.is_read && !msg.is_deleted)
         .count();
+    // trace!(        "reduce_too_many_messages : #all:{}  #unread:{}  max:{}  ",        all_messages.len(),        num_unread,        max_messages    );
     if length_before <= max_messages {
         return (false, 0, length_before, num_unread);
     }
@@ -515,6 +520,10 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
         }
         StepResult::Continue(Box::new(PurgeMessages(inner)))
     }
+
+    fn take(self: Box<Self>) -> CleanerInner {
+        self.0
+    }
 }
 
 pub struct PurgeMessages(pub CleanerInner);
@@ -549,6 +558,9 @@ impl Step<CleanerInner> for PurgeMessages {
             );
         }
         StepResult::Continue(Box::new(CheckErrorLog(inner)))
+    }
+    fn take(self: Box<Self>) -> CleanerInner {
+        self.0
     }
 }
 
@@ -686,10 +698,12 @@ pub fn check_layer(
     entries.iter().enumerate().for_each(|(folderpos, fse)| {
         let mut path: Vec<u16> = Vec::new();
         path.extend_from_slice(localpath);
+        // trace!(            "check_layer  PA{}  FP{}  FSE:  {:?} ",            parent_subs_id,            folderpos,            fse        );
         if fse.folder_position != (folderpos as isize) {
             let mut fpc = fp_correct_subs_parent.lock().unwrap();
             if !fpc.contains(&(fse.parent_subs_id as i32)) {
                 fpc.push(fse.parent_subs_id as i32);
+                // trace!("correct: {:?}", fpc);
             }
         }
         path.push(fse.folder_position as u16);
