@@ -2,9 +2,7 @@ Mon, 28 Aug 2023 18:00:00 +0000
 - Bugfix: multiple drop of Urls caused unresponsive dialog.
 - statemachine testing  with take()
 - Errors logging to database
-
-
-* Feed-Errors display with list
+- Error display with cause translation
 
 
 

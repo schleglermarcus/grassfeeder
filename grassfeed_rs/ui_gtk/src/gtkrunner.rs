@@ -423,8 +423,11 @@ impl GtkObjects for GtkObjectsImpl {
     fn get_buttons(&self) -> Vec<gtk::Button> {
         self.buttons.clone()
     }
-    fn add_button(&mut self, e: &gtk::Button) {
-        self.buttons.push(e.clone());
+    fn set_button(&mut self, idx: u8, e: &gtk::Button) {
+        if self.buttons.len() < idx as usize + 1 {
+            self.buttons.resize(idx as usize + 1, Button::new());
+        }
+        self.buttons[idx as usize ] = e.clone();
     }
 
     fn get_spinner_w(&self) -> Option<(gtk::CellRendererSpinner, gtk::TreeViewColumn)> {

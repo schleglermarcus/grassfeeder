@@ -78,27 +78,6 @@ impl std::fmt::Debug for ErrorEntry {
     }
 }
 
-/*
-impl ErrorEntry {
-    pub fn to_line(&self, display_name: String) -> String {
-        let mut disp = display_name;
-        disp.truncate(30);
-        let mut e_text = self.text.clone();
-        e_text.truncate(50);
-        let mut e_remot = self.remote_address.clone();
-        e_remot.truncate(40);
-        format!(
-            "{:20} {:16} {:4} {:50} {:40}",
-            disp,
-            db_time_to_display(self.date),
-            self.err_code,
-            e_text,
-            e_remot,
-        )
-    }
-}
- */
-
 impl TableInfo for ErrorEntry {
     fn table_name() -> String {
         "errors".to_string()

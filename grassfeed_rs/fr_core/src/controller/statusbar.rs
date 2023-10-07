@@ -53,6 +53,7 @@ pub struct StatusBar {
     pub browser_loading_progress: u8,
     browser_loading_progress_int: u8,
     downloader_stats: [u32; DLKIND_MAX],
+    pub db_check_running: bool,
 }
 
 impl StatusBar {
@@ -71,7 +72,6 @@ impl StatusBar {
             r_messages: r_msg_c,
             r_browserpane: browser_pane,
             gui_val_store: val_store,
-
             downloader_kind: Default::default(),
             downloader_kind_new: Default::default(),
             num_msg_all: Default::default(),
@@ -89,6 +89,7 @@ impl StatusBar {
             browser_loading_progress: Default::default(),
             browser_loading_progress_int: Default::default(),
             downloader_stats: [0; DLKIND_MAX],
+            db_check_running: false,
         }
     }
 

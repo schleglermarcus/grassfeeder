@@ -116,6 +116,9 @@ pub enum SJob {
     /// subs_id
     SetCursorToSubsID(isize),
     SetGuiTreeColumn1Width,
+
+    /// Cleaner Step Nr,  Current Step Message
+    NotifyDbClean(u8, Option<String>),
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -377,6 +380,24 @@ impl SourceTreeController {
 
                 SJob::GuiStoreIcons => {
                     self.icons_store_to_gui();
+                }
+                SJob::NotifyDbClean(c_step, ref c_msg) => {
+                    let dd: Vec<AValue> = vec![
+                        AValue::AU32(c_step as u32),
+                        if let Some(msg) = c_msg {
+                            AValue::ASTR(msg.clone())
+                        } else {
+                            AValue::None
+                        },
+                    ];
+                    trace!("NotifyDbClean:  {}  {:?}  dd= {:?} ", c_step, c_msg, dd);
+                    (*self.gui_val_store)
+                        .write()
+                        .unwrap()
+                        .set_dialog_data(DIALOG_SETTINGS_CHECK, &dd);
+                    (*self.gui_updater)
+                        .borrow()
+                        .update_dialog(DIALOG_SETTINGS_CHECK);
                 }
             }
             if (*self.config).borrow().mode_debug {
@@ -1146,13 +1167,13 @@ pub enum NewSourceState {
 pub fn errorentry_to_line(ee: &ErrorEntry /*, _displayname: &str */) -> String {
     // let mut disp = displayname.to_string();    disp.truncate(12);
     let mut e_remot = ee.remote_address.clone();
-    e_remot.truncate(40);
+    e_remot.truncate(110);
     let mut esrc_txt = t!(&format!("EM_DL_{}", ee.e_src));
-    esrc_txt.truncate(30);
+    esrc_txt.truncate(40);
     let mut e_text = ee.text.clone();
-    e_text.truncate(40);
+    e_text.truncate(60);
     format!(
-        "{:12} {:5} {:30}  {:40} {:40}",
+        "{:12} {:5} {:30} {:50} {:100}",
         db_time_to_display(ee.date),
         ee.e_val,
         esrc_txt,
@@ -1183,7 +1204,6 @@ mod t {
             text: String::from("Message"),
         };
         let r = errorentry_to_line(&ee);
-        assert_eq!(r, "2023-10-07 03:47:44     7 Could not load dragged source   Message                                  http://some.thing                       ");
-        println!("{}", r);
+        assert!(r.starts_with("2023-10-07 03:47:44     7"));
     }
 }

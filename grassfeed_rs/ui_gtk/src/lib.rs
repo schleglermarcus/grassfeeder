@@ -145,7 +145,8 @@ pub trait GtkObjects {
     fn set_text_entry(&mut self, idx: u8, e: &gtk::Entry);
 
     fn get_buttons(&self) -> Vec<gtk::Button>;
-    fn add_button(&mut self, e: &gtk::Button);
+    //  fn add_button(&mut self, e: &gtk::Button);
+    fn set_button(&mut self, idx: u8, e: &gtk::Button);
 
     fn get_spinner_w(&self) -> Option<(gtk::CellRendererSpinner, gtk::TreeViewColumn)>;
     fn set_spinner_w(&mut self, widgets: (gtk::CellRendererSpinner, gtk::TreeViewColumn));

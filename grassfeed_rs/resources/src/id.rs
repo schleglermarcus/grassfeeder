@@ -25,8 +25,10 @@ pub const DIALOG_OPML_EXPORT: u8 = 7;
 pub const DIALOG_SETTINGS: u8 = 8;
 pub const DIALOG_ABOUT: u8 = 9;
 pub const DIALOG_TREE0COL1: u8 = 10;
+pub const DIALOG_SETTINGS_CHECK: u8 = 11;
 
 pub const DIALOG_TEXTVIEW_ERR: u8 = 0;
+pub const DIALOG_TEXTVIEW_CLEAN: u8 = 1;
 
 pub const TEXTENTRY_NEWSOURCE_URL: u8 = 0;
 pub const TEXTENTRY_NEWSOURCE_E2: u8 = 1;
@@ -56,3 +58,5 @@ pub const SCROLLEDWINDOW_2: u8 = 2;
 pub const SEARCH_ENTRY_0: u8 = 0;
 
 pub const TOOLBUTTON_RELOAD_ALL: u8 = 0;
+
+pub const BUTTON_SETTINGS_CLEAN_START : u8 = 0;

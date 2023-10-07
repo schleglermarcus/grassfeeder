@@ -82,8 +82,6 @@ struct AdValSto {
 impl AdValSto {}
 
 impl UIAdapterValueStore for AdValSto {
-    fn memory_conserve(&mut self, _ac: bool) {}
-
     fn set_text_entry(&mut self, _index: u8, nt: String) {
         self.text_entry_text = nt;
     }
@@ -196,6 +194,13 @@ impl UIAdapterValueStore for AdValSto {
     fn get_list_length(&self, _list_index: u8) -> usize {
         0
     }
+
+    fn get_window_minimized(&self) -> bool {
+        false
+    }
+
+    fn set_window_minimized(&mut self, _active: bool) {}
+    
 }
 
 // #[derive(Default)]

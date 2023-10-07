@@ -450,7 +450,7 @@ impl ISubscriptionMove for SubscriptionMove {
         fse.parent_subs_id = parent_id;
         if was_truncated {
             let msg = format!("Found non-ISO chars in Subscription Title: {}", &display);
-            let _r = (*self.erro_repo_r).borrow().add_error(
+            (*self.erro_repo_r).borrow().add_error(
                 fse.subs_id,
                 ESRC::SubsmoveTruncated,
                 0,

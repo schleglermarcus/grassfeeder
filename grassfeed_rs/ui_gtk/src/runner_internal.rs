@@ -146,7 +146,7 @@ impl GtkRunnerInternal {
         g14m_guard!();
         gtk::glib::timeout_add_local(GTK_MAIN_INTERVAL, move || {
             let prev_count = INTERVAL_COUNTER.fetch_add(1, Ordering::Relaxed);
-            if is_minimized.load(Ordering::Relaxed) && (prev_count & 7 != 0) {
+            if is_minimized.load(Ordering::Relaxed) && (prev_count & 3 != 0) {
                 return gtk::glib::Continue(true);
             }
 

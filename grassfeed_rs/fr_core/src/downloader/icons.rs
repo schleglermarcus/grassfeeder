@@ -82,7 +82,7 @@ impl Step<IconInner> for FeedTextDownload {
         match result.status {
             200 => {
                 if elapsedms > 100 {
-                    let _r = inner.erro_repo.add_error(
+                    inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconFeedTextDur,
                         elapsedms as isize,
@@ -93,7 +93,7 @@ impl Step<IconInner> for FeedTextDownload {
                 inner.feed_download_text = result.content;
             }
             _ => {
-                let _r = inner.erro_repo.add_error(
+                inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconsFeedtext,
                     result.status as isize,
@@ -163,7 +163,7 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 }
                 Err(e_descr) => {
-                    let _r = inner.erro_repo.add_error(
+                    inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconsAHEx,
                         r.status as isize,
@@ -174,7 +174,7 @@ impl Step<IconInner> for IconAnalyzeHomepage {
             },
             _ => {
                 let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
-                let _r = inner.erro_repo.add_error(
+                inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconsAHMain,
                     r.status as isize,
@@ -213,7 +213,7 @@ impl Step<IconInner> for IconDownload {
             200 => {
                 inner.icon_bytes = r.content_bin;
                 if elapsedms > 100 {
-                    let _r = inner.erro_repo.add_error(
+                    inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconDLDuration,
                         elapsedms as isize,
@@ -225,7 +225,7 @@ impl Step<IconInner> for IconDownload {
             }
             _ => {
                 inner.download_error_happened = true;
-                let _r = inner.erro_repo.add_error(
+                inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconsDownload,
                     r.get_status() as isize,
@@ -253,7 +253,7 @@ impl Step<IconInner> for IconCheckIsImage {
             return StepResult::Continue(Box::new(IconDownscale(inner)));
         }
         if an_res.kind == IconKind::UnknownType || an_res.kind == IconKind::TooSmall {
-            let _r = inner.erro_repo.add_error(
+            inner.erro_repo.add_error(
                 inner.subs_id,
                 ESRC::IconsCheckimg,
                 inner.icon_bytes.len() as isize,
@@ -284,7 +284,7 @@ impl Step<IconInner> for IconDownscale {
                 r.err()
             );
             trace!("{msg}");
-            let _r = inner.erro_repo.add_error(
+            inner.erro_repo.add_error(
                 inner.subs_id,
                 ESRC::IconsDownscale,
                 0,

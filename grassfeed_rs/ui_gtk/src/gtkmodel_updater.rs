@@ -320,6 +320,7 @@ impl GtkModelUpdaterInt {
         let now = std::time::Instant::now();
 
         let g_o = (*self.g_o_a).read().unwrap();
+
         let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
         if let Some(row0) = (self.m_v_store)
             .read()
@@ -365,12 +366,15 @@ impl GtkModelUpdaterInt {
             list_store.set_sort_column_id(sort_col, sort_type);
         }
         list_view.set_model(Some(list_store));
-        let elapsed = now.elapsed().as_millis();
-        if elapsed > 150 {
-            debug!(
-                "update_list_model took {:?}ms #lines:{} ",
-                elapsed, num_lines
-            );
+        let is_minimized = (self.m_v_store).read().unwrap().get_window_minimized();
+        if !is_minimized {
+            let elapsed = now.elapsed().as_millis();
+            if elapsed > 200 {
+                debug!(
+                    "update_list_model took {:?}ms #lines:{} ",
+                    elapsed, num_lines
+                );
+            }
         }
     }
 
@@ -783,7 +787,10 @@ impl GtkModelUpdaterInt {
             (*self.g_o_a).write().unwrap().set_web_view(0, None, None);
             (*self.g_o_a).write().unwrap().set_web_view(1, None, None);
         }
-        (self.m_v_store).write().unwrap().memory_conserve(active);
+        (self.m_v_store)
+            .write()
+            .unwrap()
+            .set_window_minimized(active);
     }
 
     pub fn update_window_minimized(&self, minimized: bool, _ev_time: u32) {

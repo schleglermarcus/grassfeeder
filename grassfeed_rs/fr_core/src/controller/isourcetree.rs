@@ -235,7 +235,7 @@ impl ISourceTreeController for SourceTreeController {
                 .borrow()
                 .get_by_subscription(src_repo_id)
                 .iter()
-                .map(|ee| errorentry_to_line(&ee )) // , &fse.display_name 
+                .map( errorentry_to_line )
                 .collect();
             let joined = lines.join("\n");
             dd.push(AValue::ASTR(joined)); // 8

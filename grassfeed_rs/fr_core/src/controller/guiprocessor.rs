@@ -27,6 +27,7 @@ use crate::db::subscription_state::StatusMask;
 use crate::opml::opmlreader::OpmlReader;
 use crate::ui_select::gui_context::GuiContext;
 use crate::ui_select::select::ui_select;
+use crate::util;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
@@ -262,9 +263,10 @@ impl GuiProcessor {
                     description,
                     remote_addr,
                 ) => {
-                    if elapsed_ms > 1000 && subs_id > 0 {
-                        match kind {
-                            1 | 2 => {
+                    // if elapsed_ms > 2000 && subs_id > 0 {
+                    match kind {
+                        1 | 2 => {
+                            if elapsed_ms > 2000 && subs_id > 0 {
                                 (*self.erro_repo_r).borrow().add_error(
                                     subs_id,
                                     if kind == 1 {
@@ -273,18 +275,25 @@ impl GuiProcessor {
                                         ESRC::HttpIconDownload
                                     },
                                     elapsed_ms as isize,
-                                    String::default(),
+                                    remote_addr,
                                     description,
                                 );
                             }
-                            _ => {
+                        }
+                        4 => {
+                            // clean db
+
+                            debug!("db check done !! ");
+                            (*self.statusbar.borrow_mut()).db_check_running = false;
+                        }
+                        _ => {
+                            if elapsed_ms > 1000 {
                                 debug!(
                                     "JF {} {} T{} K{}  {}ms    {} ",
                                     subs_id, description, threadnr, kind, elapsed_ms, remote_addr
                                 );
                             }
-                        }
-                        // if kind == 1 {                        } else {                        }
+                        } //  }
                     }
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = 0;
                 }
@@ -514,6 +523,25 @@ impl GuiProcessor {
             .insert(std::mem::discriminant(ev), Box::new(handler));
     }
 
+    pub fn handle_settings_check_level(&self) {
+        let now = util::timestamp_now();
+        let level = ((now / 10) % 10) as u32;
+        // trace!("GP:  level: {} ", level);
+        let dd: Vec<AValue> = vec![
+            AValue::AU32(level),
+            AValue::None,
+            // AValue::ASTR(format!("GP {}", level)),
+        ];
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_dialog_data(DIALOG_SETTINGS_CHECK, &dd);
+
+        (*self.gui_updater)
+            .borrow()
+            .update_dialog(DIALOG_SETTINGS_CHECK);
+    }
+
     // GuiProcessor
 }
 
@@ -565,6 +593,9 @@ impl TimerReceiver for GuiProcessor {
                 }
                 TimerEvent::Timer1s => {
                     self.statusbar.borrow_mut().update_memory_stats();
+                }
+                TimerEvent::Timer10s => {
+                    //  self.handle_settings_check_level();
                 }
                 TimerEvent::Startup => {
                     self.process_jobs();
@@ -729,6 +760,11 @@ impl StartupWithAppContext for GuiProcessor {
         self.add_handler(
             &GuiEvents::BrowserEvent(BrowserEventType::default(), 0),
             HandleBrowserEvent(),
+        );
+
+        self.add_handler(
+            &GuiEvents::ButtonClicked(String::default()),
+            HandleButtonActivated(),
         );
     }
 }
@@ -1265,7 +1301,7 @@ impl HandleSingleEvent for HandleWindowIconified {
                 .get_values_adapter()
                 .write()
                 .unwrap()
-                .memory_conserve(is_minimized);
+                .set_window_minimized(is_minimized);
             (*self.2)
                 .borrow()
                 .get_updater_adapter()
@@ -1311,6 +1347,22 @@ impl HandleSingleEvent for HandleBrowserEvent {
         if let GuiEvents::BrowserEvent(ref ev_type, value) = ev {
             if ev_type == &BrowserEventType::LoadingProgress {
                 gp.statusbar.borrow_mut().browser_loading_progress = value as u8;
+            }
+        }
+    }
+}
+
+struct HandleButtonActivated();
+impl HandleSingleEvent for HandleButtonActivated {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
+        if let GuiEvents::ButtonClicked(msg) = ev {
+            if msg == "D_SETTINGS_CHECKNOW" {
+                let isrunning = gp.statusbar.borrow().db_check_running;
+                debug!("clicked  {}   isrunning={}  ", msg, isrunning);
+                if !isrunning {
+                    (*gp.statusbar.borrow_mut()).db_check_running = true;
+                    (*gp.downloader_r).borrow().cleanup_db();
+                }
             }
         }
     }

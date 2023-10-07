@@ -22,6 +22,7 @@ pub struct ModelValueStoreImpl {
     pub window_title: String,
     pub window_icon: String,
     pub gui_label_tooltips: Vec<String>,
+    pub window_minimized: bool,
 }
 
 impl ModelValueStoreImpl {
@@ -98,10 +99,15 @@ impl ModelValueStoreImpl {
 }
 
 impl UIAdapterValueStore for ModelValueStoreImpl {
-    fn memory_conserve(&mut self, active: bool) {
+    fn set_window_minimized(&mut self, active: bool) {
+        self.window_minimized = active;
         if active {
             self.gui_list.clear();
         }
+    }
+
+    fn get_window_minimized(&self) -> bool {
+        self.window_minimized
     }
 
     fn set_text_entry(&mut self, idx: u8, newtext: String) {

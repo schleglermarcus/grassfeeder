@@ -1,8 +1,11 @@
+use gtk::LevelBar;
 #[cfg(feature = "legacy3gtk14")]
 use gtk::NotebookBuilder;
 
 #[cfg(not(feature = "legacy3gtk14"))]
 use gtk::builders::NotebookBuilder;
+use gtk::TextBuffer;
+use gtk::TextTagTable;
 
 use crate::util::*;
 use flume::Sender;
@@ -10,6 +13,7 @@ use gtk::gdk_pixbuf::InterpType;
 use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::WidgetExt;
 use gtk::prelude::*;
+use gtk::traits::TextBufferExt;
 use gtk::AboutDialog;
 use gtk::Adjustment;
 use gtk::Align;
@@ -21,6 +25,7 @@ use gtk::FileChooserDialog;
 use gtk::Grid;
 use gtk::Image;
 use gtk::Label;
+use gtk::LevelBarMode;
 use gtk::Notebook;
 use gtk::Orientation;
 use gtk::PositionType;
@@ -52,6 +57,9 @@ const FONTSIZE_MAX: f64 = 18.0;
 const MAX_LENGTH_NEW_SOURCE_NAME: i32 = 50;
 const MAX_LENGTH_NEW_SOURCE_URL: i32 = 200;
 const GRID_SPACING: u32 = 5;
+
+const NONE_ADJ: Option<&Adjustment> = None;
+const NONE_TEXT: Option<&TextTagTable> = None;
 
 pub fn create_dialogs(
     gui_event_sender: Sender<GuiEvents>,
@@ -482,9 +490,7 @@ fn create_subscription_edit_dialog(
     grid2.attach(&label5b, 1, line, 1, 1);
     // line += 1;
 
-    const NONE_ADJ: Option<&Adjustment> = None;
     let label_nb3 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB3")));
-
     let scrolledwindow1 = ScrolledWindow::new(NONE_ADJ, NONE_ADJ);
     scrolledwindow1.set_widget_name("scrolledwindow_0");
     scrolledwindow1.set_policy(gtk::PolicyType::Automatic, gtk::PolicyType::Automatic); // scrollbar-h, scrollbar-v
@@ -493,11 +499,7 @@ fn create_subscription_edit_dialog(
 
     let textview = TextView::new();
     textview.set_vexpand(true);
-
-
-// TODO 
-//   // GtkTextView {{     font:Monospace 10; }}    
-
+    textview.set_monospace(true);
     notebook.append_page(&scrolledwindow1, Some(&label_nb3));
     scrolledwindow1.add(&textview);
 
@@ -856,6 +858,51 @@ fn create_settings_dialog(
             //  sw_enable_systray.set_halign(Align::Start);
         }
     }
+
+    let lb_clean = LevelBar::new();
+    let label_nb3 = Label::new(Some(&t!("D_SETTINGS_TAB3")));
+    let textview2 = TextView::new();
+    let b_checknow = gtk::Button::with_label("!now");
+    {
+        let grid3 = Grid::new();
+        notebook.append_page(&grid3, Some(&label_nb3));
+        grid3.set_vexpand(true);
+        grid3.set_hexpand(true);
+        grid3.set_margin(4);
+        grid3.set_row_spacing(GRID_SPACING);
+        grid3.set_column_spacing(GRID_SPACING);
+
+        let mut line = 0;
+        let label1_1 = Label::new(Some("!check: "));
+        grid3.attach(&label1_1, 0, line, 1, 1);
+        grid3.attach(&b_checknow, 1, line, 1, 1);
+        let esw = EvSenderWrapper(g_ev_se.clone());
+        b_checknow.connect_clicked(move |_m| {
+            // trace!("clicked: D_SETTINGS_CHECKNOW ");
+            esw.sendw(GuiEvents::ButtonClicked("D_SETTINGS_CHECKNOW".to_string()));
+        });
+
+        line += 1;
+        lb_clean.set_mode(LevelBarMode::Discrete);
+        lb_clean.set_min_value(0.0);
+        lb_clean.set_max_value(15.0);
+        lb_clean.set_height_request(30);
+        // lb_clean.set_vexpand(true);
+        grid3.attach(&lb_clean, 0, line, 2, 1);
+
+        line += 1;
+        let scrolledwindow2 = ScrolledWindow::new(NONE_ADJ, NONE_ADJ);
+        scrolledwindow2.set_widget_name("scrolledwindow_2");
+        scrolledwindow2.set_policy(gtk::PolicyType::Automatic, gtk::PolicyType::Automatic); // scrollbar-h, scrollbar-v
+        scrolledwindow2.set_vexpand(true);
+        scrolledwindow2.set_shadow_type(ShadowType::EtchedIn);
+
+        textview2.set_vexpand(true); //        textview2.set_monospace(true);
+        textview2.set_hexpand(true);
+        scrolledwindow2.add(&textview2);
+        grid3.attach(&scrolledwindow2, 0, line, 2, 3);
+    }
+
     let ev_se = g_ev_se;
     let sw_subs_update_onstart_c = sw_subs_update_onstart.clone();
     let spinb_source_update_c = spinb_source_update.clone();
@@ -869,7 +916,6 @@ fn create_settings_dialog(
     let scale_bright_c = scale_bright.clone();
     let sw_subs_db_cleanup_c = sw_subs_db_cleanup.clone();
     let sw_browser_cache_clear_c = sw_browser_cache_clear.clone();
-    // let sw_enable_systray_c = sw_enable_systray.clone();
 
     dialog.connect_response(move |dialog, rt| {
         match rt {
@@ -938,8 +984,38 @@ fn create_settings_dialog(
         sw_subs_db_cleanup.set_state(dialogdata.get(11).unwrap().boo()); // 11 : DB cleanup
                                                                          // sw_enable_systray.set_state(dialogdata.get(12).unwrap().boo()); // 11 : Systray Enable
     });
+
+    let tview_clean = textview2.clone();
+    ddd.set_dialog_distribute(DIALOG_SETTINGS_CHECK, move |dialogdata| {
+        if let Some(level) = dialogdata.get(0).unwrap().uint() {
+            let level: u32 = level;
+            trace!("  LEVEL:  {} ", level);
+            if level == 0 {
+                let tbuf = TextBuffer::new(NONE_TEXT);
+                tview_clean.set_buffer(Some(&tbuf));
+            }
+            lb_clean.set_value(level as f64);
+        }
+
+        if let Some(s_add) = dialogdata.get(1).unwrap().str() {
+            let buf = tview_clean.buffer().unwrap();
+            let iter_start = buf.start_iter();
+            let iter_end = buf.end_iter();
+            if let Some(e_text) = buf.text(&iter_start, &iter_end, false) {
+                let str = e_text.as_str();
+                let ntext = format!("{}\n{}", str, s_add);
+                debug!("cleaner-text:  {:?}  =>  {} ", e_text, ntext);
+                buf.set_text(&ntext);
+            } else {
+                debug!("noBuffer!");
+            }
+        }
+    });
+
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_SETTINGS, &dialog);
+    ret.set_text_view(DIALOG_TEXTVIEW_CLEAN, &textview2);
+    ret.set_button(BUTTON_SETTINGS_CLEAN_START, &b_checknow);
 }
 
 fn create_opml_import_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsType) {

@@ -76,7 +76,7 @@ impl Step<DragInner> for BrowserEvalStart {
             return StepResult::Continue(Box::new(ParseWebpage(inner)));
         }
         inner.error_message = format!("{} {}", result.status, &result.error_description);
-        let _r = inner.erro_repo.add_error(
+        inner.erro_repo.add_error(
             -1,
             ESRC::DragEvalstart,
             result.status as isize,

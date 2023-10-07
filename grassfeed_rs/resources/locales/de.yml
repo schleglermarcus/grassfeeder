@@ -94,6 +94,8 @@ D_SETTINGS_FOCUS_POLICY_BEFORE_UNREAD: "Vor letzter ungelesener"
 D_SETTINGS_DATABASES_CLEAN_ONSTART: "Datenbanken beim Start aufräumen"
 D_SETTINGS_BROWSER_CACHE_CLEAR: "Browser Zwischenspeicher löschen"
 D_SETTINGS_SYSTRAY_ICON_ENABLE: "Icon im Info-Bereich anzeigen"
+D_SETTINGS_TAB3: Datenbanken
+
 
 D_IMPORT_OPML_SELECT_FILE: Opml Datei auswählen
 D_STORE_OPML_SELECT_FILE: Opml Datei bestimmen
@@ -101,23 +103,23 @@ D_STORE_OPML_SELECT_FILE: Opml Datei bestimmen
 
 
 EM_DL_0: "-"
-EM_DL_1: GpDlFinished
-EM_DL_2: Titel abgeschnitten
-EM_DL_3: Quelle von DragNDrop unlesbar
-EM_DL_4: Fehler bei Feed-Text download
-EM_DL_5: Symbolgewinnung aus Feed-Text-1
-EM_DL_6: Symbolgewinnung aus Feed-Text-2
-EM_DL_7: Symbol Download
-EM_DL_8: Symbol Püfung
-EM_DL_9: Symbol verkleinern
-EM_DL_11: Feed-Text zu Einträgen
-EM_DL_12: ZeitStempel ungewöhnlich
-EM_DL_13: Web-Download zu langsam
-EM_DL_14: Web-Download Fehler
-EM_DL_15: Symbol Download zu langsam
-EM_DL_16: Feed-Text Download für Symbol
-EM_DL_17: Feed-Download
-EM_DL_18: Symbol Download 
+EM_DL_1: "GpDlFinished"
+EM_DL_2: "Titel abgeschnitten"
+EM_DL_3: "Quelle von DragNDrop unlesbar"
+EM_DL_4: "Fehler bei Feed-Text download"
+EM_DL_5: "Symbolgewinnung aus Feed-Text-1"
+EM_DL_6: "Symbolgewinnung aus Feed-Text-2"
+EM_DL_7: "Symbol Download"
+EM_DL_8: "Symbol Püfung"
+EM_DL_9: "Symbol verkleinern"
+EM_DL_11: "Feed-Text zu Einträgen"
+EM_DL_12: "ZeitStempel ungewöhnlich"
+EM_DL_13: "Web-Download zu langsam"
+EM_DL_14: "Web-Download Fehler"
+EM_DL_15: "Symbol Download zu langsam"
+EM_DL_16: "Feed-Text Download für Symbol"
+EM_DL_17: "Feed-Download"
+EM_DL_18: "Symbol Download"
 
 
 M_SHORTHELP_TEXT: "Grassfeeder RSS Anzeiger Tastenbelegung\n

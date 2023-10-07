@@ -88,8 +88,8 @@ impl Step<FetchInner> for DownloadStart {
         match r.status {
             200 => {
                 inner.download_text = r.content;
-                if elapsedms > 1000 {
-                    let _r = inner.erro_repo.add_error(
+                if elapsedms > 2000 {
+                    inner.erro_repo.add_error(
                         inner.fs_repo_id,
                         ESRC::MsgDownloadTooLong,
                         elapsedms as isize,
@@ -101,7 +101,7 @@ impl Step<FetchInner> for DownloadStart {
             }
             _ => {
                 inner.download_error_happened = true;
-                let _r = inner.erro_repo.add_error(
+                inner.erro_repo.add_error(
                     inner.fs_repo_id,
                     ESRC::MsgDlStartErr,
                     r.status as isize,
@@ -122,7 +122,7 @@ impl Step<FetchInner> for EvalStringAndFilter {
         let (mut new_list, ts_created, err_text): (Vec<MessageRow>, i64, String) =
             feed_text_to_entries(dl_text, inner.fs_repo_id, inner.url.clone());
         if !err_text.is_empty() {
-            let _r = inner.erro_repo.add_error(
+            inner.erro_repo.add_error(
                 inner.fs_repo_id,
                 ESRC::MsgEvalFltEmpty,
                 0,
@@ -132,7 +132,7 @@ impl Step<FetchInner> for EvalStringAndFilter {
         }
         let o_err_msg = strange_datetime_recover(&mut new_list, &inner.download_text);
         if let Some(err_msg) = o_err_msg {
-            let _r = inner.erro_repo.add_error(
+            inner.erro_repo.add_error(
                 inner.fs_repo_id,
                 ESRC::MsgEvalFltStrange,
                 0,

@@ -103,7 +103,6 @@ pub enum GuiEvents {
 }
 
 pub trait UIAdapterValueStore {
-    fn memory_conserve(&mut self, active: bool);
 
     fn set_text_entry(&mut self, index: u8, newtext: String);
     fn get_text_entry(&self, index: u8) -> Option<String>;
@@ -160,6 +159,8 @@ pub trait UIAdapterValueStore {
 
     /// gets and removes it. can be called only once
     fn get_window_icon(&mut self) -> String;
+    fn set_window_minimized(&mut self, active: bool);
+    fn get_window_minimized(&self) -> bool;
 
     fn set_label_tooltip(&mut self, index: u8, newtext: String);
     fn get_label_tooltip(&self, index: u8) -> Option<&String>;

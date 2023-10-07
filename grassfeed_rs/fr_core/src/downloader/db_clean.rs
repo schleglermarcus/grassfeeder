@@ -30,6 +30,8 @@ pub const MAX_ERROR_LINES_PER_SUBSCRIPTION: usize = 100;
 
 pub const MAX_ERROR_LINE_AGE_S: usize = 60 * 60 * 24 * 360;
 
+pub const CLEAN_STEPS_MAX: u8 = 15;
+
 pub struct CleanerInner {
     pub cjob_sender: Sender<CJob>,
     pub sourcetree_job_sender: Sender<SJob>,
@@ -93,6 +95,10 @@ impl CleanerStart {
 pub struct CleanerStart(pub CleanerInner);
 impl Step<CleanerInner> for CleanerStart {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let _r = self
+            .0
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(0, Some("Start".to_string())));
         StepResult::Continue(Box::new(RemoveNonConnectedSubscriptions(self.0)))
     }
 }
@@ -101,6 +107,9 @@ pub struct RemoveNonConnectedSubscriptions(pub CleanerInner);
 impl Step<CleanerInner> for RemoveNonConnectedSubscriptions {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(1, None));
         let all_subs = inner.subscriptionrepo.get_all_entries();
         let mut connected_child_list: HashSet<isize> = HashSet::default();
         let mut folder_work: Vec<isize> = Vec::default();
@@ -122,11 +131,24 @@ impl Step<CleanerInner> for RemoveNonConnectedSubscriptions {
                 if delete_list.contains(&se.parent_subs_id) {
                     delete_list.insert(se.subs_id);
                 } else {
-                    debug!("Cleanup:  NotConnectedSubscription: {}", &se);
+                    let _r = inner.sourcetree_job_sender.send(SJob::NotifyDbClean(
+                        1,
+                        Some(format!(" NotConnectedSubscription: {}", &se)),
+                    ));
+                    // info!("Cleanup:  NotConnectedSubscription: {}", &se);
                 }
             }
         });
         if delete_list.len() > 3 {
+            let _r = inner.sourcetree_job_sender.send(SJob::NotifyDbClean(
+                1,
+                Some(format!(
+                    "Sanitize Subscriptions:  #connected: {}   #to_delete: {}",
+                    connected_child_list.len(),
+                    delete_list.len()
+                )),
+            ));
+
             debug!(
                 "Sanitize Subscriptions:  #connected: {}   #to_delete: {}",
                 connected_child_list.len(),
@@ -137,6 +159,7 @@ impl Step<CleanerInner> for RemoveNonConnectedSubscriptions {
                 .for_each(|id| inner.subscriptionrepo.delete_by_index(*id));
             inner.need_update_subscriptions = true;
         }
+
         StepResult::Continue(Box::new(AnalyzeFolderPositions(inner)))
     }
 }
@@ -145,6 +168,11 @@ pub struct AnalyzeFolderPositions(pub CleanerInner);
 impl Step<CleanerInner> for AnalyzeFolderPositions {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
+
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(2, None));
+
         check_layer(
             &Vec::<u16>::default(),
             0,
@@ -170,11 +198,20 @@ pub struct ReSortParentId(pub CleanerInner);
 impl Step<CleanerInner> for ReSortParentId {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(3, None));
+
         let mut parent_ids: Vec<i32> = inner.fp_correct_subs_parent.lock().unwrap().clone();
         parent_ids.sort();
         parent_ids.dedup();
         if !parent_ids.is_empty() {
             trace!("Cleanup: resorting {:?}", parent_ids);
+            let _r = inner.sourcetree_job_sender.send(SJob::NotifyDbClean(
+                3,
+                Some(format!(" resorting {:?}", parent_ids)),
+            ));
+
             parent_ids.iter().for_each(|p| {
                 resort_parent_list(*p as isize, &inner.subscriptionrepo);
             });
@@ -192,6 +229,11 @@ pub struct CorrectNames(pub CleanerInner);
 impl Step<CleanerInner> for CorrectNames {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
+
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(4, None));
+
         inner
             .subscriptionrepo
             .get_all_entries()
@@ -220,6 +262,9 @@ pub struct CollapseSubscriptions(pub CleanerInner);
 impl Step<CleanerInner> for CollapseSubscriptions {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(5, None));
         let collapse_ids = inner
             .subscriptionrepo
             .get_all_entries()
@@ -229,6 +274,12 @@ impl Step<CleanerInner> for CollapseSubscriptions {
             .collect::<Vec<isize>>();
         if !collapse_ids.is_empty() {
             trace!("Cleanup:  collapsing folders: {:?}", collapse_ids);
+
+            let _r = inner.sourcetree_job_sender.send(SJob::NotifyDbClean(
+                5,
+                Some(format!(" collapsing folders: {:?}", collapse_ids)),
+            ));
+
             inner.subscriptionrepo.update_expanded(collapse_ids, false);
             inner.need_update_subscriptions = true;
         }
@@ -240,6 +291,9 @@ pub struct CorrectIconsOfFolders(pub CleanerInner);
 impl Step<CleanerInner> for CorrectIconsOfFolders {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(6, None));
         let all_folders: Vec<SubscriptionEntry> = inner
             .subscriptionrepo
             .get_all_entries()
@@ -256,6 +310,15 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
         if !reset_icon_subs_ids.is_empty() {
             //  -3,-2  is always in the list
             trace!("CorrectIconsOfFolders:  IDS={:?}", reset_icon_subs_ids);
+
+            let _r = inner.sourcetree_job_sender.send(SJob::NotifyDbClean(
+                6,
+                Some(format!(
+                    "CorrectIconsOfFolders:  IDS={:?}",
+                    reset_icon_subs_ids
+                )),
+            ));
+
             inner
                 .subscriptionrepo
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_08_GNOME_FOLDER_48);
@@ -269,6 +332,9 @@ pub struct CorrectIconsDoublettes(pub CleanerInner);
 impl Step<CleanerInner> for CorrectIconsDoublettes {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(7, None));
         let all_icons: Vec<IconEntry> = inner.iconrepo.get_all_entries();
         // let all_icons_len = all_icons.len();
         let mut ic_first: HashMap<String, isize> = HashMap::new();
@@ -285,27 +351,42 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
             });
         let all_subs = inner.subscriptionrepo.get_all_nonfolder();
         // trace!(            "IconsDoublettes:  icon_uniq:{}    replace_icons:{}   all_subscriptions:{}  all_icons:{} ",           ic_first.len(),            replace_ids.len(),            all_subs.len(), all_icons_len        );
+        let mut changes: Vec<String> = Vec::default();
         replace_ids.iter().for_each(|(repl, dest)| {
             all_subs
                 .iter()
                 .filter(|subs| subs.icon_id == *repl as usize)
                 .for_each(|subs| {
-                    trace!(
+                    let m = format!(
                         "modifiying icon id {} {}=>{} ",
-                        subs.subs_id,
-                        subs.icon_id,
-                        dest
+                        subs.subs_id, subs.icon_id, dest
                     );
+                    trace!("{} ", m);
+                    changes.push(m);
+
                     inner
                         .subscriptionrepo
                         .update_icon_id(subs.subs_id, *dest as usize)
                 });
         });
+        if !changes.is_empty() {
+            let _r = inner
+                .sourcetree_job_sender
+                .send(SJob::NotifyDbClean(7, Some(format!(" {:?} ", changes))));
+        }
         if !replace_ids.is_empty() {
             trace!(
                 "IconsDoublettes:  removing double icons: {:?} ",
                 replace_ids.keys()
             );
+            let _r = inner.sourcetree_job_sender.send(SJob::NotifyDbClean(
+                7,
+                Some(format!(
+                    "IconsDoublettes:  removing double icons: {:?} ",
+                    replace_ids.keys()
+                )),
+            ));
+
             replace_ids.iter().for_each(|(repl, _dest)| {
                 inner.iconrepo.remove_icon(*repl);
             });
@@ -319,6 +400,9 @@ pub struct CorrectIconsOnSubscriptions(pub CleanerInner);
 impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(8, None));
         let all_folders: Vec<SubscriptionEntry> = inner
             .subscriptionrepo
             .get_all_entries()
@@ -332,6 +416,7 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
             .iter()
             .map(|ie| ie.icon_id)
             .collect::<Vec<isize>>();
+
         if all_icon_ids.len() < 2 {
             error!(
                 "no icons found, skipping CorrectIconsOnSubscriptions!  {} ",
@@ -350,6 +435,15 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
                     se.subs_id,
                     se.icon_id
                 );
+
+                let _r = inner.sourcetree_job_sender.send(SJob::NotifyDbClean(
+                    8,
+                    Some(format!(
+                        "CorrectIcons: subscr {}  not-in-icon-db: {:?}  ",
+                        se.subs_id, se.icon_id
+                    )),
+                ));
+
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
             }
@@ -359,6 +453,15 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
                     se.subs_id,
                     se.icon_id
                 );
+
+                let _r = inner.sourcetree_job_sender.send(SJob::NotifyDbClean(
+                    8,
+                    Some(format!(
+                        "CorrectIcons: subscr {}  icon id too low: {:?}  ",
+                        se.subs_id, se.icon_id
+                    )),
+                ));
+
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
             }
@@ -370,6 +473,16 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
                 reset_icon_subs_ids,
                 all_icon_ids.len()
             );
+
+            let _r = inner.sourcetree_job_sender.send(SJob::NotifyDbClean(
+                8,
+                Some(format!(
+                    "CorrectIconsOnSubscriptions : {:?}   #icons={} ",
+                    reset_icon_subs_ids,
+                    all_icon_ids.len()
+                )),
+            ));
+
             inner
                 .subscriptionrepo
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_05_RSS_FEEDS_GREY_64_D);
@@ -388,6 +501,10 @@ pub struct MarkUnconnectedMessages(pub CleanerInner);
 impl Step<CleanerInner> for MarkUnconnectedMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(9, None));
+
         let parent_ids_active: Vec<i32> = inner
             .subscriptionrepo
             .get_all_nonfolder()
@@ -403,19 +520,24 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
             .map(|fse| fse.message_id as i32)
             .collect::<Vec<i32>>();
         if !noncon_ids.is_empty() {
+            let msg: String;
             if noncon_ids.len() < 100 && parent_ids_active.len() < 100 {
-                trace!(
+                msg = format!(
                     "Cleanup: not connected messages={:?}   parent-ids={:?}",
-                    &noncon_ids,
-                    &parent_ids_active
+                    &noncon_ids, &parent_ids_active
                 );
             } else {
-                debug!(
+                msg = format!(
                     "Cleanup: not connected messages: {}   parent-ids: {}",
                     &noncon_ids.len(),
                     &parent_ids_active.len()
                 );
             }
+            trace!("{} ", msg);
+            let _r = inner
+                .sourcetree_job_sender
+                .send(SJob::NotifyDbClean(9, Some(msg)));
+
             inner.need_update_messages = true;
             inner.messagesrepo.update_is_deleted_many(&noncon_ids, true);
         }
@@ -428,6 +550,11 @@ pub struct ReduceTooManyMessages(pub CleanerInner);
 impl Step<CleanerInner> for ReduceTooManyMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
+
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(10, None));
+
         if inner.max_messages_per_subscription > 1 {
             let subs_ids = inner
                 .subscriptionrepo
@@ -488,6 +615,10 @@ pub struct DeleteDoubleSameMessages(pub CleanerInner);
 impl Step<CleanerInner> for DeleteDoubleSameMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(11, None));
+
         let subs_ids_active: Vec<i32> = inner
             .subscriptionrepo
             .get_all_nonfolder()
@@ -530,6 +661,10 @@ pub struct PurgeMessages(pub CleanerInner);
 impl Step<CleanerInner> for PurgeMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(12, None));
+
         let allmsg = inner.messagesrepo.get_all_messages();
         let all_count = allmsg.len();
         let to_delete: Vec<i32> = allmsg
@@ -545,17 +680,24 @@ impl Step<CleanerInner> for PurgeMessages {
         let num_deleted = inner.messagesrepo.delete_by_index(&to_delete);
         if to_delete.len() != num_deleted {
             warn!(
-                "PurgeMessages: #all={}   TO_DELETE: {}  DELETED:{}",
-                all_count,
+                "PurgeMessages: could not delete completely:  TO_DELETE: {}  DELETED:{}",
                 to_delete.len(),
                 num_deleted,
             );
-        } else if num_deleted > 0 {
+        }
+        if num_deleted > 0 {
             trace!(
                 "PurgeMessages: #all={}  Deleted {} messages",
                 all_count,
                 num_deleted
             );
+            let _r = inner.sourcetree_job_sender.send(SJob::NotifyDbClean(
+                12,
+                Some(format!(
+                    "PurgeMessages: #all={}  Deleted {} messages",
+                    all_count, num_deleted
+                )),
+            ));
         }
         StepResult::Continue(Box::new(CheckErrorLog(inner)))
     }
@@ -568,6 +710,9 @@ pub struct CheckErrorLog(pub CleanerInner);
 impl Step<CleanerInner> for CheckErrorLog {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(13, None));
         let parent_ids_active: HashSet<isize> = inner
             .subscriptionrepo
             .get_all_nonfolder()
@@ -582,6 +727,7 @@ impl Step<CleanerInner> for CheckErrorLog {
             .filter(|e| !subs_ids.contains(&e.subs_id))
             .for_each(|e| delete_list.push(e.err_id));
         let timestamp_earliest = timestamp_now() - (MAX_ERROR_LINE_AGE_S as i64);
+        let mut msgs: Vec<String> = Vec::default();
         for subs_id in subs_ids {
             let mut all_per_subs_id: Vec<&ErrorEntry> = list
                 .iter()
@@ -591,7 +737,7 @@ impl Step<CleanerInner> for CheckErrorLog {
             if all_per_subs_id.len() > MAX_ERROR_LINES_PER_SUBSCRIPTION {
                 let (left, right) = all_per_subs_id.split_at(MAX_ERROR_LINES_PER_SUBSCRIPTION);
                 left.iter().for_each(|el| {
-                    trace!("tooMany: {:?} ", el);
+                    msgs.push(format!("tooMany: {:?} ", el));
                     delete_list.push(el.err_id);
                 });
                 all_per_subs_id = right.to_vec();
@@ -600,9 +746,14 @@ impl Step<CleanerInner> for CheckErrorLog {
                 .iter()
                 .filter(|el| el.date < timestamp_earliest)
                 .for_each(|el| {
-                    trace!("tooOld: {:?} ", el);
+                    msgs.push(format!("tooOld: {:?} ", el));
                     delete_list.push(el.err_id);
                 });
+        }
+        if !msgs.is_empty() {
+            let _r = inner
+                .sourcetree_job_sender
+                .send(SJob::NotifyDbClean(13, Some(format!(" {:?} ", msgs))));
         }
         inner.error_repo.delete_by_index(&delete_list);
         StepResult::Continue(Box::new(Notify(inner)))
@@ -613,14 +764,21 @@ pub struct Notify(pub CleanerInner);
 impl Step<CleanerInner> for Notify {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(14, None));
         inner.subscriptionrepo.db_vacuum();
         inner.messagesrepo.db_vacuum();
+
         if inner.need_update_subscriptions {
             let _r = inner.sourcetree_job_sender.send(SJob::UpdateTreePaths);
             let _r = inner
                 .sourcetree_job_sender
                 .send(SJob::FillSubscriptionsAdapter);
         }
+        let _r = inner
+            .sourcetree_job_sender
+            .send(SJob::NotifyDbClean(CLEAN_STEPS_MAX, Some("Start".to_string())));
         StepResult::Stop(inner)
     }
 
