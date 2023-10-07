@@ -1,6 +1,7 @@
 use crate::controller::contentlist::get_font_size_from_config;
 use crate::controller::contentlist::CJob;
 use crate::controller::contentlist::IContentList;
+use crate::controller::sourcetree::errorentry_to_line;
 use crate::controller::sourcetree::Config;
 use crate::controller::sourcetree::NewSourceState;
 use crate::controller::sourcetree::SJob;
@@ -18,7 +19,7 @@ use flume::Sender;
 use gui_layer::abstract_ui::AValue;
 use resources::id::DIALOG_FOLDER_EDIT;
 use resources::id::DIALOG_FS_DELETE;
-use resources::id::DIALOG_FS_EDIT;
+use resources::id::DIALOG_SUBS_EDIT;
 use resources::id::TOOLBUTTON_RELOAD_ALL;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -203,7 +204,7 @@ impl ISourceTreeController for SourceTreeController {
     }
 
     fn start_feedsource_edit_dialog(&mut self, src_repo_id: isize) {
-        let mut dialog_id = DIALOG_FS_EDIT;
+        let mut dialog_id = DIALOG_SUBS_EDIT;
         let o_fse = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_index(src_repo_id);
@@ -234,14 +235,7 @@ impl ISourceTreeController for SourceTreeController {
                 .borrow()
                 .get_by_subscription(src_repo_id)
                 .iter()
-                .map(|ee| {
-                    format!(
-                        " {:} {:} {:} ",
-                        ee.text,
-                        fse.display_name.clone(),
-                        ee.remote_address
-                    )
-                })
+                .map(|ee| errorentry_to_line(&ee )) // , &fse.display_name 
                 .collect();
             let joined = lines.join("\n");
             dd.push(AValue::ASTR(joined)); // 8

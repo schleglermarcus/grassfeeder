@@ -1,5 +1,3 @@
-use rust_i18n::t;
-
 use crate::config::configmanager::ConfigManager;
 use crate::controller::contentlist::FeedContents;
 use crate::db::messages_repo::IMessagesRepo;
@@ -17,6 +15,8 @@ use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::gui_values::PropDef;
 use resources::id::*;
+use rust_i18n;
+use rust_i18n::t;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;

@@ -74,17 +74,6 @@ impl ErrorRepo {
         http_url: String,
         msg: String,
     ) {
-        /*
-                self.add_error_ts(
-                    subsid,
-                    esrc,
-                    eval,
-                    http_url,
-                    msg,
-                    crate::util::timestamp_now(),
-                );
-        */
-
         let en = ErrorEntry {
             subs_id: subsid,
             e_src: esrc as isize,
@@ -99,7 +88,6 @@ impl ErrorRepo {
         } else {
             error!("Cannot lock Error cache! {:?} ", en);
         }
-        // let _r = self.add_error_entry(&en);
     }
 
     pub fn add_error_ts(
@@ -120,7 +108,6 @@ impl ErrorRepo {
             date: timestamp,
             ..Default::default()
         };
-        // self.ctx.insert(&en, false).map_err(rusqlite_error_to_boxed)
         self.add_error_entry(&en)
     }
 
@@ -177,10 +164,9 @@ impl ErrorRepo {
         self.ctx.execute(sql)
     }
 
-    fn flush_dirty(&self) {
+    pub fn flush_dirty(&self) {
         if let Ok(mut lg) = self.errorlines_cache.lock() {
             if lg.len() > 0 {
-                debug!("flush error lines    # {} ", lg.len());
                 while let Some(entry) = lg.pop() {
                     let r = self.add_error_entry(&entry);
                     if r.is_err() {
@@ -247,36 +233,51 @@ mod t {
     use super::*;
     use crate::db::errorentry::ESRC;
 
-    // TODO :  in-mem
-
     // RUST_BACKTRACE=1 cargo watch -s "cargo test  db::errors_repo::t::t_error_repo_store     --lib -- --exact --nocapture"
     #[test]
     fn t_error_repo_store() {
-        let e_repo = ErrorRepo::new("../target/e_rep_store/");
+        let e_repo = ErrorRepo::new_in_mem(); //  ErrorRepo::new("../target/e_rep_store/");
         let _ = e_repo.ctx.delete_table();
         e_repo.ctx.create_table();
-        let r0 = e_repo.add_error(12, ESRC::None, 0, String::default(), String::from("E_0"));
+        let r0 = e_repo.add_error_ts(12, ESRC::None, 0, String::default(), String::from("E_0"), 2);
         assert!(r0.is_ok());
-        let r1 = e_repo.add_error(12, ESRC::None, 0, String::default(), String::from("E_1"));
+        let r1 = e_repo.add_error_ts(12, ESRC::None, 0, String::default(), String::from("E_1"), 3);
         assert!(r1.is_ok());
+        e_repo.flush_dirty();
         let subs_list = e_repo.get_by_subscription(12);
         // println!(" {:?} ", subs_list);
         assert_eq!(subs_list.len(), 2);
-        assert_eq!(subs_list.get(0).unwrap().err_id, 1);
-        assert_eq!(subs_list.get(1).unwrap().err_id, 2);
+        assert_eq!(subs_list.get(0).unwrap().err_id, 2);
+        assert_eq!(subs_list.get(1).unwrap().err_id, 1);
     }
 
+    //  cargo watch -s "(cd fr_core ; RUST_BACKTRACE=1 cargo test  db::errors_repo::t::t_error_repo_last   )"
     #[test]
     fn t_error_repo_last() {
-        let e_repo = ErrorRepo::new("../target/e_rep_last/");
+        let e_repo = ErrorRepo::new_in_mem(); // ErrorRepo::new("../target/e_rep_last/");
         let _ = e_repo.ctx.delete_table();
         e_repo.ctx.create_table();
-        let _r = e_repo.add_error(12, ESRC::None, 0, String::default(), String::from("E_0"));
+        let tnow = crate::util::timestamp_now();
+        let _r = e_repo.add_error_ts(
+            12,
+            ESRC::None,
+            0,
+            String::default(),
+            String::from("E_0"),
+            tnow-1 ,
+        );
         std::thread::sleep(std::time::Duration::from_secs(1));
-        let timestamp1 = crate::util::timestamp_now();
-        let _r = e_repo.add_error(12, ESRC::None, 0, String::default(), String::from("E_1"));
+        let _r = e_repo.add_error_ts(
+            12,
+            ESRC::None,
+            0,
+            String::default(),
+            String::from("E_1"),
+            tnow ,
+        );
+        e_repo.flush_dirty();
         let last_one = e_repo.get_last_entry(12).unwrap();
         assert_eq!(last_one.err_id, 2);
-        assert_eq!(last_one.date, timestamp1);
+        assert_eq!(last_one.date, tnow );
     }
 }

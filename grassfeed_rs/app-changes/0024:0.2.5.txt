@@ -1,12 +1,12 @@
 Mon, 28 Aug 2023 18:00:00 +0000
 - Bugfix: multiple drop of Urls caused unresponsive dialog.
+- statemachine testing  with take()
+- Errors logging to database
 
---> Errors logging to database
+
+* Feed-Errors display with list
 
 
--- statemachine testing  with take()
-
---  Tree Expand - When closed and activated, do not fill the list with the aggregate
 
 - Database Check with separate Dialog
 

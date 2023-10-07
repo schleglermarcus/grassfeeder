@@ -9,6 +9,7 @@ use crate::controller::subscriptionmove::ISubscriptionMove;
 use crate::controller::subscriptionmove::SubscriptionMove;
 use crate::controller::timer::ITimer;
 use crate::controller::timer::Timer;
+use crate::db::errorentry::ErrorEntry;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::MessagesRepo;
@@ -21,6 +22,7 @@ use crate::db::subscription_state::StatusMask;
 use crate::db::subscription_state::SubsMapEntry;
 use crate::db::subscription_state::SubscriptionState;
 use crate::ui_select::gui_context::GuiContext;
+use crate::util::db_time_to_display;
 use crate::util::timestamp_now;
 use context::appcontext::AppContext;
 use context::BuildConfig;
@@ -48,6 +50,8 @@ use resources::gen_icons::IDX_30_ERROR_24X24;
 use resources::gen_icons::IDX_32_FLAG_RED_32;
 use resources::gen_icons::IDX_44_ICON_GREEN_D;
 use resources::id::*;
+use rust_i18n;
+use rust_i18n::t;
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::rc::Rc;
@@ -1137,4 +1141,49 @@ pub enum NewSourceState {
     UrlChanged,
     Requesting,
     Completed,
+}
+
+pub fn errorentry_to_line(ee: &ErrorEntry /*, _displayname: &str */) -> String {
+    // let mut disp = displayname.to_string();    disp.truncate(12);
+    let mut e_remot = ee.remote_address.clone();
+    e_remot.truncate(40);
+    let mut esrc_txt = t!(&format!("EM_DL_{}", ee.e_src));
+    esrc_txt.truncate(30);
+    let mut e_text = ee.text.clone();
+    e_text.truncate(40);
+    format!(
+        "{:12} {:5} {:30}  {:40} {:40}",
+        db_time_to_display(ee.date),
+        ee.e_val,
+        esrc_txt,
+        e_text,
+        e_remot,
+    )
+}
+
+#[cfg(test)]
+mod t {
+
+    use super::*;
+    use crate::db::errorentry::ErrorEntry;
+    use crate::db::errorentry::ESRC;
+    // use crate::util::timestamp_now;
+
+    //  cargo watch -s "(cd fr_core ; RUST_BACKTRACE=1 cargo test  controller::sourcetree::t::t_error_entry_to_line      --lib -- --exact --nocapture  )"
+    #[test]
+    fn t_error_entry_to_line() {
+        let now = 1696643264;
+        let ee = ErrorEntry {
+            err_id: 999,
+            date: now,
+            subs_id: 3,
+            e_src: ESRC::DragEvalstart as isize,
+            e_val: 7,
+            remote_address: String::from("http://some.thing"),
+            text: String::from("Message"),
+        };
+        let r = errorentry_to_line(&ee);
+        assert_eq!(r, "2023-10-07 03:47:44     7 Could not load dragged source   Message                                  http://some.thing                       ");
+        println!("{}", r);
+    }
 }

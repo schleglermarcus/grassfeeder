@@ -5,6 +5,7 @@ pub const APP_WEBSITE: &str = "https://github.com/schleglermarcus/grassfeeder";
 pub const APP_WEBSITE_LABEL: &str = "github.com / grassfeeder";
 
 pub const APP_LICENSE: &str = "LGPL-3";
+pub const AUTHOR_STATIC: &str = "Marcus der Schlegler";
 
 pub const VERSION: &str = include_str!("../version.txt");
 
@@ -17,3 +18,5 @@ pub const CARGO_PKG_REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 pub const CARGO_PKG_LICENSE: &str = env!("CARGO_PKG_LICENSE");
 pub const CARGO_CRATE_NAME: &str = env!("CARGO_CRATE_NAME");
 pub const CARGO_PKG_HOMEPAGE: &str = env!("CARGO_PKG_HOMEPAGE");
+
+

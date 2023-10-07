@@ -169,7 +169,11 @@ impl GtkModelUpdaterInt {
         if s.is_empty() {
             return crate::iconloader::get_missing_icon();
         }
-        let buf = IconLoader::decompress_string_to_vec(s);
+        if s.len() < 10 {
+            warn!("icon probably too small, on  {} ", debug_info);
+        }
+        let dbg = format!(" iconstring:{}  {}", s.len(), debug_info);
+        let buf = IconLoader::decompress_string_to_vec(s, &dbg);
         if buf.is_empty() {
             return crate::iconloader::get_missing_icon();
         }

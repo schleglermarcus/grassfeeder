@@ -114,7 +114,7 @@ fn prepare_icon(icon_str: &str, rescale_size: i32) -> Result<Image, String> {
             ICON_SIZE_LIMIT_BYTES
         ));
     }
-    let buf = IconLoader::decompress_string_to_vec(icon_str);
+    let buf = IconLoader::decompress_string_to_vec(icon_str, "prepare_icon");
     match IconLoader::vec_to_pixbuf(&buf) {
         Ok(pb) => {
             let pb_scaled = pb
@@ -493,6 +493,11 @@ fn create_subscription_edit_dialog(
 
     let textview = TextView::new();
     textview.set_vexpand(true);
+
+
+// TODO 
+//   // GtkTextView {{     font:Monospace 10; }}    
+
     notebook.append_page(&scrolledwindow1, Some(&label_nb3));
     scrolledwindow1.add(&textview);
 
@@ -534,7 +539,7 @@ fn create_subscription_edit_dialog(
     let label4b_c = label4b;
     let label5b_c = label5b;
     let textview_c = textview.clone();
-    ddd.set_dialog_distribute(DIALOG_FS_EDIT, move |dialogdata| {
+    ddd.set_dialog_distribute(DIALOG_SUBS_EDIT, move |dialogdata| {
         let mut url = String::default();
         if let Some(s) = dialogdata.get(0).unwrap().str() {
             entry1c.set_text(&s); // 0: url
@@ -572,7 +577,7 @@ fn create_subscription_edit_dialog(
         }
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
-    ret.set_dialog(DIALOG_FS_EDIT, &dialog);
+    ret.set_dialog(DIALOG_SUBS_EDIT, &dialog);
     ret.set_text_view(DIALOG_TEXTVIEW_ERR, &textview);
 }
 
@@ -1007,11 +1012,11 @@ fn create_about_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
         t!("ABOUT_APP_DESCRIPTION"),
         CARGO_PKG_LICENSE
     )));
-    dialog.set_authors(&[CARGO_PKG_AUTHORS, "Marcus der Schlegler"]);
+    dialog.set_authors(&[CARGO_PKG_AUTHORS, AUTHOR_STATIC]);
     dialog.set_website_label(Some(APP_WEBSITE_LABEL));
     dialog.set_website(Some(APP_WEBSITE));
     dialog.set_license(Some(APP_LICENSE));
-    let buf = IconLoader::decompress_string_to_vec(ICON_04_GRASS_CUT_2);
+    let buf = IconLoader::decompress_string_to_vec(ICON_04_GRASS_CUT_2, "about_dialog");
     let pb: Pixbuf = IconLoader::vec_to_pixbuf(&buf).unwrap();
     dialog.set_logo(Some(&pb));
     dialog.set_transient_for((*gtk_obj_a).read().unwrap().get_window().as_ref());

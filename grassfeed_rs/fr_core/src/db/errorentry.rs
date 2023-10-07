@@ -5,6 +5,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 // Error entry Source / Location / Reason
+#[derive(Debug, Clone, PartialEq)]
 pub enum ESRC {
     None = 0,
     GpDlFinished = 1,
@@ -24,6 +25,29 @@ pub enum ESRC {
     IconFeedTextDur = 16,
     HttpFeedDownload = 17,
     HttpIconDownload = 18,
+}
+
+impl ESRC {
+    pub const VALUES: [Self; 18] = [
+        Self::None,
+        Self::GpDlFinished,
+        Self::SubsmoveTruncated,
+        Self::DragEvalstart,
+        Self::IconsFeedtext,
+        Self::IconsAHEx,
+        Self::IconsAHMain,
+        Self::IconsDownload,
+        Self::IconsCheckimg,
+        Self::IconsDownscale,
+        Self::MsgEvalFltEmpty,
+        Self::MsgEvalFltStrange,
+        Self::MsgDownloadTooLong,
+        Self::MsgDlStartErr,
+        Self::IconDLDuration,
+        Self::IconFeedTextDur,
+        Self::HttpFeedDownload,
+        Self::HttpIconDownload,
+    ];
 }
 
 ///

@@ -95,11 +95,6 @@ pub enum IconKind {
     UnknownType, // all analyses done
 }
 
-// impl Default for IconKind {
-//     fn default() -> Self {
-//         IconKind::None
-//     }
-// }
 
 pub fn downscale_image(
     img_bytes: &[u8],

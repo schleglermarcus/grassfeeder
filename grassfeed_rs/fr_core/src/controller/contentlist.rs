@@ -603,7 +603,7 @@ impl IContentList for FeedContents {
                 }
             }
             let elapsed_m = now.elapsed().as_millis();
-            if elapsed_m > 200 {
+            if elapsed_m > 500 {
                 debug!("CJOB: {:?} took {:?}", &job, elapsed_m);
             }
         }

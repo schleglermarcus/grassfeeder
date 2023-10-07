@@ -17,8 +17,10 @@ extern crate rust_i18n;
 #[allow(unused_imports)]
 #[macro_use]
 extern crate log;
-#[cfg(test)]
-extern crate rand;
+
+
+// #[cfg(test)]
+// extern crate rand;
 
 use rust_i18n::i18n;
 i18n!("../resources/locales");

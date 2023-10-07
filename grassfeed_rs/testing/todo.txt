@@ -1,6 +1,4 @@
-- errors logging to Database
 
-- statemachine testing  with take()
 - Database Check with separate Dialog
 
 
@@ -11,6 +9,8 @@
 - Aggregate View:  use favorite colum for subscription icon
 
 - Test icon extraction with https://www.greyblake.com/blog/property-based-testing-in-rust-with-arbitrary/
+
+- Idea: tree Expand - When closed and activated, do not fill the list with the aggregate
 
 
 

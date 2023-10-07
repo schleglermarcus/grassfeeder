@@ -1,13 +1,13 @@
-grassfeeder-gtk3 (0.0.2407) jammy; urgency=low
+grassfeeder-gtk3 (0.0.2414) jammy; urgency=low
 
   - Bugfix: multiple drop of Urls caused unresponsive dialog.
+  - statemachine testing  with take()
+  - Errors logging to database
   
-  --> Errors logging to database
+  
+  * Feed-Errors display with list
   
   
-  -- statemachine testing  with take()
-  
-  --  Tree Expand - When closed and activated, do not fill the list with the aggregate
   
   - Database Check with separate Dialog
   

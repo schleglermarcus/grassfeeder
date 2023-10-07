@@ -427,6 +427,7 @@ impl ISubscriptionMove for SubscriptionMove {
         self.add_new_subscription_at_parent(newsource, display, p_id, false)
     }
 
+    ///  returns  the suscription id
     fn add_new_subscription_at_parent(
         &self,
         newsource: String,

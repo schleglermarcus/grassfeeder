@@ -4,6 +4,8 @@ use context::appcontext::AppContext;
 use fr_core::config::init_system::GrassFeederConfig;
 use fr_core::controller::subscriptionmove::ISubscriptionMove;
 use fr_core::controller::subscriptionmove::SubscriptionMove;
+use fr_core::db::errorentry::ESRC;
+use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
@@ -90,8 +92,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         let fsrwr: Rc<RefCell<dyn ISubscriptionRepo>> = acr.get_rc::<SubscriptionRepo>().unwrap();
         (*fsrwr.borrow()).scrub_all_subscriptions();
     }
-    // let feedsources_r: Rc<RefCell<dyn ISourceTreeController>> =        acr.get_rc::<SourceTreeController>().unwrap();
-    // let ref mut feedsources = (*feedsources_r).borrow_mut();
+    let error_repo: Rc<RefCell<ErrorRepo>> = acr.get_rc::<ErrorRepo>().unwrap();
 
     let subs_move_r: Rc<RefCell<dyn ISubscriptionMove>> = acr.get_rc::<SubscriptionMove>().unwrap();
     let ref subs_move = (*subs_move_r).borrow();
@@ -105,7 +106,22 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let folder2 = subs_move.add_new_folder_at_parent("folder2".to_string(), 0);
     let folder1 = subs_move.add_new_folder_at_parent("folder1".to_string(), folder2);
 
-    (*subs_move).add_new_subscription_at_parent(url_dynamic, "dynamic".to_string(), folder1, false);
+    let subs_id_dyn = (*subs_move).add_new_subscription_at_parent(
+        url_dynamic.clone(),
+        "dynamic".to_string(),
+        folder1,
+        false,
+    );
+    for esrc in ESRC::VALUES {
+        let dummy_val = subs_id_dyn * (esrc.clone() as isize);
+        (*error_repo.borrow()).add_error(
+            subs_id_dyn,
+            esrc,
+            dummy_val,
+            url_dynamic.clone(),
+            "some-message".to_string(),
+        )
+    }
     let url_staseve = format!("{}/staseve-11.xml", addr);
     let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
     subs_move.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder1, false);

@@ -30,18 +30,18 @@ impl IconLoader {
     }
 
     ///  decode String from  base64  , then decompress the data, return String
-    pub fn decompress_string_to_vec(compr_b64: &str) -> Vec<u8> {
+    pub fn decompress_string_to_vec(compr_b64: &str, debug_info: &str) -> Vec<u8> {
         match base64::decode(compr_b64) {
             Ok(buffer) => match prelude::decompress(&buffer) {
                 Ok(vec_u8) => {
                     return vec_u8;
                 }
                 Err(e) => {
-                    error!("icon-decompress: {:?}", e);
+                    error!("icon-decompress: {:?}   {}  ", e, debug_info);
                 }
             },
             Err(e) => {
-                error!("icon-decode:  {:?}", e);
+                error!("icon-decode:  {:?}  {} ", e, debug_info);
             }
         }
         Vec::default()
@@ -51,7 +51,7 @@ impl IconLoader {
 pub struct IconLoader {}
 
 pub fn get_missing_icon() -> Pixbuf {
-    IconLoader::vec_to_pixbuf(&IconLoader::decompress_string_to_vec(ICON_MISSING_STR)).unwrap()
+    IconLoader::vec_to_pixbuf(&IconLoader::decompress_string_to_vec(ICON_MISSING_STR, "")).unwrap()
 }
 
 #[allow(dead_code)]

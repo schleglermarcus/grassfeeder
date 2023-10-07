@@ -197,7 +197,8 @@ mod appcontext_test {
     use std::sync::atomic::AtomicBool;
     use std::sync::atomic::Ordering;
     pub static DBU_IN_USE: AtomicBool = AtomicBool::new(false);
-
+    use crate::controller::guiprocessor::Job;
+    
     //----
     struct GUIP {
         timer_r: Rc<RefCell<dyn ITimer>>,
@@ -227,8 +228,8 @@ mod appcontext_test {
         }
     }
 
-    #[derive(Debug, Clone)]
-    pub enum Job {}
+    // #[derive(Debug, Clone)]
+    // pub enum Job {}
 
     impl GUIP {
         pub fn new(ac: &AppContext) -> Self {

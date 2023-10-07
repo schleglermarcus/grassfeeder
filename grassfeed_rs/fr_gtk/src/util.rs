@@ -73,7 +73,7 @@ pub fn process_string_to_image(
     err_help: &String,
     size: i32,
 ) -> bool {
-    let buf = IconLoader::decompress_string_to_vec(icon_str);
+    let buf = IconLoader::decompress_string_to_vec(icon_str, err_help );
     if buf.is_empty() {
         warn!("empty icon_buffer: {} ", err_help);
         return false;
