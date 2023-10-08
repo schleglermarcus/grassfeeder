@@ -1,4 +1,5 @@
 use crate::controller::contentlist::CJob;
+use crate::controller::guiprocessor::Job;
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconRepo;
@@ -41,9 +42,10 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
         cache_folder
     );
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
-    let (c_q_s, c_q_r) = flume::bounded::<CJob>(9);
+    let (gp_job_s, _gp_job_r) = flume::bounded::<Job>(9);
+    let (_c_q_s, c_q_r) = flume::bounded::<CJob>(9);
     let cleaner_i = CleanerInner::new(
-        c_q_s, stc_job_s, subsrepo1, msgrepo1, iconrepo, 100000, err_repo,
+        gp_job_s, stc_job_s, subsrepo1, msgrepo1, iconrepo, 100000, err_repo,
     );
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     c_q_r.drain().for_each(|cjob| debug!("CJOB: {:?}", cjob));

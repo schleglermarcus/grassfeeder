@@ -116,9 +116,6 @@ pub enum SJob {
     /// subs_id
     SetCursorToSubsID(isize),
     SetGuiTreeColumn1Width,
-
-    /// Cleaner Step Nr,  Current Step Message
-    NotifyDbClean(u8, Option<String>),
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -380,25 +377,26 @@ impl SourceTreeController {
 
                 SJob::GuiStoreIcons => {
                     self.icons_store_to_gui();
-                }
-                SJob::NotifyDbClean(c_step, ref c_msg) => {
-                    let dd: Vec<AValue> = vec![
-                        AValue::AU32(c_step as u32),
-                        if let Some(msg) = c_msg {
-                            AValue::ASTR(msg.clone())
-                        } else {
-                            AValue::None
-                        },
-                    ];
-                    trace!("NotifyDbClean:  {}  {:?}  dd= {:?} ", c_step, c_msg, dd);
-                    (*self.gui_val_store)
-                        .write()
-                        .unwrap()
-                        .set_dialog_data(DIALOG_SETTINGS_CHECK, &dd);
-                    (*self.gui_updater)
-                        .borrow()
-                        .update_dialog(DIALOG_SETTINGS_CHECK);
-                }
+                } /*
+                                 SJob::NotifyDbClean(c_step, ref c_msg) => {
+                                     let dd: Vec<AValue> = vec![
+                                         AValue::AU32(c_step as u32),
+                                         if let Some(msg) = c_msg {
+                                             AValue::ASTR(msg.clone())
+                                         } else {
+                                             AValue::None
+                                         },
+                                     ];
+                                     trace!("NotifyDbClean:  {}  {:?}  dd= {:?} ", c_step, c_msg, dd);
+                                     (*self.gui_val_store)
+                                         .write()
+                                         .unwrap()
+                                         .set_dialog_data(DIALOG_SETTINGS_CHECK, &dd);
+                                     (*self.gui_updater)
+                                         .borrow()
+                                         .update_dialog(DIALOG_SETTINGS_CHECK);
+                                 }
+                  */
             }
             if (*self.config).borrow().mode_debug {
                 let elapsed_m = now.elapsed().as_millis();

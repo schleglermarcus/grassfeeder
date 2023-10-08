@@ -95,6 +95,8 @@ D_SETTINGS_DATABASES_CLEAN_ONSTART: "Datenbanken beim Start aufräumen"
 D_SETTINGS_BROWSER_CACHE_CLEAR: "Browser Zwischenspeicher löschen"
 D_SETTINGS_SYSTRAY_ICON_ENABLE: "Icon im Info-Bereich anzeigen"
 D_SETTINGS_TAB3: Datenbanken
+D_SETTINGS_DB_CLEAN: "Datenbanken aufräumen"
+D_SETTINGS_DB_CLEAN_B1: "Start"
 
 
 D_IMPORT_OPML_SELECT_FILE: Opml Datei auswählen

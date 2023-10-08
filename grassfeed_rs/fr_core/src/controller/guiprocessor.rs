@@ -24,6 +24,7 @@ use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::db::subscription_state::ISubscriptionState;
 use crate::db::subscription_state::StatusMask;
+use crate::downloader::db_clean::CLEAN_STEPS_MAX;
 use crate::opml::opmlreader::OpmlReader;
 use crate::ui_select::gui_context::GuiContext;
 use crate::ui_select::select::ui_select;
@@ -74,6 +75,8 @@ pub enum Job {
     DownloaderJobFinished(isize, u8, u8, u32, String, String),
     CheckFocusMarker(u8),
     AddBottomDisplayErrorMessage(String),
+    /// Cleaner Step Nr,  Current Step Message
+    NotifyDbClean(u8, Option<String>),
 }
 
 const JOBQUEUE_SIZE: usize = 100;
@@ -307,6 +310,32 @@ impl GuiProcessor {
                 Job::AddBottomDisplayErrorMessage(msg) => {
                     self.statusbar.borrow_mut().bottom_notices.push_back(msg);
                 }
+                Job::NotifyDbClean(c_step, ref c_msg) => {
+                    let av2nd = if let Some(msg) = c_msg {
+                        let newmsg = format!(
+                            "{}{}\n",
+                            self.statusbar.borrow().db_check_display_message,
+                            msg
+                        );
+                        self.statusbar.borrow_mut().set_db_check_msg(&newmsg);
+                        // trace!("NotifyDbClean:  {}  {:?}   ", c_step, c_msg);
+                        AValue::ASTR(newmsg)
+                    } else {
+                        AValue::None
+                    };
+                    let dd: Vec<AValue> = vec![AValue::AU32(c_step as u32), av2nd];
+                    (*self.gui_val_store)
+                        .write()
+                        .unwrap()
+                        .set_dialog_data(DIALOG_SETTINGS_CHECK, &dd);
+                    (*self.gui_updater)
+                        .borrow()
+                        .update_dialog(DIALOG_SETTINGS_CHECK);
+                    if c_step >= CLEAN_STEPS_MAX {
+                        self.statusbar.borrow_mut().db_check_running = false;
+                    }
+                }
+
                 _ => {
                     warn!("other job! {:?}", &job);
                 }
@@ -766,6 +795,10 @@ impl StartupWithAppContext for GuiProcessor {
             &GuiEvents::ButtonClicked(String::default()),
             HandleButtonActivated(),
         );
+        // self.add_handler(
+        //     &GuiEvents::NotifyDbClean(0, String::default()),
+        //     HandleNotifyDbClean(),
+        // );
     }
 }
 
@@ -1358,12 +1391,32 @@ impl HandleSingleEvent for HandleButtonActivated {
         if let GuiEvents::ButtonClicked(msg) = ev {
             if msg == "D_SETTINGS_CHECKNOW" {
                 let isrunning = gp.statusbar.borrow().db_check_running;
-                debug!("clicked  {}   isrunning={}  ", msg, isrunning);
                 if !isrunning {
-                    (*gp.statusbar.borrow_mut()).db_check_running = true;
-                    (*gp.downloader_r).borrow().cleanup_db();
+                    let mut sb = gp.statusbar.borrow_mut();
+                    sb.db_check_running = true;
+                    sb.set_db_check_msg(&String::default());
+                    gp.downloader_r.borrow().cleanup_db();
+                } else {
+                    debug!("clicked, SKIPPING {}   isrunning={}  ", msg, isrunning);
                 }
             }
         }
     }
 }
+/*
+struct HandleNotifyDbClean();
+impl HandleSingleEvent for HandleNotifyDbClean {
+    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
+        if let GuiEvents::NotifyDbClea(step , msg) = ev {
+            if msg == "D_SETTINGS_CHECKNOW" {
+                let isrunning = gp.statusbar.borrow().db_check_running;
+                debug!("clicked  {}   isrunning={}  ", msg, isrunning);
+                if !isrunning {
+                    gp.statusbar.borrow_mut().db_check_running = true;
+                    gp.downloader_r.borrow().cleanup_db();
+                }
+            }
+        }
+    }
+}
+ */

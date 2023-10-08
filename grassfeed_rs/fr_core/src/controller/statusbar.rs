@@ -54,6 +54,7 @@ pub struct StatusBar {
     browser_loading_progress_int: u8,
     downloader_stats: [u32; DLKIND_MAX],
     pub db_check_running: bool,
+    pub db_check_display_message: String,
 }
 
 impl StatusBar {
@@ -90,6 +91,7 @@ impl StatusBar {
             browser_loading_progress_int: Default::default(),
             downloader_stats: [0; DLKIND_MAX],
             db_check_running: false,
+            db_check_display_message: Default::default(),
         }
     }
 
@@ -302,5 +304,9 @@ impl StatusBar {
             dividend * VERTICAL_RISING_BAR_LEN / divisor
         };
         char::from_u32(VERTICAL_RISING_BAR[div_idx]).unwrap()
+    }
+
+    pub fn set_db_check_msg(&mut self, m: &String) {
+        self.db_check_display_message = m.clone();
     }
 }

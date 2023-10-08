@@ -427,7 +427,7 @@ impl GtkObjects for GtkObjectsImpl {
         if self.buttons.len() < idx as usize + 1 {
             self.buttons.resize(idx as usize + 1, Button::new());
         }
-        self.buttons[idx as usize ] = e.clone();
+        self.buttons[idx as usize] = e.clone();
     }
 
     fn get_spinner_w(&self) -> Option<(gtk::CellRendererSpinner, gtk::TreeViewColumn)> {

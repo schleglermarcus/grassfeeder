@@ -792,13 +792,13 @@ fn create_settings_dialog(
         cbt_focuspolicy.append_text(&get_focus_policy_name(4));
         cbt_focuspolicy.set_id_column(0);
         grid1.attach(&cbt_focuspolicy, 1, line, 1, 1);
-        line += 1;
-
-        let label3 = Label::new(Some(&t!("D_SETTINGS_DATABASES_CLEAN_ONSTART")));
-        grid1.attach(&label3, 0, line, 1, 1);
-        grid1.attach(&sw_subs_db_cleanup, 1, line, 1, 1);
-        sw_subs_db_cleanup.set_halign(Align::Start);
-        // line += 1;
+        /*
+               line += 1;
+               let label3 = Label::new(Some(&t!("D_SETTINGS_DATABASES_CLEAN_ONSTART")));
+               grid1.attach(&label3, 0, line, 1, 1);
+               grid1.attach(&sw_subs_db_cleanup, 1, line, 1, 1);
+               sw_subs_db_cleanup.set_halign(Align::Start);
+        */
     }
     let label_nb2 = Label::new(Some(&t!("D_SETTINGS_TAB2")));
     {
@@ -862,7 +862,7 @@ fn create_settings_dialog(
     let lb_clean = LevelBar::new();
     let label_nb3 = Label::new(Some(&t!("D_SETTINGS_TAB3")));
     let textview2 = TextView::new();
-    let b_checknow = gtk::Button::with_label("!now");
+    let b_checknow = gtk::Button::with_label(&t!("D_SETTINGS_DB_CLEAN_B1"));
     {
         let grid3 = Grid::new();
         notebook.append_page(&grid3, Some(&label_nb3));
@@ -871,22 +871,19 @@ fn create_settings_dialog(
         grid3.set_margin(4);
         grid3.set_row_spacing(GRID_SPACING);
         grid3.set_column_spacing(GRID_SPACING);
-
         let mut line = 0;
-        let label1_1 = Label::new(Some("!check: "));
+        let label1_1 = Label::new(Some(&t!("D_SETTINGS_DB_CLEAN")));
         grid3.attach(&label1_1, 0, line, 1, 1);
         grid3.attach(&b_checknow, 1, line, 1, 1);
         let esw = EvSenderWrapper(g_ev_se.clone());
         b_checknow.connect_clicked(move |_m| {
-            // trace!("clicked: D_SETTINGS_CHECKNOW ");
             esw.sendw(GuiEvents::ButtonClicked("D_SETTINGS_CHECKNOW".to_string()));
         });
-
         line += 1;
         lb_clean.set_mode(LevelBarMode::Discrete);
         lb_clean.set_min_value(0.0);
         lb_clean.set_max_value(15.0);
-        lb_clean.set_height_request(30);
+        lb_clean.set_height_request(20);
         // lb_clean.set_vexpand(true);
         grid3.attach(&lb_clean, 0, line, 2, 1);
 
@@ -996,18 +993,9 @@ fn create_settings_dialog(
             }
             lb_clean.set_value(level as f64);
         }
-
         if let Some(s_add) = dialogdata.get(1).unwrap().str() {
-            let buf = tview_clean.buffer().unwrap();
-            let iter_start = buf.start_iter();
-            let iter_end = buf.end_iter();
-            if let Some(e_text) = buf.text(&iter_start, &iter_end, false) {
-                let str = e_text.as_str();
-                let ntext = format!("{}\n{}", str, s_add);
-                debug!("cleaner-text:  {:?}  =>  {} ", e_text, ntext);
-                buf.set_text(&ntext);
-            } else {
-                debug!("noBuffer!");
+            if let Some(buf) = tview_clean.buffer() {
+                buf.set_text(&s_add);
             }
         }
     });

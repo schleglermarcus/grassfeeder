@@ -406,7 +406,7 @@ impl IDownloader for Downloader {
         let iconrepo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
         let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
         let cleaner_i = CleanerInner::new(
-            self.contentlist_job_sender.as_ref().unwrap().clone(),
+            self.gp_job_sender.as_ref().unwrap().clone(),
             self.source_c_sender.as_ref().unwrap().clone(),
             subs_repo,
             msgrepo1,

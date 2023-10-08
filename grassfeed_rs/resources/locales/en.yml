@@ -96,6 +96,8 @@ D_SETTINGS_DATABASES_CLEAN_ONSTART: "Clean up databases on start"
 D_SETTINGS_BROWSER_CACHE_CLEAR: "Clear browser cache"
 D_SETTINGS_SYSTRAY_ICON_ENABLE: "Show Systray Icon"
 D_SETTINGS_TAB3: Databases
+D_SETTINGS_DB_CLEAN: "Clean up databases"
+D_SETTINGS_DB_CLEAN_B1: "Start"
 
 
 D_IMPORT_OPML_SELECT_FILE: "Select Opml file"
