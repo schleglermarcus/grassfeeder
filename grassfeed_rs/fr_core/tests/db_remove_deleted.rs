@@ -1,4 +1,5 @@
-use fr_core::controller::contentlist::CJob;
+// use fr_core::controller::contentlist::CJob;
+use fr_core::controller::guiprocessor::Job;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::errorentry::ESRC;
 use fr_core::db::errors_repo::ErrorRepo;
@@ -77,28 +78,18 @@ fn clean_subscriptions_names_expanded() {
 #[test]
 fn t_db_cleanup_1() {
     setup();
-    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
-    let subsrepo = SubscriptionRepo::new_inmem(); // new("");
-    subsrepo.scrub_all_subscriptions();
-    let msgrepo1 = MessagesRepo::new_in_mem();
-    let msgrepo2 = MessagesRepo::new_by_connection(msgrepo1.get_ctx().get_connection());
-    msgrepo1.get_ctx().create_table();
-    prepare_db_with_errors_1(&msgrepo1, &subsrepo);
-    let subsrepo1 = SubscriptionRepo::by_existing_connection(subsrepo.get_connection()); // by_existing_list(subsrepo.get_list());
-    let mut iconrepo = IconRepo::new("../target/");
-    iconrepo.startup();
-    let err_repo = ErrorRepo::new_in_mem();
-    let cleaner_i = CleanerInner::new(c_q_s, stc_job_s, subsrepo, msgrepo1, iconrepo, 5, err_repo);
+    let cleaner_i = prepare_cleaner_inner(None, -1);
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
-    // trace!("  A:  parent_ids_to_correct  {:?}", parent_ids_to_correct);
     assert_eq!(parent_ids_to_correct.len(), 1);
-    let sub1 = subsrepo1.get_by_index(1).unwrap();
+
+    let sub1 = inner.subscriptionrepo.get_by_index(1).unwrap();
     assert!(sub1.display_name.starts_with("folder1"));
-    assert!(subsrepo1.get_by_index(2).unwrap().display_name.len() < 10);
-    assert!(!subsrepo1.get_by_index(2).unwrap().expanded);
-    assert_eq!(msgrepo2.get_by_index(2).unwrap().is_deleted, false); // belongs to subscription, keep it
+    let sub2 = inner.subscriptionrepo.get_by_index(2).unwrap();
+    assert!(sub2.display_name.len() < 10);
+    assert!(!sub2.expanded);
+    let msg2 = inner.messagesrepo.get_by_index(2).unwrap();
+    assert_eq!(msg2.is_deleted, false); // belongs to subscription, keep it
 }
 
 // #[ignore]
@@ -117,6 +108,7 @@ fn t_subscr_parent_ids_correction() {
     }
 }
 
+// #[ignore]
 #[test]
 fn clean_message_doublettes() {
     setup();
@@ -130,6 +122,7 @@ fn clean_message_doublettes() {
     }
 }
 
+// #[ignore]
 #[test]
 fn clean_too_many_messages() {
     setup();
@@ -144,6 +137,7 @@ fn clean_too_many_messages() {
     }
 }
 
+// #[ignore]
 #[test]
 fn clean_icon_doublettes() {
     setup();
@@ -258,12 +252,11 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
 }
 
 fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> CleanerInner {
-    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-    let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
+    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(99);
+    let (gpj_s, _gpj_r) = flume::bounded::<Job>(99);
     let subsrepo = SubscriptionRepo::new_inmem();
     subsrepo.scrub_all_subscriptions();
     let msgrepo1 = MessagesRepo::new_in_mem();
-
     let err_repo = ErrorRepo::new_in_mem();
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
@@ -278,7 +271,7 @@ fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> Cleaner
         iconrepo = IconRepo::by_existing_list(dummy_icon_list);
     }
     let cleaner_i = CleanerInner::new(
-        c_q_s,
+        gpj_s,
         stc_job_s,
         subsrepo,
         msgrepo1,

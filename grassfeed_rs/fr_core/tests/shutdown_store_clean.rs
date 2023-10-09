@@ -16,13 +16,14 @@ use gui_layer::abstract_ui::AValue;
 use gui_layer::abstract_ui::GuiEvents;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::fs::File;
 use std::rc::Rc;
 use std::sync::atomic::Ordering;
 
 // 1: Storing the pane position  into file on shutown
 // 2:  Detect circular dependency among context objects that prevent freeing them
 //  cargo    test  --test   shutdown_store_clean   --lib  -- --exact
-//  #[ignore]
+// #[ignore]
 #[test]
 fn shutdown_store_ini() {
     setup();
@@ -59,6 +60,7 @@ fn shutdown_store_ini() {
     assert_eq!(inuse, false);
 }
 
+// #[ignore]
 #[test]
 fn add_folder_and_feed() {
     setup();
@@ -69,6 +71,8 @@ fn add_folder_and_feed() {
         debug_mode: true,
         version: "add_folder_and_feed".to_string(),
     };
+    let iconfile = format!("{}/icons_list.json", gf_conf.path_config);
+    let _r = File::create(iconfile); // prevent missing file warning
     let appcontext = fr_core::config::init_system::start(gf_conf);
     let subs_r: Rc<RefCell<dyn ISubscriptionRepo>> =
         appcontext.get_rc::<SubscriptionRepo>().unwrap();

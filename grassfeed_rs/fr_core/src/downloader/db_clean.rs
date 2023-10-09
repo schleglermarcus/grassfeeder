@@ -77,8 +77,8 @@ impl CleanerInner {
     fn send_gp(&self, unmapped_step: u8, msg: Option<String>) {
         let el_ms = self.starttime.elapsed().as_millis() as u32;
         debug!(
-            "send_gp:  {} unmapped:{}   => {} ",
-            el_ms, unmapped_step, NS[unmapped_step as usize]
+            "send_gp:  {} unmapped:{}   => {}    {:?} ",
+            el_ms, unmapped_step, NS[unmapped_step as usize], msg
         );
         let _r =
             self.gp_job_sender
@@ -344,8 +344,7 @@ pub struct CorrectIconsDoublettes(pub CleanerInner);
 impl Step<CleanerInner> for CorrectIconsDoublettes {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-        info!("CorrectIconsDoublettes-0");
-
+        debug!("CorrectIconsDoublettes-0");
         inner.send_gp(7, Some("7:CorrectIconsDoublettes-0".to_string()));
         let all_icons: Vec<IconEntry> = inner.iconrepo.get_all_entries();
         let mut ic_first: HashMap<String, isize> = HashMap::new();
@@ -370,7 +369,7 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
                 .filter(|subs| subs.icon_id == *repl as usize)
                 .for_each(|subs| {
                     let m = format!("subs{} icon-id{}=>{}  ", subs.subs_id, subs.icon_id, dest);
-                    trace!("{} ", m);
+                    // trace!("{} ", m);
                     changes.push(m);
                     inner
                         .subscriptionrepo
@@ -406,7 +405,6 @@ pub struct CorrectIconsOnSubscriptions(pub CleanerInner);
 impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-        // let _r = inner.gp_job_sender.send(Job::NotifyDbClean(NS[8], None));
         inner.send_gp(8, None);
         let all_folders: Vec<SubscriptionEntry> = inner
             .subscriptionrepo
@@ -423,9 +421,12 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
             .collect::<Vec<isize>>();
 
         if all_icon_ids.len() < 2 {
-            error!(
-                "no icons found, skipping CorrectIconsOnSubscriptions!  {} ",
-                all_icon_ids.len()
+            inner.send_gp(
+                8,
+                Some(format!(
+                    "no icons found, skipping CorrectIconsOnSubscriptions: {}",
+                    all_icon_ids.len()
+                )),
             );
             return StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)));
         }
@@ -435,18 +436,6 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
                 continue;
             }
             if !all_icon_ids.contains(&(se.icon_id as isize)) {
-                trace!(
-                    "CorrectIcons: subscr {}  not-in-icon-db: {:?}  ",
-                    se.subs_id,
-                    se.icon_id
-                );
-                // let _r = inner.gp_job_sender.send(Job::NotifyDbClean(
-                //     NS[8],
-                //     Some(format!(
-                //         "CorrectIcons: subscr {}  not-in-icon-db: {:?}  ",
-                //         se.subs_id, se.icon_id
-                //     )),
-                // ));
                 inner.send_gp(
                     8,
                     Some(format!(
@@ -454,16 +443,10 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
                         se.subs_id, se.icon_id
                     )),
                 );
-
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
             }
             if se.icon_id < gen_icons::IDX_05_RSS_FEEDS_GREY_64_D {
-                trace!(
-                    "CorrectIcons: subscr {}  icon id too low: {:?}  ",
-                    se.subs_id,
-                    se.icon_id
-                );
                 inner.send_gp(
                     8,
                     Some(format!(
@@ -471,18 +454,12 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
                         se.subs_id, se.icon_id
                     )),
                 );
-
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
             }
         }
         reset_icon_subs_ids.sort();
         if !reset_icon_subs_ids.is_empty() {
-            debug!(
-                "CorrectIconsOnSubscriptions : {:?}   #icons={} ",
-                reset_icon_subs_ids,
-                all_icon_ids.len()
-            );
             inner.send_gp(
                 8,
                 Some(format!(
@@ -509,7 +486,6 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.send_gp(9, None);
-        // let _r = inner.gp_job_sender.send(Job::NotifyDbClean(NS[9], None));
         let parent_ids_active: Vec<i32> = inner
             .subscriptionrepo
             .get_all_nonfolder()
@@ -537,7 +513,7 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
                     &parent_ids_active.len()
                 )
             };
-            trace!("{} ", msg);
+            // trace!("{} ", msg);
             inner.send_gp(9, Some(msg));
             inner.need_update_messages = true;
             inner.messagesrepo.update_is_deleted_many(&noncon_ids, true);
@@ -614,9 +590,7 @@ pub struct DeleteDoubleSameMessages(pub CleanerInner);
 impl Step<CleanerInner> for DeleteDoubleSameMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
-        // let _r = inner.gp_job_sender.send(Job::NotifyDbClean(NS[11], None));
         inner.send_gp(11, None);
-
         let subs_ids_active: Vec<i32> = inner
             .subscriptionrepo
             .get_all_nonfolder()
@@ -734,8 +708,7 @@ impl Step<CleanerInner> for CheckErrorLog {
             if all_per_subs_id.len() > MAX_ERROR_LINES_PER_SUBSCRIPTION {
                 let (left, right) = all_per_subs_id.split_at(MAX_ERROR_LINES_PER_SUBSCRIPTION);
                 left.iter().for_each(|el| {
-                    // msgs.push(format!("tooMany: {:?} ", el));
-                    trace!("subs_id: {} tooMany: {:?} ", subs_id, el);
+                    // trace!("subs_id: {} tooMany: {:?} ", subs_id, el);
                     delete_list.push(el.err_id);
                 });
                 all_per_subs_id = right.to_vec();
@@ -744,13 +717,16 @@ impl Step<CleanerInner> for CheckErrorLog {
                 .iter()
                 .filter(|el| el.date < timestamp_earliest)
                 .for_each(|el| {
-                    // msgs.push(format!("tooOld: {:?} ", el));
-                    trace!("subs_id: {} tooOld: {:?} ", subs_id, el);
-
+                    // trace!("subs_id: {} tooOld: {:?} ", subs_id, el);
                     delete_list.push(el.err_id);
                 });
         }
-        // if !msgs.is_empty() {            let _r = inner                .gp_job_sender                .send(Job::NotifyDbClean(13, Some(format!(" {:?} ", msgs))));        }
+        if !delete_list.is_empty() {
+            inner.send_gp(
+                13,
+                Some(format!("deleting  {:?} log entries ", delete_list.len())),
+            );
+        }
         inner.error_repo.delete_by_index(&delete_list);
         StepResult::Continue(Box::new(Notify(inner)))
     }

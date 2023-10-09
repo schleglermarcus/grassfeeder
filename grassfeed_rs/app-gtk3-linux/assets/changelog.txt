@@ -1,4 +1,4 @@
-grassfeeder-gtk3 (0.0.2416) buster; urgency=low
+grassfeeder-gtk3 (0.0.2419) buster; urgency=low
 
   - Bugfix: multiple drop of Urls caused unresponsive dialog.
   - statemachine testing  with take()

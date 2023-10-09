@@ -7,7 +7,7 @@ use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
-use fr_core::db::subscription_entry::SubscriptionEntry;
+// use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::messages::FetchInner;
@@ -16,8 +16,8 @@ use fr_core::util::timestamp_now;
 use fr_core::util::StepResult;
 use fr_core::web::mockfilefetcher::FileFetcher;
 use fr_core::web::WebFetcherType;
-use std::cell::RefCell;
-use std::rc::Rc;
+// use std::cell::RefCell;
+// use std::rc::Rc;
 use std::sync::Arc;
 
 #[test]
@@ -119,19 +119,6 @@ fn get_file_fetcher() -> WebFetcherType {
     )))
 }
 
-#[allow(dead_code)]
-fn prepare_feedsource_dummy() -> Rc<RefCell<dyn ISubscriptionRepo>> {
-    let mut fse = SubscriptionEntry::from_new_url(
-        "feed1-display".to_string(),
-        "gui_proc_rss2_v1.rss".to_string(),
-    );
-    fse.subs_id = 1;
-    fse.folder_position = 0;
-    let subscription_repo = SubscriptionRepo::new_inmem();
-    let _r = subscription_repo.store_entry(&fse);
-    let r_fsource: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(subscription_repo));
-    r_fsource
-}
 
 // ------------------------------------
 
