@@ -305,7 +305,6 @@ impl IMessagesRepo for MessagesRepo {
             .map(|r| r.to_string())
             .collect::<Vec<String>>()
             .join(",");
-
         let sql = format!(
             "SELECT * FROM {} where feed_src_id NOT IN ( {} ) and is_deleted = false ",
             MessageRow::table_name(),

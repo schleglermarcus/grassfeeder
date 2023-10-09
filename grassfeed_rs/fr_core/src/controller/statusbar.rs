@@ -55,7 +55,6 @@ pub struct StatusBar {
     downloader_stats: [u32; DLKIND_MAX],
     pub db_check_running: bool,
     pub db_check_display_message: String,
-    
 }
 
 impl StatusBar {
@@ -307,7 +306,7 @@ impl StatusBar {
         char::from_u32(VERTICAL_RISING_BAR[div_idx]).unwrap()
     }
 
-    pub fn set_db_check_msg(&mut self, m: &String) {
-        self.db_check_display_message = m.clone();
+    pub fn set_db_check_msg(&mut self, m: &str) {
+        self.db_check_display_message = m.to_owned();
     }
 }

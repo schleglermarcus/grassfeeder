@@ -8,6 +8,9 @@ use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::db_clean::CleanerInner;
 use fr_core::downloader::db_clean::CleanerStart;
 use fr_core::util::StepResult;
+use std::thread;
+use std::time::Duration;
+// use flume::Sender;
 
 const CONF_PATH: &str = "../target/db_cleaner";
 
@@ -15,17 +18,37 @@ const CONF_PATH: &str = "../target/db_cleaner";
 #[test]
 fn investigate_cleaning_proc() {
     setup();
-
-    info!("copy ...");
     copy_big_files(true);
     info!("prepare_inner  ..");
     let (cleaner_i, gpj_r) = prepare_cleaner_inner();
-    info!("starting clean  ...");
+    let gpj_s = cleaner_i.gp_job_sender.clone();
 
-    let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
-    info!("stopped  clean  , printing Events ");
-    gpj_r.try_iter().for_each(|ev| debug!(" {:?} ", ev));
-    info!("===========================");
+    let thread_join_handle = thread::spawn(move || {
+        info!("T: starting clean  ...");
+        let _inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
+        info!("T :stopped  clean ");
+        let _r = gpj_s.send(Job::StopApplication);
+    });
+
+    loop {
+        let ev = gpj_r.recv().unwrap();
+        match ev {
+            Job::StopApplication => {
+                break;
+            }
+            Job::NotifyDbClean(step, duration, o_msg) => {
+                let mut msg = format!("{:?}", o_msg);
+                msg.truncate(100);
+                debug!("Notify: {} {} {} ", step, duration, msg);
+            }
+            _ => {
+                debug!("EV: {:?} ", ev);
+            }
+        }
+        thread::sleep(Duration::from_millis(100));
+    }
+    info!("join .... ");
+    let _ = thread_join_handle.join();
 }
 
 fn prepare_cleaner_inner() -> (CleanerInner, Receiver<Job>) {
@@ -33,8 +56,7 @@ fn prepare_cleaner_inner() -> (CleanerInner, Receiver<Job>) {
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(99);
     let (gpj_s, gpj_r) = flume::bounded::<Job>(99);
     let subsrepo = SubscriptionRepo::by_file(&format!("{}/subscriptions.db", CONF_PATH));
-
-    let msgrepo1 = MessagesRepo::new_by_filename_add_column(&format!("{}/errors.db", CONF_PATH));
+    let msgrepo1 = MessagesRepo::new_by_filename_add_column(&format!("{}/messages.db", CONF_PATH));
     let err_repo = ErrorRepo::new(&format!("{}/", CONF_PATH));
 
     let mut iconrepo: IconRepo;

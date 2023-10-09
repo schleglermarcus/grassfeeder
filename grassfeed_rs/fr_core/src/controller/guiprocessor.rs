@@ -284,10 +284,7 @@ impl GuiProcessor {
                             }
                         }
                         4 => {
-                            // clean db
-
-                            debug!("db check done !! ");
-                            (*self.statusbar.borrow_mut()).db_check_running = false;
+                            self.statusbar.borrow_mut().db_check_running = false;
                         }
                         _ => {
                             if elapsed_ms > 1000 {
@@ -1404,20 +1401,3 @@ impl HandleSingleEvent for HandleButtonActivated {
         }
     }
 }
-/*
-struct HandleNotifyDbClean();
-impl HandleSingleEvent for HandleNotifyDbClean {
-    fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        if let GuiEvents::NotifyDbClea(step , msg) = ev {
-            if msg == "D_SETTINGS_CHECKNOW" {
-                let isrunning = gp.statusbar.borrow().db_check_running;
-                debug!("clicked  {}   isrunning={}  ", msg, isrunning);
-                if !isrunning {
-                    gp.statusbar.borrow_mut().db_check_running = true;
-                    gp.downloader_r.borrow().cleanup_db();
-                }
-            }
-        }
-    }
-}
- */
