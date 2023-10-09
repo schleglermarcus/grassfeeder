@@ -57,6 +57,7 @@ const FONTSIZE_MAX: f64 = 18.0;
 const MAX_LENGTH_NEW_SOURCE_NAME: i32 = 50;
 const MAX_LENGTH_NEW_SOURCE_URL: i32 = 200;
 const GRID_SPACING: u32 = 5;
+const DB_CLEAN_STEPS_MAX: f64 = 10.0;
 
 const NONE_ADJ: Option<&Adjustment> = None;
 const NONE_TEXT: Option<&TextTagTable> = None;
@@ -882,8 +883,8 @@ fn create_settings_dialog(
         line += 1;
         lb_clean.set_mode(LevelBarMode::Discrete);
         lb_clean.set_min_value(0.0);
-        lb_clean.set_max_value(15.0);
-        lb_clean.set_height_request(20);
+        lb_clean.set_max_value(DB_CLEAN_STEPS_MAX);
+        lb_clean.set_height_request(16);
         // lb_clean.set_vexpand(true);
         grid3.attach(&lb_clean, 0, line, 2, 1);
 

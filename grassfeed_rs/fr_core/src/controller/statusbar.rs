@@ -55,6 +55,7 @@ pub struct StatusBar {
     downloader_stats: [u32; DLKIND_MAX],
     pub db_check_running: bool,
     pub db_check_display_message: String,
+    
 }
 
 impl StatusBar {

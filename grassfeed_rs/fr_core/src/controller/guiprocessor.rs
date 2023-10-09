@@ -75,8 +75,8 @@ pub enum Job {
     DownloaderJobFinished(isize, u8, u8, u32, String, String),
     CheckFocusMarker(u8),
     AddBottomDisplayErrorMessage(String),
-    /// Cleaner Step Nr,  Current Step Message
-    NotifyDbClean(u8, Option<String>),
+    /// Cleaner Step Nr,   time duration in ms,  Current Step Message
+    NotifyDbClean(u8, u32, Option<String>),
 }
 
 const JOBQUEUE_SIZE: usize = 100;
@@ -310,15 +310,16 @@ impl GuiProcessor {
                 Job::AddBottomDisplayErrorMessage(msg) => {
                     self.statusbar.borrow_mut().bottom_notices.push_back(msg);
                 }
-                Job::NotifyDbClean(c_step, ref c_msg) => {
+                Job::NotifyDbClean(c_step, duration_ms, ref c_msg) => {
+                    trace!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
                     let av2nd = if let Some(msg) = c_msg {
                         let newmsg = format!(
-                            "{}{}\n",
+                            "{}{}\t{}\n",
                             self.statusbar.borrow().db_check_display_message,
+                            duration_ms,
                             msg
                         );
                         self.statusbar.borrow_mut().set_db_check_msg(&newmsg);
-                        // trace!("NotifyDbClean:  {}  {:?}   ", c_step, c_msg);
                         AValue::ASTR(newmsg)
                     } else {
                         AValue::None
