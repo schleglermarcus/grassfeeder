@@ -49,7 +49,9 @@ use std::time::Duration;
 
 pub static KEEPRUNNING: AtomicBool = AtomicBool::new(true);
 pub const CONF_DOWNLOADER_THREADS: &str = "DownloaderThreads";
-pub const CONF_DATABASES_CLEANUP: &str = "DatabasesCleanup";
+
+// pub const CONF_DATABASES_CLEANUP: &str = "DatabasesCleanup";
+
 pub const DOWNLOADER_THREADS_DEFAULT: u8 = 2;
 pub const DOWNLOADER_LOOP_DELAY_S: u8 = 1;
 pub const DOWNLOADER_LOOP_WAIT_MS: u64 = 200; // between downloader queue requests

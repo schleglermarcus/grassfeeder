@@ -391,10 +391,9 @@ impl GuiProcessor {
         let browser_cache_clear = (self.configmanager_r)
             .borrow()
             .get_val_bool(&PropDef::BrowserClearCache.to_string());
-        let databases_cleanup = (self.configmanager_r)
-            .borrow()
-            .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP);
-        let systray_enable = self.is_systray_enabled();
+        // let databases_cleanup = (self.configmanager_r)            .borrow()            .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP);
+        // let systray_enable = self.is_systray_enabled();
+
         let dd: Vec<AValue> = vec![
             AValue::ABOOL((sources_conf).borrow().feeds_fetch_at_start), // 0 : FetchFeedsOnStart
             AValue::AU32((sources_conf).borrow().feeds_fetch_interval),  // 1 UpdateFeeds Cardinal
@@ -407,8 +406,8 @@ impl GuiProcessor {
             AValue::AU32(fontsize_manual),         // 8 : Font size Manual
             AValue::AU32(browser_conf.browser_bg as u32), // 9 : Browser_BG
             AValue::ABOOL(browser_cache_clear),    // 10 : Browser Cache Cleanup
-            AValue::ABOOL(databases_cleanup),      // 11 : Cleanup-on-start
-            AValue::ABOOL(systray_enable),         // 12 : Systray enable
+                                                   // AValue::ABOOL(databases_cleanup),      // 11 : Cleanup-on-start
+                                                   // AValue::ABOOL(systray_enable),         // 12 : Systray enable
         ];
         (*self.gui_val_store)
             .write()
@@ -1055,16 +1054,17 @@ impl HandleSingleEvent for HandleDialogData {
                         &PropDef::BrowserClearCache.to_string(),
                         payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
                     );
-                    self.r_conf.borrow().set_val(
-                        contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
-                        payload.get(11).unwrap().boo().to_string(),
-                    );
-                    if let Some(systray_e) = payload.get(12) {
-                        self.r_conf.borrow().set_val(
-                            &PropDef::SystrayEnable.to_string(),
-                            systray_e.boo().to_string(), // 12 : enable systray
-                        );
-                    }
+
+                    // self.r_conf.borrow().set_val(
+                    //     contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
+                    //     payload.get(11).unwrap().boo().to_string(),
+                    // );
+                    // if let Some(systray_e) = payload.get(12) {
+                    //     self.r_conf.borrow().set_val(
+                    //         &PropDef::SystrayEnable.to_string(),
+                    //         systray_e.boo().to_string(), // 12 : enable systray
+                    //     );
+                    // }
                     gp.addjob(Job::NotifyConfigChanged);
                 }
                 _ => {

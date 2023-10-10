@@ -3,13 +3,13 @@ Mon, 28 Aug 2023 18:00:00 +0000
 - statemachine testing  with take()
 - Errors logging to database
 - Error display with cause translation
-
-
-
-- Database Check with separate Dialog
+- Database cleanup into settings dialog
 
 
 - watch icons creation, check when too many
 
 
-
+- 
+   Compiling rustls-webpki v0.101.4
+   Compiling rustls-webpki v0.100.2
+ 

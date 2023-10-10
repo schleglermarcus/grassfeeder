@@ -32,7 +32,6 @@ pub const MAX_ERROR_LINE_AGE_S: usize = 60 * 60 * 24 * 360;
 pub const CLEAN_STEPS_MAX: u8 = 11;
 
 pub struct CleanerInner {
-    // pub cjob_sender: Sender<CJob>,
     pub gp_job_sender: Sender<Job>,
     pub sourcetree_job_sender: Sender<SJob>,
     pub subscriptionrepo: SubscriptionRepo,
@@ -93,6 +92,7 @@ impl CleanerInner {
         let _r =
             self.gp_job_sender
                 .send(Job::NotifyDbClean(NS[self.stepmarker as usize], el_ms, msg));
+        std::thread::sleep(std::time::Duration::from_millis(20));
     }
 
     fn advance_step(&mut self) {
@@ -100,6 +100,7 @@ impl CleanerInner {
     }
     fn advance_to(&mut self, newvalue: u8) {
         self.stepmarker = newvalue;
+        info!("ADVANCE-TO {} ", newvalue);
     }
 }
 
@@ -120,10 +121,12 @@ impl std::fmt::Debug for CleanerInner {
 // Mapping DB-Check-States  to Gui-Level-Bars. This allows to shift the display levels according to time usage.
 pub const NS: [u8; 25] = [
     0, 0, 0, 0, 0, // 0-4
-    0, 0, 0, 0, 1, // 5-9
-    2, 2, 3, 3, 3, // 10-14
-    3, 4, 5, 6, 7, // 15-20
-    8, 9, 10, 10, 10, // 21-25
+    0, 0, 1, 1, 1, // 5-9
+    2, 3, 4, // 10-12 ReduceTooManyMessages
+    4, 4, 5, // 13-15: DeleteDoubleSame
+    6, 7, // 16-17 PurgeMessages
+    8, 9, // 18-19 :
+    10, 10, 10, 10, 10, // 20-25
 ];
 
 impl CleanerStart {
@@ -317,7 +320,6 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_08_GNOME_FOLDER_48);
             inner.need_update_subscriptions = true;
         }
-        // inner.send_gp(6, Some("6:CorrectIconsOfFolders-2".to_string()));
         StepResult::Continue(Box::new(CorrectIconsDoublettes(inner)))
     }
 }
@@ -396,7 +398,6 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
             .iter()
             .map(|ie| ie.icon_id)
             .collect::<Vec<isize>>();
-
         if all_icon_ids.len() < 2 {
             inner.send_gp(Some(format!(
                 "no icons found, skipping CorrectIconsOnSubscriptions: {}",
@@ -470,7 +471,7 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
             .filter(|se| !se.is_deleted)
             .map(|fse| fse.message_id as i32)
             .collect::<Vec<i32>>();
-        inner.advance_step();
+        // inner.advance_step();
         inner.send_gp(Some("MarkUnconnectedMessages-2".to_string()));
         if !noncon_ids.is_empty() {
             let msg: String = if noncon_ids.len() < 100 && parent_ids_active.len() < 100 {
@@ -480,7 +481,7 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
                 )
             } else {
                 format!(
-                    "Cleanup: not connected messages: {}   parent-ids: {}",
+                    "Cleanup: not connected messages:{}   parent-ids:{}",
                     &noncon_ids.len(),
                     &parent_ids_active.len()
                 )
@@ -489,7 +490,6 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
             inner.need_update_messages = true;
             inner.messagesrepo.update_is_deleted_many(&noncon_ids, true); // needs long time
         }
-        inner.advance_step();
         inner.send_gp(Some("MarkUnconnectedMessages-4".to_string()));
         StepResult::Continue(Box::new(ReduceTooManyMessages(inner)))
     }
@@ -499,6 +499,7 @@ pub struct ReduceTooManyMessages(pub CleanerInner);
 impl Step<CleanerInner> for ReduceTooManyMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
+        inner.advance_step();
         inner.send_gp(Some("ReduceTooManyMessages-0".to_string()));
         if inner.max_messages_per_subscription > 1 {
             let subs_ids = inner
@@ -513,7 +514,7 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 subs_ids.len() / 2,
                 subs_ids.len() * 3 / 4,
             ];
-            trace!(" #SUBS:{}   markers:{:?} ", subs_ids.len(), markers);
+            // trace!(" #SUBS:{}   markers:{:?} ", subs_ids.len(), markers);
             subs_ids.iter().enumerate().for_each(|(num, su_id)| {
                 let (need_u, _n_removed, _n_all, _n_unread) = reduce_too_many_messages(
                     &inner.messagesrepo,
@@ -527,7 +528,6 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 inner.need_update_messages = need_u;
             });
         }
-        inner.advance_to(12);
         inner.send_gp(Some("ReduceTooManyMessages-2".to_string()));
         StepResult::Continue(Box::new(DeleteDoubleSameMessages(inner)))
     }
@@ -571,7 +571,7 @@ pub struct DeleteDoubleSameMessages(pub CleanerInner);
 impl Step<CleanerInner> for DeleteDoubleSameMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-        inner.advance_step();
+        inner.advance_to(13);
         inner.send_gp(Some("DeleteDoubleSameMessages-0".to_string()));
         let subs_ids_active: Vec<i32> = inner
             .subscriptionrepo
@@ -579,13 +579,11 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
             .iter()
             .map(|se| se.subs_id as i32)
             .collect();
-
         let markers = [
             subs_ids_active.len() / 4,
             subs_ids_active.len() / 2,
             subs_ids_active.len() * 3 / 4,
         ];
-        // for subs_id in subs_ids_active {
         subs_ids_active
             .iter()
             .enumerate()
@@ -616,7 +614,6 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
                     inner.send_gp(Some("DeleteDoubleSameMessages-1".to_string()));
                 }
             });
-        inner.advance_to(19);
         inner.send_gp(Some("DeleteDoubleSameMessages-2".to_string()));
         StepResult::Continue(Box::new(PurgeMessages(inner)))
     }
@@ -630,10 +627,9 @@ pub struct PurgeMessages(pub CleanerInner);
 impl Step<CleanerInner> for PurgeMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-        inner.advance_step();
+        inner.advance_to(16);
         inner.send_gp(Some("PurgeMessages-0".to_string()));
         let allmsg = inner.messagesrepo.get_all_deleted();
-        // let all_count = allmsg.len();
         let to_delete: Vec<i32> = allmsg
             .into_iter()
             .filter_map(|m| {
@@ -694,7 +690,6 @@ impl Step<CleanerInner> for CheckErrorLog {
             if all_per_subs_id.len() > MAX_ERROR_LINES_PER_SUBSCRIPTION {
                 let (left, right) = all_per_subs_id.split_at(MAX_ERROR_LINES_PER_SUBSCRIPTION);
                 left.iter().for_each(|el| {
-                    // trace!("subs_id: {} tooMany: {:?} ", subs_id, el);
                     delete_list.push(el.err_id);
                 });
                 all_per_subs_id = right.to_vec();
@@ -703,7 +698,6 @@ impl Step<CleanerInner> for CheckErrorLog {
                 .iter()
                 .filter(|el| el.date < timestamp_earliest)
                 .for_each(|el| {
-                    // trace!("subs_id: {} tooOld: {:?} ", subs_id, el);
                     delete_list.push(el.err_id);
                 });
         }
@@ -724,15 +718,19 @@ impl Step<CleanerInner> for Notify {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(Some("Notify".to_string()));
+        inner.send_gp(Some("Vacuum".to_string()));
         inner.subscriptionrepo.db_vacuum();
         inner.messagesrepo.db_vacuum();
+        inner.error_repo.db_vacuum();
+        inner.send_gp(Some("Notify".to_string()));
         if inner.need_update_subscriptions {
             let _r = inner.sourcetree_job_sender.send(SJob::UpdateTreePaths);
             let _r = inner
                 .sourcetree_job_sender
                 .send(SJob::FillSubscriptionsAdapter);
+            let _r = inner.sourcetree_job_sender.send(SJob::GuiUpdateTreeAll);
         }
+        inner.advance_step();
         inner.send_gp(Some("Stopped".to_string()));
         StepResult::Stop(inner)
     }

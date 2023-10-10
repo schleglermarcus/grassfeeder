@@ -97,7 +97,7 @@ pub enum SJob {
     SetFetchFinished(isize, bool),
     /// subscription_id, new icon_repo_id
     SetIconId(isize, isize),
-    SanitizeSources,
+    DatabasesCleanup,
     /// subscription_id, timestamp_feed_update,  timestamp_creation
     StoreFeedCreateUpdate(isize, i64, i64),
     ///  feed-url,  Display-Name, icon-id, Feed-Homepage
@@ -217,7 +217,6 @@ impl SourceTreeController {
         }
         for job in job_list {
             let now = Instant::now();
-            //  trace!("ST: {:?} ", job);
             match job {
                 SJob::NotifyTreeReadCount(subs_id, msg_all, msg_unread) => {
                     self.process_tree_read_count(subs_id, msg_all, msg_unread);
@@ -279,7 +278,7 @@ impl SourceTreeController {
                     );
                     self.tree_store_update_one(subs_id);
                 }
-                SJob::SanitizeSources => {
+                SJob::DatabasesCleanup => {
                     (*self.downloader_r).borrow().cleanup_db();
                 }
                 SJob::StoreFeedCreateUpdate(src_id, update_now, creation) => {
@@ -296,8 +295,6 @@ impl SourceTreeController {
                         homepage.clone(),
                     );
                 }
-
-                // SJob::SetSelectedFeedSource(src_repo_id) => {                    self.set_selected_feedsource(src_repo_id)                }
                 SJob::UpdateLastSelectedMessageId(fs_id, fc_id) => {
                     (*self.subscriptionrepo_r)
                         .borrow()
@@ -374,29 +371,9 @@ impl SourceTreeController {
                         .set_dialog_data(DIALOG_TREE0COL1, &dd);
                     (*self.gui_updater).borrow().update_dialog(DIALOG_TREE0COL1);
                 }
-
                 SJob::GuiStoreIcons => {
                     self.icons_store_to_gui();
-                } /*
-                                 SJob::NotifyDbClean(c_step, ref c_msg) => {
-                                     let dd: Vec<AValue> = vec![
-                                         AValue::AU32(c_step as u32),
-                                         if let Some(msg) = c_msg {
-                                             AValue::ASTR(msg.clone())
-                                         } else {
-                                             AValue::None
-                                         },
-                                     ];
-                                     trace!("NotifyDbClean:  {}  {:?}  dd= {:?} ", c_step, c_msg, dd);
-                                     (*self.gui_val_store)
-                                         .write()
-                                         .unwrap()
-                                         .set_dialog_data(DIALOG_SETTINGS_CHECK, &dd);
-                                     (*self.gui_updater)
-                                         .borrow()
-                                         .update_dialog(DIALOG_SETTINGS_CHECK);
-                                 }
-                  */
+                }
             }
             if (*self.config).borrow().mode_debug {
                 let elapsed_m = now.elapsed().as_millis();
@@ -465,10 +442,7 @@ impl SourceTreeController {
             if !self.tree_update_one(&subs_e, &su_st) {
                 if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
                     let smb = subs_mov.borrow();
-                    // let now = Instant::now();
                     smb.request_check_paths(true);
-                    // let elapsed5 = now.elapsed().as_millis();
-                    // if elapsed5 > 100 {  trace!( "process_tree_read_count {}  call request_check_paths  took  {} ",                            subs_id,                            elapsed5                       );                    }
                 }
             }
         } else {
@@ -1078,12 +1052,14 @@ impl StartupWithAppContext for SourceTreeController {
         }
         self.addjob(SJob::ScanEmptyUnread);
         self.addjob(SJob::GuiUpdateTreeAll);
-        if (self.configmanager_r)
-            .borrow()
-            .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP)
-        {
-            self.addjob(SJob::SanitizeSources);
-        }
+        /*
+               if (self.configmanager_r)
+                   .borrow()
+                   .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP)
+               {
+                   self.addjob(SJob::SanitizeSources);
+               }
+        */
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::ScanEmptyUnread);
         self.addjob(SJob::SetGuiTreeColumn1Width);
@@ -1186,7 +1162,6 @@ mod t {
     use super::*;
     use crate::db::errorentry::ErrorEntry;
     use crate::db::errorentry::ESRC;
-    // use crate::util::timestamp_now;
 
     //  cargo watch -s "(cd fr_core ; RUST_BACKTRACE=1 cargo test  controller::sourcetree::t::t_error_entry_to_line      --lib -- --exact --nocapture  )"
     #[test]

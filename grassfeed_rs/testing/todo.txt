@@ -1,11 +1,4 @@
 
-- Database Check with separate Dialog
-
-
-   Compiling rustls-webpki v0.101.4
-   Compiling rustls-webpki v0.100.2
-
-
 - Aggregate View:  use favorite colum for subscription icon
 
 - Test icon extraction with https://www.greyblake.com/blog/property-based-testing-in-rust-with-arbitrary/
@@ -15,13 +8,18 @@
 
 
 Later:
+
 - 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20
 - GTK4: block multiple instances
 - GTK4: process both sets of cmd parameters:   application   AND gtk, see runner_internal
 	https://docs.gtk.org/gio/method.Application.run.html
 - gtk_objects  with arc-mutex instead of arc-rwlock, due to clippy warning
 
+-   rustls-webpki v0.101.4    rustls-webpki v0.100.2	# ureq = ">=2.6.2"   # uneven webpki versions. later: advance to 2.8.0
+
+
 - Systray Icon integration, Use different app-indicator  lib
+
 
 
 

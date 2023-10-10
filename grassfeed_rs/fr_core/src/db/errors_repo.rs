@@ -176,6 +176,10 @@ impl ErrorRepo {
             }
         }
     }
+
+    pub fn db_vacuum(&self) -> usize {
+        self.ctx.execute("VACUUM".to_string())
+    }
 }
 
 //-------------------
@@ -264,7 +268,7 @@ mod t {
             0,
             String::default(),
             String::from("E_0"),
-            tnow-1 ,
+            tnow - 1,
         );
         std::thread::sleep(std::time::Duration::from_secs(1));
         let _r = e_repo.add_error_ts(
@@ -273,11 +277,11 @@ mod t {
             0,
             String::default(),
             String::from("E_1"),
-            tnow ,
+            tnow,
         );
         e_repo.flush_dirty();
         let last_one = e_repo.get_last_entry(12).unwrap();
         assert_eq!(last_one.err_id, 2);
-        assert_eq!(last_one.date, tnow );
+        assert_eq!(last_one.date, tnow);
     }
 }

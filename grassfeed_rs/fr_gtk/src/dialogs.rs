@@ -885,7 +885,6 @@ fn create_settings_dialog(
         lb_clean.set_min_value(0.0);
         lb_clean.set_max_value(DB_CLEAN_STEPS_MAX);
         lb_clean.set_height_request(16);
-        // lb_clean.set_vexpand(true);
         grid3.attach(&lb_clean, 0, line, 2, 1);
 
         line += 1;
@@ -912,7 +911,7 @@ fn create_settings_dialog(
     let sw_fontsize_manual_enable_c = sw_fontsize_manual_enable.clone();
     let spinb_fontsize_manual_c = spinb_fontsize_manual.clone();
     let scale_bright_c = scale_bright.clone();
-    let sw_subs_db_cleanup_c = sw_subs_db_cleanup.clone();
+    // let sw_subs_db_cleanup_c = sw_subs_db_cleanup.clone();
     let sw_browser_cache_clear_c = sw_browser_cache_clear.clone();
 
     dialog.connect_response(move |dialog, rt| {
@@ -938,8 +937,8 @@ fn create_settings_dialog(
                 av.push(AValue::AI32(spinb_fontsize_manual_c.value() as i32)); // 8 : ManualFontSizeEnable
                 av.push(AValue::AU32(scale_bright_c.value() as u32)); // 9 : Browser BG
                 av.push(AValue::ABOOL(sw_browser_cache_clear_c.state())); // 10 : browser cache cleanup
-                av.push(AValue::ABOOL(sw_subs_db_cleanup_c.state())); // 11 : DB cleanup
-                                                                      // av.push(AValue::ABOOL(sw_enable_systray_c.state())); // 12 : Systray Icon
+
+                // av.push(AValue::ABOOL(sw_subs_db_cleanup_c.state())); // 11 : DB cleanup
                 let _r = ev_se.send(GuiEvents::DialogData("settings".to_string(), av));
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {

@@ -139,14 +139,7 @@ impl TimerRegistry for Timer {
                     if *call_mut {
                         (*rc).borrow_mut().trigger_mut(te);
                     } else {
-                        let start_time = Instant::now();
-
                         (*rc).borrow().trigger(te);
-
-                        let duration_ms = start_time.elapsed().as_millis();
-                        if duration_ms > 90 {
-                            error!("TIMER  duration  {:?}   {}ms ", te, duration_ms);
-                        }
                     }
                 }
             });
@@ -234,9 +227,6 @@ mod appcontext_test {
             GUIP::new(_appcontext)
         }
     }
-
-    // #[derive(Debug, Clone)]
-    // pub enum Job {}
 
     impl GUIP {
         pub fn new(ac: &AppContext) -> Self {
