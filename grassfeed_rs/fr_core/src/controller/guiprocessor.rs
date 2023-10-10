@@ -308,7 +308,7 @@ impl GuiProcessor {
                     self.statusbar.borrow_mut().bottom_notices.push_back(msg);
                 }
                 Job::NotifyDbClean(c_step, duration_ms, ref c_msg) => {
-                    trace!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
+                    debug!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
                     let av2nd = if let Some(msg) = c_msg {
                         let newmsg = format!(
                             "{}{}\t{}\n",

@@ -139,7 +139,14 @@ impl TimerRegistry for Timer {
                     if *call_mut {
                         (*rc).borrow_mut().trigger_mut(te);
                     } else {
+                        let start_time = Instant::now();
+
                         (*rc).borrow().trigger(te);
+
+                        let duration_ms = start_time.elapsed().as_millis();
+                        if duration_ms > 90 {
+                            error!("TIMER  duration  {:?}   {}ms ", te, duration_ms);
+                        }
                     }
                 }
             });
@@ -198,7 +205,7 @@ mod appcontext_test {
     use std::sync::atomic::Ordering;
     pub static DBU_IN_USE: AtomicBool = AtomicBool::new(false);
     use crate::controller::guiprocessor::Job;
-    
+
     //----
     struct GUIP {
         timer_r: Rc<RefCell<dyn ITimer>>,

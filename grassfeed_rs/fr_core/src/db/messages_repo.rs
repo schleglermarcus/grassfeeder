@@ -66,6 +66,8 @@ pub trait IMessagesRepo {
     fn delete_by_index(&self, indices: &[i32]) -> usize;
 
     fn db_vacuum(&self) -> usize;
+
+    fn get_all_deleted(&self) -> Vec<MessageRow>;
 }
 
 pub struct MessagesRepo {
@@ -309,6 +311,14 @@ impl IMessagesRepo for MessagesRepo {
             "SELECT * FROM {} where feed_src_id NOT IN ( {} ) and is_deleted = false ",
             MessageRow::table_name(),
             src_ids_jo
+        );
+        self.ctx.get_list(sql)
+    }
+
+    fn get_all_deleted(&self) -> Vec<MessageRow> {
+        let sql = format!(
+            "SELECT * FROM {} where is_deleted = true ",
+            MessageRow::table_name(),
         );
         self.ctx.get_list(sql)
     }
