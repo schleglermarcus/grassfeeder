@@ -1,19 +1,12 @@
-grassfeeder-gtk3 (0.0.2426) buster; urgency=low
+grassfeeder-gtk3 (0.0.2433) buster; urgency=low
 
-  - Bugfix: multiple drop of Urls caused unresponsive dialog.
-  - statemachine testing  with take()
-  - Errors logging to database
-  - Error display with cause translation
-  - Database cleanup into settings dialog
+  * Errors logging to database
+  * Error display with cause translation
+  * Databases cleanup into settings dialog
+  * Statemachine testing  with take()
+  * Bugfix: multiple drop of Urls caused unresponsive dialog.
+  * Bugfix: no more creating one too many icons in icon list.
   
-  
-  - watch icons creation, check when too many
-  
-  
-  - 
-     Compiling rustls-webpki v0.101.4
-     Compiling rustls-webpki v0.100.2
-   
 
  -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 28 Aug 2023 18:00:00 +0000
 

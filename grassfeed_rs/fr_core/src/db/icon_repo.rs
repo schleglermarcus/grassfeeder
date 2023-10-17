@@ -94,9 +94,10 @@ impl IconRepo {
     pub fn check_or_store(&mut self) {
         let cur_list_len = (*self.list).read().unwrap().len();
         if cur_list_len != self.last_list_count {
-            debug!(
+            trace!(
                 "  check_or_store  {} <> {} ",
-                cur_list_len, self.last_list_count
+                cur_list_len,
+                self.last_list_count
             );
             self.store_to_file();
         }
@@ -110,13 +111,7 @@ impl IconRepo {
             .cloned()
             .collect::<Vec<IconEntry>>();
         values.sort_by(|a, b| a.icon_id.cmp(&b.icon_id));
-
-        debug!(
-            "store_to_file last={:?}    {} ",
-            values[values.len() - 2],
-            self.filename.clone()
-        );
-
+        // debug!(            "store_to_file last={:?}    {} ",           values[values.len() - 2],            self.filename.clone()        );
         match write_to(self.filename.clone(), &values, CONV_FROM) {
             Ok(_bytes_written) => {
                 self.last_list_count = values.len();
@@ -187,11 +182,7 @@ impl IconRepo {
             .write()
             .unwrap()
             .insert(new_id, store_entry.clone());
-        trace!(
-            "icons: store_entry newID {}  len{}",
-            store_entry.icon_id,
-            store_entry.icon.len()
-        );
+        // trace!(            "icons: store_entry newID {}  len{}",            store_entry.icon_id,            store_entry.icon.len()        );
         Ok(store_entry)
     }
 

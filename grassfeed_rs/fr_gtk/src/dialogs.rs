@@ -58,8 +58,8 @@ const MAX_LENGTH_NEW_SOURCE_NAME: i32 = 50;
 const MAX_LENGTH_NEW_SOURCE_URL: i32 = 200;
 const GRID_SPACING: u32 = 5;
 const DB_CLEAN_STEPS_MAX: f64 = 10.0;
-const ICON_RESCALE_SIZE: i32 = 48;
-const ICON_DIALOG_COLUMNS: i32 = 10;
+const ICON_RESCALE_SIZE: i32 = 24;
+const ICON_DIALOG_COLUMNS: i32 = 40;
 
 const NONE_ADJ: Option<&Adjustment> = None;
 const NONE_TEXT: Option<&TextTagTable> = None;
@@ -116,6 +116,9 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
         let mut ddnum = 0;
         let mut index: i32 = -1;
         let mut ic_st = String::default();
+        let mut dbindex = gen_icons::ICON_LIST.len() + 1;
+        //  let y_base = (gen_icons::ICON_LIST.len() as i32 / ICON_DIALOG_COLUMNS) + 1;
+        let y_base = 0;
         trace!("DD #{} ", dialogdata.len());
         while let Some(aval) = dialogdata.get(ddnum) {
             match aval {
@@ -129,11 +132,12 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
                     &grid,
                     &ic_st,
                     &format!("d{} #{}", index, ic_st.len()),
-                    6,
-                    index,
+                    y_base,
+                    dbindex as i32,
                 );
                 ic_st = String::default();
                 index = -1;
+                dbindex += 1;
             }
             ddnum += 1;
         }

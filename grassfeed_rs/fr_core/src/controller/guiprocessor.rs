@@ -435,8 +435,8 @@ impl GuiProcessor {
         let upper: Vec<IconEntry> = all
             .into_iter()
             .filter(|ie| ie.icon_id > ICON_LIST.len() as isize)
+            .filter(|ie| ie.icon.len() > 100)
             .collect::<Vec<IconEntry>>();
-
         let mut dd: Vec<AValue> = Vec::new();
         upper.iter().for_each(|ie| {
             dd.push(AValue::AI32(ie.icon_id as i32));

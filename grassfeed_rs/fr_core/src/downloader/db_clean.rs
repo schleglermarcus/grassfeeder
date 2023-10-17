@@ -75,18 +75,24 @@ impl CleanerInner {
         }
     }
 
-    fn send_gp(&self, /* unmapped_step: u8, */ msg: Option<String>) {
+    fn send_gp(&self, msg: Option<String>) {
         let el_ms = self.starttime.elapsed().as_millis() as u32;
         let mut msg_cut = match msg {
             Some(ref m) => m.clone(),
             None => String::default(),
         };
         msg_cut.truncate(80);
-        // trace!(            "send_gp: {}ms \tmap {}=>{} \t{} ",            el_ms,            self.stepmarker,            NS[self.stepmarker as usize],            msg_cut        );
+        trace!(
+            "send_gp: {}ms \tmap {}=>{} \t{} ",
+            el_ms,
+            self.stepmarker,
+            NS[self.stepmarker as usize],
+            msg_cut
+        );
         let _r =
             self.gp_job_sender
                 .send(Job::NotifyDbClean(NS[self.stepmarker as usize], el_ms, msg));
-        std::thread::sleep(std::time::Duration::from_millis(20));
+        std::thread::sleep(std::time::Duration::from_millis(50));
     }
 
     fn advance_step(&mut self) {
@@ -115,12 +121,12 @@ impl std::fmt::Debug for CleanerInner {
 // Mapping DB-Check-States  to Gui-Level-Bars. This allows to shift the display levels according to time usage.
 pub const NS: [u8; 25] = [
     0, 0, 0, 0, 0, // 0-4
-    0, 0, 1, 1, 1, // 5-9
-    2, 3, 4, // 10-12 ReduceTooManyMessages
-    4, 4, 5, // 13-15: DeleteDoubleSame
-    6, 7, // 16-17 PurgeMessages
-    8, 9, // 18-19 :
-    10, 10, 10, 10, 10, // 20-25
+    0, 0, 0, 1, 1, // 5-9
+    1, 2, 3, // 10-12 ReduceTooManyMessages
+    3, 4, 4, // 13-15: DeleteDoubleSame
+    5, 6, // 16-17 PurgeMessages
+    7, 8, // 18-19 :
+    9, 10, 10, 10, 10, // 20-25
 ];
 
 impl CleanerStart {
@@ -600,7 +606,6 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
                     inner.send_gp(Some("DeleteDoubleSameMessages-1".to_string()));
                 }
             });
-        // inner.send_gp(Some("DeleteDoubleSameMessages-2".to_string()));
         StepResult::Continue(Box::new(PurgeMessages(inner)))
     }
 
@@ -614,7 +619,7 @@ impl Step<CleanerInner> for PurgeMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_to(16);
-        inner.send_gp(None);
+        inner.send_gp(Some("PurgeMessages".to_string()));
         let allmsg = inner.messagesrepo.get_all_deleted();
         let to_delete: Vec<i32> = allmsg
             .into_iter()
@@ -651,7 +656,7 @@ impl Step<CleanerInner> for CheckErrorLog {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(None);
+        inner.send_gp(Some("CheckErrorLog".to_string()));
         let parent_ids_active: HashSet<isize> = inner
             .subscriptionrepo
             .get_all_nonfolder()
@@ -693,8 +698,25 @@ impl Step<CleanerInner> for CheckErrorLog {
             )));
         }
         inner.error_repo.delete_by_index(&delete_list);
-        // inner.send_gp(Some("CheckErrorLog-3".to_string()));
+        StepResult::Continue(Box::new(ShortenDatabases(inner)))
+    }
+}
+
+pub struct ShortenDatabases(pub CleanerInner);
+impl Step<CleanerInner> for ShortenDatabases {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let mut inner = self.0;
+        inner.advance_step();
+        inner.send_gp(Some("ShortenDatabases-M".to_string()));
+        inner.messagesrepo.db_vacuum();
+        inner.advance_step();
+        inner.send_gp(Some("ShortenDatabases-S".to_string()));
+        inner.subscriptionrepo.db_vacuum();
+        inner.error_repo.db_vacuum();
         StepResult::Continue(Box::new(Notify(inner)))
+    }
+    fn take(self: Box<Self>) -> CleanerInner {
+        self.0
     }
 }
 
@@ -703,11 +725,7 @@ impl Step<CleanerInner> for Notify {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(None);
-        inner.subscriptionrepo.db_vacuum();
-        inner.messagesrepo.db_vacuum();
-        inner.error_repo.db_vacuum();
-        inner.send_gp(None);
+        inner.send_gp(Some("Notify".to_string()));
         if inner.need_update_subscriptions {
             let _r = inner.sourcetree_job_sender.send(SJob::UpdateTreePaths);
             let _r = inner
