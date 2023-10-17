@@ -58,6 +58,8 @@ const MAX_LENGTH_NEW_SOURCE_NAME: i32 = 50;
 const MAX_LENGTH_NEW_SOURCE_URL: i32 = 200;
 const GRID_SPACING: u32 = 5;
 const DB_CLEAN_STEPS_MAX: f64 = 10.0;
+const ICON_RESCALE_SIZE: i32 = 48;
+const ICON_DIALOG_COLUMNS: i32 = 10;
 
 const NONE_ADJ: Option<&Adjustment> = None;
 const NONE_TEXT: Option<&TextTagTable> = None;
@@ -67,7 +69,7 @@ pub fn create_dialogs(
     gtk_obj_a: GtkObjectsType,
     ddd: &mut DialogDataDistributor,
 ) {
-    create_icons_dialog(gtk_obj_a.clone());
+    create_icons_dialog(gtk_obj_a.clone(), ddd);
     create_new_folder_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
     create_new_subscription_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_subscription_delete_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
@@ -79,7 +81,7 @@ pub fn create_dialogs(
     create_about_dialog(gtk_obj_a.clone(), ddd);
 }
 
-fn create_icons_dialog(gtk_obj_a: GtkObjectsType) {
+fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributor) {
     let dialog = Dialog::with_buttons::<Window>(
         Some("Icons Display"),
         (*gtk_obj_a).read().unwrap().get_window().as_ref(),
@@ -89,9 +91,15 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType) {
     let grid = Grid::new();
     grid.set_vexpand(true);
     grid.set_hexpand(true);
-    let columns: i32 = 4;
+
     for a in 0..gen_icons::ICON_LIST.len() {
-        grid_attach_icon(&grid, gen_icons::ICON_LIST[a], a as i32, 0, columns);
+        grid_attach_icon(
+            &grid,
+            gen_icons::ICON_LIST[a],
+            &format!("r{}", a),
+            0,
+            a as i32,
+        );
     }
     dialog.content_area().add(&grid);
     dialog.set_default_response(ResponseType::Ok);
@@ -103,16 +111,45 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType) {
         }
         dialog.hide();
     });
+
+    ddd.set_dialog_distribute(DIALOG_ICONS, move |dialogdata| {
+        let mut ddnum = 0;
+        let mut index: i32 = -1;
+        let mut ic_st = String::default();
+        trace!("DD #{} ", dialogdata.len());
+        while let Some(aval) = dialogdata.get(ddnum) {
+            match aval {
+                AValue::AI32(i) => index = *i,
+                AValue::ASTR(ref s) => ic_st = s.clone(),
+                _ => (),
+            }
+            if ic_st.len() > 10 {
+                // trace!(                    "Icons adding to grid: {}\t{} len:{}",                    ddnum,                    index,                    ic_st.len(),                );
+                grid_attach_icon(
+                    &grid,
+                    &ic_st,
+                    &format!("d{} #{}", index, ic_st.len()),
+                    6,
+                    index,
+                );
+                ic_st = String::default();
+                index = -1;
+            }
+            ddnum += 1;
+        }
+    });
+
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_ICONS, &dialog);
 }
 
-fn grid_attach_icon(grid: &Grid, icon_str: &str, index: i32, y_base: i32, columns: i32) {
-    let image = prepare_icon(icon_str, 48).unwrap();
-    image.set_tooltip_text(Some(&format!("{index}")));
-    let y: i32 = index / columns + y_base;
-    let x: i32 = index % columns;
-    grid.attach(&image, x, y, 1, 1);
+fn grid_attach_icon(grid: &Grid, icon_str: &str, tooltip: &str, y_base: i32, index: i32) {
+    if let Ok(image) = prepare_icon(icon_str, ICON_RESCALE_SIZE) {
+        image.set_tooltip_text(Some(tooltip)); // &format!("{index}")
+        let y: i32 = index / ICON_DIALOG_COLUMNS + y_base;
+        let x: i32 = index % ICON_DIALOG_COLUMNS;
+        grid.attach(&image, x, y, 1, 1);
+    }
 }
 
 fn prepare_icon(icon_str: &str, rescale_size: i32) -> Result<Image, String> {
@@ -132,7 +169,7 @@ fn prepare_icon(icon_str: &str, rescale_size: i32) -> Result<Image, String> {
             Ok(Image::from_pixbuf(Some(&pb_scaled)))
         }
         Err(e) => {
-            // error!("{:?}  length:{:?}", e, icon_str.len());
+            error!("prepare_icon : {:?}  length:{:?}", e, icon_str.len());
             Err(e.to_string())
         }
     }
@@ -739,7 +776,6 @@ fn create_settings_dialog(
     let cbt_timescale = ComboBoxText::with_entry();
     let spinb_numthread = SpinButton::with_range(1.0, DOWNLOADER_MAX_NUM_THREADS as f64, 1.0);
     let cbt_focuspolicy = ComboBoxText::with_entry();
-    let sw_subs_db_cleanup = Switch::new();
     let sw_display_feedcount = Switch::new();
     let spinb_msg_keep_count = SpinButton::with_range(20.0, 10000.0, 20.0);
     let sw_fontsize_manual_enable = Switch::new();
@@ -978,15 +1014,12 @@ fn create_settings_dialog(
         let browser_bg = dd_get_uint(dialogdata, 9, 0); // 9 : Browser_bg
         scale_bright.set_value(browser_bg as f64);
         sw_browser_cache_clear.set_state(dialogdata.get(10).unwrap().boo()); // 10 : browser cache cleanup
-        sw_subs_db_cleanup.set_state(dialogdata.get(11).unwrap().boo()); // 11 : DB cleanup
-                                                                         // sw_enable_systray.set_state(dialogdata.get(12).unwrap().boo()); // 11 : Systray Enable
+                                                                             //  sw_subs_db_cleanup.set_state(dialogdata.get(11).unwrap().boo()); // 11 : DB cleanup
+                                                                             // sw_enable_systray.set_state(dialogdata.get(12).unwrap().boo()); // 11 : Systray Enable
     });
-
     let tview_clean = textview2.clone();
     ddd.set_dialog_distribute(DIALOG_SETTINGS_CHECK, move |dialogdata| {
         if let Some(level) = dialogdata.get(0).unwrap().uint() {
-            let level: u32 = level;
-            trace!("  LEVEL:  {} ", level);
             if level == 0 {
                 let tbuf = TextBuffer::new(NONE_TEXT);
                 tview_clean.set_buffer(Some(&tbuf));

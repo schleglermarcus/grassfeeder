@@ -1052,14 +1052,6 @@ impl StartupWithAppContext for SourceTreeController {
         }
         self.addjob(SJob::ScanEmptyUnread);
         self.addjob(SJob::GuiUpdateTreeAll);
-        /*
-               if (self.configmanager_r)
-                   .borrow()
-                   .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP)
-               {
-                   self.addjob(SJob::SanitizeSources);
-               }
-        */
         self.addjob(SJob::UpdateTreePaths);
         self.addjob(SJob::ScanEmptyUnread);
         self.addjob(SJob::SetGuiTreeColumn1Width);

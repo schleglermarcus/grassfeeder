@@ -485,12 +485,6 @@ pub fn create_menubar(
     gtk_obj_a: GtkObjectsType,
     mode_debug: bool,
 ) -> MenuBar {
-    let icons_dialog: Dialog = (*gtk_obj_a)
-        .read()
-        .unwrap()
-        .get_dialog(DIALOG_ICONS)
-        .unwrap()
-        .clone();
     let menubar = MenuBar::new();
     menubar.set_border_width(TOOLBAR_BORDER_WIDTH);
     menubar.set_margin(TOOLBAR_MARGIN);
@@ -579,19 +573,19 @@ pub fn create_menubar(
             let m_about = MenuItem::with_label(&t!("M_ABOUT"));
             m_about.set_widget_name("M_ABOUT");
             menu.add(&m_about);
-            let esw = EvSenderWrapper(g_ev_se);
+            let esw = EvSenderWrapper(g_ev_se.clone());
             m_about.connect_activate(move |_m| {
                 esw.sendw(GuiEvents::MenuActivate(_m.widget_name().to_string()));
             });
         }
-
+        // let icons_dialog: Dialog = (*gtk_obj_a)         .read()        .unwrap()        .get_dialog(DIALOG_ICONS)        .unwrap()        .clone();
         if mode_debug {
             let m_icons = MenuItem::with_label(&t!("M_ICONS"));
             m_icons.set_widget_name("M_ICONS");
             menu.add(&m_icons);
-            let icons_d = icons_dialog;
-            m_icons.connect_activate(move |_m| {
-                icons_d.show_all();
+            let esw = EvSenderWrapper(g_ev_se);
+            m_icons.connect_activate(move |menuitem| {
+                esw.sendw(GuiEvents::MenuActivate(menuitem.widget_name().to_string()));
             });
         }
     }

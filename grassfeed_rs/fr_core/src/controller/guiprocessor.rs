@@ -47,6 +47,7 @@ use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::KeyCodes;
 use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
+use resources::gen_icons::ICON_LIST;
 use resources::id::DIALOG_ABOUT;
 use resources::id::*;
 use std::cell::RefCell;
@@ -308,7 +309,7 @@ impl GuiProcessor {
                     self.statusbar.borrow_mut().bottom_notices.push_back(msg);
                 }
                 Job::NotifyDbClean(c_step, duration_ms, ref c_msg) => {
-                    debug!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
+                    //  trace!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
                     let av2nd = if let Some(msg) = c_msg {
                         let newmsg = format!(
                             "{}{}\t{}\n",
@@ -361,12 +362,15 @@ impl GuiProcessor {
         gen_icons::ICON_LIST
             .iter()
             .enumerate()
+            .filter(|(num, _ico)| *num > 0)
             .map(|(num, ico)| IconEntry {
                 icon_id: num as isize,
                 icon: ico.to_string(),
             })
             .for_each(|e| {
-                let _r = (*self.iconrepo_r.borrow()).store_entry(&e);
+                if let Ok(_icon_entry) = (*self.iconrepo_r.borrow()).store_entry(&e) {
+                    // trace!(                        "default-icons: {}=>{}  #{} ",                        e.icon_id,                        icon_entry.icon_id,                        icon_entry.icon.len(),                    );
+                }
             });
     }
 
@@ -391,9 +395,6 @@ impl GuiProcessor {
         let browser_cache_clear = (self.configmanager_r)
             .borrow()
             .get_val_bool(&PropDef::BrowserClearCache.to_string());
-        // let databases_cleanup = (self.configmanager_r)            .borrow()            .get_val_bool(contentdownloader::CONF_DATABASES_CLEANUP);
-        // let systray_enable = self.is_systray_enabled();
-
         let dd: Vec<AValue> = vec![
             AValue::ABOOL((sources_conf).borrow().feeds_fetch_at_start), // 0 : FetchFeedsOnStart
             AValue::AU32((sources_conf).borrow().feeds_fetch_interval),  // 1 UpdateFeeds Cardinal
@@ -406,8 +407,6 @@ impl GuiProcessor {
             AValue::AU32(fontsize_manual),         // 8 : Font size Manual
             AValue::AU32(browser_conf.browser_bg as u32), // 9 : Browser_BG
             AValue::ABOOL(browser_cache_clear),    // 10 : Browser Cache Cleanup
-                                                   // AValue::ABOOL(databases_cleanup),      // 11 : Cleanup-on-start
-                                                   // AValue::ABOOL(systray_enable),         // 12 : Systray enable
         ];
         (*self.gui_val_store)
             .write()
@@ -429,6 +428,27 @@ impl GuiProcessor {
 
     fn start_about_dialog(&self) {
         (*self.gui_updater).borrow().show_dialog(DIALOG_ABOUT);
+    }
+
+    fn start_icons_dialog(&self) {
+        let all: Vec<IconEntry> = (*self.iconrepo_r.borrow()).get_all_entries();
+        let upper: Vec<IconEntry> = all
+            .into_iter()
+            .filter(|ie| ie.icon_id > ICON_LIST.len() as isize)
+            .collect::<Vec<IconEntry>>();
+
+        let mut dd: Vec<AValue> = Vec::new();
+        upper.iter().for_each(|ie| {
+            dd.push(AValue::AI32(ie.icon_id as i32));
+            dd.push(AValue::ASTR((*ie.icon).to_string()));
+        });
+        trace!("storing  {}  icons ", upper.len());
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_dialog_data(DIALOG_ICONS, &dd);
+        (*self.gui_updater).borrow().update_dialog(DIALOG_ICONS);
+        (*self.gui_updater).borrow().show_dialog(DIALOG_ICONS);
     }
 
     ///  for key codes look at selec.rs                           gdk_sys::GDK_KEY_Escape => KeyCodes::Escape,
@@ -620,9 +640,7 @@ impl TimerReceiver for GuiProcessor {
                 TimerEvent::Timer1s => {
                     self.statusbar.borrow_mut().update_memory_stats();
                 }
-                TimerEvent::Timer10s => {
-                    //  self.handle_settings_check_level();
-                }
+                TimerEvent::Timer10s => {}
                 TimerEvent::Startup => {
                     self.process_jobs();
                     self.startup_dialogs();
@@ -787,15 +805,10 @@ impl StartupWithAppContext for GuiProcessor {
             &GuiEvents::BrowserEvent(BrowserEventType::default(), 0),
             HandleBrowserEvent(),
         );
-
         self.add_handler(
             &GuiEvents::ButtonClicked(String::default()),
             HandleButtonActivated(),
         );
-        // self.add_handler(
-        //     &GuiEvents::NotifyDbClean(0, String::default()),
-        //     HandleNotifyDbClean(),
-        // );
     }
 }
 
@@ -856,6 +869,9 @@ impl HandleSingleEvent for HandleMenuActivate {
                 }
                 "M_ABOUT" => {
                     gp.start_about_dialog();
+                }
+                "M_ICONS" => {
+                    gp.start_icons_dialog();
                 }
                 "M_SHORT_HELP" => {
                     gp.browserpane_r.borrow().display_short_help();
@@ -1054,17 +1070,6 @@ impl HandleSingleEvent for HandleDialogData {
                         &PropDef::BrowserClearCache.to_string(),
                         payload.get(10).unwrap().boo().to_string(), // 10 : browser cache cleanup
                     );
-
-                    // self.r_conf.borrow().set_val(
-                    //     contentdownloader::CONF_DATABASES_CLEANUP, // 11 : DB cleanup
-                    //     payload.get(11).unwrap().boo().to_string(),
-                    // );
-                    // if let Some(systray_e) = payload.get(12) {
-                    //     self.r_conf.borrow().set_val(
-                    //         &PropDef::SystrayEnable.to_string(),
-                    //         systray_e.boo().to_string(), // 12 : enable systray
-                    //     );
-                    // }
                     gp.addjob(Job::NotifyConfigChanged);
                 }
                 _ => {

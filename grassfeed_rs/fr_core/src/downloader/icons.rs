@@ -311,7 +311,7 @@ impl Step<IconInner> for IconCheckPresent {
         }
         if inner.icon_bytes.len() > 10000 {
             debug!(
-                "IconStore: {} {} \t  Size {} kB",
+                "IconCheckPresent: {} {} \t big size: {} kB",
                 inner.icon_url,
                 inner.feed_url,
                 inner.icon_bytes.len() / 1024
@@ -343,9 +343,9 @@ impl Step<IconInner> for IconStore {
             icon: inner.compressed_icon.clone(),
             ..Default::default()
         };
-        debug!("IconStore:   {:?} ", &ie);
         match inner.iconrepo.store_entry(&ie) {
             Ok(entry) => {
+                debug!("IconStore:   {:?}  => ID {} ", &ie, ie.icon_id);
                 let _r = inner
                     .sourcetree_job_sender
                     .send(SJob::SetIconId(inner.subs_id, entry.icon_id));

@@ -93,10 +93,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         (*fsrwr.borrow()).scrub_all_subscriptions();
     }
     let error_repo: Rc<RefCell<ErrorRepo>> = acr.get_rc::<ErrorRepo>().unwrap();
-
     let subs_move_r: Rc<RefCell<dyn ISubscriptionMove>> = acr.get_rc::<SubscriptionMove>().unwrap();
     let ref subs_move = (*subs_move_r).borrow();
-
     let url_dynamic = format!("{}/dynamic.rss", addr);
     let url_gui_proc = format!("{}/gui_proc_3.rss", addr);
     let url_feedburner = format!("{}/feedburner.rss", addr);
