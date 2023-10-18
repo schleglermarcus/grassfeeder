@@ -345,7 +345,7 @@ impl Step<IconInner> for IconStore {
         };
         match inner.iconrepo.store_entry(&ie) {
             Ok(entry) => {
-                debug!("IconStore:   {:?}  => ID {} ", &ie, ie.icon_id);
+                debug!("IconStore:   {:?}  => ID {} ", &ie, entry.icon_id);
                 let _r = inner
                     .sourcetree_job_sender
                     .send(SJob::SetIconId(inner.subs_id, entry.icon_id));

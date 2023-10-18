@@ -1,8 +1,7 @@
-Mon, 28 Aug 2023 18:00:00 +0000
+Wed, 18 Oct 2023 23:00:00 +0000
 * Errors logging to database
 * Error display with cause translation
 * Databases cleanup into settings dialog
 * Statemachine testing  with take()
-* Bugfix: multiple drop of Urls caused unresponsive dialog.
 * Bugfix: no more creating one too many icons in icon list.
-
+* Bugfix: multiple drop of Urls caused unresponsive dialog.

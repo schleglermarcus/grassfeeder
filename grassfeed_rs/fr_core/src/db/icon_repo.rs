@@ -37,7 +37,7 @@ pub struct IconEntry {
 impl std::fmt::Debug for IconEntry {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         fmt.debug_struct("IconEntry")
-            .field("icon_id", &self.icon_id)
+            .field("id", &self.icon_id)
             .field("IC#", &self.icon.len())
             .finish()
     }
@@ -94,11 +94,7 @@ impl IconRepo {
     pub fn check_or_store(&mut self) {
         let cur_list_len = (*self.list).read().unwrap().len();
         if cur_list_len != self.last_list_count {
-            trace!(
-                "  check_or_store  {} <> {} ",
-                cur_list_len,
-                self.last_list_count
-            );
+            // trace!(                "  check_or_store  {} <> {} ",                cur_list_len,                self.last_list_count            );
             self.store_to_file();
         }
     }
@@ -111,7 +107,6 @@ impl IconRepo {
             .cloned()
             .collect::<Vec<IconEntry>>();
         values.sort_by(|a, b| a.icon_id.cmp(&b.icon_id));
-        // debug!(            "store_to_file last={:?}    {} ",           values[values.len() - 2],            self.filename.clone()        );
         match write_to(self.filename.clone(), &values, CONV_FROM) {
             Ok(_bytes_written) => {
                 self.last_list_count = values.len();

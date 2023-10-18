@@ -1137,7 +1137,7 @@ pub fn errorentry_to_line(ee: &ErrorEntry /*, _displayname: &str */) -> String {
     let mut esrc_txt = t!(&format!("EM_DL_{}", ee.e_src));
     esrc_txt.truncate(40);
     let mut e_text = ee.text.clone();
-    e_text.truncate(60);
+    e_text.truncate(100);
     format!(
         "{:12} {:5} {:30} {:50} {:100}",
         db_time_to_display(ee.date),

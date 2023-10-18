@@ -48,7 +48,7 @@ pub trait ISubscriptionMove {
     fn empty_create_default_subscriptions(&mut self);
 
     fn set_fs_delete_id(&mut self, o_fs_id: Option<usize>);
-    fn feedsource_delete(&mut self);
+    fn delete_subscription(&mut self);
 
     fn request_check_paths(&self, needs_check: bool);
     fn check_paths(&self);
@@ -540,7 +540,7 @@ impl ISubscriptionMove for SubscriptionMove {
         self.feedsource_delete_id = o_fs_id;
     }
 
-    fn feedsource_delete(&mut self) {
+    fn delete_subscription(&mut self) {
         if self.feedsource_delete_id.is_none() {
             return;
         }

@@ -100,7 +100,7 @@ impl CleanerInner {
     }
     fn advance_to(&mut self, newvalue: u8) {
         self.stepmarker = newvalue;
-        info!("ADVANCE-TO {} ", newvalue);
+        // debug!("ADVANCE-TO {} ", newvalue);
     }
 }
 
