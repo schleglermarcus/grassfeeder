@@ -12,10 +12,10 @@ RUN cargo test --release
 RUN cargo deb
 RUN cargo generate-rpm
 
-RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
-RUN mv grassfeeder*.AppImage  gf.AppImage
-RUN pwd
-RUN ls -l
+#RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
+#RUN mv grassfeeder*.AppImage  gf.AppImage
+#RUN pwd
+#RUN ls -l
 
 RUN ls -l  target/generate-rpm/*
 RUN cp target/generate-rpm/gr*.rpm  ../target/gf.rpm
