@@ -3,7 +3,6 @@
 
 - Test icon extraction with https://www.greyblake.com/blog/property-based-testing-in-rust-with-arbitrary/
 
-- Idea: tree Expand - When closed and activated, do not fill the list with the aggregate
 
 
 
