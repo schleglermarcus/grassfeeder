@@ -39,12 +39,12 @@ fn main() {
         return; // no gui
     }
     info!(
-        "Starting {}  conf:'{}'  cache:'{}'  locale={:?}  V={}",
+        "Starting {}  V={} conf:'{}'  cache:'{}'  locale={:?}  ",
         APP_NAME,
+        &version_str,
         &conf,
         &cache,
         rust_i18n::locale(),
-        &version_str,
     );
     let gfconf = init_system::GrassFeederConfig {
         path_config: conf,

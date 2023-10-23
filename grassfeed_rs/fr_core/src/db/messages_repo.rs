@@ -13,6 +13,7 @@ use context::TimerRegistry;
 use rusqlite::Connection;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::RwLock;
 
 pub trait IMessagesRepo {
     /// returns index value
@@ -23,6 +24,9 @@ pub trait IMessagesRepo {
 
     /// sorted by  entry_src_date
     fn get_by_src_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow>;
+
+    /// sorted by  entry_src_date, without deleted ones
+    //    fn get_by_subscriber(&self, src_id: isize) -> dyn Iterator<Item = MessageRow>;
 
     /// returns  the number of read lines for that source id:   -1 for undefined
     fn get_read_sum(&self, src_id: isize) -> isize;
@@ -70,8 +74,14 @@ pub trait IMessagesRepo {
     fn get_all_deleted(&self) -> Vec<MessageRow>;
 }
 
+//  type MessageCacheType = RwLock<(isize, Vec<MessageRow>)>;
+
 pub struct MessagesRepo {
     ctx: SqliteContext<MessageRow>,
+    /// cached subscription id,  retrieved rows
+    // cache: MessageCacheType,
+    cached_rows: Vec<MessageRow>,
+    cached_subs_id: isize,
 }
 
 impl MessagesRepo {
@@ -89,12 +99,18 @@ impl MessagesRepo {
     pub fn new_by_connection(con_a: Arc<Mutex<Connection>>) -> Self {
         MessagesRepo {
             ctx: SqliteContext::new_by_connection(con_a),
+            // cache: RwLock::new((-1, Vec::default())),
+            cached_rows: Vec::default(),
+            cached_subs_id: -1,
         }
     }
 
     pub fn new_in_mem() -> Self {
         MessagesRepo {
             ctx: SqliteContext::new_in_memory(),
+            // cache: RwLock::new((-1, Vec::default())),
+            cached_rows: Vec::default(),
+            cached_subs_id: -1,
         }
     }
 
@@ -117,7 +133,44 @@ impl MessagesRepo {
         if !dbctx.is_column_present(insert_column) {
             warn!("could not add column:: {}  ", insert_column);
         }
-        MessagesRepo { ctx: dbctx }
+        MessagesRepo {
+            ctx: dbctx,
+            // cache: RwLock::new((-1, Vec::default())),
+            cached_rows: Vec::default(),
+            cached_subs_id: -1,
+        }
+    }
+
+    // does not include deleted ones
+    fn get_by_subsciption(&mut self, subs_id: isize) -> MessageIterator {
+        if subs_id != self.cached_subs_id {
+            let prepared = format!(
+            "SELECT * FROM {} WHERE feed_src_id={} AND is_deleted=false  ORDER BY entry_src_date DESC ",
+            MessageRow::table_name(),            subs_id,        );
+
+            // let (mut cached_subs_id, mut list) = self.cache.write().unwrap().to_owned();
+            //  list.clear();
+
+            self.cached_rows.clear();
+
+            // let mut list: Vec<MessageRow> = Vec::default();
+            if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(&prepared) {
+                match stmt.query_map([], |row| {
+                    self.cached_rows.push(MessageRow::from_row(row));
+                    Ok(())
+                }) {
+                    Ok(mr) => {
+                        mr.count(); // seems to be necessary
+                    }
+                    Err(e) => error!("{} {:?}", &prepared, e),
+                }
+            }
+            self.cached_subs_id = subs_id;
+        }
+        MessageIterator {
+            cache: &self.cached_rows,
+            index: 0,
+        }
     }
 }
 
@@ -403,6 +456,27 @@ impl TimerReceiver for MessagesRepo {
     fn trigger(&self, event: &TimerEvent) {
         if event == &TimerEvent::Shutdown {
             self.ctx.cache_flush();
+        }
+    }
+}
+
+struct MessageIterator<'a> {
+    // cache: &'a MessageCacheType,
+    cache: &'a Vec<MessageRow>,
+    index: usize,
+}
+
+impl<'a> Iterator for MessageIterator<'a> {
+    type Item = &'a MessageRow;
+    fn next(&mut self) -> Option<Self::Item> {
+        // let list = &self.cache.read().unwrap().1;
+        if self.index < self.cache.len() {
+            let i = self.index;
+            self.index += 1;
+            self.cache.get(i)
+            //             list.get(i)
+        } else {
+            None
         }
     }
 }

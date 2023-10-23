@@ -141,7 +141,11 @@ impl Step<FetchInner> for EvalStringAndFilter {
             );
         }
         inner.timestamp_created = ts_created;
+
+        // TODO mem
+
         let existing_entries = inner.messgesrepo.get_by_src_id(inner.fs_repo_id, false);
+
         let filtered_list =
             match_new_entries_to_existing(&new_list, &existing_entries, inner.cjob_sender.clone());
         match inner.messgesrepo.insert_tx(&filtered_list) {

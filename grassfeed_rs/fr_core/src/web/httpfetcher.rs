@@ -45,6 +45,7 @@ impl HttpFetcher {
                         }
                     }
                 } else {
+                    //    TODO   mem   ureq::response::into_string()
                     match response.into_string() {
                         Ok(r_str) => r_text = r_str,
                         Err(e) => {

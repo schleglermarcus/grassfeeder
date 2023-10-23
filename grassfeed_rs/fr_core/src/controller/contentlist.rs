@@ -101,6 +101,7 @@ pub trait IContentList {
 
     //  all content entries, unread content entries
     fn get_counts(&self, source_repo_id: isize) -> Option<(i32, i32)>;
+
     fn get_config(&self) -> Config;
 
     fn set_conf_focus_policy(&mut self, n: u8);
@@ -373,9 +374,11 @@ impl FeedContents {
                     .for_each(|m| messagelist.push(m));
             }
         } else {
+            // TODO problem_mem
             messagelist = (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
         }
         if num_msg != messagelist.len() as isize {
+            // TODO problem_mem
             self.fill_state_map(&messagelist);
         }
         if self.msg_filter.is_some() {
@@ -407,15 +410,22 @@ impl FeedContents {
 
     fn fill_state_map(&self, r_messagelist: &Vec<MessageRow>) {
         let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
+
+        // TODO mem
+
         let messagelist: Vec<MessageRow> = if r_messagelist.is_empty() {
             (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false)
         } else {
             r_messagelist.clone()
         };
+
+        let msglist_len = messagelist.len() as isize;
         self.current_subscription
-            .replace((subs_id, messagelist.len() as isize, isfolder));
+            .replace((subs_id, msglist_len, isfolder));
         self.msg_state.write().unwrap().clear();
+
         messagelist.iter().enumerate().for_each(|(i, fc)| {
+            // TODO mem
             self.insert_state_from_row(fc, Some(i as isize));
         });
     }
@@ -804,11 +814,16 @@ impl IContentList for FeedContents {
 
     //  all content entries, unread content entries
     fn get_counts(&self, source_repo_id: isize) -> Option<(i32, i32)> {
-        let all = (*self.messagesrepo_r)
-            .borrow()
-            .get_by_src_id(source_repo_id, false);
-        let num_is_read = all.iter().filter(|fce| fce.is_read).count() as i32;
-        Some((all.len() as i32, (all.len() as i32 - num_is_read)))
+        let all_sum = (*self.messagesrepo_r).borrow().get_read_sum(source_repo_id);
+        let read_sum = (*self.messagesrepo_r).borrow().get_read_sum(source_repo_id);
+        Some((all_sum as i32, (all_sum - read_sum) as i32))
+        /*
+               let all = (*self.messagesrepo_r)
+                   .borrow()
+                   .get_by_src_id(source_repo_id, false);
+               let num_is_read = all.iter().filter(|fce| fce.is_read).count() as i32;
+               Some((all.len() as i32, (all.len() as i32 - num_is_read)))
+        */
     }
 
     fn get_config(&self) -> Config {
@@ -1019,18 +1034,7 @@ impl IContentList for FeedContents {
 
     fn memory_conserve(&mut self, act: bool) {
         self.window_minimized = act;
-        if act {
-            // self.msg_state.write().unwrap().clear();
-        } else {
-            // self.fill_state_map(&Vec::default());
-            /*
-                        let (_, _, isfolder) = *self.current_subscription.borrow();
-                        if isfolder {
-                            self.addjob(CJob::UpdateMessageList); // when folder is selected, we would have no messages synced else
-                        }
-            */
-            self.addjob(CJob::ListSetCursorToPolicy);
-        }
+        // if !act {            self.addjob(CJob::ListSetCursorToPolicy);        }
     }
 
     // impl IContentList
