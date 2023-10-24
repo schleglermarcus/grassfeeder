@@ -329,13 +329,13 @@ impl FeedContents {
         );
     }
 
-    fn filter_messages(&self, list_in: &[MessageRow]) -> Vec<MessageRow> {
+    fn filter_messages<'a>(&'a self, list_in: &'a [&MessageRow]) -> Vec<&MessageRow> {
         let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
         let reg = RegexBuilder::new(&regex::escape(matchtext))
             .case_insensitive(true)
             .build()
             .unwrap();
-        let out_list: Vec<MessageRow> = list_in
+        let out_list: Vec<&MessageRow> = list_in
             .iter()
             .filter(|m| {
                 let o_title = self.msg_state.read().unwrap().get_title(m.message_id);
@@ -358,41 +358,37 @@ impl FeedContents {
     /// State Map shall contain only the current subscription's messages, for finding the cursor position for the focus policy
     fn update_feed_list_contents_int(&self) {
         let (subs_id, num_msg, isfolder) = *self.current_subscription.borrow();
-        let mut messagelist: Vec<MessageRow> = Vec::default();
-        let mut child_ids: Vec<i32> = Vec::default();
+        let mut messagelist: Vec<&MessageRow> = Vec::default();
+        let mut child_ids: Vec<isize> = Vec::default();
+        let mut mr_r = self.messagesrepo_r.borrow_mut();
+        let mr_i: MessageIterator;
         if isfolder {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
                 if let Some((_subs_e, child_subs)) =
                     (*feedsources).borrow().get_current_selected_subscription()
                 {
-                    child_ids = child_subs;
+                    child_ids = child_subs
+                        .iter()
+                        .map(|i| *i as isize)
+                        .collect::<Vec<isize>>();
                 }
             }
-            for subs_id in child_ids {
-                let mut mr_r = self.messagesrepo_r.borrow_mut();
-                let i = (*mr_r).get_by_subsciption(subs_id as isize);
-                // (*(self.messagesrepo_r.borrow_mut()))                    .get_by_src_id(subs_id as isize, false)                    .into_iter()
-                i.for_each(|m| messagelist.push(m.clone())); // TODO ref
-            }
+            mr_i = (*mr_r).get_by_subscriptions(child_ids.as_slice());
         } else {
-            // TODO problem_mem
-            //            messagelist = (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
-
-            messagelist.clear();
-            let mut mr_r = self.messagesrepo_r.borrow_mut();
-            let i = (*mr_r).get_by_subsciption(subs_id as isize);
-            i.for_each(|m| messagelist.push(m.clone())); // TODO ref
+            mr_i = (*mr_r).get_by_subscription(subs_id as isize);
         }
+        mr_i.clone().for_each(|m| messagelist.push(m));
         if num_msg != messagelist.len() as isize {
-            // TODO problem_mem
-            self.fill_state_map( /*  &messagelist  */ );
+            self.fill_state_map(mr_i.clone());
         }
-        if self.msg_filter.is_some() {
-            messagelist = self.filter_messages(&messagelist);
-        }
+        let filtered_msglist: Vec<&MessageRow> = if self.msg_filter.is_some() {
+            self.filter_messages(&messagelist)
+        } else {
+            messagelist
+        };
         let mut valstore = (*self.gui_val_store).write().unwrap();
         valstore.clear_list(0);
-        messagelist.iter().enumerate().for_each(|(i, fc)| {
+        filtered_msglist.iter().enumerate().for_each(|(i, fc)| {
             let title_string = self
                 .msg_state
                 .read()
@@ -414,16 +410,13 @@ impl FeedContents {
         self.list_selected_ids.write().unwrap().clear();
     }
 
-    fn fill_state_map(&self /* r_messagelist: &Vec<MessageRow> */) {
+    fn fill_state_map(&self, mr_i: MessageIterator) {
         let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
-        let mut mr_r = self.messagesrepo_r.borrow_mut();
-        let i: MessageIterator = (*mr_r).get_by_subsciption(subs_id);
-        let msglist_len = i.len();
+        let msglist_len = mr_i.len();
         self.current_subscription
             .replace((subs_id, msglist_len as isize, isfolder));
         self.msg_state.write().unwrap().clear();
-        // messagelist.iter().enumerate()
-        i.enumerate().for_each(|(n, fc)| {
+        mr_i.enumerate().for_each(|(n, fc)| {
             self.insert_state_from_row(fc, Some(n as isize));
         });
     }
@@ -703,7 +696,10 @@ impl IContentList for FeedContents {
     }
 
     fn update_messagelist_only(&self) {
-        self.fill_state_map( /* &Vec::default() */ );
+        /*  TODO : check if this works
+               self.fill_state_map( /* &Vec::default() */ );
+        */
+
         self.addjob(CJob::UpdateMessageList);
         self.addjob(CJob::ListSetCursorToPolicy);
     }
@@ -1121,20 +1117,16 @@ pub fn match_fce(existing: &MessageRow, new_fce: &MessageRow) -> u8 {
 
 pub fn match_new_entries_to_existing(
     new_list: &Vec<MessageRow>,
-    // existing_entries: &[MessageRow],
     existing_msg_iter: MessageIterator,
     job_sender: Sender<CJob>,
 ) -> Vec<MessageRow> {
     let mut new_list_delete_indices: Vec<usize> = Vec::default();
 
-
-
     for idx_new in 0..new_list.len() {
         let n_fce: &MessageRow = new_list.get(idx_new).unwrap();
         let mut exi_pos_match: HashMap<usize, u8> = HashMap::new();
         let mut max_ones_count: u8 = 0;
-        // existing_entries.iter()
-        let e_m_i =  existing_msg_iter.clone();
+        let e_m_i = existing_msg_iter.clone();
         e_m_i.enumerate().for_each(|(n, ee)| {
             let matchfield: u8 = match_fce(ee, n_fce);
             let ones_count: u8 = matchfield.count_ones() as u8;
@@ -1150,9 +1142,7 @@ pub fn match_new_entries_to_existing(
             .find(|(_pos, ones_count)| **ones_count >= max_ones_count)
             .map(|(pos, _ones_count_)| pos);
         if let Some(pos) = pos_with_max_ones {
-            // let exi_fce = existing_entries.get(*pos).unwrap();
             let exi_fce = existing_msg_iter.get_row(*pos).unwrap();
-
             let matchfield: u8 = match_fce(exi_fce, n_fce);
             if matchfield.count_ones() >= 3 {
                 new_list_delete_indices.push(idx_new); // full match

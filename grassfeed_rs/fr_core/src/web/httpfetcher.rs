@@ -27,7 +27,7 @@ impl HttpFetcher {
                     if length > 0 {
                         length = std::cmp::min(length, MAX_BUFFER_LENGTH);
                     } else {
-                        // trace!("HttpFetcher:  NO content-length , using maximum !");
+                        trace!("HttpFetcher:  NO content-length , using maximum !");
                         length = NO_CONTENTLENGTH_BUFFER_SIZE;
                     }
                     r_bytes = Vec::with_capacity(length as usize);

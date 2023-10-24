@@ -28,7 +28,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::RwLock;
 
-// #[ignore]
 #[test]
 fn clean_errorlist_no_subscription() {
     setup();

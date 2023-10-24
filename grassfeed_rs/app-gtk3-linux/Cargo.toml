@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.0.2604"	# 0.2.5
+version = "0.0.2605"	# 0.2.5
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -10,7 +10,7 @@ name = "grassfeeder"
 path = "src/main.rs"
 
 
-# 
+#
 # crates.io does not allow packages to be published with path dependencies
 #
 # cargo-vendor always attracts the windows libraries, which are too big
