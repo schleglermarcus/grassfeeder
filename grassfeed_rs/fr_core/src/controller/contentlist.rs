@@ -11,6 +11,7 @@ use crate::db::message::decompress;
 use crate::db::message::MessageRow;
 use crate::db::message_state::MessageStateMap;
 use crate::db::messages_repo::IMessagesRepo;
+use crate::db::messages_repo::MessageIterator;
 use crate::db::messages_repo::MessagesRepo;
 use crate::downloader::db_clean;
 use crate::ui_select::gui_context::GuiContext;
@@ -368,18 +369,23 @@ impl FeedContents {
                 }
             }
             for subs_id in child_ids {
-                (*(self.messagesrepo_r.borrow_mut()))
-                    .get_by_src_id(subs_id as isize, false)
-                    .into_iter()
-                    .for_each(|m| messagelist.push(m));
+                let mut mr_r = self.messagesrepo_r.borrow_mut();
+                let i = (*mr_r).get_by_subsciption(subs_id as isize);
+                // (*(self.messagesrepo_r.borrow_mut()))                    .get_by_src_id(subs_id as isize, false)                    .into_iter()
+                i.for_each(|m| messagelist.push(m.clone())); // TODO ref
             }
         } else {
             // TODO problem_mem
-            messagelist = (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
+            //            messagelist = (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false);
+
+            messagelist.clear();
+            let mut mr_r = self.messagesrepo_r.borrow_mut();
+            let i = (*mr_r).get_by_subsciption(subs_id as isize);
+            i.for_each(|m| messagelist.push(m.clone())); // TODO ref
         }
         if num_msg != messagelist.len() as isize {
             // TODO problem_mem
-            self.fill_state_map(&messagelist);
+            self.fill_state_map( /*  &messagelist  */ );
         }
         if self.msg_filter.is_some() {
             messagelist = self.filter_messages(&messagelist);
@@ -408,25 +414,17 @@ impl FeedContents {
         self.list_selected_ids.write().unwrap().clear();
     }
 
-    fn fill_state_map(&self, r_messagelist: &Vec<MessageRow>) {
+    fn fill_state_map(&self /* r_messagelist: &Vec<MessageRow> */) {
         let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
-
-        // TODO mem
-
-        let messagelist: Vec<MessageRow> = if r_messagelist.is_empty() {
-            (*(self.messagesrepo_r.borrow_mut())).get_by_src_id(subs_id, false)
-        } else {
-            r_messagelist.clone()
-        };
-
-        let msglist_len = messagelist.len() as isize;
+        let mut mr_r = self.messagesrepo_r.borrow_mut();
+        let i: MessageIterator = (*mr_r).get_by_subsciption(subs_id);
+        let msglist_len = i.len();
         self.current_subscription
-            .replace((subs_id, msglist_len, isfolder));
+            .replace((subs_id, msglist_len as isize, isfolder));
         self.msg_state.write().unwrap().clear();
-
-        messagelist.iter().enumerate().for_each(|(i, fc)| {
-            // TODO mem
-            self.insert_state_from_row(fc, Some(i as isize));
+        // messagelist.iter().enumerate()
+        i.enumerate().for_each(|(n, fc)| {
+            self.insert_state_from_row(fc, Some(n as isize));
         });
     }
 
@@ -705,7 +703,7 @@ impl IContentList for FeedContents {
     }
 
     fn update_messagelist_only(&self) {
-        self.fill_state_map(&Vec::default());
+        self.fill_state_map( /* &Vec::default() */ );
         self.addjob(CJob::UpdateMessageList);
         self.addjob(CJob::ListSetCursorToPolicy);
     }
@@ -1123,15 +1121,21 @@ pub fn match_fce(existing: &MessageRow, new_fce: &MessageRow) -> u8 {
 
 pub fn match_new_entries_to_existing(
     new_list: &Vec<MessageRow>,
-    existing_entries: &[MessageRow],
+    // existing_entries: &[MessageRow],
+    existing_msg_iter: MessageIterator,
     job_sender: Sender<CJob>,
 ) -> Vec<MessageRow> {
     let mut new_list_delete_indices: Vec<usize> = Vec::default();
+
+
+
     for idx_new in 0..new_list.len() {
         let n_fce: &MessageRow = new_list.get(idx_new).unwrap();
         let mut exi_pos_match: HashMap<usize, u8> = HashMap::new();
         let mut max_ones_count: u8 = 0;
-        existing_entries.iter().enumerate().for_each(|(n, ee)| {
+        // existing_entries.iter()
+        let e_m_i =  existing_msg_iter.clone();
+        e_m_i.enumerate().for_each(|(n, ee)| {
             let matchfield: u8 = match_fce(ee, n_fce);
             let ones_count: u8 = matchfield.count_ones() as u8;
             if ones_count > 1 {
@@ -1146,7 +1150,9 @@ pub fn match_new_entries_to_existing(
             .find(|(_pos, ones_count)| **ones_count >= max_ones_count)
             .map(|(pos, _ones_count_)| pos);
         if let Some(pos) = pos_with_max_ones {
-            let exi_fce = existing_entries.get(*pos).unwrap();
+            // let exi_fce = existing_entries.get(*pos).unwrap();
+            let exi_fce = existing_msg_iter.get_row(*pos).unwrap();
+
             let matchfield: u8 = match_fce(exi_fce, n_fce);
             if matchfield.count_ones() >= 3 {
                 new_list_delete_indices.push(idx_new); // full match

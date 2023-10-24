@@ -13,7 +13,6 @@ use context::TimerRegistry;
 use rusqlite::Connection;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::sync::RwLock;
 
 pub trait IMessagesRepo {
     /// returns index value
@@ -21,12 +20,6 @@ pub trait IMessagesRepo {
 
     // returns number of elements
     fn insert_tx(&self, e_list: &[MessageRow]) -> Result<i64, Box<dyn std::error::Error>>;
-
-    /// sorted by  entry_src_date
-    fn get_by_src_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow>;
-
-    /// sorted by  entry_src_date, without deleted ones
-    //    fn get_by_subscriber(&self, src_id: isize) -> dyn Iterator<Item = MessageRow>;
 
     /// returns  the number of read lines for that source id:   -1 for undefined
     fn get_read_sum(&self, src_id: isize) -> isize;
@@ -72,6 +65,12 @@ pub trait IMessagesRepo {
     fn db_vacuum(&self) -> usize;
 
     fn get_all_deleted(&self) -> Vec<MessageRow>;
+
+    /// Sorted by  entry_src_date.  Takes more memory.
+    fn get_by_subs_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow>;
+
+    /// does not include deleted ones,  sorted by  entry_src_date
+    fn get_by_subsciption(&mut self, subs_id: isize) -> MessageIterator;
 }
 
 //  type MessageCacheType = RwLock<(isize, Vec<MessageRow>)>;
@@ -140,38 +139,6 @@ impl MessagesRepo {
             cached_subs_id: -1,
         }
     }
-
-    // does not include deleted ones
-    fn get_by_subsciption(&mut self, subs_id: isize) -> MessageIterator {
-        if subs_id != self.cached_subs_id {
-            let prepared = format!(
-            "SELECT * FROM {} WHERE feed_src_id={} AND is_deleted=false  ORDER BY entry_src_date DESC ",
-            MessageRow::table_name(),            subs_id,        );
-
-            // let (mut cached_subs_id, mut list) = self.cache.write().unwrap().to_owned();
-            //  list.clear();
-
-            self.cached_rows.clear();
-
-            // let mut list: Vec<MessageRow> = Vec::default();
-            if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(&prepared) {
-                match stmt.query_map([], |row| {
-                    self.cached_rows.push(MessageRow::from_row(row));
-                    Ok(())
-                }) {
-                    Ok(mr) => {
-                        mr.count(); // seems to be necessary
-                    }
-                    Err(e) => error!("{} {:?}", &prepared, e),
-                }
-            }
-            self.cached_subs_id = subs_id;
-        }
-        MessageIterator {
-            cache: &self.cached_rows,
-            index: 0,
-        }
-    }
 }
 
 impl IMessagesRepo for MessagesRepo {
@@ -191,7 +158,7 @@ impl IMessagesRepo for MessagesRepo {
             .map_err(rusqlite_error_to_boxed)
     }
 
-    fn get_by_src_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow> {
+    fn get_by_subs_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow> {
         let no_deleted_and = if include_deleted {
             String::default()
         } else {
@@ -215,7 +182,6 @@ impl IMessagesRepo for MessagesRepo {
                 Err(e) => error!("{} {:?}", &prepared, e),
             }
         }
-
         list
     }
 
@@ -422,6 +388,34 @@ impl IMessagesRepo for MessagesRepo {
     fn db_vacuum(&self) -> usize {
         self.ctx.execute("VACUUM".to_string())
     }
+
+    /// does not include deleted ones
+    fn get_by_subsciption(&mut self, subs_id: isize) -> MessageIterator {
+        if subs_id != self.cached_subs_id {
+            let prepared = format!(
+            "SELECT * FROM {} WHERE feed_src_id={} AND is_deleted=false  ORDER BY entry_src_date DESC ",
+            MessageRow::table_name(),            subs_id,        );
+            self.cached_rows.clear();
+            if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(&prepared) {
+                match stmt.query_map([], |row| {
+                    self.cached_rows.push(MessageRow::from_row(row));
+                    Ok(())
+                }) {
+                    Ok(mr) => {
+                        mr.count(); // seems to be necessary
+                    }
+                    Err(e) => error!("{} {:?}", &prepared, e),
+                }
+            }
+            self.cached_subs_id = subs_id;
+        }
+        MessageIterator {
+            cache: &self.cached_rows,
+            index: 0,
+        }
+    }
+
+    // impl IMessagesRepo
 }
 
 impl Buildable for MessagesRepo {
@@ -460,8 +454,8 @@ impl TimerReceiver for MessagesRepo {
     }
 }
 
-struct MessageIterator<'a> {
-    // cache: &'a MessageCacheType,
+#[derive(Clone)]
+pub struct MessageIterator<'a> {
     cache: &'a Vec<MessageRow>,
     index: usize,
 }
@@ -469,15 +463,26 @@ struct MessageIterator<'a> {
 impl<'a> Iterator for MessageIterator<'a> {
     type Item = &'a MessageRow;
     fn next(&mut self) -> Option<Self::Item> {
-        // let list = &self.cache.read().unwrap().1;
         if self.index < self.cache.len() {
             let i = self.index;
             self.index += 1;
             self.cache.get(i)
-            //             list.get(i)
         } else {
             None
         }
+    }
+}
+
+impl MessageIterator<'_> {
+    pub fn len(&self) -> usize {
+        self.cache.len()
+    }
+    pub fn get_row(&self, index: usize) -> Option<&MessageRow> {
+        let o_mr = (*self.cache).get(index);
+        if o_mr.is_none() {
+            return None;
+        }
+        Some(&o_mr.unwrap())
     }
 }
 
@@ -668,7 +673,7 @@ mod t {
     #[test]
     fn t_get_by_src_id() {
         let msg_r = prepare_3_rows();
-        let list = (*msg_r).borrow().get_by_src_id(3, true);
+        let list = (*msg_r).borrow().get_by_subs_id(3, true);
         assert_eq!(list.len(), 2);
         assert_eq!(list.get(0).unwrap().message_id, 2);
     }

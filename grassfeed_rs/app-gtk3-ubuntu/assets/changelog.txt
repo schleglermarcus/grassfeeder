@@ -1,3 +1,18 @@
+grassfeeder-gtk3 (0.0.2604) jammy; urgency=low
+
+  
+  
+  - investigate memory usage:
+    
+  
+  - Icon view:  check double icon display!
+  
+  - Aggregate View:  use favorite colum for subscription icon
+  
+  
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Wed, 18 Oct 2023 23:00:00 +0000
+
 grassfeeder-gtk3 (0.2.5) jammy; urgency=low
 
   * Errors logging to database

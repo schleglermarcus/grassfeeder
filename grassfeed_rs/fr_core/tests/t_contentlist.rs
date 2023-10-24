@@ -59,10 +59,12 @@ fn test_new_entries_filter() {
     // one entry new, that existed.   gives an empty insert list
     let mut new_list: Vec<MessageRow> = Vec::default();
     new_list.push(fce1.clone());
-    let existing_entries = (*msg_repo_r).borrow().get_by_src_id(source_repo_id, false);
-    assert_eq!(existing_entries.len(), 3);
+    // let existing_entries = (*msg_repo_r).borrow().get_by_src_id(source_repo_id, false);
+    let mut msg_r = (*msg_repo_r).borrow_mut();
+    let exi_i = msg_r.get_by_subsciption(source_repo_id);
+    assert_eq!(exi_i.len(), 3);
     let insert_list =
-        match_new_entries_to_existing(&new_list.to_vec(), &existing_entries, job_sender.clone());
+        match_new_entries_to_existing(&new_list.to_vec(), exi_i.clone(), job_sender.clone());
     assert_eq!(insert_list.len(), 0);
 
     // one entry changed, only title change results in title update
@@ -71,7 +73,7 @@ fn test_new_entries_filter() {
     fce0.title = changed_title.to_string();
     new_list.push(fce0);
     let insert_list =
-        match_new_entries_to_existing(&new_list.to_vec(), &existing_entries, job_sender.clone());
+        match_new_entries_to_existing(&new_list.to_vec(), exi_i.clone(), job_sender.clone());
     assert_eq!(insert_list.len(), 0);
     match job_receiver.recv().unwrap() {
         CJob::DbUpdateTitle(id, title) => {
@@ -89,7 +91,7 @@ fn test_new_entries_filter() {
     fce2.entry_src_date = changed_timestamp;
     new_list.push(fce2);
     let insert_list =
-        match_new_entries_to_existing(&new_list.to_vec(), &existing_entries, job_sender.clone());
+        match_new_entries_to_existing(&new_list.to_vec(), exi_i.clone(), job_sender.clone());
 
     assert_eq!(insert_list.len(), 0);
     match job_receiver.recv().unwrap() {

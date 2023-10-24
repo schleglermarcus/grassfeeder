@@ -7,6 +7,7 @@ use crate::db::icon_repo::IconRepo;
 use crate::db::message::compress;
 use crate::db::message::MessageRow;
 use crate::db::messages_repo::IMessagesRepo;
+use crate::db::messages_repo::MessageIterator;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
@@ -144,10 +145,15 @@ impl Step<FetchInner> for EvalStringAndFilter {
 
         // TODO mem
 
-        let existing_entries = inner.messgesrepo.get_by_src_id(inner.fs_repo_id, false);
+        //  let existing_entries = inner.messgesrepo.get_by_src_id(inner.fs_repo_id, false);
+        let mr_i: MessageIterator = inner.messgesrepo.get_by_subsciption(inner.fs_repo_id);
 
-        let filtered_list =
-            match_new_entries_to_existing(&new_list, &existing_entries, inner.cjob_sender.clone());
+        let filtered_list = match_new_entries_to_existing(
+            &new_list,
+            // &existing_entries,
+            mr_i,
+            inner.cjob_sender.clone(),
+        );
         match inner.messgesrepo.insert_tx(&filtered_list) {
             Ok(_num) => {
                 inner.download_text.clear();

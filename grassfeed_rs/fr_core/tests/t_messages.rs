@@ -61,7 +61,7 @@ fn feed_text_to_entries_local() {
     let msgrepo_r: Rc<RefCell<dyn IMessagesRepo>> = Rc::new(RefCell::new(msgrepo));
     let source_repo_id = 5;
     let _r = (*msgrepo_r).borrow().insert_tx(&new_list);
-    let r_list = (*msgrepo_r).borrow().get_by_src_id(source_repo_id, true);
+    let r_list = (*msgrepo_r).borrow().get_by_subs_id(source_repo_id, true);
     assert_eq!(r_list.len(), 2);
 }
 

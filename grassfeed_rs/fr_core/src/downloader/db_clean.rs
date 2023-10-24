@@ -531,7 +531,7 @@ pub fn reduce_too_many_messages(
     max_messages: usize,
     subs_id: isize,
 ) -> (bool, usize, usize, usize) {
-    let mut all_messages = msg_r.get_by_src_id(subs_id, true);
+    let mut all_messages = msg_r.get_by_subs_id(subs_id, true);
     let length_before = all_messages.len();
     let num_unread = all_messages
         .iter()
@@ -581,7 +581,7 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
             .enumerate()
             .for_each(|(num, subs_id)| {
                 let mut msglist: Vec<MessageRow> =
-                    inner.messagesrepo.get_by_src_id(*subs_id as isize, true);
+                    inner.messagesrepo.get_by_subs_id(*subs_id as isize, true);
                 if !msglist.is_empty() {
                     msglist.sort_by(|a, b| a.fetch_date.cmp(&b.fetch_date));
                     let mut known: HashSet<(i64, String)> = HashSet::new();

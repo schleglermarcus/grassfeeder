@@ -116,9 +116,9 @@ fn clean_message_doublettes() {
     prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
     let sut = DeleteDoubleSameMessages(cleaner_i);
     if let StepResult::Continue(s) = Box::new(sut).step() {
-        let inner: CleanerInner = s.take();
-        let msg4 = inner.messagesrepo.get_by_src_id(4, false);
-        assert_eq!(msg4.len(), 1); // the other 10 are set deleted
+        let mut inner: CleanerInner = s.take();
+        let msg4_i = inner.messagesrepo.get_by_subsciption(4);
+        assert_eq!(msg4_i.len(), 1); // the other 10 are set deleted
     }
 }
 
@@ -131,9 +131,9 @@ fn clean_too_many_messages() {
     prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
     let sut = ReduceTooManyMessages(cleaner_i);
     if let StepResult::Continue(s) = Box::new(sut).step() {
-        let inner: CleanerInner = s.take();
-        let msg1 = inner.messagesrepo.get_by_src_id(5, false);
-        assert_eq!(msg1.len(), c_max_messages as usize);
+        let mut inner: CleanerInner = s.take();
+        let msg1_i = inner.messagesrepo.get_by_subsciption(5);
+        assert_eq!(msg1_i.len(), c_max_messages as usize);
     }
 }
 
