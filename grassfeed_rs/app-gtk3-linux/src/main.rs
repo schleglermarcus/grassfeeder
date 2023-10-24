@@ -39,9 +39,9 @@ fn main() {
         return; // no gui
     }
     info!(
-        "Starting {}  V={} conf:'{}'  cache:'{}'  locale={:?}  ",
+        "Starting {}-{} conf:'{}'  cache:'{}'  locale={:?}  ",
         APP_NAME,
-        &version_str,
+        version_str,
         &conf,
         &cache,
         rust_i18n::locale(),
@@ -54,5 +54,5 @@ fn main() {
     };
     let appcontext = init_system::start(gfconf);
     init_system::run(&appcontext);
-    info!("Stopped {} ", APP_NAME,);
+    info!("Stopped {}-{} ", APP_NAME, version_str);
 }

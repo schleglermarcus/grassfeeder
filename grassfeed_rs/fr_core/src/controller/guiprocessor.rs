@@ -1201,7 +1201,6 @@ impl HandleSingleEvent for HandleToolBarButton {
             match id.as_str() {
                 "reload-subscriptions-all" => {
                     let o_c = (*self.0).borrow().get_current_selected_subscription();
-                    debug!("RELOAD-ALL {:?} ", o_c);
                     match o_c {
                         Some((subs_e, _)) => {
                             self.0

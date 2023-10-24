@@ -1,4 +1,4 @@
-grassfeeder-gtk3 (0.0.2606) buster; urgency=low
+grassfeeder-gtk3 (0.0.2610) buster; urgency=low
 
   * Messages loading more efficient: references+partial+caching
   

@@ -1,4 +1,3 @@
-// use crate::controller::contentlist::CJob;
 use crate::controller::guiprocessor::Job;
 use crate::controller::sourcetree::SJob;
 use crate::db::errorentry::ErrorEntry;
@@ -509,52 +508,62 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
             ];
             subs_ids.iter().enumerate().for_each(|(num, su_id)| {
                 let (need_u, _n_removed, _n_all, _n_unread) = reduce_too_many_messages(
-                    &inner.messagesrepo,
+                    &mut inner.messagesrepo,
                     inner.max_messages_per_subscription as usize,
                     *su_id,
                 );
                 if markers.contains(&num) {
                     inner.advance_step();
-                    inner.send_gp(Some("ReduceTooManyMessages-1".to_string()));
+                    inner.send_gp(None); // Some("ReduceTooManyMessages-1".to_string())
                 }
                 inner.need_update_messages = need_u;
             });
         }
-        inner.send_gp(Some("ReduceTooManyMessages-2".to_string()));
+        inner.send_gp(None); // Some("ReduceTooManyMessages-2".to_string())
         StepResult::Continue(Box::new(DeleteDoubleSameMessages(inner)))
     }
 }
 
 // returns   need-update, #removed, num-all, num-unread
 pub fn reduce_too_many_messages(
-    msg_r: &MessagesRepo,
+    msg_r: &mut MessagesRepo,
     max_messages: usize,
     subs_id: isize,
 ) -> (bool, usize, usize, usize) {
-    let mut all_messages = msg_r.get_by_subs_id(subs_id, true);
-    let length_before = all_messages.len();
-    let num_unread = all_messages
-        .iter()
-        .filter(|msg| !msg.is_read && !msg.is_deleted)
-        .count();
-    if length_before <= max_messages {
-        return (false, 0, length_before, num_unread);
-    }
-    all_messages.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
-    let (stay, remove) = all_messages.split_at(max_messages);
-    let remove_list: Vec<i32> = remove
-        .iter()
-        .filter(|e| !e.is_favorite())
-        .map(|e| e.message_id as i32)
-        .collect();
-    if !remove_list.is_empty() {
-        msg_r.update_is_deleted_many(&remove_list, true);
-        let num_unread = stay
+    let remove_list: Vec<i32>;
+    let length_before: usize;
+    let mut num_unread: usize;
+    let num_all_stay: usize;
+    {
+        let mut all_messages = msg_r
+            .get_by_subscriptions(&[subs_id], true)
+            .collect::<Vec<&MessageRow>>();
+        length_before = all_messages.len();
+
+        num_unread = all_messages
             .iter()
             .filter(|msg| !msg.is_read && !msg.is_deleted)
             .count();
-        let num_all = stay.iter().filter(|msg| !msg.is_deleted).count();
-        return (true, remove_list.len(), num_all, num_unread);
+        if length_before <= max_messages {
+            return (false, 0, length_before, num_unread);
+        }
+        all_messages.sort_by(|a, b| b.entry_src_date.cmp(&a.entry_src_date));
+        let (stay, remove) = all_messages.split_at(max_messages);
+        remove_list = remove
+            .iter()
+            .filter(|e| !e.is_favorite())
+            .map(|e| e.message_id as i32)
+            .collect();
+        num_unread = stay
+            .iter()
+            .filter(|msg| !msg.is_read && !msg.is_deleted)
+            .count();
+        num_all_stay = stay.iter().filter(|msg| !msg.is_deleted).count();
+    }
+    if !remove_list.is_empty() {
+        msg_r.update_is_deleted_many(&remove_list, true);
+
+        return (true, remove_list.len(), num_all_stay, num_unread);
     }
     (false, 0, length_before, num_unread)
 }
@@ -580,30 +589,31 @@ impl Step<CleanerInner> for DeleteDoubleSameMessages {
             .iter()
             .enumerate()
             .for_each(|(num, subs_id)| {
-                let mut msglist: Vec<MessageRow> =
-                    inner.messagesrepo.get_by_subs_id(*subs_id as isize, true);
+                let mut msglist = inner
+                    .messagesrepo
+                    .get_by_subscriptions(&[*subs_id as isize], true)
+                    .collect::<Vec<&MessageRow>>();
                 if !msglist.is_empty() {
                     msglist.sort_by(|a, b| a.fetch_date.cmp(&b.fetch_date));
                     let mut known: HashSet<(i64, String)> = HashSet::new();
-                    let mut delete_list: Vec<MessageRow> = Vec::default();
+                    let mut delete_list: Vec<i32> = Vec::default();
                     msglist.iter().for_each(|msg| {
                         if known.contains(&(msg.entry_src_date, msg.title.clone())) {
-                            delete_list.push(msg.clone());
+                            delete_list.push(msg.message_id as i32);
                         } else {
                             known.insert((msg.entry_src_date, msg.title.clone()));
                         };
                     });
                     if !delete_list.is_empty() {
-                        let del_indices: Vec<i32> =
-                            delete_list.iter().map(|m| m.message_id as i32).collect();
+                        //  let del_indices: Vec<i32> =                            delete_list.iter().map(|m| m.message_id as i32).collect();
                         inner
                             .messagesrepo
-                            .update_is_deleted_many(del_indices.as_slice(), true);
+                            .update_is_deleted_many(delete_list.as_slice(), true);
                     }
                 }
                 if markers.contains(&num) {
                     inner.advance_step();
-                    inner.send_gp(Some("DeleteDoubleSameMessages-1".to_string()));
+                    inner.send_gp(None); // Some("DeleteDoubleSameMessages-1".to_string())
                 }
             });
         StepResult::Continue(Box::new(PurgeMessages(inner)))
@@ -619,7 +629,7 @@ impl Step<CleanerInner> for PurgeMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_to(16);
-        inner.send_gp(Some("PurgeMessages".to_string()));
+        inner.send_gp(None); // Some("PurgeMessages".to_string())
         let allmsg = inner.messagesrepo.get_all_deleted();
         let to_delete: Vec<i32> = allmsg
             .into_iter()
@@ -643,7 +653,6 @@ impl Step<CleanerInner> for PurgeMessages {
         if num_deleted > 0 {
             inner.send_gp(Some(format!("Deleted {} messages", num_deleted)));
         }
-        // inner.send_gp(Some("PurgeMessages-3".to_string()));
         StepResult::Continue(Box::new(CheckErrorLog(inner)))
     }
     fn take(self: Box<Self>) -> CleanerInner {
@@ -656,7 +665,7 @@ impl Step<CleanerInner> for CheckErrorLog {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(Some("CheckErrorLog".to_string()));
+        inner.send_gp(None); // Some("CheckErrorLog".to_string())
         let parent_ids_active: HashSet<isize> = inner
             .subscriptionrepo
             .get_all_nonfolder()
@@ -707,10 +716,10 @@ impl Step<CleanerInner> for ShortenDatabases {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(Some("ShortenDatabases-M".to_string()));
+        inner.send_gp(None); // Some("ShortenDatabases-M".to_string())
         inner.messagesrepo.db_vacuum();
         inner.advance_step();
-        inner.send_gp(Some("ShortenDatabases-S".to_string()));
+        inner.send_gp(None); //  Some("ShortenDatabases-S".to_string())
         inner.subscriptionrepo.db_vacuum();
         inner.error_repo.db_vacuum();
         StepResult::Continue(Box::new(Notify(inner)))
@@ -725,13 +734,16 @@ impl Step<CleanerInner> for Notify {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(Some("Notify".to_string()));
+        inner.send_gp(None); // Some("Notify".to_string())
         if inner.need_update_subscriptions {
             let _r = inner.sourcetree_job_sender.send(SJob::UpdateTreePaths);
             let _r = inner
                 .sourcetree_job_sender
                 .send(SJob::FillSubscriptionsAdapter);
             let _r = inner.sourcetree_job_sender.send(SJob::GuiUpdateTreeAll);
+        }
+        if inner.need_update_messages {
+            info!("CHECK:  need_update_messages  what to do here?");
         }
         inner.advance_step();
         inner.send_gp(Some("Stopped".to_string()));

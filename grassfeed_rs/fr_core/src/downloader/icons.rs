@@ -111,7 +111,7 @@ struct HomepageDownload(IconInner);
 impl Step<IconInner> for HomepageDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        let dl_text = workaround_https_declaration(inner.feed_download_text.clone());
+        let dl_text = workaround_https_declaration( & inner.feed_download_text );
         let (homepage, _feed_title, errtext) =
             util::retrieve_homepage_from_feed_text(dl_text.as_bytes(), &inner.feed_url);
         if !homepage.is_empty() {

@@ -7,8 +7,12 @@ const MAX_BUFFER_LENGTH: u64 = 1000000;
 const NO_CONTENTLENGTH_BUFFER_SIZE: u64 = 1000000;
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections
+
+
 pub struct HttpFetcher {}
 impl HttpFetcher {
+
+    /// heap:   ureq::response::into_string() consumes 20%
     fn request_url(&self, url: String, is_binary: bool) -> HttpGetResult {
         let mut r_text = String::default();
         let mut r_status: u16 = 0;
@@ -45,7 +49,6 @@ impl HttpFetcher {
                         }
                     }
                 } else {
-                    //    TODO   mem   ureq::response::into_string()
                     match response.into_string() {
                         Ok(r_str) => r_text = r_str,
                         Err(e) => {

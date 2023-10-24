@@ -119,7 +119,7 @@ struct EvalStringAndFilter(FetchInner);
 impl Step<FetchInner> for EvalStringAndFilter {
     fn step(self: Box<Self>) -> StepResult<FetchInner> {
         let mut inner = self.0;
-        let dl_text = workaround_https_declaration(inner.download_text.clone());
+        let dl_text = workaround_https_declaration(& inner.download_text);
         let (mut new_list, ts_created, err_text): (Vec<MessageRow>, i64, String) =
             feed_text_to_entries(dl_text, inner.fs_repo_id, inner.url.clone());
         if !err_text.is_empty() {
@@ -200,6 +200,7 @@ impl Step<FetchInner> for Final {
 
 /// returns  list of content entries,   timestamp of creation, error_text
 /// titles are compressed
+/// heap:  feed_rs::parser::parse consumes 20%
 pub fn feed_text_to_entries(
     text: String,
     source_repo_id: isize,
@@ -208,6 +209,8 @@ pub fn feed_text_to_entries(
     let mut fce_list: Vec<MessageRow> = Vec::new();
     let mut created_ts: i64 = 0;
     let mut err_text = String::default();
+
+    //   TODO heap
     match feed_rs::parser::parse(text.as_bytes()) {
         Ok(feed) => {
             for e in feed.entries {

@@ -22,7 +22,7 @@ pub fn retrieve_homepage_from_feed_text(
 
     if feed.title.is_none() && feed.description.is_none() {
         let ftext_str = String::from_utf8_lossy(input);
-        let declaration_replaced = workaround_https_declaration(ftext_str.to_string());
+        let declaration_replaced = workaround_https_declaration(&ftext_str.to_string());
         if let Ok(f) = parser::parse(declaration_replaced.as_bytes()) {
             feed = f;
         }
@@ -186,7 +186,7 @@ pub fn compress_vec_to_string(uncompressed: &[u8]) -> String {
     base64::encode(compressed_data)
 }
 
-pub fn workaround_https_declaration(wrong: String) -> String {
+pub fn workaround_https_declaration(wrong: &String) -> String {
     wrong.replace(
         "https://www.w3.org/2005/Atom",
         "http://www.w3.org/2005/Atom",

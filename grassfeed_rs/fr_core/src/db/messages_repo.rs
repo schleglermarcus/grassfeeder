@@ -68,13 +68,18 @@ pub trait IMessagesRepo {
     fn get_all_deleted(&self) -> Vec<MessageRow>;
 
     /// Sorted by  entry_src_date.  Takes more memory.
+    #[deprecated]
     fn get_by_subs_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow>;
 
     /// does not include deleted ones,  sorted by  entry_src_date
     fn get_by_subscription(&mut self, subs_id: isize) -> MessageIterator;
 
     /// does not include deleted ones
-    fn get_by_subscriptions(&mut self, subs_ids: &[isize]) -> MessageIterator;
+    fn get_by_subscriptions(
+        &mut self,
+        subs_ids: &[isize],
+        include_deleted: bool,
+    ) -> MessageIterator;
 }
 
 //  type MessageCacheType = RwLock<(isize, Vec<MessageRow>)>;
@@ -442,7 +447,16 @@ impl IMessagesRepo for MessagesRepo {
     }
 
     /// does not include deleted ones
-    fn get_by_subscriptions(&mut self, subs_ids: &[isize]) -> MessageIterator {
+    fn get_by_subscriptions(
+        &mut self,
+        subs_ids: &[isize],
+        include_deleted: bool,
+    ) -> MessageIterator {
+        let no_deleted_and = if include_deleted {
+            String::default()
+        } else {
+            " AND is_deleted=false ".to_string()
+        };
         let n_subs_id = combine_subs_ids(&subs_ids);
         if n_subs_id != self.cached_subs_id {
             let joined = subs_ids
@@ -451,8 +465,12 @@ impl IMessagesRepo for MessagesRepo {
                 .collect::<Vec<String>>()
                 .join(",");
             let prepared = format!(
-            "SELECT {} FROM {} WHERE feed_src_id in ({}) AND is_deleted=false  ORDER BY entry_src_date DESC ",
-                Self::columns_msg_reduced(), MessageRow::table_name(),            joined,        );
+                "SELECT {} FROM {} WHERE feed_src_id in ({}) {} ORDER BY entry_src_date DESC ",
+                Self::columns_msg_reduced(),
+                MessageRow::table_name(),
+                joined,
+                no_deleted_and
+            );
             self.request_messages_reduced(&prepared);
             self.cached_subs_id = n_subs_id;
         }
@@ -534,6 +552,9 @@ impl MessageIterator<'_> {
             return None;
         }
         Some(&o_mr.unwrap())
+    }
+    pub fn reset(&mut self) {
+        self.index = 0;
     }
 }
 

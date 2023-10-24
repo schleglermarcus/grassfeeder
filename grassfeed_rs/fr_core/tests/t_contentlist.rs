@@ -161,7 +161,7 @@ fn parse_linuxcompati() {
     setup();
     let rss_str: String =
         std::fs::read_to_string("../target/td/feeds/linuxcomp_notitle.xml").unwrap();
-    let feed_result = parser::parse(workaround_https_declaration(rss_str).as_bytes());
+    let feed_result = parser::parse(workaround_https_declaration(&rss_str).as_bytes());
     if feed_result.is_err() {
         warn!("Err={:?}", feed_result.err());
         assert!(false);

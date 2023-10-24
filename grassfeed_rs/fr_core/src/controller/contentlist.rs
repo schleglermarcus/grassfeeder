@@ -373,7 +373,7 @@ impl ContentList {
                         .collect::<Vec<isize>>();
                 }
             }
-            mr_i = (*mr_r).get_by_subscriptions(child_ids.as_slice());
+            mr_i = (*mr_r).get_by_subscriptions(child_ids.as_slice(), false);
         } else {
             mr_i = (*mr_r).get_by_subscription(subs_id as isize);
         }
@@ -416,8 +416,10 @@ impl ContentList {
         self.current_subscription
             .replace((subs_id, msglist_len as isize, isfolder));
         self.msg_state.write().unwrap().clear();
-        mr_i.enumerate().for_each(|(n, fc)| {
-            self.insert_state_from_row(fc, Some(n as isize));
+
+        mr_i.enumerate().for_each(|(n, msg)| {
+            // TODO mem
+            self.insert_state_from_row(msg, Some(n as isize));
         });
     }
 
@@ -478,13 +480,25 @@ impl ContentList {
             .borrow()
             .get_val_int(ContentList::CONF_MSG_KEEP_COUNT)
             .unwrap_or(-1);
-        let msg_repo = MessagesRepo::new_by_connection(
+        let mut msg_repo = MessagesRepo::new_by_connection(
             (*self.messagesrepo_r).borrow().get_ctx().get_connection(),
         );
+        // let mut msg_repo2 = MessagesRepo::new_by_connection(            (*self.messagesrepo_r).borrow().get_ctx().get_connection(),        );
+
+        // let mut all_msg = msg_repo            .get_by_subscriptions(&[subs_id], true)            .collect::<Vec<&MessageRow>>();
+
+        // let mr_i = msg_repo1.get_by_subscriptions(&[subs_id], true);
 
         let (rm_some, _n_rm, num_all, num_unread) =
-            db_clean::reduce_too_many_messages(&msg_repo, msg_keep_count as usize, subs_id);
-        // if rm_some {            trace!(                "checkMessageCounts {} unread:{} removed:{} ",                subs_id,                num_unread,                n_rm            );        }
+            db_clean::reduce_too_many_messages(&mut msg_repo, msg_keep_count as usize, subs_id);
+        if rm_some {
+            trace!(
+                "checkMessageCounts {} unread:{} removed:{} ",
+                subs_id,
+                num_unread,
+                _n_rm
+            );
+        }
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             (*feedsources)
                 .borrow()

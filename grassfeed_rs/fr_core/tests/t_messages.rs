@@ -60,8 +60,10 @@ fn feed_text_to_entries_local() {
     msgrepo.get_ctx().create_table();
     let msgrepo_r: Rc<RefCell<dyn IMessagesRepo>> = Rc::new(RefCell::new(msgrepo));
     let source_repo_id = 5;
-    let _r = (*msgrepo_r).borrow().insert_tx(&new_list);
-    let r_list = (*msgrepo_r).borrow().get_by_subs_id(source_repo_id, true);
+    let mut msg_r = (*msgrepo_r).borrow_mut();
+    let _r = msg_r.insert_tx(&new_list);
+    let r_list = msg_r        .get_by_subscription(source_repo_id)
+        .collect::<Vec<&MessageRow>>();
     assert_eq!(r_list.len(), 2);
 }
 
