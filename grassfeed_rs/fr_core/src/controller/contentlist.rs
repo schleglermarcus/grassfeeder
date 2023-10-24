@@ -85,9 +85,6 @@ pub trait IContentList {
     // check if the old subs_id has changed before
     fn update_message_list_(&self, subscription_id: isize);
 
-    /// Read from db and put into the list view
-    // fn update_messagelist_only(&self /*, feed_source_id: isize*/);
-
     ///  Vec < list_position,   feed_content_id >
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]);
 
@@ -375,7 +372,7 @@ impl ContentList {
             }
             mr_i = (*mr_r).get_by_subscriptions(child_ids.as_slice(), false);
         } else {
-            mr_i = (*mr_r).get_by_subscription(subs_id as isize);
+            mr_i = (*mr_r).get_by_subscription(subs_id);
         }
         mr_i.clone().for_each(|m| messagelist.push(m));
         if num_msg != messagelist.len() as isize {
@@ -416,9 +413,7 @@ impl ContentList {
         self.current_subscription
             .replace((subs_id, msglist_len as isize, isfolder));
         self.msg_state.write().unwrap().clear();
-
         mr_i.enumerate().for_each(|(n, msg)| {
-            // TODO mem
             self.insert_state_from_row(msg, Some(n as isize));
         });
     }
@@ -483,22 +478,9 @@ impl ContentList {
         let mut msg_repo = MessagesRepo::new_by_connection(
             (*self.messagesrepo_r).borrow().get_ctx().get_connection(),
         );
-        // let mut msg_repo2 = MessagesRepo::new_by_connection(            (*self.messagesrepo_r).borrow().get_ctx().get_connection(),        );
-
-        // let mut all_msg = msg_repo            .get_by_subscriptions(&[subs_id], true)            .collect::<Vec<&MessageRow>>();
-
-        // let mr_i = msg_repo1.get_by_subscriptions(&[subs_id], true);
-
         let (rm_some, _n_rm, num_all, num_unread) =
             db_clean::reduce_too_many_messages(&mut msg_repo, msg_keep_count as usize, subs_id);
-        if rm_some {
-            trace!(
-                "checkMessageCounts {} unread:{} removed:{} ",
-                subs_id,
-                num_unread,
-                _n_rm
-            );
-        }
+        // if rm_some {            trace!(                "checkMessageCounts {} unread:{} removed:{} ",                subs_id,                num_unread,                _n_rm            );        }
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             (*feedsources)
                 .borrow()
@@ -510,7 +492,9 @@ impl ContentList {
                 ));
         }
     }
-} // impl FeedContents
+
+    // impl FeedContents
+}
 
 impl IContentList for ContentList {
     /// returns queue size
@@ -710,18 +694,15 @@ impl IContentList for ContentList {
         }
     }
 
-    /*
-       fn update_messagelist_only(&self) {
-           self.addjob(CJob::UpdateMessageList);
-           self.addjob(CJob::ListSetCursorToPolicy);
-       }
-    */
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]) {
         for (list_position, feed_content_id) in vec_pos_dbid {
             let o_msg: Option<MessageRow> =
                 (*(self.messagesrepo_r.borrow_mut())).get_by_index(*feed_content_id as isize);
             if o_msg.is_none() {
-                warn!("update_single: no messsage for {}", feed_content_id);
+                warn!(
+                    "update_content_list_some: no messsage for {}",
+                    feed_content_id
+                );
                 continue;
             }
             let msg: MessageRow = o_msg.unwrap();
@@ -770,7 +751,6 @@ impl IContentList for ContentList {
             return;
         }
         let mut msg = o_msg.unwrap();
-        // trace!(            "TOGGLE_FAV  {}   col{}  isFav:{} ",            msg_id,            list_position,            msg.is_favorite()        );
         if let Some(f) = new_fav {
             msg.set_favorite(f);
         } else {
@@ -820,16 +800,9 @@ impl IContentList for ContentList {
 
     //  all content entries, unread content entries
     fn get_counts(&self, source_repo_id: isize) -> Option<(i32, i32)> {
-        let all_sum = (*self.messagesrepo_r).borrow().get_read_sum(source_repo_id);
+        let all_sum  = (*self.messagesrepo_r).borrow().get_src_sum(source_repo_id);
         let read_sum = (*self.messagesrepo_r).borrow().get_read_sum(source_repo_id);
         Some((all_sum as i32, (all_sum - read_sum) as i32))
-        /*
-               let all = (*self.messagesrepo_r)
-                   .borrow()
-                   .get_by_src_id(source_repo_id, false);
-               let num_is_read = all.iter().filter(|fce| fce.is_read).count() as i32;
-               Some((all.len() as i32, (all.len() as i32 - num_is_read)))
-        */
     }
 
     fn get_config(&self) -> Config {

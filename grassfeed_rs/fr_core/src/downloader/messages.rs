@@ -119,7 +119,7 @@ struct EvalStringAndFilter(FetchInner);
 impl Step<FetchInner> for EvalStringAndFilter {
     fn step(self: Box<Self>) -> StepResult<FetchInner> {
         let mut inner = self.0;
-        let dl_text = workaround_https_declaration(& inner.download_text);
+        let dl_text = workaround_https_declaration(&inner.download_text);
         let (mut new_list, ts_created, err_text): (Vec<MessageRow>, i64, String) =
             feed_text_to_entries(dl_text, inner.fs_repo_id, inner.url.clone());
         if !err_text.is_empty() {
@@ -209,9 +209,8 @@ pub fn feed_text_to_entries(
     let mut fce_list: Vec<MessageRow> = Vec::new();
     let mut created_ts: i64 = 0;
     let mut err_text = String::default();
-
-    //   TODO heap
-    match feed_rs::parser::parse(text.as_bytes()) {
+    match feed_rs::parser::parse(text.as_bytes())  //   TODO heap
+    {
         Ok(feed) => {
             for e in feed.entries {
                 let (mut fce, err_t) = message_from_modelentry(&e);
@@ -378,7 +377,6 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
             }
         }
     }
-
     if let Some(t) = me.title.clone() {
         let mut filtered = remove_invalid_chars_from_input(t.content);
         filtered = filtered.trim().to_string();

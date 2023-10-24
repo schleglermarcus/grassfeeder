@@ -68,8 +68,8 @@ pub trait IMessagesRepo {
     fn get_all_deleted(&self) -> Vec<MessageRow>;
 
     /// Sorted by  entry_src_date.  Takes more memory.
-    #[deprecated]
-    fn get_by_subs_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow>;
+    // #[deprecated]
+    // fn get_by_subs_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow>;
 
     /// does not include deleted ones,  sorted by  entry_src_date
     fn get_by_subscription(&mut self, subs_id: isize) -> MessageIterator;
@@ -105,7 +105,6 @@ impl MessagesRepo {
     pub fn new_by_connection(con_a: Arc<Mutex<Connection>>) -> Self {
         MessagesRepo {
             ctx: SqliteContext::new_by_connection(con_a),
-            // cache: RwLock::new((-1, Vec::default())),
             cached_rows: Vec::default(),
             cached_subs_id: -1,
         }
@@ -141,7 +140,6 @@ impl MessagesRepo {
         }
         MessagesRepo {
             ctx: dbctx,
-            // cache: RwLock::new((-1, Vec::default())),
             cached_rows: Vec::default(),
             cached_subs_id: -1,
         }
@@ -199,6 +197,7 @@ impl IMessagesRepo for MessagesRepo {
             .map_err(rusqlite_error_to_boxed)
     }
 
+/*
     fn get_by_subs_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow> {
         let no_deleted_and = if include_deleted {
             String::default()
@@ -225,6 +224,7 @@ impl IMessagesRepo for MessagesRepo {
         }
         list
     }
+ */
 
     /// returns  the number of read lines for that source id:   -1 for undefined
     fn get_read_sum(&self, src_id: isize) -> isize {
@@ -457,7 +457,7 @@ impl IMessagesRepo for MessagesRepo {
         } else {
             " AND is_deleted=false ".to_string()
         };
-        let n_subs_id = combine_subs_ids(&subs_ids);
+        let n_subs_id = combine_subs_ids(subs_ids);
         if n_subs_id != self.cached_subs_id {
             let joined = subs_ids
                 .iter()
@@ -543,18 +543,20 @@ impl<'a> Iterator for MessageIterator<'a> {
 }
 
 impl MessageIterator<'_> {
-    pub fn len(&self) -> usize {
-        self.cache.len()
-    }
     pub fn get_row(&self, index: usize) -> Option<&MessageRow> {
         let o_mr = (*self.cache).get(index);
-        if o_mr.is_none() {
-            return None;
-        }
-        Some(&o_mr.unwrap())
+        o_mr?;
+        // if o_mr        .is_none() {            return None;        }
+        Some(o_mr.unwrap())
     }
     pub fn reset(&mut self) {
         self.index = 0;
+    }
+    pub fn len(&self) -> usize {
+        self.cache.len()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.cache.len() == 0
     }
 }
 

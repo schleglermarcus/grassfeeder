@@ -230,6 +230,7 @@ pub trait UIUpdaterAdapter {
     fn update_window_minimized(&self, mini: bool, ev_time: u32);
     fn store_image(&self, idx: i32, img: String);
     fn toolbutton_set_sensitive(&self, idx: u8, sens: bool);
+    fn button_set_sensitive(&self, idx: u8, sens: bool);
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]

@@ -62,7 +62,8 @@ fn feed_text_to_entries_local() {
     let source_repo_id = 5;
     let mut msg_r = (*msgrepo_r).borrow_mut();
     let _r = msg_r.insert_tx(&new_list);
-    let r_list = msg_r        .get_by_subscription(source_repo_id)
+    let r_list = msg_r
+        .get_by_subscription(source_repo_id)
         .collect::<Vec<&MessageRow>>();
     assert_eq!(r_list.len(), 2);
 }

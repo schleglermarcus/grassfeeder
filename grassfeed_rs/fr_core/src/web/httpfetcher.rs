@@ -8,11 +8,9 @@ const NO_CONTENTLENGTH_BUFFER_SIZE: u64 = 1000000;
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections
 
-
 pub struct HttpFetcher {}
 impl HttpFetcher {
-
-    /// heap:   ureq::response::into_string() consumes 20%
+    /// heap:   ureq::response::into_string() consumes about  20% of overall memory usage
     fn request_url(&self, url: String, is_binary: bool) -> HttpGetResult {
         let mut r_text = String::default();
         let mut r_status: u16 = 0;
@@ -31,7 +29,7 @@ impl HttpFetcher {
                     if length > 0 {
                         length = std::cmp::min(length, MAX_BUFFER_LENGTH);
                     } else {
-                        trace!("HttpFetcher:  NO content-length , using maximum !");
+                        // trace!("HttpFetcher:  NO content-length , using maximum ! {} ", url);
                         length = NO_CONTENTLENGTH_BUFFER_SIZE;
                     }
                     r_bytes = Vec::with_capacity(length as usize);
@@ -114,7 +112,6 @@ mod httpfetcher_t {
         HttpFetcher {}
     }
 
-    // #[ignore]
     #[test]
     fn test_local404() {
         let r = prep_fetcher().request_url("http://localhost::8123/nothing".to_string());
@@ -122,7 +119,6 @@ mod httpfetcher_t {
         assert!(r.error_description.contains("InvalidUrl"));
     }
 
-    // #[ignore]
     #[test]
     fn test_remote_200() {
         let r = prep_fetcher()
@@ -130,15 +126,13 @@ mod httpfetcher_t {
         assert_eq!(r.get_status(), 200);
     }
 
-    // #[ignore]
     #[test]
-    #[allow(dead_code)]
+//     #[allow(dead_code)]
     fn test_remote_403() {
         let r = prep_fetcher().request_url("https://static.foxnews.com/unknown.png".to_string());
         assert_eq!(r.get_status(), 403);
     }
 
-    // #[ignore]
     #[test]
     fn test_remote_connect() {
         let r = prep_fetcher()
@@ -147,7 +141,6 @@ mod httpfetcher_t {
         assert!(r.error_description.contains("ConnectionFailed"));
     }
 
-    // #[ignore]
     #[test]
     fn test_remote_404() {
         let r = prep_fetcher()

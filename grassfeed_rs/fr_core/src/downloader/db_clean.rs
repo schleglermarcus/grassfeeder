@@ -28,7 +28,7 @@ use std::time::Instant;
 pub const MAX_PATH_DEPTH: usize = 30;
 pub const MAX_ERROR_LINES_PER_SUBSCRIPTION: usize = 100;
 pub const MAX_ERROR_LINE_AGE_S: usize = 60 * 60 * 24 * 360;
-pub const CLEAN_STEPS_MAX: u8 = 11;
+pub const CLEAN_STEPS_MAX: u8 = 10;
 
 pub struct CleanerInner {
     pub gp_job_sender: Sender<Job>,
@@ -450,7 +450,7 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(Some("MarkUnconnectedMessages-0".to_string()));
+        inner.send_gp(None); // Some("MarkUnconnectedMessages-0".to_string())
         let parent_ids_active: Vec<i32> = inner
             .subscriptionrepo
             .get_all_nonfolder()

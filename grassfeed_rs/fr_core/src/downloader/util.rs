@@ -186,7 +186,7 @@ pub fn compress_vec_to_string(uncompressed: &[u8]) -> String {
     base64::encode(compressed_data)
 }
 
-pub fn workaround_https_declaration(wrong: &String) -> String {
+pub fn workaround_https_declaration(wrong: &str) -> String {
     wrong.replace(
         "https://www.w3.org/2005/Atom",
         "http://www.w3.org/2005/Atom",

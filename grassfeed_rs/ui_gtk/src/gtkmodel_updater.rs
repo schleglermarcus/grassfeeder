@@ -1,5 +1,3 @@
-// https://gtk-rs.org/gtk3-rs/stable/0.15/docs/gtk/prelude/trait.GtkListStoreExt.html
-
 #[cfg(feature = "legacy3gtk14")]
 use webkit2gtk::traits::WebViewExt;
 #[cfg(not(feature = "legacy3gtk14"))]
@@ -67,6 +65,7 @@ impl GtkModelUpdaterInt {
         error!("update_text_entry({}) not found", idx);
     }
 
+    /// https://gtk-rs.org/gtk3-rs/stable/0.15/docs/gtk/prelude/trait.GtkListStoreExt.html
     ///  disconnects the view, expands the current focus again
     pub fn update_tree_model(&self, index: u8) {
         let g_o = (*self.g_o_a).read().unwrap();
@@ -817,12 +816,24 @@ impl GtkModelUpdaterInt {
         self.pixbuf_cache.borrow_mut().insert(idx, pb);
     }
 
-    pub fn button_set_sensitive(&self, idx: u8, sens: bool) {
+    pub fn toolbutton_set_sensitive(&self, idx: u8, sens: bool) {
         let g_o = (*self.g_o_a).read().unwrap();
         if let Some(tb) = g_o.get_toolbutton(idx) {
             tb.set_sensitive(sens);
         } else {
             warn!("ToolButton {} not found! ", idx);
+        }
+    }
+
+    pub fn button_set_sensitive(&self, idx: u8, sens: bool) {
+        let g_o = (*self.g_o_a).read().unwrap();
+
+        debug!("BUTTON - sens {} {} ", idx, sens);
+
+        if let Some(b) = g_o.get_button(idx) {
+            b.set_sensitive(sens);
+        } else {
+            warn!("Button {} not found! ", idx);
         }
     }
 } // GtkModelUpdaterInt

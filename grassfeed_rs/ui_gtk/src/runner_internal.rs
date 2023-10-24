@@ -277,6 +277,9 @@ fn loop_proc_int_commands(
                 upd_int.update_window_minimized(mini, ev_time)
             }
             IntCommands::StoreImage(idx, ref img) => upd_int.store_image(idx, img.clone()),
+            IntCommands::ToolButtonSetSensitive(idx, sens) => {
+                upd_int.toolbutton_set_sensitive(idx, sens);
+            }
             IntCommands::ButtonSetSensitive(idx, sens) => upd_int.button_set_sensitive(idx, sens),
             _ => {
                 warn!("GTKS other cmd {:?}", command);

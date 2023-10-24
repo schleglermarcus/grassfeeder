@@ -200,7 +200,6 @@ impl UIAdapterValueStore for AdValSto {
     }
 
     fn set_window_minimized(&mut self, _active: bool) {}
-    
 }
 
 // #[derive(Default)]
@@ -262,6 +261,9 @@ impl UIUpdaterAdapter for UpdAda {
     fn store_image(&self, _idx: i32, _img: String) {}
 
     fn toolbutton_set_sensitive(&self, _idx: u8, _sens: bool) {
+        unimplemented!()
+    }
+    fn button_set_sensitive(&self, _idx: u8, _sens: bool) {
         unimplemented!()
     }
 }

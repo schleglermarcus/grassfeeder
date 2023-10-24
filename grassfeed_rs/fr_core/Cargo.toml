@@ -46,6 +46,7 @@ proc-status = ">=0.1.1"
 usvg = "0.25"
 base64 = "<=0.20.0"                                         #  0.21  wants code adaption on many places
 itertools = ">=0.10.5"
+# memory-stats = "1.1.0"
 
 [dev-dependencies]
 rand = "0.8.5"

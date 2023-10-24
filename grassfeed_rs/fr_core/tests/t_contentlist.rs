@@ -126,7 +126,6 @@ fn parse_wissensmanufaktur() {
     );
 }
 
-// #[ignore]
 #[test]
 fn parse_youtube() {
     setup();
@@ -139,11 +138,9 @@ fn parse_youtube() {
         .map(|fe| message_from_modelentry(&fe).0)
         .collect();
     let msg0 = fce_list.get_mut(0).unwrap();
-    // debug!("msg0={:?}", msg0.content_text);
     assert!(msg0.content_text.len() > 2);
 }
 
-// #[ignore]
 #[test]
 fn parse_convert_entry_file1() {
     setup();

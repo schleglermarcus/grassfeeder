@@ -275,6 +275,7 @@ impl GtkObjects for GtkObjectsImpl {
     fn get_window(&self) -> Option<Window> {
         self.window.clone()
     }
+
     fn set_window(&mut self, w: &Window) {
         self.window.replace(w.clone());
     }
@@ -428,6 +429,9 @@ impl GtkObjects for GtkObjectsImpl {
             self.buttons.resize(idx as usize + 1, Button::new());
         }
         self.buttons[idx as usize] = e.clone();
+    }
+    fn get_button(&self, idx: u8) -> Option<&gtk::Button> {
+        self.buttons.get(idx as usize)
     }
 
     fn get_spinner_w(&self) -> Option<(gtk::CellRendererSpinner, gtk::TreeViewColumn)> {
@@ -809,6 +813,10 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     }
 
     fn toolbutton_set_sensitive(&self, idx: u8, sens: bool) {
+        self.send_to_int(&IntCommands::ToolButtonSetSensitive(idx, sens));
+    }
+
+    fn button_set_sensitive(&self, idx: u8, sens: bool) {
         self.send_to_int(&IntCommands::ButtonSetSensitive(idx, sens));
     }
 } //

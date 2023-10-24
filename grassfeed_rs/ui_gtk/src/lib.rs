@@ -102,6 +102,7 @@ pub enum IntCommands {
     MemoryConserve(bool),
     TrayIconEnable(bool),
     UpdateWindowMinimized(bool, u32),
+    ToolButtonSetSensitive(u8, bool),
     ButtonSetSensitive(u8, bool),
 }
 
@@ -145,7 +146,7 @@ pub trait GtkObjects {
     fn set_text_entry(&mut self, idx: u8, e: &gtk::Entry);
 
     fn get_buttons(&self) -> Vec<gtk::Button>;
-    //  fn add_button(&mut self, e: &gtk::Button);
+    fn get_button(&self, idx: u8) -> Option<&gtk::Button>;
     fn set_button(&mut self, idx: u8, e: &gtk::Button);
 
     fn get_spinner_w(&self) -> Option<(gtk::CellRendererSpinner, gtk::TreeViewColumn)>;

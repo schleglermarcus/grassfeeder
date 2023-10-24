@@ -309,7 +309,7 @@ impl GuiProcessor {
                     self.statusbar.borrow_mut().bottom_notices.push_back(msg);
                 }
                 Job::NotifyDbClean(c_step, duration_ms, ref c_msg) => {
-                    //  trace!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
+                    debug!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
                     let av2nd = if let Some(msg) = c_msg {
                         let newmsg = format!(
                             "{}{}\t{}\n",
@@ -332,6 +332,9 @@ impl GuiProcessor {
                         .update_dialog(DIALOG_SETTINGS_CHECK);
                     if c_step >= CLEAN_STEPS_MAX {
                         self.statusbar.borrow_mut().db_check_running = false;
+                        (*self.gui_updater)
+                            .borrow()
+                            .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, true);
                     }
                 }
 
@@ -572,17 +575,11 @@ impl GuiProcessor {
     pub fn handle_settings_check_level(&self) {
         let now = util::timestamp_now();
         let level = ((now / 10) % 10) as u32;
-        // trace!("GP:  level: {} ", level);
-        let dd: Vec<AValue> = vec![
-            AValue::AU32(level),
-            AValue::None,
-            // AValue::ASTR(format!("GP {}", level)),
-        ];
+        let dd: Vec<AValue> = vec![AValue::AU32(level), AValue::None];
         (*self.gui_val_store)
             .write()
             .unwrap()
             .set_dialog_data(DIALOG_SETTINGS_CHECK, &dd);
-
         (*self.gui_updater)
             .borrow()
             .update_dialog(DIALOG_SETTINGS_CHECK);
@@ -1393,11 +1390,21 @@ impl HandleSingleEvent for HandleButtonActivated {
         if let GuiEvents::ButtonClicked(msg) = ev {
             if msg == "D_SETTINGS_CHECKNOW" {
                 let isrunning = gp.statusbar.borrow().db_check_running;
+
+                debug!("BUTTON:  {}  {}", msg, isrunning);
                 if !isrunning {
+                    (*gp.gui_updater)
+                        .borrow()
+                        .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, false);
                     let mut sb = gp.statusbar.borrow_mut();
                     sb.db_check_running = true;
-                    sb.set_db_check_msg(&String::default());
+                    // sb.set_db_check_msg("starting ...");
                     gp.downloader_r.borrow().cleanup_db();
+                    gp.addjob(Job::NotifyDbClean(
+                        0,
+                        0,
+                        Some("starting cleanup ...".to_string()),
+                    ));
                 } else {
                     debug!("clicked, SKIPPING {}   isrunning={}  ", msg, isrunning);
                 }
