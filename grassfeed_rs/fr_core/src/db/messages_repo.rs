@@ -11,6 +11,7 @@ use context::TimerEvent;
 use context::TimerReceiver;
 use context::TimerRegistry;
 use rusqlite::Connection;
+use rusqlite::Row;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -81,7 +82,7 @@ pub trait IMessagesRepo {
 pub struct MessagesRepo {
     ctx: SqliteContext<MessageRow>,
     cached_rows: Vec<MessageRow>,
-    cached_subs_id: i128,
+    cached_subs_id: i64,
 }
 
 impl MessagesRepo {
@@ -139,6 +140,40 @@ impl MessagesRepo {
             cached_rows: Vec::default(),
             cached_subs_id: -1,
         }
+    }
+
+    fn request_messages_reduced(&mut self, sql: &str) {
+        self.cached_rows.clear();
+        if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(sql) {
+            match stmt.query_map([], |row| {
+                self.cached_rows.push(Self::from_row_reduced(row));
+                Ok(())
+            }) {
+                Ok(mr) => {
+                    mr.count(); // seems to be necessary
+                }
+                Err(e) => error!("{} {:?}", sql, e),
+            }
+        }
+    }
+
+    fn from_row_reduced(row: &Row) -> MessageRow {
+        MessageRow {
+            message_id: row.get(0).unwrap(),
+            subscription_id: row.get(1).unwrap(),
+            title: row.get(2).unwrap(),
+            post_id: row.get(3).unwrap(),
+            link: row.get(4).unwrap(),
+            is_deleted: row.get(5).unwrap(),
+            is_read: row.get(6).unwrap(),
+            entry_src_date: row.get(7).unwrap(),
+            markers: row.get(8).unwrap(),
+            ..Default::default()
+        }
+    }
+
+    fn columns_msg_reduced() -> &'static str {
+        "message_id, feed_src_id, title, post_id, link, is_deleted, is_read, entry_src_date, markers  	"
     }
 }
 
@@ -392,23 +427,13 @@ impl IMessagesRepo for MessagesRepo {
 
     /// does not include deleted ones
     fn get_by_subscription(&mut self, subs_id: isize) -> MessageIterator {
-        if subs_id as i128 != self.cached_subs_id {
+        if subs_id as i64 != self.cached_subs_id {
+            //  from_row_reduced      columns_msg_reduced
             let prepared = format!(
-            "SELECT * FROM {} WHERE feed_src_id={} AND is_deleted=false  ORDER BY entry_src_date DESC ",
-            MessageRow::table_name(),  subs_id,   );
-            self.cached_rows.clear();
-            if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(&prepared) {
-                match stmt.query_map([], |row| {
-                    self.cached_rows.push(MessageRow::from_row(row));
-                    Ok(())
-                }) {
-                    Ok(mr) => {
-                        mr.count(); // seems to be necessary
-                    }
-                    Err(e) => error!("{} {:?}", &prepared, e),
-                }
-            }
-            self.cached_subs_id = subs_id as i128;
+                "SELECT {} FROM {} WHERE feed_src_id={} AND is_deleted=false  ORDER BY entry_src_date DESC ",
+                Self::columns_msg_reduced(),MessageRow::table_name(),  subs_id);
+            self.request_messages_reduced(&prepared);
+            self.cached_subs_id = subs_id as i64;
         }
         MessageIterator {
             cache: &self.cached_rows,
@@ -418,29 +443,17 @@ impl IMessagesRepo for MessagesRepo {
 
     /// does not include deleted ones
     fn get_by_subscriptions(&mut self, subs_ids: &[isize]) -> MessageIterator {
-        let n_subs_id = cache_idx(&subs_ids);
+        let n_subs_id = combine_subs_ids(&subs_ids);
         if n_subs_id != self.cached_subs_id {
             let joined = subs_ids
                 .iter()
                 .map(|r| r.to_string())
                 .collect::<Vec<String>>()
                 .join(",");
-
             let prepared = format!(
-            "SELECT * FROM {} WHERE feed_src_id in ({}) AND is_deleted=false  ORDER BY entry_src_date DESC ",
-            MessageRow::table_name(),            joined,        );
-            self.cached_rows.clear();
-            if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(&prepared) {
-                match stmt.query_map([], |row| {
-                    self.cached_rows.push(MessageRow::from_row(row));
-                    Ok(())
-                }) {
-                    Ok(mr) => {
-                        mr.count(); // seems to be necessary
-                    }
-                    Err(e) => error!("{} {:?}", &prepared, e),
-                }
-            }
+            "SELECT {} FROM {} WHERE feed_src_id in ({}) AND is_deleted=false  ORDER BY entry_src_date DESC ",
+                Self::columns_msg_reduced(), MessageRow::table_name(),            joined,        );
+            self.request_messages_reduced(&prepared);
             self.cached_subs_id = n_subs_id;
         }
         MessageIterator {
@@ -452,9 +465,8 @@ impl IMessagesRepo for MessagesRepo {
     // impl IMessagesRepo
 }
 
-fn cache_idx(ids: &[isize]) -> i128 {
-    let sum: i128 = ids.iter().map(|i| *i as i128).sum();
-    sum
+fn combine_subs_ids(ids: &[isize]) -> i64 {
+    ids.iter().map(|i| *i as i64).sum()
 }
 
 impl Buildable for MessagesRepo {

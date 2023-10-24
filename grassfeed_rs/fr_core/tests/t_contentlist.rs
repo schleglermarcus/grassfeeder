@@ -4,7 +4,7 @@ use flume::Sender;
 use fr_core::config::init_system::GrassFeederConfig;
 use fr_core::controller::contentlist::match_new_entries_to_existing;
 use fr_core::controller::contentlist::CJob;
-use fr_core::controller::contentlist::FeedContents;
+use fr_core::controller::contentlist::ContentList;
 use fr_core::controller::contentlist::IContentList;
 use fr_core::db::message::MessageRow;
 use fr_core::db::messages_repo::IMessagesRepo;
@@ -28,7 +28,7 @@ fn test_new_entries_filter() {
         version: "db_entries_filter".to_string(),
     };
     let appcontext = fr_core::config::init_system::start(gf_conf);
-    let feedcontents_r = appcontext.get_rc::<FeedContents>().unwrap();
+    let feedcontents_r = appcontext.get_rc::<ContentList>().unwrap();
     let msg_repo_r: Rc<RefCell<dyn IMessagesRepo>> = appcontext.get_rc::<MessagesRepo>().unwrap();
     let _r = (*msg_repo_r).borrow().get_ctx().delete_table();
     (*msg_repo_r).borrow().get_ctx().create_table();
@@ -59,9 +59,8 @@ fn test_new_entries_filter() {
     // one entry new, that existed.   gives an empty insert list
     let mut new_list: Vec<MessageRow> = Vec::default();
     new_list.push(fce1.clone());
-    // let existing_entries = (*msg_repo_r).borrow().get_by_src_id(source_repo_id, false);
     let mut msg_r = (*msg_repo_r).borrow_mut();
-    let exi_i = msg_r.get_by_subsciption(source_repo_id);
+    let exi_i = msg_r.get_by_subscription(source_repo_id);
     assert_eq!(exi_i.len(), 3);
     let insert_list =
         match_new_entries_to_existing(&new_list.to_vec(), exi_i.clone(), job_sender.clone());

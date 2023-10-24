@@ -1,5 +1,5 @@
 use crate::config::configmanager::ConfigManager;
-use crate::controller::contentlist::FeedContents;
+use crate::controller::contentlist::ContentList;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
@@ -53,7 +53,7 @@ pub enum BrowserZoomCommand {
 
 pub struct BrowserPane {
     configmanager_r: Rc<RefCell<ConfigManager>>,
-    feedcontents_w: Weak<RefCell<FeedContents>>, // YY
+    feedcontents_w: Weak<RefCell<ContentList>>,
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
@@ -311,7 +311,7 @@ impl Buildable for BrowserPane {
 
 impl StartupWithAppContext for BrowserPane {
     fn startup(&mut self, ac: &AppContext) {
-        self.feedcontents_w = Rc::downgrade(&(*ac).get_rc::<FeedContents>().unwrap());
+        self.feedcontents_w = Rc::downgrade(&(*ac).get_rc::<ContentList>().unwrap());
         self.create_browser_dir();
     }
 }

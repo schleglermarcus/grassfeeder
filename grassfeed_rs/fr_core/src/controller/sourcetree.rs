@@ -2,7 +2,7 @@ use crate::config::configmanager::ConfigManager;
 use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
 use crate::controller::contentlist::CJob;
-use crate::controller::contentlist::FeedContents;
+use crate::controller::contentlist::ContentList;
 use crate::controller::contentlist::IContentList;
 use crate::controller::isourcetree::ISourceTreeController;
 use crate::controller::subscriptionmove::ISubscriptionMove;
@@ -126,7 +126,7 @@ pub struct SourceTreeController {
     pub(super) configmanager_r: Rc<RefCell<ConfigManager>>,
     pub(super) downloader_r: Rc<RefCell<dyn IDownloader>>,
     pub(super) gui_context_w: Weak<RefCell<GuiContext>>,
-    pub(super) feedcontents_w: Weak<RefCell<FeedContents>>, // YY
+    pub(super) feedcontents_w: Weak<RefCell<ContentList>>,
     pub(super) gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     pub(super) gui_val_store: UIAdapterValueStoreType,
     pub(super) erro_repo_r: Rc<RefCell<ErrorRepo>>,
@@ -1020,7 +1020,7 @@ impl Buildable for SourceTreeController {
 
 impl StartupWithAppContext for SourceTreeController {
     fn startup(&mut self, ac: &AppContext) {
-        self.feedcontents_w = Rc::downgrade(&(*ac).get_rc::<FeedContents>().unwrap());
+        self.feedcontents_w = Rc::downgrade(&(*ac).get_rc::<ContentList>().unwrap());
         self.gui_context_w = Rc::downgrade(&(*ac).get_rc::<GuiContext>().unwrap());
         self.messagesrepo_w = Rc::downgrade(&(*ac).get_rc::<MessagesRepo>().unwrap());
 

@@ -60,7 +60,7 @@ pub struct MessageRow {
     pub categories: String,
     pub markers: u64,
     /// a copy of the decompressed title, needed for sorting
-    title_d: Option<String>,
+    pub title_d: Option<String>,
 }
 
 impl MessageRow {

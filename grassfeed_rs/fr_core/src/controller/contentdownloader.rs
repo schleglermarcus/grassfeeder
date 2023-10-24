@@ -1,6 +1,6 @@
 use crate::config::configmanager::ConfigManager;
 use crate::controller::contentlist::CJob;
-use crate::controller::contentlist::FeedContents;
+use crate::controller::contentlist::ContentList;
 use crate::controller::contentlist::IContentList;
 use crate::controller::guiprocessor::GuiProcessor;
 use crate::controller::guiprocessor::Job;
@@ -395,7 +395,7 @@ impl IDownloader for Downloader {
     fn cleanup_db(&self) {
         let msg_keep_count: i32 = (*self.configmanager_r)
             .borrow()
-            .get_val_int(FeedContents::CONF_MSG_KEEP_COUNT)
+            .get_val_int(ContentList::CONF_MSG_KEEP_COUNT)
             .unwrap_or(-1) as i32;
         let subs_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
@@ -488,7 +488,7 @@ impl Buildable for Downloader {
 
 impl StartupWithAppContext for Downloader {
     fn startup(&mut self, ac: &AppContext) {
-        let fceedcontents_r: Rc<RefCell<dyn IContentList>> = ac.get_rc::<FeedContents>().unwrap();
+        let fceedcontents_r: Rc<RefCell<dyn IContentList>> = ac.get_rc::<ContentList>().unwrap();
         let cjob_sender = (*fceedcontents_r).borrow().get_job_sender();
         self.contentlist_job_sender = Some(cjob_sender);
         let stc_r: Rc<RefCell<dyn ISourceTreeController>> =

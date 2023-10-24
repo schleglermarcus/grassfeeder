@@ -86,7 +86,7 @@ pub trait IContentList {
     fn update_message_list_(&self, subscription_id: isize);
 
     /// Read from db and put into the list view
-    fn update_messagelist_only(&self /*, feed_source_id: isize*/);
+    // fn update_messagelist_only(&self /*, feed_source_id: isize*/);
 
     ///  Vec < list_position,   feed_content_id >
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]);
@@ -134,7 +134,7 @@ pub trait IContentList {
 }
 
 /// needs GuiContext  ConfigManager  BrowserPane  Downloader
-pub struct FeedContents {
+pub struct ContentList {
     timer_r: Rc<RefCell<Timer>>,
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
     feedsources_w: Weak<RefCell<SourceTreeController>>,
@@ -154,7 +154,7 @@ pub struct FeedContents {
     window_minimized: bool,
 }
 
-impl FeedContents {
+impl ContentList {
     pub const CONF_FOCUS_POLICY: &'static str = "MessageSelectFocusPolicy";
     pub const CONF_MSG_KEEP_COUNT: &'static str = "MessagesKeepCount";
     pub const CONF_MSG_KEEP_COUNT_DEFAULT: i32 = 1000;
@@ -168,7 +168,7 @@ impl FeedContents {
         let bp_r = (*ac).get_rc::<BrowserPane>().unwrap();
         let msg_r = (*ac).get_rc::<MessagesRepo>().unwrap();
         let dl_r = (*ac).get_rc::<Downloader>().unwrap();
-        FeedContents {
+        ContentList {
             timer_r: (*ac).get_rc::<Timer>().unwrap(),
             gui_updater: u_a,
             gui_val_store: v_s_a,
@@ -476,7 +476,7 @@ impl FeedContents {
     fn check_message_counts(&self, subs_id: isize) {
         let msg_keep_count: isize = (*self.configmanager_r)
             .borrow()
-            .get_val_int(FeedContents::CONF_MSG_KEEP_COUNT)
+            .get_val_int(ContentList::CONF_MSG_KEEP_COUNT)
             .unwrap_or(-1);
         let msg_repo = MessagesRepo::new_by_connection(
             (*self.messagesrepo_r).borrow().get_ctx().get_connection(),
@@ -498,11 +498,11 @@ impl FeedContents {
     }
 } // impl FeedContents
 
-impl IContentList for FeedContents {
+impl IContentList for ContentList {
     /// returns queue size
     fn addjob(&self, nj: CJob) -> usize {
         if self.job_queue_sender.is_full() {
-            error!("FeedContents CJob queue full  Skipping  {:?}", nj);
+            error!("ContentList CJob queue full  Skipping  {:?}", nj);
         } else {
             self.job_queue_sender.send(nj).unwrap();
         }
@@ -691,19 +691,17 @@ impl IContentList for FeedContents {
             }
             self.current_subscription
                 .replace((subscription_id, -1, isfolder));
-            self.update_messagelist_only();
+            self.addjob(CJob::UpdateMessageList);
+            self.addjob(CJob::ListSetCursorToPolicy);
         }
     }
 
-    fn update_messagelist_only(&self) {
-        /*  TODO : check if this works
-               self.fill_state_map( /* &Vec::default() */ );
-        */
-
-        self.addjob(CJob::UpdateMessageList);
-        self.addjob(CJob::ListSetCursorToPolicy);
-    }
-
+    /*
+       fn update_messagelist_only(&self) {
+           self.addjob(CJob::UpdateMessageList);
+           self.addjob(CJob::ListSetCursorToPolicy);
+       }
+    */
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]) {
         for (list_position, feed_content_id) in vec_pos_dbid {
             let o_msg: Option<MessageRow> =
@@ -832,7 +830,7 @@ impl IContentList for FeedContents {
         self.config.focus_policy = n;
         (*self.configmanager_r)
             .borrow()
-            .set_val(FeedContents::CONF_FOCUS_POLICY, n.to_string());
+            .set_val(ContentList::CONF_FOCUS_POLICY, n.to_string());
     }
 
     fn set_conf_msg_keep_count(&mut self, n: i32) {
@@ -843,7 +841,7 @@ impl IContentList for FeedContents {
         self.config.message_keep_count = n;
         (*self.configmanager_r)
             .borrow_mut()
-            .set_val(FeedContents::CONF_MSG_KEEP_COUNT, n.to_string());
+            .set_val(ContentList::CONF_MSG_KEEP_COUNT, n.to_string());
     }
 
     fn notify_config_update(&mut self) {
@@ -962,7 +960,6 @@ impl IContentList for FeedContents {
             .borrow()
             .get_by_index(msg_id)
             .unwrap();
-
         let triplet = (
             decompress(&msg.content_text),
             decompress(&msg.author),
@@ -1034,16 +1031,16 @@ impl IContentList for FeedContents {
     // impl IContentList
 }
 
-impl Buildable for FeedContents {
-    type Output = FeedContents;
+impl Buildable for ContentList {
+    type Output = ContentList;
     fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
-        let mut fc = FeedContents::new(_appcontext);
-        if let Some(i) = conf.get_int(FeedContents::CONF_FOCUS_POLICY) {
+        let mut fc = ContentList::new(_appcontext);
+        if let Some(i) = conf.get_int(ContentList::CONF_FOCUS_POLICY) {
             fc.config.focus_policy = i as u8;
         } else {
             fc.config.focus_policy = 1;
         }
-        if let Some(i) = conf.get_int(FeedContents::CONF_MSG_KEEP_COUNT) {
+        if let Some(i) = conf.get_int(ContentList::CONF_MSG_KEEP_COUNT) {
             fc.config.message_keep_count = i as i32;
         } else {
             fc.config.message_keep_count = Self::CONF_MSG_KEEP_COUNT_DEFAULT;
@@ -1058,10 +1055,10 @@ impl Buildable for FeedContents {
     }
 }
 
-impl StartupWithAppContext for FeedContents {
+impl StartupWithAppContext for ContentList {
     fn startup(&mut self, ac: &AppContext) {
         self.feedsources_w = Rc::downgrade(&(*ac).get_rc::<SourceTreeController>().unwrap());
-        let feedcontents_r = ac.get_rc::<FeedContents>().unwrap();
+        let feedcontents_r = ac.get_rc::<ContentList>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();
             t.register(&TimerEvent::Timer100ms, feedcontents_r.clone(), true);
@@ -1079,7 +1076,7 @@ impl StartupWithAppContext for FeedContents {
     }
 }
 
-impl TimerReceiver for FeedContents {
+impl TimerReceiver for ContentList {
     fn trigger_mut(&mut self, event: &TimerEvent) {
         if self.window_minimized {
             if event == &TimerEvent::Timer2s {

@@ -4,7 +4,7 @@ use crate::controller::browserpane::BrowserZoomCommand;
 use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader;
 use crate::controller::contentdownloader::IDownloader;
-use crate::controller::contentlist::FeedContents;
+use crate::controller::contentlist::ContentList;
 use crate::controller::contentlist::IContentList;
 use crate::controller::contentlist::ListMoveCommand;
 use crate::controller::isourcetree::ISourceTreeController;
@@ -125,7 +125,7 @@ impl GuiProcessor {
             (*ac).get_rc::<SourceTreeController>().unwrap(),
             dl_r.clone(),
             gui_u_a.clone(),
-            (*ac).get_rc::<FeedContents>().unwrap(),
+            (*ac).get_rc::<ContentList>().unwrap(),
             (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
             gui_v_a.clone(),
         ));
@@ -134,7 +134,7 @@ impl GuiProcessor {
             subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
             configmanager_r: (*ac).get_rc::<ConfigManager>().unwrap(),
             feedsources_r: (*ac).get_rc::<SourceTreeController>().unwrap(),
-            contentlist_r: (*ac).get_rc::<FeedContents>().unwrap(),
+            contentlist_r: (*ac).get_rc::<ContentList>().unwrap(),
             iconrepo_r: (*ac).get_rc::<IconRepo>().unwrap(),
             timer_r: (*ac).get_rc::<Timer>().unwrap(),
             browserpane_r: (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
