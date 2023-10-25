@@ -1,8 +1,7 @@
-grassfeeder-gtk3 (0.0.2610) buster; urgency=low
+grassfeeder-gtk3 (0.0.2620) buster; urgency=low
 
   * Messages loading more efficient: references+partial+caching
-  
-  
+  * Running cb-clean deactivates the start button
   
   - Icon view:  check double icon display!
   

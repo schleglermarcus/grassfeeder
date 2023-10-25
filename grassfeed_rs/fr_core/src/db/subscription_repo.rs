@@ -42,6 +42,8 @@ pub trait ISubscriptionRepo {
 
     fn get_all_entries(&self) -> Vec<SubscriptionEntry>;
 
+    fn get_by_icon_id(&self, icon_id: isize) -> Vec<SubscriptionEntry>;
+
     /// if subs_id == 0  stores at next possible higher  subs_id.
     /// if subs_id is given, we store that.
     fn store_entry(
@@ -49,7 +51,7 @@ pub trait ISubscriptionRepo {
         entry: &SubscriptionEntry,
     ) -> Result<SubscriptionEntry, Box<dyn std::error::Error>>;
 
-    ///   store IconID into feed source
+    ///   store IconID into subscription enty
     fn update_icon_id_time(&self, src_id: isize, icon_id: usize, timestamp_s: i64);
     fn update_icon_id(&self, src_id: isize, icon_id: usize);
     fn update_icon_id_many(&self, src_ids: Vec<i32>, icon_id: usize);
@@ -233,6 +235,15 @@ impl ISubscriptionRepo for SubscriptionRepo {
             "SELECT * FROM {} WHERE updated_int<{}  order by updated_int ",
             SubscriptionEntry::table_name(),
             updated_time_s
+        );
+        self.ctx.get_list(prepared)
+    }
+
+    fn get_by_icon_id(&self, icon_id: isize) -> Vec<SubscriptionEntry> {
+        let prepared = format!(
+            "SELECT * FROM {} WHERE icon_id={}  order by updated_int ",
+            SubscriptionEntry::table_name(),
+            icon_id
         );
         self.ctx.get_list(prepared)
     }
@@ -769,6 +780,23 @@ mod ut {
         assert_eq!(list.get(1).unwrap().folder_position, 1);
         assert_eq!(list.get(2).unwrap().subs_id, 12);
         assert_eq!(list.get(2).unwrap().folder_position, 2);
+    }
+
+    #[test]
+    //cargo test   db::subscription_repo::ut::t_get_by_icon_id  --lib  -- --exact
+    fn t_get_by_icon_id() {
+        setup();
+        let mut sr = SubscriptionRepo::new_inmem();
+        sr.startup_int();
+        let mut s1 = SubscriptionEntry::default();
+        s1.parent_subs_id = 20;
+        s1.icon_id = 77;
+        assert!(sr.store_entry(&s1).is_ok());
+        s1.icon_id = 55;
+        assert!(sr.store_entry(&s1).is_ok());
+        let list = sr.get_by_icon_id(77);
+        assert_eq!(list.len(), 1);
+        assert_eq!(list.get(0).unwrap().icon_id, 77);
     }
 
     // dummy instead of log configuration

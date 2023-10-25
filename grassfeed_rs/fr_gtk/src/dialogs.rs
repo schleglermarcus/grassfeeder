@@ -60,6 +60,7 @@ const GRID_SPACING: u32 = 5;
 const DB_CLEAN_STEPS_MAX: f64 = 10.0;
 const ICON_RESCALE_SIZE: i32 = 24;
 const ICON_DIALOG_COLUMNS: i32 = 40;
+const ICON_DIALOG_INCLUDE_INTERNAL: bool = false;
 
 const NONE_ADJ: Option<&Adjustment> = None;
 const NONE_TEXT: Option<&TextTagTable> = None;
@@ -91,15 +92,16 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
     let grid = Grid::new();
     grid.set_vexpand(true);
     grid.set_hexpand(true);
-
-    for a in 0..gen_icons::ICON_LIST.len() {
-        grid_attach_icon(
-            &grid,
-            gen_icons::ICON_LIST[a],
-            &format!("r{}", a),
-            0,
-            a as i32,
-        );
+    if ICON_DIALOG_INCLUDE_INTERNAL {
+        for a in 0..gen_icons::ICON_LIST.len() {
+            grid_attach_icon(
+                &grid,
+                gen_icons::ICON_LIST[a],
+                &format!("r{}", a),
+                0,
+                a as i32,
+            );
+        }
     }
     dialog.content_area().add(&grid);
     dialog.set_default_response(ResponseType::Ok);
@@ -113,31 +115,49 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
     });
 
     ddd.set_dialog_distribute(DIALOG_ICONS, move |dialogdata| {
+        const DD_ROWS: usize = 3;
         let mut ddnum = 0;
-        let mut index: i32 = -1;
-        let mut ic_st = String::default();
-        let mut dbindex = gen_icons::ICON_LIST.len() + 1;
-        //  let y_base = (gen_icons::ICON_LIST.len() as i32 / ICON_DIALOG_COLUMNS) + 1;
+        let mut icon_id: i32 = -1;
+        let mut ic_str = String::default();
+        let mut sub_id_str = String::default();
+        let mut grid_index = 0;
+        if ICON_DIALOG_INCLUDE_INTERNAL {
+            grid_index = gen_icons::ICON_LIST.len() + 1;
+        }
         let y_base = 0;
         trace!("DD #{} ", dialogdata.len());
         while let Some(aval) = dialogdata.get(ddnum) {
-            match aval {
-                AValue::AI32(i) => index = *i,
-                AValue::ASTR(ref s) => ic_st = s.clone(),
+            match ddnum % DD_ROWS {
+                0 => {
+                    if let AValue::AI32(i) = aval {
+                        icon_id = *i;
+                    }
+                }
+                1 => {
+                    if let AValue::ASTR(ref s) = aval {
+                        ic_str = s.clone();
+                    }
+                }
+                2 => {
+                    if let AValue::ASTR(ref s) = aval {
+                        sub_id_str = s.clone();
+                    }
+                }
                 _ => (),
-            }
-            if ic_st.len() > 10 {
-                // trace!(                    "Icons adding to grid: {}\t{} len:{}",                    ddnum,                    index,                    ic_st.len(),                );
+            };
+            if ddnum % DD_ROWS == 0 {
+                // trace!(                    "Icons adding to grid: {} IID:{} len:{} subs:{}",                    dbindex,                    icon_id,                    ic_str.len(),                    sub_id_str                );
                 grid_attach_icon(
                     &grid,
-                    &ic_st,
-                    &format!("d{} #{}", index, ic_st.len()),
+                    &ic_str,
+                    &format!("d{}  S{} #{}", icon_id, sub_id_str, ic_str.len()),
                     y_base,
-                    dbindex as i32,
+                    grid_index as i32,
                 );
-                ic_st = String::default();
-                index = -1;
-                dbindex += 1;
+                ic_str = String::default();
+                icon_id = -1;
+                sub_id_str.clear();
+                grid_index += 1;
             }
             ddnum += 1;
         }
@@ -147,11 +167,11 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
     ret.set_dialog(DIALOG_ICONS, &dialog);
 }
 
-fn grid_attach_icon(grid: &Grid, icon_str: &str, tooltip: &str, y_base: i32, index: i32) {
+fn grid_attach_icon(grid: &Grid, icon_str: &str, tooltip: &str, y_base: i32, grid_index: i32) {
     if let Ok(image) = prepare_icon(icon_str, ICON_RESCALE_SIZE) {
-        image.set_tooltip_text(Some(tooltip)); // &format!("{index}")
-        let y: i32 = index / ICON_DIALOG_COLUMNS + y_base;
-        let x: i32 = index % ICON_DIALOG_COLUMNS;
+        image.set_tooltip_text(Some(tooltip));
+        let y: i32 = grid_index / ICON_DIALOG_COLUMNS + y_base;
+        let x: i32 = grid_index % ICON_DIALOG_COLUMNS;
         grid.attach(&image, x, y, 1, 1);
     }
 }

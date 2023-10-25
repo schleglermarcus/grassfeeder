@@ -62,7 +62,7 @@ impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
-            //  debug!(                "IconLoadStart: db-HP:{}   prev-iconurl:{}",                subs_e.website_url, inner.icon_url            );
+            // trace!(                "IconLoadStart: db-HP:{}   prev-iconurl:{}",                subs_e.website_url, inner.icon_url            );
             if !subs_e.website_url.is_empty() {
                 inner.feed_homepage = subs_e.website_url;
                 return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
@@ -111,7 +111,7 @@ struct HomepageDownload(IconInner);
 impl Step<IconInner> for HomepageDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        let dl_text = workaround_https_declaration( & inner.feed_download_text );
+        let dl_text = workaround_https_declaration(&inner.feed_download_text);
         let (homepage, _feed_title, errtext) =
             util::retrieve_homepage_from_feed_text(dl_text.as_bytes(), &inner.feed_url);
         if !homepage.is_empty() {
@@ -338,6 +338,7 @@ struct IconStore(IconInner);
 impl Step<IconInner> for IconStore {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let inner: IconInner = self.0;
+
         assert!(!inner.compressed_icon.is_empty());
         let ie = IconEntry {
             icon: inner.compressed_icon.clone(),
@@ -345,7 +346,13 @@ impl Step<IconInner> for IconStore {
         };
         match inner.iconrepo.store_entry(&ie) {
             Ok(entry) => {
-                debug!("IconStore:   {:?}  => ID {} ", &ie, entry.icon_id);
+                debug!(
+                    "IconStore:  len:{:?}  => ID {}  F:{}  HP:{} ",
+                    ie.icon.len(),
+                    entry.icon_id,
+                    inner.feed_url,
+                    inner.feed_homepage
+                );
                 let _r = inner
                     .sourcetree_job_sender
                     .send(SJob::SetIconId(inner.subs_id, entry.icon_id));

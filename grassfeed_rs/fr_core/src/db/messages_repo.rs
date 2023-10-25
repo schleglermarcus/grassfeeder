@@ -197,35 +197,6 @@ impl IMessagesRepo for MessagesRepo {
             .map_err(rusqlite_error_to_boxed)
     }
 
-/*
-    fn get_by_subs_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow> {
-        let no_deleted_and = if include_deleted {
-            String::default()
-        } else {
-            " AND is_deleted=false ".to_string()
-        };
-        let prepared = format!(
-            "SELECT * FROM {} WHERE feed_src_id={} {}  ORDER BY entry_src_date DESC ",
-            MessageRow::table_name(),
-            src_id,
-            no_deleted_and,
-        );
-        let mut list: Vec<MessageRow> = Vec::default();
-        if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(&prepared) {
-            match stmt.query_map([], |row| {
-                list.push(MessageRow::from_row(row));
-                Ok(())
-            }) {
-                Ok(mr) => {
-                    mr.count(); // seems to be necessary
-                }
-                Err(e) => error!("{} {:?}", &prepared, e),
-            }
-        }
-        list
-    }
- */
-
     /// returns  the number of read lines for that source id:   -1 for undefined
     fn get_read_sum(&self, src_id: isize) -> isize {
         let sql = format!(
@@ -745,11 +716,12 @@ mod t {
     }
 
     #[test]
-    fn t_get_by_src_id() {
-        let msg_r = prepare_3_rows();
-        let list = (*msg_r).borrow().get_by_subs_id(3, true);
-        assert_eq!(list.len(), 2);
-        assert_eq!(list.get(0).unwrap().message_id, 2);
+    fn t_get_by_subscriptions() {
+        let imessagesrepo = prepare_3_rows();
+        let mut msg_r = (*imessagesrepo).borrow_mut();
+        let mut mr_i = msg_r.get_by_subscriptions(&[3], true);
+        assert_eq!(mr_i.len(), 2);
+        assert_eq!(mr_i.next().unwrap().message_id, 2);
     }
 
     //RUST_BACKTRACE=1 cargo watch -s "cargo test  db::messages_repo::t::t_insert_get_row   --lib -- --exact --nocapture "

@@ -368,8 +368,8 @@ impl GtkModelUpdaterInt {
         let is_minimized = (self.m_v_store).read().unwrap().get_window_minimized();
         if !is_minimized {
             let elapsed = now.elapsed().as_millis();
-            if elapsed > 200 {
-                debug!(
+            if elapsed > 250 {
+                trace!(
                     "update_list_model took {:?}ms #lines:{} ",
                     elapsed, num_lines
                 );

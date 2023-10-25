@@ -26,8 +26,6 @@ const VERTICAL_RISING_BAR: [u32; 9] = [
 
 const VERTICAL_RISING_BAR_LEN: usize = VERTICAL_RISING_BAR.len() - 1;
 
-const DIVISOR_MB: usize = 1024 * 1024;
-
 // #[derive(Default)]
 pub struct StatusBar {
     r_subscriptions_controller: Rc<RefCell<dyn ISourceTreeController>>,
@@ -288,33 +286,10 @@ impl StatusBar {
     // estimation of the current physical memory used by the application, in bytes.
     // 		Comes from proc//status/VmRSS
     pub fn update_memory_stats(&mut self) {
-/*
-        if let Some(usage) = memory_stats::memory_stats() {
-            trace!(
-                "MS:  Phys: \t{}   \tVirtual: \t{}",
-                usage.physical_mem / DIVISOR_MB,
-                usage.virtual_mem / DIVISOR_MB
-            );
-            self.mem_usage_vmrss_bytes =
-                (self.mem_usage_vmrss_bytes + usage.physical_mem as isize) / 2;
-        }
- */
         if let Ok(mem) = proc_status::mem_usage() {
             // trace!(                "PS:  MEM:  {} {}",                mem.current / DIVISOR_MB,                mem.peak / DIVISOR_MB            );
             self.mem_usage_vmrss_bytes = (self.mem_usage_vmrss_bytes + mem.current as isize) / 2;
         }
-
-        /*
-
-               if let Ok(ps) = proc_status::ProcStatus::read() {
-                   trace!("PS: VmRSS={:?}", ps.entry("VmRSS").unwrap().value);
-
-
-
-                   // trace!("PS: VmRSS={:?}", ps.entry("VmRSS").unwrap().value);
-                   // for entry in ps.entries() {                let entry = entry.unwrap();            }
-               }
-        */
     }
 
     fn error_formatter(s: String) -> String {

@@ -20,6 +20,7 @@ use crate::db::errorentry::ESRC;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
+use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::db::subscription_state::ISubscriptionState;
@@ -267,7 +268,6 @@ impl GuiProcessor {
                     description,
                     remote_addr,
                 ) => {
-                    // if elapsed_ms > 2000 && subs_id > 0 {
                     match kind {
                         1 | 2 => {
                             if elapsed_ms > 2000 && subs_id > 0 {
@@ -294,7 +294,7 @@ impl GuiProcessor {
                                     subs_id, description, threadnr, kind, elapsed_ms, remote_addr
                                 );
                             }
-                        } //  }
+                        }
                     }
                     self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = 0;
                 }
@@ -309,7 +309,7 @@ impl GuiProcessor {
                     self.statusbar.borrow_mut().bottom_notices.push_back(msg);
                 }
                 Job::NotifyDbClean(c_step, duration_ms, ref c_msg) => {
-                    debug!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
+                    // debug!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
                     let av2nd = if let Some(msg) = c_msg {
                         let newmsg = format!(
                             "{}{}\t{}\n",
@@ -337,7 +337,6 @@ impl GuiProcessor {
                             .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, true);
                     }
                 }
-
                 _ => {
                     warn!("other job! {:?}", &job);
                 }
@@ -440,10 +439,21 @@ impl GuiProcessor {
             .filter(|ie| ie.icon_id > ICON_LIST.len() as isize)
             .filter(|ie| ie.icon.len() > 100)
             .collect::<Vec<IconEntry>>();
+
         let mut dd: Vec<AValue> = Vec::new();
         upper.iter().for_each(|ie| {
+            let subscriptions: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
+                .borrow()
+                .get_by_icon_id(ie.icon_id);
+            let subs_ids = subscriptions
+                .iter()
+                .map(|s| s.subs_id.to_string())
+                .collect::<Vec<String>>()
+                .join(" ");
+
             dd.push(AValue::AI32(ie.icon_id as i32));
             dd.push(AValue::ASTR((*ie.icon).to_string()));
+            dd.push(AValue::ASTR(subs_ids));
         });
         trace!("storing  {}  icons ", upper.len());
         (*self.gui_val_store)
@@ -1398,7 +1408,6 @@ impl HandleSingleEvent for HandleButtonActivated {
                         .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, false);
                     let mut sb = gp.statusbar.borrow_mut();
                     sb.db_check_running = true;
-                    // sb.set_db_check_msg("starting ...");
                     gp.downloader_r.borrow().cleanup_db();
                     gp.addjob(Job::NotifyDbClean(
                         0,
