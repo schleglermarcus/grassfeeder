@@ -810,7 +810,10 @@ impl GtkModelUpdaterInt {
     }
 
     pub fn store_image(&self, idx: i32, img: String) {
-        // if self.pixbuf_cache.borrow().contains_key(&idx) {            debug!("  store_image: {} already contained ", idx);        }
+        if self.pixbuf_cache.borrow().contains_key(&idx) {
+            debug!("  store_image: {} already contained, skipping ", idx);
+            return;
+        }
         let pb: Pixbuf = Self::icon_for_string(&img, &format!("store_image {} ", idx));
         self.pixbuf_cache.borrow_mut().insert(idx, pb);
     }

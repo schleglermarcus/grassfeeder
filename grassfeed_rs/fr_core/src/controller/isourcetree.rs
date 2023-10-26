@@ -126,9 +126,7 @@ impl ISourceTreeController for SourceTreeController {
                 .borrow_mut()
                 .set_read_complete_subscription(subs_id);
 
-
-
-            debug!("mark_as_read({})", subs_id);
+            debug!("mark_as_read({})", subs_id);	// TODO 
             feedcontents.borrow().addjob(CJob::UpdateMessageList);
         }
     }
@@ -210,11 +208,9 @@ impl ISourceTreeController for SourceTreeController {
         self.job_queue_sender.clone()
     }
 
-    fn start_feedsource_edit_dialog(&mut self, src_repo_id: isize) {
+    fn start_feedsource_edit_dialog(&mut self, subs_id: isize) {
         let mut dialog_id = DIALOG_SUBS_EDIT;
-        let o_fse = (*self.subscriptionrepo_r)
-            .borrow()
-            .get_by_index(src_repo_id);
+        let o_fse = (*self.subscriptionrepo_r).borrow().get_by_index(subs_id);
         if o_fse.is_none() {
             return;
         }
@@ -223,29 +219,37 @@ impl ISourceTreeController for SourceTreeController {
         let mut num_all: i32 = -1;
         let mut num_unread: i32 = -1;
         if let Some(feedcontents) = self.feedcontents_w.upgrade() {
-            (num_all, num_unread) = (*feedcontents).borrow().get_counts(src_repo_id).unwrap();
+            (num_all, num_unread) = (*feedcontents).borrow().get_counts(subs_id).unwrap();
         }
         let mut dd: Vec<AValue> = Vec::default();
-        let n_icon: i32 = fse.icon_id as i32;
-        dd.push(AValue::ASTR(fse.display_name.clone())); // 0
+        // let icon_id: i32 = fse.icon_id as i32;
+
+        let mut iconval = AValue::None;
+        if let Some(ie) = (*self.iconrepo_r)
+            .borrow()
+            .get_by_index(fse.icon_id as isize)
+        {
+            iconval = AValue::AIMG(ie.icon);
+        }
+        dd.push(AValue::ASTR(fse.display_name.clone())); // 0  url
         if fse.is_folder {
             dialog_id = DIALOG_FOLDER_EDIT;
         } else {
             dd.push(AValue::ASTR(fse.url.clone())); // 1
-            dd.push(AValue::IIMG(n_icon)); // 2
+            dd.push(iconval); // 2
             dd.push(AValue::AI32(num_all)); // 3
             dd.push(AValue::AI32(num_unread)); // 4
-            dd.push(AValue::ASTR(fse.website_url)); // 5
+            dd.push(AValue::ASTR(fse.website_url)); // 5 main website
             dd.push(AValue::ASTR(db_time_to_display_nonnull(fse.updated_int))); // 6
             dd.push(AValue::ASTR(db_time_to_display_nonnull(fse.updated_ext))); // 7
             let lines: Vec<String> = (*self.erro_repo_r)
                 .borrow()
-                .get_by_subscription(src_repo_id)
+                .get_by_subscription(subs_id)
                 .iter()
                 .map(errorentry_to_line)
                 .collect();
             let joined = lines.join("\n");
-            dd.push(AValue::ASTR(joined)); // 8
+            dd.push(AValue::ASTR(joined)); // 8 error lines
         }
         (*self.gui_val_store)
             .write()

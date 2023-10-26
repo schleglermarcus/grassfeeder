@@ -52,7 +52,7 @@ pub const CONF_DOWNLOADER_THREADS: &str = "DownloaderThreads";
 
 pub const DOWNLOADER_THREADS_DEFAULT: u8 = 2;
 pub const DOWNLOADER_LOOP_DELAY_S: u8 = 1;
-pub const DOWNLOADER_LOOP_WAIT_MS: u64 = 200; // between downloader queue requests
+pub const DOWNLOADER_LOOP_WAIT_MS: u64 = 100; // between downloader queue requests
 pub const DOWNLOADER_JOB_QUEUE: usize = 2000;
 pub const DLKIND_MAX: usize = 7;
 
@@ -66,7 +66,8 @@ pub trait IDownloader {
     fn new_feedsource_request(&self, fs_edit_url: &str);
     fn load_icon(&self, fs_id: isize, fs_url: String, old_icon_id: usize);
     fn cleanup_db(&self);
-    fn get_queue_size(&self) -> usize;
+    /// size of queue, number of running threads
+    fn get_queue_size(&self) -> (u16, u16);
     fn browser_drag_request(&self, dragged_url: &str);
     fn launch_webbrowser(&self, url: String, cl_id: isize, list_pos: u32);
     fn get_statistics(&self) -> [u32; DLKIND_MAX];
@@ -221,6 +222,7 @@ impl Downloader {
                         if let Some(dljob) = o_job {
                             (*busy_a).write().unwrap()[n as usize] = (dljob.kind(), hostname);
                             Self::process_job(dljob, gp_sender.clone(), n);
+
                             (*busy_a).write().unwrap()[n as usize] = (0, String::default());
                         }
                     }
@@ -272,7 +274,11 @@ impl Downloader {
                 let _i = StepResult::start(Box::new(LaunchWebBrowserStart::new(i)));
             }
         }
+
         let elapsedms = now.elapsed().as_millis();
+
+        thread::sleep(Duration::from_millis(1000)); // TODO: remove
+
         let _r = gp_sender.send(Job::DownloaderJobFinished(
             subs_id,
             proc_num,
@@ -445,8 +451,17 @@ impl IDownloader for Downloader {
             .set_val(CONF_DOWNLOADER_THREADS, n.to_string());
     }
 
-    fn get_queue_size(&self) -> usize {
-        (*self.job_queue).read().unwrap().len()
+    fn get_queue_size(&self) -> (u16, u16) {
+        let num_busy = (*self.busy_indicators)
+            .read()
+            .unwrap()
+            .iter()
+            .filter(|k_u| k_u.0 > 0)
+            .count();
+        (
+            (*self.job_queue).read().unwrap().len() as u16,
+            num_busy as u16,
+        )
     }
 
     fn browser_drag_request(&self, dragged_url: &str) {

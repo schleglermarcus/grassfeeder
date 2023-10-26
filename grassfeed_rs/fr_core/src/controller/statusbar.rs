@@ -41,7 +41,7 @@ pub struct StatusBar {
     last_fetch_time: i64,
     selected_repo_id: isize,
     pub num_downloader_threads: u8,
-    num_dl_queue_length: usize,
+    num_dl_queue_length: u16,
     selected_msg_id: i32,
     selected_msg_url: String,
     /// proc//status/VmRSS  Resident set size, estimation of the current physical memory used by the application
@@ -207,6 +207,7 @@ impl StatusBar {
             }
         }
         let new_qsize = (*self.r_downloader).borrow().get_queue_size();
+        let new_qsize = new_qsize.0 + new_qsize.1; // queue + threads
         if new_qsize != self.num_dl_queue_length {
             self.num_dl_queue_length = new_qsize;
             need_update1 = true;
@@ -222,33 +223,29 @@ impl StatusBar {
                 downloader_display.push(nc);
             }
             let unread_all = format!("{:5} / {:5}", self.num_msg_unread, self.num_msg_all);
-            let memdisplay = if self.mode_debug {
-                let mut dl_line = String::default();
-                self.downloader_stats
-                    .iter()
-                    .enumerate()
-                    .filter(|(_n, s)| **s > 0)
-                    .map(|(n, s)| format!("{}{} ", dl_char_for_kind(n as u8), s))
-                    .for_each(|s| dl_line.push_str(&s));
-
-                format!(
-                    "  {}MB  {}  ",
-                    self.mem_usage_vmrss_bytes / 1048576,
-                    dl_line
-                )
+            let mut dl_line = String::default();
+            self.downloader_stats
+                .iter()
+                .enumerate()
+                .filter(|(_n, s)| **s > 0)
+                .map(|(n, s)| format!("{}{} ", dl_char_for_kind(n as u8), s))
+                .for_each(|s| dl_line.push_str(&s));
+            let memdisplay = format!(
+                "  {}MB  {}  ",
+                self.mem_usage_vmrss_bytes / 1048576,
+                dl_line
+            );
+            let dl_queue_txt = if self.num_dl_queue_length > 0 {
+                format!("{:2}", self.num_dl_queue_length)
             } else {
-                String::default()
+                "  ".to_string()
             };
-            let msg1 = format!(   "<tt>\u{25df}{downloader_display}\u{25de} {unread_all}    \u{2595}{block_vertical}\u{258F} {memdisplay}</tt>",            );
-            (*self.gui_val_store)
+            let msg1 = format!(   "<tt>{dl_queue_txt} {downloader_display}  {unread_all}    \u{2595}{block_vertical}\u{258F}</tt>"   );
+            (*self.gui_val_store) // \u{25df} \u{25de}
                 .write()
                 .unwrap()
                 .set_label_text(LABEL_STATUS_1, msg1);
-            let msg1tooltip = if self.num_dl_queue_length > 0 {
-                format!("Queue: {}", self.num_dl_queue_length)
-            } else {
-                String::default()
-            };
+            let msg1tooltip = memdisplay;
             (*self.gui_val_store)
                 .write()
                 .unwrap()

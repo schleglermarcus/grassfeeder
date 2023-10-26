@@ -103,7 +103,6 @@ pub enum GuiEvents {
 }
 
 pub trait UIAdapterValueStore {
-
     fn set_text_entry(&mut self, index: u8, newtext: String);
     fn get_text_entry(&self, index: u8) -> Option<String>;
 
@@ -262,7 +261,9 @@ pub enum AValue {
     AU32(u32),
     AI32(i32),
     ASTR(String),
+    /// icon as compressed string
     AIMG(String),
+    /// index for cached Icon
     IIMG(i32),
     ABOOL(bool),
 }

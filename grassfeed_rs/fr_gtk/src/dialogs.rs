@@ -608,10 +608,10 @@ fn create_subscription_edit_dialog(
     ddd.set_dialog_distribute(DIALOG_SUBS_EDIT, move |dialogdata| {
         let mut url = String::default();
         if let Some(s) = dialogdata.get(0).unwrap().str() {
-            entry1c.set_text(&s); // 0: url
+            entry1c.set_text(&s); //   0: displayname
         }
         if let Some(s) = dialogdata.get(1).unwrap().str() {
-            entry2c.set_text(&s); //  1: icon
+            entry2c.set_text(&s); //   1: url
             url = s;
         }
         if !process_icon_to_image(dialogdata.get(2), &image_c, &url) {
@@ -620,16 +620,16 @@ fn create_subscription_edit_dialog(
                 &image_c,
                 &url,
                 DIALOG_ICON_SIZE,
-            );
+            ); //  2: icon
         }
         if let Some(s) = dialogdata.get(3).unwrap().str() {
-            label2b_c.set_text(&s); // num-all
+            label2b_c.set_text(&s); // 3: num-all
         }
         if let Some(s) = dialogdata.get(4).unwrap().str() {
-            label3b_c.set_text(&s); // num-unread
+            label3b_c.set_text(&s); // 4: num-unread
         }
         if let Some(s) = dialogdata.get(5).unwrap().str() {
-            label1b_c.set_text(&s); // main website
+            label1b_c.set_text(&s); // 5: main website
         }
         if let Some(s) = dialogdata.get(6).unwrap().str() {
             label4b_c.set_text(&s); // update-int

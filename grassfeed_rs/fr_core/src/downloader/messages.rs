@@ -209,8 +209,7 @@ pub fn feed_text_to_entries(
     let mut fce_list: Vec<MessageRow> = Vec::new();
     let mut created_ts: i64 = 0;
     let mut err_text = String::default();
-    match feed_rs::parser::parse(text.as_bytes())  //   TODO heap
-    {
+    match feed_rs::parser::parse(text.as_bytes()) {
         Ok(feed) => {
             for e in feed.entries {
                 let (mut fce, err_t) = message_from_modelentry(&e);

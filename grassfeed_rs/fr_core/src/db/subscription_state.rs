@@ -40,8 +40,7 @@ pub trait ISubscriptionState {
 
     fn dump(&self);
 
-    //     #[deprecated]
-    //     fn clear(&mut self);
+    fn get_fetch_scheduled(&self) -> Vec<isize>; // Vec<(&isize, &SubsMapEntry)>;
 }
 
 #[derive(Default)]
@@ -191,6 +190,18 @@ impl ISubscriptionState for SubscriptionState {
             .iter()
             .for_each(|(k, v)| debug!("SSD {} {:?}", k, v));
         // debug!("subscription_state::dump() {:#?}", self.statemap);
+    }
+
+    fn get_fetch_scheduled(&self) -> Vec<isize> {
+        //  Vec<(&isize, &SubsMapEntry)> {
+        self.statemap
+            .iter()
+            .filter(|(_id, entry)| !entry.is_folder())
+            .filter(|(_id, entry)| !entry.is_deleted())
+            .filter(|(_id, entry)| entry.check_bitmask(StatusMask::FetchScheduled as usize))
+            .filter(|(_id, entry)| !entry.is_fetch_scheduled_jobcreated())
+            .map(|(id, _entry)| *id)
+            .collect::<Vec<isize>>()
     }
 }
 

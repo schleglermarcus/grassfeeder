@@ -330,9 +330,7 @@ impl Step<IconInner> for IconCheckPresent {
             inner.iconrepo.get_by_icon(inner.compressed_icon.clone());
         if !existing_icons.is_empty() {
             let existing_id = existing_icons[0].icon_id;
-
-             trace!(                "icon already there. {}=>{}  subs: {} ",                inner.fs_icon_id_old,                existing_id,                inner.subs_id            );
-
+            //  trace!(                "icon already there. {}=>{}  subs: {} ",                inner.fs_icon_id_old,                existing_id,                inner.subs_id            );
             if existing_id != inner.fs_icon_id_old {
                 let _r = inner
                     .sourcetree_job_sender
