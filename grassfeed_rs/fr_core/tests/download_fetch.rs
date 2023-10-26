@@ -65,8 +65,8 @@ fn single_dl_regular() {
     );
     assert_eq!(stc_job_r.recv(), Ok(SJob::SetFetchFinished(1, false)));
     assert!(stc_job_r.is_empty());
-    let all = msgrepo_req.get_all_messages();
-    assert_eq!(all.len(), 2);
+    let all_sum = msgrepo_req.get_all_sum();
+    assert_eq!(all_sum, 2);
 }
 
 #[test]
@@ -109,8 +109,10 @@ fn download_with_create_date() {
         SJob::StoreFeedCreateUpdate(3, ts_now, date_copied_from_example.timestamp())
     );
     assert_eq!(stc_job_r.recv().unwrap(), SJob::SetFetchFinished(3, false));
-    let all = msgrepo_req.get_all_messages();
-    assert_eq!(all.len(), 2);
+    // let all = msgrepo_req.get_all_messages();
+    // assert_eq!(all.len(), 2);
+    let all_sum = msgrepo_req.get_all_sum();
+    assert_eq!(all_sum, 2);
 }
 
 fn get_file_fetcher() -> WebFetcherType {
@@ -118,7 +120,6 @@ fn get_file_fetcher() -> WebFetcherType {
         "../target/td/feeds/".to_string(),
     )))
 }
-
 
 // ------------------------------------
 

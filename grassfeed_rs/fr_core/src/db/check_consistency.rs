@@ -30,22 +30,18 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
     let msg_fn = MessagesRepo::filename(config_folder);
     let msg_copy = format!("{msg_fn}.copy");
     std::fs::copy(&msg_fn, msg_copy).unwrap();
-    let msgrepo1 = MessagesRepo::new_by_filename_add_column(&msg_fn);
+
+    let msg_repo = MessagesRepo::new_by_filename_add_column(&msg_fn);
     let err_repo = ErrorRepo::new(cache_folder);
     let mut iconrepo = IconRepo::new(config_folder);
     iconrepo.startup();
-    let all_messages = msgrepo1.get_all_messages();
-    trace!(
-        "Messages  {}  #{}  CACHE: {}",
-        &msg_fn,
-        &all_messages.len(),
-        cache_folder
-    );
+    let sum_all_msg = msg_repo.get_all_sum();
+    trace!("{} has  {} Messages  ", &msg_fn, sum_all_msg,);
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let (gp_job_s, _gp_job_r) = flume::bounded::<Job>(9);
     let (_c_q_s, c_q_r) = flume::bounded::<CJob>(9);
     let cleaner_i = CleanerInner::new(
-        gp_job_s, stc_job_s, subsrepo1, msgrepo1, iconrepo, 100000, err_repo,
+        gp_job_s, stc_job_s, subsrepo1, msg_repo, iconrepo, 100000, err_repo,
     );
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     c_q_r.drain().for_each(|cjob| debug!("CJOB: {:?}", cjob));
@@ -54,7 +50,8 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
     if !parent_ids_to_correct.is_empty() {
         debug!(" to_correct: {:?} {:?} ", parent_ids_to_correct, sjobs);
     }
-    let all_messages = inner.messagesrepo.get_all_messages();
-    let count_not_deleted = all_messages.iter().filter(|m| !m.is_deleted).count();
-    debug!("After cleanup  #MESSAGES= #{}", count_not_deleted);
+    let sum_all_msg = inner.messagesrepo.get_all_sum();
+    // let all_messages = inner.messagesrepo.get_all_messages();
+    // let count_not_deleted = all_messages.iter().filter(|m| !m.is_deleted).count();
+    debug!("After cleanup  number of messages: {}", sum_all_msg);
 }

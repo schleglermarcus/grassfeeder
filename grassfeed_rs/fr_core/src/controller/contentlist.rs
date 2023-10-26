@@ -239,12 +239,13 @@ impl ContentList {
         }
         let repo_ids: Vec<i32> = repoid_listpos.iter().map(|(r, _p)| *r).collect();
         (*self.messagesrepo_r)
-            .borrow_mut()
+            .borrow()
             .update_is_read_many(&repo_ids, is_read);
         self.msg_state
             .write()
             .unwrap()
             .set_read_many(&repo_ids, is_read);
+        (*self.messagesrepo_r).borrow_mut().cache_clear();
         let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
         if isfolder {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
@@ -353,7 +354,7 @@ impl ContentList {
 
     /// Read from db and put into the list view,
     /// State Map shall contain only the current subscription's messages, for finding the cursor position for the focus policy
-    fn update_feed_list_contents_int(&self) {
+    fn update_messagelist_int(&self) {
         let (subs_id, num_msg, isfolder) = *self.current_subscription.borrow();
         let mut messagelist: Vec<&MessageRow> = Vec::default();
         let mut child_ids: Vec<isize> = Vec::default();
@@ -374,7 +375,10 @@ impl ContentList {
         } else {
             mr_i = (*mr_r).get_by_subscription(subs_id);
         }
-        mr_i.clone().for_each(|m| messagelist.push(m));
+        mr_i.clone().for_each(|m| {
+            // debug!(                "update_messagelist_int {}  ISREAD:{}   ",                m.message_id, m.is_read            );
+            messagelist.push(m);
+        });
         if num_msg != messagelist.len() as isize {
             self.fill_state_map(mr_i.clone());
         }
@@ -403,6 +407,7 @@ impl ContentList {
                 ),
             );
         });
+        // debug!("update_messagelist_int {}    update_list ", subs_id);
         (*self.gui_updater).borrow().update_list(TREEVIEW1);
         self.list_selected_ids.write().unwrap().clear();
     }
@@ -583,7 +588,7 @@ impl IContentList for ContentList {
                     }
                 }
                 CJob::UpdateMessageList => {
-                    self.update_feed_list_contents_int();
+                    self.update_messagelist_int();
                 }
                 CJob::ListSetCursorToMessage(msg_id) => {
                     self.set_cursor_to_message(msg_id);
@@ -644,9 +649,10 @@ impl IContentList for ContentList {
         });
         if !is_unread_ids.is_empty() {
             (*self.messagesrepo_r)
-                .borrow_mut()
+                .borrow()
                 .update_is_read_many(&is_unread_ids, true);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
+            (*self.messagesrepo_r).borrow_mut().cache_clear();
         }
         self.addjob(CJob::UpdateMessageListSome(list_pos_dbid));
         if let Some(feedsources) = self.feedsources_w.upgrade() {
@@ -662,19 +668,19 @@ impl IContentList for ContentList {
         }
     }
 
-    fn set_read_complete_subscription(&mut self, src_repo_id: isize) {
-        (*self.messagesrepo_r)
-            .borrow_mut()
-            .update_is_read_all(src_repo_id, true);
+    fn set_read_complete_subscription(&mut self, subs_id: isize) {
+        let mut mr_r = (*self.messagesrepo_r).borrow_mut();
+        mr_r.update_is_read_all(subs_id, true);
+        mr_r.cache_clear();
         let (current_subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
-        if current_subs_id == src_repo_id {
-            self.update_message_list_(src_repo_id);
-            self.addjob(CJob::RequestUnreadAllCount(src_repo_id));
+        if current_subs_id == subs_id {
+            self.update_message_list_(subs_id);
+            self.addjob(CJob::RequestUnreadAllCount(subs_id));
             (*self.gui_updater).borrow().update_list(TREEVIEW1);
         } else {
             warn!(
                 "set_read_complete_subscription: {} != {}",
-                current_subs_id, src_repo_id
+                current_subs_id, subs_id
             );
         }
     }
@@ -733,7 +739,8 @@ impl IContentList for ContentList {
             .write()
             .unwrap()
             .set_read_many(&[msg_id as i32], !is_read);
-        (*(self.messagesrepo_r.borrow_mut())).update_is_read_many(&[msg_id as i32], !is_read);
+        (*(self.messagesrepo_r.borrow())).update_is_read_many(&[msg_id as i32], !is_read);
+        (*(self.messagesrepo_r.borrow_mut())).cache_clear();
         let vec_pos_db: Vec<(u32, u32)> = vec![(list_position as u32, msg_id as u32)];
         self.update_content_list_some(&vec_pos_db);
         (*self.gui_updater)
@@ -800,7 +807,7 @@ impl IContentList for ContentList {
 
     //  all content entries, unread content entries
     fn get_counts(&self, source_repo_id: isize) -> Option<(i32, i32)> {
-        let all_sum  = (*self.messagesrepo_r).borrow().get_src_sum(source_repo_id);
+        let all_sum = (*self.messagesrepo_r).borrow().get_src_sum(source_repo_id);
         let read_sum = (*self.messagesrepo_r).borrow().get_read_sum(source_repo_id);
         Some((all_sum as i32, (all_sum - read_sum) as i32))
     }

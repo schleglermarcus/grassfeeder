@@ -742,9 +742,7 @@ impl Step<CleanerInner> for Notify {
                 .send(SJob::FillSubscriptionsAdapter);
             let _r = inner.sourcetree_job_sender.send(SJob::GuiUpdateTreeAll);
         }
-        if inner.need_update_messages {
-            info!("CHECK:  need_update_messages  what to do here?");
-        }
+        // if inner.need_update_messages       // Later: notify Gui, update tree
         inner.advance_step();
         inner.send_gp(Some("Stopped".to_string()));
         StepResult::Stop(inner)

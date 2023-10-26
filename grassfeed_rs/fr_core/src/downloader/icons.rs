@@ -62,7 +62,9 @@ impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
-            // trace!(                "IconLoadStart: db-HP:{}   prev-iconurl:{}",                subs_e.website_url, inner.icon_url            );
+            if inner.icon_url.len() > 0 {
+                // trace!(                    "IconLoadStart: db-HP:{}   prev-iconurl:{}",                    subs_e.website_url,                    inner.icon_url                );
+            }
             if !subs_e.website_url.is_empty() {
                 inner.feed_homepage = subs_e.website_url;
                 return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
@@ -144,8 +146,6 @@ impl Step<IconInner> for CompareHomepageToDB {
                     .subscriptionrepo
                     .update_homepage(inner.subs_id, &inner.feed_homepage);
             }
-        } else {
-            //  debug!("no subscription in db for {}", inner.subs_id);
         }
         StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)))
     }
@@ -160,6 +160,11 @@ impl Step<IconInner> for IconAnalyzeHomepage {
             200 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
                 Ok(icon_url) => {
                     inner.icon_url = icon_url;
+                    trace!(
+                        "IconAnalyzeHomepage( {} ) : iconurl {} ",
+                        inner.subs_id,
+                        &inner.icon_url
+                    );
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 }
                 Err(e_descr) => {
@@ -302,6 +307,9 @@ struct IconCheckPresent(IconInner);
 impl Step<IconInner> for IconCheckPresent {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
+
+        // trace!(            "IconCheckPresent( {} ) url {}  len {} ",            inner.subs_id,            inner.icon_url,            inner.icon_bytes.len()        );
+
         if inner.icon_bytes.len() < 10 {
             error!(
                 "downloaded icon_too_small! {:?} {:?}",
@@ -309,7 +317,7 @@ impl Step<IconInner> for IconCheckPresent {
             );
             return StepResult::Stop(inner);
         }
-        if inner.icon_bytes.len() > 10000 {
+        if inner.icon_bytes.len() > 2000 {
             debug!(
                 "IconCheckPresent: {} {} \t big size: {} kB",
                 inner.icon_url,
@@ -322,7 +330,9 @@ impl Step<IconInner> for IconCheckPresent {
             inner.iconrepo.get_by_icon(inner.compressed_icon.clone());
         if !existing_icons.is_empty() {
             let existing_id = existing_icons[0].icon_id;
-            //  trace!(                "icon already there. {}=>{}   ",                inner.fs_icon_id_old,                existing_id            );
+
+             trace!(                "icon already there. {}=>{}  subs: {} ",                inner.fs_icon_id_old,                existing_id,                inner.subs_id            );
+
             if existing_id != inner.fs_icon_id_old {
                 let _r = inner
                     .sourcetree_job_sender

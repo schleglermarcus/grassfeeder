@@ -317,9 +317,7 @@ impl GtkModelUpdaterInt {
     ///  Needs the same index for   ListStore  as for TreeView
     pub fn update_list_model_full(&self, list_index: u8) {
         let now = std::time::Instant::now();
-
         let g_o = (*self.g_o_a).read().unwrap();
-
         let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
         if let Some(row0) = (self.m_v_store)
             .read()
@@ -371,7 +369,8 @@ impl GtkModelUpdaterInt {
             if elapsed > 250 {
                 trace!(
                     "update_list_model took {:?}ms #lines:{} ",
-                    elapsed, num_lines
+                    elapsed,
+                    num_lines
                 );
             }
         }

@@ -97,15 +97,15 @@ impl ISourceTreeController for SourceTreeController {
         }
     }
 
-    fn mark_as_read(&self, src_repo_id: isize) {
+    fn mark_as_read(&self, subs_id: isize) {
         let mut is_folder: bool = false;
-        if let Some(st) = self.statemap.borrow().get_state(src_repo_id) {
+        if let Some(st) = self.statemap.borrow().get_state(subs_id) {
             is_folder = st.is_folder();
         }
         if is_folder {
             let child_fse: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
                 .borrow()
-                .get_by_parent_repo_id(src_repo_id);
+                .get_by_parent_repo_id(subs_id);
             child_fse
                 .iter()
                 .filter(|fse| !fse.is_folder)
@@ -124,7 +124,11 @@ impl ISourceTreeController for SourceTreeController {
         } else if let Some(feedcontents) = self.feedcontents_w.upgrade() {
             (feedcontents)
                 .borrow_mut()
-                .set_read_complete_subscription(src_repo_id);
+                .set_read_complete_subscription(subs_id);
+
+
+
+            debug!("mark_as_read({})", subs_id);
             feedcontents.borrow().addjob(CJob::UpdateMessageList);
         }
     }

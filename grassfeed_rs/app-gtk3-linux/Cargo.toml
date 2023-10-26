@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.0.2620"	# 0.2.5
+version = "0.0.0"	# 0.2.5   for debian package
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"

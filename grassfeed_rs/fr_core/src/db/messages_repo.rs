@@ -28,7 +28,7 @@ pub trait IMessagesRepo {
     /// return count of all lines for that source-id, excluding deleted ones.  if not found, returns -1
     fn get_src_sum(&self, src_id: isize) -> isize;
 
-    /// return count of all lines for that source-id
+    /// return count of all messages
     fn get_all_sum(&self) -> isize;
 
     fn get_by_index(&self, indexvalue: isize) -> Option<MessageRow>;
@@ -36,9 +36,13 @@ pub trait IMessagesRepo {
     /// returns   subscription id  , is_read
     fn get_is_read(&self, repo_id: isize) -> (isize, bool);
 
-    fn get_all_messages(&self) -> Vec<MessageRow>;
+    // #[deprecated]
+    // fn get_all_messages(&self) -> Vec<MessageRow>;
 
+    /// does not clear the cache !
     fn update_is_read_many(&self, repo_ids: &[i32], new_is_read: bool);
+
+    /// does not clear the cache !
     fn update_is_read_all(&self, source_repo_id: isize, new_is_read: bool);
 
     ///  title string shall be compressed. This undeletes the message,  Returns number of lines
@@ -67,10 +71,6 @@ pub trait IMessagesRepo {
 
     fn get_all_deleted(&self) -> Vec<MessageRow>;
 
-    /// Sorted by  entry_src_date.  Takes more memory.
-    // #[deprecated]
-    // fn get_by_subs_id(&self, src_id: isize, include_deleted: bool) -> Vec<MessageRow>;
-
     /// does not include deleted ones,  sorted by  entry_src_date
     fn get_by_subscription(&mut self, subs_id: isize) -> MessageIterator;
 
@@ -80,13 +80,16 @@ pub trait IMessagesRepo {
         subs_ids: &[isize],
         include_deleted: bool,
     ) -> MessageIterator;
-}
 
-//  type MessageCacheType = RwLock<(isize, Vec<MessageRow>)>;
+    fn cache_clear(&mut self);
+
+    fn get_all_messages(&mut self) -> MessageIterator;
+}
 
 pub struct MessagesRepo {
     ctx: SqliteContext<MessageRow>,
     cached_rows: Vec<MessageRow>,
+    // -1: no selection was made        -2  all rows were selected
     cached_subs_id: i64,
 }
 
@@ -218,7 +221,6 @@ impl IMessagesRepo for MessagesRepo {
         self.ctx.one_number(sql)
     }
 
-    /// return count of all lines for that source-id
     fn get_all_sum(&self) -> isize {
         let sql = format!(
             "SELECT COUNT({}) FROM {} ",
@@ -247,10 +249,6 @@ impl IMessagesRepo for MessagesRepo {
         }
     }
 
-    fn get_all_messages(&self) -> Vec<MessageRow> {
-        self.ctx.get_all()
-    }
-
     fn update_is_read_many(&self, repo_ids: &[i32], new_is_read: bool) {
         let joined = repo_ids
             .iter()
@@ -265,6 +263,7 @@ impl IMessagesRepo for MessagesRepo {
             joined
         );
         self.ctx.execute(sql);
+        // self.cache_clear();
     }
 
     fn update_is_read_all(&self, source_repo_id: isize, new_is_read: bool) {
@@ -275,6 +274,7 @@ impl IMessagesRepo for MessagesRepo {
             source_repo_id,
         );
         self.ctx.execute(sql);
+        // self.cache_clear();
     }
 
     fn update_title(&self, repo_id: isize, new_title: String) -> usize {
@@ -451,6 +451,25 @@ impl IMessagesRepo for MessagesRepo {
         }
     }
 
+    fn cache_clear(&mut self) {
+        self.cached_rows.clear();
+        self.cached_subs_id = -1;
+    }
+
+    fn get_all_messages(&mut self) -> MessageIterator {
+        let prepared = format!(
+            "SELECT {} FROM {}  ORDER BY feed_src_id  ",
+            Self::columns_msg_reduced(),
+            MessageRow::table_name(),
+        );
+        self.request_messages_reduced(&prepared);
+        self.cached_subs_id = -2;
+        MessageIterator {
+            cache: &self.cached_rows,
+            index: 0,
+        }
+    }
+
     // impl IMessagesRepo
 }
 
@@ -579,8 +598,8 @@ mod t {
         let r = (*msg_r).borrow().insert_tx(&insert);
         assert!(r.is_ok());
         assert_eq!(r.unwrap() as usize, insert.len());
-        let list = (*msg_r).borrow().get_all_messages();
-        assert_eq!(list.len(), 5);
+        let sum = (*msg_r).borrow().get_all_sum();
+        assert_eq!(sum, 5);
     }
 
     #[test]
@@ -590,8 +609,9 @@ mod t {
         let r = (*msg_r).borrow().insert(&insert);
         assert!(r.is_ok());
         assert_eq!(r.unwrap(), 4);
-        let list = (*msg_r).borrow().get_all_messages();
-        assert_eq!(list.len(), 4);
+        // let list = (*msg_r).borrow().get_all_messages();
+        let sum = (*msg_r).borrow().get_all_sum();
+        assert_eq!(sum, 4);
     }
 
     #[test]
@@ -667,23 +687,39 @@ mod t {
     fn t_update_is_read_all() {
         let msg_r = prepare_3_rows();
         (*msg_r).borrow().update_is_read_all(3, true);
-        let list = (*msg_r).borrow().get_all_messages();
-        assert_eq!(list.get(0).unwrap().is_read, false);
-        assert_eq!(list.get(1).unwrap().is_read, true);
-        assert_eq!(list.get(2).unwrap().is_read, true);
+        let mut msg_rb = (*msg_r).borrow_mut();
+        let allmsg: Vec<&MessageRow> = msg_rb
+            .get_all_messages()
+            // .inspect(|m| println!("ALL:  {:?} ", m))
+            .collect::<Vec<&MessageRow>>();
+        // let mut mr_iter = msg_rb.get_by_subscription(0);
+        assert_eq!(allmsg.get(0).unwrap().is_read, false);
+        // mr_iter = msg_rb.get_by_subscription(1);
+        assert_eq!(allmsg.get(1).unwrap().is_read, true);
+        // assert_eq!(list.get(1).unwrap().is_read, true);
+        // mr_iter = msg_rb.get_by_subscription(2);
+        assert_eq!(allmsg.get(2).unwrap().is_read, true);
+        // assert_eq!(list.get(2).unwrap().is_read, true);
         //    assert_eq!((*msg_r).borrow().get_is_read(3), (3, true));
     }
 
+    // cargo watch -s "cargo test  db::messages_repo::t::t_update_is_read_many    --lib -- --exact --nocapture "
     #[test]
     fn t_update_is_read_many() {
         let msg_r = prepare_3_rows();
         let repo_ids = vec![2, 3];
         (*msg_r).borrow().update_is_read_many(&repo_ids, true);
-        let list = (*msg_r).borrow().get_all_messages();
-        assert_eq!(list.get(0).unwrap().is_read, false);
-        assert_eq!(list.get(1).unwrap().is_read, true);
-        assert_eq!(list.get(2).unwrap().is_read, true);
-        //    assert_eq!((*msg_r).borrow().get_is_read(3), (3, true));
+        let mut msg_rb = (*msg_r).borrow_mut();
+        let allmsg: Vec<&MessageRow> = msg_rb
+            .get_all_messages()
+            .inspect(|m| println!("ALL:  {:?} ", m))
+            .collect::<Vec<&MessageRow>>();
+        assert_eq!(allmsg.get(0).unwrap().is_read, false);
+        // mr_iter = msg_rb.get_by_subscription(1);
+        assert_eq!(allmsg.get(1).unwrap().is_read, true);
+        // assert_eq!(list.get(1).unwrap().is_read, true);
+        // mr_iter = msg_rb.get_by_subscription(2);
+        assert_eq!(allmsg.get(2).unwrap().is_read, true);
     }
 
     #[test]

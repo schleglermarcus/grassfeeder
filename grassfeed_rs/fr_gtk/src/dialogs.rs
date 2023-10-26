@@ -92,6 +92,8 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
     let grid = Grid::new();
     grid.set_vexpand(true);
     grid.set_hexpand(true);
+    grid.set_column_spacing(2);
+    grid.set_row_spacing(2);
     if ICON_DIALOG_INCLUDE_INTERNAL {
         for a in 0..gen_icons::ICON_LIST.len() {
             grid_attach_icon(
@@ -134,7 +136,7 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
                     }
                 }
                 1 => {
-                    if let AValue::ASTR(ref s) = aval {
+                    if let AValue::AIMG(ref s) = aval {
                         ic_str = s.clone();
                     }
                 }
@@ -150,7 +152,7 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
                 grid_attach_icon(
                     &grid,
                     &ic_str,
-                    &format!("d{}  S{} #{}", icon_id, sub_id_str, ic_str.len()),
+                    &format!("d{}  s{} #{}", icon_id, sub_id_str, ic_str.len()),
                     y_base,
                     grid_index as i32,
                 );

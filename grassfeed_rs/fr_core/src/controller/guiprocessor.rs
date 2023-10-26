@@ -437,9 +437,8 @@ impl GuiProcessor {
         let upper: Vec<IconEntry> = all
             .into_iter()
             .filter(|ie| ie.icon_id > ICON_LIST.len() as isize)
-            .filter(|ie| ie.icon.len() > 100)
+            .filter(|ie| ie.icon.len() > 30)
             .collect::<Vec<IconEntry>>();
-
         let mut dd: Vec<AValue> = Vec::new();
         upper.iter().for_each(|ie| {
             let subscriptions: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
@@ -450,9 +449,8 @@ impl GuiProcessor {
                 .map(|s| s.subs_id.to_string())
                 .collect::<Vec<String>>()
                 .join(" ");
-
             dd.push(AValue::AI32(ie.icon_id as i32));
-            dd.push(AValue::ASTR((*ie.icon).to_string()));
+            dd.push(AValue::AIMG ((*ie.icon).to_string()));
             dd.push(AValue::ASTR(subs_ids));
         });
         trace!("storing  {}  icons ", upper.len());
