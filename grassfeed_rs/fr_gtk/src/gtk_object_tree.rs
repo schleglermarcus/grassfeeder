@@ -424,14 +424,11 @@ pub fn create_webview(
             progress,
         ));
     });
-    webview1.connect_ready_to_show(|_wv: &WebView| {
-        debug!("ready_to_show: {}", 0);
-    });
-
+    // webview1.connect_ready_to_show(|_wv: &WebView| {        debug!("ready_to_show: {}", 0);    });
     let webview2: WebView = WebView::with_context(w_context);
     webview2.set_widget_name("webview_1");
     webview2.set_border_width(WEBVIEW_BORDER_WIDTH);
-    debug!("ObjTree: create_webview : {:?} {:?} ", webview1, webview2);
+    // debug!("ObjTree: create_webview : {:?} {:?} ", webview1, webview2);
     (webview1, webview2)
 }
 

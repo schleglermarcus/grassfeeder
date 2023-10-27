@@ -555,48 +555,34 @@ impl SourceTreeController {
     }
 
     // if folder was scheduled, now create a downloader job
-    //  TODO  MORE PARALLEL !!!
     fn process_fetch_scheduled(&self) {
-        let mut fetch_scheduled: Vec<isize>; // Vec<(&isize, &SubsMapEntry)>;
-                                             // let local_statemap = self.statemap.borrow();
-                                             // fetch_scheduled = local_statemap.get_fetch_scheduled();
+        let mut fetch_scheduled: Vec<isize>;
         fetch_scheduled = self.statemap.borrow().get_fetch_scheduled();
         if fetch_scheduled.is_empty() {
             return;
         }
-
         let fetch_all_count = fetch_scheduled.len();
         fetch_scheduled.truncate(FETCH_PROCESS_ONETIME_LIMIT);
-
-        // let source_id = *fetch_scheduled_list.first().unwrap();
-        //        let mut is_deleted: bool = false;
-        //      let mut jobcreated: bool = false;
-        // let su_st = self            .statemap            .borrow()            .get_state(source_id)            .unwrap_or_default();
-
         for subs_id in &fetch_scheduled {
             if let Some(subs_e) = (*self.subscriptionrepo_r).borrow().get_by_index(*subs_id) {
                 if subs_e.isdeleted() {
                     debug!(
-                        "process_fetch_scheduled:  was already deleted  {:?}",
-                        subs_id
+                        "process_fetch_scheduled: {} was already deleted.  {}/{}  ",
+                        subs_id,
+                        fetch_scheduled.len(),
+                        fetch_all_count
                     );
                     self.statemap.borrow_mut().set_deleted(*subs_id, true);
                     return; // shortcut -  try next run again
                 }
             }
         }
-        trace!(
-            "process_fetch:   {}  / {} ",
-            fetch_scheduled.len(),
-            fetch_all_count
-        );
         for subs_id in &fetch_scheduled {
             self.statemap.borrow_mut().set_status(
                 &[*subs_id],
                 StatusMask::FetchScheduledJobCreated,
                 true,
             );
-
             (*self.downloader_r).borrow().add_update_source(*subs_id);
             self.set_any_spinner_visible(true);
             self.tree_store_update_one(*subs_id);
@@ -1034,13 +1020,10 @@ impl StartupWithAppContext for SourceTreeController {
         self.feedcontents_w = Rc::downgrade(&(*ac).get_rc::<ContentList>().unwrap());
         self.gui_context_w = Rc::downgrade(&(*ac).get_rc::<GuiContext>().unwrap());
         self.messagesrepo_w = Rc::downgrade(&(*ac).get_rc::<MessagesRepo>().unwrap());
-
         self.subscriptionmove_w = Rc::downgrade(&(*ac).get_rc::<SubscriptionMove>().unwrap());
-
         let sm_c_r: Rc<RefCell<dyn ISubscriptionMove>> =
             (*ac).get_rc::<SubscriptionMove>().unwrap();
         self.statemap = (*sm_c_r).borrow().get_state_map();
-
         let f_so_r = ac.get_rc::<SourceTreeController>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();
@@ -1141,16 +1124,15 @@ pub enum NewSourceState {
     Completed,
 }
 
-pub fn errorentry_to_line(ee: &ErrorEntry /*, _displayname: &str */) -> String {
-    // let mut disp = displayname.to_string();    disp.truncate(12);
+pub fn errorentry_to_line(ee: &ErrorEntry) -> String {
     let mut e_remot = ee.remote_address.clone();
     e_remot.truncate(110);
     let mut esrc_txt = t!(&format!("EM_DL_{}", ee.e_src));
     esrc_txt.truncate(40);
     let mut e_text = ee.text.clone();
-    e_text.truncate(100);
+    e_text.truncate(200);
     format!(
-        "{:12} {:5} {:30} {:50} {:100}",
+        "{:12} {:5} {:30} {:50} {:200}",
         db_time_to_display(ee.date),
         ee.e_val,
         esrc_txt,

@@ -274,11 +274,7 @@ impl Downloader {
                 let _i = StepResult::start(Box::new(LaunchWebBrowserStart::new(i)));
             }
         }
-
         let elapsedms = now.elapsed().as_millis();
-
-        thread::sleep(Duration::from_millis(1000)); // TODO: remove
-
         let _r = gp_sender.send(Job::DownloaderJobFinished(
             subs_id,
             proc_num,

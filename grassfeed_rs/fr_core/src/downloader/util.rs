@@ -22,7 +22,7 @@ pub fn retrieve_homepage_from_feed_text(
 
     if feed.title.is_none() && feed.description.is_none() {
         let ftext_str = String::from_utf8_lossy(input);
-        let declaration_replaced = workaround_https_declaration(&ftext_str.to_string());
+        let declaration_replaced = workaround_https_declaration(&ftext_str);
         if let Ok(f) = parser::parse(declaration_replaced.as_bytes()) {
             feed = f;
         }

@@ -125,8 +125,6 @@ impl ISourceTreeController for SourceTreeController {
             (feedcontents)
                 .borrow_mut()
                 .set_read_complete_subscription(subs_id);
-
-            debug!("mark_as_read({})", subs_id);	// TODO 
             feedcontents.borrow().addjob(CJob::UpdateMessageList);
         }
     }
@@ -140,10 +138,7 @@ impl ISourceTreeController for SourceTreeController {
 
     fn addjob(&self, nj: SJob) {
         if self.job_queue_sender.is_full() {
-            warn!(
-                "FeedSource SJob queue full, size {}.  Skipping  {:?}",
-                JOBQUEUE_SIZE, nj
-            );
+            warn!("SJob queue full: {}  Skipping {:?}", JOBQUEUE_SIZE, nj);
         } else {
             self.job_queue_sender.send(nj).unwrap();
         }
@@ -190,13 +185,12 @@ impl ISourceTreeController for SourceTreeController {
             .clear_num_all_unread(source_repo_id);
         if let Some((fse, _list)) = &self.get_current_selected_subscription() {
             if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+                let fc = (*feedcontents).borrow();
                 if fse.subs_id == source_repo_id {
-                    // (*feedcontents).borrow(). update_messagelist_only();
-                    let fc = (*feedcontents).borrow();
                     fc.addjob(CJob::UpdateMessageList);
                     fc.addjob(CJob::ListSetCursorToPolicy);
                 } else {
-                    (*feedcontents).borrow().update_message_list_(fse.subs_id);
+                    fc.update_message_list_(fse.subs_id);
                 }
             }
         }
@@ -222,8 +216,6 @@ impl ISourceTreeController for SourceTreeController {
             (num_all, num_unread) = (*feedcontents).borrow().get_counts(subs_id).unwrap();
         }
         let mut dd: Vec<AValue> = Vec::default();
-        // let icon_id: i32 = fse.icon_id as i32;
-
         let mut iconval = AValue::None;
         if let Some(ie) = (*self.iconrepo_r)
             .borrow()

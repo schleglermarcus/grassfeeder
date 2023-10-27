@@ -62,9 +62,7 @@ impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
-            if inner.icon_url.len() > 0 {
-                // trace!(                    "IconLoadStart: db-HP:{}   prev-iconurl:{}",                    subs_e.website_url,                    inner.icon_url                );
-            }
+            // if !inner.icon_url.is_empty() {                 trace!(                    "IconLoadStart: db-HP:{}   prev-iconurl:{}",                    subs_e.website_url,                    inner.icon_url                );            }
             if !subs_e.website_url.is_empty() {
                 inner.feed_homepage = subs_e.website_url;
                 return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));

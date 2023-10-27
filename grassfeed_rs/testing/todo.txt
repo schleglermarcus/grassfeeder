@@ -1,6 +1,7 @@
 
 - Aggregate View:  use favorite colum for subscription icon
 
+
 - put icons into db, add storing the icon-url with it.
 
 

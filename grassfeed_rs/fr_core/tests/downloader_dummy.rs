@@ -35,7 +35,7 @@ impl IDownloader for DownloaderDummy {
     fn cleanup_db(&self) {
         unimplemented!()
     }
-    fn get_queue_size(&self) -> usize {
+    fn get_queue_size(&self) -> (u16, u16) {
         unimplemented!()
     }
 
