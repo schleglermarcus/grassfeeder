@@ -189,11 +189,9 @@ impl ISubscriptionState for SubscriptionState {
         self.statemap
             .iter()
             .for_each(|(k, v)| debug!("SSD {} {:?}", k, v));
-        // debug!("subscription_state::dump() {:#?}", self.statemap);
     }
 
     fn get_fetch_scheduled(&self) -> Vec<isize> {
-        //  Vec<(&isize, &SubsMapEntry)> {
         self.statemap
             .iter()
             .filter(|(_id, entry)| !entry.is_folder())

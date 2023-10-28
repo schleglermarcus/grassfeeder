@@ -1,4 +1,4 @@
-grassfeeder-gtk3 (0.0.2639) buster; urgency=low
+grassfeeder-gtk3 (0.0.2642) buster; urgency=low
 
   * Messages loading more efficient: references+partial+caching
   * Running database-clean deactivates the start button

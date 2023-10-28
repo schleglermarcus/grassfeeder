@@ -450,7 +450,7 @@ impl GuiProcessor {
                 .collect::<Vec<String>>()
                 .join(" ");
             dd.push(AValue::AI32(ie.icon_id as i32));
-            dd.push(AValue::AIMG ((*ie.icon).to_string()));
+            dd.push(AValue::AIMG((*ie.icon).to_string()));
             dd.push(AValue::ASTR(subs_ids));
         });
         trace!("storing  {}  icons ", upper.len());
@@ -1398,8 +1398,6 @@ impl HandleSingleEvent for HandleButtonActivated {
         if let GuiEvents::ButtonClicked(msg) = ev {
             if msg == "D_SETTINGS_CHECKNOW" {
                 let isrunning = gp.statusbar.borrow().db_check_running;
-
-                debug!("BUTTON:  {}  {}", msg, isrunning);
                 if !isrunning {
                     (*gp.gui_updater)
                         .borrow()

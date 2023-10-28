@@ -124,10 +124,13 @@ impl Step<IconInner> for HomepageDownload {
             }
             return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
         } else {
-            trace!(
-                "got no HP  from feed text!  Feed-URL: {}   {}",
-                &inner.feed_url,
-                errtext
+            // trace!(                "got no HP  from feed text!  Feed-URL: {}   {}",                &inner.feed_url,                errtext            );
+            inner.erro_repo.add_error(
+                inner.subs_id,
+                ESRC::IconNoHomepageFromFeedtext,
+                0,
+                inner.feed_url.clone(),
+                errtext,
             );
         }
         StepResult::Continue(Box::new(IconFallbackSimple(inner)))
@@ -158,11 +161,7 @@ impl Step<IconInner> for IconAnalyzeHomepage {
             200 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
                 Ok(icon_url) => {
                     inner.icon_url = icon_url;
-                    trace!(
-                        "IconAnalyzeHomepage( {} ) : iconurl {} ",
-                        inner.subs_id,
-                        &inner.icon_url
-                    );
+                    // trace!(                        "IconAnalyzeHomepage( {} ) : iconurl {} ",                        inner.subs_id,                        &inner.icon_url                    );
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 }
                 Err(e_descr) => {

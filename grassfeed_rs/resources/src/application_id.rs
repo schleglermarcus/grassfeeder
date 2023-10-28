@@ -18,5 +18,3 @@ pub const CARGO_PKG_REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 pub const CARGO_PKG_LICENSE: &str = env!("CARGO_PKG_LICENSE");
 pub const CARGO_CRATE_NAME: &str = env!("CARGO_CRATE_NAME");
 pub const CARGO_PKG_HOMEPAGE: &str = env!("CARGO_PKG_HOMEPAGE");
-
-

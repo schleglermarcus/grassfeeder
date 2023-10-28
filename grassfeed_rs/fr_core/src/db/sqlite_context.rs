@@ -73,7 +73,7 @@ impl<T: TableInfo> SqliteContext<T> {
             T::table_name(),
             T::create_string()
         );
-        let _num_rows  = self.execute(create_str);
+        let _num_rows = self.execute(create_str);
         for cr_idx in T::create_indices() {
             self.execute(cr_idx);
         }

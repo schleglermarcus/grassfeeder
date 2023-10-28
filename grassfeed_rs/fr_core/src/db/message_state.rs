@@ -48,7 +48,7 @@ impl MessageStateMap {
         title_compressed: String,
         subs_id: isize,
     ) {
-        if self.msgmap.contains_key(& msg_id_) {
+        if self.msgmap.contains_key(&msg_id_) {
             warn!("MessageStateMap::insert   {} already contained!", msg_id_);
         }
 

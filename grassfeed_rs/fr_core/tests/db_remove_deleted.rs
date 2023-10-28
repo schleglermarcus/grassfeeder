@@ -149,8 +149,6 @@ fn clean_icon_doublettes() {
     }
 }
 
-
-
 #[test]
 fn clean_errorlist_too_old() {
     setup();

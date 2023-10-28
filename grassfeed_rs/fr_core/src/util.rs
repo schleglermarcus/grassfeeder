@@ -95,7 +95,6 @@ pub enum IconKind {
     UnknownType, // all analyses done
 }
 
-
 pub fn downscale_image(
     img_bytes: &[u8],
     img_type: &IconKind,

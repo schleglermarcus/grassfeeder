@@ -59,4 +59,4 @@ pub const SEARCH_ENTRY_0: u8 = 0;
 
 pub const TOOLBUTTON_RELOAD_ALL: u8 = 0;
 
-pub const BUTTON_SETTINGS_CLEAN_START : u8 = 1;
+pub const BUTTON_SETTINGS_CLEAN_START: u8 = 1;

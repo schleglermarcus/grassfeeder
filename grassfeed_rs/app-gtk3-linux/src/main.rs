@@ -37,13 +37,11 @@ fn main() {
         trace!("Database Check {} {} {} ", &version_str, &conf, &cache);
         check_consistency::databases_check_manual(&conf, &cache);
         return; // no gui
-    }
+    } // conf:'{}'  cache:'{}'
     info!(
-        "Starting {}-{} conf:'{}'  cache:'{}'  locale={:?}  ",
+        "Starting {}-{}   locale={:?}  ",
         APP_NAME,
-        version_str,
-        &conf,
-        &cache,
+        version_str, // &conf,        &cache,
         rust_i18n::locale(),
     );
     let gfconf = init_system::GrassFeederConfig {

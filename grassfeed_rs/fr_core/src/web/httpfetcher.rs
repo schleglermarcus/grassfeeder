@@ -127,7 +127,7 @@ mod httpfetcher_t {
     }
 
     #[test]
-//     #[allow(dead_code)]
+    //     #[allow(dead_code)]
     fn test_remote_403() {
         let r = prep_fetcher().request_url("https://static.foxnews.com/unknown.png".to_string());
         assert_eq!(r.get_status(), 403);

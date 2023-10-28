@@ -120,7 +120,8 @@ EM_DL_14: "HttpDownload Err"
 EM_DL_15: "Icon download too slow"
 EM_DL_16: "Icon feed text DL"
 EM_DL_17: "feed download"
-EM_DL_17: "Icon download"
+EM_DL_18: "Icon download"
+EM_DL_19: "Ho hmepage from feed text"
 
 
 M_SHORTHELP_TEXT: "Grassfeeder RSS Reader Keyboard assignments\n

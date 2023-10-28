@@ -3,7 +3,7 @@ pub const DOWNLOADER_MAX_NUM_THREADS: usize = 10;
 pub const ICON_SIZE_LIMIT_BYTES: usize = 10000;
 
 /// Searching for unread-state not present:  on each scan attempt, how many unread-jobs do we create.
-pub const SCAN_EMPTY_UNREAD_GROUP: u8 = 10;
+pub const SCAN_EMPTY_UNREAD_GROUP: u8 = 5;
 
 /// On each scheduled check, how many download jobs do we create
 pub const FETCH_PROCESS_ONETIME_LIMIT: usize = 2;

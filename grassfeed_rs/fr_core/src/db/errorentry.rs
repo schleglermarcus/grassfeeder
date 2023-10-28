@@ -25,10 +25,11 @@ pub enum ESRC {
     IconFeedTextDur = 16,
     HttpFeedDownload = 17,
     HttpIconDownload = 18,
+    IconNoHomepageFromFeedtext = 19,
 }
 
 impl ESRC {
-    pub const VALUES: [Self; 18] = [
+    pub const VALUES: [Self; 19] = [
         Self::None,
         Self::GpDlFinished,
         Self::SubsmoveTruncated,
@@ -47,6 +48,7 @@ impl ESRC {
         Self::IconFeedTextDur,
         Self::HttpFeedDownload,
         Self::HttpIconDownload,
+        Self::IconNoHomepageFromFeedtext,
     ];
 }
 
@@ -87,7 +89,7 @@ impl TableInfo for ErrorEntry {
     // INTEGER REAL  TEXT  BLOB		BOOLEAN
     fn create_string() -> String {
         String::from(
-            "err_id  INTEGER  PRIMARY KEY, subs_id  INTEGER, e_src  INTEGER,  e_val  INTEGER , 
+            "err_id  INTEGER  PRIMARY KEY, subs_id  INTEGER, e_src  INTEGER,  e_val  INTEGER ,
               date  INTEGER,   remote_address TEXT, err_text TEXT ",
         )
     }

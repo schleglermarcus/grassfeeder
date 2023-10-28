@@ -211,7 +211,6 @@ fn stop_on_nonexistent() {
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let subscr_r = SubscriptionRepo::new_inmem();
     let erro_rep = ErrorRepo::new_in_mem();
-                // erro_rep.startup_read();
     let dl_inner = IconInner {
         subs_id: 5,
         feed_url: "http://localhorst/none.xml".to_string(),

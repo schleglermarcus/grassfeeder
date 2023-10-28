@@ -51,7 +51,7 @@ pub trait ISubscriptionRepo {
         entry: &SubscriptionEntry,
     ) -> Result<SubscriptionEntry, Box<dyn std::error::Error>>;
 
-    ///   store IconID into subscription enty
+    ///   store IconID into subscription entry
     fn update_icon_id_time(&self, src_id: isize, icon_id: usize, timestamp_s: i64);
     fn update_icon_id(&self, src_id: isize, icon_id: usize);
     fn update_icon_id_many(&self, src_ids: Vec<i32>, icon_id: usize);

@@ -536,7 +536,6 @@ impl MessageIterator<'_> {
     pub fn get_row(&self, index: usize) -> Option<&MessageRow> {
         let o_mr = (*self.cache).get(index);
         o_mr?;
-        // if o_mr        .is_none() {            return None;        }
         Some(o_mr.unwrap())
     }
     pub fn reset(&mut self) {
