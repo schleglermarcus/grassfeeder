@@ -300,7 +300,7 @@ pub fn create_listview(
     content_tree_view.connect_drag_data_received(
         move |_tv, _dragcontext, _x, _y, selectiondata, _info, _timestamp| {
             if let Some(gstri) = selectiondata.text() {
-                debug!("DDR: SEL.text {:?} ", gstri.to_string());
+                // trace!("DDR: SEL.text {:?} ", gstri.to_string());
                 esw.sendw(GuiEvents::DragDropUrlReceived(gstri.to_string()));
             }
         },

@@ -177,7 +177,7 @@ impl Step<ComprehensiveInner> for ComprStoreIcon {
             };
             match inner.iconrepo.store_entry(&ie) {
                 Ok(entry) => {
-                    info!("compr: stored icon {} {} ", entry.icon_id, inner.icon_url);
+                    trace!("compr: stored icon {} {} ", entry.icon_id, inner.icon_url);
                     inner.icon_id = entry.icon_id;
                 }
                 Err(e) => {
@@ -195,7 +195,6 @@ pub struct ComprFinal(ComprehensiveInner);
 impl Step<ComprehensiveInner> for ComprFinal {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let inner: ComprehensiveInner = self.0;
-        // trace!(            "DL: sending job  NewFeedSourceEdit  icon_id={}",            inner.icon_id        );
         let _r = inner.sourcetree_job_sender.send(SJob::NewFeedSourceEdit(
             inner.feed_url_edit.clone(),
             inner.feed_title.clone(),

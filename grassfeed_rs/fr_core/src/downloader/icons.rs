@@ -119,7 +119,6 @@ impl Step<IconInner> for HomepageDownload {
                 inner.feed_homepage = homepage;
             } else {
                 let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
-                // debug!("found_HP==feed-url :-/ ALT-HP={}", alt_hp);
                 inner.feed_homepage = alt_hp;
             }
             return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
@@ -304,9 +303,6 @@ struct IconCheckPresent(IconInner);
 impl Step<IconInner> for IconCheckPresent {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-
-        // trace!(            "IconCheckPresent( {} ) url {}  len {} ",            inner.subs_id,            inner.icon_url,            inner.icon_bytes.len()        );
-
         if inner.icon_bytes.len() < 10 {
             error!(
                 "downloaded icon_too_small! {:?} {:?}",

@@ -491,6 +491,18 @@ impl GuiProcessor {
                     .borrow_mut()
                     .move_list_cursor(ListMoveCommand::LaterUnreadMessage);
             }
+            KeyCodes::Key_e => {
+                (*self.feedsources_r)
+                    .borrow()
+                    .move_to_other_subscription(true);
+                // debug!("TODO: select upper subscription");
+            }
+            KeyCodes::Key_c => {
+                (*self.feedsources_r)
+                    .borrow()
+                    .move_to_other_subscription(false);
+                // debug!("TODO: select lower subscription");
+            }
             KeyCodes::Delete => {
                 if *self.focus_by_tab.borrow() == FocusByTab::FocusMessages {
                     (*self.contentlist_r).borrow().keyboard_delete();

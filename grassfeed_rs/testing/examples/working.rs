@@ -141,7 +141,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         subs_move.add_new_subscription_at_parent(
             url_gui_proc.clone(),
             "gui_proc_2 & big-icon".to_string(),
-            folder1,
+            folder2,
             false,
         );
         let f5 = subs_move.add_new_folder_at_parent("folder5".to_string(), 0);

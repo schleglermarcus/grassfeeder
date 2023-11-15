@@ -27,11 +27,17 @@ pub fn from_gdk_sys(code: isize) -> KeyCodes {
         gdk_sys::GDK_KEY_a => KeyCodes::Key_a,
         gdk_sys::GDK_KEY_B => KeyCodes::Key_B,
         gdk_sys::GDK_KEY_b => KeyCodes::Key_b,
+        gdk_sys::GDK_KEY_c => KeyCodes::Key_c,
+        gdk_sys::GDK_KEY_d => KeyCodes::Key_d,
+        gdk_sys::GDK_KEY_e => KeyCodes::Key_e,
         gdk_sys::GDK_KEY_N => KeyCodes::Key_N,
         gdk_sys::GDK_KEY_n => KeyCodes::Key_n,
+        gdk_sys::GDK_KEY_q => KeyCodes::Key_q,
         gdk_sys::GDK_KEY_s => KeyCodes::Key_s,
         gdk_sys::GDK_KEY_v => KeyCodes::Key_v,
+        gdk_sys::GDK_KEY_w => KeyCodes::Key_w,
         gdk_sys::GDK_KEY_x => KeyCodes::Key_x,
+        gdk_sys::GDK_KEY_y => KeyCodes::Key_y,
         _ => KeyCodes::Nothing,
     }
 }

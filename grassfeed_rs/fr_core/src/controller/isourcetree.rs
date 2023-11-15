@@ -21,6 +21,7 @@ use resources::id::DIALOG_FOLDER_EDIT;
 use resources::id::DIALOG_FS_DELETE;
 use resources::id::DIALOG_SUBS_EDIT;
 use resources::id::TOOLBUTTON_RELOAD_ALL;
+use resources::id::TREEVIEW0;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -54,6 +55,8 @@ pub trait ISourceTreeController {
     /// returns  Subscription,  Non-Folder-Child-IDs
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
     fn set_selected_message_id(&self, subs_id: isize, msg_id: isize);
+
+    fn move_to_other_subscription(&self, move_up: bool);
 }
 
 impl ISourceTreeController for SourceTreeController {
@@ -461,5 +464,67 @@ impl ISourceTreeController for SourceTreeController {
 
     fn memory_conserve(&mut self, act: bool) {
         self.currently_minimized = act;
+    }
+
+    fn move_to_other_subscription(&self, move_up: bool) {
+        let mut subs_id: isize = -1;
+        if let Some((subs_e, _nonfolder_child_ids)) =
+            self.current_selected_subscription.borrow().as_ref()
+        {
+            subs_id = subs_e.subs_id;
+        }
+        if subs_id < 0 {
+            return;
+        }
+        let mut path: Vec<u16> = Vec::default();
+        if let Some(s_path) = self.statemap.borrow().get_tree_path(subs_id) {
+            path = s_path;
+        }
+        if path.is_empty() {
+            return;
+        }
+        let mut newpath = path.clone();
+        let nplen = path.len();
+        let mut last_path_num = newpath[nplen - 1];
+        if move_up {
+            if last_path_num > 0 {
+                last_path_num -= 1;
+            } else {
+                debug!(
+                    "move_to_other_subscription:  {:?}   up:{} path:{:?}  CANNOT go up",
+                    subs_id, move_up, path
+                );
+            }
+        } else {
+            last_path_num += 1;
+        }
+        newpath[nplen - 1] = last_path_num;
+        // trace!(            " MOVE:  {:?}   up:{} path:{:?}   => {:?} ",            subs_id, move_up, path, newpath        );
+        let o_new_id = self.statemap.borrow().get_id_by_path(&newpath);
+        if o_new_id == None {
+            debug!(
+                "move_to_other_subscription:  {:?}   up:{} path:{:?} LOW path   {:?} not found ",
+                subs_id, move_up, path, newpath
+            );
+            return;
+        }
+        let new_id = o_new_id.unwrap();
+        debug!(
+            " MOVE:  {:?}    path:{:?} up:{}  => {:?} {} ",
+            subs_id, path, move_up, newpath, new_id
+        );
+        (*self.gui_updater)
+            .borrow()
+            .tree_set_cursor(TREEVIEW0, newpath);
+        /*
+               if false {
+                   self.set_ctx_subscription(new_id as isize);
+                   if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+                       (*feedcontents)
+                           .borrow()
+                           .update_message_list_(new_id as isize);
+                   }
+               }
+        */
     }
 }

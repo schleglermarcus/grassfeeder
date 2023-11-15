@@ -6,4 +6,7 @@ Wed, 18 Oct 2023 23:00:00 +0000
 * Bugfix Subscription edit dialog: restored icon display
 
 
+!!   tree-blocked  abschalten bei neu-befüllung des Baums
+
+
 - keyboard command for selecting next or previous subscription

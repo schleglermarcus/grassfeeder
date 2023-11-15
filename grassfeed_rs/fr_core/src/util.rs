@@ -225,6 +225,7 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&gt;", ">");
     ret = ret.replace("&amp;", " & ");
     ret = ret.replace("&#038;", " & ");
+    ret = ret.replace("&#132;", "™");
     ret = ret.replace("&#128;", "€");
     ret = ret.replace("&#147;", "›");
     ret = ret.replace("&#148;", "-");
@@ -235,6 +236,7 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#157;", " Š ");
     ret = ret.replace("&#163;", "£");
     ret = ret.replace("&#160;", " ");
+    ret = ret.replace("&#162;", " ");
     ret = ret.replace("&#164;", " ");
     ret = ret.replace("&#166;", " ... ");
     ret = ret.replace("&#169;", "é");
