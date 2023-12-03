@@ -310,7 +310,7 @@ impl Step<IconInner> for IconCheckPresent {
             );
             return StepResult::Stop(inner);
         }
-        if inner.icon_bytes.len() > 2000 {
+        if inner.icon_bytes.len() > 5000 {
             debug!(
                 "IconCheckPresent: {} {} \t big size: {} kB",
                 inner.icon_url,

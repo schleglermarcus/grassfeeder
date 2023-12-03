@@ -15,7 +15,13 @@ pub trait ISubscriptionState {
     ) -> Vec<isize>;
 
     fn get_tree_path(&self, db_id: isize) -> Option<Vec<u16>>;
-    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>, is_folder: bool);
+    fn set_tree_path(
+        &mut self,
+        db_id: isize,
+        newpath: Vec<u16>,
+        is_folder: bool,
+        subs_relative_idx: isize,
+    );
 
     fn set_status(&mut self, idlist: &[isize], statusflag: StatusMask, activated: bool);
 
@@ -40,7 +46,9 @@ pub trait ISubscriptionState {
 
     fn dump(&self);
 
-    fn get_fetch_scheduled(&self) -> Vec<isize>; // Vec<(&isize, &SubsMapEntry)>;
+    fn get_fetch_scheduled(&self) -> Vec<isize>;
+
+    fn get_path_for_rel(&self, rel_id: isize) -> Option<Vec<u16>>;
 }
 
 #[derive(Default)]
@@ -55,7 +63,13 @@ impl ISubscriptionState for SubscriptionState {
         }
     }
 
-    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>, is_folder: bool) {
+    fn set_tree_path(
+        &mut self,
+        db_id: isize,
+        newpath: Vec<u16>,
+        is_folder: bool,
+        relative_idx: isize,
+    ) {
         if let std::collections::hash_map::Entry::Vacant(e) = self.statemap.entry(db_id) {
             let mut sme = SubsMapEntry {
                 tree_path: Some(newpath),
@@ -65,6 +79,7 @@ impl ISubscriptionState for SubscriptionState {
             e.insert(sme);
         } else if let Some(st) = self.statemap.get_mut(&db_id) {
             st.set_path(newpath);
+            st.set_relative_idx(relative_idx);
         }
     }
 
@@ -201,6 +216,19 @@ impl ISubscriptionState for SubscriptionState {
             .map(|(id, _entry)| *id)
             .collect::<Vec<isize>>()
     }
+
+    fn get_path_for_rel(&self, rel_id: isize) -> Option<Vec<u16>> {
+        let o_p = self
+            .statemap
+            .iter()
+            .filter(|(_id, st)| st.get_relative_idx() == rel_id)
+            .map(|(_id, st)| st.get_path())
+            .next();
+        if o_p.is_none() {
+            return None;
+        }
+        o_p.unwrap()
+    }
 }
 
 #[allow(dead_code)]
@@ -223,6 +251,8 @@ pub struct SubsMapEntry {
     pub tree_path: Option<Vec<u16>>,
     pub status: usize,
     pub num_msg_all_unread: Option<(isize, isize)>,
+    ///  sequence of subscriptions, to navigate up/down
+    pub relative_idx: isize,
 }
 
 pub trait FeedSourceState {
@@ -255,9 +285,12 @@ pub trait FeedSourceState {
 
     fn is_messagecounts_checked(&self) -> bool;
     fn set_messagecounts_checked(&mut self, n: bool);
+
+    fn set_relative_idx(&mut self, i: isize);
+    fn get_relative_idx(&self) -> isize;
 }
 
-#[allow(dead_code)]
+// #[allow(dead_code)]
 impl FeedSourceState for SubsMapEntry {
     fn is_err_on_fetch(&self) -> bool {
         self.check_bitmask(StatusMask::ErrFetchReq as usize)
@@ -320,6 +353,7 @@ impl FeedSourceState for SubsMapEntry {
     fn set_path(&mut self, newpath: Vec<u16>) {
         self.tree_path = Some(newpath);
     }
+
     fn get_path(&self) -> Option<Vec<u16>> {
         self.tree_path.clone()
     }
@@ -339,11 +373,24 @@ impl FeedSourceState for SubsMapEntry {
     fn set_messagecounts_checked(&mut self, n: bool) {
         self.change_bitmask(StatusMask::MessageCountsChecked as usize, n)
     }
+
+    fn set_relative_idx(&mut self, i: isize) {
+        self.relative_idx = i;
+    }
+    fn get_relative_idx(&self) -> isize {
+        self.relative_idx
+    }
 }
 
 #[cfg(test)]
 pub mod t {
     use super::*;
+
+    //cargo watch -s "cargo test db::subscription_state::t::t_move_to_other_subscription  --lib -- --exact --nocapture"
+    #[test]
+    fn t_move_to_other_subscription() {
+        println!("HELLO!!  ");
+    }
 
     //cargo watch -s "cargo test db::subscription_state::t::t_scan_num_all_unread  --lib -- --exact --nocapture"
     #[test]

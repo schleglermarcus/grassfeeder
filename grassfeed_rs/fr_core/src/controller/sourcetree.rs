@@ -1083,7 +1083,7 @@ impl Default for Config {
         Config {
             feeds_fetch_at_start: false,
             feeds_fetch_interval: 1,
-            ///  1:Minute    2:Hour    3:Day
+            //  1:Minute    2:Hour    3:Day
             feeds_fetch_interval_unit: 32,
             display_feedcount_all: false,
             mode_debug: false,

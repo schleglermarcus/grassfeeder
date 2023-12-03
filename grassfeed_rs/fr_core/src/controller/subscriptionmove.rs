@@ -277,13 +277,23 @@ impl SubscriptionMove {
         let entries: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_subs_id as isize);
+        let mut relative_subs_index = 0; // enumerate the subscriptions, to enable accessing previous/next one
         entries.iter().enumerate().for_each(|(num, entry)| {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(localpath);
             path.push(num as u16);
             self.update_paths_rec(&path, entry.subs_id as i32, is_deleted);
             let mut smm = self.statemap.borrow_mut();
-            smm.set_tree_path(entry.subs_id, path, entry.is_folder);
+            if !entry.is_folder {
+                relative_subs_index += 1;
+            }
+            trace(
+                "update_paths_rec  num {}  rel {}   path {:?}",
+                num,
+                relative_subs_index,
+                path,
+            );
+            smm.set_tree_path(entry.subs_id, path, entry.is_folder, relative_subs_index);
             smm.set_deleted(entry.subs_id, is_deleted);
         });
         false

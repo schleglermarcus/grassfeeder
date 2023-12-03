@@ -132,4 +132,6 @@ M_SHORTHELP_TEXT: "Grassfeeder RSS Anzeiger Tastenbelegung\n
   s           Zur zeitlich vorigen ungelesenen Meldung springen \n
   x           Zur zeitlich nächsten ungelesenen Meldung springen \n
   Leertaste   Mehrere Meldungen im Browser starten \n
+  e           Voriges Abonnement auswählen \n
+  c           Folgendes Abonnement auswählen \n
   "

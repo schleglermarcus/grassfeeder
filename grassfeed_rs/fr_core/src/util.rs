@@ -217,17 +217,18 @@ pub fn filter_by_iso8859_1(input: &str) -> (String, bool) {
 pub fn remove_invalid_chars_from_input(inp: String) -> String {
     let mut ret = inp;
     ret = ret.replace(&['\"', '\n', '\"'][..], "");
+    ret = ret.replace("&gt;", ">");
+    ret = ret.replace("&amp;", " & ");
+    ret = ret.replace("&quot;", "\"");
     ret = ret.replace("&#38;", "&");
     ret = ret.replace("&#038;", "&");
     ret = ret.replace("&#039;", "\"");
     ret = ret.replace("&#x26;", "&");
     ret = ret.replace("&#x27;", "\'");
-    ret = ret.replace("&gt;", ">");
-    ret = ret.replace("&amp;", " & ");
     ret = ret.replace("&#038;", " & ");
     ret = ret.replace("&#132;", "™");
     ret = ret.replace("&#128;", "€");
-    ret = ret.replace("&#147;", "›");
+    ret = ret.replace("&#147;", ">");
     ret = ret.replace("&#148;", "-");
     ret = ret.replace("&#xF6;", "ö");
     ret = ret.replace("&#152;", "\'");
@@ -262,7 +263,7 @@ pub fn remove_invalid_chars_from_input(inp: String) -> String {
     ret = ret.replace("&#8230;", " ... ");
     ret = ret.replace("&#8242;", "\'");
     ret = ret.replace("&#x8211;", " - ");
-    ret = ret.replace("&quot;", "\"");
+    ret = ret.replace("\u{2028}", " ");
     ret.trim().to_string()
 }
 
@@ -305,10 +306,8 @@ mod t {
     use super::*;
     use crate::util::fetch_http_to_bin;
     use crate::util::remove_invalid_chars_from_input;
-    // use std::fs::File;
-    // use std::io::Write;
 
-    //cargo watch -s "cargo    test  util::util_fetch_test::sanitize_input   --lib  -- --exact "
+    //cargo watch -s "cargo    test  util::t::sanitize_input   --lib  -- --exact "
     #[test]
     pub fn sanitize_input() {
         assert_eq!(
@@ -326,6 +325,10 @@ mod t {
         assert_eq!(
             remove_invalid_chars_from_input("Jenkins &#226;&#128;&#147; Brighteon".to_string()),
             "Jenkins \"€› Brighteon".to_string()
+        );
+        assert_eq!(
+            "l”.   U".to_string(),
+            remove_invalid_chars_from_input("l”.   U".to_string())
         );
     }
 
