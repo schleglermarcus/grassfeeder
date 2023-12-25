@@ -20,4 +20,5 @@ git checkout main ;    git pull ;  git status
     
   
 
-
+# for cargo-appimage
+# apt-get install libc6-dev   librust-glib-sys-dev   librust-atk-sys-dev   librust-gdk-sys-dev  libsoup2.4-dev  libjavascriptcoregtk-4.0-dev  libwebkit2gtk-4.0-dev
