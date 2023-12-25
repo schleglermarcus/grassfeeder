@@ -1,9 +1,10 @@
+- deactivate tree-blocked   when filling the tree
 
-- Aggregate View:  use favorite colum for subscription icon
-
+- Use resvg  to convert   svg icons
 
 - put icons into db, add storing the icon-url with it.
 
+- Aggregate View:  use favorite colum for subscription icon
 
 - Test icon extraction with https://www.greyblake.com/blog/property-based-testing-in-rust-with-arbitrary/
 

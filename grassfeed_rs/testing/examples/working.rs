@@ -130,11 +130,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
         ];
+        let f5 = subs_move.add_new_folder_at_parent("folder5".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
             subs_move.add_new_subscription_at_parent(
                 url.to_string(),
                 desc.to_string(),
-                folder1,
+                f5,
                 false,
             );
         });
@@ -144,15 +145,22 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             folder2,
             false,
         );
-        let f5 = subs_move.add_new_folder_at_parent("folder5".to_string(), 0);
         subs_move.add_new_folder_at_parent("5_0".to_string(), f5);
         subs_move.add_new_folder_at_parent("5_1".to_string(), f5);
         subs_move.add_new_subscription_at_parent(
             "https://www.globalresearch.ca/feed".to_string(),
             "GlobalR".to_string(),
-            folder2,
+            f5,
             false,
         );
+        subs_move.add_new_subscription_at_parent(
+            "https://freiheitsfunken.info/feed/rss/".to_string(),
+            "freiheitsf".to_string(),
+            f5,
+            false,
+        );
+
+
     }
     if false {
         let src = [

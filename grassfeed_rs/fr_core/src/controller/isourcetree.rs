@@ -476,74 +476,28 @@ impl ISourceTreeController for SourceTreeController {
         if subs_id < 0 {
             return;
         }
-        let mut oldpath: Vec<u16> = Vec::default();
         let mut relative_idx = -1;
         if let Some(st) = self.statemap.borrow().get_state(subs_id) {
             relative_idx = st.get_relative_idx();
-            if let Some(p) = st.get_path() {
-                oldpath = p;
+        }
+        let mut new_rel_ix = relative_idx;
+        let mut o_path: Option<Vec<u16>> = None;
+        if move_up {
+            while new_rel_ix > 1 && o_path.is_none() {
+                new_rel_ix -= 1;
+                o_path = self.statemap.borrow().get_path_for_rel(new_rel_ix);
+            }
+        } else {
+            while new_rel_ix < relative_idx + 30 && o_path.is_none() {
+                new_rel_ix += 1;
+                o_path = self.statemap.borrow().get_path_for_rel(new_rel_ix);
             }
         }
-        let new_rel_ix = relative_idx + if move_up { -1 } else { 1 };
-
-        if let Some(path) = self.statemap.borrow().get_path_for_rel(new_rel_ix) {
-            debug!(
-                " MOVE:  {:?}     up:{}  rel:{} p:{:?} =>  {}   path:{:?}  ",
-                subs_id, move_up, relative_idx, oldpath, new_rel_ix, path,
-            );
+        if let Some(path) = o_path {
+            // trace!(                " MOVE:  {:?}     up:{}  rel:{} p:{:?} =>  {}   path:{:?}  ",                subs_id,                move_up,                relative_idx,                oldpath,                new_rel_ix,                path,            );
             (*self.gui_updater)
                 .borrow()
                 .tree_set_cursor(TREEVIEW0, path);
         }
-        /*
-               let mut path: Vec<u16> = Vec::default();
-               if path.is_empty() {
-                   return;
-               }
-
-               let mut newpath = path.clone();
-               let nplen = path.len();
-               let mut last_path_num = newpath[nplen - 1];
-               if move_up {
-                   if last_path_num > 0 {
-                       last_path_num -= 1;
-                   } else {
-                       debug!(
-                           "move_to_other_subscription:  {:?}   up:{} path:{:?}  CANNOT go up",
-                           subs_id, move_up, path
-                       );
-                   }
-               } else {
-                   last_path_num += 1;
-               }
-               newpath[nplen - 1] = last_path_num;
-               trace!(
-                   " MOVE:  {:?}   up:{} path:{:?}   => {:?} ",
-                   subs_id,
-                   move_up,
-                   path,
-                   newpath
-               );
-               let o_new_id = self.statemap.borrow().get_id_by_path(&newpath);
-               if o_new_id == None {
-                   debug!(
-                       "move_to_other_subscription:  {:?}   up:{} path:{:?} LOW path   {:?} not found ",
-                       subs_id, move_up, path, newpath
-                   );
-                   return;
-               }
-               let new_id = o_new_id.unwrap();
-
-        */
-        /*
-               if false {
-                   self.set_ctx_subscription(new_id as isize);
-                   if let Some(feedcontents) = self.feedcontents_w.upgrade() {
-                       (*feedcontents)
-                           .borrow()
-                           .update_message_list_(new_id as isize);
-                   }
-               }
-        */
     }
 }

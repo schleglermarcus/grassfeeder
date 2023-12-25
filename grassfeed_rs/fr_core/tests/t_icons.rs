@@ -1,5 +1,6 @@
 use fr_core::downloader::icons::icon_analyser;
 use fr_core::downloader::util::extract_icon_from_homepage;
+use fr_core::util::downscale_image;
 use fr_core::util::IconKind;
 use fr_core::web::mockfilefetcher;
 use fr_core::TD_BASE;
@@ -63,10 +64,12 @@ fn test_extract_icon_relay_rd() {
 }
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::icons::t_::analyze_icon_local  --lib -- --exact --nocapture "
+//  #[ignore]
 #[test]
 fn analyze_icon_local() {
     setup();
     let set: [(&str, IconKind); 9] = [
+        //         ("funken.svg", IconKind::Svg),      // Later : add re-svg for svg conversion to bitmap
         ("favicon.ico", IconKind::Ico),          //
         ("icon_651.ico", IconKind::Png),         //
         ("report24-favicon.ico", IconKind::Jpg), // is jpg
@@ -79,7 +82,7 @@ fn analyze_icon_local() {
     ];
     set.iter().for_each(|(ic_name, e_kind)| {
         let filename = format!("{}icons/{}", TD_BASE, ic_name);
-        // trace!("FILE: {}   ", filename);
+        trace!("FILE: {}   ", filename);
         let o_blob = mockfilefetcher::file_to_bin(&filename);
         if o_blob.is_err() {
             error!("{:?}  {}", &o_blob.as_ref().err(), &filename);
@@ -87,9 +90,30 @@ fn analyze_icon_local() {
         }
         let blob = o_blob.unwrap();
         let r = icon_analyser(&blob);
-        //  trace!(            "analyze_icon_local  {} \t {:?}\t{}   ",            filename, r.kind, r.message,        );
+        trace!(
+            "analyze_icon_local  {} \t {:?}\t{}   ",
+            filename,
+            r.kind,
+            r.message,
+        );
         assert_eq!(r.kind, *e_kind);
     });
+}
+
+#[ignore] // later re-svg
+#[test]
+fn t_downscale_icon() {
+    setup();
+    let filename = format!("{}icons/{}", TD_BASE, "funken.svg");
+    let o_blob = mockfilefetcher::file_to_bin(&filename);
+    if o_blob.is_err() {
+        error!("{:?}  {}", &o_blob.as_ref().err(), &filename);
+        panic!();
+    }
+    let blob = o_blob.unwrap();
+    let r = downscale_image(&blob, &IconKind::Svg, 64);
+    debug!("R={:?} ", r);
+    assert!(r.is_ok());
 }
 
 // ------------------------------------

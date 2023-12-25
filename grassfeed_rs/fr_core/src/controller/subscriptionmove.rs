@@ -270,6 +270,7 @@ impl SubscriptionMove {
         localpath: &[u16],
         parent_subs_id: i32,
         mut is_deleted: bool,
+        relative_subs_index: &mut isize,
     ) -> bool {
         if parent_subs_id < 0 {
             is_deleted = true;
@@ -277,24 +278,23 @@ impl SubscriptionMove {
         let entries: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_parent_repo_id(parent_subs_id as isize);
-        let mut relative_subs_index = 0; // enumerate the subscriptions, to enable accessing previous/next one
         entries.iter().enumerate().for_each(|(num, entry)| {
+            *relative_subs_index += 1;
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(localpath);
             path.push(num as u16);
-            self.update_paths_rec(&path, entry.subs_id as i32, is_deleted);
-            let mut smm = self.statemap.borrow_mut();
-            if !entry.is_folder {
-                relative_subs_index += 1;
+            // trace!(                "update_paths_rec  num {}  rel {}   path {:?}     N:{:?}  ",                num,                relative_subs_index,                path,                entry.display_name            );
+            {
+                let mut smm = self.statemap.borrow_mut();
+                let ri = if entry.is_folder {
+                    -1
+                } else {
+                    *relative_subs_index
+                };
+                smm.set_tree_path(entry.subs_id, path.clone(), entry.is_folder, ri);
+                smm.set_deleted(entry.subs_id, is_deleted);
             }
-            trace(
-                "update_paths_rec  num {}  rel {}   path {:?}",
-                num,
-                relative_subs_index,
-                path,
-            );
-            smm.set_tree_path(entry.subs_id, path, entry.is_folder, relative_subs_index);
-            smm.set_deleted(entry.subs_id, is_deleted);
+            self.update_paths_rec(&path, entry.subs_id as i32, is_deleted, relative_subs_index);
         });
         false
     }
@@ -429,7 +429,8 @@ impl ISubscriptionMove for SubscriptionMove {
     }
 
     fn update_cached_paths(&self) {
-        self.update_paths_rec(&Vec::<u16>::default(), 0, false);
+        let mut rel_idx: isize = 1;
+        self.update_paths_rec(&Vec::<u16>::default(), 0, false, &mut rel_idx);
     }
 
     fn add_new_subscription(&mut self, newsource: String, display: String) -> isize {

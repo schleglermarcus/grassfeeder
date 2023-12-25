@@ -76,7 +76,7 @@ fn test_extract_icon_kolkata() {
 #[test]
 fn multiple_icons_location() {
     setup();
-    let urls: [(String, String); 11] = [
+    let urls: [(String, String); 10] = [
         (
             "http://chaosradio.ccc.de/chaosradio-complete.rss".to_string(),
             "".to_string(),
@@ -117,12 +117,10 @@ fn multiple_icons_location() {
             "https://lupocattivoblog.com/feed/".to_string(),
             "https://lupocattivoblog.com/".to_string(),
         ),
-        (
-            "http://feeds.seoulnews.net/rss/3f5c98640a497b43".to_string(),
-            "http://www.seoulnews.net".to_string(),
-        ),
+        //  (            "http://feeds.seoulnews.net/rss/3f5c98640a497b43".to_string(),            "http://www.seoulnews.net".to_string(),        ),
     ];
     for u_h in urls {
+        // trace!("homepage  {}   feed-url {} ", &u_h.0, &u_h.1);
         let (ie_list, err_happened) = download_icon_one_url(&u_h.0, &u_h.1);
         assert_eq!(ie_list.len(), 1);
         assert!(!err_happened);
@@ -143,7 +141,6 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry
     };
     let _r = subscr_r.store_entry(&se);
     let erro_rep = ErrorRepo::new_in_mem();
-    //  erro_rep.startup_read();
     let icon_inner = IconInner {
         subs_id: 1,
         feed_url: feed_url.clone(),

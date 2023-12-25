@@ -1,12 +1,7 @@
-Wed, 18 Oct 2023 23:00:00 +0000
+Mon, 25 Dec 2023 12:00:00 +0000
 * Messages loading more efficient: references+partial+caching
 * Running database-clean deactivates the start button
 * Icon view with usage tooltip
-* Status bar with queue length
-* Bugfix Subscription edit dialog: restored icon display
-
-
-!!   tree-blocked  deactivate when filling the tree
-
-
-- keyboard command for selecting next or previous subscription
+* Status bar with task queue length
+* Keyboard command for selecting next or previous subscription
+* Bugfix at Subscription edit dialog: restored icon display

@@ -63,23 +63,18 @@ impl ISubscriptionState for SubscriptionState {
         }
     }
 
-    fn set_tree_path(
-        &mut self,
-        db_id: isize,
-        newpath: Vec<u16>,
-        is_folder: bool,
-        relative_idx: isize,
-    ) {
+    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>, is_folder: bool, rel_idx: isize) {
         if let std::collections::hash_map::Entry::Vacant(e) = self.statemap.entry(db_id) {
             let mut sme = SubsMapEntry {
                 tree_path: Some(newpath),
+                relative_idx: rel_idx,
                 ..Default::default()
             };
             sme.set_folder(is_folder);
             e.insert(sme);
         } else if let Some(st) = self.statemap.get_mut(&db_id) {
             st.set_path(newpath);
-            st.set_relative_idx(relative_idx);
+            st.set_relative_idx(rel_idx);
         }
     }
 
@@ -224,16 +219,13 @@ impl ISubscriptionState for SubscriptionState {
             .filter(|(_id, st)| st.get_relative_idx() == rel_id)
             .map(|(_id, st)| st.get_path())
             .next();
-        if o_p.is_none() {
-            return None;
-        }
+        o_p.as_ref()?;
         o_p.unwrap()
     }
 }
 
 #[allow(dead_code)]
 pub enum StatusMask {
-    // Dirty = 1,
     FetchScheduled = 8,
     FetchScheduledJobCreated = 16,
     FetchInProgress = 32,
