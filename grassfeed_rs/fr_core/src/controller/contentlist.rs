@@ -83,7 +83,7 @@ pub trait IContentList {
     fn process_list_row_activated(&self, act_dbid_listpos: &HashMap<i32, i32>);
 
     // check if the old subs_id has changed before
-    fn update_message_list_(&self, subscription_id: isize);
+    fn update_message_list(&self, subscription_id: isize);
 
     ///  Vec < list_position,   feed_content_id >
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]);
@@ -233,7 +233,7 @@ impl ContentList {
         newrow
     }
 
-    fn set_read_many(&self, repoid_listpos: &Vec<(i32, i32)>, is_read: bool) {
+    fn set_read_many(&self, repoid_listpos: &[(i32, i32)], is_read: bool) {
         if repoid_listpos.is_empty() {
             return;
         }
@@ -376,7 +376,7 @@ impl ContentList {
             mr_i = (*mr_r).get_by_subscription(subs_id);
         }
         mr_i.clone().for_each(|m| {
-            // debug!(                "update_messagelist_int {}  ISREAD:{}   ",                m.message_id, m.is_read            );
+            // trace!(                "update_messagelist_int {}  ISREAD:{}   ",                m.message_id,                m.is_read            );
             messagelist.push(m);
         });
         if num_msg != messagelist.len() as isize {
@@ -407,7 +407,7 @@ impl ContentList {
                 ),
             );
         });
-        // debug!("update_messagelist_int {}    update_list ", subs_id);
+        // debug!(            "update_messagelist_int {}     #filtered={}  ",            subs_id,            filtered_msglist.len()        );
         (*self.gui_updater).borrow().update_list(TREEVIEW1);
         self.list_selected_ids.write().unwrap().clear();
     }
@@ -425,28 +425,34 @@ impl ContentList {
 
     fn delete_messages(&self, del_ids: &[i32]) {
         (self.messagesrepo_r)
-            .borrow()
+            .borrow_mut()
             .update_is_deleted_many(del_ids, true);
+
         let o_neighbour = self
             .msg_state
             .read()
             .unwrap()
             .find_neighbour_message(del_ids);
+
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         trace!(
-            "kb_delete: {:?} {:?}  next={:?}",
+            "delete_messages: {:?}  subsid:{:?}  next={:?}",
             del_ids,
             subs_id,
             o_neighbour
         );
-        self.update_message_list_(subs_id);
+
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             feedsources.borrow().clear_read_unread(subs_id);
         }
+
         self.addjob(CJob::RequestUnreadAllCount(subs_id));
         self.addjob(CJob::UpdateMessageList);
+
         if let Some((msg_id, _gui_list_pos)) = o_neighbour {
             self.addjob(CJob::ListSetCursorToMessage(msg_id));
+        } else {
+            self.addjob(CJob::ListSetCursorToPolicy);
         }
     }
 
@@ -674,7 +680,7 @@ impl IContentList for ContentList {
         mr_r.cache_clear();
         let (current_subs_id, _numlines, _isfolder) = *self.current_subscription.borrow();
         if current_subs_id == subs_id {
-            self.update_message_list_(subs_id);
+            self.update_message_list(subs_id);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
             (*self.gui_updater).borrow().update_list(TREEVIEW1);
         } else {
@@ -685,7 +691,7 @@ impl IContentList for ContentList {
         }
     }
 
-    fn update_message_list_(&self, subscription_id: isize) {
+    fn update_message_list(&self, subscription_id: isize) {
         let (old_subs_id, _num_msg, mut isfolder) = *self.current_subscription.borrow();
         if subscription_id != old_subs_id {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
@@ -1107,7 +1113,7 @@ pub fn match_fce(existing: &MessageRow, new_fce: &MessageRow) -> u8 {
 }
 
 pub fn match_new_entries_to_existing(
-    new_list: &Vec<MessageRow>,
+    new_list: &[MessageRow],
     existing_msg_iter: MessageIterator,
     job_sender: Sender<CJob>,
 ) -> Vec<MessageRow> {

@@ -13,6 +13,7 @@ use crate::util::Step;
 use crate::util::StepResult;
 use crate::web::WebFetcherType;
 use flume::Sender;
+use ico::ResourceType;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 use std::time::Instant;
 
@@ -245,12 +246,17 @@ impl Step<IconInner> for IconCheckIsImage {
         let mut inner: IconInner = self.0;
         let an_res = icon_analyser(&inner.icon_bytes);
         inner.image_icon_kind = an_res.kind.clone();
-        if (an_res.width_orig > ICON_CONVERT_TO_WIDTH
-            || an_res.height_orig > ICON_CONVERT_TO_WIDTH
-            || inner.icon_bytes.len() > ICON_SIZE_LIMIT_BYTES
-            || an_res.kind == IconKind::Webp)
-            && an_res.kind != IconKind::UnknownType
-        {
+
+        debug!(
+            "IconCheckIsImage:  K {:?}  {}  {}",
+            an_res.kind, inner.feed_homepage, inner.icon_url
+        );
+
+        if decide_downscale(inner.icon_bytes.len(), &an_res) {
+            debug!(
+                "IconCheckIsImage:  go to downscale  Url:{} ",
+                inner.icon_url
+            );
             return StepResult::Continue(Box::new(IconDownscale(inner)));
         }
         if an_res.kind == IconKind::UnknownType || an_res.kind == IconKind::TooSmall {
@@ -265,6 +271,18 @@ impl Step<IconInner> for IconCheckIsImage {
         }
         StepResult::Continue(Box::new(IconCheckPresent(inner)))
     }
+}
+
+// solution for compressed svg:   downscale them before
+pub fn decide_downscale(length: usize, an_res: &IconAnalyseResult) -> bool {
+    (
+        an_res.width_orig > ICON_CONVERT_TO_WIDTH
+            || an_res.height_orig > ICON_CONVERT_TO_WIDTH
+            || length > ICON_SIZE_LIMIT_BYTES
+            || an_res.kind == IconKind::Webp
+            || an_res.icon_disguised_as_png
+        // || an_res.kind == IconKind::Svg
+    ) && an_res.kind != IconKind::UnknownType
 }
 
 pub struct IconDownscale(pub IconInner);
@@ -384,6 +402,7 @@ pub struct IconAnalyseResult {
     width_orig: u32,
     height_orig: u32,
     pub message: String,
+    icon_disguised_as_png: bool,
 }
 
 impl IconAnalyseResult {
@@ -403,12 +422,13 @@ impl IconAnalyseResult {
     }
 }
 
+// there are icons that are named .ico but that are png.  Try png first
 pub fn icon_analyser(vec_u8: &[u8]) -> IconAnalyseResult {
     let analysers: [Box<dyn InvestigateOne>; 8] = [
         Box::new(BySize {}),
         Box::new(InvJpg {}),
-        Box::new(InvIco {}),
         Box::new(InvPng {}),
+        Box::new(InvIco {}),
         Box::new(InvGif {}),
         Box::new(InvWebp {}),
         Box::new(InvBmp {}),
@@ -448,13 +468,26 @@ impl InvestigateOne for InvIco {
         match ico::IconDir::read(std::io::Cursor::new(vec_u8)) {
             Ok(decoder) => {
                 r.kind = IconKind::Ico;
+                if decoder.resource_type() != ResourceType::Icon {
+                    debug!("InvIco:  not handled  {:?} ", decoder.resource_type());
+                }
                 if let Some(entry) = decoder.entries().first() {
+                    debug!(
+                        "InvIco: E0:  isPng:{}  BpP:{} ",
+                        entry.is_png(),
+                        entry.bits_per_pixel()
+                    );
                     r.width_orig = entry.width();
                     r.height_orig = entry.height();
+                    if entry.is_png() {
+                        // r.kind = IconKind::Png;
+                        r.icon_disguised_as_png = true;
+                    }
                 }
             }
             Err(e) => {
                 r.message = format!("not_ico: {e}");
+                debug!("InvIco:  not_ico {} ", r.message);
             }
         }
         r
@@ -478,6 +511,7 @@ impl InvestigateOne for InvPng {
             }
             Err(e) => {
                 r.message = format!("not_png: {e}");
+                debug!("InvPng:    Not-png  {} ", r.message);
             }
         }
         r
@@ -548,9 +582,23 @@ struct InvSvg {}
 impl InvestigateOne for InvSvg {
     #[cfg(not(feature = "legacy3gtk14"))]
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
+        use std::any::Any;
+
         let mut r = IconAnalyseResult::default();
-        match usvg::Tree::from_data(vec_u8, &usvg::Options::default().to_ref()) {
-            Ok(_rtree) => {
+
+        let fontdb: fontdb::Database = fontdb::Database::new();
+
+        // TODO look how that works
+        match usvg::Tree::from_data(vec_u8, &usvg::Options::default(), &fontdb) {
+            Ok(rtree) => {
+                // TODO investigate   svg  type and info
+                debug!(
+                    "INVSVG:   W:{} H:{}  type:{:?} ",
+                    rtree.size().width(),
+                    rtree.size().height(),
+                    rtree.type_id()
+                );
+
                 r.kind = IconKind::Svg;
             }
             Err(e) => {

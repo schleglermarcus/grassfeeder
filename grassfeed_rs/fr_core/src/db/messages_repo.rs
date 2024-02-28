@@ -54,7 +54,7 @@ pub trait IMessagesRepo {
     /// undeletes the message
     fn update_entry_src_date(&self, repo_id: isize, n_src_date: i64) -> usize;
 
-    fn update_is_deleted_many(&self, repo_ids: &[i32], new_is_del: bool);
+    fn update_is_deleted_many(&mut self, repo_ids: &[i32], new_is_del: bool);
     fn update_markers(&self, msg_id: isize, n_markers: u64) -> usize;
 
     fn get_ctx(&self) -> &SqliteContext<MessageRow>;
@@ -263,7 +263,6 @@ impl IMessagesRepo for MessagesRepo {
             joined
         );
         self.ctx.execute(sql);
-        // self.cache_clear();
     }
 
     fn update_is_read_all(&self, source_repo_id: isize, new_is_read: bool) {
@@ -274,7 +273,6 @@ impl IMessagesRepo for MessagesRepo {
             source_repo_id,
         );
         self.ctx.execute(sql);
-        // self.cache_clear();
     }
 
     fn update_title(&self, repo_id: isize, new_title: String) -> usize {
@@ -354,7 +352,7 @@ impl IMessagesRepo for MessagesRepo {
         self.ctx.get_list(sql)
     }
 
-    fn update_is_deleted_many(&self, repo_ids: &[i32], new_is_del: bool) {
+    fn update_is_deleted_many(&mut self, repo_ids: &[i32], new_is_del: bool) {
         let joined = repo_ids
             .iter()
             .map(|r| r.to_string())
@@ -368,6 +366,7 @@ impl IMessagesRepo for MessagesRepo {
             joined
         );
         self.ctx.execute(sql);
+        self.cache_clear();
     }
 
     fn update_markers(&self, msg_id: isize, n_markers: u64) -> usize {

@@ -5,7 +5,7 @@ use fr_core::util::IconKind;
 use fr_core::web::mockfilefetcher;
 use fr_core::TD_BASE;
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_extract_icon_fromrome() {
     setup();
@@ -18,7 +18,7 @@ fn test_extract_icon_fromrome() {
     );
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_extract_icon_seoul() {
     setup();
@@ -31,7 +31,7 @@ fn test_extract_icon_seoul() {
     );
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_extract_icon_terrahertz() {
     setup();
@@ -47,7 +47,7 @@ fn test_extract_icon_terrahertz() {
     );
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn test_extract_icon_relay_rd() {
     setup();
@@ -63,26 +63,32 @@ fn test_extract_icon_relay_rd() {
     );
 }
 
-//RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::icons::t_::analyze_icon_local  --lib -- --exact --nocapture "
+// TODO   Slashdot.org  icon  "Komprimierte Symbole werden nicht unterstützt"
+
+//RUST_BACKTRACE=1 cargo watch -s " "
+//cargo test  downloader::icons::t_::analyze_icon_local  --lib -- --exact --nocapture
 //  #[ignore]
 #[test]
 fn analyze_icon_local() {
     setup();
-    let set: [(&str, IconKind); 9] = [
-        //         ("funken.svg", IconKind::Svg),      // Later : add re-svg for svg conversion to bitmap
+    let set: [(&str, IconKind); 10] = [
+        ("slashdot-favicon.ico", IconKind::Png), // ist en PNG    "Komprimierte Symbole werden nicht unterstützt"  ?
+        // LATER TODO //   ("funken.svg", IconKind::Svg), // Later : add re-svg for svg conversion to bitmap
+        //
         ("favicon.ico", IconKind::Ico),          //
         ("icon_651.ico", IconKind::Png),         //
         ("report24-favicon.ico", IconKind::Jpg), // is jpg
         ("naturalnews_favicon.ico", IconKind::Ico),
         ("heise-safari-pinned-tab.svg", IconKind::Svg),
+        ("heise-safari-pinned-tab-2024.svg", IconKind::Svg),
         ("gorillavsbear_townsquare.ico", IconKind::Ico), // MS Windows icon resource - 3 icons, 48x48, 32 bits/pixel, 48x48, 32 bits/pixel
         ("LHNN-Logo-Main-Color-1.png", IconKind::Png),
-        ("seoulnews_favicon.ico", IconKind::UnknownType),
-        ("asue-favico.ico", IconKind::Ico),
+        // ("seoulnews_favicon.ico", IconKind::UnknownType),
+        ("asue-favico.ico", IconKind::Png),
     ];
     set.iter().for_each(|(ic_name, e_kind)| {
         let filename = format!("{}icons/{}", TD_BASE, ic_name);
-        trace!("FILE: {}   ", filename);
+        trace!("-->file: {}   ", filename);
         let o_blob = mockfilefetcher::file_to_bin(&filename);
         if o_blob.is_err() {
             error!("{:?}  {}", &o_blob.as_ref().err(), &filename);

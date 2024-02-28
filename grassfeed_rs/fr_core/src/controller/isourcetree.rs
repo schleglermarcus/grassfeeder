@@ -193,7 +193,7 @@ impl ISourceTreeController for SourceTreeController {
                     fc.addjob(CJob::UpdateMessageList);
                     fc.addjob(CJob::ListSetCursorToPolicy);
                 } else {
-                    fc.update_message_list_(fse.subs_id);
+                    fc.update_message_list(fse.subs_id);
                 }
             }
         }

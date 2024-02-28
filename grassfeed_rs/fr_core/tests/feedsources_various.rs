@@ -10,10 +10,10 @@ use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
-use fr_core::downloader::icons::icon_analyser;
-use fr_core::util::IconKind;
-use fr_core::web::httpfetcher::HttpFetcher;
-use fr_core::web::IHttpRequester;
+// use fr_core::downloader::icons::icon_analyser;
+// use fr_core::util::IconKind;
+// use fr_core::web::httpfetcher::HttpFetcher;
+// use fr_core::web::IHttpRequester;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -76,6 +76,7 @@ fn update_folder_pos() {
     assert_eq!(result.get(2).unwrap().folder_position, 33);
 }
 
+/*
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  web::httpfetcher::httpfetcher_t::test_heise_svg  --lib -- --exact --nocapture"
 #[test]
 fn test_heise_svg() {
@@ -87,6 +88,7 @@ fn test_heise_svg() {
     let an_res = icon_analyser(&r.content_bin);
     assert_eq!(an_res.kind, IconKind::Svg);
 }
+ */
 
 // ----------------------------
 

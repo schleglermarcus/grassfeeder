@@ -238,7 +238,7 @@ impl GuiProcessor {
                 Job::SwitchContentList(feed_source_id) => {
                     (*self.contentlist_r)
                         .borrow()
-                        .update_message_list_(feed_source_id);
+                        .update_message_list(feed_source_id);
                     (*self.gui_updater).borrow().update_list(0);
                 }
                 Job::UpdateTextView(t_v_id) => {
@@ -920,7 +920,7 @@ impl HandleSingleEvent for HandleTreeRowActivated {
             (*self.1)
                 .borrow_mut()
                 .set_ctx_subscription(subs_id as isize);
-            (*self.0).borrow().update_message_list_(subs_id as isize);
+            (*self.0).borrow().update_message_list(subs_id as isize);
             gp.focus_by_tab.replace(FocusByTab::FocusSubscriptions);
         }
     }

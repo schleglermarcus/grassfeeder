@@ -37,13 +37,14 @@ image = ">=0.24.0"
 textcode = ">=0.2.2"
 ureq = ">=2.6.2"                                            # uneven webpki versions. later: advance to 2.8.0
 ico = ">=0.3.0"
-png = ">=0.17.7"
+png = ">=0.17.13"
 gif = ">=0.12.0"
 tinybmp = ">=0.4.0"                                         # =0.3.0 problem with rayon
 jpeg-decoder = { version = ">=0.3.0" }                      # ">=0.2.0"
 libwebp-image = "0.3.0"
 proc-status = ">=0.1.1"
-usvg = "0.25"
+usvg = ">=0.40.0"  #  "0.25"
+fontdb = ">=0.16.2"
 base64 = "<=0.20.0"                                         #  0.21  wants code adaption on many places
 itertools = ">=0.10.5"
 # memory-stats = "1.1.0"

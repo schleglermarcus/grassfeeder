@@ -291,7 +291,6 @@ pub mod t {
                 0,
             );
         }
-        // msm.dump();
         assert_eq!(msm.find_unread_message(4, true), Some((2, 1)));
         assert_eq!(msm.find_unread_message(4, false), Some((6, 7)));
     }

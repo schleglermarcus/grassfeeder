@@ -2,10 +2,15 @@ use crate::controller::sourcetree::SJob;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::downloader::util;
+use crate::util::downscale_image;
 use crate::util::Step;
 use crate::util::StepResult;
 use crate::web::WebFetcherType;
 use flume::Sender;
+
+use super::icons::decide_downscale;
+use super::icons::icon_analyser;
+use super::icons::ICON_CONVERT_TO_WIDTH;
 
 /// for new-source dialog
 pub struct ComprehensiveInner {
@@ -85,7 +90,11 @@ impl Step<ComprehensiveInner> for ParseFeedString {
         if !feed_title.is_empty() {
             inner.feed_title = feed_title;
         }
-        // trace!("COMPR2:  HP={}  TI={}", inner.feed_homepage,inner.feed_title );
+        trace!(
+            "COMPR2:  HP={}  TI={}",
+            inner.feed_homepage,
+            inner.feed_title
+        );
         if !inner.feed_homepage.is_empty() {
             StepResult::Continue(Box::new(ComprAnalyzeHomepage(inner)))
         } else {
@@ -137,8 +146,16 @@ impl Step<ComprehensiveInner> for ComprLoadIcon {
         let r = (*inner.web_fetcher).request_url_bin(inner.icon_url.clone());
         match r.status {
             200 => {
-                // trace!(                    "icon-download: {} '{}'  =>  {} {} {} ",                    inner.feed_url_edit,                    inner.icon_url,                    &r.get_status(),                   r.get_kind(),                    r.error_description                );
+                trace!(
+                    "icon-download: {} '{}'  =>  {} {} {} ",
+                    inner.feed_url_edit,
+                    inner.icon_url,
+                    &r.get_status(),
+                    r.get_kind(),
+                    r.error_description
+                );
                 inner.icon_bytes = r.content_bin;
+
                 StepResult::Continue(Box::new(ComprStoreIcon(inner)))
             }
             _ => {
@@ -163,11 +180,26 @@ impl Step<ComprehensiveInner> for ComprStoreIcon {
         let mut inner: ComprehensiveInner = self.0;
         if inner.icon_bytes.len() < 10 {
             debug!(
-                "compr: icon too small: {} {}",
+                "ComprStoreIcon: icon too small: {} {}",
                 inner.icon_url, inner.feed_url_edit
             );
             return StepResult::Continue(Box::new(ComprFinal(inner)));
         }
+
+        let an_res = icon_analyser(&inner.icon_bytes);
+
+        if decide_downscale(inner.icon_bytes.len(), &an_res) {
+            match downscale_image(&inner.icon_bytes, &an_res.kind, ICON_CONVERT_TO_WIDTH) {
+                Ok(r) => {
+                    debug!("ComprStoreIcon: downscaled {:?}  ", inner.icon_url);
+                    inner.icon_bytes = r;
+                }
+                Err(e) => {
+                    debug!("downscale {:?} error {:?} ", inner.icon_url, e);
+                }
+            }
+        }
+
         let comp_st = util::compress_vec_to_string(&inner.icon_bytes);
         let existing_icons: Vec<IconEntry> = inner.iconrepo.get_by_icon(comp_st.clone());
         if existing_icons.is_empty() {

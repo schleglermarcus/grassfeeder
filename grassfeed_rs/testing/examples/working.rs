@@ -103,41 +103,50 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
     let folder2 = subs_move.add_new_folder_at_parent("folder2".to_string(), 0);
     let folder1 = subs_move.add_new_folder_at_parent("folder1".to_string(), folder2);
-
-    let subs_id_dyn = (*subs_move).add_new_subscription_at_parent(
-        url_dynamic.clone(),
-        "dynamic".to_string(),
-        folder1,
-        false,
-    );
-    for esrc in ESRC::VALUES {
-        let dummy_val = subs_id_dyn * (esrc.clone() as isize);
-        (*error_repo.borrow()).add_error(
-            subs_id_dyn,
-            esrc,
-            dummy_val,
-            url_dynamic.clone(),
-            "some-message".to_string(),
-        )
-    }
-    let url_staseve = format!("{}/staseve-11.xml", addr);
-    let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
-    subs_move.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder1, false);
-    subs_move.add_new_subscription_at_parent(url_staseve, "staseve11".to_string(), folder1, false);
     if true {
+        subs_move.add_new_subscription_at_parent(
+            "https://rss.slashdot.org/Slashdot/slashdot".to_string(),
+            "slashdot".to_string(),
+            folder1,
+            false,
+        );
+    }
+
+    if false {
+        let f5 = subs_move.add_new_folder_at_parent("folder5".to_string(), 0);
+        let subs_id_dyn = (*subs_move).add_new_subscription_at_parent(
+            url_dynamic.clone(),
+            "dynamic".to_string(),
+            folder1,
+            false,
+        );
+        for esrc in ESRC::VALUES {
+            let dummy_val = subs_id_dyn * (esrc.clone() as isize);
+            (*error_repo.borrow()).add_error(
+                subs_id_dyn,
+                esrc,
+                dummy_val,
+                url_dynamic.clone(),
+                "some-message".to_string(),
+            )
+        }
+
+        let url_staseve = format!("{}/staseve-11.xml", addr);
+        let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
+        subs_move.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder1, false);
+        subs_move.add_new_subscription_at_parent(
+            url_staseve,
+            "staseve11".to_string(),
+            folder1,
+            false,
+        );
         let src = [
             (url_feedburner.as_str(), "feedburner"),
             (url_insi.as_str(), "newsinsideout_com"),
             (url_r_foto.as_str(), "fotograf"),
         ];
-        let f5 = subs_move.add_new_folder_at_parent("folder5".to_string(), 0);
         src.iter().for_each(|(url, desc)| {
-            subs_move.add_new_subscription_at_parent(
-                url.to_string(),
-                desc.to_string(),
-                f5,
-                false,
-            );
+            subs_move.add_new_subscription_at_parent(url.to_string(), desc.to_string(), f5, false);
         });
         subs_move.add_new_subscription_at_parent(
             url_gui_proc.clone(),
@@ -153,15 +162,21 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             f5,
             false,
         );
+
         subs_move.add_new_subscription_at_parent(
-            "https://freiheitsfunken.info/feed/rss/".to_string(),
-            "freiheitsf".to_string(),
+            "http://hhk6.com/feed/".to_string(),
+            "hhk6".to_string(),
             f5,
             false,
         );
-
-
+        subs_move.add_new_subscription_at_parent(
+            "http://feeds.seoulnews.net/rss/3f5c98640a497b43".to_string(),
+            "seoulnews - 기사 요약 -".to_string(),
+            f5,
+            false,
+        );
     }
+
     if false {
         let src = [
             ("http://vkjehannum.wordpress.com/feed/", "vkjehannum"),
