@@ -1,6 +1,6 @@
 use fr_core::downloader::icons::icon_analyser;
 use fr_core::downloader::util::extract_icon_from_homepage;
-use fr_core::util::downscale_image;
+use fr_core::util::png_from_svg;
 use fr_core::util::IconKind;
 use fr_core::web::mockfilefetcher;
 use fr_core::TD_BASE;
@@ -63,18 +63,13 @@ fn test_extract_icon_relay_rd() {
     );
 }
 
-// TODO   Slashdot.org  icon  "Komprimierte Symbole werden nicht unterstützt"
-
-//RUST_BACKTRACE=1 cargo watch -s " "
-//cargo test  downloader::icons::t_::analyze_icon_local  --lib -- --exact --nocapture
-//  #[ignore]
+#[ignore]
 #[test]
 fn analyze_icon_local() {
     setup();
-    let set: [(&str, IconKind); 10] = [
-        ("slashdot-favicon.ico", IconKind::Png), // ist en PNG    "Komprimierte Symbole werden nicht unterstützt"  ?
-        // LATER TODO //   ("funken.svg", IconKind::Svg), // Later : add re-svg for svg conversion to bitmap
-        //
+    let set: [(&str, IconKind); 12] = [
+        ("funken.svg", IconKind::Svg), // Later : add re-svg for svg conversion to bitmap
+        ("slashdot-favicon.ico", IconKind::Ico), // ist en PNG    "Komprimierte Symbole werden nicht unterstützt"  ?
         ("favicon.ico", IconKind::Ico),          //
         ("icon_651.ico", IconKind::Png),         //
         ("report24-favicon.ico", IconKind::Jpg), // is jpg
@@ -83,12 +78,12 @@ fn analyze_icon_local() {
         ("heise-safari-pinned-tab-2024.svg", IconKind::Svg),
         ("gorillavsbear_townsquare.ico", IconKind::Ico), // MS Windows icon resource - 3 icons, 48x48, 32 bits/pixel, 48x48, 32 bits/pixel
         ("LHNN-Logo-Main-Color-1.png", IconKind::Png),
-        // ("seoulnews_favicon.ico", IconKind::UnknownType),
-        ("asue-favico.ico", IconKind::Png),
+        ("seoulnews_favicon.ico", IconKind::UnknownType),
+        ("asue-favico.ico", IconKind::Ico),
     ];
     set.iter().for_each(|(ic_name, e_kind)| {
         let filename = format!("{}icons/{}", TD_BASE, ic_name);
-        trace!("-->file: {}   ", filename);
+        // trace!("-->file: {}   ", filename);
         let o_blob = mockfilefetcher::file_to_bin(&filename);
         if o_blob.is_err() {
             error!("{:?}  {}", &o_blob.as_ref().err(), &filename);
@@ -96,16 +91,11 @@ fn analyze_icon_local() {
         }
         let blob = o_blob.unwrap();
         let r = icon_analyser(&blob);
-        trace!(
-            "analyze_icon_local  {} \t {:?}\t{}   ",
-            filename,
-            r.kind,
-            r.message,
-        );
+        // trace!(            "analyze_icon_local  {} \t {:?}\t{}   ",            filename,            r.kind,            r.message,        );
         assert_eq!(r.kind, *e_kind);
     });
 }
-
+/*
 #[ignore] // later re-svg
 #[test]
 fn t_downscale_icon() {
@@ -119,6 +109,35 @@ fn t_downscale_icon() {
     let blob = o_blob.unwrap();
     let r = downscale_image(&blob, &IconKind::Svg, 64);
     debug!("R={:?} ", r);
+    assert!(r.is_ok());
+}
+ */
+
+#[test]
+fn test_from_svg() {
+    setup();
+
+    let filename = format!("{}icons/{}", TD_BASE, "funken.svg");
+    let o_blob = mockfilefetcher::file_to_bin(&filename);
+    if o_blob.is_err() {
+        error!("{:?}  {}", &o_blob.as_ref().err(), &filename);
+        panic!();
+    }
+    let blob = o_blob.unwrap();
+    let r = png_from_svg(&blob /*, 120 */);
+    assert!(r.is_ok());
+    let r_data = r.unwrap();
+
+    let r = std::fs::write("../target/funken.png", r_data);
+    /*
+        let r = image::save_buffer(
+            &std::path::Path::new("../target/funken.png"),
+            &r_data,
+            20,
+            20,
+            image::ColorType::Rgba8, // image::RGBA(8),
+        );
+    */
     assert!(r.is_ok());
 }
 

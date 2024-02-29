@@ -487,7 +487,7 @@ impl InvestigateOne for InvIco {
             }
             Err(e) => {
                 r.message = format!("not_ico: {e}");
-                debug!("InvIco:  not_ico {} ", r.message);
+                // debug!("InvIco:  not_ico {} ", r.message);
             }
         }
         r
@@ -511,7 +511,7 @@ impl InvestigateOne for InvPng {
             }
             Err(e) => {
                 r.message = format!("not_png: {e}");
-                debug!("InvPng:    Not-png  {} ", r.message);
+                // debug!("InvPng:    Not-png  {} ", r.message);
             }
         }
         r

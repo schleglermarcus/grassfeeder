@@ -62,6 +62,8 @@ pub const ICON_MISSING_STR: &str = "8AWJUE5HDQoaCgAAAA1JSERSAAAAQAQA+dQIAwAAAJ23
 mod _i {
     use super::*;
 
+
+    // TODO remove
     // domain: gdk-pixbuf-error-quark, code: 0, message: "Compressed icons are not supported"
     // https://docs.gtk.org/gdk-pixbuf/ctor.Pixbuf.new_from_stream.html
     // https://docs.rs/gdk-pixbuf/0.15.11/gdk_pixbuf/struct.Pixbuf.html#method.from_stream

@@ -10,7 +10,6 @@ extern crate proc_status;
 extern crate rusqlite;
 extern crate tinybmp;
 extern crate tl;
-extern crate usvg;
 extern crate webbrowser;
 #[macro_use]
 extern crate rust_i18n;
@@ -18,9 +17,10 @@ extern crate rust_i18n;
 #[macro_use]
 extern crate log;
 extern crate fontdb;
+extern crate usvg;
+extern crate resvg;
+extern crate tiny_skia;
 
-// #[cfg(test)]
-// extern crate rand;
 
 use rust_i18n::i18n;
 i18n!("../resources/locales");
