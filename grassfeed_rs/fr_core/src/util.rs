@@ -86,6 +86,7 @@ pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Result
 pub enum IconKind {
     #[default]
     None,
+    HttpRawData,
     TooSmall,
     Ico,
     Png,
@@ -94,18 +95,15 @@ pub enum IconKind {
     Gif,
     Svg,
     Webp,
-    UnknownType, // all analyses done
+    AnalyseDoneUnknown, // all analyses done
 }
 
-/// TODO later:  use resvg  to convert   svg icons
-/// https://friendlyuser.github.io/posts/tech/rust/Using_Resvg_in_Rust_A_Comprehensive_Guide/
 pub fn downscale_image(
     img_bytes: &[u8],
     img_type: &IconKind,
     resize_w_h: u32,
 ) -> Result<Vec<u8>, String> {
     let buffersize = 1000000;
-
     let img_fo: ImageFormat = match img_type {
         IconKind::Png => ImageFormat::Png,
         IconKind::Jpg => ImageFormat::Jpeg,
@@ -118,7 +116,6 @@ pub fn downscale_image(
             ImageFormat::Ico
         }
     };
-
     let r = image::load_from_memory_with_format(img_bytes, img_fo);
     if let Err(e) = r {
         return Err(format!("downscale_image: {img_type:?} {e:?}",));
@@ -148,7 +145,8 @@ pub fn downscale_image(
 // https://friendlyuser.github.io/posts/tech/rust/Using_Resvg_in_Rust_A_Comprehensive_Guide/
 // https://trycatchdebug.net/news/1128026/resvg-in-rust-guide
 // https://docs.rs/tiny-skia/latest/tiny_skia/struct.PixmapMut.html
-pub fn png_from_svg(img_bytes: &[u8] /* , _resize_w_h: u32 */) -> Result<Vec<u8>, String> {
+/// returns a Vec<u8>  with raw png file data
+pub fn png_from_svg(img_bytes: &[u8]) -> Result<Vec<u8>, String> {
     let fontdb: fontdb::Database = fontdb::Database::new();
     let r = usvg::Tree::from_data(img_bytes, &usvg::Options::default(), &fontdb);
     if let Err(e) = r {
@@ -158,20 +156,14 @@ pub fn png_from_svg(img_bytes: &[u8] /* , _resize_w_h: u32 */) -> Result<Vec<u8>
     let width = tree.size().width() as u32;
     let height = tree.size().height() as u32;
     let tr: Transform = Transform::default();
-
     let mut pxm: tiny_skia::Pixmap = tiny_skia::Pixmap::new(width, height).unwrap();
     let mut pmm: PixmapMut = pxm.as_mut();
     resvg::render(&tree, tr, &mut pmm);
-    // let ret: Vec<u8> = pxm.data().to_vec();
-
     let r = pxm.encode_png();
     if let Err(e) = r {
         return Err(format!("fromSvg:encode_png {:?}", e));
     }
-    let enc_png = r.unwrap();
-
-    Ok(enc_png)
-    //Err(String::default())
+    Ok(r.unwrap())
 }
 
 #[allow(clippy::match_like_matches_macro)]

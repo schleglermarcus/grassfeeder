@@ -25,6 +25,7 @@ use crate::downloader::launch_web::LaunchInner;
 use crate::downloader::launch_web::LaunchWebBrowserStart;
 use crate::downloader::messages::FetchInner;
 use crate::downloader::messages::FetchStart;
+use crate::util::IconKind;
 use crate::util::StepResult;
 use crate::web::httpfetcher::HttpFetcher;
 use crate::web::WebFetcherType;
@@ -206,7 +207,6 @@ impl Downloader {
                             hostname = hostnam.clone();
                             for (_kind, hn) in (*busy_a).read().unwrap().iter() {
                                 if !hn.is_empty() && hn.eq(hostnam) {
-                                    // trace!("HOST {} in use with {} {} , pushback  ", hn, kind, n);
                                     skip_it = true;
                                 }
                             }
@@ -222,7 +222,6 @@ impl Downloader {
                         if let Some(dljob) = o_job {
                             (*busy_a).write().unwrap()[n as usize] = (dljob.kind(), hostname);
                             Self::process_job(dljob, gp_sender.clone(), n);
-
                             (*busy_a).write().unwrap()[n as usize] = (0, String::default());
                         }
                     }
@@ -253,6 +252,7 @@ impl Downloader {
         let _r = gp_sender.send(Job::DownloaderJobStarted(proc_num, job_kind));
         let job_description = format!("{}  {:?}", std::thread::current().name().unwrap(), &dljob);
         let job_hostname = dljob.hostname().unwrap_or_default();
+        // trace!(            "PJ:  {:?} {:?} {:?} {:?}  ",            job_description,            job_hostname,            job_kind,            subs_id        );
         match dljob {
             DLJob::None => {}
             DLJob::Feed(i) => {
@@ -361,6 +361,7 @@ impl IDownloader for Downloader {
             feed_url: feedurl,
             icon_url: String::default(),
             iconrepo: icon_repo,
+            icon_kind: IconKind::HttpRawData,
             web_fetcher: self.web_fetcher.clone(),
             download_error_happened: false,
             icon_bytes: Vec::default(),
@@ -370,7 +371,6 @@ impl IDownloader for Downloader {
             feed_download_text: String::default(),
             subscriptionrepo: subscription_repo,
             erro_repo: errors_rep,
-            image_icon_kind: Default::default(),
             compressed_icon: Default::default(),
         };
         self.add_to_queue(DLJob::Icon(dl_inner));

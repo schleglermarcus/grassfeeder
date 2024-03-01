@@ -5,7 +5,7 @@ use fr_core::util::IconKind;
 use fr_core::web::mockfilefetcher;
 use fr_core::TD_BASE;
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_extract_icon_fromrome() {
     setup();
@@ -18,20 +18,7 @@ fn test_extract_icon_fromrome() {
     );
 }
 
-#[ignore]
-#[test]
-fn test_extract_icon_seoul() {
-    setup();
-    let filename = format!("{}websites/www.seoulnews.net.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &String::default());
-    assert_eq!(
-        r,
-        Ok("https://static.themainstreammedia.com/web/newsnet/favicons/favicon.ico".to_string())
-    );
-}
-
-#[ignore]
+// #[ignore]
 #[test]
 fn test_extract_icon_terrahertz() {
     setup();
@@ -47,7 +34,36 @@ fn test_extract_icon_terrahertz() {
     );
 }
 
-#[ignore]
+// #[ignore]
+#[test]
+fn test_extract_icon_seoulnews() {
+    setup();
+    let filename = format!("{}websites/www.seoulnews.net.html", TD_BASE);
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &"https://www.seoulnews.net".to_string());
+    assert!(r.is_ok());
+    assert_eq!(
+        r.unwrap(),
+        "https://static.themainstreammedia.com/web/newsnet/favicons/favicon.ico"
+    );
+}
+
+/*
+// #[ignore]
+#[test]
+fn test_extract_icon_seoul() {
+    setup();
+    let filename = format!("{}websites/www.seoulnews.net.html", TD_BASE);
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &String::default());
+    assert_eq!(
+        r,
+        Ok("https://static.themainstreammedia.com/web/newsnet/favicons/favicon.ico".to_string())
+    );
+}
+ */
+
+// #[ignore]
 #[test]
 fn test_extract_icon_relay_rd() {
     setup();
@@ -63,7 +79,43 @@ fn test_extract_icon_relay_rd() {
     );
 }
 
-#[ignore]
+#[test]
+fn test_extract_icon_neweurop() {
+    setup();
+    let filename = format!("{}websites/neweurope.html", TD_BASE);
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &"https://www.neweurope.eu/".to_string());
+    assert_eq!(
+        r,
+        Ok("https://www.neweurope.eu/wp-content/uploads/2019/07/NE-16.jpg".to_string())
+    );
+}
+
+#[test]
+fn test_extract_icon_kolkata() {
+    setup();
+    let filename = format!("{}websites/{}", TD_BASE, "kolkata_tv.html");
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &String::default());
+    assert_eq!(r, Ok("https://s14410312.in1.wpsitepreview.link/wp-content/themes/KolkataTv/assets/images/scroll-fav.png".to_string()));
+}
+
+#[test]
+fn test_extract_icon_nn() {
+    setup();
+    let filename = format!("{}websites/naturalnews_com.html", TD_BASE);
+    let page = std::fs::read_to_string(filename).unwrap();
+    let r = extract_icon_from_homepage(page, &String::default());
+    assert_eq!(
+        r,
+        Ok(
+            "https://www.naturalnews.com/wp-content/themes/naturalnews-child/images/favicon.ico"
+                .to_string()
+        )
+    );
+}
+
+// #[ignore]
 #[test]
 fn analyze_icon_local() {
     setup();
@@ -78,7 +130,7 @@ fn analyze_icon_local() {
         ("heise-safari-pinned-tab-2024.svg", IconKind::Svg),
         ("gorillavsbear_townsquare.ico", IconKind::Ico), // MS Windows icon resource - 3 icons, 48x48, 32 bits/pixel, 48x48, 32 bits/pixel
         ("LHNN-Logo-Main-Color-1.png", IconKind::Png),
-        ("seoulnews_favicon.ico", IconKind::UnknownType),
+        ("seoulnews_net_favicon.ico", IconKind::Ico),
         ("asue-favico.ico", IconKind::Ico),
     ];
     set.iter().for_each(|(ic_name, e_kind)| {
@@ -95,28 +147,10 @@ fn analyze_icon_local() {
         assert_eq!(r.kind, *e_kind);
     });
 }
-/*
-#[ignore] // later re-svg
-#[test]
-fn t_downscale_icon() {
-    setup();
-    let filename = format!("{}icons/{}", TD_BASE, "funken.svg");
-    let o_blob = mockfilefetcher::file_to_bin(&filename);
-    if o_blob.is_err() {
-        error!("{:?}  {}", &o_blob.as_ref().err(), &filename);
-        panic!();
-    }
-    let blob = o_blob.unwrap();
-    let r = downscale_image(&blob, &IconKind::Svg, 64);
-    debug!("R={:?} ", r);
-    assert!(r.is_ok());
-}
- */
 
 #[test]
 fn test_from_svg() {
     setup();
-
     let filename = format!("{}icons/{}", TD_BASE, "funken.svg");
     let o_blob = mockfilefetcher::file_to_bin(&filename);
     if o_blob.is_err() {
@@ -124,21 +158,28 @@ fn test_from_svg() {
         panic!();
     }
     let blob = o_blob.unwrap();
-    let r = png_from_svg(&blob /*, 120 */);
+    let r = png_from_svg(&blob);
     assert!(r.is_ok());
-    let r_data = r.unwrap();
-
-    let r = std::fs::write("../target/funken.png", r_data);
-    /*
-        let r = image::save_buffer(
-            &std::path::Path::new("../target/funken.png"),
-            &r_data,
-            20,
-            20,
-            image::ColorType::Rgba8, // image::RGBA(8),
-        );
-    */
-    assert!(r.is_ok());
+    let r_data: Vec<u8> = r.unwrap();
+    // let r = std::fs::write("../target/funken.png", r_data);    assert!(r.is_ok());
+    let cursor = std::io::Cursor::new(r_data);
+    let decoder = png::Decoder::new(cursor);
+    let mut width: u32 = 0;
+    let mut height: u32 = 0;
+    match decoder.read_info() {
+        Ok(mut reader) => {
+            let mut buf = vec![0; reader.output_buffer_size()]; // Read the next frame. An APNG might contain multiple frames.
+            if let Ok(info) = reader.next_frame(&mut buf) {
+                width = info.width;
+                height = info.height;
+            }
+        }
+        Err(e) => {
+            warn!("png-decod {:?} ", e);
+        }
+    }
+    assert_eq!(width, 120);
+    assert_eq!(height, 120);
 }
 
 // ------------------------------------

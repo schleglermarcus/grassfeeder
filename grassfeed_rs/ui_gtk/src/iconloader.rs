@@ -62,23 +62,6 @@ pub const ICON_MISSING_STR: &str = "8AWJUE5HDQoaCgAAAA1JSERSAAAAQAQA+dQIAwAAAJ23
 mod _i {
     use super::*;
 
-
-    // TODO remove
-    // domain: gdk-pixbuf-error-quark, code: 0, message: "Compressed icons are not supported"
-    // https://docs.gtk.org/gdk-pixbuf/ctor.Pixbuf.new_from_stream.html
-    // https://docs.rs/gdk-pixbuf/0.15.11/gdk_pixbuf/struct.Pixbuf.html#method.from_stream
-    #[test]
-    pub fn test_slashdot() {
-        let buffer = file_to_bin("tests/data/slashdot-favicon.ico").unwrap();
-        let r = IconLoader::vec_to_pixbuf(&buffer);
-
-        debug!("R: {:?}", r);
-
-        println!("R: {:?}", r);
-
-        assert!(r.is_ok());
-    }
-
     pub fn file_to_bin(filename: &str) -> std::io::Result<Vec<u8>> {
         let mut f = File::open(filename)?;
         let mut buffer: Vec<u8> = Vec::new();

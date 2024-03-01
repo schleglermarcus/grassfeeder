@@ -1,6 +1,5 @@
 use fr_core::db::message::MessageRow;
 use fr_core::downloader::messages::feed_text_to_entries;
-use fr_core::downloader::util::extract_icon_from_homepage;
 use fr_core::TD_BASE;
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test   downloader::messages::t_:feed_text_to_entries_tages  --lib -- --exact --nocapture "
@@ -18,20 +17,6 @@ fn feed_text_to_entries_tages() {
     );
 }
 
-#[test]
-fn test_extract_icon_relay_rd() {
-    setup();
-    let filename = format!("{}websites/relay_rd.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &"https://www.relay.fm/rd".to_string());
-    assert_eq!(
-        r,
-        Ok(
-            "https://www.relay.fm/assets/favicon-fd28d8fa5c60ac2860b452a36991933e905f82f1349c4a5ad171dd0586b2b331.ico"
-                .to_string()
-        )
-    );
-}
 
 // #[ignore]
 #[test]

@@ -355,7 +355,7 @@ pub fn create_new_subscription_dialog(
         if dialogdata.len() < 2 {
             return; // empty subscription dialog
         }
-        if let Some(s) = dialogdata.get(0).unwrap().str() {
+        if let Some(s) = dialogdata.first().unwrap().str() {
             entry_name_c.set_text(&s); // 0: Display Name
         }
         if let Some(s) = dialogdata.get(1).unwrap().str() {
@@ -435,7 +435,7 @@ pub fn create_subscription_delete_dialog(
     let label3c = label3;
     let dialog_c = dialog.clone();
     ddd.set_dialog_distribute(DIALOG_FS_DELETE, move |dialogdata| {
-        let is_folder: bool = dialogdata.get(0).unwrap().boo();
+        let is_folder: bool = dialogdata.first().unwrap().boo();
         if is_folder {
             label1c.set_text(&t!("D_DELETE_FOLDER_QUEST")); // "Delete this folder ?"
             dialog_c.set_title(&t!("D_DELETE_FOLDER_TITLE"));
@@ -607,7 +607,7 @@ fn create_subscription_edit_dialog(
     let textview_c = textview.clone();
     ddd.set_dialog_distribute(DIALOG_SUBS_EDIT, move |dialogdata| {
         let mut url = String::default();
-        if let Some(s) = dialogdata.get(0).unwrap().str() {
+        if let Some(s) = dialogdata.first().unwrap().str() {
             entry1c.set_text(&s); //   0: displayname
         }
         if let Some(s) = dialogdata.get(1).unwrap().str() {
@@ -709,7 +709,7 @@ fn create_folder_edit_dialog(
     });
     let entry1c = entry1;
     ddd.set_dialog_distribute(DIALOG_FOLDER_EDIT, move |dialogdata| {
-        if let Some(s) = dialogdata.get(0).unwrap().str() {
+        if let Some(s) = dialogdata.first().unwrap().str() {
             entry1c.set_text(&s);
         }
     });
@@ -1018,7 +1018,7 @@ fn create_settings_dialog(
     });
 
     ddd.set_dialog_distribute(DIALOG_SETTINGS, move |dialogdata| {
-        sw_subs_update_onstart.set_state(dialogdata.get(0).unwrap().boo()); // 0 : UpdateFeedsOnStart
+        sw_subs_update_onstart.set_state(dialogdata.first().unwrap().boo()); // 0 : UpdateFeedsOnStart
         let mut interval_cardinal = dd_get_uint(dialogdata, 1, 1); // 1 UpdateFeeds Cardinal
         interval_cardinal = std::cmp::max(1, interval_cardinal);
         let spinbuttonvalue: f64 = interval_cardinal as f64;
@@ -1045,7 +1045,7 @@ fn create_settings_dialog(
     });
     let tview_clean = textview2.clone();
     ddd.set_dialog_distribute(DIALOG_SETTINGS_CHECK, move |dialogdata| {
-        if let Some(level) = dialogdata.get(0).unwrap().uint() {
+        if let Some(level) = dialogdata.first().unwrap().uint() {
             if level == 0 {
                 let tbuf = TextBuffer::new(NONE_TEXT);
                 tview_clean.set_buffer(Some(&tbuf));
@@ -1152,7 +1152,7 @@ fn create_about_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
     });
     let dia_c = dialog.clone();
     ddd.set_dialog_distribute(DIALOG_ABOUT, move |dialogdata| {
-        if let Some(s) = dialogdata.get(0).unwrap().str() {
+        if let Some(s) = dialogdata.first().unwrap().str() {
             dia_c.set_version(Some(&s));
         }
     });

@@ -109,8 +109,6 @@ impl<T: TableInfo> SqliteContext<T> {
             col_names.join(", "),
             questionmarks
         );
-        // trace!("insert:{:?}=>{:?} Idx:{}", &prepared, &wrap_vec, with_index);
-        // println!("insert:{:?}=>{:?} Idx:{}", &prepared, &wrap_vec, with_index);
         let vec_dyn_tosql: Vec<&dyn ToSql> = wrap_vec
             .iter()
             .map(|w| w.to_dyn_tosql())
@@ -125,11 +123,11 @@ impl<T: TableInfo> SqliteContext<T> {
         }
     }
 
-    pub fn insert_tx(&self, list: &Vec<T>) -> Result<i64, rusqlite::Error> {
+    pub fn insert_tx(&self, list: &[T]) -> Result<i64, rusqlite::Error> {
         if list.is_empty() {
             return Ok(0);
         }
-        let e0 = list.get(0).unwrap();
+        let e0 = list.first().unwrap();
         let col_names = e0.get_insert_columns();
         let questionmarks = vec!["?"; col_names.len()].to_vec().join(", ");
         let prep_sql = format!(
@@ -164,6 +162,7 @@ impl<T: TableInfo> SqliteContext<T> {
         }
     }
 
+    #[allow(clippy::blocks_in_conditions)]
     pub fn get_one(&self, sql: String) -> Option<T> {
         let mut ret: Option<T> = None;
         if let Ok(mut stmt) = (*self.connection).lock().unwrap().prepare(&sql) {
@@ -195,6 +194,7 @@ impl<T: TableInfo> SqliteContext<T> {
         self.get_list(prepared)
     }
 
+    #[allow(clippy::blocks_in_conditions)]
     pub fn get_list(&self, sql: String) -> Vec<T> {
         let mut list: Vec<T> = Vec::default();
         if let Ok(mut stmt) = (*self.connection).lock().unwrap().prepare(&sql) {

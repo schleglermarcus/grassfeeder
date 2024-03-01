@@ -324,12 +324,13 @@ fn show_context_menu_message(
     ev_button: u32,
     g_ev_se: Sender<GuiEvents>,
     _gtk_obj_a: GtkObjectsType,
-    repoid_listpos: &Vec<(i32, i32)>,
+//    repoid_listpos: &Vec<(i32, i32)>,
+    repoid_listpos: &[(i32, i32)],
 ) {
     let mi_mark_read = MenuItem::with_label(&t!("CM_MSG_MARK_AS_READ"));
     let esc = EvSenderCache(
         g_ev_se.clone(),
-        GuiEvents::ListSelectedAction(0, "mark-as-read".to_string(), repoid_listpos.clone()),
+        GuiEvents::ListSelectedAction(0, "mark-as-read".to_string(), repoid_listpos.to_owned()),
     );
     mi_mark_read.connect_activate(move |_menuiten| {
         esc.send();
@@ -337,7 +338,7 @@ fn show_context_menu_message(
     let mi_mark_unread = MenuItem::with_label(&t!("CM_MSG_MARK_AS_UNREAD"));
     let esc = EvSenderCache(
         g_ev_se.clone(),
-        GuiEvents::ListSelectedAction(0, "mark-as-unread".to_string(), repoid_listpos.clone()),
+        GuiEvents::ListSelectedAction(0, "mark-as-unread".to_string(), repoid_listpos.to_owned()),
     );
     mi_mark_unread.connect_activate(move |_menuiten| {
         esc.send();
@@ -345,7 +346,7 @@ fn show_context_menu_message(
     let mi_open_browser = MenuItem::with_label(&t!("CM_MSG_OPEN_IN_BROWSER"));
     let esc = EvSenderCache(
         g_ev_se.clone(),
-        GuiEvents::ListSelectedAction(0, "open-in-browser".to_string(), repoid_listpos.clone()),
+        GuiEvents::ListSelectedAction(0, "open-in-browser".to_string(), repoid_listpos.to_owned()),
     );
     mi_open_browser.connect_activate(move |_menuiten| {
         esc.send();
@@ -354,7 +355,7 @@ fn show_context_menu_message(
     let mi_delete = MenuItem::with_label(&t!("CM_MSG_DELETE"));
     let esc = EvSenderCache(
         g_ev_se.clone(),
-        GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.clone()),
+        GuiEvents::ListSelectedAction(0, "messages-delete".to_string(), repoid_listpos.to_owned()),
     );
     mi_delete.connect_activate(move |_menuiten| {
         esc.send();
@@ -367,7 +368,7 @@ fn show_context_menu_message(
             GuiEvents::ListSelectedAction(
                 0,
                 "message-copy-link".to_string(),
-                repoid_listpos.clone(),
+                repoid_listpos.to_owned(),
             ),
         );
         mi_copy_link.connect_activate(move |_menuiten| {
@@ -378,7 +379,7 @@ fn show_context_menu_message(
     let mi_mark_favorite = MenuItem::with_label(&t!("CM_MSG_MARK_FAVORITE"));
     let esc = EvSenderCache(
         g_ev_se.clone(),
-        GuiEvents::ListSelectedAction(0, "mark-as-favorite".to_string(), repoid_listpos.clone()),
+        GuiEvents::ListSelectedAction(0, "mark-as-favorite".to_string(), repoid_listpos.to_owned()),
     );
     mi_mark_favorite.connect_activate(move |_menuiten| {
         esc.send();
@@ -386,7 +387,7 @@ fn show_context_menu_message(
     let mi_unmark_favorite = MenuItem::with_label(&t!("CM_MSG_UNMARK_FAVORITE"));
     let esc = EvSenderCache(
         g_ev_se,
-        GuiEvents::ListSelectedAction(0, "unmark-favorite".to_string(), repoid_listpos.clone()),
+        GuiEvents::ListSelectedAction(0, "unmark-favorite".to_string(), repoid_listpos.to_owned()),
     );
     mi_unmark_favorite.connect_activate(move |_menuiten| {
         esc.send();

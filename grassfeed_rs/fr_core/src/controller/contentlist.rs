@@ -603,7 +603,7 @@ impl IContentList for ContentList {
                     self.set_favorite_int(vec_listpos_msgid, new_fav);
                 }
                 CJob::LaunchBrowserSuccess(msg_id, list_position) => {
-                    self.set_read_many(&vec![(msg_id as i32, list_position as i32)], true);
+                    self.set_read_many(&[(msg_id as i32, list_position as i32)], true);
                 }
                 CJob::CheckMessageCounts(subs_id) => {
                     self.check_message_counts(subs_id);

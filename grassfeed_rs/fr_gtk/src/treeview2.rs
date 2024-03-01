@@ -269,7 +269,7 @@ pub fn create_treeview(
     // let t0col1 = tree0column1.clone();
     ddd.set_dialog_distribute(DIALOG_TREE0COL1, move |dialogdata| {
         let mut col0width = COL1NARROW_WIDTH;
-        if dialogdata.get(0).unwrap().boo() {
+        if dialogdata.first().unwrap().boo() {
             col0width = COL1WIDE_WIDTH;
         }
         tree0column1.set_fixed_width(col0width);

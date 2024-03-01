@@ -118,7 +118,7 @@ pub fn extract_icon_from_homepage(
         .collect();
     // trace!("iconlist={:?}", icon_list);
     if !icon_list.is_empty() {
-        let mut icon_href: String = icon_list.get(0).unwrap().clone();
+        let mut icon_href: String = icon_list.first().unwrap().clone();
         if icon_href.starts_with("//") {
             icon_href = format!("https:{icon_href}");
         }

@@ -1003,7 +1003,7 @@ impl HandleSingleEvent for HandleDialogData {
         if let GuiEvents::DialogData(ref ident, ref payload) = ev {
             match ident.as_str() {
                 "new-folder" => {
-                    if let Some(AValue::ASTR(s)) = payload.get(0) {
+                    if let Some(AValue::ASTR(s)) = payload.first() {
                         (*self.r_subm).borrow_mut().add_new_folder(s.to_string());
                     }
                 }
@@ -1011,7 +1011,7 @@ impl HandleSingleEvent for HandleDialogData {
                     if payload.len() < 2 {
                         error!("new-feedsource, too few data ");
                     } else if let (Some(AValue::ASTR(ref s0)), Some(AValue::ASTR(ref s1))) =
-                        (payload.get(0), payload.get(1))
+                        (payload.first(), payload.get(1))
                     {
                         let new_id = self
                             .r_subm
@@ -1025,12 +1025,12 @@ impl HandleSingleEvent for HandleDialogData {
                     }
                 }
                 "import-opml" => {
-                    if let Some(AValue::ASTR(ref s)) = payload.get(0) {
+                    if let Some(AValue::ASTR(ref s)) = payload.first() {
                         self.r_subm.borrow_mut().import_opml(s.to_string());
                     }
                 }
                 "export-opml" => {
-                    if let Some(AValue::ASTR(ref s)) = payload.get(0) {
+                    if let Some(AValue::ASTR(ref s)) = payload.first() {
                         let mut opmlreader = OpmlReader::new(self.r_subr.clone());
                         opmlreader.transfer_from_db();
                         match opmlreader.write_to_file(s.to_string()) {
@@ -1055,7 +1055,7 @@ impl HandleSingleEvent for HandleDialogData {
                 "settings" => {
                     self.r_stc
                         .borrow_mut()
-                        .set_conf_load_on_start(payload.get(0).unwrap().boo());
+                        .set_conf_load_on_start(payload.first().unwrap().boo());
                     self.r_stc
                         .borrow_mut()
                         .set_conf_fetch_interval(payload.get(1).unwrap().int().unwrap());

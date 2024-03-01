@@ -26,6 +26,7 @@ pub enum ESRC {
     HttpFeedDownload = 17,
     HttpIconDownload = 18,
     IconNoHomepageFromFeedtext = 19,
+    IconsSvgToPng = 20,
 }
 
 impl ESRC {

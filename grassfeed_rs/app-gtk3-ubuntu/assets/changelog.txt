@@ -1,3 +1,20 @@
+grassfeeder-gtk3 (0.0.2703) jammy; urgency=low
+
+  * Bugfix: Delete filtered messages did not result in list update
+  
+  
+  - Slashdot.org  icon  "Komprimierte Symbole werden nicht unterstützt"
+  
+  - freiheitsfunken icon
+  
+  - Use resvg  to convert   svg icons
+  
+  - deactivate tree-blocked   when filling the tree
+  
+  - Aggregate View:  use favorite colum for subscription icon
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Mon, 25 Dec 2023 21:00:00 +0000
+
 grassfeeder-gtk3 (0.2.6) jammy; urgency=low
 
   * Messages loading more efficient: references+partial+caching

@@ -115,6 +115,7 @@ impl ErrorRepo {
         self.ctx.insert(en, false).map_err(rusqlite_error_to_boxed)
     }
 
+    #[allow(clippy::blocks_in_conditions)]
     pub fn get_by_subscription(&self, subs_id: isize) -> Vec<ErrorEntry> {
         let prepared = format!(
             "SELECT * FROM {} WHERE subs_id={}  ORDER BY date DESC ",

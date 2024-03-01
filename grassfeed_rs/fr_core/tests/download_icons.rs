@@ -9,7 +9,7 @@ use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::icons::IconCheckIsImage;
 use fr_core::downloader::icons::IconInner;
 use fr_core::downloader::icons::IconLoadStart;
-use fr_core::downloader::util::extract_icon_from_homepage;
+// use fr_core::downloader::util::extract_icon_from_homepage;
 use fr_core::downloader::util::retrieve_homepage_from_feed_text;
 use fr_core::util::convert_webp_to_png;
 use fr_core::util::Step;
@@ -23,33 +23,6 @@ use std::io::Write;
 use std::sync::Arc;
 
 #[test]
-fn test_extract_icon_neweurop() {
-    setup();
-    let filename = format!("{}websites/neweurope.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &"https://www.neweurope.eu/".to_string());
-    assert_eq!(
-        r,
-        Ok("https://www.neweurope.eu/wp-content/uploads/2019/07/NE-16.jpg".to_string())
-    );
-}
-
-#[test]
-fn test_extract_icon_nn() {
-    setup();
-    let filename = format!("{}websites/naturalnews_com.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &String::default());
-    assert_eq!(
-        r,
-        Ok(
-            "https://www.naturalnews.com/wp-content/themes/naturalnews-child/images/favicon.ico"
-                .to_string()
-        )
-    );
-}
-
-#[test]
 fn image_webp_to_png() {
     setup();
     let filename = format!("{}icons/lupoca.webp", TD_BASE);
@@ -61,15 +34,6 @@ fn image_webp_to_png() {
     assert!(w_r.is_ok());
     // debug!("{} bytes written {:?}", outdata.len(), w_r);
     assert!(outdata.len() >= 1151 && outdata.len() <= 1288);
-}
-
-#[test]
-fn test_extract_icon_kolkata() {
-    setup();
-    let filename = format!("{}websites/{}", TD_BASE, "kolkata_tv.html");
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &String::default());
-    assert_eq!(r, Ok("https://s14410312.in1.wpsitepreview.link/wp-content/themes/KolkataTv/assets/images/scroll-fav.png".to_string()));
 }
 
 // #[ignore]
@@ -155,7 +119,7 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry
         feed_download_text: String::default(),
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
-        image_icon_kind: Default::default(),
+        icon_kind: Default::default(),
         compressed_icon: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
@@ -190,7 +154,7 @@ fn icon_too_big() {
         feed_download_text: String::default(),
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
-        image_icon_kind: Default::default(),
+        icon_kind: Default::default(),
         compressed_icon: Default::default(),
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
@@ -222,7 +186,7 @@ fn stop_on_nonexistent() {
         feed_download_text: String::default(),
         subscriptionrepo: subscr_r,
         erro_repo: erro_rep,
-        image_icon_kind: Default::default(),
+        icon_kind: Default::default(),
         compressed_icon: Default::default(),
     };
     let ic = IconCheckIsImage(dl_inner);

@@ -116,7 +116,6 @@ impl MessagesRepo {
     pub fn new_in_mem() -> Self {
         MessagesRepo {
             ctx: SqliteContext::new_in_memory(),
-            // cache: RwLock::new((-1, Vec::default())),
             cached_rows: Vec::default(),
             cached_subs_id: -1,
         }
@@ -148,6 +147,7 @@ impl MessagesRepo {
         }
     }
 
+    #[allow(clippy::blocks_in_conditions)]
     fn request_messages_reduced(&mut self, sql: &str) {
         self.cached_rows.clear();
         if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(sql) {
@@ -196,7 +196,7 @@ impl IMessagesRepo for MessagesRepo {
 
     fn insert_tx(&self, e_list: &[MessageRow]) -> Result<i64, Box<dyn std::error::Error>> {
         self.ctx
-            .insert_tx(&e_list.to_vec())
+            .insert_tx(e_list)
             .map_err(rusqlite_error_to_boxed)
     }
 

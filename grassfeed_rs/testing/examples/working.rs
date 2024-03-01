@@ -103,16 +103,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
     let folder2 = subs_move.add_new_folder_at_parent("folder2".to_string(), 0);
     let folder1 = subs_move.add_new_folder_at_parent("folder1".to_string(), folder2);
-    if true {
-        subs_move.add_new_subscription_at_parent(
-            "https://freiheitsfunken.info/feed/rss/".to_string(),
-            "Frfunken".to_string(),
-            folder1,
-            false,
-        );
-    }
+    if true {}
 
-    if false {
+    if true {
         let f5 = subs_move.add_new_folder_at_parent("folder5".to_string(), 0);
         let subs_id_dyn = (*subs_move).add_new_subscription_at_parent(
             url_dynamic.clone(),
@@ -170,15 +163,15 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             false,
         );
         subs_move.add_new_subscription_at_parent(
-            "http://feeds.seoulnews.net/rss/3f5c98640a497b43".to_string(),
-            "seoulnews - 기사 요약 -".to_string(),
+            "https://rss.slashdot.org/Slashdot/slashdot".to_string(),
+            "slashdot".to_string(),
             f5,
             false,
         );
         subs_move.add_new_subscription_at_parent(
-            "https://rss.slashdot.org/Slashdot/slashdot".to_string(),
-            "slashdot".to_string(),
-            f5,
+            "https://freiheitsfunken.info/feed/rss/".to_string(),
+            "Frfunken".to_string(),
+            folder1,
             false,
         );
     }
