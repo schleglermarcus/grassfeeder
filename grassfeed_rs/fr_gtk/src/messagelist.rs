@@ -324,7 +324,6 @@ fn show_context_menu_message(
     ev_button: u32,
     g_ev_se: Sender<GuiEvents>,
     _gtk_obj_a: GtkObjectsType,
-//    repoid_listpos: &Vec<(i32, i32)>,
     repoid_listpos: &[(i32, i32)],
 ) {
     let mi_mark_read = MenuItem::with_label(&t!("CM_MSG_MARK_AS_READ"));

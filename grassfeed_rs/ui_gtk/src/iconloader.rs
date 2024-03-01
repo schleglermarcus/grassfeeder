@@ -22,7 +22,6 @@ impl IconLoader {
         base64::encode(compressed_data)
     }
 
-    // TODO: write test
     pub fn vec_to_pixbuf(buffer: &[u8]) -> Result<Pixbuf, gtk::glib::error::Error> {
         let mis: MemoryInputStream = MemoryInputStream::from_bytes(&Bytes::from(buffer));
         let cancellable: Option<&Cancellable> = None;
@@ -61,11 +60,4 @@ pub const ICON_MISSING_STR: &str = "8AWJUE5HDQoaCgAAAA1JSERSAAAAQAQA+dQIAwAAAJ23
 #[cfg(test)]
 mod _i {
     use super::*;
-
-    pub fn file_to_bin(filename: &str) -> std::io::Result<Vec<u8>> {
-        let mut f = File::open(filename)?;
-        let mut buffer: Vec<u8> = Vec::new();
-        let _readsize = f.read_to_end(&mut buffer)?;
-        Ok(buffer)
-    }
 }

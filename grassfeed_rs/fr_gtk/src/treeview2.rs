@@ -125,29 +125,35 @@ pub fn create_treeview(
     let drag_s7 = drag_state.clone();
     let esw = EvSenderWrapper(g_ev_se.clone());
     let g_o_a_c = gtk_obj_a.clone();
-    treeview1.connect_cursor_changed(move |treeview: &TreeView| {
+
+    let connect_cursor_changed_handler = move |treeview: &TreeView| {
         let (o_tp, _tree_view_column) = treeview.cursor();
         if let Some(mut treepath) = o_tp {
             let tree_blocked = (*g_o_a_c).read().unwrap().get_block_tree_updates(0);
             let in_drag = (*drag_s7).read().unwrap().block_row_activated();
-            if !in_drag && !tree_blocked {
-                let mut repo_id: i32 = -1;
-                let selection = treeview.selection();
-                if let Some((model, iter)) = selection.selected() {
-                    repo_id = model.value(&iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+            if !in_drag {
+                if tree_blocked {
+                    debug!(
+                        " in-drag:{in_drag}   tree-blocked:{tree_blocked}  TreeRowActivated  {:?} ",
+                        treepath.indices_with_depth()
+                    );
+                } else {
+                    let mut repo_id: i32 = -1;
+                    let selection = treeview.selection();
+                    if let Some((model, iter)) = selection.selected() {
+                        repo_id =
+                            model.value(&iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+                    }
+                    let indices = treepath.indices_with_depth();
+                    let ind_u16: Vec<u16> = indices.iter().map(|v| *v as u16).collect::<Vec<u16>>();
+                    esw.sendw(GuiEvents::TreeRowActivated(0, ind_u16, repo_id));
                 }
-                let indices = treepath.indices_with_depth();
-                let ind_u16: Vec<u16> = indices.iter().map(|v| *v as u16).collect::<Vec<u16>>();
-                // trace!("TreeRowActivated : {:?}  {:?} ", ind_u16, repo_id);
-                esw.sendw(GuiEvents::TreeRowActivated(0, ind_u16, repo_id));
-            } else {
-                warn!(
-                    " in-drag   tree-blocked   {in_drag}  {tree_blocked}  TreeRowActivated  {:?} ",
-                    treepath.indices_with_depth()
-                );
             }
         }
-    });
+    };
+
+    treeview1.connect_cursor_changed(connect_cursor_changed_handler);
+
     let ev_se_3 = g_ev_se.clone();
     treeview1.connect_button_press_event(move |p_tv, ev_but| {
         let mut source_repo_id: i32 = -1;

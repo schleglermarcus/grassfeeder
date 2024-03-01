@@ -68,10 +68,15 @@ impl GtkModelUpdaterInt {
     /// https://gtk-rs.org/gtk3-rs/stable/0.15/docs/gtk/prelude/trait.GtkListStoreExt.html
     ///  disconnects the view, expands the current focus again
     pub fn update_tree_model(&self, index: u8) {
-        let g_o = (*self.g_o_a).read().unwrap();
-        let tree_store: &TreeStore = g_o.get_tree_store(index as usize).unwrap();
-        let tree_view: &TreeView = g_o.get_tree_view(index as usize).unwrap();
-        let max_columns = g_o.get_tree_store_max_columns(index as usize) as usize;
+        let max_columns: usize;
+        let tree_store: TreeStore;
+        let tree_view: TreeView;
+        {
+            let g_o = (*self.g_o_a).read().unwrap();
+            tree_store = g_o.get_tree_store(index as usize).unwrap().clone();
+            tree_view = g_o.get_tree_view(index as usize).unwrap().clone();
+            max_columns = g_o.get_tree_store_max_columns(index as usize) as usize;
+        }
         let view_option: Option<&ListStore> = None;
         tree_view.set_model(view_option);
         tree_store.clear();
@@ -83,7 +88,7 @@ impl GtkModelUpdaterInt {
             innerpath.push(path_index as i32);
             self.add_to_treestore(
                 index as usize,
-                tree_store,
+                &tree_store,
                 gti,
                 None,
                 innerpath,
@@ -91,10 +96,14 @@ impl GtkModelUpdaterInt {
                 &mut expand_paths,
             );
         }
-        tree_view.set_model(Some(tree_store));
+        tree_view.set_model(Some(&tree_store));
         expand_paths.iter().for_each(|t_path| {
             tree_view.expand_to_path(t_path);
         });
+        (*self.g_o_a)
+            .write()
+            .unwrap()
+            .set_block_tree_updates(index, false);
     }
 
     ///  Fills the columns, according to the guitreeitem's order

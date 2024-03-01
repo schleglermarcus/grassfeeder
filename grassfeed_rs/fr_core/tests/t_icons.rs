@@ -48,21 +48,6 @@ fn test_extract_icon_seoulnews() {
     );
 }
 
-/*
-// #[ignore]
-#[test]
-fn test_extract_icon_seoul() {
-    setup();
-    let filename = format!("{}websites/www.seoulnews.net.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &String::default());
-    assert_eq!(
-        r,
-        Ok("https://static.themainstreammedia.com/web/newsnet/favicons/favicon.ico".to_string())
-    );
-}
- */
-
 // #[ignore]
 #[test]
 fn test_extract_icon_relay_rd() {
@@ -161,7 +146,7 @@ fn test_from_svg() {
     let r = png_from_svg(&blob);
     assert!(r.is_ok());
     let r_data: Vec<u8> = r.unwrap();
-    // let r = std::fs::write("../target/funken.png", r_data);    assert!(r.is_ok());
+    //   assert!(std::fs::write("../target/funken.png", r_data).is_ok());
     let cursor = std::io::Cursor::new(r_data);
     let decoder = png::Decoder::new(cursor);
     let mut width: u32 = 0;
