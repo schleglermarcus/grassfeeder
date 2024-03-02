@@ -55,6 +55,7 @@ pub trait ISourceTreeController {
     /// returns  Subscription,  Non-Folder-Child-IDs
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
     fn set_selected_message_id(&self, subs_id: isize, msg_id: isize);
+    fn get_subs_icon_id(&self, subs_id: isize) -> usize;
 
     fn move_to_other_subscription(&self, move_up: bool);
 }
@@ -499,5 +500,9 @@ impl ISourceTreeController for SourceTreeController {
                 .borrow()
                 .tree_set_cursor(TREEVIEW0, path);
         }
+    }
+
+    fn get_subs_icon_id(&self, subs_id: isize) -> usize {
+        self.statemap.borrow().get_icon_id(subs_id)
     }
 }

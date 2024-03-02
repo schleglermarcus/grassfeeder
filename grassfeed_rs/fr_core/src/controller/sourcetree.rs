@@ -271,6 +271,9 @@ impl SourceTreeController {
                             .store_image(icon_id as i32, icon_e.icon);
                     }
                     let ts_now = timestamp_now();
+                    self.statemap
+                        .borrow_mut()
+                        .set_icon_id(subs_id, icon_id as usize);
                     (*self.subscriptionrepo_r).borrow().update_icon_id_time(
                         subs_id,
                         icon_id as usize,

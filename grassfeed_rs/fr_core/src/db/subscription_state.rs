@@ -1,4 +1,4 @@
-use resources::parameter::SCAN_EMPTY_UNREAD_GROUP;
+use resources::{gen_icons::IDX_02_ICON_MISSING_BROWN, parameter::SCAN_EMPTY_UNREAD_GROUP};
 use std::collections::HashMap;
 
 pub trait ISubscriptionState {
@@ -21,6 +21,7 @@ pub trait ISubscriptionState {
         newpath: Vec<u16>,
         is_folder: bool,
         subs_relative_idx: isize,
+        subs_icon: usize,
     );
 
     fn set_status(&mut self, idlist: &[isize], statusflag: StatusMask, activated: bool);
@@ -49,6 +50,9 @@ pub trait ISubscriptionState {
     fn get_fetch_scheduled(&self) -> Vec<isize>;
 
     fn get_path_for_rel(&self, rel_id: isize) -> Option<Vec<u16>>;
+
+    fn get_icon_id(&self, subs_id: isize) -> usize;
+    fn set_icon_id(&mut self, subs_id: isize, icon_id: usize);
 }
 
 #[derive(Default)]
@@ -63,11 +67,20 @@ impl ISubscriptionState for SubscriptionState {
         }
     }
 
-    fn set_tree_path(&mut self, db_id: isize, newpath: Vec<u16>, is_folder: bool, rel_idx: isize) {
+    fn set_tree_path(
+        &mut self,
+        db_id: isize,
+        newpath: Vec<u16>,
+        is_folder: bool,
+        rel_idx: isize,
+        subs_icon: usize,
+    ) {
         if let std::collections::hash_map::Entry::Vacant(e) = self.statemap.entry(db_id) {
             let mut sme = SubsMapEntry {
                 tree_path: Some(newpath),
                 relative_idx: rel_idx,
+                subs_icon_id: subs_icon,
+
                 ..Default::default()
             };
             sme.set_folder(is_folder);
@@ -222,6 +235,23 @@ impl ISubscriptionState for SubscriptionState {
         o_p.as_ref()?;
         o_p.unwrap()
     }
+
+    fn get_icon_id(&self, subs_id: isize) -> usize {
+        let o_idx = self
+            .statemap
+            .iter()
+            .filter(|(id, _st)| **id == subs_id)
+            .map(|(_id, st)| st.get_icon_id())
+            .next();
+        o_idx.unwrap_or(IDX_02_ICON_MISSING_BROWN)
+    }
+
+    fn set_icon_id(&mut self, subs_id: isize, icon_id: usize) {
+        self.statemap
+            .iter_mut()
+            .filter(|(id, _entry)| **id == subs_id)
+            .for_each(|(_id, entry)| entry.set_icon_id(icon_id));
+    }
 }
 
 #[allow(dead_code)]
@@ -245,6 +275,7 @@ pub struct SubsMapEntry {
     pub num_msg_all_unread: Option<(isize, isize)>,
     ///  sequence of subscriptions, to navigate up/down
     pub relative_idx: isize,
+    pub subs_icon_id: usize,
 }
 
 pub trait FeedSourceState {
@@ -277,9 +308,11 @@ pub trait FeedSourceState {
 
     fn is_messagecounts_checked(&self) -> bool;
     fn set_messagecounts_checked(&mut self, n: bool);
-
     fn set_relative_idx(&mut self, i: isize);
     fn get_relative_idx(&self) -> isize;
+
+    fn set_icon_id(&mut self, i: usize);
+    fn get_icon_id(&self) -> usize;
 }
 
 // #[allow(dead_code)]
@@ -371,6 +404,13 @@ impl FeedSourceState for SubsMapEntry {
     }
     fn get_relative_idx(&self) -> isize {
         self.relative_idx
+    }
+
+    fn set_icon_id(&mut self, i: usize) {
+        self.subs_icon_id = i;
+    }
+    fn get_icon_id(&self) -> usize {
+        self.subs_icon_id
     }
 }
 

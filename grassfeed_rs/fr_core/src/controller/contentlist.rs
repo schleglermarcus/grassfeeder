@@ -1,4 +1,4 @@
-use crate::config::configmanager::ConfigManager;
+use  crate::config::configmanager::ConfigManager;
 use crate::controller::browserpane::BrowserPane;
 use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader::Downloader;
@@ -32,6 +32,7 @@ use gui_layer::gui_values::FontAttributes;
 use gui_layer::gui_values::PropDef;
 use regex::RegexBuilder;
 use resources::gen_icons;
+use resources::gen_icons::IDX_34_DATA_XP2;
 use resources::id::LIST0_COL_MSG_ID;
 use resources::id::TREEVIEW1;
 use resources::names::FOCUS_POLICY_NAMES;
@@ -190,13 +191,21 @@ impl ContentList {
         fontsize: u32,
         title_d: String,
         debug_mode: bool,
+        aggr_icon_id: Option<usize>,
     ) -> Vec<AValue> {
         let mut newrow: Vec<AValue> = Vec::default();
-        let nfav = if fc.is_favorite() {
-            gen_icons::IDX_44_ICON_GREEN_D
-        } else {
-            gen_icons::IDX_03_ICON_TRANSPARENT_48
-        };
+
+        let mut nfav = gen_icons::IDX_03_ICON_TRANSPARENT_48;
+        match aggr_icon_id {
+            None => {
+                if fc.is_favorite() {
+                    nfav = gen_icons::IDX_44_ICON_GREEN_D
+                };
+            }
+            Some(agg_id) => {
+                nfav = agg_id;
+            }
+        }
         newrow.push(AValue::IIMG(nfav as i32)); // 0
         newrow.push(AValue::ASTR(title_d)); // 1: message title
         if fc.entry_src_date > 0 {
@@ -316,7 +325,12 @@ impl ContentList {
         );
     }
 
-    fn insert_state_from_row(&self, msg: &MessageRow, list_position: Option<isize>) {
+    fn insert_state_from_row(
+        &self,
+        msg: &MessageRow,
+        list_position: Option<isize>,
+        subscription_icon_id: usize,
+    ) {
         self.msg_state.write().unwrap().insert(
             msg.message_id,
             msg.is_read,
@@ -324,6 +338,7 @@ impl ContentList {
             msg.entry_src_date,
             msg.title.clone(),
             msg.subscription_id,
+            subscription_icon_id,
         );
     }
 
@@ -360,6 +375,7 @@ impl ContentList {
         let mut child_ids: Vec<isize> = Vec::default();
         let mut mr_r = self.messagesrepo_r.borrow_mut();
         let mr_i: MessageIterator;
+
         if isfolder {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
                 if let Some((_subs_e, child_subs)) =
@@ -390,12 +406,12 @@ impl ContentList {
         let mut valstore = (*self.gui_val_store).write().unwrap();
         valstore.clear_list(0);
         filtered_msglist.iter().enumerate().for_each(|(i, fc)| {
-            let title_string = self
-                .msg_state
-                .read()
-                .unwrap()
-                .get_title(fc.message_id)
-                .unwrap_or_default();
+            let st = self.msg_state.read().unwrap();
+            let title_string = st.get_title(fc.message_id).unwrap_or_default();
+            let o_icon: Option<usize> = match isfolder {
+                true => Some(st.get_subscription_icon_id(fc.message_id as isize)),
+                false => None,
+            };
             valstore.insert_list_item(
                 0,
                 i as i32,
@@ -404,6 +420,7 @@ impl ContentList {
                     self.config.list_fontsize as u32,
                     title_string,
                     self.config.mode_debug,
+                    o_icon,
                 ),
             );
         });
@@ -417,10 +434,16 @@ impl ContentList {
         let msglist_len = mr_i.len();
         self.current_subscription
             .replace((subs_id, msglist_len as isize, isfolder));
-        self.msg_state.write().unwrap().clear();
-        mr_i.enumerate().for_each(|(n, msg)| {
-            self.insert_state_from_row(msg, Some(n as isize));
-        });
+        if let Some(feedsources) = self.feedsources_w.upgrade() {
+            self.msg_state.write().unwrap().clear();
+            mr_i.enumerate().for_each(|(n, msg)| {
+                let su_icon = (*feedsources)
+                    .borrow()
+                    .get_subs_icon_id(msg.subscription_id);
+                // trace!(                    "fill_state_map msg:{}  subs:{}  ICON:  {} ",                    msg.message_id, msg.subscription_id, su_icon                );
+                self.insert_state_from_row(msg, Some(n as isize), su_icon);
+            });
+        }
     }
 
     fn delete_messages(&self, del_ids: &[i32]) {
@@ -707,14 +730,13 @@ impl IContentList for ContentList {
     }
 
     fn update_content_list_some(&self, vec_pos_dbid: &[(u32, u32)]) {
-        for (list_position, feed_content_id) in vec_pos_dbid {
+        let (_subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
+
+        for (list_position, msg_id) in vec_pos_dbid {
             let o_msg: Option<MessageRow> =
-                (*(self.messagesrepo_r.borrow_mut())).get_by_index(*feed_content_id as isize);
+                (*(self.messagesrepo_r.borrow_mut())).get_by_index(*msg_id as isize);
             if o_msg.is_none() {
-                warn!(
-                    "update_content_list_some: no messsage for {}",
-                    feed_content_id
-                );
+                warn!("update_content_list_some no messsage {}", msg_id);
                 continue;
             }
             let msg: MessageRow = o_msg.unwrap();
@@ -722,19 +744,31 @@ impl IContentList for ContentList {
                 debug!("update_content_list_some  isdeleted: {}", &msg);
                 continue;
             }
-            if let Some(titl) = self.msg_state.read().unwrap().get_title(msg.message_id) {
-                let av_list = Self::message_to_row(
-                    &msg,
-                    self.config.list_fontsize as u32,
-                    titl,
-                    self.config.mode_debug,
-                );
-                (*self.gui_val_store).write().unwrap().insert_list_item(
-                    0,
-                    *list_position as i32,
-                    &av_list,
-                );
+            let st = self.msg_state.read().unwrap();
+
+            let o_title = st.get_title(msg.message_id);
+            if o_title.is_none() {
+                continue;
             }
+
+            let title = o_title.unwrap();
+            let o_icon: Option<usize> = match isfolder {
+                true => Some(st.get_subscription_icon_id(msg.message_id)),
+                false => None,
+            };
+            // trace!(" update_content_list_some   {} {:?} ", isfolder, o_icon);
+            let av_list = Self::message_to_row(
+                &msg,
+                self.config.list_fontsize as u32,
+                title,
+                self.config.mode_debug,
+                o_icon,
+            );
+            (*self.gui_val_store).write().unwrap().insert_list_item(
+                0,
+                *list_position as i32,
+                &av_list,
+            );
         }
     }
 
@@ -758,6 +792,15 @@ impl IContentList for ContentList {
 
     /// for clicking on Favorite Icon
     fn toggle_favorite(&self, msg_id: isize, list_position: i32, new_fav: Option<bool>) {
+        let (_subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
+        if isfolder {
+            trace!(
+                "Message {}  isfolder:{} not reacting on fav toggle",
+                msg_id,
+                isfolder
+            );
+            return;
+        }
         let o_msg = (*(self.messagesrepo_r.borrow_mut())).get_by_index(msg_id);
         if o_msg.is_none() {
             warn!("FAV: msg not found: {}", msg_id);
@@ -945,7 +988,7 @@ impl IContentList for ContentList {
         let contains = self.msg_state.read().unwrap().contains(msg_id);
         if !contains {
             if let Some(msg) = current_row {
-                self.insert_state_from_row(msg, None);
+                self.insert_state_from_row(msg, None, IDX_34_DATA_XP2); // indicating a missing previous msg state representation
             }
         }
         let o_co_au_ca = self
@@ -1025,7 +1068,6 @@ impl IContentList for ContentList {
 
     fn memory_conserve(&mut self, act: bool) {
         self.window_minimized = act;
-        // if !act {            self.addjob(CJob::ListSetCursorToPolicy);        }
     }
 
     // impl IContentList

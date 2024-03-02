@@ -283,7 +283,7 @@ impl SubscriptionMove {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(localpath);
             path.push(num as u16);
-            // trace!(                "update_paths_rec  num {}  rel {}   path {:?}     N:{:?}  ",                num,                relative_subs_index,                path,                entry.display_name            );
+            //  trace!(                "update_paths_rec  num {}  rel {}   path {:?}     N:{:?}   icon:{} ",                num,                relative_subs_index,                path,                entry.display_name,                entry.icon_id            );
             {
                 let mut smm = self.statemap.borrow_mut();
                 let ri = if entry.is_folder {
@@ -291,7 +291,13 @@ impl SubscriptionMove {
                 } else {
                     *relative_subs_index
                 };
-                smm.set_tree_path(entry.subs_id, path.clone(), entry.is_folder, ri);
+                smm.set_tree_path(
+                    entry.subs_id,
+                    path.clone(),
+                    entry.is_folder,
+                    ri,
+                    entry.icon_id,
+                );
                 smm.set_deleted(entry.subs_id, is_deleted);
             }
             self.update_paths_rec(&path, entry.subs_id as i32, is_deleted, relative_subs_index);

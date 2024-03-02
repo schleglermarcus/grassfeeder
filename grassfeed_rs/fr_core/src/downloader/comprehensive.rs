@@ -107,13 +107,10 @@ pub struct ComprAnalyzeHomepage(ComprehensiveInner);
 impl Step<ComprehensiveInner> for ComprAnalyzeHomepage {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let mut inner: ComprehensiveInner = self.0;
-        debug!(
-            "ComprAnalyzeHomepage: {}   icon_url={}",
-            &inner.feed_homepage, inner.icon_url
-        );
+        // debug!(            "ComprAnalyzeHomepage: {}   icon_url={}",            &inner.feed_homepage, inner.icon_url        );
         let r = (*inner.web_fetcher).request_url(inner.feed_homepage.clone());
         match r.status {
-            200 | 202 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
+            200 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
                 Ok(icon_url) => {
                     inner.icon_url = icon_url;
                 }

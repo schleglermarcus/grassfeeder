@@ -1,17 +1,15 @@
 - Use resvg  to convert   svg icons
-
 - deactivate tree-blocked   when filling the tree
-
 - Aggregate View:  use favorite colum for subscription icon
 
-- put icons into db, add storing the icon-url with it.
 
 
+- put icons into database, add storing the icon-url, web-date, web-size with it.
 
+- put errors in a database
 
 
 Later:
-
 - 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20
 - GTK4: block multiple instances
 - GTK4: process both sets of cmd parameters:   application   AND gtk, see runner_internal

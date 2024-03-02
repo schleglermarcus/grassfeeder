@@ -1,3 +1,5 @@
+use resources::gen_icons::IDX_03_ICON_TRANSPARENT_48;
+
 use crate::db::message::decompress;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -13,6 +15,7 @@ pub struct MessageState {
     /// display text, decompressed
     pub title_d: String,
     pub subscription_id_copy: isize,
+    pub subscription_icon_id: usize,
 }
 
 impl std::fmt::Display for MessageState {
@@ -47,6 +50,7 @@ impl MessageStateMap {
         ts_created: i64,
         title_compressed: String,
         subs_id: isize,
+        subs_icon_id: usize,
     ) {
         if self.msgmap.contains_key(&msg_id_) {
             warn!("MessageStateMap::insert   {} already contained!", msg_id_);
@@ -58,6 +62,7 @@ impl MessageStateMap {
             is_read_copy: is_read,
             msg_id: msg_id_,
             subscription_id_copy: subs_id,
+            subscription_icon_id: subs_icon_id,
             ..Default::default()
         };
         if !title_compressed.is_empty() {
@@ -83,6 +88,13 @@ impl MessageStateMap {
             return st.is_read_copy;
         }
         false
+    }
+
+    pub fn get_subscription_icon_id(&self, msg_id: isize) -> usize {
+        if let Some(st) = self.msgmap.get(&msg_id) {
+            return st.subscription_icon_id as usize;
+        }
+        IDX_03_ICON_TRANSPARENT_48
     }
 
     pub fn get_gui_pos(&self, msg_id: isize) -> u32 {
@@ -289,6 +301,7 @@ pub mod t {
                 (a as i64) * 10000000,
                 String::default(),
                 0,
+                0,
             );
         }
         assert_eq!(msm.find_unread_message(4, true), Some((2, 1)));
@@ -307,6 +320,7 @@ pub mod t {
                 a + 100,
                 (a as i64) * 10000000,
                 String::default(),
+                0,
                 0,
             );
         }
@@ -330,6 +344,7 @@ pub mod t {
                 (a as i64) * 10000000,
                 String::default(),
                 0,
+                0,
             );
         }
         let o_last_read = msm.find_before_earliest_unread();
@@ -352,6 +367,7 @@ pub mod t {
                 a + 100,
                 (1 + a as i64) * 10000000,
                 String::default(),
+                0,
                 0,
             );
         }
