@@ -5,129 +5,14 @@ use fr_core::util::IconKind;
 use fr_core::web::mockfilefetcher;
 use fr_core::TD_BASE;
 
-/*
-#[ignore]
-#[test]
-fn test_extract_icon_fromrome() {
-    setup();
-    let filename = format!("{}websites/fromrome.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &"https://www.fromrome.info/".to_string());
-    assert_eq!(
-        r,
-        Ok("https://www.fromrome.info/wp-content/uploads/2019/10/cropped-header.jpg".to_string())
-    );
-}
-
-#[ignore]
-#[test]
-fn test_extract_icon_terrahertz() {
-    setup();
-    let filename = format!("{}websites/terraherz_wpstaging.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &String::default());
-    assert_eq!(
-        r,
-        Ok(
-            "https://terraherz.wpcomstaging.com/wp-content/uploads/gwpf_icon/favicon.png"
-                .to_string()
-        )
-    );
-}
-
-
-// #[ignore]
-#[test]
-fn test_extract_icon_seoulnews() {
-    setup();
-    let filename = format!("{}websites/www.seoulnews.net.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &String::default() ); // &"https://www.seoulnews.net".to_string()
-    assert!(r.is_ok());
-    assert_eq!(
-        r.unwrap(),
-        "https://static.themainstreammedia.com/web/newsnet/favicons/favicon.ico"
-    );
-}
-
-// #[ignore]
-#[test]
-fn test_extract_icon_relay_rd() {
-    setup();
-    let filename = format!("{}websites/relay_rd.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, "https://www.relay.fm/rd"); // &"https://www.relay.fm/rd".to_string()
-    assert_eq!(
-        r,
-        Ok(
-            "https://www.relay.fm/assets/favicon-fd28d8fa5c60ac2860b452a36991933e905f82f1349c4a5ad171dd0586b2b331.ico"
-                .to_string()
-        )
-    );
-}
-
-
-// #[ignore]
-#[test]
-fn test_extract_icon_neweurop() {
-    setup();
-    let filename = format!("{}websites/neweurope.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, "" ); // &"https://www.neweurope.eu/".to_string()
-    assert_eq!(
-        r,
-        Ok("https://www.neweurope.eu/wp-content/uploads/2019/07/NE-16.jpg".to_string())
-    );
-}
-
-#[ignore]
-#[test]
-fn test_extract_icon_kolkata() {
-    setup();
-    let filename = format!("{}websites/{}", TD_BASE, "kolkata_tv.html");
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &String::default());
-    assert_eq!(r, Ok("https://s14410312.in1.wpsitepreview.link/wp-content/themes/KolkataTv/assets/images/scroll-fav.png".to_string()));
-}
-
-#[ignore]
-#[test]
-fn test_extract_icon_nn() {
-    setup();
-    let filename = format!("{}websites/naturalnews_com.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &String::default());
-    assert_eq!(
-        r,
-        Ok(
-            "https://www.naturalnews.com/wp-content/themes/naturalnews-child/images/favicon.ico"
-                .to_string()
-        )
-    );
-}
-#[ignore]
-#[test]
-fn test_extract_icon_tvalde() {
-    setup();
-    let filename = format!("{}websites/thevaluable_dev.html", TD_BASE);
-    let page = std::fs::read_to_string(filename).unwrap();
-    let r = extract_icon_from_homepage(page, &String::default());
-    assert_eq!(
-        r,
-        Ok("https://thevaluable.dev/images/favicon.png".to_string())
-    );
-}
-
- */
-
+// later: create sloppy  extract-icon-from-page for missing quotes:
+//  thevaluable_dev            <link rel="shortcut icon" href=https://thevaluable.dev/images/favicon.png>
+// ( "thevaluable_dev.html",   "",          "https://thevaluable.dev/images/favicon.png",                ),
 #[test]
 fn extract_icons() {
     setup();
     //  file name inside zip,   additional-homepage,   expected icon url
     let set: [(&str, &str, &str); 8] = [
-      // later: create sloppy  extract-icon-from-page for missing quotes:
-      //  thevaluable_dev            <link rel="shortcut icon" href=https://thevaluable.dev/images/favicon.png>
-      // ( "thevaluable_dev.html",   "",          "https://thevaluable.dev/images/favicon.png",                ),
       ("naturalnews_com.html", "",
           "https://www.naturalnews.com/wp-content/themes/naturalnews-child/images/favicon.ico",           ),
       ("fromrome.html",               "",
@@ -154,7 +39,6 @@ fn extract_icons() {
     });
 }
 
-// #[ignore]
 #[test]
 fn analyze_icon_local() {
     setup();
@@ -174,7 +58,6 @@ fn analyze_icon_local() {
     ];
     set.iter().for_each(|(ic_name, e_kind)| {
         let filename = format!("{}icons/{}", TD_BASE, ic_name);
-        // trace!("-->file: {}   ", filename);
         let o_blob = mockfilefetcher::file_to_bin(&filename);
         if o_blob.is_err() {
             error!("{:?}  {}", &o_blob.as_ref().err(), &filename);

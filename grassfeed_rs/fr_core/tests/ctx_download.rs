@@ -112,7 +112,7 @@ fn chrono_broken_timestamp() {
     assert!(pars_res.is_err());
     assert_eq!(
         pars_res.err().unwrap().to_string(),
-        "trailing input".to_string()
+        "input contains invalid characters".to_string()
     );
 }
 

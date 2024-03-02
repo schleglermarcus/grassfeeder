@@ -97,7 +97,6 @@ pub fn extract_icon_from_homepage(
         })
         .collect();
     // debug!("numlinktags: {} \n {:?}", link_tags.len(), link_tags);
-
     let icon_list: Vec<String> = link_tags
         .iter()
         .map(|t| {
