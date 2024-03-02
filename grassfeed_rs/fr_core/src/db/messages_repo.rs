@@ -195,9 +195,7 @@ impl IMessagesRepo for MessagesRepo {
     }
 
     fn insert_tx(&self, e_list: &[MessageRow]) -> Result<i64, Box<dyn std::error::Error>> {
-        self.ctx
-            .insert_tx(e_list)
-            .map_err(rusqlite_error_to_boxed)
+        self.ctx.insert_tx(e_list).map_err(rusqlite_error_to_boxed)
     }
 
     /// returns  the number of read lines for that source id:   -1 for undefined

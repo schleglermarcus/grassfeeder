@@ -42,6 +42,7 @@ pub struct MessageStateMap {
 }
 
 impl MessageStateMap {
+    #[allow(clippy::too_many_arguments)]
     pub fn insert(
         &mut self,
         msg_id_: isize,
@@ -92,7 +93,7 @@ impl MessageStateMap {
 
     pub fn get_subscription_icon_id(&self, msg_id: isize) -> usize {
         if let Some(st) = self.msgmap.get(&msg_id) {
-            return st.subscription_icon_id as usize;
+            return st.subscription_icon_id;
         }
         IDX_03_ICON_TRANSPARENT_48
     }

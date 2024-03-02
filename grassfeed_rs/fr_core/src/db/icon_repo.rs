@@ -85,9 +85,8 @@ impl IconRepo {
                 hm.insert(id, se);
             });
         } else {
-            warn!("subscription file not found: {}", &self.filename);
+            debug!("icon list file not found: {}", &self.filename);
         }
-
         true
     }
 

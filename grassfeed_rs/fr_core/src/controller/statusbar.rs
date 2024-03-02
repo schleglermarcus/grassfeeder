@@ -95,7 +95,6 @@ impl StatusBar {
         }
     }
 
-    // #[allow(clippy::needless_range_loop)] // handle this later
     pub fn update(&mut self) {
         let mut need_update1: bool = false;
         let mut need_update2: bool = false;

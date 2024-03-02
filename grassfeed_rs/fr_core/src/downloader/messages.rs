@@ -245,10 +245,7 @@ pub fn feed_text_to_entries(
 }
 
 //  modifies the message list, if a date entry can be interpreted
-pub fn strange_datetime_recover(
-    newmessages: &mut [MessageRow],
-    dl_text: &str,
-) -> Option<String> {
+pub fn strange_datetime_recover(newmessages: &mut [MessageRow], dl_text: &str) -> Option<String> {
     if newmessages.is_empty() {
         return None;
     }

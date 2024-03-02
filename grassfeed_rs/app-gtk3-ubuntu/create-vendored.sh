@@ -8,15 +8,17 @@ test -f vendor && rm -rf vendor
 cargo vendor
 
 find vendor/windows/src      -name Windows -type d |xargs rm -rf
-find vendor/windows-sys/src  -name Windows -type d |xargs rm -rfv
-find vendor/windows-sys*     -name Windows -type d |xargs rm -rfv
-
+find vendor/windows-sys/src  -name Windows -type d |xargs rm -rf
+find vendor/windows-sys*     -name Windows -type d |xargs rm -rf
 find vendor/windows* -name lib -type d |xargs rm -rf
 find vendor/winapi* -name lib -type d |xargs rm -rf
 
-# find vendor/winapi* -name src -type d |xargs rm -rfv
-# find vendor/winnow -name src -type d |xargs rm -rfv
-# find vendor/winnow -name examples -type d |xargs rm -rfv
+find vendor/image -name tests -type d |xargs rm -rfv
+
+
+# That file sqlite3.c is big, and still needed to build
+# find vendor/libsqlite3-sys/sqlcipher -name sqlite3.c  -type f |xargs rm -rfv
+
 
 mv vendor sources-vendored
 tar c sources-vendored |gzip >src_vendored.tar.gz

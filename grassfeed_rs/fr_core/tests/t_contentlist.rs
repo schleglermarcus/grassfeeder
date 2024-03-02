@@ -17,7 +17,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 // test if feed update content matching works
-// #[ignore]
 #[test]
 fn test_new_entries_filter() {
     setup();
@@ -71,6 +70,7 @@ fn test_new_entries_filter() {
     let changed_title = "moon";
     fce0.title = changed_title.to_string();
     new_list.push(fce0);
+
     let insert_list =
         match_new_entries_to_existing(&new_list.to_vec(), exi_i.clone(), job_sender.clone());
     assert_eq!(insert_list.len(), 0);
@@ -106,7 +106,6 @@ fn test_new_entries_filter() {
     }
 }
 
-// #[ignore]
 #[test]
 fn parse_wissensmanufaktur() {
     setup();
@@ -152,7 +151,6 @@ fn parse_convert_entry_file1() {
     assert_eq!(fce.content_text, "Today: Lorem ipsum dolor sit amet");
 }
 
-// #[ignore]
 #[test]
 fn parse_linuxcompati() {
     setup();
@@ -188,7 +186,8 @@ fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
             (logger_config::QuietFlags::Controller as u64)
-                | (logger_config::QuietFlags::Config as u64),
+                | (logger_config::QuietFlags::Config as u64)
+                | (logger_config::QuietFlags::Db as u64),
         );
         unzipper::unzip_some();
     });

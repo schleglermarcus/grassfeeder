@@ -1,4 +1,4 @@
-use  crate::config::configmanager::ConfigManager;
+use crate::config::configmanager::ConfigManager;
 use crate::controller::browserpane::BrowserPane;
 use crate::controller::browserpane::IBrowserPane;
 use crate::controller::contentdownloader::Downloader;
@@ -409,7 +409,7 @@ impl ContentList {
             let st = self.msg_state.read().unwrap();
             let title_string = st.get_title(fc.message_id).unwrap_or_default();
             let o_icon: Option<usize> = match isfolder {
-                true => Some(st.get_subscription_icon_id(fc.message_id as isize)),
+                true => Some(st.get_subscription_icon_id(fc.message_id)),
                 false => None,
             };
             valstore.insert_list_item(
@@ -750,7 +750,6 @@ impl IContentList for ContentList {
             if o_title.is_none() {
                 continue;
             }
-
             let title = o_title.unwrap();
             let o_icon: Option<usize> = match isfolder {
                 true => Some(st.get_subscription_icon_id(msg.message_id)),
@@ -794,11 +793,6 @@ impl IContentList for ContentList {
     fn toggle_favorite(&self, msg_id: isize, list_position: i32, new_fav: Option<bool>) {
         let (_subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
         if isfolder {
-            trace!(
-                "Message {}  isfolder:{} not reacting on fav toggle",
-                msg_id,
-                isfolder
-            );
             return;
         }
         let o_msg = (*(self.messagesrepo_r.borrow_mut())).get_by_index(msg_id);

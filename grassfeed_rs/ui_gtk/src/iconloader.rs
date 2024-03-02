@@ -6,7 +6,6 @@ use lz4_compression::prelude;
 use std::fs::File;
 use std::io::Read;
 
-#[allow(dead_code)]
 impl IconLoader {
     ///
     pub fn file_to_bin(filename: &str) -> std::io::Result<Vec<u8>> {
@@ -57,7 +56,4 @@ pub fn get_missing_icon() -> Pixbuf {
 #[allow(dead_code)]
 pub const ICON_MISSING_STR: &str = "8AWJUE5HDQoaCgAAAA1JSERSAAAAQAQA+dQIAwAAAJ23gewAAAAEZ0FNQQAAsY8L/GEFAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAGUExURQAAAP8AABv/jSIAAAABdFJOUwBA5thmAAAAB3RJTUUH5QwbBCYjrgVHhAAAAC9JREFUWMPtzDEBACAMA7Di3zQaNr6SCEjOowiqggwJBAKBQCAQCASCf4ItQUVwAfOIBwFYkamfAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIxLTEyLTI3VDAzOjM4OjM1KzAxOjAwcFZSLTEAb21vZGlmeTEAB/ABAQvqkQAAAABJRU5ErkJggg==";
 
-#[cfg(test)]
-mod _i {
-    use super::*;
-}
+// #[cfg(test)] mod _i {     use super::*; }

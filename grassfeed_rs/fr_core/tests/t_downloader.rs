@@ -17,7 +17,6 @@ fn feed_text_to_entries_tages() {
     );
 }
 
-
 // #[ignore]
 #[test]
 fn parse_blogger_af() {

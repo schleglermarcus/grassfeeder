@@ -70,10 +70,11 @@ pub fn retrieve_homepage_from_feed_text(
     )
 }
 
+// later:  create sloppy icon extractor
 /// return   Result < icon-url , error-message  >
 pub fn extract_icon_from_homepage(
     hp_content: String,
-    homepage_url: &String,
+    homepage_url: &str,
 ) -> Result<String, String> {
     let dom: tl::VDom = match tl::parse(&hp_content, tl::ParserOptions::default()) {
         Ok(d) => d,
@@ -84,15 +85,19 @@ pub fn extract_icon_from_homepage(
     let link_tags: Vec<&HTMLTag> = dom
         .nodes()
         .iter()
+        // .inspect(|n| trace!("N: {:?} ", &n))
         .filter_map(|n| match n {
             Node::Tag(htmltag) => Some(htmltag),
             _ => None,
         })
         .filter(|htmltag| {
             let t_name = htmltag.name().as_utf8_str().into_owned();
-            t_name == "link"
+            // debug!(                "N: {:?}  A0:{:?}  ",                &t_name,                &htmltag.attributes().iter().next()            );
+            t_name == "link" || t_name == "meta"
         })
         .collect();
+    // debug!("numlinktags: {} \n {:?}", link_tags.len(), link_tags);
+
     let icon_list: Vec<String> = link_tags
         .iter()
         .map(|t| {
@@ -104,6 +109,7 @@ pub fn extract_icon_from_homepage(
                 .collect();
             attrmap
         })
+        // .inspect(|at_m| debug!("AM1:{:?}", at_m))
         .filter(|attrmap| attrmap.get("rel").is_some())
         .filter(|attrmap| {
             if let Some(typ_e) = attrmap.get("type") {
@@ -123,7 +129,7 @@ pub fn extract_icon_from_homepage(
             icon_href = format!("https:{icon_href}");
         }
         if !icon_href.starts_with("http:") && !icon_href.starts_with("https:") {
-            let mut homepage_host: String = homepage_url.clone();
+            let mut homepage_host: String = homepage_url.to_string();
             if icon_href.starts_with('/') {
                 match Url::parse(homepage_url) {
                     Ok(parsed) => {
@@ -137,7 +143,10 @@ pub fn extract_icon_from_homepage(
         }
         return Ok(icon_href);
     }
-    Err("no rel_icon  on page  found".to_string())
+    Err(format!(
+        "no rel_icon on page found: #linktags:{} ",
+        link_tags.len()
+    ))
 }
 
 pub fn feed_url_to_main_url(f_u: String) -> String {
