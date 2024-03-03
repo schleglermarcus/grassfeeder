@@ -1,9 +1,3 @@
-- Use resvg  to convert   svg icons
-- deactivate tree-blocked   when filling the tree
-- Aggregate View:  use favorite colum for subscription icon
-
-
-
 - put icons into database, add storing the icon-url, web-date, web-size with it.
 
 - put errors in a database
