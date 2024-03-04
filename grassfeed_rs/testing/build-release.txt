@@ -8,8 +8,9 @@
   git merge origin/v0_2_2
   git commit
   git push origin main
-  (cd grassfeed_rs ; cargo test ; cd app-gtk3-linux ; ./debian-stage2.sh )
-  (cd grassfeed_rs/app-gtk3-ubuntu/ ; ./deb-sign.sh )
+  cd grassfeed_rs   ; cargo test  
+  (cd app-gtk3-linux ; ./debian-stage2.sh )
+  (cd app-gtk3-ubuntu/ ; ./deb-sign.sh )
 
 
 * Put the work folder back to main

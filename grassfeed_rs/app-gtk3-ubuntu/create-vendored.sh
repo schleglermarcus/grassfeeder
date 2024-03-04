@@ -14,8 +14,8 @@ find vendor/windows* -name lib -type d |xargs rm -rf
 find vendor/winapi* -name lib -type d |xargs rm -rf
 
 
-# image/tests is used by the image lib to build :-(
-find vendor/image -name examples -type d |xargs rm -rf
+# image/tests and image/examples is used by the image lib to build :-(
+# find vendor/image -name examples -type d |xargs rm -rf
 
 # That file sqlite3.c is big, and still needed to build
 # find vendor/libsqlite3-sys/sqlcipher -name sqlite3.c  -type f |xargs rm -rfv

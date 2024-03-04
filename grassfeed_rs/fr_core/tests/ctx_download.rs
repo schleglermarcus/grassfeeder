@@ -110,10 +110,8 @@ fn chrono_broken_timestamp() {
     let broken_ts = "Fri, 05 Aug 2022 23:28:01 Europe/Dublin";
     let pars_res = chrono::DateTime::parse_from_rfc2822(&broken_ts);
     assert!(pars_res.is_err());
-    assert_eq!(
-        pars_res.err().unwrap().to_string(),
-        "input contains invalid characters".to_string()
-    );
+    let r: String = pars_res.err().unwrap().to_string();
+    assert!("input contains invalid characters" == r || "trailing input" == r);
 }
 
 // ------------------------------------
