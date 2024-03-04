@@ -23,8 +23,8 @@ once_cell = ">=1.12.0"
 rust-i18n = "1.1.1"                                                # 1.1.4 seems to attract files from outside
 fern = { version = ">=0.6", features = ["colored", "chrono"] }
 dirs-next = ">=2.0.0"
-
-
+## Workaround due to a dependency resolution issue with the vendored sources.
+js-sys = "=0.3.68"
 
 [profile.release]
 opt-level = 's' # Optimize for size.

@@ -25,7 +25,7 @@ signal-hook = ">=0.3.15"
 chrono = ">=0.4.24"
 webbrowser = ">=0.7.1"
 rust-i18n = "1.1.1"                                         # 1.1.4 seems to attract files from outside
-fern = { version = "^0.6.2", features = ["colored"] }
+fern = { version = ">=0.6", features = ["colored"] }
 flume = { version = ">=0.10.14" }
 lz4-compression = "^0.7.0"
 rusqlite = { version = ">=0.31.0" } # , features = ["bundled"]
@@ -53,7 +53,7 @@ bmp = ">=0.5.0"   # no more tinybmp, due to code size
 [dev-dependencies]
 rand = "0.8.5"
 zip = "0.6.3"
-fern = { version = "^0.6.2", features = ["colored"] }
+fern = { version = ">=0.6", features = ["colored"] }
 xmlparser = ">=0.13.5"
 
 [package.metadata.i18n]

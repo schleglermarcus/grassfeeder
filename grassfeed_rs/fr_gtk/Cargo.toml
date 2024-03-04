@@ -17,8 +17,7 @@ context = { path = "../context" }
 resources = { path = "../resources" }
 ui_gtk = { path = "../ui_gtk" }
 rust-i18n = "1.1.1"	# 1.1.4 seems to attract files from outside
-fern = { version = "^0.6.2", features = ["colored"] }
-# gtk = { version = "0.16.2", features = ["v3_24_30 "] }	#    2023-03 apply this, deprecate ubuntu20?
+fern = { version = ">=0.6", features = ["colored"] }
 gtk = { package = "gtk", version = "^0.15.5", features = ["v3_22_30"] }
 gdk = "^0.15.2"
 gdk-sys = "^0.15.1"
