@@ -1,4 +1,11 @@
+
+
+- Update subordinated feed counts, when deleting from folder
+
+- Backspace to reset the search bar
+
 - put icons into database, add storing the icon-url, web-date, web-size with it.
+
 
 - put errors in a database
 

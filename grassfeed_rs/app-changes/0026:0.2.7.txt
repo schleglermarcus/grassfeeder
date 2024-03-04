@@ -1,4 +1,6 @@
 Sun, 03 Mar 2024 00:00:00 +0000
-
-
-- put icons into database, add storing the icon-url, web-date, web-size with it.
+* Added website icon support: Svg, png disguised as ico
+* Aggregate View: use favorite colum for subscription icon
+* Libraries update, exchanged tinybmp for bmp
+* Bugfix: Delete filtered messages did not result in list update
+* Bugfix: Deactivate tree-blocked when filling subscriptions
