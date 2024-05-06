@@ -90,11 +90,7 @@ impl Step<ComprehensiveInner> for ParseFeedString {
         if !feed_title.is_empty() {
             inner.feed_title = feed_title;
         }
-        trace!(
-            "COMPR2:  HP={}  TI={}",
-            inner.feed_homepage,
-            inner.feed_title
-        );
+        // trace!(            "COMPR2:  HP={}  TI={}",            inner.feed_homepage,            inner.feed_title        );
         if !inner.feed_homepage.is_empty() {
             StepResult::Continue(Box::new(ComprAnalyzeHomepage(inner)))
         } else {
@@ -146,28 +142,13 @@ impl Step<ComprehensiveInner> for ComprLoadIcon {
         let r = (*inner.web_fetcher).request_url_bin(inner.icon_url.clone());
         match r.status {
             200 => {
-                trace!(
-                    "icon-download: {} '{}'  =>  {} {} {} ",
-                    inner.feed_url_edit,
-                    inner.icon_url,
-                    &r.get_status(),
-                    r.get_kind(),
-                    r.error_description
-                );
+                // trace!(                    "icon-download: {} '{}'  =>  {} {} {} ",                    inner.feed_url_edit,                    inner.icon_url,                    &r.get_status(),                    r.get_kind(),                    r.error_description                );
                 inner.icon_bytes = r.content_bin;
-
                 StepResult::Continue(Box::new(ComprStoreIcon(inner)))
             }
             _ => {
                 inner.download_error_happened = true;
-                debug!(
-                    "icon-download: {} '{}'  =>  {} {} {} ",
-                    inner.feed_url_edit,
-                    inner.icon_url,
-                    r.get_status(),
-                    r.get_kind(),
-                    r.error_description
-                );
+                // debug!(                    "icon-download: {} '{}'  =>  {} {} {} ",                    inner.feed_url_edit,                    inner.icon_url,                    r.get_status(),                    r.get_kind(),                    r.error_description                );
                 StepResult::Continue(Box::new(ComprFinal(inner)))
             }
         }

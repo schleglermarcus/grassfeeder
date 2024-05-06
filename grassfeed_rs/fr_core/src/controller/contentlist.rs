@@ -440,38 +440,46 @@ impl ContentList {
                 let su_icon = (*feedsources)
                     .borrow()
                     .get_subs_icon_id(msg.subscription_id);
-                // trace!(                    "fill_state_map msg:{}  subs:{}  ICON:  {} ",                    msg.message_id, msg.subscription_id, su_icon                );
                 self.insert_state_from_row(msg, Some(n as isize), su_icon);
             });
         }
     }
 
     fn delete_messages(&self, del_ids: &[i32]) {
-        (self.messagesrepo_r)
-            .borrow_mut()
-            .update_is_deleted_many(del_ids, true);
+        let del_ids_i: Vec<isize> = del_ids.iter().map(|i| *i as isize).collect::<Vec<isize>>();
+        let child_subs_ids;
+        {
+            let mut msg_rep = (self.messagesrepo_r).borrow_mut();
+            child_subs_ids = msg_rep.get_subscription_ids(&del_ids_i);
+            msg_rep.update_is_deleted_many(del_ids, true);
+        }
+        debug!(
+            "delete_messages : del_ids_i   {:?}   subs_ids: {:?} ",
+            del_ids_i, child_subs_ids
+        );
 
         let o_neighbour = self
             .msg_state
             .read()
             .unwrap()
             .find_neighbour_message(del_ids);
-
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         trace!(
-            "delete_messages: {:?}  subsid:{:?}  next={:?}",
+            "delete_messages: {:?}  subsid:{:?}  next={:?}  TODO update children counts ",
             del_ids,
             subs_id,
             o_neighbour
         );
-
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             feedsources.borrow().clear_read_unread(subs_id);
         }
 
         self.addjob(CJob::RequestUnreadAllCount(subs_id));
+        for child_subs_id in child_subs_ids {
+            debug!("requesting UnreadCount for child : {} ", child_subs_id);
+            self.addjob(CJob::RequestUnreadAllCount(child_subs_id));
+        }
         self.addjob(CJob::UpdateMessageList);
-
         if let Some((msg_id, _gui_list_pos)) = o_neighbour {
             self.addjob(CJob::ListSetCursorToMessage(msg_id));
         } else {
@@ -602,6 +610,7 @@ impl IContentList for ContentList {
                         .switch_browsertab_content(msg_id, title, o_co_au_ca);
                 }
                 CJob::ListSetCursorToPolicy => self.set_cursor_to_policy(),
+
                 CJob::RequestUnreadAllCount(feed_source_id) => {
                     let msg_count = (*self.messagesrepo_r).borrow().get_src_sum(feed_source_id);
                     let read_count = (*self.messagesrepo_r).borrow().get_read_sum(feed_source_id);

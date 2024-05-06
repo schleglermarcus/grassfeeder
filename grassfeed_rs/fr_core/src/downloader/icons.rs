@@ -64,7 +64,9 @@ impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
-            // if !inner.icon_url.is_empty() {                trace!(                "IconLoadStart:  ID:{}  db-HP:{}   prev-iconurl:{}  HP:{} icon_id:{}  {}  feed-url:{} ",                inner.subs_id,                subs_e.website_url,                inner.icon_url,                inner.feed_homepage,                subs_e.icon_id ,                 subs_e.display_name, subs_e.url            );            }
+            if !inner.icon_url.is_empty() {
+                trace!(                "IconLoadStart:  ID:{}  db-HP:{}   prev-iconurl:{}  HP:{} icon_id:{}  {}  feed-url:{} ",                inner.subs_id,                subs_e.website_url,                inner.icon_url,                inner.feed_homepage,                subs_e.icon_id ,                 subs_e.display_name, subs_e.url            );
+            }
             if !subs_e.website_url.is_empty() {
                 inner.feed_homepage = subs_e.website_url;
                 return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
@@ -114,10 +116,10 @@ struct HomepageDownload(IconInner);
 impl Step<IconInner> for HomepageDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        //         trace!("HomepageDownload:   ID:{} ", inner.subs_id);
         let dl_text = workaround_https_declaration(&inner.feed_download_text);
         let (homepage, _feed_title, errtext) =
             util::retrieve_homepage_from_feed_text(dl_text.as_bytes(), &inner.feed_url);
+        // trace!(            "HomepageDownload({})  i_hp:{}  retr_hp:{}  title:{}  err:{}    feed_url:{} ",            inner.subs_id, inner.feed_homepage, homepage, _feed_title, errtext, inner.feed_url        );
         if !homepage.is_empty() {
             if homepage != inner.feed_url {
                 inner.feed_homepage = homepage;
@@ -163,17 +165,17 @@ pub struct IconAnalyzeHomepage(IconInner);
 impl Step<IconInner> for IconAnalyzeHomepage {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        // trace!(            "IconAnalyzeHomepage({})   i.feed_hp:{} ",            inner.subs_id,            inner.feed_homepage        );
+        // trace!(            "IconAnalyzeHomepage({})   feed_hp:{} ",            inner.subs_id,            inner.feed_homepage        );
         let r = (*inner.web_fetcher).request_url(inner.feed_homepage.clone());
         match r.status {
             200 | 202 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
                 Ok(icon_url) => {
                     inner.icon_url = icon_url;
-                    //  trace!(                        "IconAnalyzeHomepage( {} ) - extracted -  iconurl {} ",                        inner.subs_id,                        &inner.icon_url                    );
+                    // trace!(                        "IconAnalyzeHomepage( {} ) - extracted -  iconurl {} ",                        inner.subs_id,                        &inner.icon_url                    );
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 }
                 Err(e_descr) => {
-                    //  debug!("IconAnalyzeHomepage({}) E: {} ", inner.subs_id, e_descr);
+                    // debug!("IconAnalyzeHomepage({}) E: {} ", inner.subs_id, e_descr);
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconsAHEx,
@@ -185,7 +187,7 @@ impl Step<IconInner> for IconAnalyzeHomepage {
             },
             _ => {
                 let alt_hp = util::feed_url_to_main_url(inner.feed_url.clone());
-                //  debug!(                    "IconAnalyzeHomepage({})   STATUS:{} ",                    inner.subs_id, r.status                );
+                // trace!(                    "IconAnalyzeHomepage({})   STATUS:{} ",                    inner.subs_id,                    r.status                );
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconsAHMain,
@@ -207,7 +209,7 @@ struct IconFallbackSimple(IconInner);
 impl Step<IconInner> for IconFallbackSimple {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner = self.0;
-        //  trace!("IconFallbackSimple( {} )  ", inner.subs_id,);
+        // trace!("IconFallbackSimple( {} )  ", inner.subs_id,);
         if inner.icon_url.is_empty() {
             inner.icon_url = util::feed_url_to_icon_url(inner.feed_url.clone());
         }
@@ -238,6 +240,7 @@ impl Step<IconInner> for IconDownload {
             }
             _ => {
                 inner.download_error_happened = true;
+                // debug!(                    "IconDownload ERR {}  {}   {}   ",                    r.get_kind(),                    r.error_description,                    inner.icon_url                );
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconsDownload,
@@ -262,7 +265,7 @@ impl Step<IconInner> for IconCheckIsImage {
             return StepResult::Continue(Box::new(IconSvgToPng(inner)));
         }
         if decide_downscale(inner.icon_bytes.len(), &an_res) {
-            // trace!(                "IconCheckIsImage:  go to downscale  Url:{} ",                inner.icon_url            );
+            // trace!(                "IconCheckIsImage:  go to downscale  Url:{} ",               inner.icon_url            );
             return StepResult::Continue(Box::new(IconDownscale(inner)));
         }
         if an_res.kind == IconKind::AnalyseDoneUnknown || an_res.kind == IconKind::TooSmall {
@@ -293,7 +296,6 @@ pub struct IconSvgToPng(pub IconInner);
 impl Step<IconInner> for IconSvgToPng {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        // trace!("IconSvgToPng: ...  {:?} ", inner.icon_kind);
         let r = png_from_svg(&inner.icon_bytes);
         if r.is_err() {
             let msg = format!(

@@ -4,7 +4,11 @@
 
 - Backspace to reset the search bar
 
+- https://www.inka-magazin.de/stadtmagazin-karlsruhe-baden-pfalz.html
+  Multiple Feeds On one Page, Create a Selector
+
 - put icons into database, add storing the icon-url, web-date, web-size with it.
+
 
 
 - put errors in a database
@@ -18,6 +22,10 @@ Later:
 - gtk_objects  with arc-mutex instead of arc-rwlock, due to clippy warning
 
 -   rustls-webpki v0.101.4    rustls-webpki v0.100.2	# ureq = ">=2.6.2"   # uneven webpki versions. later: advance to 2.8.0
+
+- Later: extra solution for  telepolis icon:
+    According to  Feed:  https://www.heise.de/icons/favicon.ico?.ltc.308a82f7715a4c82e83b
+    Really:          https://www.telepolis.de/icons/favicon.ico?.ltc.308a82f7715a4c82e83b
 
 
 - Systray Icon integration, Use different app-indicator  lib

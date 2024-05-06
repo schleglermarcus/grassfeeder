@@ -10,6 +10,7 @@ use context::StartupWithAppContext;
 use context::TimerEvent;
 use context::TimerReceiver;
 use context::TimerRegistry;
+use itertools::Itertools;
 use rusqlite::Connection;
 use rusqlite::Row;
 use std::sync::Arc;
@@ -35,9 +36,6 @@ pub trait IMessagesRepo {
 
     /// returns   subscription id  , is_read
     fn get_is_read(&self, repo_id: isize) -> (isize, bool);
-
-    // #[deprecated]
-    // fn get_all_messages(&self) -> Vec<MessageRow>;
 
     /// does not clear the cache !
     fn update_is_read_many(&self, repo_ids: &[i32], new_is_read: bool);
@@ -84,6 +82,8 @@ pub trait IMessagesRepo {
     fn cache_clear(&mut self);
 
     fn get_all_messages(&mut self) -> MessageIterator;
+
+    fn get_subscription_ids(&mut self, msg_ids: &[isize]) -> Vec<isize>;
 }
 
 pub struct MessagesRepo {
@@ -179,7 +179,7 @@ impl MessagesRepo {
     }
 
     fn columns_msg_reduced() -> &'static str {
-        "message_id, feed_src_id, title, post_id, link, is_deleted, is_read, entry_src_date, markers  	"
+        "message_id, feed_src_id, title, post_id, link, is_deleted, is_read, entry_src_date, markers"
     }
 }
 
@@ -465,6 +465,37 @@ impl IMessagesRepo for MessagesRepo {
             cache: &self.cached_rows,
             index: 0,
         }
+    }
+
+    fn get_subscription_ids(&mut self, msg_ids: &[isize]) -> Vec<isize> {
+        let joined = msg_ids
+            .iter()
+            .map(|r| r.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+        let prepared = format!(
+            "SELECT {} FROM {} WHERE {} in ( {} ) ORDER BY feed_src_id  ",
+            Self::columns_msg_reduced(),
+            MessageRow::table_name(),
+            MessageRow::index_column_name(),
+            joined,
+        );
+        self.request_messages_reduced(&prepared);
+        let subs_id_list: Vec<isize> = self
+            .cached_rows
+            .iter()
+            .filter(|m| msg_ids.contains(&m.message_id))
+            .map(|msg| msg.subscription_id)
+            .dedup()
+            .collect::<Vec<isize>>();
+        trace!(
+            "get_subscription_ids: {}  {:?}    #CACHED:{} ",
+            prepared,
+            subs_id_list,
+            self.cached_rows.len()
+        );
+
+        subs_id_list
     }
 
     // impl IMessagesRepo

@@ -26,6 +26,9 @@ pub const CONV_TO: &dyn Fn(String) -> Option<SubscriptionEntry> = &json_to_subsc
 pub const CONV_FROM: &dyn Fn(&SubscriptionEntry) -> Option<String> = &subscription_entry_to_json;
 
 pub trait ISubscriptionRepo {
+
+
+  // TODO rename get_children
     /// sorts by folder_position
     fn get_by_parent_repo_id(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry>;
 

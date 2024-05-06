@@ -103,9 +103,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
     let folder2 = subs_move.add_new_folder_at_parent("folder2".to_string(), 0);
     let folder1 = subs_move.add_new_folder_at_parent("folder1".to_string(), folder2);
-    if true {}
-
-    if false {
+    if true {
         let f5 = subs_move.add_new_folder_at_parent("folder5".to_string(), 0);
         let subs_id_dyn = (*subs_move).add_new_subscription_at_parent(
             url_dynamic.clone(),
@@ -151,12 +149,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         subs_move.add_new_folder_at_parent("5_1".to_string(), f5);
 
         subs_move.add_new_subscription_at_parent(
-            "https://www.bitchute.com/feeds/rss/channel/mrastrotheology".to_string(),
-            "bitchute".to_string(),
-            f5,
-            false,
-        );
-        subs_move.add_new_subscription_at_parent(
             "https://freiheitsfunken.info/feed/rss/".to_string(),
             "Frfunken".to_string(),
             folder1,
@@ -165,6 +157,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         subs_move.add_new_subscription_at_parent(
             "https://thevaluable.dev/index.xml".to_string(),
             "valdev".to_string(),
+            folder1,
+            false,
+        );
+        subs_move.add_new_subscription_at_parent(
+            "https://www.heise.de/tp/news-atom.xml".to_string(),
+            "TP ".to_string(),
             folder1,
             false,
         );

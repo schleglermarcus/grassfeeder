@@ -121,7 +121,7 @@ pub fn extract_icon_from_homepage(
         .filter(|attrmap| attrmap.get("rel").unwrap().contains("icon"))
         .filter_map(|attrmap| attrmap.get("href").cloned())
         .collect();
-    // trace!("iconlist={:?}", icon_list);
+    // debug!(        "extract_icon_from_homepage:  hp_url:{homepage_url} iconlist={:?}",        icon_list    );
     if !icon_list.is_empty() {
         let mut icon_href: String = icon_list.first().unwrap().clone();
         if icon_href.starts_with("//") {
