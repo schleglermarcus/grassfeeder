@@ -484,17 +484,10 @@ impl IMessagesRepo for MessagesRepo {
         let subs_id_list: Vec<isize> = self
             .cached_rows
             .iter()
-            .filter(|m| msg_ids.contains(&m.message_id))
             .map(|msg| msg.subscription_id)
             .dedup()
             .collect::<Vec<isize>>();
-        trace!(
-            "get_subscription_ids: {}  {:?}    #CACHED:{} ",
-            prepared,
-            subs_id_list,
-            self.cached_rows.len()
-        );
-
+        // trace!(            "get_subscription_ids: {}  {:?}    #CACHED:{} ",            prepared,            subs_id_list,            self.cached_rows.len()        );
         subs_id_list
     }
 

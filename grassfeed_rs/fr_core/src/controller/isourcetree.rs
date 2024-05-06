@@ -223,7 +223,7 @@ impl ISourceTreeController for SourceTreeController {
         let mut iconval = AValue::None;
         if let Some(ie) = (*self.iconrepo_r)
             .borrow()
-            .get_by_index(fse.icon_id as isize)
+            .get_by_index_(fse.icon_id as isize)
         {
             iconval = AValue::AIMG(ie.icon);
         }

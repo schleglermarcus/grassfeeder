@@ -56,7 +56,6 @@ pub fn create_tree_store() -> (TreeStore, usize) {
 // Store:	Feed-Icon	Feed-Source-Name	Number-items	Status-Icon		Is-Folder	DB-ID	num-unread
 // View:	Feed-Icon	Feed-Source-Name	Number-items	Status-Icon
 //
-//
 // tree_store.connect_row_deleted(); Does not give a usable path, useless for drag recognition
 //
 // https://developer-old.gnome.org/pygtk/stable/class-gtkcellrenderer.html
@@ -125,7 +124,6 @@ pub fn create_treeview(
     let drag_s7 = drag_state.clone();
     let esw = EvSenderWrapper(g_ev_se.clone());
     let g_o_a_c = gtk_obj_a.clone();
-
     let connect_cursor_changed_handler = move |treeview: &TreeView| {
         let (o_tp, _tree_view_column) = treeview.cursor();
         if let Some(mut treepath) = o_tp {
@@ -133,10 +131,7 @@ pub fn create_treeview(
             let in_drag = (*drag_s7).read().unwrap().block_row_activated();
             if !in_drag {
                 if tree_blocked {
-                    debug!(
-                        " in-drag:{in_drag}   tree-blocked:{tree_blocked}  TreeRowActivated  {:?} ",
-                        treepath.indices_with_depth()
-                    );
+                    // debug!(                        " in-drag:{in_drag}   tree-blocked:{tree_blocked}  TreeRowActivated  {:?} ",                        treepath.indices_with_depth()                    );
                 } else {
                     let mut repo_id: i32 = -1;
                     let selection = treeview.selection();
@@ -151,9 +146,7 @@ pub fn create_treeview(
             }
         }
     };
-
     treeview1.connect_cursor_changed(connect_cursor_changed_handler);
-
     let ev_se_3 = g_ev_se.clone();
     treeview1.connect_button_press_event(move |p_tv, ev_but| {
         let mut source_repo_id: i32 = -1;

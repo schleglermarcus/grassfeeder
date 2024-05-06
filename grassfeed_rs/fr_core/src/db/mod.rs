@@ -2,6 +2,7 @@ pub mod check_consistency;
 pub mod errorentry;
 pub mod errors_repo;
 pub mod icon_repo;
+pub mod icon_row;
 pub mod message;
 pub mod message_state;
 pub mod messages_repo;

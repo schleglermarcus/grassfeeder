@@ -1,7 +1,5 @@
 
-
-- Update subordinated feed counts, when deleting from folder
-
+- put errors in a database
 - Backspace to reset the search bar
 
 - https://www.inka-magazin.de/stadtmagazin-karlsruhe-baden-pfalz.html
@@ -10,8 +8,6 @@
 - put icons into database, add storing the icon-url, web-date, web-size with it.
 
 
-
-- put errors in a database
 
 
 Later:

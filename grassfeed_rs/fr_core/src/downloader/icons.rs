@@ -371,7 +371,7 @@ impl Step<IconInner> for IconCheckPresent {
         }
         inner.compressed_icon = util::compress_vec_to_string(&inner.icon_bytes);
         let existing_icons: Vec<IconEntry> =
-            inner.iconrepo.get_by_icon(inner.compressed_icon.clone());
+            inner.iconrepo.get_by_icon_(inner.compressed_icon.clone());
         if !existing_icons.is_empty() {
             let existing_id = existing_icons[0].icon_id;
             //  trace!(                "icon already there. {}=>{}  subs: {} ",                inner.fs_icon_id_old,                existing_id,                inner.subs_id            );

@@ -328,7 +328,7 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
         let mut inner = self.0;
         inner.advance_step();
         inner.send_gp(None);
-        let all_icons: Vec<IconEntry> = inner.iconrepo.get_all_entries();
+        let all_icons: Vec<IconEntry> = inner.iconrepo.get_all_entries_();
         let mut ic_first: HashMap<String, isize> = HashMap::new();
         let mut replace_ids: HashMap<isize, isize> = HashMap::new(); // subsequent-icon-id =>  previous icon-id
         all_icons
@@ -392,7 +392,7 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
         let mut reset_icon_subs_ids: Vec<i32> = Vec::default();
         let all_icon_ids: Vec<isize> = inner
             .iconrepo
-            .get_all_entries()
+            .get_all_entries_()
             .iter()
             .map(|ie| ie.icon_id)
             .collect::<Vec<isize>>();

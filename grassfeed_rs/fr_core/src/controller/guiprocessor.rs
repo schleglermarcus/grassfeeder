@@ -433,7 +433,7 @@ impl GuiProcessor {
     }
 
     fn start_icons_dialog(&self) {
-        let all: Vec<IconEntry> = (*self.iconrepo_r.borrow()).get_all_entries();
+        let all: Vec<IconEntry> = (*self.iconrepo_r.borrow()).get_all_entries_();
         let upper: Vec<IconEntry> = all
             .into_iter()
             .filter(|ie| ie.icon_id > ICON_LIST.len() as isize)

@@ -33,9 +33,3 @@ rusqlite = { version = ">=0.22", features = ["bundled"] }
 [package.metadata.i18n]
 available-locales = ["en", "de"]
 default-locale = "en"
-
-
-#  cargo watch -s "cargo run  --example regular --features ui-gtk   "
-#[[example]]
-#name = "regular"
-#path = "examples/regular.rs"

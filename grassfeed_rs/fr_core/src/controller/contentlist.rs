@@ -453,30 +453,18 @@ impl ContentList {
             child_subs_ids = msg_rep.get_subscription_ids(&del_ids_i);
             msg_rep.update_is_deleted_many(del_ids, true);
         }
-        debug!(
-            "delete_messages : del_ids_i   {:?}   subs_ids: {:?} ",
-            del_ids_i, child_subs_ids
-        );
-
+        // debug!(            "delete_messages : del_ids_i   {:?}   subs_ids: {:?} ",            del_ids_i, child_subs_ids        );
         let o_neighbour = self
             .msg_state
             .read()
             .unwrap()
             .find_neighbour_message(del_ids);
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
-        trace!(
-            "delete_messages: {:?}  subsid:{:?}  next={:?}  TODO update children counts ",
-            del_ids,
-            subs_id,
-            o_neighbour
-        );
         if let Some(feedsources) = self.feedsources_w.upgrade() {
             feedsources.borrow().clear_read_unread(subs_id);
         }
-
         self.addjob(CJob::RequestUnreadAllCount(subs_id));
         for child_subs_id in child_subs_ids {
-            debug!("requesting UnreadCount for child : {} ", child_subs_id);
             self.addjob(CJob::RequestUnreadAllCount(child_subs_id));
         }
         self.addjob(CJob::UpdateMessageList);

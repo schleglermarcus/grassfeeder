@@ -85,7 +85,6 @@ pub fn extract_icon_from_homepage(
     let link_tags: Vec<&HTMLTag> = dom
         .nodes()
         .iter()
-        // .inspect(|n| trace!("N: {:?} ", &n))
         .filter_map(|n| match n {
             Node::Tag(htmltag) => Some(htmltag),
             _ => None,
@@ -108,7 +107,6 @@ pub fn extract_icon_from_homepage(
                 .collect();
             attrmap
         })
-        // .inspect(|at_m| debug!("AM1:{:?}", at_m))
         .filter(|attrmap| attrmap.get("rel").is_some())
         .filter(|attrmap| {
             if let Some(typ_e) = attrmap.get("type") {
@@ -117,7 +115,6 @@ pub fn extract_icon_from_homepage(
                 true
             }
         })
-        // .inspect(|at_m| debug!("AM2:{:?}", at_m))
         .filter(|attrmap| attrmap.get("rel").unwrap().contains("icon"))
         .filter_map(|attrmap| attrmap.get("href").cloned())
         .collect();

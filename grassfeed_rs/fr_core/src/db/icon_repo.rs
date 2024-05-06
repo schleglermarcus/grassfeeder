@@ -18,12 +18,27 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::RwLock;
 
+use super::icon_row::IconRow;
+use super::sqlite_context::SqliteContext;
+
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
 pub const FILENAME: &str = "icons_list.json";
 
 /// line to convert, line number
 pub const CONV_TO: &dyn Fn(String, usize) -> Option<IconEntry> = &json_to_icon_entry;
 pub const CONV_FROM: &dyn Fn(&IconEntry) -> Option<String> = &icon_entry_to_json;
+
+pub trait IIconRepo {
+    fn get_ctx(&self) -> &SqliteContext<IconRow>;
+
+    fn get_by_icon(&self, icon_s: String) -> Vec<IconRow>;
+
+    fn get_by_index(&self, icon_id: isize) -> Option<IconRow>;
+    fn get_all_entries(&self) -> Vec<IconRow>;
+
+    fn store_icon(&mut self, icon_id_: isize, new_icon: String);
+    fn remove_icon(&self, icon_id: isize);
+}
 
 ///
 /// List of  Icon
@@ -48,25 +63,49 @@ pub struct IconRepo {
     ///  ID -> Entry
     list: Arc<RwLock<HashMap<isize, IconEntry>>>,
     last_list_count: usize,
+
+    ctx: SqliteContext<IconRow>,
 }
 
 impl IconRepo {
     pub fn new(folder_name: &str) -> Self {
+        info!("TODO  IconRepo to DB ");
         IconRepo {
             list: Arc::new(RwLock::new(HashMap::new())),
             filename: folder_name.to_string(),
             last_list_count: 0,
+            ctx: SqliteContext::new_in_memory(),
         }
     }
 
     pub fn by_existing_list(existing: Arc<RwLock<HashMap<isize, IconEntry>>>) -> Self {
+        info!("TODO  IconRepo to DB ");
         IconRepo {
             list: existing,
             filename: String::default(),
             last_list_count: 0,
+            ctx: SqliteContext::new_in_memory(),
         }
     }
 
+    pub fn new_by_filename(filename: &str) -> Self {
+        let dbctx = SqliteContext::new(filename.to_string());
+        IconRepo {
+            ctx: dbctx,
+            filename: String::default(),
+            list: Arc::new(RwLock::new(HashMap::new())),
+            last_list_count: 0,
+        }
+    }
+
+    pub fn new_in_mem() -> Self {
+        IconRepo {
+            ctx: SqliteContext::new_in_memory(),
+            filename: String::default(),
+            list: Arc::new(RwLock::new(HashMap::new())),
+            last_list_count: 0,
+        }
+    }
     pub fn startup(&mut self) -> bool {
         match std::fs::create_dir_all(&self.filename) {
             Ok(()) => (),
@@ -120,47 +159,6 @@ impl IconRepo {
         (*self.list).write().unwrap().clear();
     }
 
-    pub fn store_icon(&mut self, icon_id_: isize, new_icon: String) {
-        info!("icon_repo::store_icon: {} ", icon_id_);
-        (*self.list).write().unwrap().insert(
-            icon_id_,
-            IconEntry {
-                icon_id: icon_id_,
-                icon: new_icon,
-            },
-        );
-        self.last_list_count += 1;
-    }
-
-    pub fn get_by_icon(&self, icon_s: String) -> Vec<IconEntry> {
-        (*self.list)
-            .read()
-            .unwrap()
-            .iter()
-            .filter(|(_id, ie)| ie.icon == icon_s)
-            .map(|(_id, ie)| ie.clone())
-            .collect()
-    }
-
-    pub fn get_by_index(&self, icon_id: isize) -> Option<IconEntry> {
-        (*self.list)
-            .read()
-            .unwrap()
-            .iter()
-            .filter(|(_id, ie)| ie.icon_id == icon_id)
-            .map(|(_id, ie)| ie.clone())
-            .next()
-    }
-
-    pub fn get_all_entries(&self) -> Vec<IconEntry> {
-        (*self.list)
-            .read()
-            .unwrap()
-            .iter()
-            .map(|(_id, sub)| sub.clone())
-            .collect::<Vec<IconEntry>>()
-    }
-
     pub fn store_entry(&self, entry: &IconEntry) -> Result<IconEntry, Box<dyn std::error::Error>> {
         let mut new_id = entry.icon_id;
         if new_id <= 0 {
@@ -180,13 +178,83 @@ impl IconRepo {
         Ok(store_entry)
     }
 
+    pub fn get_list(&self) -> Arc<RwLock<HashMap<isize, IconEntry>>> {
+        self.list.clone()
+    }
+
+    pub fn store_icon_(&mut self, icon_id_: isize, new_icon: String) {
+        info!("icon_repo::store_icon: {} ", icon_id_);
+        (*self.list).write().unwrap().insert(
+            icon_id_,
+            IconEntry {
+                icon_id: icon_id_,
+                icon: new_icon,
+            },
+        );
+        self.last_list_count += 1;
+    }
+
+    pub fn get_by_icon_(&self, icon_s: String) -> Vec<IconEntry> {
+        (*self.list)
+            .read()
+            .unwrap()
+            .iter()
+            .filter(|(_id, ie)| ie.icon == icon_s)
+            .map(|(_id, ie)| ie.clone())
+            .collect()
+    }
+
+    pub fn get_by_index_(&self, icon_id: isize) -> Option<IconEntry> {
+        (*self.list)
+            .read()
+            .unwrap()
+            .iter()
+            .filter(|(_id, ie)| ie.icon_id == icon_id)
+            .map(|(_id, ie)| ie.clone())
+            .next()
+    }
+
+    pub fn get_all_entries_(&self) -> Vec<IconEntry> {
+        (*self.list)
+            .read()
+            .unwrap()
+            .iter()
+            .map(|(_id, sub)| sub.clone())
+            .collect::<Vec<IconEntry>>()
+    }
+
     pub fn remove_icon(&self, icon_id: isize) {
         let o_r = (*self.list).write().unwrap().remove(&icon_id);
         assert!(o_r.is_some());
     }
+}
 
-    pub fn get_list(&self) -> Arc<RwLock<HashMap<isize, IconEntry>>> {
-        self.list.clone()
+//-------------------
+
+impl IIconRepo for IconRepo {
+    fn get_ctx(&self) -> &SqliteContext<IconRow> {
+        unimplemented!();
+    }
+
+    fn store_icon(&mut self, icon_id_: isize, new_icon: String) {
+        info!("icon_repo::store_icon: {} ", icon_id_);
+        unimplemented!();
+    }
+
+    fn get_by_icon(&self, icon_s: String) -> Vec<IconRow> {
+        unimplemented!();
+    }
+
+    fn get_by_index(&self, icon_id: isize) -> Option<IconRow> {
+        unimplemented!();
+    }
+
+    fn get_all_entries(&self) -> Vec<IconRow> {
+        unimplemented!();
+    }
+
+    fn remove_icon(&self, icon_id: isize) {
+        unimplemented!();
     }
 }
 
@@ -335,7 +403,7 @@ fn read_from(
 }
 
 #[cfg(test)]
-mod ut {
+mod t_ {
     use super::*;
     pub const TEST_FOLDER1: &'static str = "../target/db_t_ico_rep";
     #[test]

@@ -265,7 +265,7 @@ impl SourceTreeController {
                     self.set_fetch_finished(fs_id, error_happened)
                 }
                 SJob::SetIconId(subs_id, icon_id) => {
-                    if let Some(icon_e) = (*self.iconrepo_r).borrow().get_by_index(icon_id) {
+                    if let Some(icon_e) = (*self.iconrepo_r).borrow().get_by_index_(icon_id) {
                         (*self.gui_updater)
                             .borrow()
                             .store_image(icon_id as i32, icon_e.icon);
@@ -657,7 +657,7 @@ impl SourceTreeController {
         self.new_source.borrow_mut().feed_homepage = feed_homepage;
         let mut icon_str = String::default();
         if icon_id > 0 {
-            if let Some(ie) = self.iconrepo_r.borrow().get_by_index(icon_id) {
+            if let Some(ie) = self.iconrepo_r.borrow().get_by_index_(icon_id) {
                 icon_str = ie.icon;
             }
         };
@@ -950,7 +950,6 @@ impl SourceTreeController {
                 Some(subs.icon_id)
             })
             .collect::<HashSet<usize>>();
-
         icon_ids.insert(IDX_01_BORDER_RED);
         icon_ids.insert(IDX_02_ICON_MISSING_BROWN);
         icon_ids.insert(IDX_03_ICON_TRANSPARENT_48);
@@ -963,9 +962,8 @@ impl SourceTreeController {
         icon_ids.insert(IDX_30_ERROR_24X24);
         icon_ids.insert(IDX_32_FLAG_RED_32);
         icon_ids.insert(IDX_44_ICON_GREEN_D);
-        // trace!(            "icons_store_to_gui  SRC={:?}   icon_ids= {:?} ",            src_ids, icon_ids        );
         for ii in icon_ids {
-            let o_icon = (*self.iconrepo_r).borrow().get_by_index(ii as isize);
+            let o_icon = (*self.iconrepo_r).borrow().get_by_index_(ii as isize);
             if o_icon.is_none() {
                 continue;
             };
