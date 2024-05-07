@@ -36,7 +36,7 @@ pub trait IIconRepo {
     fn get_by_index(&self, icon_id: isize) -> Option<IconRow>;
     fn get_all_entries(&self) -> Vec<IconRow>;
 
-    fn store_icon(&mut self, icon_id_: isize, new_icon: String);
+    fn store_icon(&self, icon_id_: isize, new_icon: String);
     fn remove_icon(&self, icon_id: isize);
 }
 
@@ -236,7 +236,7 @@ impl IIconRepo for IconRepo {
         unimplemented!();
     }
 
-    fn store_icon(&mut self, icon_id_: isize, new_icon: String) {
+    fn store_icon(&self, icon_id_: isize, new_icon: String) {
         info!("icon_repo::store_icon: {} ", icon_id_);
         unimplemented!();
     }
@@ -406,6 +406,8 @@ fn read_from(
 mod t_ {
     use super::*;
     pub const TEST_FOLDER1: &'static str = "../target/db_t_ico_rep";
+
+    // cargo watch -s "(cd fr_core ;  RUST_BACKTRACE=1  cargo test  db::icon_repo::t_::t_store_file   --lib -- --exact --nocapture  )  "
     #[test]
     fn t_store_file() {
         setup();
@@ -416,17 +418,27 @@ mod t_ {
             let s1 = IconEntry::default();
             assert!(iconrepo.store_entry(&s1).is_ok());
             assert!(iconrepo.store_entry(&s1).is_ok());
-            let list = iconrepo.get_all_entries();
+            let list = iconrepo.get_all_entries_();
             assert_eq!(list.len(), 2);
             iconrepo.check_or_store();
         }
-
         {
             let mut sr = IconRepo::new(TEST_FOLDER1);
             sr.startup();
-            let list = sr.get_all_entries();
+            let list = sr.get_all_entries_();
             assert_eq!(list.len(), 2);
         }
+    }
+
+    // cargo watch -s "(cd fr_core ;  RUST_BACKTRACE=1  cargo test  db::icon_repo::t_::t_db_store   --lib -- --exact --nocapture  )  "
+    #[test]
+    fn t_db_store() {
+        let ir = IconRepo::new_in_mem();
+        let r_ir: Rc<dyn IIconRepo> = Rc::new(ir);
+        (*r_ir).store_icon(2, "hello".to_string());
+
+        let r = (*r_ir).get_by_index(2).unwrap();
+        assert_eq!("hello", r.icon.as_str());
     }
 
     // dummy instead of log configuration

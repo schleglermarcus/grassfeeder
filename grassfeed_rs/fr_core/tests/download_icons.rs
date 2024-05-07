@@ -127,7 +127,7 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry
         assert_eq!(ev, SJob::SetIconId(1, 10));
     }
     (
-        last.iconrepo.get_all_entries(),
+        last.iconrepo.get_all_entries_(),
         last.download_error_happened,
     )
 }
@@ -159,7 +159,7 @@ fn icon_too_big() {
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     assert!(!last.download_error_happened);
-    let all_e = last.iconrepo.get_all_entries();
+    let all_e = last.iconrepo.get_all_entries_();
     assert_eq!(all_e.len(), 1);
     let icon0 = all_e.get(0).unwrap();
     assert!(icon0.icon.len() < 10000);

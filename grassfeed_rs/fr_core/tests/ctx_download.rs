@@ -47,7 +47,7 @@ fn comprehensive_feed_download() {
     assert_eq!(last.feed_title, "Ajax and XUL".to_string());
     assert_eq!(last.feed_homepage, "http://localhost/".to_string());
     assert_eq!(last.icon_url, "http://localhost/favicon.ico".to_string());
-    let all_e = last.iconrepo.get_all_entries();
+    let all_e = last.iconrepo.get_all_entries_();
     assert_eq!(all_e.len(), 1);
 }
 

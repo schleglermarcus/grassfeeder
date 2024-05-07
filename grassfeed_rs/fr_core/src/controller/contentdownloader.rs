@@ -9,7 +9,6 @@ use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::timer::Timer;
 use crate::db::errors_repo::ErrorRepo;
-use crate::db::icon_repo::IIconRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;

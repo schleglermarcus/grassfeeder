@@ -144,7 +144,7 @@ fn clean_icon_doublettes() {
     let sut = CorrectIconsDoublettes(cleaner_i);
     if let StepResult::Continue(s) = Box::new(sut).step() {
         let inner: CleanerInner = s.take();
-        let all = inner.iconrepo.get_all_entries();
+        let all = inner.iconrepo.get_all_entries_();
         assert_eq!(all.len(), 3);
     }
 }
