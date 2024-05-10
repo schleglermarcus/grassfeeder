@@ -3,15 +3,16 @@ use super::sqlite_context::Wrap;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct IconRow {
+    pub web_date: i64,
+    pub req_date: i64,
     pub icon_id: isize,
-    pub web_url: String,
     pub web_size: isize,
-    pub web_date: isize,
     /// 0: raw, from web
     /// 1: gtk-image
     /// 2: image-rs
     /// 3: png
     pub compression_type: u8,
+    pub web_url: String,
     pub icon: String,
 }
 
@@ -24,8 +25,8 @@ impl TableInfo for IconRow {
     // INTEGER REAL  TEXT  BLOB		BOOLEAN
     fn create_string() -> String {
         String::from(
-            "icon_id  INTEGER  PRIMARY KEY, web_url  text, web_size  INTEGER,  \
-            web_date INTEGER, compression_type INTEGER, icon: text ",
+            "icon_id  INTEGER  PRIMARY KEY, web_url  TEXT, web_size  INTEGER,  \
+            web_date INTEGER,  req_date INTEGER, compression_type INTEGER, icon TEXT ",
         )
     }
 
@@ -43,7 +44,8 @@ impl TableInfo for IconRow {
             String::from("web_url"),
             String::from("web_size"),
             String::from("web_date"),
-            String::from("compression_type"), // 5
+            String::from("req_date"), // 5
+            String::from("compression_type"),
             String::from("icon"),
         ]
     }
@@ -53,8 +55,9 @@ impl TableInfo for IconRow {
             Wrap::INT(self.icon_id), // 1
             Wrap::STR(self.web_url.clone()),
             Wrap::INT(self.web_size),
-            Wrap::INT(self.web_date),
-            Wrap::INT(self.compression_type as isize), // 5
+            Wrap::I64(self.web_date),
+            Wrap::I64(self.req_date), // 5
+            Wrap::INT(self.compression_type as isize),
             Wrap::STR(self.icon.clone()),
         ]
     }
@@ -65,8 +68,9 @@ impl TableInfo for IconRow {
             web_url: row.get(1).unwrap(),
             web_size: row.get(2).unwrap(),
             web_date: row.get(3).unwrap(),
-            compression_type: row.get(4).unwrap(),
-            icon: row.get(5).unwrap(),
+            req_date: row.get(4).unwrap(),
+            compression_type: row.get(5).unwrap(),
+            icon: row.get(6).unwrap(),
             ..Default::default()
         }
     }

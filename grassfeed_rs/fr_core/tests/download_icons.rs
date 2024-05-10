@@ -108,7 +108,7 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry
     let icon_inner = IconInner {
         subs_id: 1,
         feed_url: feed_url.clone(),
-        iconrepo: IconRepo::new(""),
+        iconrepo: IconRepo::new_(""),
         web_fetcher: Arc::new(Box::new(HttpFetcher {})),
         download_error_happened: false,
         icon_url: String::default(),
@@ -139,11 +139,10 @@ fn icon_too_big() {
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let subscr_r = SubscriptionRepo::new_inmem();
     let erro_rep = ErrorRepo::new_in_mem();
-    // erro_rep.startup_read();
     let icon_inner = IconInner {
         subs_id: 1,
         feed_url: "http://lisahaven.news/feed/".to_string(),
-        iconrepo: IconRepo::new(""),
+        iconrepo: IconRepo::new_(""),
         web_fetcher: Arc::new(Box::new(HttpFetcher {})),
         download_error_happened: false,
         icon_url: String::default(),
@@ -176,7 +175,7 @@ fn stop_on_nonexistent() {
         subs_id: 5,
         feed_url: "http://localhorst/none.xml".to_string(),
         icon_url: String::default(),
-        iconrepo: IconRepo::new(""),
+        iconrepo: IconRepo::new_(""),
         web_fetcher: get_file_fetcher(),
         download_error_happened: false,
         icon_bytes: Vec::default(),

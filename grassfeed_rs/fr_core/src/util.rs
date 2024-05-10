@@ -11,7 +11,7 @@ use usvg::Transform;
 
 static DATETIME_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
 
-pub fn file_exists(filename: &String) -> bool {
+pub fn file_exists(filename: &str) -> bool {
     if let Ok(metadata) = std::fs::metadata(filename) {
         return metadata.is_file();
     }

@@ -20,7 +20,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
-pub const FILENAME_JSON: &str = "subscription_list.json";
+// pub const FILENAME_JSON: &str = "subscription_list.json";
 
 pub const CONV_TO: &dyn Fn(String) -> Option<SubscriptionEntry> = &json_to_subscription_entry;
 pub const CONV_FROM: &dyn Fn(&SubscriptionEntry) -> Option<String> = &subscription_entry_to_json;
@@ -127,7 +127,7 @@ impl SubscriptionRepo {
 
         SubscriptionRepo {
             folder_name: folder_conf.to_string(),
-            ctx: SqliteContext::new(reg_filename),
+            ctx: SqliteContext::new(& reg_filename),
         }
     }
 
@@ -138,7 +138,7 @@ impl SubscriptionRepo {
     pub fn by_file(filename: &str) -> Self {
         SubscriptionRepo {
             folder_name: String::default(),
-            ctx: SqliteContext::new(filename.to_string()),
+            ctx: SqliteContext::new(filename ) ,
         }
     }
 

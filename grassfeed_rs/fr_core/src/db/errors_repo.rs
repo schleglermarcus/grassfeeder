@@ -34,8 +34,8 @@ impl ErrorRepo {
                 error!("ErrorRepo cannot create folder {} {:?}", &folder_n, e);
             }
         }
-        let filename = ErrorRepo::filename(folder_n);
-        let dbctx = SqliteContext::new(filename.to_string());
+        let filename : String = ErrorRepo::filename(folder_n);
+        let dbctx = SqliteContext::new(&filename);
         ErrorRepo {
             ctx: dbctx,
             errorlines_cache: Default::default(),

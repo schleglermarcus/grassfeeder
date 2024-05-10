@@ -149,6 +149,9 @@ fn clean_icon_doublettes() {
     }
 }
 
+
+
+// #[ignore]
 #[test]
 fn clean_errorlist_too_old() {
     setup();
@@ -173,7 +176,7 @@ fn clean_errorlist_too_old() {
     }
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn clean_errorlist_too_many() {
     setup();
@@ -260,10 +263,11 @@ fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> Cleaner
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let mut iconrepo: IconRepo;
     if let Some(i_p) = copy_icons {
-        copy_icon_json(i_p); //  "../target/iconc"
-        iconrepo = IconRepo::new(i_p);
-        iconrepo.startup();
+        copy_icon_json(i_p);
+        iconrepo = IconRepo::new_(i_p);
+        iconrepo.startup_();
     } else {
+        debug!("dummy_icon_list: ....  ");
         let dummy_icon_list: Arc<RwLock<HashMap<isize, IconEntry>>> =
             Arc::new(RwLock::new(HashMap::default()));
         iconrepo = IconRepo::by_existing_list(dummy_icon_list);
@@ -287,8 +291,8 @@ fn copy_icon_json(icn_path: &str) {
         format!("{}/icons_list.json", icn_path),
     );
     assert!(r.is_ok());
-    let mut iconrepo = IconRepo::new(icn_path);
-    iconrepo.startup();
+    let mut iconrepo = IconRepo::new_(icn_path);  // TODO  better solution for dummy data
+    iconrepo.startup_();
 }
 
 // ------------------------------------

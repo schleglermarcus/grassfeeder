@@ -26,7 +26,7 @@ fn single_dl_regular() {
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
     let f_src_repo = SubscriptionRepo::new_inmem();
     f_src_repo.scrub_all_subscriptions();
-    let icon_repo = IconRepo::new("");
+    let icon_repo = IconRepo::new_("");
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
@@ -75,7 +75,7 @@ fn download_with_create_date() {
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
     let subsc_r = SubscriptionRepo::new_inmem();
     subsc_r.scrub_all_subscriptions();
-    let icon_repo = IconRepo::new("");
+    let icon_repo = IconRepo::new_("");
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let msgrepo = MessagesRepo::new_in_mem();
     let msgrepo_req = MessagesRepo::new_by_connection(msgrepo.get_ctx().get_connection());

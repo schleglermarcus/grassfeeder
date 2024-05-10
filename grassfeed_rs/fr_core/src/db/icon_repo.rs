@@ -1,6 +1,8 @@
 use crate::controller::timer::Timer;
 use crate::db::message::compress;
 use crate::db::message::decompress;
+use crate::db::sqlite_context::rusqlite_error_to_boxed;
+use crate::util::timestamp_now;
 use context::appcontext::AppContext;
 use context::BuildConfig;
 use context::Buildable;
@@ -36,7 +38,14 @@ pub trait IIconRepo {
     fn get_by_index(&self, icon_id: isize) -> Option<IconRow>;
     fn get_all_entries(&self) -> Vec<IconRow>;
 
-    fn store_icon(&self, icon_id_: isize, new_icon: String);
+    fn add_icon(
+        &self,
+        new_icon: String,
+        http_date: i64,
+        http_length: isize,
+        http_url: String,
+    ) -> Result<i64, Box<dyn std::error::Error>>;
+
     fn remove_icon(&self, icon_id: isize);
 }
 
@@ -68,8 +77,35 @@ pub struct IconRepo {
 }
 
 impl IconRepo {
+    /// with DB
     pub fn new(folder_name: &str) -> Self {
-        info!("TODO  IconRepo to DB ");
+        info!("NEW IconRepo-DB folder: {} ", folder_name);
+        let fname = Self::filename(folder_name);
+
+        match std::fs::create_dir_all(&fname) {
+            Ok(()) => (),
+            Err(e) => {
+                error!("IconRepo cannot create folder {} {:?}", fname, e);
+            }
+        }
+
+        IconRepo {
+            list: Arc::new(RwLock::new(HashMap::new())),
+            ctx: SqliteContext::new(&fname),
+            filename: fname,
+            last_list_count: 0,
+        }
+    }
+
+    pub fn new_(folder_name: &str) -> Self {
+        warn!("OLD  IconRepo to DB ");
+        let fname = Self::filename(folder_name);
+        match std::fs::create_dir_all(&fname) {
+            Ok(()) => (),
+            Err(e) => {
+                error!("IconRepo cannot create folder {} {:?}", fname, e);
+            }
+        }
         IconRepo {
             list: Arc::new(RwLock::new(HashMap::new())),
             filename: folder_name.to_string(),
@@ -78,8 +114,9 @@ impl IconRepo {
         }
     }
 
+    #[deprecated]
     pub fn by_existing_list(existing: Arc<RwLock<HashMap<isize, IconEntry>>>) -> Self {
-        info!("TODO  IconRepo to DB ");
+        debug!("OLD   by_existing_list ");
         IconRepo {
             list: existing,
             filename: String::default(),
@@ -88,8 +125,9 @@ impl IconRepo {
         }
     }
 
+    // #[deprecated]
     pub fn new_by_filename(filename: &str) -> Self {
-        let dbctx = SqliteContext::new(filename.to_string());
+        let dbctx = SqliteContext::new(filename);
         IconRepo {
             ctx: dbctx,
             filename: String::default(),
@@ -99,14 +137,23 @@ impl IconRepo {
     }
 
     pub fn new_in_mem() -> Self {
-        IconRepo {
+        let ir = IconRepo {
             ctx: SqliteContext::new_in_memory(),
             filename: String::default(),
             list: Arc::new(RwLock::new(HashMap::new())),
             last_list_count: 0,
-        }
+        };
+        ir.ctx.create_table();
+        ir
     }
-    pub fn startup(&mut self) -> bool {
+
+    pub fn filename(foldername: &str) -> String {
+        format!("{foldername}icons.db")
+    }
+
+    //  #[deprecated]
+    pub fn startup_(&mut self) -> bool {
+        debug!("CREATE_DIR : {}  ", &self.filename);
         match std::fs::create_dir_all(&self.filename) {
             Ok(()) => (),
             Err(e) => {
@@ -115,6 +162,8 @@ impl IconRepo {
             }
         }
         let filename = format!("{}/{}", self.filename, FILENAME);
+        debug!("filename= {}  ", filename);
+
         self.filename = filename;
         if std::path::Path::new(&self.filename).exists() {
             let slist = read_from(self.filename.clone(), CONV_TO);
@@ -126,9 +175,11 @@ impl IconRepo {
         } else {
             debug!("icon list file not found: {}", &self.filename);
         }
+        debug!("startup_  done" );
         true
     }
 
+    // #[deprecated]
     pub fn check_or_store(&mut self) {
         let cur_list_len = (*self.list).read().unwrap().len();
         if cur_list_len != self.last_list_count {
@@ -137,6 +188,7 @@ impl IconRepo {
         }
     }
 
+    // #[deprecated]
     fn store_to_file(&mut self) {
         let mut values = (*self.list)
             .read()
@@ -155,10 +207,12 @@ impl IconRepo {
         }
     }
 
+    // #[deprecated]
     pub fn clear(&self) {
         (*self.list).write().unwrap().clear();
     }
 
+    // #[deprecated]
     pub fn store_entry(&self, entry: &IconEntry) -> Result<IconEntry, Box<dyn std::error::Error>> {
         let mut new_id = entry.icon_id;
         if new_id <= 0 {
@@ -236,9 +290,26 @@ impl IIconRepo for IconRepo {
         unimplemented!();
     }
 
-    fn store_icon(&self, icon_id_: isize, new_icon: String) {
-        info!("icon_repo::store_icon: {} ", icon_id_);
-        unimplemented!();
+    fn add_icon(
+        &self,
+        new_icon: String,
+        http_date: i64,
+        http_length: isize,
+        http_url: String,
+    ) -> Result<i64, Box<dyn std::error::Error>> {
+        let entry: IconRow = IconRow {
+            icon: new_icon,
+            web_date: http_date,
+            web_size: http_length,
+            web_url: http_url,
+            compression_type: 1,
+            req_date: timestamp_now(),
+            ..Default::default()
+        };
+        info!("icon_repo::store_icon: {:?} ", entry);
+        self.ctx
+            .insert(&entry, false)
+            .map_err(rusqlite_error_to_boxed)
     }
 
     fn get_by_icon(&self, icon_s: String) -> Vec<IconRow> {
@@ -246,7 +317,7 @@ impl IIconRepo for IconRepo {
     }
 
     fn get_by_index(&self, icon_id: isize) -> Option<IconRow> {
-        unimplemented!();
+        self.ctx.get_by_index(icon_id)
     }
 
     fn get_all_entries(&self) -> Vec<IconRow> {
@@ -265,7 +336,7 @@ impl Buildable for IconRepo {
     fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         let o_folder = conf.get(KEY_FOLDERNAME);
         match o_folder {
-            Some(folder) => IconRepo::new(&folder),
+            Some(folder) => IconRepo::new_(&folder),
             None => {
                 conf.dump();
                 panic!("iconrepo config has no {KEY_FOLDERNAME} ");
@@ -287,7 +358,7 @@ impl StartupWithAppContext for IconRepo {
                 .register(&TimerEvent::Shutdown, su_r, true);
         }
 
-        self.startup();
+        self.startup_();
     }
 }
 
@@ -408,12 +479,12 @@ mod t_ {
     pub const TEST_FOLDER1: &'static str = "../target/db_t_ico_rep";
 
     // cargo watch -s "(cd fr_core ;  RUST_BACKTRACE=1  cargo test  db::icon_repo::t_::t_store_file   --lib -- --exact --nocapture  )  "
-    #[test]
+    // #[test]
     fn t_store_file() {
         setup();
         {
-            let mut iconrepo = IconRepo::new(TEST_FOLDER1);
-            iconrepo.startup();
+            let mut iconrepo = IconRepo::new_(TEST_FOLDER1);
+            iconrepo.startup_();
             iconrepo.clear();
             let s1 = IconEntry::default();
             assert!(iconrepo.store_entry(&s1).is_ok());
@@ -423,8 +494,8 @@ mod t_ {
             iconrepo.check_or_store();
         }
         {
-            let mut sr = IconRepo::new(TEST_FOLDER1);
-            sr.startup();
+            let mut sr = IconRepo::new_(TEST_FOLDER1);
+            sr.startup_();
             let list = sr.get_all_entries_();
             assert_eq!(list.len(), 2);
         }
@@ -433,12 +504,15 @@ mod t_ {
     // cargo watch -s "(cd fr_core ;  RUST_BACKTRACE=1  cargo test  db::icon_repo::t_::t_db_store   --lib -- --exact --nocapture  )  "
     #[test]
     fn t_db_store() {
+        setup();
         let ir = IconRepo::new_in_mem();
         let r_ir: Rc<dyn IIconRepo> = Rc::new(ir);
-        (*r_ir).store_icon(2, "hello".to_string());
-
-        let r = (*r_ir).get_by_index(2).unwrap();
-        assert_eq!("hello", r.icon.as_str());
+        let r = (*r_ir).add_icon("hello".to_string(), 0, 0, "".to_string());
+        // debug!("R: {:?} ", r);
+        assert!(r.is_ok());
+        let r2 = (*r_ir).get_by_index(r.unwrap() as isize);
+        assert!(r2.is_some());
+        assert_eq!("hello", r2.unwrap().icon.as_str());
     }
 
     // dummy instead of log configuration

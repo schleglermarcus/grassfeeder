@@ -34,7 +34,7 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
     let msg_repo = MessagesRepo::new_by_filename_add_column(&msg_fn);
     let err_repo = ErrorRepo::new(cache_folder);
     let mut iconrepo = IconRepo::new(config_folder);
-    iconrepo.startup();
+    iconrepo.startup_();
     let sum_all_msg = msg_repo.get_all_sum();
     trace!("{} has  {} Messages  ", &msg_fn, sum_all_msg,);
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);

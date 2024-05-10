@@ -31,7 +31,7 @@ fn comprehensive_feed_download() {
     let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(base_path)));
     let comp_inner = ComprehensiveInner {
         feed_url_edit: "gui_proc_rss2_v1.rss".to_string(),
-        iconrepo: IconRepo::new(""),
+        iconrepo: IconRepo::new_(""),
         web_fetcher: fetcher,
         download_error_happened: false,
         icon_url: String::default(),
@@ -72,7 +72,7 @@ fn downloader_load_message_into_db() {
     fse.folder_position = 0;
     let _r = f_src_repo.store_entry(&fse);
     let fsrc_r: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(f_src_repo));
-    let icon_repo_r = Rc::new(RefCell::new(IconRepo::new("")));
+    let icon_repo_r = Rc::new(RefCell::new(IconRepo::new_("")));
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
     let msgrepo_r = Rc::new(RefCell::new(msgrepo));

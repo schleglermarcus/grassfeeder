@@ -33,8 +33,8 @@ where
 }
 
 impl<T: TableInfo> SqliteContext<T> {
-    pub fn new(filenam: String) -> Self {
-        let existed = file_exists(&filenam);
+    pub fn new(filenam: &str) -> Self {
+        let existed = file_exists(filenam);
         let c = Connection::open(filenam).unwrap();
         SqliteContext {
             connection: Arc::new(Mutex::new(c)),

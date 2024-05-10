@@ -1,3 +1,16 @@
+grassfeeder-gtk3 (0.0.3002) buster; urgency=low
+
+  * When deleting from folder, update subordinated feed counts
+  
+  
+  - put icons into database, add storing the icon-url, web-date, web-size with it.
+     icon-id,  web-size, web-date, img_compr,
+  
+  
+  - Backspace to reset the search bar
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Tue, 05 Mar 2024 00:00:00 +0000
+
 grassfeeder-gtk3 (0.2.9) buster; urgency=low
 
   * Re-packaged vendored dependencies
