@@ -49,7 +49,6 @@ use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::KeyCodes;
 use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
-use resources::gen_icons::ICON_LIST;
 use resources::id::DIALOG_ABOUT;
 use resources::id::*;
 use std::cell::RefCell;

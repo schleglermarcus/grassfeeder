@@ -2,6 +2,7 @@ use crate::controller::contentlist::CJob;
 use crate::controller::guiprocessor::Job;
 use crate::controller::sourcetree::SJob;
 use crate::db::errors_repo::ErrorRepo;
+use crate::db::icon_repo::IIconRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
@@ -33,8 +34,11 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
 
     let msg_repo = MessagesRepo::new_by_filename_add_column(&msg_fn);
     let err_repo = ErrorRepo::new(cache_folder);
-    let mut iconrepo = IconRepo::new(config_folder);
-    iconrepo.startup_();
+    let iconrepo = IconRepo::new(config_folder);
+
+    // iconrepo.startup_();
+    iconrepo.create_table();
+
     let sum_all_msg = msg_repo.get_all_sum();
     trace!("{} has  {} Messages  ", &msg_fn, sum_all_msg,);
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
@@ -51,7 +55,5 @@ pub fn databases_check_manual(config_folder: &str, cache_folder: &str) {
         debug!(" to_correct: {:?} {:?} ", parent_ids_to_correct, sjobs);
     }
     let sum_all_msg = inner.messagesrepo.get_all_sum();
-    // let all_messages = inner.messagesrepo.get_all_messages();
-    // let count_not_deleted = all_messages.iter().filter(|m| !m.is_deleted).count();
     debug!("After cleanup  number of messages: {}", sum_all_msg);
 }

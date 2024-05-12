@@ -2,8 +2,9 @@ use crate::controller::guiprocessor::Job;
 use crate::controller::sourcetree::SJob;
 use crate::db::errorentry::ErrorEntry;
 use crate::db::errors_repo::ErrorRepo;
-use crate::db::icon_repo::IconEntry;
+use crate::db::icon_repo::IIconRepo;
 use crate::db::icon_repo::IconRepo;
+use crate::db::icon_row::IconRow;
 use crate::db::message::MessageRow;
 use crate::db::messages_repo::IMessagesRepo;
 use crate::db::messages_repo::MessagesRepo;
@@ -328,7 +329,7 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
         let mut inner = self.0;
         inner.advance_step();
         inner.send_gp(None);
-        let all_icons: Vec<IconEntry> = inner.iconrepo.get_all_entries_();
+        let all_icons: Vec<IconRow> = inner.iconrepo.get_all_entries();
         let mut ic_first: HashMap<String, isize> = HashMap::new();
         let mut replace_ids: HashMap<isize, isize> = HashMap::new(); // subsequent-icon-id =>  previous icon-id
         all_icons
@@ -367,11 +368,11 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
                 "IconsDoublettes:  removing double icons: {:?} ",
                 replace_ids.keys()
             )));
-
             replace_ids.iter().for_each(|(repl, _dest)| {
-                inner.iconrepo.remove_icon(*repl);
+                // inner.iconrepo.remove_icon(*repl);
+                inner.iconrepo.delete_icon(*repl);
             });
-            inner.iconrepo.check_or_store();
+            // inner.iconrepo.check_or_store();
         }
         StepResult::Continue(Box::new(CorrectIconsOnSubscriptions(inner)))
     }
@@ -392,7 +393,7 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
         let mut reset_icon_subs_ids: Vec<i32> = Vec::default();
         let all_icon_ids: Vec<isize> = inner
             .iconrepo
-            .get_all_entries_()
+            .get_all_entries()
             .iter()
             .map(|ie| ie.icon_id)
             .collect::<Vec<isize>>();

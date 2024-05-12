@@ -1,6 +1,7 @@
 use crate::controller::sourcetree::SJob;
-use crate::db::icon_repo::IconEntry;
+use crate::db::icon_repo::IIconRepo;
 use crate::db::icon_repo::IconRepo;
+use crate::db::icon_row::IconRow;
 use crate::downloader::util;
 use crate::util::downscale_image;
 use crate::util::Step;
@@ -182,16 +183,20 @@ impl Step<ComprehensiveInner> for ComprStoreIcon {
         }
 
         let comp_st = util::compress_vec_to_string(&inner.icon_bytes);
-        let existing_icons: Vec<IconEntry> = inner.iconrepo.get_by_icon_(comp_st.clone());
+        let existing_icons: Vec<IconRow> = inner.iconrepo.get_by_icon(comp_st.clone());
         if existing_icons.is_empty() {
-            let ie = IconEntry {
-                icon: comp_st,
-                ..Default::default()
-            };
-            match inner.iconrepo.store_entry(&ie) {
-                Ok(entry) => {
-                    trace!("compr: stored icon {} {} ", entry.icon_id, inner.icon_url);
-                    inner.icon_id = entry.icon_id;
+            //  let ie = IconEntry {                 icon: comp_st,                 ..Default::default()             };
+            match inner.iconrepo.add_icon(
+                comp_st,
+                0,
+                0,
+                inner.icon_url.clone(),
+                crate::db::icon_row::CompressionType::ImageRs,
+            ) {
+                // store_entry(&ie) {
+                Ok(new_id) => {
+                    trace!("compr: added icon {} {} ", new_id, inner.icon_url);
+                    inner.icon_id = new_id as isize;
                 }
                 Err(e) => {
                     warn!("Storing Icon from {}  failed {:?} ", inner.icon_url, e);
