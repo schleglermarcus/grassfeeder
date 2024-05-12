@@ -1,8 +1,11 @@
 use crate::controller::sourcetree::SJob;
 use crate::db::errorentry::ESRC;
 use crate::db::errors_repo::ErrorRepo;
+use crate::db::icon_repo::IIconRepo;
 use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
+use crate::db::icon_row::CompressionType;
+use crate::db::icon_row::IconRow;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::downloader::util;
@@ -370,11 +373,18 @@ impl Step<IconInner> for IconCheckPresent {
             );
         }
         inner.compressed_icon = util::compress_vec_to_string(&inner.icon_bytes);
-        let existing_icons: Vec<IconEntry> =
-            inner.iconrepo.get_by_icon_(inner.compressed_icon.clone());
+        let existing_icons: Vec<IconRow> =
+            inner.iconrepo.get_by_icon(inner.compressed_icon.clone());
+
         if !existing_icons.is_empty() {
             let existing_id = existing_icons[0].icon_id;
-            //  trace!(                "icon already there. {}=>{}  subs: {} ",                inner.fs_icon_id_old,                existing_id,                inner.subs_id            );
+            trace!(
+                "icon already there. {}=>{}  subs:{}  U:{} ",
+                inner.fs_icon_id_old,
+                existing_id,
+                inner.subs_id,
+                inner.icon_url
+            );
             if existing_id != inner.fs_icon_id_old {
                 let _r = inner
                     .sourcetree_job_sender
@@ -396,18 +406,29 @@ impl Step<IconInner> for IconStore {
             icon: inner.compressed_icon.clone(),
             ..Default::default()
         };
-        match inner.iconrepo.store_entry(&ie) {
-            Ok(entry) => {
+
+        let http_date: i64 = 0; // TODO
+        let http_length: isize = 0; // TODO
+
+        // inner.iconrepo.store_entry(&ie)
+        match inner.iconrepo.add_icon(
+            inner.compressed_icon.clone(),
+            http_date,
+            http_length,
+            inner.icon_url.clone(),
+            CompressionType::ImageRs
+        ) {
+            Ok(icon_id) => {
                 debug!(
                     "IconStore:  len:{:?}  => ID {}  F:{}  HP:{} ",
                     ie.icon.len(),
-                    entry.icon_id,
+                    icon_id,
                     inner.feed_url,
                     inner.feed_homepage
                 );
                 let _r = inner
                     .sourcetree_job_sender
-                    .send(SJob::SetIconId(inner.subs_id, entry.icon_id));
+                    .send(SJob::SetIconId(inner.subs_id, icon_id as isize));
             }
             Err(e) => {
                 error!("Storing Icon from {}  failed {:?}", inner.icon_url, e);

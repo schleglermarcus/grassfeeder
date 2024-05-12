@@ -1,7 +1,11 @@
 use crate::controller::timer::Timer;
+use crate::db::icon_row::CompressionType;
+use crate::db::icon_row::IconRow;
 use crate::db::message::compress;
 use crate::db::message::decompress;
 use crate::db::sqlite_context::rusqlite_error_to_boxed;
+use crate::db::sqlite_context::SqliteContext;
+use crate::db::sqlite_context::TableInfo;
 use crate::util::timestamp_now;
 use context::appcontext::AppContext;
 use context::BuildConfig;
@@ -10,6 +14,7 @@ use context::StartupWithAppContext;
 use context::TimerEvent;
 use context::TimerReceiver;
 use context::TimerRegistry;
+use rusqlite::Connection;
 use serde::Deserialize;
 use serde::Serialize;
 use std::cell::RefCell;
@@ -18,10 +23,8 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::rc::Rc;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::sync::RwLock;
-
-use super::icon_row::IconRow;
-use super::sqlite_context::SqliteContext;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
 pub const FILENAME: &str = "icons_list.json";
@@ -44,9 +47,17 @@ pub trait IIconRepo {
         http_date: i64,
         http_length: isize,
         http_url: String,
+        compression: CompressionType,
     ) -> Result<i64, Box<dyn std::error::Error>>;
 
-    fn remove_icon(&self, icon_id: isize);
+    fn store_icon(
+        &self,
+        icon_id: isize,
+        new_icon: String,
+    ) -> Result<i64, Box<dyn std::error::Error>>;
+
+    /// returns number of deleted rows
+    fn delete_icon(&self, icon_id: isize) -> usize;
 }
 
 ///
@@ -79,19 +90,22 @@ pub struct IconRepo {
 impl IconRepo {
     /// with DB
     pub fn new(folder_name: &str) -> Self {
-        info!("NEW IconRepo-DB folder: {} ", folder_name);
         let fname = Self::filename(folder_name);
+        debug!("NEW IconRepo-DB folder: {}  file: {}", folder_name, fname);
 
-        match std::fs::create_dir_all(&fname) {
+        match std::fs::create_dir_all(&folder_name) {
             Ok(()) => (),
             Err(e) => {
-                error!("IconRepo cannot create folder {} {:?}", fname, e);
+                error!("IconRepo cannot create folder {} {:?}", folder_name, e);
             }
         }
 
+        let sqctx = SqliteContext::new(&fname);
+        // sqctx.create_table();
+
         IconRepo {
             list: Arc::new(RwLock::new(HashMap::new())),
-            ctx: SqliteContext::new(&fname),
+            ctx: sqctx,
             filename: fname,
             last_list_count: 0,
         }
@@ -115,8 +129,8 @@ impl IconRepo {
     }
 
     #[deprecated]
-    pub fn by_existing_list(existing: Arc<RwLock<HashMap<isize, IconEntry>>>) -> Self {
-        debug!("OLD   by_existing_list ");
+    pub fn by_existing_list_(existing: Arc<RwLock<HashMap<isize, IconEntry>>>) -> Self {
+        debug!("OLD__by_existing_list ");
         IconRepo {
             list: existing,
             filename: String::default(),
@@ -125,8 +139,8 @@ impl IconRepo {
         }
     }
 
-    // #[deprecated]
     pub fn new_by_filename(filename: &str) -> Self {
+        debug!("icon_repo::NEW  filename={} ", filename);
         let dbctx = SqliteContext::new(filename);
         IconRepo {
             ctx: dbctx,
@@ -147,11 +161,20 @@ impl IconRepo {
         ir
     }
 
+    pub fn new_by_connection(con: Arc<Mutex<Connection>>) -> Self {
+        IconRepo {
+            ctx: SqliteContext::new_by_connection(con),
+            filename: String::default(),
+            list: Arc::new(RwLock::new(HashMap::new())),
+            last_list_count: 0,
+        }
+    }
+
     pub fn filename(foldername: &str) -> String {
         format!("{foldername}icons.db")
     }
 
-    //  #[deprecated]
+    #[deprecated]
     pub fn startup_(&mut self) -> bool {
         debug!("CREATE_DIR : {}  ", &self.filename);
         match std::fs::create_dir_all(&self.filename) {
@@ -175,11 +198,11 @@ impl IconRepo {
         } else {
             debug!("icon list file not found: {}", &self.filename);
         }
-        debug!("startup_  done" );
+        debug!("startup_  done");
         true
     }
 
-    // #[deprecated]
+    #[deprecated]
     pub fn check_or_store(&mut self) {
         let cur_list_len = (*self.list).read().unwrap().len();
         if cur_list_len != self.last_list_count {
@@ -212,7 +235,7 @@ impl IconRepo {
         (*self.list).write().unwrap().clear();
     }
 
-    // #[deprecated]
+    #[deprecated(note = " use add_icon()  or store_icon() ")]
     pub fn store_entry(&self, entry: &IconEntry) -> Result<IconEntry, Box<dyn std::error::Error>> {
         let mut new_id = entry.icon_id;
         if new_id <= 0 {
@@ -248,6 +271,7 @@ impl IconRepo {
         self.last_list_count += 1;
     }
 
+    #[deprecated(note = " use get_by_icon()  ")]
     pub fn get_by_icon_(&self, icon_s: String) -> Vec<IconEntry> {
         (*self.list)
             .read()
@@ -287,7 +311,7 @@ impl IconRepo {
 
 impl IIconRepo for IconRepo {
     fn get_ctx(&self) -> &SqliteContext<IconRow> {
-        unimplemented!();
+        &self.ctx
     }
 
     fn add_icon(
@@ -296,24 +320,30 @@ impl IIconRepo for IconRepo {
         http_date: i64,
         http_length: isize,
         http_url: String,
+        compression: CompressionType,
     ) -> Result<i64, Box<dyn std::error::Error>> {
         let entry: IconRow = IconRow {
             icon: new_icon,
             web_date: http_date,
             web_size: http_length,
             web_url: http_url,
-            compression_type: 1,
+            compression_type: compression,
             req_date: timestamp_now(),
             ..Default::default()
         };
-        info!("icon_repo::store_icon: {:?} ", entry);
+        debug!("icon_repo::ADD  {:?} ", entry);
         self.ctx
             .insert(&entry, false)
             .map_err(rusqlite_error_to_boxed)
     }
 
     fn get_by_icon(&self, icon_s: String) -> Vec<IconRow> {
-        unimplemented!();
+        let sql = format!(
+            "SELECT * FROM {} where icon=\"{}\" ",
+            IconRow::table_name(),
+            icon_s
+        );
+        self.ctx.get_list(sql)
     }
 
     fn get_by_index(&self, icon_id: isize) -> Option<IconRow> {
@@ -321,11 +351,42 @@ impl IIconRepo for IconRepo {
     }
 
     fn get_all_entries(&self) -> Vec<IconRow> {
-        unimplemented!();
+        self.ctx.get_all()
     }
 
-    fn remove_icon(&self, icon_id: isize) {
-        unimplemented!();
+    fn delete_icon(&self, icon_id: isize) -> usize {
+        let sql = format!(
+            "DELETE FROM {}  WHERE {}={} ",
+            IconRow::table_name(),
+            IconRow::index_column_name(),
+            icon_id
+        );
+        self.ctx.execute(sql)
+    }
+
+    fn store_icon(
+        &self,
+        icon_id_: isize,
+        new_icon: String,
+    ) -> Result<i64, Box<dyn std::error::Error>> {
+        let entry: IconRow = IconRow {
+            icon_id: icon_id_,
+            icon: new_icon,
+            web_date: 0,
+            web_size: 0,
+            web_url: String::default(),
+            compression_type: CompressionType::None, //  TODO
+            req_date: 0,
+            ..Default::default()
+        };
+        trace!(
+            "icon_repo::store_icon: {} C{:?}",
+            entry.icon_id,
+            entry.compression_type
+        );
+        self.ctx
+            .insert(&entry, true)
+            .map_err(rusqlite_error_to_boxed)
     }
 }
 
@@ -336,7 +397,7 @@ impl Buildable for IconRepo {
     fn build(conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         let o_folder = conf.get(KEY_FOLDERNAME);
         match o_folder {
-            Some(folder) => IconRepo::new_(&folder),
+            Some(folder) => IconRepo::new(&folder),
             None => {
                 conf.dump();
                 panic!("iconrepo config has no {KEY_FOLDERNAME} ");
@@ -347,18 +408,23 @@ impl Buildable for IconRepo {
 
 impl StartupWithAppContext for IconRepo {
     fn startup(&mut self, ac: &AppContext) {
-        let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
-        let su_r = ac.get_rc::<IconRepo>().unwrap();
-        {
-            (*timer_r)
-                .borrow_mut()
-                .register(&TimerEvent::Timer10s, su_r.clone(), true);
-            (*timer_r)
-                .borrow_mut()
-                .register(&TimerEvent::Shutdown, su_r, true);
-        }
+        debug!("creating table  ... ");
+        self.ctx.create_table();
 
-        self.startup_();
+        if false {
+            let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
+            let su_r = ac.get_rc::<IconRepo>().unwrap();
+            {
+                (*timer_r)
+                    .borrow_mut()
+                    .register(&TimerEvent::Timer10s, su_r.clone(), true);
+                (*timer_r)
+                    .borrow_mut()
+                    .register(&TimerEvent::Shutdown, su_r, true);
+            }
+
+            self.startup_();
+        }
     }
 }
 
@@ -507,7 +573,13 @@ mod t_ {
         setup();
         let ir = IconRepo::new_in_mem();
         let r_ir: Rc<dyn IIconRepo> = Rc::new(ir);
-        let r = (*r_ir).add_icon("hello".to_string(), 0, 0, "".to_string());
+        let r = (*r_ir).add_icon(
+            "hello".to_string(),
+            0,
+            0,
+            "".to_string(),
+            CompressionType::None,
+        );
         // debug!("R: {:?} ", r);
         assert!(r.is_ok());
         let r2 = (*r_ir).get_by_index(r.unwrap() as isize);

@@ -11,6 +11,7 @@ use crate::controller::timer::ITimer;
 use crate::controller::timer::Timer;
 use crate::db::errorentry::ErrorEntry;
 use crate::db::errors_repo::ErrorRepo;
+use crate::db::icon_repo::IIconRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_entry::SubscriptionEntry;
@@ -122,7 +123,7 @@ pub enum SJob {
 pub struct SourceTreeController {
     pub messagesrepo_w: Weak<RefCell<MessagesRepo>>,
     pub(super) subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
-    pub(super) iconrepo_r: Rc<RefCell<IconRepo>>,
+    pub(super) iconrepo_r: Rc<RefCell<dyn IIconRepo>>,
     pub(super) configmanager_r: Rc<RefCell<ConfigManager>>,
     pub(super) downloader_r: Rc<RefCell<dyn IDownloader>>,
     pub(super) gui_context_w: Weak<RefCell<GuiContext>>,
@@ -265,7 +266,7 @@ impl SourceTreeController {
                     self.set_fetch_finished(fs_id, error_happened)
                 }
                 SJob::SetIconId(subs_id, icon_id) => {
-                    if let Some(icon_e) = (*self.iconrepo_r).borrow().get_by_index_(icon_id) {
+                    if let Some(icon_e) = (*self.iconrepo_r).borrow().get_by_index(icon_id) {
                         (*self.gui_updater)
                             .borrow()
                             .store_image(icon_id as i32, icon_e.icon);
@@ -657,7 +658,7 @@ impl SourceTreeController {
         self.new_source.borrow_mut().feed_homepage = feed_homepage;
         let mut icon_str = String::default();
         if icon_id > 0 {
-            if let Some(ie) = self.iconrepo_r.borrow().get_by_index_(icon_id) {
+            if let Some(ie) = self.iconrepo_r.borrow().get_by_index(icon_id) {
                 icon_str = ie.icon;
             }
         };
@@ -963,7 +964,7 @@ impl SourceTreeController {
         icon_ids.insert(IDX_32_FLAG_RED_32);
         icon_ids.insert(IDX_44_ICON_GREEN_D);
         for ii in icon_ids {
-            let o_icon = (*self.iconrepo_r).borrow().get_by_index_(ii as isize);
+            let o_icon = (*self.iconrepo_r).borrow().get_by_index(ii as isize);
             if o_icon.is_none() {
                 continue;
             };

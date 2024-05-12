@@ -9,6 +9,7 @@ use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::timer::Timer;
 use crate::db::errors_repo::ErrorRepo;
+use crate::db::icon_repo::IIconRepo;
 use crate::db::icon_repo::IconRepo;
 use crate::db::messages_repo::MessagesRepo;
 use crate::db::subscription_repo::ISubscriptionRepo;
@@ -327,7 +328,11 @@ impl IDownloader for Downloader {
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
-        let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+
+        // let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+        let icon_repo =
+            IconRepo::new_by_connection((*self.iconrepo_r).borrow().get_ctx().get_connection());
+
         let msgrepo = MessagesRepo::new_by_connection(
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
@@ -351,7 +356,10 @@ impl IDownloader for Downloader {
     }
 
     fn load_icon(&self, subsid: isize, feedurl: String, old_icon_id: usize) {
-        let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+        // let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+        let icon_repo =
+            IconRepo::new_by_connection((*self.iconrepo_r).borrow().get_ctx().get_connection());
+
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
@@ -377,7 +385,9 @@ impl IDownloader for Downloader {
     }
 
     fn new_feedsource_request(&self, fs_edit_url: &str) {
-        let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+        // let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+        let icon_repo =
+            IconRepo::new_by_connection((*self.iconrepo_r).borrow().get_ctx().get_connection());
         let inner = ComprehensiveInner {
             feed_url_edit: fs_edit_url.to_string(),
             icon_url: String::default(),
@@ -405,14 +415,17 @@ impl IDownloader for Downloader {
         let msgrepo1 = MessagesRepo::new_by_connection(
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
-        let iconrepo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+        // let iconrepo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
+        let icon_repo =
+            IconRepo::new_by_connection((*self.iconrepo_r).borrow().get_ctx().get_connection());
+
         let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
         let cleaner_i = CleanerInner::new(
             self.gp_job_sender.as_ref().unwrap().clone(),
             self.source_c_sender.as_ref().unwrap().clone(),
             subs_repo,
             msgrepo1,
-            iconrepo,
+            icon_repo,
             msg_keep_count,
             errors_rep,
         );

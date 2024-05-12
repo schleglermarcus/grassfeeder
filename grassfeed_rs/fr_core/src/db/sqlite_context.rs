@@ -14,13 +14,14 @@ pub trait TableInfo {
     fn create_string() -> String;
     fn index_column_name() -> String;
     fn create_indices() -> Vec<String>;
+    fn from_row(row: &rusqlite::Row) -> Self;
+    fn get_index_value(&self) -> isize;
 
     /// without index column
     fn get_insert_columns(&self) -> Vec<String>;
+
     /// without index column
     fn get_insert_values(&self) -> Vec<Wrap>;
-    fn from_row(row: &rusqlite::Row) -> Self;
-    fn get_index_value(&self) -> isize;
 }
 
 pub struct SqliteContext<T>
@@ -35,9 +36,12 @@ where
 impl<T: TableInfo> SqliteContext<T> {
     pub fn new(filenam: &str) -> Self {
         let existed = file_exists(filenam);
-        let c = Connection::open(filenam).unwrap();
+        let r = Connection::open(filenam);
+        if let Err(ref e) = r {
+            warn!("opening file {} => {:?}   {} ", filenam, e, existed);
+        }
         SqliteContext {
-            connection: Arc::new(Mutex::new(c)),
+            connection: Arc::new(Mutex::new(r.unwrap())),
             _p: PhantomData,
             db_file_existed_before: existed,
         }

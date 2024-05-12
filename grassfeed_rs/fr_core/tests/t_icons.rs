@@ -113,51 +113,6 @@ fn test_from_svg() {
 use fr_core::db::icon_repo::IconEntry;
 pub const TEST_FOLDER1: &'static str = "../target/db_t_ico_rep";
 
-
-/*
-// cargo watch -s "(cd fr_core ;  RUST_BACKTRACE=1  cargo test  db::icon_repo::t_::t_store_file   --lib -- --exact --nocapture  )  "
-#[test]
-fn t_store_file() {
-    setup();
-    {
-        debug!("t_store_file  {}  new() ... ", TEST_FOLDER1);
-        let mut iconrepo = IconRepo::new_(TEST_FOLDER1);
-        debug!("t_store_file  startup() ... " );
-        iconrepo.startup_();
-        iconrepo.clear();
-        let s1 = IconEntry::default();
-        assert!(iconrepo.store_entry (&s1).is_ok());
-        assert!(iconrepo.store_entry(&s1).is_ok());
-        let list = iconrepo.get_all_entries_();
-        assert_eq!(list.len(), 2);
-        iconrepo.check_or_store();
-    }
-    {
-        let mut sr = IconRepo::new_(TEST_FOLDER1);
-        sr.startup_();
-        let list = sr.get_all_entries_();
-        assert_eq!(list.len(), 2);
-    }
-}
- */
-
-
-/*
-// cargo watch -s "(cd fr_core ;  RUST_BACKTRACE=1  cargo test  db::icon_repo::t_::t_db_store   --lib -- --exact --nocapture  )  "
-#[test]
-fn t_db_store() {
-    setup();
-    let ir = IconRepo::new_in_mem();
-    let r_ir: Rc<dyn IIconRepo> = Rc::new(ir);
-    let r = (*r_ir).add_icon("hello".to_string(), 0, 0, "".to_string());
-    // debug!("R: {:?} ", r);
-    assert!(r.is_ok());
-    let r2 = (*r_ir).get_by_index(r.unwrap()  as isize );
-    assert!(r2.is_some());
-    assert_eq!("hello", r2.unwrap().icon.as_str());
-}
- */
-
 // ------------------------------------
 
 mod logger_config;

@@ -18,8 +18,9 @@ use crate::controller::timer::Timer;
 use crate::controller::timer::TimerJob;
 use crate::db::errorentry::ESRC;
 use crate::db::errors_repo::ErrorRepo;
-use crate::db::icon_repo::IconEntry;
+use crate::db::icon_repo::IIconRepo;
 use crate::db::icon_repo::IconRepo;
+use crate::db::icon_row::IconRow;
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
@@ -102,7 +103,7 @@ pub struct GuiProcessor {
     erro_repo_r: Rc<RefCell<ErrorRepo>>,
     subscriptionmove_r: Rc<RefCell<dyn ISubscriptionMove>>,
     subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
-    iconrepo_r: Rc<RefCell<IconRepo>>,
+    iconrepo_r: Rc<RefCell<dyn IIconRepo>>,
     statusbar: RefCell<StatusBar>,
     focus_by_tab: RefCell<FocusByTab>,
     currently_minimized: RefCell<bool>,
@@ -365,15 +366,35 @@ impl GuiProcessor {
             .iter()
             .enumerate()
             .filter(|(num, _ico)| *num > 0)
-            .map(|(num, ico)| IconEntry {
-                icon_id: num as isize,
-                icon: ico.to_string(),
-            })
-            .for_each(|e| {
-                if let Ok(_icon_entry) = (*self.iconrepo_r.borrow()).store_entry(&e) {
-                    // trace!(                        "default-icons: {}=>{}  #{} ",                        e.icon_id,                        icon_entry.icon_id,                        icon_entry.icon.len(),                    );
+            .for_each(|(num, ico)| {
+                let ic_r = self.iconrepo_r.borrow();
+                if ic_r.get_by_index(num as isize).is_none() {
+                    if let Err(e) = ic_r.store_icon(num as isize, ico.to_string()) {
+                        warn!("default-icons: {} => {:?}   ", num, e);
+                    }
                 }
             });
+
+        /*
+               gen_icons::ICON_LIST
+                   .iter()
+                   .enumerate()
+                   .filter(|(num, _ico)| *num > 0)
+                   .map(|(num, ico)| IconEntry {
+                       icon_id: num as isize,
+                       icon: ico.to_string(),
+                   })
+                   .for_each(|e| {
+                       if let Ok(_icon_entry) = (*self.iconrepo_r.borrow()).store_entry(  e.icon_id ,&e) {
+                           trace!(
+                               "default-icons: {}=>{}  #{} ",
+                               e.icon_id,
+                               icon_entry.icon_id,
+                               icon_entry.icon.len(),
+                           );
+                       }
+                   });
+        */
     }
 
     fn start_settings_dialog(&self) {
@@ -433,12 +454,13 @@ impl GuiProcessor {
     }
 
     fn start_icons_dialog(&self) {
-        let all: Vec<IconEntry> = (*self.iconrepo_r.borrow()).get_all_entries_();
-        let upper: Vec<IconEntry> = all
+        let all: Vec<IconRow> = (*self.iconrepo_r.borrow()).get_all_entries();
+        debug!("ICONS get all : {} ", all.len());
+        let upper: Vec<IconRow> = all
             .into_iter()
-            .filter(|ie| ie.icon_id > ICON_LIST.len() as isize)
-            .filter(|ie| ie.icon.len() > 30)
-            .collect::<Vec<IconEntry>>();
+            // .filter(|ie| ie.icon_id > ICON_LIST.len() as isize)
+            // .filter(|ie| ie.icon.len() > 30)
+            .collect::<Vec<IconRow>>();
         let mut dd: Vec<AValue> = Vec::new();
         upper.iter().for_each(|ie| {
             let subscriptions: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)

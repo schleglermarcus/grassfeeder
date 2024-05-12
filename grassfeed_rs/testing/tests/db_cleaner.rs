@@ -58,11 +58,9 @@ fn prepare_cleaner_inner() -> (CleanerInner, Receiver<Job>) {
     let subsrepo = SubscriptionRepo::by_file(&format!("{}/subscriptions.db", CONF_PATH));
     let msgrepo1 = MessagesRepo::new_by_filename_add_column(&format!("{}/messages.db", CONF_PATH));
     let err_repo = ErrorRepo::new(&format!("{}/", CONF_PATH));
-
     let mut iconrepo: IconRepo;
     iconrepo = IconRepo::new(CONF_PATH);
-    iconrepo.startup();
-
+    iconrepo.startup_();
     let cleaner_i = CleanerInner::new(
         gpj_s,
         stc_job_s,

@@ -98,6 +98,7 @@ pub enum IconKind {
     AnalyseDoneUnknown, // all analyses done
 }
 
+/// returns   an image-rs  created byte array
 pub fn downscale_image(
     img_bytes: &[u8],
     img_type: &IconKind,
