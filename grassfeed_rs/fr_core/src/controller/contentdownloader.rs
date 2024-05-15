@@ -110,8 +110,18 @@ impl DLKind for DLJob {
 
     fn hostname(&self) -> Option<String> {
         match self {
-            DLJob::Feed(fetch_inner) => Downloader::host_from_url(&fetch_inner.url),
-            DLJob::Icon(icon_inner) => Downloader::host_from_url(&icon_inner.feed_url),
+            DLJob::Feed(fetch_inner) => {
+                if fetch_inner.url.is_empty() {
+                    return None;
+                }
+                Downloader::host_from_url(&fetch_inner.url)
+            }
+            DLJob::Icon(icon_inner) => {
+                if icon_inner.feed_url.is_empty() {
+                    return None;
+                }
+                Downloader::host_from_url(&icon_inner.feed_url)
+            }
             _ => None,
         }
     }
@@ -356,14 +366,13 @@ impl IDownloader for Downloader {
     }
 
     fn load_icon(&self, subsid: isize, feedurl: String, old_icon_id: usize) {
-        // let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
         let icon_repo =
             IconRepo::new_by_connection((*self.iconrepo_r).borrow().get_ctx().get_connection());
-
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
         let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
+        //  trace!("Q-Add: {subsid} {}  old:{old_icon_id} ", &feedurl);
         let dl_inner = IconInner {
             subs_id: subsid,
             feed_url: feedurl,
@@ -385,7 +394,6 @@ impl IDownloader for Downloader {
     }
 
     fn new_feedsource_request(&self, fs_edit_url: &str) {
-        // let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
         let icon_repo =
             IconRepo::new_by_connection((*self.iconrepo_r).borrow().get_ctx().get_connection());
         let inner = ComprehensiveInner {

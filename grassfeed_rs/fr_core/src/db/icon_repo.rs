@@ -1,3 +1,4 @@
+use crate::controller::timer::Timer;
 use crate::db::icon_row::CompressionType;
 use crate::db::icon_row::IconRow;
 use crate::db::sqlite_context::rusqlite_error_to_boxed;
@@ -10,22 +11,21 @@ use context::Buildable;
 use context::StartupWithAppContext;
 use context::TimerEvent;
 use context::TimerReceiver;
+use context::TimerRegistry;
 use rusqlite::Connection;
 use serde::Deserialize;
 use serde::Serialize;
-use std::collections::HashMap;
-use std::io::BufWriter;
-use std::io::Write;
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::sync::RwLock;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
 pub const FILENAME: &str = "icons_list.json";
 
 /// line to convert, line number
-pub const CONV_TO: &dyn Fn(String, usize) -> Option<IconEntry> = &json_to_icon_entry;
-pub const CONV_FROM: &dyn Fn(&IconEntry) -> Option<String> = &icon_entry_to_json;
+// pub const CONV_TO: &dyn Fn(String, usize) -> Option<IconEntry> = &json_to_icon_entry;
+// pub const CONV_FROM: &dyn Fn(&IconEntry) -> Option<String> = &icon_entry_to_json;
 
 pub trait IIconRepo {
     fn get_ctx(&self) -> &SqliteContext<IconRow>;
@@ -48,12 +48,21 @@ pub trait IIconRepo {
         &self,
         icon_id: isize,
         new_icon: String,
-    ) -> Result<i64, Box<dyn std::error::Error>>;
+        comp_type: CompressionType,
+    ) -> Result<usize, Box<dyn std::error::Error>>;
 
     /// returns number of deleted rows
     fn delete_icon(&self, icon_id: isize) -> usize;
 
     fn create_table(&self);
+
+    /// returns number of changed rows
+    fn update_icon(
+        &self,
+        icon_id: isize,
+        new_icon: Option<String>,
+        comp_type: CompressionType,
+    ) -> Result<usize, Box<dyn std::error::Error>>;
 }
 
 ///
@@ -75,11 +84,10 @@ impl std::fmt::Debug for IconEntry {
 }
 
 pub struct IconRepo {
-    filename: String,
+    // filename: String,
     ///  ID -> Entry
-    list: Arc<RwLock<HashMap<isize, IconEntry>>>,
-    last_list_count: usize,
-
+    // list: Arc<RwLock<HashMap<isize, IconEntry>>>,
+    // last_list_count: usize,
     ctx: SqliteContext<IconRow>,
 }
 
@@ -87,8 +95,6 @@ impl IconRepo {
     /// with DB
     pub fn new(folder_name: &str) -> Self {
         let fname = Self::filename(folder_name);
-        debug!("NEW IconRepo-DB folder: {}  file: {}", folder_name, fname);
-
         match std::fs::create_dir_all(&folder_name) {
             Ok(()) => (),
             Err(e) => {
@@ -97,13 +103,14 @@ impl IconRepo {
         }
         let sqctx = SqliteContext::new(&fname);
         IconRepo {
-            list: Arc::new(RwLock::new(HashMap::new())),
+            // list: Arc::new(RwLock::new(HashMap::new())),
             ctx: sqctx,
-            filename: fname,
-            last_list_count: 0,
+            //            filename: fname,
+            // last_list_count: 0,
         }
     }
 
+    #[deprecated]
     pub fn new_(folder_name: &str) -> Self {
         warn!("OLD  IconRepo to DB ");
         let fname = Self::filename(folder_name);
@@ -114,41 +121,43 @@ impl IconRepo {
             }
         }
         IconRepo {
-            list: Arc::new(RwLock::new(HashMap::new())),
-            filename: folder_name.to_string(),
-            last_list_count: 0,
+            // list: Arc::new(RwLock::new(HashMap::new())),
+            // filename: folder_name.to_string(),
+            // last_list_count: 0,
             ctx: SqliteContext::new_in_memory(),
         }
     }
 
-    #[deprecated]
-    pub fn by_existing_list_(existing: Arc<RwLock<HashMap<isize, IconEntry>>>) -> Self {
-        debug!("OLD__by_existing_list ");
-        IconRepo {
-            list: existing,
-            filename: String::default(),
-            last_list_count: 0,
-            ctx: SqliteContext::new_in_memory(),
-        }
-    }
+    /*
+       #[deprecated]
+       pub fn by_existing_list_(existing: Arc<RwLock<HashMap<isize, IconEntry>>>) -> Self {
+           debug!("OLD__by_existing_list ");
+           IconRepo {
+               // list: existing,
+               // filename: String::default(),
+               // last_list_count: 0,
+               ctx: SqliteContext::new_in_memory(),
+           }
+       }
+    */
 
     pub fn new_by_filename(filename: &str) -> Self {
-        debug!("icon_repo::NEW  filename={} ", filename);
+        trace!("icon_repo::NEW  filename={} ", filename);
         let dbctx = SqliteContext::new(filename);
         IconRepo {
             ctx: dbctx,
-            filename: String::default(),
-            list: Arc::new(RwLock::new(HashMap::new())),
-            last_list_count: 0,
+            // filename: String::default(),
+            // list: Arc::new(RwLock::new(HashMap::new())),
+            // last_list_count: 0,
         }
     }
 
     pub fn new_in_mem() -> Self {
         let ir = IconRepo {
             ctx: SqliteContext::new_in_memory(),
-            filename: String::default(),
-            list: Arc::new(RwLock::new(HashMap::new())),
-            last_list_count: 0,
+            // filename: String::default(),
+            // list: Arc::new(RwLock::new(HashMap::new())),
+            // last_list_count: 0,
         };
         ir.ctx.create_table();
         ir
@@ -157,9 +166,9 @@ impl IconRepo {
     pub fn new_by_connection(con: Arc<Mutex<Connection>>) -> Self {
         IconRepo {
             ctx: SqliteContext::new_by_connection(con),
-            filename: String::default(),
-            list: Arc::new(RwLock::new(HashMap::new())),
-            last_list_count: 0,
+            // filename: String::default(),
+            // list: Arc::new(RwLock::new(HashMap::new())),
+            // last_list_count: 0,
         }
     }
 
@@ -167,142 +176,115 @@ impl IconRepo {
         format!("{foldername}icons.db")
     }
 
-    #[deprecated]
-    fn startup_(&mut self) -> bool {
-        debug!("CREATE_DIR : {}  ", &self.filename);
-        match std::fs::create_dir_all(&self.filename) {
-            Ok(()) => (),
-            Err(e) => {
-                error!("IconRepo cannot create folder {} {:?}", &self.filename, e);
-                return false;
-            }
-        }
-        let filename = format!("{}/{}", self.filename, FILENAME);
-        debug!("filename= {}  ", filename);
-
-        self.filename = filename;
-        if std::path::Path::new(&self.filename).exists() {
-            let slist = read_from(self.filename.clone(), CONV_TO);
-            let mut hm = (*self.list).write().unwrap();
-            slist.into_iter().for_each(|se| {
-                let id = se.icon_id;
-                hm.insert(id, se);
-            });
-        } else {
-            debug!("icon list file not found: {}", &self.filename);
-        }
-        debug!("startup_  done");
-        true
-    }
-
     /*
        #[deprecated]
-       pub fn check_or_store(&mut self) {
-           let cur_list_len = (*self.list).read().unwrap().len();
-           if cur_list_len != self.last_list_count {
-               // trace!(                "  check_or_store  {} <> {} ",                cur_list_len,                self.last_list_count            );
-               self.store_to_file();
+       fn startup_(&mut self) -> bool {
+           debug!("CREATE_DIR : {}  ", &self.filename);
+           match std::fs::create_dir_all(&self.filename) {
+               Ok(()) => (),
+               Err(e) => {
+                   error!("IconRepo cannot create folder {} {:?}", &self.filename, e);
+                   return false;
+               }
            }
+           let filename = format!("{}/{}", self.filename, FILENAME);
+           debug!("filename= {}  ", filename);
+
+           self.filename = filename;
+           if std::path::Path::new(&self.filename).exists() {
+               let slist = read_from(self.filename.clone(), CONV_TO);
+               let mut hm = (*self.list).write().unwrap();
+               slist.into_iter().for_each(|se| {
+                   let id = se.icon_id;
+                   hm.insert(id, se);
+               });
+           } else {
+               debug!("icon list file not found: {}", &self.filename);
+           }
+           debug!("startup_  done");
+           true
        }
     */
 
     /*
-       #[deprecated]
-       fn store_to_file(&mut self) {
-           let mut values = (*self.list)
+
+       // #[deprecated]
+       fn clear(&self) {
+           (*self.list).write().unwrap().clear();
+       }
+
+       #[deprecated(note = " use add_icon()  or store_icon() ")]
+       fn store_entry(&self, entry: &IconEntry) -> Result<IconEntry, Box<dyn std::error::Error>> {
+           let mut new_id = entry.icon_id;
+           if new_id <= 0 {
+               let max_id = match (*self.list).read().unwrap().keys().max() {
+                   Some(id) => *id,
+                   None => 9, // start value
+               };
+               new_id = max_id + 1;
+           }
+           let mut store_entry = entry.clone();
+           store_entry.icon_id = new_id;
+           (*self.list)
+               .write()
+               .unwrap()
+               .insert(new_id, store_entry.clone());
+           // trace!(            "icons: store_entry newID {}  len{}",            store_entry.icon_id,            store_entry.icon.len()        );
+           Ok(store_entry)
+       }
+
+       fn get_list(&self) -> Arc<RwLock<HashMap<isize, IconEntry>>> {
+           self.list.clone()
+       }
+
+       fn store_icon_(&mut self, icon_id_: isize, new_icon: String) {
+           info!("icon_repo::store_icon: {} ", icon_id_);
+           (*self.list).write().unwrap().insert(
+               icon_id_,
+               IconEntry {
+                   icon_id: icon_id_,
+                   icon: new_icon,
+               },
+           );
+           self.last_list_count += 1;
+       }
+
+       #[deprecated(note = " use get_by_icon()  ")]
+       fn get_by_icon_(&self, icon_s: String) -> Vec<IconEntry> {
+           (*self.list)
                .read()
                .unwrap()
-               .values()
-               .cloned()
-               .collect::<Vec<IconEntry>>();
-           values.sort_by(|a, b| a.icon_id.cmp(&b.icon_id));
-           match write_to(self.filename.clone(), &values, CONV_FROM) {
-               Ok(_bytes_written) => {
-                   self.last_list_count = values.len();
-               }
-               Err(e) => {
-                   error!("IconRepo:store_to_file  {}  {:?} ", &self.filename, e);
-               }
-           }
+               .iter()
+               .filter(|(_id, ie)| ie.icon == icon_s)
+               .map(|(_id, ie)| ie.clone())
+               .collect()
+       }
+
+       fn get_by_index_(&self, icon_id: isize) -> Option<IconEntry> {
+           (*self.list)
+               .read()
+               .unwrap()
+               .iter()
+               .filter(|(_id, ie)| ie.icon_id == icon_id)
+               .map(|(_id, ie)| ie.clone())
+               .next()
+       }
+
+       fn get_all_entries_(&self) -> Vec<IconEntry> {
+           (*self.list)
+               .read()
+               .unwrap()
+               .iter()
+               .map(|(_id, sub)| sub.clone())
+               .collect::<Vec<IconEntry>>()
+       }
+
+       #[deprecated(note = " use delete_icon ")]
+       fn remove_icon(&self, icon_id: isize) {
+           let o_r = (*self.list).write().unwrap().remove(&icon_id);
+           assert!(o_r.is_some());
        }
     */
-
-    // #[deprecated]
-    fn clear(&self) {
-        (*self.list).write().unwrap().clear();
-    }
-
-    #[deprecated(note = " use add_icon()  or store_icon() ")]
-    fn store_entry(&self, entry: &IconEntry) -> Result<IconEntry, Box<dyn std::error::Error>> {
-        let mut new_id = entry.icon_id;
-        if new_id <= 0 {
-            let max_id = match (*self.list).read().unwrap().keys().max() {
-                Some(id) => *id,
-                None => 9, // start value
-            };
-            new_id = max_id + 1;
-        }
-        let mut store_entry = entry.clone();
-        store_entry.icon_id = new_id;
-        (*self.list)
-            .write()
-            .unwrap()
-            .insert(new_id, store_entry.clone());
-        // trace!(            "icons: store_entry newID {}  len{}",            store_entry.icon_id,            store_entry.icon.len()        );
-        Ok(store_entry)
-    }
-
-    fn get_list(&self) -> Arc<RwLock<HashMap<isize, IconEntry>>> {
-        self.list.clone()
-    }
-
-    fn store_icon_(&mut self, icon_id_: isize, new_icon: String) {
-        info!("icon_repo::store_icon: {} ", icon_id_);
-        (*self.list).write().unwrap().insert(
-            icon_id_,
-            IconEntry {
-                icon_id: icon_id_,
-                icon: new_icon,
-            },
-        );
-        self.last_list_count += 1;
-    }
-
-    #[deprecated(note = " use get_by_icon()  ")]
-    fn get_by_icon_(&self, icon_s: String) -> Vec<IconEntry> {
-        (*self.list)
-            .read()
-            .unwrap()
-            .iter()
-            .filter(|(_id, ie)| ie.icon == icon_s)
-            .map(|(_id, ie)| ie.clone())
-            .collect()
-    }
-
-    fn get_by_index_(&self, icon_id: isize) -> Option<IconEntry> {
-        (*self.list)
-            .read()
-            .unwrap()
-            .iter()
-            .filter(|(_id, ie)| ie.icon_id == icon_id)
-            .map(|(_id, ie)| ie.clone())
-            .next()
-    }
-
-    fn get_all_entries_(&self) -> Vec<IconEntry> {
-        (*self.list)
-            .read()
-            .unwrap()
-            .iter()
-            .map(|(_id, sub)| sub.clone())
-            .collect::<Vec<IconEntry>>()
-    }
-
-    #[deprecated(note = " use delete_icon ")]
-    fn remove_icon(&self, icon_id: isize) {
-        let o_r = (*self.list).write().unwrap().remove(&icon_id);
-        assert!(o_r.is_some());
-    }
 }
 
 //-------------------
@@ -366,14 +348,15 @@ impl IIconRepo for IconRepo {
         &self,
         icon_id_: isize,
         new_icon: String,
-    ) -> Result<i64, Box<dyn std::error::Error>> {
+        comp_type: CompressionType,
+    ) -> Result<usize, Box<dyn std::error::Error>> {
         let entry: IconRow = IconRow {
             icon_id: icon_id_,
             icon: new_icon,
             web_date: 0,
             web_size: 0,
             web_url: String::default(),
-            compression_type: CompressionType::None, //  TODO
+            compression_type: comp_type,
             req_date: 0,
             ..Default::default()
         };
@@ -382,13 +365,34 @@ impl IIconRepo for IconRepo {
             entry.icon_id,
             entry.compression_type
         );
-        self.ctx
-            .insert(&entry, true)
-            .map_err(rusqlite_error_to_boxed)
+        match self.ctx.insert(&entry, true) {
+            Ok(r) => return Result::Ok(r as usize),
+            Err(e) => return Result::Err(Box::new(e) ),
+        }
     }
 
     fn create_table(&self) {
         self.ctx.create_table();
+    }
+
+    fn update_icon(
+        &self,
+        icon_id: isize,
+        new_icon: Option<String>,
+        comp_type: CompressionType,
+    ) -> Result<usize, Box<dyn std::error::Error>> {
+        let mut up_icon: String = String::default();
+        if new_icon.is_some() {
+            up_icon = format!(" , icon =\"{}\" ", new_icon.unwrap());
+        }
+        let sql = format!(
+            "UPDATE {}  SET  compression_type = {} {} WHERE icon_id = {}",
+            IconRow::table_name(),
+            comp_type as u8,
+            up_icon,
+            icon_id,
+        );
+        Ok(self.ctx.execute(sql))
     }
 }
 
@@ -409,41 +413,34 @@ impl Buildable for IconRepo {
 }
 
 impl StartupWithAppContext for IconRepo {
-    fn startup(&mut self, _ac: &AppContext) {
-        debug!("creating table  ... ");
+    fn startup(&mut self, ac: &AppContext) {
         self.ctx.create_table();
-        /*
-               if false {
-                   let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
-                   let su_r = ac.get_rc::<IconRepo>().unwrap();
-                   {
-                       (*timer_r)
-                           .borrow_mut()
-                           .register(&TimerEvent::Timer10s, su_r.clone(), true);
-                       (*timer_r)
-                           .borrow_mut()
-                           .register(&TimerEvent::Shutdown, su_r, true);
-                   }
-
-                   self.startup_();
-               }
-        */
+        {
+            let timer_r: Rc<RefCell<Timer>> = (*ac).get_rc::<Timer>().unwrap();
+            let su_r = ac.get_rc::<IconRepo>().unwrap();
+            {
+                (*timer_r)
+                    .borrow_mut()
+                    .register(&TimerEvent::Shutdown, su_r, true);
+            }
+            //  self.startup_();
+        }
     }
 }
 
 impl TimerReceiver for IconRepo {
-    fn trigger_mut(&mut self, _event: &TimerEvent) {
-        /*
-               match event {
-                    TimerEvent::Timer10s => {                self.check_or_store();            }
-                    TimerEvent::Shutdown => {                self.check_or_store();            }
-                   _ => (),
-               }
-        */
+    fn trigger_mut(&mut self, event: &TimerEvent) {
+        match event {
+            TimerEvent::Shutdown => {
+                self.ctx.cache_flush();
+            }
+            _ => (),
+        }
     }
 }
 
-// #[allow(dead_code)]
+/*
+
 fn icon_entry_to_json(input: &IconEntry) -> Option<String> {
     match serde_json::to_string(input) {
         Ok(encoded) => Some(encoded),
@@ -454,8 +451,7 @@ fn icon_entry_to_json(input: &IconEntry) -> Option<String> {
     }
 }
 
-/*
-// #[allow(dead_code)]
+
 fn icon_entry_to_txt(input: &IconEntry) -> Option<String> {
     match bincode::serialize(input) {
         Ok(encoded) => Some(compress(String::from_utf8(encoded).unwrap().as_str())),
@@ -465,9 +461,8 @@ fn icon_entry_to_txt(input: &IconEntry) -> Option<String> {
         }
     }
 }
- */
 
-// #[allow(dead_code)]
+
 fn json_to_icon_entry(line: String, linenumber: usize) -> Option<IconEntry> {
     let dec_r: serde_json::Result<IconEntry> = serde_json::from_str(&line);
     match dec_r {
@@ -484,8 +479,8 @@ fn json_to_icon_entry(line: String, linenumber: usize) -> Option<IconEntry> {
     }
 }
 
-/*
-// #[allow(dead_code)]
+
+
 fn txt_to_icon_entry(line: String) -> Option<IconEntry> {
     let dc_bytes: String = decompress(&line);
     let dec_r: bincode::Result<IconEntry> = bincode::deserialize(dc_bytes.as_bytes());
@@ -499,7 +494,7 @@ fn txt_to_icon_entry(line: String) -> Option<IconEntry> {
 }
  */
 
-#[allow(dead_code)]
+/*
 fn write_to(
     filename: String,
     input: &[IconEntry],
@@ -543,6 +538,8 @@ fn read_from(
     }
     subscriptions_list
 }
+
+ */
 
 #[cfg(test)]
 mod t_ {

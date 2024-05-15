@@ -131,7 +131,7 @@ impl MessagesRepo {
 
     pub fn new_by_filename_add_column(filename: &str) -> Self {
         let insert_column = "markers";
-        let dbctx = SqliteContext::new(filename );
+        let dbctx = SqliteContext::new(filename);
         let m_e = dbctx.is_column_present(insert_column);
         if !m_e {
             debug!("adding column  {}  ", insert_column);

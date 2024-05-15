@@ -116,7 +116,7 @@ impl OpmlReader {
         fse: &SubscriptionEntry,
         feed_src_repo: Rc<RefCell<dyn ISubscriptionRepo>>,
     ) {
-        let fse_list = (*feed_src_repo).borrow().get_by_parent_repo_id(fse.subs_id);
+        let fse_list = (*feed_src_repo).borrow().get_children(fse.subs_id);
         for fse in fse_list {
             let mut outl = from_feed_source(&fse);
             if fse.is_folder {

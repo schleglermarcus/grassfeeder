@@ -149,8 +149,6 @@ fn clean_icon_doublettes() {
     }
 }
 
-
-
 // #[ignore]
 #[test]
 fn clean_errorlist_too_old() {
@@ -291,7 +289,7 @@ fn copy_icon_json(icn_path: &str) {
         format!("{}/icons_list.json", icn_path),
     );
     assert!(r.is_ok());
-    let mut iconrepo = IconRepo::new_(icn_path);  // TODO  better solution for dummy data
+    let mut iconrepo = IconRepo::new_(icn_path); // TODO  better solution for dummy data
     iconrepo.startup_();
 }
 

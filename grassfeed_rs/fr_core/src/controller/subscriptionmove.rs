@@ -219,7 +219,7 @@ impl SubscriptionMove {
         // insert element into destination list
         let mut to_list = (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_parent_repo_id(to_parent_id);
+            .get_children(to_parent_id);
         if to_folderpos_lim > to_list.len() as isize {
             to_folderpos_lim = to_list.len() as isize;
         }
@@ -241,7 +241,7 @@ impl SubscriptionMove {
     pub fn resort_parent_list(&self, parent_subs_id: isize) {
         let mod_list = (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_parent_repo_id(parent_subs_id);
+            .get_children(parent_subs_id);
         mod_list.iter().enumerate().for_each(|(n, fse)| {
             if fse.folder_position != n as isize {
                 (*self.subscriptionrepo_r)
@@ -277,7 +277,7 @@ impl SubscriptionMove {
         }
         let entries: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_parent_repo_id(parent_subs_id as isize);
+            .get_children(parent_subs_id as isize);
         entries.iter().enumerate().for_each(|(num, entry)| {
             *relative_subs_index += 1;
             let mut path: Vec<u16> = Vec::new();
@@ -406,7 +406,7 @@ impl ISubscriptionMove for SubscriptionMove {
         fse.expanded = true;
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_parent_repo_id(parent_id)
+            .get_children(parent_id)
             .iter()
             .map(|fse| fse.folder_position)
             .max();
@@ -477,7 +477,7 @@ impl ISubscriptionMove for SubscriptionMove {
         }
         let max_folderpos: Option<isize> = (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_parent_repo_id(parent_id)
+            .get_children(parent_id)
             .iter()
             .map(|fse| fse.folder_position)
             .max();

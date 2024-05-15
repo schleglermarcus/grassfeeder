@@ -20,6 +20,7 @@ use crate::db::errorentry::ESRC;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IIconRepo;
 use crate::db::icon_repo::IconRepo;
+use crate::db::icon_row::CompressionType;
 use crate::db::icon_row::IconRow;
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_repo::ISubscriptionRepo;
@@ -361,16 +362,22 @@ impl GuiProcessor {
 
     // single entries:  53ms		combined:  39ms
     pub fn store_default_icons(&self) {
+        let ic_r = self.iconrepo_r.borrow();
         gen_icons::ICON_LIST
             .iter()
             .enumerate()
             .filter(|(num, _ico)| *num > 0)
             .for_each(|(num, ico)| {
-                let ic_r = self.iconrepo_r.borrow();
-                if ic_r.get_by_index(num as isize).is_none() {
-                    if let Err(e) = ic_r.store_icon(num as isize, ico.to_string()) {
-                        warn!("default-icons: {} => {:?}   ", num, e);
+                let o_iconrow = ic_r.get_by_index(num as isize);
+                // trace!(                    " store_default_icons : ID{} length{}   InRepo: {} ",                    num,                    ico.len(),                    o_iconrow.is_some()                );
+                let result = match o_iconrow {
+                    Some(_r_icon) => ic_r.update_icon(num as isize, Some ( ico.to_string()) , CompressionType::ImageRs),
+                    None => {
+                        ic_r.store_icon(num as isize, ico.to_string(), CompressionType::ImageRs)
                     }
+                };
+                if result.is_err() {
+                    error!("store_default_icons: {} => {:?}   ", num, result.err());
                 }
             });
 

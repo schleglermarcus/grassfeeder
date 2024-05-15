@@ -26,11 +26,12 @@ pub const CONV_TO: &dyn Fn(String) -> Option<SubscriptionEntry> = &json_to_subsc
 pub const CONV_FROM: &dyn Fn(&SubscriptionEntry) -> Option<String> = &subscription_entry_to_json;
 
 pub trait ISubscriptionRepo {
-
-
-  // TODO rename get_children
+    // TODO rename get_children
     /// sorts by folder_position
+    #[deprecated(note = "Use    get_children() ")]
     fn get_by_parent_repo_id(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry>;
+
+    fn get_children(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry>;
 
     /// get by parent_subs_id  and folder_position
     fn get_by_pri_fp(&self, parent_subs_id: isize, folder_pos: isize) -> Vec<SubscriptionEntry>;
@@ -127,7 +128,7 @@ impl SubscriptionRepo {
 
         SubscriptionRepo {
             folder_name: folder_conf.to_string(),
-            ctx: SqliteContext::new(& reg_filename),
+            ctx: SqliteContext::new(&reg_filename),
         }
     }
 
@@ -138,7 +139,7 @@ impl SubscriptionRepo {
     pub fn by_file(filename: &str) -> Self {
         SubscriptionRepo {
             folder_name: String::default(),
-            ctx: SqliteContext::new(filename ) ,
+            ctx: SqliteContext::new(filename),
         }
     }
 
@@ -174,7 +175,7 @@ impl SubscriptionRepo {
 
     /// recursive, depth-first
     pub fn dump_tree_rec(&self, lpath: &[u16], parent_subs_id: isize, ident: &str) {
-        let entries = self.get_by_parent_repo_id(parent_subs_id);
+        let entries = self.get_children(parent_subs_id);
         entries.iter().enumerate().for_each(|(n, fse)| {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(lpath);
@@ -205,12 +206,23 @@ impl SubscriptionRepo {
 impl ISubscriptionRepo for SubscriptionRepo {
     /// sorts by folder_position
     fn get_by_parent_repo_id(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry> {
+        /*
         let prepared = format!(
             "SELECT * FROM {} WHERE parent_subs_id={} order by folder_position ",
             SubscriptionEntry::table_name(),
             parent_subs_id
         );
+        self.ctx.get_list(prepared)
+         */
+        self.get_children(parent_subs_id)
+    }
 
+    fn get_children(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry> {
+        let prepared = format!(
+            "SELECT * FROM {} WHERE parent_subs_id={} order by folder_position ",
+            SubscriptionEntry::table_name(),
+            parent_subs_id
+        );
         self.ctx.get_list(prepared)
     }
 
@@ -442,7 +454,7 @@ impl ISubscriptionRepo for SubscriptionRepo {
         let mut scan_list: Vec<isize> = Vec::default();
         scan_list.push(del_index);
         while let Some(idx) = scan_list.pop() {
-            let child_list = self.get_by_parent_repo_id(idx);
+            let child_list = self.get_children(idx);
             for se in &child_list {
                 scan_list.push(se.subs_id);
                 to_delete_list.insert(se.subs_id);

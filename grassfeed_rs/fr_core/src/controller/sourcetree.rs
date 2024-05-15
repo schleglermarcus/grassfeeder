@@ -56,7 +56,6 @@ use resources::parameter::FETCH_PROCESS_ONETIME_LIMIT;
 use rust_i18n;
 use rust_i18n::t;
 use std::cell::RefCell;
-use std::collections::HashSet;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::time::Instant;
@@ -117,6 +116,8 @@ pub enum SJob {
     /// subs_id
     SetCursorToSubsID(isize),
     SetGuiTreeColumn1Width,
+    /// subs_id
+    CheckIconOutdated(isize),
 }
 
 /// needs  GuiContext SubscriptionRepo ConfigManager IconRepo
@@ -266,6 +267,8 @@ impl SourceTreeController {
                     self.set_fetch_finished(fs_id, error_happened)
                 }
                 SJob::SetIconId(subs_id, icon_id) => {
+                    trace!("SJob:SetIconId  {} {}", subs_id, icon_id);
+
                     if let Some(icon_e) = (*self.iconrepo_r).borrow().get_by_index(icon_id) {
                         (*self.gui_updater)
                             .borrow()
@@ -378,6 +381,9 @@ impl SourceTreeController {
                 SJob::GuiStoreIcons => {
                     self.icons_store_to_gui();
                 }
+                SJob::CheckIconOutdated(subs_id) => {
+                    self.check_icon_outdated(subs_id);
+                }
             }
             if (*self.config).borrow().mode_debug {
                 let elapsed_m = now.elapsed().as_millis();
@@ -458,7 +464,7 @@ impl SourceTreeController {
     fn sum_up_num_all_unread(&self, folder_subs_id: isize) -> bool {
         let children = (*self.subscriptionrepo_r)
             .borrow()
-            .get_by_parent_repo_id(folder_subs_id);
+            .get_children(folder_subs_id);
         let child_subs_ids: Vec<isize> = children.iter().map(|se| se.subs_id).collect();
         let mut sum_all = 0;
         let mut sum_unread = 0;
@@ -498,7 +504,7 @@ impl SourceTreeController {
         let entries = self
             .subscriptionrepo_r
             .borrow()
-            .get_by_parent_repo_id(parent_subscr_id);
+            .get_children(parent_subscr_id);
         entries.iter().enumerate().for_each(|(_n, fse)| {
             let o_subs_map = self.statemap.borrow().get_state(fse.subs_id);
             if o_subs_map.is_none() {
@@ -590,23 +596,43 @@ impl SourceTreeController {
             (*self.downloader_r).borrow().add_update_source(*subs_id);
             self.set_any_spinner_visible(true);
             self.tree_store_update_one(*subs_id);
-            self.check_icon(*subs_id);
+            self.check_icon_outdated(*subs_id);
             self.statemap
                 .borrow_mut()
                 .set_status(&[*subs_id], StatusMask::FetchScheduled, false);
         }
     }
 
-    fn check_icon(&self, subs_id: isize) {
+    fn check_icon_outdated(&self, subs_id: isize) {
         let o_subs = self.subscriptionrepo_r.borrow().get_by_index(subs_id);
         if o_subs.is_none() {
             return;
         }
         let subs = o_subs.unwrap();
+        if subs.url.len() < 2 {
+            trace!(
+                "subs.url too short!  '{}'    id:{}  '{}' ",
+                subs.url,
+                subs_id,
+                subs.display_name
+            );
+            return;
+        }
         let now_seconds = timestamp_now();
         let time_outdated = now_seconds - (subs.updated_icon + ICON_RELOAD_TIME_S);
-        if time_outdated > 0 || subs.icon_id < ICON_LIST.len() {
-            // trace!(                "check_icon({}): icon-id:{} time_outdated={}h   icontime:{} {} {}",                subs_id,                subs.icon_id,                time_outdated / 3600,                crate::util::db_time_to_display_nonnull(subs.updated_icon),                subs.display_name, subs.url            );
+
+        // || subs.icon_id < ICON_LIST.len()
+        if time_outdated > 0 {
+            trace!(
+                "check_icon({}): icon-id:{} time_outdated:{}h   icontime:{}  url:{}   '{}' ",
+                subs_id,
+                subs.icon_id,
+                time_outdated / 3600,
+                crate::util::db_time_to_display_nonnull(subs.updated_icon),
+                subs.url,
+                subs.display_name,
+            );
+
             (*self.downloader_r)
                 .borrow()
                 .load_icon(subs.subs_id, subs.url, subs.icon_id);
@@ -789,7 +815,7 @@ impl SourceTreeController {
         let entries = self
             .subscriptionrepo_r
             .borrow()
-            .get_by_parent_repo_id(parent_subs_id as isize);
+            .get_children(parent_subs_id as isize);
         entries.iter().enumerate().for_each(|(n, fse)| {
             let mut path: Vec<u16> = Vec::new();
             path.extend_from_slice(localpath);
@@ -934,44 +960,81 @@ impl SourceTreeController {
     }
 
     fn icons_store_to_gui(&self) {
+        for ii in [
+            IDX_01_BORDER_RED,
+            IDX_02_ICON_MISSING_BROWN,
+            IDX_03_ICON_TRANSPARENT_48,
+            IDX_04_GRASS_CUT_2,
+            IDX_05_RSS_FEEDS_GREY_64_D,
+            IDX_06_CENTER_POINT_GREEN,
+            IDX_08_GNOME_FOLDER_48,
+            IDX_14_ICON_DOWNLOAD_64,
+            IDX_16_DOCUMENT_PROPERTIES_48,
+            IDX_30_ERROR_24X24,
+            IDX_32_FLAG_RED_32,
+            IDX_44_ICON_GREEN_D,
+        ] {
+            match (*self.iconrepo_r).borrow().get_by_index(ii as isize) {
+                Some(ic) => (*self.gui_updater).borrow().store_image(ii as i32, ic.icon),
+                None => (),
+            }
+        }
         let mut src_ids =
             self.statemap
                 .borrow()
                 .get_ids_by_status(StatusMask::IsDeletedCopy, false, true);
         src_ids.sort();
-        let mut icon_ids = src_ids
-            .iter()
-            .filter_map(|subs_id| {
-                let o_subs = self.subscriptionrepo_r.borrow().get_by_index(*subs_id);
-                if o_subs.is_none() {
-                    debug!(" No subscription for {} ", subs_id);
-                    return None;
-                }
-                let subs = o_subs.unwrap();
-                Some(subs.icon_id)
-            })
-            .collect::<HashSet<usize>>();
-        icon_ids.insert(IDX_01_BORDER_RED);
-        icon_ids.insert(IDX_02_ICON_MISSING_BROWN);
-        icon_ids.insert(IDX_03_ICON_TRANSPARENT_48);
-        icon_ids.insert(IDX_04_GRASS_CUT_2); // main window icon
-        icon_ids.insert(IDX_05_RSS_FEEDS_GREY_64_D);
-        icon_ids.insert(IDX_06_CENTER_POINT_GREEN);
-        icon_ids.insert(IDX_08_GNOME_FOLDER_48);
-        icon_ids.insert(IDX_14_ICON_DOWNLOAD_64);
-        icon_ids.insert(IDX_16_DOCUMENT_PROPERTIES_48);
-        icon_ids.insert(IDX_30_ERROR_24X24);
-        icon_ids.insert(IDX_32_FLAG_RED_32);
-        icon_ids.insert(IDX_44_ICON_GREEN_D);
-        for ii in icon_ids {
-            let o_icon = (*self.iconrepo_r).borrow().get_by_index(ii as isize);
+        let mut count_stored_icons: usize = 0;
+        for subs_id in src_ids {
+            let o_subs = self.subscriptionrepo_r.borrow().get_by_index(subs_id);
+            if o_subs.is_none() {
+                debug!(" No subscription for {} ", subs_id);
+                continue;
+            }
+            let subs = o_subs.unwrap();
+            if subs.icon_id <= ICON_LIST.len() {
+                continue;
+            }
+            let o_icon = (*self.iconrepo_r).borrow().get_by_index(subs.icon_id as isize);
             if o_icon.is_none() {
+                debug!(
+                    "No Icon From Repo for subscr {}  s_icon_id {}  '{}'  -->downloading again ",
+                    subs_id, subs.icon_id, subs.display_name
+                );
+                // self.addjob(SJob::CheckIconOutdated(subs_id as isize));
+
+                (*self.downloader_r)
+                    .borrow()
+                    .load_icon(subs.subs_id, subs.url, subs.icon_id);
+
                 continue;
             };
+            // icon_ids.insert(subscr.icon_id);
+            let icn = o_icon.unwrap();
             (*self.gui_updater)
                 .borrow()
-                .store_image(ii as i32, o_icon.unwrap().icon);
+                .store_image(icn.icon_id as i32, icn.icon);
+            count_stored_icons += 1;
         }
+        debug!("icons_store_to_gui {}   ", count_stored_icons);
+
+        /*
+                src_ids
+                    .iter()
+                    .filter_map(|subs_id| {
+                        let o_subs = self.subscriptionrepo_r.borrow().get_by_index(*subs_id);
+                        if o_subs.is_none() {
+                            debug!(" No subscription for {} ", subs_id);
+                            return None;
+                        }
+                        let subs = o_subs.unwrap();
+                        Some(subs.icon_id)
+                    })
+                    .for_each(|icon_id| {
+                    });
+                // .collect::<HashSet<usize>>();
+                debug!("icons_store_to_gui  #icons: {} ", icon_ids.len());
+        */
     }
 }
 

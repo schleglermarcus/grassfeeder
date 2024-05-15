@@ -153,7 +153,7 @@ impl Step<CleanerInner> for RemoveNonConnectedSubscriptions {
         let mut folder_work: Vec<isize> = Vec::default();
         folder_work.push(0);
         while let Some(parent_subs_id) = folder_work.pop() {
-            let childs = inner.subscriptionrepo.get_by_parent_repo_id(parent_subs_id);
+            let childs = inner.subscriptionrepo.get_children(parent_subs_id);
             childs.iter().for_each(|se| {
                 connected_child_list.insert(se.subs_id);
                 if se.is_folder {
@@ -761,9 +761,7 @@ pub fn check_layer(
     fp_correct_subs_parent: &Mutex<Vec<i32>>,
     subs_active_parents: &Mutex<Vec<i32>>,
 ) {
-    let entries = (*subs_repo)
-        .borrow()
-        .get_by_parent_repo_id(parent_subs_id as isize);
+    let entries = (*subs_repo).borrow().get_children(parent_subs_id as isize);
     if !entries.is_empty() {
         subs_active_parents.lock().unwrap().push(parent_subs_id);
     }
@@ -797,7 +795,7 @@ pub fn check_layer(
 
 /// straightens the folder_position
 pub fn resort_parent_list(parent_subs_id: isize, subscriptionrepo: &SubscriptionRepo) {
-    let mod_list = subscriptionrepo.get_by_parent_repo_id(parent_subs_id);
+    let mod_list = subscriptionrepo.get_children(parent_subs_id);
     mod_list.iter().enumerate().for_each(|(n, fse)| {
         if fse.folder_position != n as isize {
             subscriptionrepo.update_folder_position(fse.subs_id, n as isize);

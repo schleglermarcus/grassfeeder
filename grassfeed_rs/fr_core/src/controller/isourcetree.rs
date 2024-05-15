@@ -79,9 +79,8 @@ impl ISourceTreeController for SourceTreeController {
             }
         }
         if is_folder {
-            let child_fse: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
-                .borrow()
-                .get_by_parent_repo_id(subs_id);
+            let child_fse: Vec<SubscriptionEntry> =
+                (*self.subscriptionrepo_r).borrow().get_children(subs_id);
             let child_repo_ids: Vec<isize> = child_fse
                 .iter()
                 .filter(|fse| !fse.is_folder)
@@ -107,9 +106,8 @@ impl ISourceTreeController for SourceTreeController {
             is_folder = st.is_folder();
         }
         if is_folder {
-            let child_fse: Vec<SubscriptionEntry> = (*self.subscriptionrepo_r)
-                .borrow()
-                .get_by_parent_repo_id(subs_id);
+            let child_fse: Vec<SubscriptionEntry> =
+                (*self.subscriptionrepo_r).borrow().get_children(subs_id);
             child_fse
                 .iter()
                 .filter(|fse| !fse.is_folder)
@@ -415,7 +413,7 @@ impl ISourceTreeController for SourceTreeController {
             if fse.is_folder {
                 child_ids = (*self.subscriptionrepo_r)
                     .borrow()
-                    .get_by_parent_repo_id(fse.subs_id)
+                    .get_children(fse.subs_id)
                     .iter()
                     .filter(|fse| !fse.is_folder)
                     .map(|fse| fse.subs_id as i32)

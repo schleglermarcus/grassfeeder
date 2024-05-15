@@ -161,15 +161,19 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             false,
         );
         subs_move.add_new_subscription_at_parent(
-            "https://www.heise.de/tp/news-atom.xml".to_string(),
-            "TP ".to_string(),
+            "http://staseve.eu/?feed=rss2".to_string(),
+            "staseve-rss2".to_string(),
             folder1,
             false,
         );
+
+
     }
 
     if false {
         let src = [
+            ("https://blog.linuxmint.com/?feed=rss2", "Mint"),
+            ("https://www.heise.de/tp/news-atom.xml", "heise"),
             ("https://www.globalresearch.ca/feed", "globalresearch"),
             ("https://rss.slashdot.org/Slashdot/slashdot", "slashdot"),
             ("http://vkjehannum.wordpress.com/feed/", "vkjehannum"),

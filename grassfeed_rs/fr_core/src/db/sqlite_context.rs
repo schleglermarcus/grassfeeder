@@ -66,6 +66,7 @@ impl<T: TableInfo> SqliteContext<T> {
     pub fn get_connection(&self) -> Arc<Mutex<Connection>> {
         self.connection.clone()
     }
+
     pub fn delete_table(&self) -> rusqlite::Result<usize> {
         let stm = format!("DROP TABLE {} ", T::table_name(),);
         (*self.connection).lock().unwrap().execute(&stm, [])
