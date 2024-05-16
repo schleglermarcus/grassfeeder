@@ -688,7 +688,7 @@ impl SourceTreeController {
                 icon_str = ie.icon;
             }
         };
-        self.new_source.borrow_mut().icon_str = icon_str.clone();
+        self.new_source.borrow_mut().icon_str.clone_from(&icon_str);
         let dd: Vec<AValue> = vec![
             AValue::ASTR(self.new_source.borrow().display_name.clone()),
             AValue::ASTR(self.new_source.borrow().feed_homepage.clone()),
@@ -974,9 +974,8 @@ impl SourceTreeController {
             IDX_32_FLAG_RED_32,
             IDX_44_ICON_GREEN_D,
         ] {
-            match (*self.iconrepo_r).borrow().get_by_index(ii as isize) {
-                Some(ic) => (*self.gui_updater).borrow().store_image(ii as i32, ic.icon),
-                None => (),
+            if let Some(ic) = (*self.iconrepo_r).borrow().get_by_index(ii as isize) {
+                (*self.gui_updater).borrow().store_image(ii as i32, ic.icon);
             }
         }
         let mut src_ids =
@@ -995,7 +994,9 @@ impl SourceTreeController {
             if subs.icon_id <= ICON_LIST.len() {
                 continue;
             }
-            let o_icon = (*self.iconrepo_r).borrow().get_by_index(subs.icon_id as isize);
+            let o_icon = (*self.iconrepo_r)
+                .borrow()
+                .get_by_index(subs.icon_id as isize);
             if o_icon.is_none() {
                 debug!(
                     "No Icon From Repo for subscr {}  s_icon_id {}  '{}'  -->downloading again ",
@@ -1017,24 +1018,6 @@ impl SourceTreeController {
             count_stored_icons += 1;
         }
         debug!("icons_store_to_gui {}   ", count_stored_icons);
-
-        /*
-                src_ids
-                    .iter()
-                    .filter_map(|subs_id| {
-                        let o_subs = self.subscriptionrepo_r.borrow().get_by_index(*subs_id);
-                        if o_subs.is_none() {
-                            debug!(" No subscription for {} ", subs_id);
-                            return None;
-                        }
-                        let subs = o_subs.unwrap();
-                        Some(subs.icon_id)
-                    })
-                    .for_each(|icon_id| {
-                    });
-                // .collect::<HashSet<usize>>();
-                debug!("icons_store_to_gui  #icons: {} ", icon_ids.len());
-        */
     }
 }
 

@@ -1,15 +1,15 @@
 use fr_core::controller::contentdownloader::Downloader;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::errors_repo::ErrorRepo;
-use fr_core::db::icon_repo::IconEntry;
+use fr_core::db::icon_repo::IIconRepo;
 use fr_core::db::icon_repo::IconRepo;
+use fr_core::db::icon_row::IconRow;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::icons::IconCheckIsImage;
 use fr_core::downloader::icons::IconInner;
 use fr_core::downloader::icons::IconLoadStart;
-// use fr_core::downloader::util::extract_icon_from_homepage;
 use fr_core::downloader::util::retrieve_homepage_from_feed_text;
 use fr_core::util::convert_webp_to_png;
 use fr_core::util::Step;
@@ -42,11 +42,11 @@ fn multiple_icons_location() {
     setup();
     let urls: [(String, String); 10] = [
         (
-            "http://chaosradio.ccc.de/chaosradio-complete.rss".to_string(),
+            "https://www.nachdenkseiten.de/?feed=atom".to_string(),
             "".to_string(),
         ),
         (
-            "https://www.nachdenkseiten.de/?feed=atom".to_string(),
+            "http://chaosradio.ccc.de/chaosradio-complete.rss".to_string(),
             "".to_string(),
         ),
         (
@@ -84,7 +84,7 @@ fn multiple_icons_location() {
         //  (            "http://feeds.seoulnews.net/rss/3f5c98640a497b43".to_string(),            "http://www.seoulnews.net".to_string(),        ),
     ];
     for u_h in urls {
-        // trace!("homepage  {}   feed-url {} ", &u_h.0, &u_h.1);
+        // debug!(            "multiple_icons_location:   {}   feed-url {} ",            &u_h.0, &u_h.1        );
         let (ie_list, err_happened) = download_icon_one_url(&u_h.0, &u_h.1);
         assert_eq!(ie_list.len(), 1);
         assert!(!err_happened);
@@ -92,7 +92,7 @@ fn multiple_icons_location() {
 }
 
 //  unstable, sometimes does not deliver a sound feed.   (XmlReader(Parser { e: EndEventMismatch { expected: "guid", found: "title" } })
-fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry>, bool) {
+fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconRow>, bool) {
     setup();
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let subscr_r = SubscriptionRepo::new_inmem();
@@ -108,7 +108,7 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry
     let icon_inner = IconInner {
         subs_id: 1,
         feed_url: feed_url.clone(),
-        iconrepo: IconRepo::new_(""),
+        iconrepo: IconRepo::new_in_mem(),
         web_fetcher: Arc::new(Box::new(HttpFetcher {})),
         download_error_happened: false,
         icon_url: String::default(),
@@ -124,10 +124,10 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconEntry
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     if let Ok(ev) = stc_job_r.recv_timeout(std::time::Duration::from_millis(1)) {
-        assert_eq!(ev, SJob::SetIconId(1, 10));
+        assert_eq!(ev, SJob::SetIconId(1, 1));
     }
     (
-        last.iconrepo.get_all_entries_(),
+        last.iconrepo.get_all_entries(),
         last.download_error_happened,
     )
 }
@@ -142,7 +142,7 @@ fn icon_too_big() {
     let icon_inner = IconInner {
         subs_id: 1,
         feed_url: "http://lisahaven.news/feed/".to_string(),
-        iconrepo: IconRepo::new_(""),
+        iconrepo: IconRepo::new_in_mem(),
         web_fetcher: Arc::new(Box::new(HttpFetcher {})),
         download_error_happened: false,
         icon_url: String::default(),
@@ -158,7 +158,7 @@ fn icon_too_big() {
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     assert!(!last.download_error_happened);
-    let all_e = last.iconrepo.get_all_entries_();
+    let all_e = last.iconrepo.get_all_entries();
     assert_eq!(all_e.len(), 1);
     let icon0 = all_e.get(0).unwrap();
     assert!(icon0.icon.len() < 10000);
@@ -175,7 +175,7 @@ fn stop_on_nonexistent() {
         subs_id: 5,
         feed_url: "http://localhorst/none.xml".to_string(),
         icon_url: String::default(),
-        iconrepo: IconRepo::new_(""),
+        iconrepo: IconRepo::new_in_mem(),
         web_fetcher: get_file_fetcher(),
         download_error_happened: false,
         icon_bytes: Vec::default(),

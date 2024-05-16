@@ -109,7 +109,7 @@ impl StatusBar {
         if let Some((fse, _)) = o_fse {
             repo_id_new = fse.subs_id;
             last_fetch_time = fse.updated_int;
-            feed_src_link = fse.url.clone();
+            feed_src_link.clone_from(&fse.url);
             is_folder = fse.is_folder;
             let dl_r_b = (*self.r_downloader).borrow();
             self.num_downloader_threads = dl_r_b.get_config().num_downloader_threads;
@@ -306,6 +306,7 @@ impl StatusBar {
 
     /// Text field inside the Settings Dialog, DB-Cleanup Tab
     pub fn set_db_check_msg(&mut self, m: &str) {
-        self.db_check_display_message = m.to_owned();
+        // self.db_check_display_message = m.to_owned();
+        m.clone_into(&mut self.db_check_display_message);
     }
 }

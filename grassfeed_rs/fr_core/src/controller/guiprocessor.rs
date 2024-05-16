@@ -371,7 +371,11 @@ impl GuiProcessor {
                 let o_iconrow = ic_r.get_by_index(num as isize);
                 // trace!(                    " store_default_icons : ID{} length{}   InRepo: {} ",                    num,                    ico.len(),                    o_iconrow.is_some()                );
                 let result = match o_iconrow {
-                    Some(_r_icon) => ic_r.update_icon(num as isize, Some ( ico.to_string()) , CompressionType::ImageRs),
+                    Some(_r_icon) => ic_r.update_icon(
+                        num as isize,
+                        Some(ico.to_string()),
+                        CompressionType::ImageRs,
+                    ),
                     None => {
                         ic_r.store_icon(num as isize, ico.to_string(), CompressionType::ImageRs)
                     }
@@ -380,27 +384,6 @@ impl GuiProcessor {
                     error!("store_default_icons: {} => {:?}   ", num, result.err());
                 }
             });
-
-        /*
-               gen_icons::ICON_LIST
-                   .iter()
-                   .enumerate()
-                   .filter(|(num, _ico)| *num > 0)
-                   .map(|(num, ico)| IconEntry {
-                       icon_id: num as isize,
-                       icon: ico.to_string(),
-                   })
-                   .for_each(|e| {
-                       if let Ok(_icon_entry) = (*self.iconrepo_r.borrow()).store_entry(  e.icon_id ,&e) {
-                           trace!(
-                               "default-icons: {}=>{}  #{} ",
-                               e.icon_id,
-                               icon_entry.icon_id,
-                               icon_entry.icon.len(),
-                           );
-                       }
-                   });
-        */
     }
 
     fn start_settings_dialog(&self) {

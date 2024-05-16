@@ -2,7 +2,6 @@ use crate::controller::sourcetree::SJob;
 use crate::db::errorentry::ESRC;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IIconRepo;
-use crate::db::icon_repo::IconEntry;
 use crate::db::icon_repo::IconRepo;
 use crate::db::icon_row::CompressionType;
 use crate::db::icon_row::IconRow;
@@ -407,12 +406,7 @@ struct IconStore(IconInner);
 impl Step<IconInner> for IconStore {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let inner: IconInner = self.0;
-
         assert!(!inner.compressed_icon.is_empty());
-        let ie = IconEntry {
-            icon: inner.compressed_icon.clone(),
-            ..Default::default()
-        };
         let http_date: i64 = 0; // TODO
         let http_length: isize = 0; // TODO
         match inner.iconrepo.add_icon(
@@ -425,7 +419,7 @@ impl Step<IconInner> for IconStore {
             Ok(icon_id) => {
                 debug!(
                     "IconStore:  len:{:?}  => ID {}  F:{}  HP:{}  --> SetIconId",
-                    ie.icon.len(),
+                    inner.compressed_icon.len(),
                     icon_id,
                     inner.feed_url,
                     inner.feed_homepage

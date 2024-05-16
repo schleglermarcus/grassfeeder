@@ -30,11 +30,7 @@ pub struct IconRow {
     pub req_date: i64,
     pub icon_id: isize,
     pub web_size: isize,
-    /// 0: raw, from web
-    /// 1: gtk-image
-    /// 2: image-rs
-    /// 3: png
-    pub compression_type: CompressionType, // u8,
+    pub compression_type: CompressionType,
     pub web_url: String,
     pub icon: String,
 }
@@ -96,7 +92,6 @@ impl TableInfo for IconRow {
             req_date: row.get(4).unwrap(),
             compression_type: CompressionType::from_isize(i_5),
             icon: row.get(6).unwrap(),
-            ..Default::default()
         }
     }
 

@@ -7,7 +7,6 @@ use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
-// use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::messages::FetchInner;
@@ -16,8 +15,6 @@ use fr_core::util::timestamp_now;
 use fr_core::util::StepResult;
 use fr_core::web::mockfilefetcher::FileFetcher;
 use fr_core::web::WebFetcherType;
-// use std::cell::RefCell;
-// use std::rc::Rc;
 use std::sync::Arc;
 
 #[test]
@@ -26,7 +23,7 @@ fn single_dl_regular() {
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
     let f_src_repo = SubscriptionRepo::new_inmem();
     f_src_repo.scrub_all_subscriptions();
-    let icon_repo = IconRepo::new_("");
+    let icon_repo = IconRepo::new_in_mem(); //IconRepo::new_("");
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
@@ -75,7 +72,7 @@ fn download_with_create_date() {
     let (c_q_s, _c_q_r) = flume::bounded::<CJob>(9);
     let subsc_r = SubscriptionRepo::new_inmem();
     subsc_r.scrub_all_subscriptions();
-    let icon_repo = IconRepo::new_("");
+    let icon_repo = IconRepo::new_in_mem();
     let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
     let msgrepo = MessagesRepo::new_in_mem();
     let msgrepo_req = MessagesRepo::new_by_connection(msgrepo.get_ctx().get_connection());

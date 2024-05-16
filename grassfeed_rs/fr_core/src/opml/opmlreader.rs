@@ -55,7 +55,7 @@ impl OpmlReader {
         self.root_outline = Outline::default();
         self.root_outline.version = Some(o.version.clone());
         if let Some(ref head) = o.head {
-            self.root_outline.title = head.title.clone();
+            self.root_outline.title.clone_from(&head.title);
         }
         self.root_outline.outlines = o.body.outlines;
         Ok(())
@@ -129,7 +129,7 @@ impl OpmlReader {
     /// downgraded:  removed xmlelem due to compile issues. No more formatted output. Using simple line split
     pub fn write_to_file(&mut self, filename: String) -> Result<(), Box<dyn std::error::Error>> {
         let mut opml = OPML::default();
-        opml.body.outlines = self.root_outline.outlines.clone();
+        opml.body.outlines.clone_from(&self.root_outline.outlines);
         if let Some(ver) = self.root_outline.version.clone() {
             opml.version = ver;
         }
@@ -143,19 +143,6 @@ impl OpmlReader {
         }
         let mut file = File::create(filename)?;
         let unformatted = opml.to_string()?;
-        /*
-               let cursor = std::io::Cursor::new(unformatted.as_bytes());
-               let doc = Document::from_reader(cursor)?;
-               let conf = display::Config {
-                   is_pretty: true,
-                   indent: 2,
-                   max_line_length: 1000,
-                   entity_mode: display::EntityMode::Standard,
-                   indent_text_nodes: false,
-                   end_pad: 0,
-               };
-               let formatted = doc.to_string_pretty_with_config(&conf);
-        */
         let formatted = unformatted.replace('>', ">\n");
         let _r = file.write(formatted.as_bytes())?;
         Ok(())
@@ -191,14 +178,14 @@ pub fn from_outline(o: &Outline, repo_parent_id: isize, folder_pos: isize) -> Su
     let mut feed_url = String::default();
     let mut websit_url = String::default();
     if let Some(x_u) = &o.xml_url {
-        feed_url = x_u.clone();
+        feed_url.clone_from(x_u);
     }
     //later:  see if we can get the web main url from  the outline
     if let Some(h_u) = &o.html_url {
         if feed_url.is_empty() {
-            feed_url = h_u.clone();
+            feed_url.clone_from(h_u);
         } else {
-            websit_url = h_u.clone();
+            websit_url.clone_from(h_u);
         }
     }
     let displayname = remove_invalid_chars_from_input(o.text.clone());

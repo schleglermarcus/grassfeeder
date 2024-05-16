@@ -10,10 +10,6 @@ use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
 use fr_core::db::subscription_repo::SubscriptionRepo;
-// use fr_core::downloader::icons::icon_analyser;
-// use fr_core::util::IconKind;
-// use fr_core::web::httpfetcher::HttpFetcher;
-// use fr_core::web::IHttpRequester;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -57,7 +53,7 @@ fn delete_feed_v1() {
     let (mut fsc, r_fsource) = prepare_subscription_move(fs_list);
     fsc.set_delete_subscription_id(Some(2));
     fsc.move_subscription_to_trash();
-    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
+    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(0);
     assert_eq!(result.get(0).unwrap().folder_position, 0);
     assert_eq!(result.get(1).unwrap().folder_position, 1);
 }

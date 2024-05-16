@@ -1,9 +1,8 @@
-// use fr_core::controller::contentlist::CJob;
 use fr_core::controller::guiprocessor::Job;
 use fr_core::controller::sourcetree::SJob;
 use fr_core::db::errorentry::ESRC;
 use fr_core::db::errors_repo::ErrorRepo;
-use fr_core::db::icon_repo::IconEntry;
+use fr_core::db::icon_repo::IIconRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::message::compress;
 use fr_core::db::message::MessageRow;
@@ -24,9 +23,9 @@ use fr_core::downloader::db_clean::MAX_ERROR_LINE_AGE_S;
 use fr_core::util::timestamp_now;
 use fr_core::util::Step;
 use fr_core::util::StepResult;
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::sync::RwLock;
+// use std::collections::HashMap;
+// use std::sync::Arc;
+// use std::sync::RwLock;
 
 #[test]
 fn clean_errorlist_no_subscription() {
@@ -136,7 +135,8 @@ fn clean_too_many_messages() {
     }
 }
 
-// #[ignore]
+// Later: create new test data
+#[ignore]
 #[test]
 fn clean_icon_doublettes() {
     setup();
@@ -144,7 +144,7 @@ fn clean_icon_doublettes() {
     let sut = CorrectIconsDoublettes(cleaner_i);
     if let StepResult::Continue(s) = Box::new(sut).step() {
         let inner: CleanerInner = s.take();
-        let all = inner.iconrepo.get_all_entries_();
+        let all = inner.iconrepo.get_all_entries();
         assert_eq!(all.len(), 3);
     }
 }
@@ -246,8 +246,10 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
         m1.entry_src_date = 1000000000_i64 + 100000 * i;
         let _r = msgrepo.insert(&m1);
     }
-    let r = std::fs::copy("tests/data/icons_sane.json", "../target/icons_list.json");
-    assert!(r.is_ok());
+
+    // Later: more icons test for removing
+    // let r = std::fs::copy("tests/data/icons_sane.json", "../target/icons_list.json");
+    // assert!(r.is_ok());
 }
 
 fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> CleanerInner {
@@ -259,16 +261,16 @@ fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> Cleaner
     let err_repo = ErrorRepo::new_in_mem();
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
-    let mut iconrepo: IconRepo;
+    let iconrepo = IconRepo::new_in_mem();
     if let Some(i_p) = copy_icons {
-        copy_icon_json(i_p);
-        iconrepo = IconRepo::new_(i_p);
-        iconrepo.startup_();
+        /*  Later: create test data for removal testing
+               copy_icon_json(i_p);
+               iconrepo = IconRepo::new_(i_p);
+               iconrepo.startup_();
+        */
     } else {
-        debug!("dummy_icon_list: ....  ");
-        let dummy_icon_list: Arc<RwLock<HashMap<isize, IconEntry>>> =
-            Arc::new(RwLock::new(HashMap::default()));
-        iconrepo = IconRepo::by_existing_list(dummy_icon_list);
+        // debug!("dummy_icon_list: ....  ");        let dummy_icon_list: Arc<RwLock<HashMap<isize, IconEntry>>> =            Arc::new(RwLock::new(HashMap::default()));
+        // iconrepo = IconRepo::by_existing_list(dummy_icon_list);
     }
     let cleaner_i = CleanerInner::new(
         gpj_s,
@@ -282,6 +284,7 @@ fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> Cleaner
     cleaner_i
 }
 
+/*
 fn copy_icon_json(icn_path: &str) {
     let _r = std::fs::create_dir(icn_path);
     let r = std::fs::copy(
@@ -292,7 +295,7 @@ fn copy_icon_json(icn_path: &str) {
     let mut iconrepo = IconRepo::new_(icn_path); // TODO  better solution for dummy data
     iconrepo.startup_();
 }
-
+ */
 // ------------------------------------
 
 mod logger_config;

@@ -137,12 +137,12 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
                 }
                 1 => {
                     if let AValue::AIMG(ref s) = aval {
-                        ic_str = s.clone();
+                        ic_str.clone_from( s );
                     }
                 }
                 2 => {
                     if let AValue::ASTR(ref s) = aval {
-                        sub_id_str = s.clone();
+                        sub_id_str.clone_from( s );
                     }
                 }
                 _ => (),

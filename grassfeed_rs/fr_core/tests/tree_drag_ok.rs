@@ -58,7 +58,7 @@ fn drag_different_parent_down() {
             assert!(false);
         }
     }
-    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(2);
+    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(2);
     assert_eq!(result.len(), 1);
 }
 
@@ -82,7 +82,7 @@ fn drag_folder_one_up() {
     let (fsc, r_fsource) = prepare_subscription_move(fs_list);
     let success = fsc.on_subscription_drag(0, vec![1], vec![0, 0]);
     // r_fsource.borrow().debug_dump_tree("after ");
-    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(1);
+    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(1);
     assert_eq!(result.len(), 1);
     assert!(success);
 }
@@ -92,9 +92,9 @@ fn same_folder_move_third_under_first() {
     setup(); //   [2] => [1]
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
     let (fsc, r_fsource) = prepare_subscription_move(fs_list);
-    let entries: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
+    let entries: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(0);
     fsc.drag_move(entries[2].clone(), 0, 1);
-    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
+    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(0);
     assert_eq!(result.len(), 3);
     assert_eq!(result.get(0).unwrap().subs_id, 1);
     assert_eq!(result.get(1).unwrap().subs_id, 3);
@@ -106,10 +106,10 @@ fn same_folder_move_first_under_second() {
     setup();
     let fs_list: Vec<SubscriptionEntry> = dataset_simple_trio();
     let (fsc, r_fsource) = prepare_subscription_move(fs_list);
-    let entries: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
+    let entries: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(0);
     fsc.drag_move(entries[0].clone(), 0, 2);
     //    r_fsource.borrow().debug_dump_tree("UNS_");
-    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
+    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(0);
     assert_eq!(result.len(), 3);
     assert_eq!(result.get(0).unwrap().subs_id, 2);
     assert_eq!(result.get(1).unwrap().subs_id, 1);
@@ -135,7 +135,7 @@ fn drag_2nd_folder_to_1st_folder() {
         Err(e) => error!("{:?}", e),
     }
     // r_fsource.borrow().debug_dump_tree("\nup2 ");
-    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
+    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(0);
     assert_eq!(result.len(), 1);
     assert_eq!(result.get(0).unwrap().subs_id, 1);
 }
@@ -156,7 +156,7 @@ fn drag_up_to_root() {
         Err(e) => error!("{:?}", e),
     }
     // r_fsource.borrow().debug_dump_tree("\nup2 ");
-    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
+    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(0);
     assert_eq!(result.len(), 3);
     assert_eq!(result.get(0).unwrap().subs_id, 3);
     assert_eq!(result.get(1).unwrap().subs_id, 1);
@@ -195,7 +195,7 @@ fn drag_folder_on_other_folder() {
         }
     }
     //    r_fsource.borrow().debug_dump_tree("\nontosecond2: ");
-    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
+    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(0);
     assert_eq!(result.len(), 2);
     assert_eq!(result.get(0).unwrap().subs_id, 2);
     assert_eq!(result.get(1).unwrap().subs_id, 3);
@@ -230,7 +230,7 @@ fn drag_entry_below_last() {
         }
     }
     //  r_fsource.borrow().debug_dump_tree("\nbelow2: ");
-    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_by_parent_repo_id(0);
+    let result: Vec<SubscriptionEntry> = (*r_fsource).borrow().get_children(0);
     assert_eq!(result.len(), 3);
     assert_eq!(result.get(0).unwrap().subs_id, 2); //
 }

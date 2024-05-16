@@ -173,7 +173,10 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
                     .children
                     .resize((last_path_pos + 1) as usize, new_child.clone());
             }
-            new_child.children = (add_node).children[last_path_pos as usize].children.clone();
+            // new_child.children = (add_node).children[last_path_pos as usize].children.clone();
+
+            new_child.children .clone_from( & (add_node).children[last_path_pos as usize].children   );
+
             (add_node).children[last_path_pos as usize] = new_child;
         } else {
             error!(
@@ -196,7 +199,8 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
         while self.gui_list.len() <= list_position as usize {
             self.gui_list.push(Vec::default());
         }
-        self.gui_list[list_position as usize] = values.to_owned();
+        // self.gui_list[list_position as usize] = values.to_owned();
+        values.clone_into(&mut self.gui_list[list_position as usize]);
     }
 
     //  Later: use list index
@@ -293,7 +297,8 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
             self.dialog_data
                 .resize(idx as usize + 1, Vec::<AValue>::default());
         }
-        self.dialog_data[idx as usize] = values.to_owned();
+        // self.dialog_data[idx as usize] = values.to_owned();
+        values.clone_into(&mut self.dialog_data[idx as usize]);
     }
 
     fn get_dialog_data(&self, idx: u8) -> Option<&Vec<AValue>> {

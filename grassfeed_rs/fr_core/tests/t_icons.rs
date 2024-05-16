@@ -1,4 +1,4 @@
-use fr_core::db::icon_repo::IIconRepo;
+// use fr_core::db::icon_repo::IIconRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::downloader::icons::icon_analyser;
 use fr_core::downloader::util::extract_icon_from_homepage;
@@ -6,7 +6,7 @@ use fr_core::util::png_from_svg;
 use fr_core::util::IconKind;
 use fr_core::web::mockfilefetcher;
 use fr_core::TD_BASE;
-use std::rc::Rc;
+// use std::rc::Rc;
 
 // later: create sloppy  extract-icon-from-page for missing quotes:
 //  thevaluable_dev            <link rel="shortcut icon" href=https://thevaluable.dev/images/favicon.png>
@@ -110,7 +110,6 @@ fn test_from_svg() {
     assert_eq!(height, 120);
 }
 
-use fr_core::db::icon_repo::IconEntry;
 pub const TEST_FOLDER1: &'static str = "../target/db_t_ico_rep";
 
 // ------------------------------------

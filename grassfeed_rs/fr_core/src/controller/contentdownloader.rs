@@ -215,7 +215,7 @@ impl Downloader {
                     let mut hostname = String::default();
                     if let Some(ref_job) = (*queue_a).read().unwrap().front() {
                         if let Some(ref hostnam) = ref_job.hostname() {
-                            hostname = hostnam.clone();
+                            hostname.clone_from(hostnam);
                             for (_kind, hn) in (*busy_a).read().unwrap().iter() {
                                 if !hn.is_empty() && hn.eq(hostnam) {
                                     skip_it = true;

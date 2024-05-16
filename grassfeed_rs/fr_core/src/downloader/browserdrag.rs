@@ -115,8 +115,7 @@ impl Step<DragInner> for CheckContentIsFeed {
         if let Some(t_t) = parsed.title {
             inner.feed_display_title = t_t.content;
         }
-        inner.found_feed_url = inner.dragged_url.clone();
-        // trace!(            "CheckContentIsFeed OK {:?}  title:{}",            &inner.found_feed_url,            inner.feed_display_title        );
+        inner.found_feed_url.clone_from(&inner.dragged_url);
         StepResult::Continue(Box::new(CompleteRelativeUrl(inner)))
     }
 }
@@ -128,7 +127,7 @@ impl Step<DragInner> for AnalyzeContentSloppy {
         let extracted: Vec<String> = extract_feed_urls_sloppy(&inner.dragged_url_content);
         if !extracted.is_empty() {
             debug!("feed adresses found by sloppy:   {:?}", extracted);
-            inner.found_feed_url = extracted.first().unwrap().clone();
+            inner.found_feed_url.clone_from(extracted.first().unwrap());
         }
         StepResult::Continue(Box::new(CompleteRelativeUrl(inner)))
     }
@@ -140,8 +139,7 @@ impl Step<DragInner> for CompleteRelativeUrl {
         let mut inner: DragInner = self.0;
         let mut drag_url = inner.dragged_url.clone();
         if !drag_url.starts_with("http") {
-            drag_url = inner.testing_base_url.clone();
-            // debug!(                "CompleteRelativeUrl ....testing case : {}  found: {}  ",                drag_url, inner.found_feed_url            );
+            drag_url.clone_from(&inner.testing_base_url);
         }
         if !inner.found_feed_url.is_empty() && !inner.found_feed_url.starts_with("http") {
             let o_homepage_addr = go_to_homepage(&drag_url);

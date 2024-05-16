@@ -786,7 +786,7 @@ mod ut {
         s1.parent_subs_id = 7;
         s1.folder_position = 2;
         assert!(sr.store_entry(&s1).is_ok());
-        let list = sr.get_by_parent_repo_id(7);
+        let list = sr.get_children(7);
         list.iter().for_each(|e| debug!("##  {:?}", e));
         assert_eq!(list.len(), 3);
         assert_eq!(list.get(0).unwrap().subs_id, 10);

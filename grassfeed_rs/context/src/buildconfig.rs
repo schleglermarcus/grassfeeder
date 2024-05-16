@@ -9,18 +9,18 @@ pub struct BuildConfigContainer {
 
 impl BuildConfig for BuildConfigContainer {
     fn get(&self, key: &str) -> Option<String> {
-        self.map.get(&key.to_string()).cloned()
+        self.map.get(key).cloned()
     }
 
     fn get_int(&self, key: &str) -> Option<isize> {
-        if let Some(r) = self.map.get(&key.to_string()).map(|s| s.parse::<isize>()) {
+        if let Some(r) = self.map.get(key).map(|s| s.parse::<isize>()) {
             return r.ok();
         }
         None
     }
 
     fn get_bool(&self, key: &str) -> bool {
-        if let Some(Ok(v)) = self.map.get(&key.to_string()).map(|s| s.parse::<bool>()) {
+        if let Some(Ok(v)) = self.map.get(key).map(|s| s.parse::<bool>()) {
             return v;
         }
         false

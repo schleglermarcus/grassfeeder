@@ -339,14 +339,14 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
         })
         .collect::<Vec<&feed_rs::model::Link>>();
     if let Some(link_) = linklist.first() {
-        msg.link = link_.href.clone();
+        msg.link.clone_from ( & link_.href );
     }
     if let Some(summary) = me.summary.clone() {
         if !summary.content.is_empty() {
             msg.content_text = summary.content;
         }
     }
-    msg.post_id = me.id.clone();
+    msg.post_id.clone_from( & me.id );
     if let Some(c) = me.content.clone() {
         if let Some(b) = c.body {
             msg.content_text = b
@@ -368,7 +368,7 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
         if msg.content_text.is_empty() {
             if let Some(descrip) = &media.description {
                 if descrip.content_type.to_string().starts_with("text") {
-                    msg.content_text = descrip.content.clone();
+                    msg.content_text.clone_from(&descrip.content);
                 }
             }
         }
@@ -379,7 +379,7 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
         msg.title = filtered;
     } else {
         error_text = format!("Message ID {} has no valid title.", &me.id);
-        msg.title = msg.post_id.clone();
+        msg.title.clone_from(&msg.post_id);
     }
     let authorlist = me
         .authors
