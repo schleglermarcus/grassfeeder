@@ -22,6 +22,7 @@ pub fn from_gdk_sys(code: isize) -> KeyCodes {
         gdk_sys::GDK_KEY_Right => KeyCodes::CursorRight,
         gdk_sys::GDK_KEY_Left => KeyCodes::CursorLeft,
         gdk_sys::GDK_KEY_Delete => KeyCodes::Delete,
+        gdk_sys::GDK_KEY_BackSpace => KeyCodes::Backspace,
 
         gdk_sys::GDK_KEY_A => KeyCodes::Key_A,
         gdk_sys::GDK_KEY_a => KeyCodes::Key_a,

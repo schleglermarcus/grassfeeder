@@ -66,11 +66,11 @@ impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
-            //          if !inner.icon_url.is_empty() {
-            debug!("IconLoadStart:  ID:{}  db-HP:{} prev-icon-url:{}  HP:{} icon_id:{}  {}  feed-url:{} ",
+            if !inner.icon_url.is_empty() {
+                trace!("IconLoadStart:  ID:{}  db-HP:{} prev-icon-url:{}  HP:{} icon_id:{}  {}  feed-url:{} ",
                   inner.subs_id,subs_e.website_url, inner.icon_url, inner.feed_homepage,
                   subs_e.icon_id,subs_e.display_name, subs_e.url );
-            //            }
+            }
             if !subs_e.website_url.is_empty() {
                 inner.feed_homepage = subs_e.website_url;
                 return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
@@ -85,7 +85,7 @@ impl Step<IconInner> for FeedTextDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let now = Instant::now();
-        trace!("FeedTextDownload:   feed-url:{} ", inner.feed_url);
+        // trace!("FeedTextDownload:   feed-url:{} ", inner.feed_url);
         let result = (*inner.web_fetcher).request_url(&inner.feed_url);
         let elapsedms = now.elapsed().as_millis();
         match result.status {
@@ -136,10 +136,9 @@ impl Step<IconInner> for HomepageDownload {
             }
             return StepResult::Continue(Box::new(CompareHomepageToDB(inner)));
         } else {
-            trace!(
+            debug!(
                 "got no HP  from feed text!  Feed-URL: {}   {}",
-                &inner.feed_url,
-                errtext
+                &inner.feed_url, errtext
             );
             inner.erro_repo.add_error(
                 inner.subs_id,
@@ -173,18 +172,16 @@ impl Step<IconInner> for IconAnalyzeHomepage {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let homepage: String = inner.feed_homepage.clone();
-        //  if !homepage.ends_with('/') {            homepage = format!("{}/", homepage);        }
         // trace!(            "IconAnalyzeHomepage({})   feed_hp:{} ",            inner.subs_id,            homepage        );
         let r = (*inner.web_fetcher).request_url(&homepage);
         match r.status {
             200 | 202 => match util::extract_icon_from_homepage(r.content, &homepage) {
                 Ok(icon_url) => {
                     inner.icon_url = icon_url;
-                    // trace!(                        "IconAnalyzeHomepage( {} ) - extracted -  iconurl {} ",                       inner.subs_id,                        &inner.icon_url                    );
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 }
                 Err(e_descr) => {
-                    debug!("IconAnalyzeHomepage({}) E: {} ", inner.subs_id, e_descr);
+                    // trace!(                        "IconAnalyzeHomepage({}) E: {}  {} ",                        inner.subs_id,                        e_descr,                        homepage                    );
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconsAHEx,
@@ -249,12 +246,15 @@ impl Step<IconInner> for IconDownload {
             }
             _ => {
                 inner.download_error_happened = true;
-                debug!(
-                    "IconDownload ERR {}  {}   {}   ",
-                    r.get_kind(),
-                    r.error_description,
-                    inner.icon_url
-                );
+                if r.get_status() != 404 {
+                    trace!(
+                        "IconDownload ERR {} {}  {}   {}   ",
+                        r.get_status(),
+                        r.error_description,
+                        r.get_kind(),
+                        inner.icon_url
+                    );
+                }
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconsDownload,
@@ -339,7 +339,7 @@ pub struct IconDownscale(pub IconInner);
 impl Step<IconInner> for IconDownscale {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        trace!("IconDownscale: ... {:?} ", inner.icon_kind);
+        // trace!("IconDownscale: ... {:?} ", inner.icon_kind);
         let r = downscale_image(&inner.icon_bytes, &inner.icon_kind, ICON_CONVERT_TO_WIDTH);
         if r.is_err() {
             let msg = format!(
@@ -349,7 +349,7 @@ impl Step<IconInner> for IconDownscale {
                 inner.icon_url,
                 r.err()
             );
-            trace!("{msg}");
+            // trace!("{msg}");
             inner.erro_repo.add_error(
                 inner.subs_id,
                 ESRC::IconsDownscale,

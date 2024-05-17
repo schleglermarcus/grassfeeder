@@ -74,18 +74,14 @@ const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * (ICON_RELOAD_TIME_D as i64);
 pub enum SJob {
     /// only store into adapter
     FillSubscriptionsAdapter,
-
-    // take all needed icons and put it into the updater
+    // Put all needed icons it into the gui updater
     GuiStoreIcons,
-
     /// only update from adapter into TreeView
     GuiUpdateTreeAll,
     /// subscription_id
     GuiUpdateTree(isize),
-
     /// path to be updated
     GuiUpdateTreePartial(Vec<u16>),
-
     ScheduleFetchAllFeeds,
     CheckSpinnerActive,
     /// subscription_id
@@ -97,6 +93,7 @@ pub enum SJob {
     SetFetchFinished(isize, bool),
     /// subscription_id, new icon_repo_id
     SetIconId(isize, isize),
+
     DatabasesCleanup,
     /// subscription_id, timestamp_feed_update,  timestamp_creation
     StoreFeedCreateUpdate(isize, i64, i64),
@@ -229,7 +226,7 @@ impl SourceTreeController {
                     }
                 }
                 SJob::FillSubscriptionsAdapter => {
-                    self.feedsources_into_store_adapter();
+                    self.subscriptions_to_gui_adapter();
                 }
                 SJob::GuiUpdateTree(subs_id) => {
                     if let Some(path) = self.get_path_for_src(subs_id) {
@@ -267,23 +264,31 @@ impl SourceTreeController {
                     self.set_fetch_finished(fs_id, error_happened)
                 }
                 SJob::SetIconId(subs_id, icon_id) => {
-                    trace!("SJob:SetIconId  {} {}", subs_id, icon_id);
-
-                    if let Some(icon_e) = (*self.iconrepo_r).borrow().get_by_index(icon_id) {
-                        (*self.gui_updater)
-                            .borrow()
-                            .store_image(icon_id as i32, icon_e.icon);
-                    }
                     let ts_now = timestamp_now();
-                    self.statemap
-                        .borrow_mut()
-                        .set_icon_id(subs_id, icon_id as usize);
                     (*self.subscriptionrepo_r).borrow().update_icon_id_time(
                         subs_id,
                         icon_id as usize,
                         ts_now,
                     );
+                    self.statemap
+                        .borrow_mut()
+                        .set_icon_id(subs_id, icon_id as usize);
                     self.tree_store_update_one(subs_id);
+
+                    if let Some(icon_e) = (*self.iconrepo_r).borrow().get_by_index(icon_id) {
+                        debug!(
+                            "SJob:SetIconId  {} {}  {} ",
+                            subs_id, icon_id, icon_e.web_url
+                        );
+                        (*self.gui_updater)
+                            .borrow()
+                            .store_image(icon_id as i32, icon_e.icon);
+                    } else {
+                        warn!(
+                            "SJob:SetIconId  {} {}  icon-ID not in Repo!!  ",
+                            subs_id, icon_id
+                        );
+                    }
                 }
                 SJob::DatabasesCleanup => {
                     (*self.downloader_r).borrow().cleanup_db();
@@ -493,7 +498,7 @@ impl SourceTreeController {
     }
 
     ///  Read all sources   from db and put into ModelValueAdapter
-    pub fn feedsources_into_store_adapter(&self) {
+    pub fn subscriptions_to_gui_adapter(&self) {
         (*self.gui_val_store).write().unwrap().clear_tree(0);
         self.insert_tree_row(&Vec::<u16>::default(), 0);
         self.addjob(SJob::CheckSpinnerActive);
@@ -610,29 +615,12 @@ impl SourceTreeController {
         }
         let subs = o_subs.unwrap();
         if subs.url.len() < 2 {
-            trace!(
-                "subs.url too short!  '{}'    id:{}  '{}' ",
-                subs.url,
-                subs_id,
-                subs.display_name
-            );
             return;
         }
         let now_seconds = timestamp_now();
         let time_outdated = now_seconds - (subs.updated_icon + ICON_RELOAD_TIME_S);
-
-        // || subs.icon_id < ICON_LIST.len()
         if time_outdated > 0 {
-            trace!(
-                "check_icon({}): icon-id:{} time_outdated:{}h   icontime:{}  url:{}   '{}' ",
-                subs_id,
-                subs.icon_id,
-                time_outdated / 3600,
-                crate::util::db_time_to_display_nonnull(subs.updated_icon),
-                subs.url,
-                subs.display_name,
-            );
-
+            // trace!(                "check_icon({}): icon-id:{} time_outdated:{}h   icontime:{}  url:{}   '{}' ",                subs_id,                subs.icon_id,                time_outdated / 3600,                crate::util::db_time_to_display_nonnull(subs.updated_icon),                subs.url,                subs.display_name,            );
             (*self.downloader_r)
                 .borrow()
                 .load_icon(subs.subs_id, subs.url, subs.icon_id);
@@ -986,7 +974,6 @@ impl SourceTreeController {
                 .borrow()
                 .get_ids_by_status(StatusMask::IsDeletedCopy, false, true);
         src_ids.sort();
-        let mut count_stored_icons: usize = 0;
         for subs_id in src_ids {
             let o_subs = self.subscriptionrepo_r.borrow().get_by_index(subs_id);
             if o_subs.is_none() {
@@ -1001,7 +988,10 @@ impl SourceTreeController {
                 .borrow()
                 .get_by_index(subs.icon_id as isize);
             if o_icon.is_none() {
-                debug!("No Icon From Repo for subscr {}  s_icon_id {}  '{}'  ...downloading ",subs_id, subs.icon_id, subs.display_name );
+                debug!(
+                    "No Icon From Repo for subscr {}  s_icon_id {}  '{}'  ...downloading ",
+                    subs_id, subs.icon_id, subs.display_name
+                );
                 (*self.downloader_r)
                     .borrow()
                     .load_icon(subs.subs_id, subs.url, subs.icon_id);
@@ -1011,9 +1001,7 @@ impl SourceTreeController {
             (*self.gui_updater)
                 .borrow()
                 .store_image(icn.icon_id as i32, icn.icon);
-            count_stored_icons += 1;
         }
-        // debug!("icons_store_to_gui {}   ", count_stored_icons);
     }
 }
 

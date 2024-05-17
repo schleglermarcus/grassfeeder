@@ -50,6 +50,7 @@ use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::KeyCodes;
 use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
+use resources::gen_icons::ICON_01_BORDER_RED;
 use resources::gen_icons::ICON_LIST;
 use resources::id::DIALOG_ABOUT;
 use resources::id::*;
@@ -363,28 +364,73 @@ impl GuiProcessor {
 
     // single entries:  53ms		combined:  39ms
     pub fn store_default_icons(&self) {
-        let ic_r = self.iconrepo_r.borrow();
+        // let ic_r = self.iconrepo_r.borrow();
+        let mut last_stored_id: isize = -1;
         gen_icons::ICON_LIST
             .iter()
             .enumerate()
             .filter(|(num, _ico)| *num > 0)
             .for_each(|(num, ico)| {
-                let o_iconrow = ic_r.get_by_index(num as isize);
-                // trace!(                    " store_default_icons : ID{} length{}   InRepo: {} ",                    num,                    ico.len(),                    o_iconrow.is_some()                );
-                let result = match o_iconrow {
-                    Some(_r_icon) => ic_r.update_icon(
-                        num as isize,
-                        Some(ico.to_string()),
-                        CompressionType::ImageRs,
-                    ),
-                    None => {
-                        ic_r.store_icon(num as isize, ico.to_string(), CompressionType::ImageRs)
-                    }
+                let r = self.store_or_update_icon(num as isize, ico.to_string());
+                if r.is_err() {
+                    error!("store_default_icons: {} => {:?}   ", last_stored_id, r);
                 };
-                if result.is_err() {
-                    error!("store_default_icons: {} => {:?}   ", num, result.err());
-                }
+
+                /*
+                               let o_iconrow = ic_r.get_by_index(num as isize);
+                               // trace!(                    " store_default_icons : ID{} length{}   InRepo: {} ",                    num,                    ico.len(),                    o_iconrow.is_some()                );
+                               let result = match o_iconrow {
+                                   Some(_r_icon) => ic_r.update_icon(
+                                       num as isize,
+                                       Some(ico.to_string()),
+                                       CompressionType::ImageRs,
+                                   ),
+                                   None => {
+                                       ic_r.store_icon(num as isize, ico.to_string(), CompressionType::ImageRs)
+                                   }
+                               };
+                */
+                last_stored_id = num as isize;
             });
+
+        last_stored_id += 1;
+
+        let r = self.store_or_update_icon(last_stored_id, ICON_01_BORDER_RED.to_string());
+
+        if r.is_err() {
+            error!("store_default_icons: {} => {:?}   ", last_stored_id, r);
+        }
+
+        /*
+               let o_iconrow = ic_r.get_by_index(last_stored_id);
+               let result = match o_iconrow {
+                   Some(_r_icon) => ic_r.update_icon(
+                       last_stored_id,
+                       Some(ICON_01_BORDER_RED.to_string()),
+                       CompressionType::None,
+                   ),
+                   None => ic_r.store_icon(
+                       last_stored_id,
+                       ICON_01_BORDER_RED.to_string(),
+                       CompressionType::None,
+                   ),
+               };
+        */
+    }
+
+    fn store_or_update_icon(
+        &self,
+        id: isize,
+        content: String,
+    ) -> Result<usize, Box<dyn std::error::Error>> {
+        let ic_r = self.iconrepo_r.borrow();
+        let o_iconrow = ic_r.get_by_index(id);
+        // trace!(                    " store_default_icons : ID{} length{}   InRepo: {} ",                    num,                    ico.len(),                    o_iconrow.is_some()                );
+        let result = match o_iconrow {
+            Some(_r_icon) => ic_r.update_icon(id, Some(content), CompressionType::ImageRs),
+            None => ic_r.store_icon(id, content, CompressionType::ImageRs),
+        };
+        result
     }
 
     fn start_settings_dialog(&self) {
@@ -465,7 +511,7 @@ impl GuiProcessor {
             dd.push(AValue::AIMG((*ie.icon).to_string()));
             dd.push(AValue::ASTR(subs_ids));
         });
-        dd.push(AValue::AI32(-1));  // dummy value for the dialog evaluation
+        dd.push(AValue::AI32(-1)); // dummy value for the dialog evaluation
         dd.push(AValue::AIMG(String::default()));
         dd.push(AValue::ASTR(String::default()));
         (*self.gui_val_store)

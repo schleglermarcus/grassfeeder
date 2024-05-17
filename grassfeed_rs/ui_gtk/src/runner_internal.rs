@@ -279,7 +279,7 @@ fn loop_proc_int_commands(
             }
         }
         let elapsed_ms = now.elapsed().as_millis();
-        if elapsed_ms > 300 {
+        if elapsed_ms > 400 {
             warn!("R_INT: {:?} took {:?}", &command, elapsed_ms);
         }
     }

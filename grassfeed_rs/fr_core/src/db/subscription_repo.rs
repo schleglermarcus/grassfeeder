@@ -26,11 +26,10 @@ pub const CONV_TO: &dyn Fn(String) -> Option<SubscriptionEntry> = &json_to_subsc
 pub const CONV_FROM: &dyn Fn(&SubscriptionEntry) -> Option<String> = &subscription_entry_to_json;
 
 pub trait ISubscriptionRepo {
-    // TODO rename get_children
-    /// sorts by folder_position
-    #[deprecated(note = "Use    get_children() ")]
-    fn get_by_parent_repo_id(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry>;
+    // #[deprecated(note = "Use    get_children() ")]
+    // fn get_by_parent_repo_id(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry>;
 
+    /// sorts by folder_position
     fn get_children(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry>;
 
     /// get by parent_subs_id  and folder_position
@@ -204,19 +203,19 @@ impl SubscriptionRepo {
 }
 
 impl ISubscriptionRepo for SubscriptionRepo {
-    /// sorts by folder_position
+    /*
     fn get_by_parent_repo_id(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry> {
-        /*
         let prepared = format!(
             "SELECT * FROM {} WHERE parent_subs_id={} order by folder_position ",
             SubscriptionEntry::table_name(),
             parent_subs_id
         );
         self.ctx.get_list(prepared)
-         */
         self.get_children(parent_subs_id)
     }
+         */
 
+    /// sorts by folder_position
     fn get_children(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry> {
         let prepared = format!(
             "SELECT * FROM {} WHERE parent_subs_id={} order by folder_position ",

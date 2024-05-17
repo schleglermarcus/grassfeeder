@@ -139,6 +139,7 @@ pub enum KeyCodes {
     CursorDown,
     CursorRight,
     CursorLeft,
+    Backspace,
     F1,
     F2,
     F3,
