@@ -149,8 +149,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         subs_move.add_new_folder_at_parent("5_1".to_string(), f5);
 
         subs_move.add_new_subscription_at_parent(
-            "https://freiheitsfunken.info/feed/rss/".to_string(),
-            "Frfunken".to_string(),
+            "https://www.naturalnews.com/rss.xml".to_string(),
+            "NTR-News".to_string(),
             folder1,
             false,
         );
@@ -172,6 +172,7 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
     if false {
         let src = [
+            ("https://freiheitsfunken.info/feed/rss/", "Frfunken"),
             ("https://blog.linuxmint.com/?feed=rss2", "Mint"),
             ("https://www.heise.de/tp/news-atom.xml", "heise"),
             ("https://www.globalresearch.ca/feed", "globalresearch"),

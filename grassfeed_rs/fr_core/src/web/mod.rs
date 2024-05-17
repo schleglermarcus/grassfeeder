@@ -6,8 +6,8 @@ use std::sync::Arc;
 pub type WebFetcherType = Arc<Box<dyn IHttpRequester + Send + Sync + 'static>>;
 
 pub trait IHttpRequester {
-    fn request_url(&self, url: String) -> HttpGetResult;
-    fn request_url_bin(&self, url: String) -> HttpGetResult;
+    fn request_url(&self, url: &str ) -> HttpGetResult;
+    fn request_url_bin(&self, url: &str) -> HttpGetResult;
 }
 
 #[derive(Debug, Default)]

@@ -91,11 +91,11 @@ pub fn extract_icon_from_homepage(
         })
         .filter(|htmltag| {
             let t_name = htmltag.name().as_utf8_str().into_owned();
-            // debug!(                "N: {:?}  A0:{:?}  ",                &t_name,                &htmltag.attributes().iter().next()            );
+            // trace!(                "N: {:?}  A0:{:?}  ",                &t_name,                &htmltag.attributes().iter().next()            );
             t_name == "link" || t_name == "meta"
         })
         .collect();
-    // debug!("numlinktags: {} \n {:?}", link_tags.len(), link_tags);
+    // trace!("numlinktags: {} \n {:?}", link_tags.len(), link_tags);
     let icon_list: Vec<String> = link_tags
         .iter()
         .map(|t| {
@@ -118,7 +118,7 @@ pub fn extract_icon_from_homepage(
         .filter(|attrmap| attrmap.get("rel").unwrap().contains("icon"))
         .filter_map(|attrmap| attrmap.get("href").cloned())
         .collect();
-    // debug!(        "extract_icon_from_homepage:  hp_url:{homepage_url} iconlist={:?}",        icon_list    );
+    // debug!(         "extract_icon_from_homepage:  hp_url:{homepage_url} iconlist={:?}",         icon_list    );
     if !icon_list.is_empty() {
         let mut icon_href: String = icon_list.first().unwrap().clone();
         if icon_href.starts_with("//") {
@@ -134,7 +134,10 @@ pub fn extract_icon_from_homepage(
                     }
                     Err(e) => debug!("XI:2:  ({})   ERR:{:?}", &homepage_url, e),
                 }
+            } else if !homepage_host.ends_with('/') {
+                homepage_host = format!("{}/", homepage_host);
             }
+            //  debug!("extract2 homepage_host: {homepage_host} ");
             icon_href = format!("{homepage_host}{icon_href}");
         }
         return Ok(icon_href);

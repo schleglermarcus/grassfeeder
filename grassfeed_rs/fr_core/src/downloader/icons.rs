@@ -86,7 +86,7 @@ impl Step<IconInner> for FeedTextDownload {
         let mut inner: IconInner = self.0;
         let now = Instant::now();
         trace!("FeedTextDownload:   feed-url:{} ", inner.feed_url);
-        let result = (*inner.web_fetcher).request_url(inner.feed_url.clone());
+        let result = (*inner.web_fetcher).request_url(&inner.feed_url);
         let elapsedms = now.elapsed().as_millis();
         match result.status {
             200 => {
@@ -172,13 +172,15 @@ pub struct IconAnalyzeHomepage(IconInner);
 impl Step<IconInner> for IconAnalyzeHomepage {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        //  trace!(            "IconAnalyzeHomepage({})   feed_hp:{} ",            inner.subs_id,            inner.feed_homepage        );
-        let r = (*inner.web_fetcher).request_url(inner.feed_homepage.clone());
+        let homepage: String = inner.feed_homepage.clone();
+        //  if !homepage.ends_with('/') {            homepage = format!("{}/", homepage);        }
+        // trace!(            "IconAnalyzeHomepage({})   feed_hp:{} ",            inner.subs_id,            homepage        );
+        let r = (*inner.web_fetcher).request_url(&homepage);
         match r.status {
-            200 | 202 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
+            200 | 202 => match util::extract_icon_from_homepage(r.content, &homepage) {
                 Ok(icon_url) => {
                     inner.icon_url = icon_url;
-                    //  trace!(                        "IconAnalyzeHomepage( {} ) - extracted -  iconurl {} ",                        inner.subs_id,                        &inner.icon_url                    );
+                    // trace!(                        "IconAnalyzeHomepage( {} ) - extracted -  iconurl {} ",                       inner.subs_id,                        &inner.icon_url                    );
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 }
                 Err(e_descr) => {
@@ -187,7 +189,7 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                         inner.subs_id,
                         ESRC::IconsAHEx,
                         r.status as isize,
-                        inner.feed_homepage.clone(),
+                        homepage,
                         e_descr,
                     );
                 }
@@ -199,7 +201,7 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                     inner.subs_id,
                     ESRC::IconsAHMain,
                     r.status as isize,
-                    inner.feed_homepage.clone(),
+                    homepage,
                     r.error_description,
                 );
                 if inner.feed_homepage != alt_hp {
@@ -216,7 +218,6 @@ struct IconFallbackSimple(IconInner);
 impl Step<IconInner> for IconFallbackSimple {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner = self.0;
-        trace!("IconFallbackSimple( {} )  ", inner.subs_id,);
         if inner.icon_url.is_empty() {
             inner.icon_url = util::feed_url_to_icon_url(inner.feed_url.clone());
         }
@@ -228,8 +229,9 @@ struct IconDownload(IconInner);
 impl Step<IconInner> for IconDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
+        // trace!("IconDownload({}) {} ", inner.subs_id, &inner.icon_url);
         let now = Instant::now();
-        let r = (*inner.web_fetcher).request_url_bin(inner.icon_url.clone());
+        let r = (*inner.web_fetcher).request_url_bin(&inner.icon_url);
         let elapsedms = now.elapsed().as_millis();
         match r.status {
             200 => {

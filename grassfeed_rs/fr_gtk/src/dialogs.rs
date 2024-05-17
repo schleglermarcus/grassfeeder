@@ -60,7 +60,7 @@ const GRID_SPACING: u32 = 5;
 const DB_CLEAN_STEPS_MAX: f64 = 10.0;
 const ICON_RESCALE_SIZE: i32 = 24;
 const ICON_DIALOG_COLUMNS: i32 = 40;
-const ICON_DIALOG_INCLUDE_INTERNAL: bool = false;
+// const ICON_DIALOG_INCLUDE_INTERNAL: bool = false;
 
 const NONE_ADJ: Option<&Adjustment> = None;
 const NONE_TEXT: Option<&TextTagTable> = None;
@@ -94,17 +94,19 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
     grid.set_hexpand(true);
     grid.set_column_spacing(2);
     grid.set_row_spacing(2);
-    if ICON_DIALOG_INCLUDE_INTERNAL {
-        for a in 0..gen_icons::ICON_LIST.len() {
-            grid_attach_icon(
-                &grid,
-                gen_icons::ICON_LIST[a],
-                &format!("r{}", a),
-                0,
-                a as i32,
-            );
-        }
-    }
+    /*
+       if ICON_DIALOG_INCLUDE_INTERNAL {
+           for a in 0..gen_icons::ICON_LIST.len() {
+               grid_attach_icon(
+                   &grid,
+                   gen_icons::ICON_LIST[a],
+                   &format!("r{}", a),
+                   0,
+                   a as i32,
+               );
+           }
+       }
+    */
     dialog.content_area().add(&grid);
     dialog.set_default_response(ResponseType::Ok);
     dialog.connect_response(move |dialog, rt| {
@@ -123,11 +125,8 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
         let mut ic_str = String::default();
         let mut sub_id_str = String::default();
         let mut grid_index = 0;
-        if ICON_DIALOG_INCLUDE_INTERNAL {
-            grid_index = gen_icons::ICON_LIST.len() + 1;
-        }
+        //  if ICON_DIALOG_INCLUDE_INTERNAL {            grid_index = gen_icons::ICON_LIST.len() + 1;        }
         let y_base = 0;
-        trace!("DD #{} ", dialogdata.len());
         while let Some(aval) = dialogdata.get(ddnum) {
             match ddnum % DD_ROWS {
                 0 => {
@@ -137,22 +136,23 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
                 }
                 1 => {
                     if let AValue::AIMG(ref s) = aval {
-                        ic_str.clone_from( s );
+                        ic_str.clone_from(s);
                     }
                 }
                 2 => {
                     if let AValue::ASTR(ref s) = aval {
-                        sub_id_str.clone_from( s );
+                        sub_id_str.clone_from(s);
                     }
                 }
                 _ => (),
             };
+            ddnum += 1;
             if ddnum % DD_ROWS == 0 {
-                // trace!(                    "Icons adding to grid: {} IID:{} len:{} subs:{}",                    dbindex,                    icon_id,                    ic_str.len(),                    sub_id_str                );
+                //  trace!("GR  i{} len:{} subs:{}", icon_id, ic_str.len(), sub_id_str);
                 grid_attach_icon(
                     &grid,
                     &ic_str,
-                    &format!("d{}  s{} #{}", icon_id, sub_id_str, ic_str.len()),
+                    &format!("i{} s{} #{}", icon_id, sub_id_str, ic_str.len()),
                     y_base,
                     grid_index as i32,
                 );
@@ -161,7 +161,6 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
                 sub_id_str.clear();
                 grid_index += 1;
             }
-            ddnum += 1;
         }
     });
 

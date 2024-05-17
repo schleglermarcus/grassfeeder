@@ -257,7 +257,7 @@ impl ISourceTreeController for SourceTreeController {
         if self.current_edit_fse.is_none() || values.is_empty() {
             return;
         }
-        let fse: SubscriptionEntry = self.current_edit_fse.take().unwrap();
+        let subscr: SubscriptionEntry = self.current_edit_fse.take().unwrap();
         assert!(!values.is_empty());
         let mut newname = String::default();
         if let Some(s) = values.first() {
@@ -266,21 +266,28 @@ impl ISourceTreeController for SourceTreeController {
             }
         }
         let newname = (*newname).trim();
-        if !newname.is_empty() && fse.display_name != newname {
+        if !newname.is_empty() && subscr.display_name != newname {
             (*self.subscriptionrepo_r)
                 .borrow()
-                .update_displayname(fse.subs_id, newname.to_string());
-            self.tree_store_update_one(fse.subs_id);
+                .update_displayname(subscr.subs_id, newname.to_string());
+            self.tree_store_update_one(subscr.subs_id);
         }
-        if !fse.is_folder {
+
+        debug!("end_feedsource_edit_dialog: {:?}   => {:?} ", subscr , values.get(1) );
+
+        if !subscr.is_folder {
             let new_url = values.get(1).unwrap().str().unwrap();
             let new_url = (*new_url).trim();
-            if !new_url.is_empty() && fse.url != new_url {
+            if !new_url.is_empty() && subscr.url != new_url {
                 (*self.subscriptionrepo_r)
                     .borrow()
-                    .update_url(fse.subs_id, new_url.to_string());
-                self.addjob(SJob::ScheduleUpdateFeed(fse.subs_id));
+                    .update_url(subscr.subs_id, new_url.to_string());
+                self.addjob(SJob::ScheduleUpdateFeed(subscr.subs_id));
             }
+            (*self.downloader_r)
+                .borrow()
+                .load_icon(subscr.subs_id, subscr.url, subscr.icon_id);
+            //                self.addjob(SJob::CheckIconOutdated( fse.subs_id ));
         }
     }
 

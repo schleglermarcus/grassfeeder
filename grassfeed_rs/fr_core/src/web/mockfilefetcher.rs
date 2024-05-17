@@ -18,9 +18,9 @@ impl FileFetcher {
 const REPLACE_LOCALHOST: &str = "http://localhost/";
 
 impl IHttpRequester for FileFetcher {
-    fn request_url(&self, url: String) -> HttpGetResult {
+    fn request_url(&self, url: &str) -> HttpGetResult {
         let mut r = HttpGetResult::default();
-        let mut p_url: String = url;
+        let mut p_url: String = url.to_string();
         if p_url.starts_with(REPLACE_LOCALHOST) {
             p_url = p_url.split_off(REPLACE_LOCALHOST.len());
         }
@@ -38,8 +38,8 @@ impl IHttpRequester for FileFetcher {
         r
     }
 
-    fn request_url_bin(&self, url: String) -> HttpGetResult {
-        let mut p_url: String = url;
+    fn request_url_bin(&self, url: &str) -> HttpGetResult {
+        let mut p_url: String = url.to_string();
         if p_url.starts_with(REPLACE_LOCALHOST) {
             p_url = p_url.split_off(REPLACE_LOCALHOST.len());
         }

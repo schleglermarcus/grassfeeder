@@ -59,25 +59,6 @@ pub trait IIconRepo {
     ) -> Result<usize, Box<dyn std::error::Error>>;
 }
 
-/*
-#[deprecated]
-#[derive(Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
-pub struct IconEntry {
-    pub icon_id: isize,
-    pub icon: String,
-}
-
-
-impl std::fmt::Debug for IconEntry {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        fmt.debug_struct("IconEntry")
-            .field("id", &self.icon_id)
-            .field("IC#", &self.icon.len())
-            .finish()
-    }
-}
- */
-
 pub struct IconRepo {
     ctx: SqliteContext<IconRow>,
 }
@@ -95,6 +76,7 @@ impl IconRepo {
         IconRepo { ctx: sqctx }
     }
 
+/*
     #[deprecated]
     pub fn new_(folder_name: &str) -> Self {
         warn!("OLD  IconRepo to DB ");
@@ -109,6 +91,7 @@ impl IconRepo {
             ctx: SqliteContext::new_in_memory(),
         }
     }
+*/
 
     pub fn new_by_filename(filename: &str) -> Self {
         trace!("icon_repo::NEW  filename={} ", filename);
@@ -286,35 +269,6 @@ impl TimerReceiver for IconRepo {
 #[cfg(test)]
 mod t_ {
     use super::*;
-    /*
-
-    pub const TEST_FOLDER1: &'static str = "../target/db_t_ico_rep";
-
-       // cargo watch -s "(cd fr_core ;  RUST_BACKTRACE=1  cargo test  db::icon_repo::t_::t_store_file   --lib -- --exact --nocapture  )  "
-       #[test]
-       fn t_store_file() {
-           setup();
-           {
-               let ir = IconRepo::new_in_mem(); // IconRepo::new_(TEST_FOLDER1);
-                                                // iconrepo.startup_();
-                                                // iconrepo.clear();
-
-               let r_ir: Rc<dyn IIconRepo> = Rc::new(ir);
-               let s1 = IconEntry::default();
-               assert!((*r_ir).store_entry(&s1).is_ok());
-               assert!((*r_ir).store_entry(&s1).is_ok());
-               let list = (*r_ir).get_all_entries_();
-               assert_eq!(list.len(), 2);
-               //iconrepo.check_or_store();
-           }
-           {
-               let mut sr = IconRepo::new_(TEST_FOLDER1);
-               sr.startup_();
-               let list = sr.get_all_entries_();
-               assert_eq!(list.len(), 2);
-           }
-       }
-    */
 
     // cargo watch -s "(cd fr_core ;  RUST_BACKTRACE=1  cargo test  db::icon_repo::t_::t_db_store   --lib -- --exact --nocapture  )  "
     #[test]

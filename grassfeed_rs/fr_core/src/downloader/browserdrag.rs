@@ -70,7 +70,7 @@ impl BrowserEvalStart {
 impl Step<DragInner> for BrowserEvalStart {
     fn step(self: Box<Self>) -> StepResult<DragInner> {
         let mut inner: DragInner = self.0;
-        let result = (*inner.web_fetcher).request_url(inner.dragged_url.clone());
+        let result = (*inner.web_fetcher).request_url( & inner.dragged_url);
         if result.status == 200 {
             inner.dragged_url_content = result.content;
             return StepResult::Continue(Box::new(ParseWebpage(inner)));

@@ -56,7 +56,7 @@ impl Step<ComprehensiveInner> for ComprStart {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let mut inner: ComprehensiveInner = self.0;
         let url = inner.feed_url_edit.clone();
-        let result = (*inner.web_fetcher).request_url(url.clone());
+        let result = (*inner.web_fetcher).request_url( & url );
         match result.status {
             200 => {
                 inner.url_download_text = result.content;
@@ -105,7 +105,7 @@ impl Step<ComprehensiveInner> for ComprAnalyzeHomepage {
     fn step(self: Box<Self>) -> StepResult<ComprehensiveInner> {
         let mut inner: ComprehensiveInner = self.0;
         // debug!(            "ComprAnalyzeHomepage: {}   icon_url={}",            &inner.feed_homepage, inner.icon_url        );
-        let r = (*inner.web_fetcher).request_url(inner.feed_homepage.clone());
+        let r = (*inner.web_fetcher).request_url(  & inner.feed_homepage);
         match r.status {
             200 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
                 Ok(icon_url) => {
@@ -140,7 +140,7 @@ impl Step<ComprehensiveInner> for ComprLoadIcon {
         if inner.icon_url.is_empty() {
             return StepResult::Continue(Box::new(ComprFinal(inner)));
         }
-        let r = (*inner.web_fetcher).request_url_bin(inner.icon_url.clone());
+        let r = (*inner.web_fetcher).request_url_bin(  & inner.icon_url );
         match r.status {
             200 => {
                 // trace!(                    "icon-download: {} '{}'  =>  {} {} {} ",                    inner.feed_url_edit,                    inner.icon_url,                    &r.get_status(),                    r.get_kind(),                    r.error_description                );

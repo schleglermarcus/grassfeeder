@@ -66,8 +66,8 @@ pub const TREE_STATUS_COLUMN: usize = 7;
 pub const DEFAULT_CONFIG_FETCH_FEED_INTERVAL: u8 = 2;
 pub const DEFAULT_CONFIG_FETCH_FEED_UNIT: u8 = 2; // hours
 
-/// seven days
-const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * 7;
+const ICON_RELOAD_TIME_D: u8 = 2; // 2 days, later 7
+const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * (ICON_RELOAD_TIME_D as i64);
 
 // #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -677,18 +677,21 @@ impl SourceTreeController {
         icon_id: isize,
         feed_homepage: String,
     ) {
-        self.new_source.borrow_mut().state = NewSourceState::Completed;
-        self.new_source.borrow_mut().edit_url = feed_url_edit;
-        self.new_source.borrow_mut().display_name = display_name;
-        self.new_source.borrow_mut().icon_id = icon_id;
-        self.new_source.borrow_mut().feed_homepage = feed_homepage;
         let mut icon_str = String::default();
         if icon_id > 0 {
             if let Some(ie) = self.iconrepo_r.borrow().get_by_index(icon_id) {
                 icon_str = ie.icon;
             }
         };
-        self.new_source.borrow_mut().icon_str.clone_from(&icon_str);
+        {
+            let mut ns = self.new_source.borrow_mut();
+            ns.state = NewSourceState::Completed;
+            ns.edit_url = feed_url_edit;
+            ns.display_name = display_name;
+            ns.icon_id = icon_id;
+            ns.feed_homepage = feed_homepage;
+            ns.icon_str.clone_from(&icon_str);
+        }
         let dd: Vec<AValue> = vec![
             AValue::ASTR(self.new_source.borrow().display_name.clone()),
             AValue::ASTR(self.new_source.borrow().feed_homepage.clone()),
@@ -998,26 +1001,19 @@ impl SourceTreeController {
                 .borrow()
                 .get_by_index(subs.icon_id as isize);
             if o_icon.is_none() {
-                debug!(
-                    "No Icon From Repo for subscr {}  s_icon_id {}  '{}'  -->downloading again ",
-                    subs_id, subs.icon_id, subs.display_name
-                );
-                // self.addjob(SJob::CheckIconOutdated(subs_id as isize));
-
+                debug!("No Icon From Repo for subscr {}  s_icon_id {}  '{}'  ...downloading ",subs_id, subs.icon_id, subs.display_name );
                 (*self.downloader_r)
                     .borrow()
                     .load_icon(subs.subs_id, subs.url, subs.icon_id);
-
                 continue;
             };
-            // icon_ids.insert(subscr.icon_id);
             let icn = o_icon.unwrap();
             (*self.gui_updater)
                 .borrow()
                 .store_image(icn.icon_id as i32, icn.icon);
             count_stored_icons += 1;
         }
-        debug!("icons_store_to_gui {}   ", count_stored_icons);
+        // debug!("icons_store_to_gui {}   ", count_stored_icons);
     }
 }
 

@@ -11,7 +11,7 @@ const NO_CONTENTLENGTH_BUFFER_SIZE: u64 = 1000000;
 pub struct HttpFetcher {}
 impl HttpFetcher {
     /// heap:   ureq::response::into_string() consumes about  20% of overall memory usage
-    fn request_url(&self, url: String, is_binary: bool) -> HttpGetResult {
+    fn request_url(&self, url: &str, is_binary: bool) -> HttpGetResult {
         let mut r_text = String::default();
         let mut r_status: u16 = 0;
         let mut r_errorkind: u8 = 0;
@@ -76,10 +76,10 @@ impl HttpFetcher {
 }
 
 impl IHttpRequester for HttpFetcher {
-    fn request_url(&self, url: String) -> HttpGetResult {
+    fn request_url(&self, url: &str) -> HttpGetResult {
         self.request_url(url, false)
     }
-    fn request_url_bin(&self, url: String) -> HttpGetResult {
+    fn request_url_bin(&self, url: &str) -> HttpGetResult {
         self.request_url(url, true)
     }
 }
@@ -114,44 +114,42 @@ mod httpfetcher_t {
 
     #[test]
     fn test_local404() {
-        let r = prep_fetcher().request_url("http://localhost::8123/nothing".to_string());
+        let r = prep_fetcher().request_url("http://localhost::8123/nothing");
         assert_eq!(r.get_kind(), 1);
         assert!(r.error_description.contains("InvalidUrl"));
     }
 
     #[test]
     fn test_remote_200() {
-        let r = prep_fetcher()
-            .request_url("https://www.heise.de/icons/ho/topnavi/nopur.gif".to_string());
+        let r = prep_fetcher().request_url("https://www.heise.de/icons/ho/topnavi/nopur.gif");
         assert_eq!(r.get_status(), 200);
     }
 
     #[test]
     //     #[allow(dead_code)]
     fn test_remote_403() {
-        let r = prep_fetcher().request_url("https://static.foxnews.com/unknown.png".to_string());
+        let r = prep_fetcher().request_url("https://static.foxnews.com/unknown.png");
         assert_eq!(r.get_status(), 403);
     }
 
     #[test]
     fn test_remote_connect() {
-        let r = prep_fetcher()
-            .request_url("https://www.hyundai-kefico.com/en/main/index.do".to_string());
+        let r = prep_fetcher().request_url("https://www.hyundai-kefico.com/en/main/index.do");
         assert_eq!(r.get_kind(), 4);
         assert!(r.error_description.contains("ConnectionFailed"));
     }
 
     #[test]
     fn test_remote_404() {
-        let r = prep_fetcher()
-            .request_url_bin("https://www.heise.de/icons/ho/touch-icons/none.png".to_string());
+        let r =
+            prep_fetcher().request_url_bin("https://www.heise.de/icons/ho/touch-icons/none.png");
         assert_eq!(r.get_status(), 404);
     }
 
     //  cargo test  web::httpfetcher::httpfetcher_t::test_remote_kodansha --lib -- --exact --nocapture
     #[test]
     fn test_remote_kodansha() {
-        let r = prep_fetcher().request_url_bin("https://kodansha.us/favicon.ico".to_string());
+        let r = prep_fetcher().request_url_bin("https://kodansha.us/favicon.ico");
         assert_eq!(r.get_status(), 200);
     }
 }

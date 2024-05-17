@@ -50,6 +50,7 @@ use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::KeyCodes;
 use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
+use resources::gen_icons::ICON_LIST;
 use resources::id::DIALOG_ABOUT;
 use resources::id::*;
 use std::cell::RefCell;
@@ -444,10 +445,9 @@ impl GuiProcessor {
 
     fn start_icons_dialog(&self) {
         let all: Vec<IconRow> = (*self.iconrepo_r.borrow()).get_all_entries();
-        debug!("ICONS get all : {} ", all.len());
         let upper: Vec<IconRow> = all
             .into_iter()
-            // .filter(|ie| ie.icon_id > ICON_LIST.len() as isize)
+            .filter(|ie| ie.icon_id >= ICON_LIST.len() as isize)
             // .filter(|ie| ie.icon.len() > 30)
             .collect::<Vec<IconRow>>();
         let mut dd: Vec<AValue> = Vec::new();
@@ -460,11 +460,14 @@ impl GuiProcessor {
                 .map(|s| s.subs_id.to_string())
                 .collect::<Vec<String>>()
                 .join(" ");
+            // trace!(                "IC_DIA: i{} <-- s{}   len: {}  U:{} ",                ie.icon_id,                subs_ids,                ie.icon.len(),                ie.web_url            );
             dd.push(AValue::AI32(ie.icon_id as i32));
             dd.push(AValue::AIMG((*ie.icon).to_string()));
             dd.push(AValue::ASTR(subs_ids));
         });
-        trace!("storing  {}  icons ", upper.len());
+        dd.push(AValue::AI32(-1));  // dummy value for the dialog evaluation
+        dd.push(AValue::AIMG(String::default()));
+        dd.push(AValue::ASTR(String::default()));
         (*self.gui_val_store)
             .write()
             .unwrap()

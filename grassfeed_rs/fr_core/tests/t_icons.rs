@@ -1,26 +1,22 @@
-// use fr_core::db::icon_repo::IIconRepo;
-use fr_core::db::icon_repo::IconRepo;
+// use fr_core::db::icon_repo::IconRepo;
 use fr_core::downloader::icons::icon_analyser;
 use fr_core::downloader::util::extract_icon_from_homepage;
 use fr_core::util::png_from_svg;
 use fr_core::util::IconKind;
 use fr_core::web::mockfilefetcher;
 use fr_core::TD_BASE;
-// use std::rc::Rc;
 
 // later: create sloppy  extract-icon-from-page for missing quotes:
 //  thevaluable_dev            <link rel="shortcut icon" href=https://thevaluable.dev/images/favicon.png>
 // ( "thevaluable_dev.html",   "",          "https://thevaluable.dev/images/favicon.png",                ),
-#[ignore]
+// #[ignore]
 #[test]
 fn extract_icons() {
     setup();
     //  file name inside zip,   additional-homepage,   expected icon url
     let set: [(&str, &str, &str); 8] = [
-      ("naturalnews_com.html", "",
-          "https://www.naturalnews.com/wp-content/themes/naturalnews-child/images/favicon.ico",           ),
-      ("fromrome.html",               "",
-          "https://www.fromrome.info/wp-content/uploads/2019/10/cropped-header.jpg",           ),
+      ("naturalnews-2024.html", "https://www.naturalnews.com",  "https://www.naturalnews.com/Images/favicon.ico", ),
+      ("fromrome.html", "", "https://www.fromrome.info/wp-content/uploads/2019/10/cropped-header.jpg",           ),
       ("terraherz_wpstaging.html",               "",
           "https://terraherz.wpcomstaging.com/wp-content/uploads/gwpf_icon/favicon.png",           ),
       ("terraherz_wpstaging.html",               "",
@@ -43,7 +39,7 @@ fn extract_icons() {
     });
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn analyze_icon_local() {
     setup();
@@ -75,7 +71,7 @@ fn analyze_icon_local() {
     });
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn test_from_svg() {
     setup();

@@ -84,7 +84,7 @@ impl Step<FetchInner> for DownloadStart {
     fn step(self: Box<Self>) -> StepResult<FetchInner> {
         let mut inner = self.0;
         let now = Instant::now();
-        let r = (*inner.web_fetcher).request_url(inner.url.clone());
+        let r = (*inner.web_fetcher).request_url(  & inner.url );
         let elapsedms = now.elapsed().as_millis();
         match r.status {
             200 => {
@@ -538,7 +538,7 @@ mod t_ {
 
     // #[allow(dead_code)]
     #[test]
-    fn from_modelentry_naturalnews_copy() {
+    fn from_modelentry_natnew_copy() {
         let rsstext = r#"<?xml version="1.0" encoding="ISO-8859-1"?>
 	 <rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
 	   <channel>

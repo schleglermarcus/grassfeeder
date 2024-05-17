@@ -262,7 +262,7 @@ fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> Cleaner
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let iconrepo = IconRepo::new_in_mem();
-    if let Some(i_p) = copy_icons {
+    if let Some(_i_p) = copy_icons {
         /*  Later: create test data for removal testing
                copy_icon_json(i_p);
                iconrepo = IconRepo::new_(i_p);
