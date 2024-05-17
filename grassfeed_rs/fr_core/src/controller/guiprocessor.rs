@@ -82,6 +82,7 @@ pub enum Job {
     AddBottomDisplayErrorMessage(String),
     /// Cleaner Step Nr,   time duration in ms,  Current Step Message
     NotifyDbClean(u8, u32, Option<String>),
+    StoreDefaultIcons,
 }
 
 const JOBQUEUE_SIZE: usize = 100;
@@ -216,7 +217,6 @@ impl GuiProcessor {
             match job {
                 Job::StartApplication => {
                     (*self.gui_runner).borrow().start();
-                    self.store_default_icons();
                     (*self.gui_context_r)
                         .borrow_mut()
                         .set_window_title(String::default());
@@ -340,6 +340,9 @@ impl GuiProcessor {
                             .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, true);
                     }
                 }
+                Job::StoreDefaultIcons => {
+                    self.store_default_icons();
+                }
                 _ => {
                     warn!("other job! {:?}", &job);
                 }
@@ -364,7 +367,6 @@ impl GuiProcessor {
 
     // single entries:  53ms		combined:  39ms
     pub fn store_default_icons(&self) {
-        // let ic_r = self.iconrepo_r.borrow();
         let mut last_stored_id: isize = -1;
         gen_icons::ICON_LIST
             .iter()
@@ -375,47 +377,14 @@ impl GuiProcessor {
                 if r.is_err() {
                     error!("store_default_icons: {} => {:?}   ", last_stored_id, r);
                 };
-
-                /*
-                               let o_iconrow = ic_r.get_by_index(num as isize);
-                               // trace!(                    " store_default_icons : ID{} length{}   InRepo: {} ",                    num,                    ico.len(),                    o_iconrow.is_some()                );
-                               let result = match o_iconrow {
-                                   Some(_r_icon) => ic_r.update_icon(
-                                       num as isize,
-                                       Some(ico.to_string()),
-                                       CompressionType::ImageRs,
-                                   ),
-                                   None => {
-                                       ic_r.store_icon(num as isize, ico.to_string(), CompressionType::ImageRs)
-                                   }
-                               };
-                */
                 last_stored_id = num as isize;
             });
 
         last_stored_id += 1;
-
         let r = self.store_or_update_icon(last_stored_id, ICON_01_BORDER_RED.to_string());
-
         if r.is_err() {
             error!("store_default_icons: {} => {:?}   ", last_stored_id, r);
         }
-
-        /*
-               let o_iconrow = ic_r.get_by_index(last_stored_id);
-               let result = match o_iconrow {
-                   Some(_r_icon) => ic_r.update_icon(
-                       last_stored_id,
-                       Some(ICON_01_BORDER_RED.to_string()),
-                       CompressionType::None,
-                   ),
-                   None => ic_r.store_icon(
-                       last_stored_id,
-                       ICON_01_BORDER_RED.to_string(),
-                       CompressionType::None,
-                   ),
-               };
-        */
     }
 
     fn store_or_update_icon(
@@ -574,6 +543,11 @@ impl GuiProcessor {
                 } else {
                     debug!("space key but unfocused");
                 }
+            }
+            KeyCodes::Backspace => {
+                (*self.gui_updater)
+                    .borrow()
+                    .update_search_entry(SEARCH_ENTRY_0, String::default());
             }
             _ => {
                 // trace!("key-pressed: other {} {:?} {:?}", keycode, _o_char, kc);
@@ -738,6 +712,7 @@ impl StartupWithAppContext for GuiProcessor {
             self.timer_sender = Some((*t).get_ctrl_sender());
         }
         self.addjob(Job::StartApplication);
+        self.addjob(Job::StoreDefaultIcons);
         self.addjob(Job::NotifyConfigChanged);
         self.statusbar.borrow_mut().num_downloader_threads = (*self.downloader_r)
             .borrow()

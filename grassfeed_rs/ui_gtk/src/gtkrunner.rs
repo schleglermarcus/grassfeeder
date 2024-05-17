@@ -819,4 +819,9 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     fn button_set_sensitive(&self, idx: u8, sens: bool) {
         self.send_to_int(&IntCommands::ButtonSetSensitive(idx, sens));
     }
+
+    fn update_search_entry(&self, nr: u8, msg: String) {
+        self.send_to_int(&IntCommands::UpdateSearchEntry(nr, msg));
+    }
+
 } //

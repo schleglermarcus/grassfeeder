@@ -230,6 +230,7 @@ pub trait UIUpdaterAdapter {
     fn store_image(&self, idx: i32, img: String);
     fn toolbutton_set_sensitive(&self, idx: u8, sens: bool);
     fn button_set_sensitive(&self, idx: u8, sens: bool);
+    fn update_search_entry(&self, nr: u8, msg: String);
 }
 
 #[derive(Debug, Ord, Eq, PartialEq, PartialOrd, Hash, Clone)]

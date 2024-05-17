@@ -838,13 +838,20 @@ impl GtkModelUpdaterInt {
 
     pub fn button_set_sensitive(&self, idx: u8, sens: bool) {
         let g_o = (*self.g_o_a).read().unwrap();
-
-        debug!("BUTTON - sens {} {} ", idx, sens);
-
         if let Some(b) = g_o.get_button(idx) {
             b.set_sensitive(sens);
         } else {
             warn!("Button {} not found! ", idx);
+        }
+    }
+
+    pub fn update_search_entry(&self, idx: u8, msg: String) {
+        let g_o = (*self.g_o_a).read().unwrap();
+        if let Some(se) = g_o.get_searchentry(idx) {
+            debug!("buffer().set_text({})   ", msg);
+            se.buffer().set_text(&msg);
+        } else {
+            warn!("SearchEntry {} not found! ", idx);
         }
     }
 } // GtkModelUpdaterInt

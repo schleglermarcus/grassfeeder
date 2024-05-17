@@ -389,9 +389,12 @@ impl Step<IconInner> for IconCheckPresent {
 
         if !existing_icons.is_empty() {
             let existing_id = existing_icons[0].icon_id;
-            debug!(
-                "icon already there. {}=>{}  subs:{}  U:{} ",
-                inner.fs_icon_id_old, existing_id, inner.subs_id, inner.icon_url
+            trace!(
+                "icon already in DB: {}=>{}  subs:{}  U:{} ",
+                inner.fs_icon_id_old,
+                existing_id,
+                inner.subs_id,
+                inner.icon_url
             );
             if existing_id != inner.fs_icon_id_old {
                 let _r = inner

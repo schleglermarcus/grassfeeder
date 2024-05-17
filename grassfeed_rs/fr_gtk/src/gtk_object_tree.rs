@@ -708,7 +708,6 @@ pub fn create_toolbar(
     searchentry.set_tooltip_text(Some(&t!("TB_FILTER_1")));
     searchentry.set_height_request(12);
     searchentry.set_vexpand(false);
-
     let esw = EvSenderWrapper(g_ev_se);
     searchentry.connect_changed(move |se: &SearchEntry| {
         esw.sendw(GuiEvents::SearchEntryTextChanged(

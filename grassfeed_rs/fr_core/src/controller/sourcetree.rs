@@ -274,12 +274,8 @@ impl SourceTreeController {
                         .borrow_mut()
                         .set_icon_id(subs_id, icon_id as usize);
                     self.tree_store_update_one(subs_id);
-
                     if let Some(icon_e) = (*self.iconrepo_r).borrow().get_by_index(icon_id) {
-                        debug!(
-                            "SJob:SetIconId  {} {}  {} ",
-                            subs_id, icon_id, icon_e.web_url
-                        );
+                        // trace!(                            "SJob:SetIconId  {} {}  {} ",                            subs_id, icon_id, icon_e.web_url                        );
                         (*self.gui_updater)
                             .borrow()
                             .store_image(icon_id as i32, icon_e.icon);

@@ -76,23 +76,6 @@ impl IconRepo {
         IconRepo { ctx: sqctx }
     }
 
-/*
-    #[deprecated]
-    pub fn new_(folder_name: &str) -> Self {
-        warn!("OLD  IconRepo to DB ");
-        let fname = Self::filename(folder_name);
-        match std::fs::create_dir_all(&fname) {
-            Ok(()) => (),
-            Err(e) => {
-                error!("IconRepo cannot create folder {} {:?}", fname, e);
-            }
-        }
-        IconRepo {
-            ctx: SqliteContext::new_in_memory(),
-        }
-    }
-*/
-
     pub fn new_by_filename(filename: &str) -> Self {
         trace!("icon_repo::NEW  filename={} ", filename);
         let dbctx = SqliteContext::new(filename);

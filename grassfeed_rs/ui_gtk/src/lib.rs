@@ -104,6 +104,7 @@ pub enum IntCommands {
     UpdateWindowMinimized(bool, u32),
     ToolButtonSetSensitive(u8, bool),
     ButtonSetSensitive(u8, bool),
+    UpdateSearchEntry(u8, String),
 }
 
 pub type WebContentType = Option<Box<dyn Fn(CreateBrowserConfig) -> WebContext>>;

@@ -266,6 +266,9 @@ impl UIUpdaterAdapter for UpdAda {
     fn button_set_sensitive(&self, _idx: u8, _sens: bool) {
         unimplemented!()
     }
+    fn update_search_entry(&self, _nr: u8, _msg: String) {
+        unimplemented!()
+    }
 }
 
 struct MockRunner {

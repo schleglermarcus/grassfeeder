@@ -274,6 +274,7 @@ fn loop_proc_int_commands(
                 upd_int.toolbutton_set_sensitive(idx, sens);
             }
             IntCommands::ButtonSetSensitive(idx, sens) => upd_int.button_set_sensitive(idx, sens),
+            IntCommands::UpdateSearchEntry(idx, msg) => upd_int.update_search_entry(idx, msg),
             _ => {
                 warn!("GTKS other cmd {:?}", command);
             }

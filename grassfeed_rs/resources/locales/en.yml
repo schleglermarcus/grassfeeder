@@ -133,4 +133,5 @@ M_SHORTHELP_TEXT: "Grassfeeder RSS Reader Keyboard assignments\n
   Space       Start browser with multiple messages \n
   e           Move focus to previous subscription \n
   c           Move focus to following subscription \n
+  Backspace   Empty the search field
   "
