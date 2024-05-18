@@ -115,7 +115,7 @@ impl GuiContext {
         } else {
             format!("{} - {}", t, self.application_name)
         };
-        self.window_title.clone_from(& wtitle );
+        self.window_title.clone_from(&wtitle);
         (*self.values_store_adapter)
             .write()
             .unwrap()

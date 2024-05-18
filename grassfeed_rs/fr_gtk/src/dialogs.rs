@@ -125,7 +125,6 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
         let mut ic_str = String::default();
         let mut sub_id_str = String::default();
         let mut grid_index = 0;
-        //  if ICON_DIALOG_INCLUDE_INTERNAL {            grid_index = gen_icons::ICON_LIST.len() + 1;        }
         let y_base = 0;
         while let Some(aval) = dialogdata.get(ddnum) {
             match ddnum % DD_ROWS {
@@ -154,7 +153,7 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
                     &ic_str,
                     &format!("i{} s{} #{}", icon_id, sub_id_str, ic_str.len()),
                     y_base,
-                    grid_index as i32,
+                    grid_index,
                 );
                 ic_str = String::default();
                 icon_id = -1;

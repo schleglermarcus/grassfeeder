@@ -823,5 +823,4 @@ impl UIUpdaterAdapter for UIUpdaterAdapterImpl {
     fn update_search_entry(&self, nr: u8, msg: String) {
         self.send_to_int(&IntCommands::UpdateSearchEntry(nr, msg));
     }
-
 } //

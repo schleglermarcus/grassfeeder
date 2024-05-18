@@ -84,7 +84,7 @@ impl Step<FetchInner> for DownloadStart {
     fn step(self: Box<Self>) -> StepResult<FetchInner> {
         let mut inner = self.0;
         let now = Instant::now();
-        let r = (*inner.web_fetcher).request_url(  & inner.url );
+        let r = (*inner.web_fetcher).request_url(&inner.url);
         let elapsedms = now.elapsed().as_millis();
         match r.status {
             200 => {
@@ -339,14 +339,14 @@ pub fn message_from_modelentry(me: &Entry) -> (MessageRow, String) {
         })
         .collect::<Vec<&feed_rs::model::Link>>();
     if let Some(link_) = linklist.first() {
-        msg.link.clone_from ( & link_.href );
+        msg.link.clone_from(&link_.href);
     }
     if let Some(summary) = me.summary.clone() {
         if !summary.content.is_empty() {
             msg.content_text = summary.content;
         }
     }
-    msg.post_id.clone_from( & me.id );
+    msg.post_id.clone_from(&me.id);
     if let Some(c) = me.content.clone() {
         if let Some(b) = c.body {
             msg.content_text = b

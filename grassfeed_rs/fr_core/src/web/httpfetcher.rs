@@ -18,7 +18,7 @@ impl HttpFetcher {
         let mut r_ed = String::default();
         let mut r_bytes: Vec<u8> = Vec::default();
         let agent = ureq::builder().user_agent("ferris/1.0").build();
-        match agent.get(&url).call() {
+        match agent.get(url).call() {
             Ok(response) => {
                 r_status = response.status();
                 if is_binary {

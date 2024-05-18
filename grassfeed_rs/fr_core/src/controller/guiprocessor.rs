@@ -385,23 +385,6 @@ impl GuiProcessor {
             error!("store_default_icons: D:{}  E:{:?}   ", num_deleted, r);
         }
     }
-/*
-    fn store_or_update_icon(
-        &self,
-        id: isize,
-        content: String,
-    ) -> Result<usize, Box<dyn std::error::Error>> {
-        let ic_r = self.iconrepo_r.borrow();
-        let o_iconrow = ic_r.get_by_index(id);
-        // trace!(                    " store_default_icons : ID{} length{}   InRepo: {} ",                    num,                    ico.len(),                    o_iconrow.is_some()                );
-        let result = match o_iconrow {
-            Some(_r_icon) => ic_r.update_icon(id, Some(content), CompressionType::ImageRs),
-            None => ic_r.store_icon(id, content, CompressionType::ImageRs),
-        };
-        result
-    }
- */
-
 
     fn start_settings_dialog(&self) {
         let sources_conf = (*self.feedsources_r).borrow().get_config();
@@ -1081,10 +1064,10 @@ impl HandleSingleEvent for HandleDialogData {
                     self.r_subm.borrow_mut().move_subscription_to_trash();
                 }
                 "subscription-edit-ok" => {
-                    self.r_stc.borrow_mut().end_feedsource_edit_dialog(payload);
+                    self.r_stc.borrow_mut().end_subscr_edit_dialog(payload);
                 }
                 "folder-edit" => {
-                    self.r_stc.borrow_mut().end_feedsource_edit_dialog(payload);
+                    self.r_stc.borrow_mut().end_subscr_edit_dialog(payload);
                 }
                 "settings" => {
                     self.r_stc

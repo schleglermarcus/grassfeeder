@@ -142,43 +142,6 @@ fn store_or_update_icon(
     result
 }
 
-/*
-#[test]
-fn storing_combined() {
-    setup();
-    let iconrepo = IconRepo::new("../target/db_icons_combined/");
-    let tables_created = iconrepo.create_table();
-    let now = Instant::now();
-    let id_list: Vec<u8> = gen_icons::ICON_LIST
-        .iter()
-        .enumerate()
-        .map(|(num, _i)| num as u8)
-        .collect::<Vec<u8>>();
-    let num_deleted = iconrepo.delete_icons(id_list);
-    let rows: Vec<IconRow> = gen_icons::ICON_LIST
-        .iter()
-        .enumerate()
-        .map(|(num, ic)| IconRow {
-            icon_id: num as isize,
-            icon: ic.to_string(),
-            compression_type: CompressionType::ImageRs,
-            req_date: 0,
-            web_date: 0,
-            web_size: 0,
-            web_url: String::default(),
-        })
-        .collect::<Vec<IconRow>>();
-    let r = iconrepo.insert_tx(&rows);
-    debug!(
-        "Combined: used time: {} ms   Result:{:?}   #deleted:{}   #tables_created:{} ",
-        now.elapsed().as_millis(),
-        r,
-        num_deleted,
-        tables_created
-    );
-}
- */
-
 #[test]
 fn icons_store_delete_and_tx() {
     setup();
@@ -221,10 +184,7 @@ use std::sync::Once;
 static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
-        let _r = logger_config::setup_fern_logger(
-            // logger_config::QuietFlags::Controller as u64
-            0,
-        );
+        let _r = logger_config::setup_fern_logger(logger_config::QuietFlags::Controller as u64);
         unzipper::unzip_some();
     });
 }

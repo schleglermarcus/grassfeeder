@@ -46,7 +46,7 @@ pub trait ISourceTreeController {
     fn notify_config_update(&mut self);
 
     fn start_feedsource_edit_dialog(&mut self, source_repo_id: isize);
-    fn end_feedsource_edit_dialog(&mut self, values: &[AValue]);
+    fn end_subscr_edit_dialog(&mut self, values: &[AValue]);
     fn start_new_fol_sub_dialog(&mut self, src_repo_id: isize, dialog_id: u8);
     fn start_delete_dialog(&mut self, src_repo_id: isize);
     fn newsource_dialog_edit(&mut self, edit_feed_url: String);
@@ -253,7 +253,7 @@ impl ISourceTreeController for SourceTreeController {
         (*self.gui_updater).borrow().show_dialog(dialog_id);
     }
 
-    fn end_feedsource_edit_dialog(&mut self, values: &[AValue]) {
+    fn end_subscr_edit_dialog(&mut self, values: &[AValue]) {
         if self.current_edit_fse.is_none() || values.is_empty() {
             return;
         }
@@ -272,9 +272,6 @@ impl ISourceTreeController for SourceTreeController {
                 .update_displayname(subscr.subs_id, newname.to_string());
             self.tree_store_update_one(subscr.subs_id);
         }
-
-        debug!("end_feedsource_edit_dialog: {:?}   => {:?} ", subscr , values.get(1) );
-
         if !subscr.is_folder {
             let new_url = values.get(1).unwrap().str().unwrap();
             let new_url = (*new_url).trim();
@@ -287,7 +284,6 @@ impl ISourceTreeController for SourceTreeController {
             (*self.downloader_r)
                 .borrow()
                 .load_icon(subscr.subs_id, subscr.url, subscr.icon_id);
-            //                self.addjob(SJob::CheckIconOutdated( fse.subs_id ));
         }
     }
 

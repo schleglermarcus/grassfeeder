@@ -32,7 +32,7 @@ fn comprehensive_feed_download() {
     let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(base_path)));
     let comp_inner = ComprehensiveInner {
         feed_url_edit: "gui_proc_rss2_v1.rss".to_string(),
-        iconrepo: IconRepo::new_in_mem(),  // new_(""),
+        iconrepo: IconRepo::new_in_mem(), 
         web_fetcher: fetcher,
         download_error_happened: false,
         icon_url: String::default(),
@@ -63,7 +63,7 @@ fn downloader_load_message_into_db() {
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let (gp_s, _gp_r) = flume::bounded::<Job>(9);
     let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
-    let f_src_repo = SubscriptionRepo::new_inmem(); // new("");
+    let f_src_repo = SubscriptionRepo::new_inmem(); 
     f_src_repo.scrub_all_subscriptions();
     let mut fse = SubscriptionEntry::from_new_url(
         "feed1-display".to_string(),
@@ -73,7 +73,7 @@ fn downloader_load_message_into_db() {
     fse.folder_position = 0;
     let _r = f_src_repo.store_entry(&fse);
     let fsrc_r: Rc<RefCell<dyn ISubscriptionRepo>> = Rc::new(RefCell::new(f_src_repo));
-    let icon_repo_r = Rc::new(RefCell::new(IconRepo::new_in_mem () /*   new_("") */  ));
+    let icon_repo_r = Rc::new(RefCell::new(IconRepo::new_in_mem()));
     let msgrepo = MessagesRepo::new_in_mem();
     msgrepo.get_ctx().create_table();
     let msgrepo_r = Rc::new(RefCell::new(msgrepo));

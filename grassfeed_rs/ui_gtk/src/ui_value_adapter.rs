@@ -173,9 +173,9 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
                     .children
                     .resize((last_path_pos + 1) as usize, new_child.clone());
             }
-            // new_child.children = (add_node).children[last_path_pos as usize].children.clone();
-
-            new_child.children .clone_from( & (add_node).children[last_path_pos as usize].children   );
+            new_child
+                .children
+                .clone_from(&(add_node).children[last_path_pos as usize].children);
 
             (add_node).children[last_path_pos as usize] = new_child;
         } else {
@@ -199,7 +199,6 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
         while self.gui_list.len() <= list_position as usize {
             self.gui_list.push(Vec::default());
         }
-        // self.gui_list[list_position as usize] = values.to_owned();
         values.clone_into(&mut self.gui_list[list_position as usize]);
     }
 

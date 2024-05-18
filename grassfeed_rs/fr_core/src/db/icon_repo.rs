@@ -225,8 +225,6 @@ impl IIconRepo for IconRepo {
         Ok(self.ctx.execute(sql))
     }
 
-
-
     fn delete_icons(&self, indices: Vec<u8>) -> usize {
         let joined = indices
             .iter()

@@ -7,7 +7,6 @@ use std::fs::File;
 use std::io::Read;
 
 impl IconLoader {
-
     pub fn file_to_bin(filename: &str) -> std::io::Result<Vec<u8>> {
         let mut f = File::open(filename)?;
         let mut buffer: Vec<u8> = Vec::new();

@@ -422,13 +422,7 @@ impl Step<IconInner> for IconStore {
             CompressionType::ImageRs,
         ) {
             Ok(icon_id) => {
-                debug!(
-                    "IconStore:  len:{:?}  => ID {}  F:{}  HP:{}  --> SetIconId",
-                    inner.compressed_icon.len(),
-                    icon_id,
-                    inner.feed_url,
-                    inner.feed_homepage
-                );
+                // trace!(                    "IconStore:  len:{:?}  => ID {}  F:{}  HP:{}  --> SetIconId",                    inner.compressed_icon.len(),                    icon_id,                    inner.feed_url,                    inner.feed_homepage                );
                 let _r = inner
                     .sourcetree_job_sender
                     .send(SJob::SetIconId(inner.subs_id, icon_id as isize));

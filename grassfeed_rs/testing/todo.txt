@@ -1,7 +1,5 @@
-- put icons into database, add storing the icon-url, web-date, web-size with it.
-- Backspace to reset the search bar
 
-
+- remove queue display left
 - put errors in a database
 - remove or re-load icons that are too old
 - remove unused icons
@@ -9,8 +7,6 @@
 
 - https://www.inka-magazin.de/stadtmagazin-karlsruhe-baden-pfalz.html
   Multiple Feeds On one Page, Create a Selector
-
-
 
 
 
