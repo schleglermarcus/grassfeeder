@@ -21,8 +21,8 @@ use std::rc::Rc;
 fn test_new_entries_filter() {
     setup();
     let gf_conf = GrassFeederConfig {
-        path_config: "../target/db_entries_filter".to_string(),
-        path_cache: "../target/db_entries_filter".to_string(),
+        path_config: "../target/db_entries_filter/".to_string(),
+        path_cache: "../target/db_entries_filter/".to_string(),
         debug_mode: true,
         version: "db_entries_filter".to_string(),
     };

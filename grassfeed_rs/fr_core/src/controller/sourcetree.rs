@@ -53,6 +53,7 @@ use resources::gen_icons::IDX_44_ICON_GREEN_D;
 use resources::id::*;
 use resources::parameter::CHECK_MESSAGE_COUNTS_SET_SIZE;
 use resources::parameter::FETCH_PROCESS_ONETIME_LIMIT;
+// use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 use rust_i18n;
 use rust_i18n::t;
 use std::cell::RefCell;
@@ -961,9 +962,9 @@ impl SourceTreeController {
             IDX_32_FLAG_RED_32,
             IDX_44_ICON_GREEN_D,
         ] {
-            if let Some(ic) = (*self.iconrepo_r).borrow().get_by_index(ii as isize) {
-                (*self.gui_updater).borrow().store_image(ii as i32, ic.icon);
-            }
+            (*self.gui_updater)
+                .borrow()
+                .store_image(ii as i32, ICON_LIST[ii].to_string());
         }
         let mut src_ids =
             self.statemap

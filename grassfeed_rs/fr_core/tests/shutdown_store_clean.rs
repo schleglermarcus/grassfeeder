@@ -29,7 +29,7 @@ fn shutdown_store_ini() {
     setup();
     assert!(ui_select::is_mock_mode());
     {
-        let folder = "../target/db_shutdown".to_string();
+        let folder = "../target/db_shutdown/".to_string();
         let gf_conf = GrassFeederConfig {
             path_config: folder.clone(),
             path_cache: folder.clone(),
@@ -66,8 +66,8 @@ fn add_folder_and_feed() {
     setup();
     assert!(ui_select::is_mock_mode());
     let gf_conf = GrassFeederConfig {
-        path_config: "../target/db_feedsource_add".to_string(),
-        path_cache: "../target/db_feedsource_add".to_string(),
+        path_config: "../target/db_feedsource_add/".to_string(),
+        path_cache: "../target/db_feedsource_add/".to_string(),
         debug_mode: true,
         version: "add_folder_and_feed".to_string(),
     };

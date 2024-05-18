@@ -1,4 +1,4 @@
-grassfeeder-gtk3 (0.0.3014) jammy; urgency=low
+grassfeeder-gtk3 (0.0.3016) jammy; urgency=low
 
   * When deleting from folder, update subordinated feed counts
   - put icons into database, add storing the icon-url, web-date, web-size with it.

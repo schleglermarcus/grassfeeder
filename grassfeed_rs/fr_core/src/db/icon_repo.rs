@@ -12,11 +12,16 @@ use context::StartupWithAppContext;
 use context::TimerEvent;
 use context::TimerReceiver;
 use context::TimerRegistry;
+use rusqlite::params_from_iter;
 use rusqlite::Connection;
+use rusqlite::ParamsFromIter;
+use rusqlite::ToSql;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::Mutex;
+
+use super::sqlite_context::Wrap;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
 pub const FILENAME: &str = "icons_list.json";
@@ -48,13 +53,24 @@ pub trait IIconRepo {
     /// returns number of deleted rows
     fn delete_icon(&self, icon_id: isize) -> usize;
 
-    fn create_table(&self);
+    fn delete_icons(&self, ids: Vec<u8>) -> usize;
+
+    /// returns number of tables created
+    fn create_table(&self) -> usize;
 
     /// returns number of changed rows
     fn update_icon(
         &self,
         icon_id: isize,
         new_icon: Option<String>,
+        comp_type: CompressionType,
+    ) -> Result<usize, Box<dyn std::error::Error>>;
+
+    // fn insert_tx(&self, e_list: &[IconRow]) -> Result<i64, Box<dyn std::error::Error>>;
+
+    fn store_icons_tx(
+        &self,
+        list: Vec<(isize, String)>,
         comp_type: CompressionType,
     ) -> Result<usize, Box<dyn std::error::Error>>;
 }
@@ -65,6 +81,7 @@ pub struct IconRepo {
 
 impl IconRepo {
     pub fn new(folder_name: &str) -> Self {
+        assert!(folder_name.ends_with('/'));
         let fname = Self::filename(folder_name);
         match std::fs::create_dir_all(folder_name) {
             Ok(()) => (),
@@ -125,7 +142,7 @@ impl IIconRepo for IconRepo {
             req_date: timestamp_now(),
             ..Default::default()
         };
-        debug!("icon_repo::ADD  {:?} ", entry);
+        debug!("icon_repo::add_icon {:?} ", entry);
         self.ctx
             .insert(&entry, false)
             .map_err(rusqlite_error_to_boxed)
@@ -184,8 +201,8 @@ impl IIconRepo for IconRepo {
         }
     }
 
-    fn create_table(&self) {
-        self.ctx.create_table();
+    fn create_table(&self) -> usize {
+        self.ctx.create_table()
     }
 
     fn update_icon(
@@ -206,6 +223,64 @@ impl IIconRepo for IconRepo {
             icon_id,
         );
         Ok(self.ctx.execute(sql))
+    }
+
+
+
+    fn delete_icons(&self, indices: Vec<u8>) -> usize {
+        let joined = indices
+            .iter()
+            .map(|r| r.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+        let sql = format!(
+            "DELETE FROM {}   WHERE {} in  ( {} ) ",
+            IconRow::table_name(),
+            IconRow::index_column_name(),
+            joined
+        );
+        self.ctx.execute(sql)
+    }
+
+    fn store_icons_tx(
+        &self,
+        list: Vec<(isize, String)>,
+        comp_type: CompressionType,
+    ) -> Result<usize, Box<dyn std::error::Error>> {
+        let prep_sql = format!(
+            "INSERT INTO {} ( {} ) VALUES ( {} )",
+            IconRow::table_name(),
+            " icon_id, compression_type,  icon ",
+            " ?, ?, ? "
+        );
+        let conn = self.ctx.get_connection();
+        let mut locked_conn = conn.lock().unwrap();
+        let tx = locked_conn.transaction().unwrap();
+        let mut num_success: usize = 0;
+        for (id, content) in list {
+            let wrap_vec: Vec<Wrap> = [
+                Wrap::INT(id),
+                Wrap::INT(comp_type.clone() as isize),
+                Wrap::STR(content),
+            ]
+            .to_vec();
+            let vec_dyn_tosql: Vec<&dyn ToSql> = wrap_vec
+                .iter()
+                .map(|w| w.to_dyn_tosql())
+                .collect::<Vec<&dyn ToSql>>();
+            let params_fi: ParamsFromIter<&Vec<&dyn ToSql>> = params_from_iter(&vec_dyn_tosql);
+            let mut stmt = tx.prepare_cached(&prep_sql).unwrap();
+            match stmt.execute(params_fi) {
+                Ok(num) => num_success += num,
+                Err(e) => {
+                    error!("{} => {:?}", prep_sql, e)
+                }
+            };
+        }
+        match tx.commit() {
+            Ok(_) => Ok(num_success),
+            Err(e) => Err(Box::new(e)),
+        }
     }
 }
 

@@ -1,10 +1,15 @@
-// use fr_core::db::icon_repo::IconRepo;
+use fr_core::db::icon_repo::IIconRepo;
+use fr_core::db::icon_repo::IconRepo;
+use fr_core::db::icon_row::CompressionType;
+// use fr_core::db::icon_row::IconRow;
 use fr_core::downloader::icons::icon_analyser;
 use fr_core::downloader::util::extract_icon_from_homepage;
 use fr_core::util::png_from_svg;
 use fr_core::util::IconKind;
 use fr_core::web::mockfilefetcher;
 use fr_core::TD_BASE;
+use resources::gen_icons;
+use std::time::Instant;
 
 // later: create sloppy  extract-icon-from-page for missing quotes:
 //  thevaluable_dev            <link rel="shortcut icon" href=https://thevaluable.dev/images/favicon.png>
@@ -106,7 +111,102 @@ fn test_from_svg() {
     assert_eq!(height, 120);
 }
 
-pub const TEST_FOLDER1: &'static str = "../target/db_t_ico_rep";
+// #[ignore]
+#[test]
+fn storing_solitary() {
+    setup();
+    let iconrepo = IconRepo::new("../target/db_icons_solitary/");
+    iconrepo.create_table();
+    let now = Instant::now();
+    gen_icons::ICON_LIST
+        .iter()
+        .enumerate()
+        .for_each(|(num, ico)| {
+            let r = store_or_update_icon(num as isize, ico.to_string(), &iconrepo);
+            assert!(r.is_ok());
+        });
+    debug!("solitary, used time: {} ms ", now.elapsed().as_millis());
+}
+
+fn store_or_update_icon(
+    id: isize,
+    content: String,
+    repo: &IconRepo,
+) -> Result<usize, Box<dyn std::error::Error>> {
+    let o_iconrow = repo.get_by_index(id);
+    // trace!(        " store_default_icons : ID{} #{}  InRepo: {} ",        id,        content.len(),        o_iconrow.is_some()    );
+    let result = match o_iconrow {
+        Some(_r_icon) => repo.update_icon(id, Some(content), CompressionType::ImageRs),
+        None => repo.store_icon(id, content, CompressionType::ImageRs),
+    };
+    result
+}
+
+/*
+#[test]
+fn storing_combined() {
+    setup();
+    let iconrepo = IconRepo::new("../target/db_icons_combined/");
+    let tables_created = iconrepo.create_table();
+    let now = Instant::now();
+    let id_list: Vec<u8> = gen_icons::ICON_LIST
+        .iter()
+        .enumerate()
+        .map(|(num, _i)| num as u8)
+        .collect::<Vec<u8>>();
+    let num_deleted = iconrepo.delete_icons(id_list);
+    let rows: Vec<IconRow> = gen_icons::ICON_LIST
+        .iter()
+        .enumerate()
+        .map(|(num, ic)| IconRow {
+            icon_id: num as isize,
+            icon: ic.to_string(),
+            compression_type: CompressionType::ImageRs,
+            req_date: 0,
+            web_date: 0,
+            web_size: 0,
+            web_url: String::default(),
+        })
+        .collect::<Vec<IconRow>>();
+    let r = iconrepo.insert_tx(&rows);
+    debug!(
+        "Combined: used time: {} ms   Result:{:?}   #deleted:{}   #tables_created:{} ",
+        now.elapsed().as_millis(),
+        r,
+        num_deleted,
+        tables_created
+    );
+}
+ */
+
+#[test]
+fn icons_store_delete_and_tx() {
+    setup();
+    let iconrepo = IconRepo::new("../target/db_icons_sequence/");
+    let tables_created = iconrepo.create_table();
+    let now = Instant::now();
+    let id_list: Vec<u8> = gen_icons::ICON_LIST
+        .iter()
+        .enumerate()
+        .map(|(num, _i)| num as u8)
+        .collect::<Vec<u8>>();
+    let num_deleted = iconrepo.delete_icons(id_list);
+    let list: Vec<(isize, String)> = gen_icons::ICON_LIST
+        .iter()
+        .enumerate()
+        .map(|(num, ic)| (num as isize, ic.to_string()))
+        .collect::<Vec<(isize, String)>>();
+    let r = iconrepo.store_icons_tx(list, CompressionType::None);
+    debug!(
+        "TX used time: {} ms      #deleted:{}   #tables_created:{}    R:{:?} ",
+        now.elapsed().as_millis(),
+        num_deleted,
+        tables_created,
+        r
+    );
+    assert!(r.is_ok());
+    assert_eq!(r.unwrap(), gen_icons::ICON_LIST.len());
+}
 
 // ------------------------------------
 

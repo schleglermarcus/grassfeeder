@@ -72,16 +72,18 @@ impl<T: TableInfo> SqliteContext<T> {
         (*self.connection).lock().unwrap().execute(&stm, [])
     }
 
-    pub fn create_table(&self) {
+    // returns number of tables created
+    pub fn create_table(&self) -> usize {
         let create_str = format!(
             "CREATE TABLE  IF NOT EXISTS   {} ( {} )",
             T::table_name(),
             T::create_string()
         );
-        let _num_rows = self.execute(create_str);
+        let num_tables = self.execute(create_str);
         for cr_idx in T::create_indices() {
             self.execute(cr_idx);
         }
+        num_tables
     }
 
     // On success, returns the number of rows that were changed
@@ -305,7 +307,7 @@ impl<T: TableInfo> SqliteContext<T> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Wrap {
     INT(isize),
     I64(i64),
@@ -316,7 +318,7 @@ pub enum Wrap {
 }
 
 impl Wrap {
-    fn to_dyn_tosql(&self) -> &dyn ToSql {
+    pub fn to_dyn_tosql(&self) -> &dyn ToSql {
         match self {
             Wrap::INT(i) => i,
             Wrap::I64(i) => i,

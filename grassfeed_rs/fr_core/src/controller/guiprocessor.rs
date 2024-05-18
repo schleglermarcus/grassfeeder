@@ -50,7 +50,6 @@ use gui_layer::abstract_ui::UIUpdaterMarkWidgetType;
 use gui_layer::gui_values::KeyCodes;
 use gui_layer::gui_values::PropDef;
 use resources::gen_icons;
-use resources::gen_icons::ICON_01_BORDER_RED;
 use resources::gen_icons::ICON_LIST;
 use resources::id::DIALOG_ABOUT;
 use resources::id::*;
@@ -367,26 +366,26 @@ impl GuiProcessor {
 
     // single entries:  53ms		combined:  39ms
     pub fn store_default_icons(&self) {
-        let mut last_stored_id: isize = -1;
-        gen_icons::ICON_LIST
+        let id_list: Vec<u8> = gen_icons::ICON_LIST
             .iter()
             .enumerate()
-            .filter(|(num, _ico)| *num > 0)
-            .for_each(|(num, ico)| {
-                let r = self.store_or_update_icon(num as isize, ico.to_string());
-                if r.is_err() {
-                    error!("store_default_icons: {} => {:?}   ", last_stored_id, r);
-                };
-                last_stored_id = num as isize;
-            });
-
-        last_stored_id += 1;
-        let r = self.store_or_update_icon(last_stored_id, ICON_01_BORDER_RED.to_string());
+            .map(|(num, _i)| num as u8)
+            .collect::<Vec<u8>>();
+        let num_deleted = self.iconrepo_r.borrow().delete_icons(id_list);
+        let list: Vec<(isize, String)> = gen_icons::ICON_LIST
+            .iter()
+            .enumerate()
+            .map(|(num, ic)| (num as isize, ic.to_string()))
+            .collect::<Vec<(isize, String)>>();
+        let r = self
+            .iconrepo_r
+            .borrow()
+            .store_icons_tx(list, CompressionType::None);
         if r.is_err() {
-            error!("store_default_icons: {} => {:?}   ", last_stored_id, r);
+            error!("store_default_icons: D:{}  E:{:?}   ", num_deleted, r);
         }
     }
-
+/*
     fn store_or_update_icon(
         &self,
         id: isize,
@@ -401,6 +400,8 @@ impl GuiProcessor {
         };
         result
     }
+ */
+
 
     fn start_settings_dialog(&self) {
         let sources_conf = (*self.feedsources_r).borrow().get_config();
