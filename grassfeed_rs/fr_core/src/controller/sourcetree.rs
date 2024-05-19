@@ -53,7 +53,6 @@ use resources::gen_icons::IDX_44_ICON_GREEN_D;
 use resources::id::*;
 use resources::parameter::CHECK_MESSAGE_COUNTS_SET_SIZE;
 use resources::parameter::FETCH_PROCESS_ONETIME_LIMIT;
-// use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 use rust_i18n;
 use rust_i18n::t;
 use std::cell::RefCell;

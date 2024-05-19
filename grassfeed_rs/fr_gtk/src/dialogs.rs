@@ -94,19 +94,6 @@ fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
     grid.set_hexpand(true);
     grid.set_column_spacing(2);
     grid.set_row_spacing(2);
-    /*
-       if ICON_DIALOG_INCLUDE_INTERNAL {
-           for a in 0..gen_icons::ICON_LIST.len() {
-               grid_attach_icon(
-                   &grid,
-                   gen_icons::ICON_LIST[a],
-                   &format!("r{}", a),
-                   0,
-                   a as i32,
-               );
-           }
-       }
-    */
     dialog.content_area().add(&grid);
     dialog.set_default_response(ResponseType::Ok);
     dialog.connect_response(move |dialog, rt| {

@@ -11,7 +11,6 @@ use fr_core::downloader::db_clean::CleanerStart;
 use fr_core::util::StepResult;
 use std::thread;
 use std::time::Duration;
-// use flume::Sender;
 
 const CONF_PATH: &str = "../target/db_cleaner";
 
@@ -59,9 +58,8 @@ fn prepare_cleaner_inner() -> (CleanerInner, Receiver<Job>) {
     let subsrepo = SubscriptionRepo::by_file(&format!("{}/subscriptions.db", CONF_PATH));
     let msgrepo1 = MessagesRepo::new_by_filename_add_column(&format!("{}/messages.db", CONF_PATH));
     let err_repo = ErrorRepo::new(&format!("{}/", CONF_PATH));
-    // iconrepo = IconRepo::new(CONF_PATH);
     let iconrepo = IconRepo::new_in_mem();
-    iconrepo.create_table(); // startup_();
+    iconrepo.create_table();
     let cleaner_i = CleanerInner::new(
         gpj_s,
         stc_job_s,

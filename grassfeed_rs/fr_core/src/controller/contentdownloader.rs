@@ -338,11 +338,8 @@ impl IDownloader for Downloader {
         let subscription_repo = SubscriptionRepo::by_existing_connection(
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
-
-        // let icon_repo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
         let icon_repo =
             IconRepo::new_by_connection((*self.iconrepo_r).borrow().get_ctx().get_connection());
-
         let msgrepo = MessagesRepo::new_by_connection(
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
@@ -423,10 +420,8 @@ impl IDownloader for Downloader {
         let msgrepo1 = MessagesRepo::new_by_connection(
             (*self.messagesrepo).borrow().get_ctx().get_connection(),
         );
-        // let iconrepo = IconRepo::by_existing_list((*self.iconrepo_r).borrow().get_list());
         let icon_repo =
             IconRepo::new_by_connection((*self.iconrepo_r).borrow().get_ctx().get_connection());
-
         let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
         let cleaner_i = CleanerInner::new(
             self.gp_job_sender.as_ref().unwrap().clone(),

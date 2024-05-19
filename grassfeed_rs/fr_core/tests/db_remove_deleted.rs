@@ -23,9 +23,6 @@ use fr_core::downloader::db_clean::MAX_ERROR_LINE_AGE_S;
 use fr_core::util::timestamp_now;
 use fr_core::util::Step;
 use fr_core::util::StepResult;
-// use std::collections::HashMap;
-// use std::sync::Arc;
-// use std::sync::RwLock;
 
 #[test]
 fn clean_errorlist_no_subscription() {
