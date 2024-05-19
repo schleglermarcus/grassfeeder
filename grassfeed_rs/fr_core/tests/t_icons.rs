@@ -125,7 +125,8 @@ fn storing_solitary() {
             let r = store_or_update_icon(num as isize, ico.to_string(), &iconrepo);
             assert!(r.is_ok());
         });
-    debug!("solitary, used time: {} ms ", now.elapsed().as_millis());
+    // trace!("solitary, used time: {} ms ", now.elapsed().as_millis());
+    assert!(now.elapsed().as_millis() < 300);
 }
 
 fn store_or_update_icon(
@@ -146,29 +147,24 @@ fn store_or_update_icon(
 fn icons_store_delete_and_tx() {
     setup();
     let iconrepo = IconRepo::new("../target/db_icons_sequence/");
-    let tables_created = iconrepo.create_table();
+    let _tables_created = iconrepo.create_table();
     let now = Instant::now();
     let id_list: Vec<u8> = gen_icons::ICON_LIST
         .iter()
         .enumerate()
         .map(|(num, _i)| num as u8)
         .collect::<Vec<u8>>();
-    let num_deleted = iconrepo.delete_icons(id_list);
+    let _num_deleted = iconrepo.delete_icons(id_list);
     let list: Vec<(isize, String)> = gen_icons::ICON_LIST
         .iter()
         .enumerate()
         .map(|(num, ic)| (num as isize, ic.to_string()))
         .collect::<Vec<(isize, String)>>();
     let r = iconrepo.store_icons_tx(list, CompressionType::None);
-    debug!(
-        "TX used time: {} ms      #deleted:{}   #tables_created:{}    R:{:?} ",
-        now.elapsed().as_millis(),
-        num_deleted,
-        tables_created,
-        r
-    );
+    // trace!("TX used time: {} ms      #deleted:{}   #tables_created:{}    R:{:?} ",        now.elapsed().as_millis(),        num_deleted,        tables_created,        r    );
     assert!(r.is_ok());
     assert_eq!(r.unwrap(), gen_icons::ICON_LIST.len());
+    assert!(now.elapsed().as_millis() < 100);
 }
 
 // ------------------------------------

@@ -14,8 +14,6 @@ use std::sync::Arc;
 use xmlparser::Token;
 use xmlparser::Tokenizer;
 
-// const ERR_REPO_BASE: &str = "../target/";
-
 // #[ignore]
 #[test]
 fn t_extract_url() {
@@ -122,9 +120,12 @@ Parsers are confused with that.
 https://github.com/untitaker/html5gum
 https://github.com/cloudflare/lol-html
 https://github.com/servo/html5ever
+
+
+// #[ignore]
+// #[test]
 */
-#[ignore]
-#[test]
+#[allow(dead_code)]
 fn analyse_nn_with_html_parser() {
     setup();
     let fname = format!("{}{}", TD_BASE, "websites/naturalnews-page.html");

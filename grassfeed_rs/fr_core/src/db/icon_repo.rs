@@ -142,7 +142,6 @@ impl IIconRepo for IconRepo {
             req_date: timestamp_now(),
             ..Default::default()
         };
-        debug!("icon_repo::add_icon {:?} ", entry);
         self.ctx
             .insert(&entry, false)
             .map_err(rusqlite_error_to_boxed)
@@ -339,7 +338,6 @@ mod t_ {
             "".to_string(),
             CompressionType::None,
         );
-        // debug!("R: {:?} ", r);
         assert!(r.is_ok());
         let r2 = (*r_ir).get_by_index(r.unwrap() as isize);
         assert!(r2.is_some());
