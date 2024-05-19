@@ -7,7 +7,7 @@ RUN cat gf.tar.gz |gzip -d |tar x
 
 WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
 RUN pwd
-RUN test -f Cargo.lock || rm Cargo.lock
+RUN test -f Cargo.lock && rm Cargo.lock
 RUN cargo clean
 RUN cargo test --release
 RUN cargo deb
