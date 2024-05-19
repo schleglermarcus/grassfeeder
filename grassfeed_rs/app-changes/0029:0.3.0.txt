@@ -1,4 +1,4 @@
 Sun, 19 May 2024 12:00:00 +0000
-* When deleting from folder, update subordinated feed counts
-* put icons into database, add storing the icon-url, web-date, web-size with it.
+* Put icons into database, add storing the icon-url, web-date, web-size with it.
 * Backspace to reset the search bar
+* When deleting from folder, update subordinated feed counts
