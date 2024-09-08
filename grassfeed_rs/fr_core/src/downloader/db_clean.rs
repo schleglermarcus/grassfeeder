@@ -329,7 +329,13 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
         let mut inner = self.0;
         inner.advance_step();
         inner.send_gp(None);
+
+
+
         let all_icons: Vec<IconRow> = inner.iconrepo.get_all_entries();
+
+// TODO   inner.iconrepo.get_all_entries()
+
         let mut ic_first: HashMap<String, isize> = HashMap::new();
         let mut replace_ids: HashMap<isize, isize> = HashMap::new(); // subsequent-icon-id =>  previous icon-id
         all_icons
@@ -525,7 +531,8 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
     }
 }
 
-// returns   need-update, #removed, num-all, num-unread
+///  Consumes the user-configured max-messages value
+/// returns   need-update, #removed, num-all, num-unread
 pub fn reduce_too_many_messages(
     msg_r: &mut MessagesRepo,
     max_messages: usize,

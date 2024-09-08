@@ -18,16 +18,17 @@ resources = { path = "../resources" }
 ui_gtk = { path = "../ui_gtk" }
 rust-i18n = "1.1.1"	# 1.1.4 seems to attract files from outside
 fern = { version = ">=0.6", features = ["colored"] }
-gtk = { package = "gtk", version = "^0.15.5", features = ["v3_22_30"] }
-gdk = "^0.15.2"
-gdk-sys = "^0.15.1"
+gtk = { package = "gtk", version = "^0.16.2", features = ["v3_24"] }
+# old:    gtk = { version = ">=0.15.5", features = ["v3_22_30"] }
+gdk = "^0.16.2"
+gdk-sys = "^0.16.0"
+glib = "0.16.9"
 itertools = ">=0.10.5"
 once_cell = ">=1.12.0"
 log = ">=0.4.11"    # "^0.4.17"
 pango = "^0.15.10"
 flume = ">=0.10.14"
-webkit2gtk = { version = "=0.18.2", default-features = false, features = [    "v2_36",] }
-glib = "^0.15.5"
+webkit2gtk = { version = "=0.19.2", default-features = false, features = [    "v2_36",] }
 
 
 [dev-dependencies]

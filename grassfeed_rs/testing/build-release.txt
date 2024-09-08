@@ -8,7 +8,7 @@
   git merge origin/v0_2_2
   git commit
   git push origin main
-  cd grassfeed_rs   ; cargo test  
+  cd grassfeed_rs   ; cargo test
   (cd app-gtk3-linux ; ./debian-stage2.sh )
   (cd app-gtk3-ubuntu/ ; ./deb-sign.sh )
 
@@ -18,9 +18,4 @@ git checkout main ;    git pull ;  git status
 
 
 * Create new Branch
-(B=v0_2_3 ;	git branch $B ;	git checkout $B ; git push -u origin $B ;   git branch --set-upstream-to=origin/$B $B ) 
-    
-  
-
-# for cargo-appimage
-# apt-get install libc6-dev   librust-glib-sys-dev   librust-atk-sys-dev   librust-gdk-sys-dev  libsoup2.4-dev  libjavascriptcoregtk-4.0-dev  libwebkit2gtk-4.0-dev
+(B=v0_2_3 ;	git branch $B ;	git checkout $B ; git push -u origin $B ;   git branch --set-upstream-to=origin/$B $B )

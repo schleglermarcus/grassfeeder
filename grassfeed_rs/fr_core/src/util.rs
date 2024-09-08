@@ -148,8 +148,8 @@ pub fn downscale_image(
 // https://docs.rs/tiny-skia/latest/tiny_skia/struct.PixmapMut.html
 /// returns a Vec<u8>  with raw png file data
 pub fn png_from_svg(img_bytes: &[u8]) -> Result<Vec<u8>, String> {
-    let fontdb: fontdb::Database = fontdb::Database::new();
-    let r = usvg::Tree::from_data(img_bytes, &usvg::Options::default(), &fontdb);
+    // let fontdb: fontdb::Database = fontdb::Database::new();
+    let r = usvg::Tree::from_data(img_bytes, &usvg::Options::default() /*, &fontdb  */);
     if let Err(e) = r {
         return Err(format!("fromSvg:from_data {:?}", e));
     }

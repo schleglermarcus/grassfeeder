@@ -1,0 +1,12 @@
+Sun, 19 May 2024 12:00:00 +0000
+
+- library update: gtkwebkit to 0.19
+
+- fix db cleanup locking issue
+
+- remove queue display left
+- remove or re-load icons that are too old
+
+
+- put errors in a database
+- remove unused icons

@@ -85,11 +85,20 @@ pub fn create_treeview(
     {
         let col = TreeViewColumn::new();
         let cellrendpixbuf = CellRendererPixbuf::new();
-        col.pack_start(&cellrendpixbuf, false);
-        col.add_attribute(&cellrendpixbuf, "gicon", 0_i32);
+        //        col.pack_start(&cellrendpixbuf, false);
+        gtk::prelude::CellLayoutExt::pack_start(&col, &cellrendpixbuf, false);
+
+        //        col.add_attribute(&cellrendpixbuf, "gicon", 0_i32);
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "gicon", 0_i32);
+
         let cellrendtext = CellRendererText::new();
-        col.pack_start(&cellrendtext, true);
-        col.add_attribute(&cellrendtext, "text", 1_i32); // display-name
+
+        //        col.pack_start(&cellrendtext, true);
+        gtk::prelude::CellLayoutExt::pack_start(&col, &cellrendtext, true);
+
+        //         col.add_attribute(&cellrendtext, "text", 1_i32); // display-name
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendtext, "text", 1_i32); // display-name
+
         TreeViewColumnExt::set_cell_data_func(
             &col,
             &cellrendtext,
@@ -103,21 +112,41 @@ pub fn create_treeview(
     {
         let col = tree0column1.clone();
         let cellrendtext = CellRendererText::new();
-        col.pack_start(&cellrendtext, false);
-        col.add_attribute(&cellrendtext, "text", 2_i32); // unread-text
-        col.add_attribute(&cellrendtext, "visible", 11_i32); //  unread-text visible
+
+        //        col.pack_start(&cellrendtext, false);
+        gtk::prelude::CellLayoutExt::pack_start(&col, &cellrendtext, false);
+
+        //         col.add_attribute(&cellrendtext, "text", 2_i32); // unread-text
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendtext, "text", 2_i32); // unread-text
+
+        // col.add_attribute(&cellrendtext, "visible", 11_i32); //  unread-text visible
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendtext, "visible", 11_i32); //  unread-text visible
+
         TreeViewColumnExt::set_cell_data_func(
             &col,
             &cellrendtext,
             Some(Box::new(BoldFunction::<TreeBoldDiscr>::tree_switch_bold)),
         );
         let cellrendpixbuf = CellRendererPixbuf::new();
-        col.pack_end(&cellrendpixbuf, false);
-        col.add_attribute(&cellrendpixbuf, "gicon", 3_i32);
-        col.add_attribute(&cellrendpixbuf, "visible", 10_i32);
-        col.pack_end(&cellrenderer_spinner, false);
-        col.add_attribute(&cellrenderer_spinner, "active", 9_i32);
-        col.add_attribute(&cellrenderer_spinner, "visible", 9_i32);
+
+        //         col.pack_end(&cellrendpixbuf, false);
+        gtk::prelude::CellLayoutExt::pack_end(&col, &cellrendpixbuf, false);
+
+        //         col.add_attribute(&cellrendpixbuf, "gicon", 3_i32);
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "gicon", 3_i32);
+
+        //         col.add_attribute(&cellrendpixbuf, "visible", 10_i32);
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "visible", 10_i32);
+
+        //         col.pack_end(&cellrenderer_spinner, false);
+        gtk::prelude::CellLayoutExt::pack_end(&col, &cellrenderer_spinner, false);
+
+        //        col.add_attribute(&cellrenderer_spinner, "active", 9_i32);
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrenderer_spinner, "active", 9_i32);
+
+        // col.add_attribute(&cellrenderer_spinner, "visible", 9_i32);
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrenderer_spinner, "visible", 9_i32);
+
         col.set_fixed_width(9); // If we don't fix the width, the gtk system crashes on moving the pane-1
         treeview1.append_column(&col);
     }

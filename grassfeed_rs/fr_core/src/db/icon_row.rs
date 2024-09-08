@@ -86,12 +86,12 @@ impl TableInfo for IconRow {
         let i_5: isize = row.get(5).unwrap();
         IconRow {
             icon_id: row.get(0).unwrap(),
-            web_url: row.get(1).unwrap(),
-            web_size: row.get(2).unwrap(),
-            web_date: row.get(3).unwrap(),
-            req_date: row.get(4).unwrap(),
+            web_url: row.get(1).unwrap_or_default(),
+            web_size: row.get(2).unwrap_or_default(),
+            web_date: row.get(3).unwrap_or_default(),
+            req_date: row.get(4).unwrap_or_default(),
             compression_type: CompressionType::from_isize(i_5),
-            icon: row.get(6).unwrap(),
+            icon: row.get(6).unwrap_or_default(),
         }
     }
 

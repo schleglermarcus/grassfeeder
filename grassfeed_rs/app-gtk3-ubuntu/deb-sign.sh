@@ -49,8 +49,7 @@ echo "" >>$CT
 echo "Package: $PKGNAME"  >>$CT
 echo "Architecture: $ARCHITECTURE"  >>$CT
 cat assets/deb-control.txt |egrep  "Depends:"  |head -n1  >>$CT
-# echo "####### PWD=`pwd`    WORKDIR=$WORKDIR  #### cp -vR $CT debian/  "
-# cp -vR $CT debian/
+
 R="debian/rules"
 (cd $WORKDIR ;   echo "#!/usr/bin/make -f" >$R )
 (cd $WORKDIR ;   echo "">>$R )

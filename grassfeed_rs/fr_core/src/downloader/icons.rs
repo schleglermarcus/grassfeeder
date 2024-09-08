@@ -629,8 +629,8 @@ impl InvestigateOne for InvSvg {
     #[cfg(not(feature = "legacy3gtk14"))]
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
-        let fontdb: usvg::fontdb::Database = fontdb::Database::new();
-        match usvg::Tree::from_data(vec_u8, &usvg::Options::default(), &fontdb) {
+        // let fontdb: usvg::fontdb::Database = usvg::fontdb::Database::new();
+        match usvg::Tree::from_data(vec_u8, &usvg::Options::default(),  /*   &fontdb */ )  {
             Ok(_rtree) => {
                 // trace!(                    "INVSVG:   W:{} H:{}  type:{:?} ",                    rtree.size().width(),                    rtree.size().height(),                    rtree.type_id()                );
                 r.kind = IconKind::Svg;

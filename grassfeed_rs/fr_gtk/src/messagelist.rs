@@ -65,8 +65,13 @@ pub fn create_listview(
     {
         let col = TreeViewColumn::new();
         let cellrendpixbuf = CellRendererPixbuf::new();
-        col.pack_start(&cellrendpixbuf, true);
-        col.add_attribute(&cellrendpixbuf, "gicon", 0_i32);
+
+        // col.pack_start(&cellrendpixbuf, true);
+        gtk::prelude::CellLayoutExt::pack_start(&col, &cellrendpixbuf, true);
+
+        // col.add_attribute(&cellrendpixbuf, "gicon", 0_i32);
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "gicon", 0_i32);
+
         col.set_title("F");
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
         col.set_fixed_width(WIDTH_ISREAD_FAV);
@@ -77,8 +82,13 @@ pub fn create_listview(
     {
         let cellrendtext = CellRendererText::new();
         let col = TreeViewColumn::new();
-        col.pack_start(&cellrendtext, true);
-        col.add_attribute(&cellrendtext, TYPESTRING_TEXT, 1);
+
+        //         col.pack_start(&cellrendtext, true);
+        gtk::prelude::CellLayoutExt::pack_start(&col, &cellrendtext, true);
+
+        // col.add_attribute(&cellrendtext, TYPESTRING_TEXT, 1);
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendtext, TYPESTRING_TEXT, 1);
+
         col.set_visible(true);
         col.set_title(&t!("MSGLIST_TOP_TITLE"));
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
@@ -113,8 +123,13 @@ pub fn create_listview(
     {
         let col = TreeViewColumn::new(); // is-read
         let cellrendpixbuf = CellRendererPixbuf::new();
-        col.pack_end(&cellrendpixbuf, false);
-        col.add_attribute(&cellrendpixbuf, "gicon", 3_i32);
+
+        // col.pack_end(&cellrendpixbuf, false);
+        gtk::prelude::CellLayoutExt::pack_end(&col, &cellrendpixbuf, false);
+
+        //        col.add_attribute(&cellrendpixbuf, "gicon", 3_i32);
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "gicon", 3_i32);
+
         col.set_title("R");
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
         col.set_expand(false);
@@ -127,9 +142,15 @@ pub fn create_listview(
     {
         let cellrendtext = CellRendererText::new();
         let col = TreeViewColumn::new();
-        col.pack_end(&cellrendtext, false);
-        col.add_attribute(&cellrendtext, TYPESTRING_TEXT, 2);
+
+        // col.pack_end(&cellrendtext, false);
+        gtk::prelude::CellLayoutExt::pack_end(&col, &cellrendtext, false);
+
+        // col.add_attribute(&cellrendtext, TYPESTRING_TEXT, 2);
+        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendtext, TYPESTRING_TEXT, 2);
+
         col.set_visible(true);
+
         col.set_title(&t!("MSGLIST_TOP_DATE"));
         col.set_sizing(gtk::TreeViewColumnSizing::GrowOnly);
         col.set_min_width(10);

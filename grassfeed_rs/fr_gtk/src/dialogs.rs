@@ -46,6 +46,7 @@ use resources::gen_icons::*;
 use resources::id::*;
 use resources::parameter::DOWNLOADER_MAX_NUM_THREADS;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
+use resources::parameter::STORE_MESSAGES_PER_SUBSCRIPTION;
 use rust_i18n;
 use rust_i18n::t;
 use ui_gtk::dialogdatadistributor::DialogDataDistributor;
@@ -788,7 +789,11 @@ fn create_settings_dialog(
     let spinb_numthread = SpinButton::with_range(1.0, DOWNLOADER_MAX_NUM_THREADS as f64, 1.0);
     let cbt_focuspolicy = ComboBoxText::with_entry();
     let sw_display_feedcount = Switch::new();
-    let spinb_msg_keep_count = SpinButton::with_range(20.0, 10000.0, 20.0);
+    let spinb_msg_keep_count = SpinButton::with_range(
+        20.0,
+        STORE_MESSAGES_PER_SUBSCRIPTION as f64 , /*  10000.0 */
+        20.0,
+    );
     let sw_fontsize_manual_enable = Switch::new();
     let spinb_fontsize_manual = SpinButton::with_range(FONTSIZE_MIN, FONTSIZE_MAX, 1.0);
     let scale_bright = Scale::with_range(Orientation::Horizontal, 0.0, 255.0, 1.0);

@@ -94,7 +94,10 @@ impl GtkRunnerInternal {
                 &app_url
             );
             let _r = ev_se.send(GuiEvents::AppWasAlreadyRunning);
-            app.release();
+
+            // TODO check:  this was in 0.18  , but no more in  0.19
+            // app.release();
+
             dbus_close(&app);
             return false;
         }
@@ -297,7 +300,10 @@ fn build_window(
     window.set_title(&title);
     window.set_default_size(width, height);
     window.show_all();
-    if let Some(screen) = window.screen() {
+
+    // if let Some(screen) = window.screen() {
+    //      if let Some(screen) = gtk::prelude::WidgetExt::screen(&window) {
+    if let Some(screen) = gtk::prelude::GtkWindowExt::screen(&window) {
         if let Some(settings) = Settings::for_screen(&screen) {
             settings.set_gtk_enable_animations(true);
         } else {

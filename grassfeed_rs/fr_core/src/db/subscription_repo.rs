@@ -20,10 +20,9 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
-// pub const FILENAME_JSON: &str = "subscription_list.json";
 
-pub const CONV_TO: &dyn Fn(String) -> Option<SubscriptionEntry> = &json_to_subscription_entry;
-pub const CONV_FROM: &dyn Fn(&SubscriptionEntry) -> Option<String> = &subscription_entry_to_json;
+// pub const CONV_TO: &dyn Fn(String) -> Option<SubscriptionEntry> = &json_to_subscription_entry;
+// pub const CONV_FROM: &dyn Fn(&SubscriptionEntry) -> Option<String> = &subscription_entry_to_json;
 
 pub trait ISubscriptionRepo {
     /// sorts by folder_position
@@ -539,7 +538,7 @@ impl TimerReceiver for SubscriptionRepo {
     }
 }
 
-//  #[allow(dead_code)]
+/*
 fn subscription_entry_to_json(input: &SubscriptionEntry) -> Option<String> {
     match serde_json::to_string(input) {
         Ok(encoded) => Some(encoded),
@@ -550,7 +549,6 @@ fn subscription_entry_to_json(input: &SubscriptionEntry) -> Option<String> {
     }
 }
 
-// #[allow(dead_code)]
 fn json_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
     let dec_r: serde_json::Result<SubscriptionEntry> = serde_json::from_str(&line);
     match dec_r {
@@ -561,6 +559,7 @@ fn json_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
         }
     }
 }
+ */
 
 #[cfg(test)]
 mod ut {
