@@ -422,7 +422,13 @@ impl Step<IconInner> for IconStore {
             CompressionType::ImageRs,
         ) {
             Ok(icon_id) => {
-                // trace!(                    "IconStore:  len:{:?}  => ID {}  F:{}  HP:{}  --> SetIconId",                    inner.compressed_icon.len(),                    icon_id,                    inner.feed_url,                    inner.feed_homepage                );
+                trace!(
+                    "IconStore:  len:{:?}  => ID {}  F:{}  HP:{}  --> SetIconId",
+                    inner.compressed_icon.len(),
+                    icon_id,
+                    inner.feed_url,
+                    inner.feed_homepage
+                );
                 let _r = inner
                     .sourcetree_job_sender
                     .send(SJob::SetIconId(inner.subs_id, icon_id as isize));
@@ -629,10 +635,8 @@ impl InvestigateOne for InvSvg {
     #[cfg(not(feature = "legacy3gtk14"))]
     fn investigate(&self, vec_u8: &[u8]) -> IconAnalyseResult {
         let mut r = IconAnalyseResult::default();
-        // let fontdb: usvg::fontdb::Database = usvg::fontdb::Database::new();
-        match usvg::Tree::from_data(vec_u8, &usvg::Options::default(),  /*   &fontdb */ )  {
+        match usvg::Tree::from_data(vec_u8, &usvg::Options::default()) {
             Ok(_rtree) => {
-                // trace!(                    "INVSVG:   W:{} H:{}  type:{:?} ",                    rtree.size().width(),                    rtree.size().height(),                    rtree.type_id()                );
                 r.kind = IconKind::Svg;
             }
             Err(e) => {

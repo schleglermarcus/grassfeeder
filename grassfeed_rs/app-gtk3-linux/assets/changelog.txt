@@ -1,3 +1,13 @@
+grassfeeder-gtk3 (0.0.3109) buster; urgency=low
+
+  - Library update: gtkwebkit to 0.19, gtk to 0.16
+  - Bugfix db cleanup locking issue
+  - Bigger Font for browser title
+  
+  - remove queue display left
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sun, 19 May 2024 12:00:00 +0000
+
 grassfeeder-gtk3 (0.3.0) buster; urgency=low
 
   * Put icons into database, add storing the icon-url, web-date, web-size with it.

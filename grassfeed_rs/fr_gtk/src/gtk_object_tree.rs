@@ -1,3 +1,5 @@
+use gdk::pango::AttrFontFeatures;
+use gdk::pango::Attribute;
 #[cfg(feature = "legacy3gtk14")]
 use gtk::ToggleToolButtonBuilder;
 #[cfg(feature = "legacy3gtk14")]
@@ -16,6 +18,8 @@ use crate::util::DragState;
 use crate::util::EvSenderWrapper;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
+use gdk::pango::AttrList;
+use gdk::pango::AttrSize;
 use gdk::EventButton;
 use gtk::pango::WrapMode;
 use gtk::prelude::GtkMenuItemExt;
@@ -69,6 +73,7 @@ const TOOLBAR_BORDER_WIDTH: u32 = 0;
 const TOOLBAR_MARGIN: i32 = 0;
 const RATIO_BROWSER_FONTSIZE_PERCENT: u32 = 140;
 const WEBVIEW_BORDER_WIDTH: u32 = 0;
+const BROWSER_AREA_LINK_TITLE_FONT_SIZE: i32 = 12; // 10 == default
 
 pub const ICON_PATH: &str = "/usr/share/pixmaps/grassfeeder/";
 pub const ICON2: &str = "grassfeeder-indicator2";
@@ -305,6 +310,14 @@ impl GtkObjectTree {
         let label_entry_link = Label::new(Some("-"));
         label_entry_link.set_halign(Align::Start);
         label_entry_link.set_wrap(true);
+        let attributes = AttrList::new();
+        attributes.insert(Attribute::from(AttrSize::new(
+            BROWSER_AREA_LINK_TITLE_FONT_SIZE * pango::SCALE,
+        )));
+        attributes.insert(Attribute::from(AttrFontFeatures::new(
+            " font-weight:bold; ",
+        )));
+        label_entry_link.set_attributes(Some(&attributes));
         box1_v.pack_start(&label_entry_link, false, false, 0);
 
         let box2_h = gtk::Box::new(Orientation::Horizontal, 0);

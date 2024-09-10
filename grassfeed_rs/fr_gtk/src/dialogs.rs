@@ -798,7 +798,6 @@ fn create_settings_dialog(
     let spinb_fontsize_manual = SpinButton::with_range(FONTSIZE_MIN, FONTSIZE_MAX, 1.0);
     let scale_bright = Scale::with_range(Orientation::Horizontal, 0.0, 255.0, 1.0);
     let sw_browser_cache_clear = Switch::new();
-    // let sw_enable_systray = Switch::new();
     {
         let grid1 = Grid::new();
         grid1.set_vexpand(true);
@@ -845,13 +844,6 @@ fn create_settings_dialog(
         cbt_focuspolicy.append_text(&get_focus_policy_name(4));
         cbt_focuspolicy.set_id_column(0);
         grid1.attach(&cbt_focuspolicy, 1, line, 1, 1);
-        /*
-               line += 1;
-               let label3 = Label::new(Some(&t!("D_SETTINGS_DATABASES_CLEAN_ONSTART")));
-               grid1.attach(&label3, 0, line, 1, 1);
-               grid1.attach(&sw_subs_db_cleanup, 1, line, 1, 1);
-               sw_subs_db_cleanup.set_halign(Align::Start);
-        */
     }
     let label_nb2 = Label::new(Some(&t!("D_SETTINGS_TAB2")));
     {
@@ -907,8 +899,6 @@ fn create_settings_dialog(
             line += 1;
             let label2_5 = Label::new(Some(&t!("D_SETTINGS_SYSTRAY_ICON_ENABLE")));
             grid2.attach(&label2_5, 0, line, 1, 1);
-            //  grid2.attach(&sw_enable_systray, 1, line, 1, 1);
-            //  sw_enable_systray.set_halign(Align::Start);
         }
     }
 
@@ -963,7 +953,6 @@ fn create_settings_dialog(
     let sw_fontsize_manual_enable_c = sw_fontsize_manual_enable.clone();
     let spinb_fontsize_manual_c = spinb_fontsize_manual.clone();
     let scale_bright_c = scale_bright.clone();
-    // let sw_subs_db_cleanup_c = sw_subs_db_cleanup.clone();
     let sw_browser_cache_clear_c = sw_browser_cache_clear.clone();
 
     dialog.connect_response(move |dialog, rt| {
@@ -989,8 +978,6 @@ fn create_settings_dialog(
                 av.push(AValue::AI32(spinb_fontsize_manual_c.value() as i32)); // 8 : ManualFontSizeEnable
                 av.push(AValue::AU32(scale_bright_c.value() as u32)); // 9 : Browser BG
                 av.push(AValue::ABOOL(sw_browser_cache_clear_c.state())); // 10 : browser cache cleanup
-
-                // av.push(AValue::ABOOL(sw_subs_db_cleanup_c.state())); // 11 : DB cleanup
                 let _r = ev_se.send(GuiEvents::DialogData("settings".to_string(), av));
             }
             ResponseType::Cancel | ResponseType::DeleteEvent => {
@@ -1031,7 +1018,6 @@ fn create_settings_dialog(
         scale_bright.set_value(browser_bg as f64);
         sw_browser_cache_clear.set_state(dialogdata.get(10).unwrap().boo()); // 10 : browser cache cleanup
                                                                              //  sw_subs_db_cleanup.set_state(dialogdata.get(11).unwrap().boo()); // 11 : DB cleanup
-                                                                             // sw_enable_systray.set_state(dialogdata.get(12).unwrap().boo()); // 11 : Systray Enable
     });
     let tview_clean = textview2.clone();
     ddd.set_dialog_distribute(DIALOG_SETTINGS_CHECK, move |dialogdata| {

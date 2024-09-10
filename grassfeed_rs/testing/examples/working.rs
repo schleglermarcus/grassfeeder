@@ -103,14 +103,24 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
     let folder2 = subs_move.add_new_folder_at_parent("folder2".to_string(), 0);
     let folder1 = subs_move.add_new_folder_at_parent("folder1".to_string(), folder2);
+
+    subs_move.add_new_subscription_at_parent(
+        "https://www.naturalnews.com/rss.xml".to_string(),
+        "NTR-News".to_string(),
+        folder1,
+        false,
+    );
+
     if true {
         let f5 = subs_move.add_new_folder_at_parent("folder5".to_string(), 0);
+
         let subs_id_dyn = (*subs_move).add_new_subscription_at_parent(
             url_dynamic.clone(),
             "dynamic".to_string(),
             folder1,
             false,
         );
+
         for esrc in ESRC::VALUES {
             let dummy_val = subs_id_dyn * (esrc.clone() as isize);
             (*error_repo.borrow()).add_error(
@@ -122,12 +132,10 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             )
         }
 
-        let url_staseve = format!("{}/staseve-11.xml", addr);
-        let url_nn_aug = format!("{}/naturalnews_aug.xml", addr);
-        subs_move.add_new_subscription_at_parent(url_nn_aug, "NN-aug".to_string(), folder1, false);
+        //  subs_move.add_new_subscription_at_parent(            format!("{}/naturalnews_aug.xml", addr),            "NN-aug".to_string(),            folder1,            false,        );
         subs_move.add_new_subscription_at_parent(
-            url_staseve,
-            "staseve11".to_string(),
+            format!("{}/staseve-11.xml", addr),
+            "staseve-11".to_string(),
             folder1,
             false,
         );
@@ -149,12 +157,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         subs_move.add_new_folder_at_parent("5_1".to_string(), f5);
 
         subs_move.add_new_subscription_at_parent(
-            "https://www.naturalnews.com/rss.xml".to_string(),
-            "NTR-News".to_string(),
-            folder1,
-            false,
-        );
-        subs_move.add_new_subscription_at_parent(
             "https://thevaluable.dev/index.xml".to_string(),
             "valdev".to_string(),
             folder1,
@@ -166,8 +168,12 @@ fn test_setup_values(acr: &AppContext, addr: String) {
             folder1,
             false,
         );
-
-
+        subs_move.add_new_subscription_at_parent(
+            "http://www.ilgiornale.it/taxonomy/term/40821/feed    ".to_string(),
+            "giornale".to_string(),
+            folder1,
+            false,
+        );
     }
 
     if false {

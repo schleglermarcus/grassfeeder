@@ -342,12 +342,16 @@ impl ContentList {
         );
     }
 
-    fn filter_messages<'a>(&'a self, list_in: &'a [&MessageRow]) -> Vec<&MessageRow> {
+    fn filter_messages1<'a>(&'a self, list_in: &'a [&MessageRow]) -> Vec<&MessageRow> {
         let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
+
         let reg = RegexBuilder::new(&regex::escape(matchtext))
             .case_insensitive(true)
             .build()
             .unwrap();
+
+        trace!("filter_messages:  matchtext {}", matchtext);
+
         let out_list: Vec<&MessageRow> = list_in
             .iter()
             .filter(|m| {
@@ -399,7 +403,9 @@ impl ContentList {
             self.fill_state_map(mr_i.clone());
         }
         let filtered_msglist: Vec<&MessageRow> = if self.msg_filter.is_some() {
-            self.filter_messages(&messagelist)
+            // self.filter_messages1(&messagelist)
+            let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
+            filter_messages2(&self.msg_state, &messagelist, matchtext)
         } else {
             messagelist
         };
@@ -752,7 +758,6 @@ impl IContentList for ContentList {
                 true => Some(st.get_subscription_icon_id(msg.message_id)),
                 false => None,
             };
-            // trace!(" update_content_list_some   {} {:?} ", isfolder, o_icon);
             let av_list = Self::message_to_row(
                 &msg,
                 self.config.list_fontsize as u32,
@@ -760,6 +765,7 @@ impl IContentList for ContentList {
                 self.config.mode_debug,
                 o_icon,
             );
+            // trace!(                " update_content_list_some   {} {:?}  {:?} ",                isfolder,                o_icon,                av_list            );
             (*self.gui_val_store).write().unwrap().insert_list_item(
                 0,
                 *list_position as i32,
@@ -1253,4 +1259,37 @@ pub enum ListMoveCommand {
     None,
     LaterUnreadMessage,
     PreviousUnreadMessage,
+}
+
+pub fn filter_messages2<'a>(
+    msgstate: &RwLock<MessageStateMap>,
+    list_in: &'a [&MessageRow],
+    matchtext: &str,
+) -> Vec<&'a MessageRow> {
+    // let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
+
+    let reg = RegexBuilder::new(&regex::escape(matchtext))
+        .case_insensitive(true)
+        .build()
+        .unwrap();
+
+    trace!("filter_messages:  matchtext {}", matchtext);
+
+    let out_list: Vec<&MessageRow> = list_in
+        .iter()
+        .filter(|m| {
+            let o_title = msgstate.read().unwrap().get_title(m.message_id);
+            if o_title.is_none() {
+                return true;
+            }
+            let title = o_title.unwrap();
+
+            if reg.is_match(&title) {
+                return true;
+            }
+            false
+        })
+        .cloned()
+        .collect();
+    out_list
 }

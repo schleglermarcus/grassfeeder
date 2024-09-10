@@ -7,6 +7,7 @@ use fr_core::controller::contentlist::CJob;
 use fr_core::controller::contentlist::ContentList;
 use fr_core::controller::contentlist::IContentList;
 use fr_core::db::message::MessageRow;
+use fr_core::db::message_state::MessageStateMap;
 use fr_core::db::messages_repo::IMessagesRepo;
 use fr_core::db::messages_repo::MessagesRepo;
 use fr_core::downloader::messages::message_from_modelentry;
@@ -15,6 +16,7 @@ use fr_core::util;
 use fr_core::TD_BASE;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::RwLock;
 
 // test if feed update content matching works
 #[test]
@@ -169,6 +171,34 @@ fn parse_linuxcompati() {
         .map(|fe| message_from_modelentry(&fe).0)
         .collect();
     assert_eq!(list.len(), 1);
+}
+
+//  cargo watch -s "(cd fr_core ; cargo test --test t_contentlist)  "
+#[test]
+fn t_filter_messages() {
+    setup();
+    let msgstate: RwLock<MessageStateMap> = RwLock::new(MessageStateMap::default());
+    let filter = "alle";
+    let mut messagelist: Vec<&MessageRow> = Vec::default();
+    let  m1 = MessageRow {
+        title: String::from("Hello"),
+        message_id: 1,
+        ..Default::default()
+    };
+    messagelist.push(&m1);
+    let  m2 = MessageRow {
+        title: String::from("alles "),
+        message_id: 2,
+        ..Default::default()
+    };
+    messagelist.push(&m2);
+    let r = fr_core::controller::contentlist::filter_messages2(&msgstate, &messagelist, filter);
+    debug!(" #R: {:?} ", r.len());
+
+    debug!("  {:?} ", r);
+
+    assert_eq!(1, r.len());
+    // assert!(r.starts_with("2023-10-07 03:47:44     7"));
 }
 
 // ------------------------------------

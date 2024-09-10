@@ -1,9 +1,12 @@
-
 - remove queue display left
-- put errors in a database
+
 - remove or re-load icons that are too old
 - remove unused icons
+- put errors in a database
+- put errors in a database
 
+
+- package bas64  to newer version
 
 - https://www.inka-magazin.de/stadtmagazin-karlsruhe-baden-pfalz.html
   Multiple Feeds On one Page, Create a Selector

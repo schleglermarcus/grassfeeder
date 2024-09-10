@@ -10,6 +10,7 @@ use textcode::iso8859_1;
 use usvg::Transform;
 
 static DATETIME_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
+static CONVERT_BUFFERSIZE: usize = 100000;
 
 pub fn file_exists(filename: &str) -> bool {
     if let Ok(metadata) = std::fs::metadata(filename) {
@@ -57,7 +58,7 @@ pub fn timestamp_from_utc(in_utc: DateTime<Utc>) -> i64 {
 }
 
 pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Result<Vec<u8>, String> {
-    let buffersize = 100000;
+    // let buffersize = 100000;
     let r = image::load_from_memory_with_format(bytes_webp, ImageFormat::WebP);
     if let Err(e) = r {
         return Err(format!("convert_webp_to_png:1 {e:?}"));
@@ -66,7 +67,7 @@ pub fn convert_webp_to_png(bytes_webp: &[u8], resize_w_h: Option<u32>) -> Result
     if let Some(width) = resize_w_h {
         dynimg = dynimg.thumbnail(width, width);
     }
-    let outbuf: Vec<u8> = Vec::with_capacity(buffersize);
+    let outbuf: Vec<u8> = Vec::with_capacity(CONVERT_BUFFERSIZE);
     let mut cursor = Cursor::new(outbuf);
     let rw = image::write_buffer_with_format(
         &mut cursor,
@@ -104,7 +105,7 @@ pub fn downscale_image(
     img_type: &IconKind,
     resize_w_h: u32,
 ) -> Result<Vec<u8>, String> {
-    let buffersize = 1000000;
+    // let buffersize = 1000000;
     let img_fo: ImageFormat = match img_type {
         IconKind::Png => ImageFormat::Png,
         IconKind::Jpg => ImageFormat::Jpeg,
@@ -127,7 +128,7 @@ pub fn downscale_image(
     if !is_small_colortype(&colortype) {
         colortype = image::ColorType::Rgba8;
     }
-    let outbuf: Vec<u8> = Vec::with_capacity(buffersize);
+    let outbuf: Vec<u8> = Vec::with_capacity(CONVERT_BUFFERSIZE);
     let mut cursor = Cursor::new(outbuf);
     let rw = image::write_buffer_with_format(
         &mut cursor,
@@ -148,8 +149,7 @@ pub fn downscale_image(
 // https://docs.rs/tiny-skia/latest/tiny_skia/struct.PixmapMut.html
 /// returns a Vec<u8>  with raw png file data
 pub fn png_from_svg(img_bytes: &[u8]) -> Result<Vec<u8>, String> {
-    // let fontdb: fontdb::Database = fontdb::Database::new();
-    let r = usvg::Tree::from_data(img_bytes, &usvg::Options::default() /*, &fontdb  */);
+    let r = usvg::Tree::from_data(img_bytes, &usvg::Options::default());
     if let Err(e) = r {
         return Err(format!("fromSvg:from_data {:?}", e));
     }
@@ -223,7 +223,6 @@ pub fn fetch_http_to_bin(url: String, maxsize: usize) -> (Vec<u8>, usize) {
 }
 
 /// returns String,   was-truncated
-// #[allow(dead_code)]
 pub fn filter_by_iso8859_1(input: &str) -> (String, bool) {
     let mut dst: Vec<u8> = Vec::new();
     iso8859_1::encode(input, &mut dst);

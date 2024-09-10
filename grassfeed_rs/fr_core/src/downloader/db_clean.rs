@@ -330,11 +330,9 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
         inner.advance_step();
         inner.send_gp(None);
 
-
-
         let all_icons: Vec<IconRow> = inner.iconrepo.get_all_entries();
 
-// TODO   inner.iconrepo.get_all_entries()
+        // TODO
 
         let mut ic_first: HashMap<String, isize> = HashMap::new();
         let mut replace_ids: HashMap<isize, isize> = HashMap::new(); // subsequent-icon-id =>  previous icon-id
@@ -375,10 +373,8 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
                 replace_ids.keys()
             )));
             replace_ids.iter().for_each(|(repl, _dest)| {
-                // inner.iconrepo.remove_icon(*repl);
                 inner.iconrepo.delete_icon(*repl);
             });
-            // inner.iconrepo.check_or_store();
         }
         StepResult::Continue(Box::new(CorrectIconsOnSubscriptions(inner)))
     }
@@ -521,12 +517,12 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
                 );
                 if markers.contains(&num) {
                     inner.advance_step();
-                    inner.send_gp(None); // Some("ReduceTooManyMessages-1".to_string())
+                    inner.send_gp(None);
                 }
                 inner.need_update_messages = need_u;
             });
         }
-        inner.send_gp(None); // Some("ReduceTooManyMessages-2".to_string())
+        inner.send_gp(None);
         StepResult::Continue(Box::new(DeleteDoubleSameMessages(inner)))
     }
 }

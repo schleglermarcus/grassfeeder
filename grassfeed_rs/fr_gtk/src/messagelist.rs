@@ -6,15 +6,22 @@ use crate::util::MOUSE_BUTTON_LEFT;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
 use gdk::EventButton;
+use glib::Cast;
+use glib::StaticType;
 use gtk::gdk_pixbuf::Pixbuf;
+use gtk::prelude::CellLayoutExt;
+use gtk::prelude::GtkMenuExtManual;
 use gtk::prelude::GtkMenuItemExt;
+use gtk::prelude::MenuShellExt;
 use gtk::prelude::TreeModelExt;
+use gtk::prelude::TreeSelectionExt;
 use gtk::prelude::TreeViewColumnExt;
 use gtk::prelude::TreeViewExt;
 use gtk::prelude::WidgetExt;
-use gtk::prelude::*;
+use gtk::prelude::WidgetExtManual;
 use gtk::CellRendererPixbuf;
 use gtk::CellRendererText;
+use gtk::Inhibit;
 use gtk::ListStore;
 use gtk::Menu;
 use gtk::MenuItem;
@@ -30,7 +37,6 @@ use rust_i18n::t;
 use ui_gtk::GtkObjectsType;
 
 const TYPESTRING_TEXT: &str = "text";
-
 const WIDTH_ISREAD_FAV: i32 = 26;
 
 pub fn create_listview(
@@ -65,13 +71,8 @@ pub fn create_listview(
     {
         let col = TreeViewColumn::new();
         let cellrendpixbuf = CellRendererPixbuf::new();
-
-        // col.pack_start(&cellrendpixbuf, true);
-        gtk::prelude::CellLayoutExt::pack_start(&col, &cellrendpixbuf, true);
-
-        // col.add_attribute(&cellrendpixbuf, "gicon", 0_i32);
-        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "gicon", 0_i32);
-
+        CellLayoutExt::pack_start(&col, &cellrendpixbuf, true);
+        CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "gicon", 0_i32);
         col.set_title("F");
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
         col.set_fixed_width(WIDTH_ISREAD_FAV);
@@ -82,13 +83,8 @@ pub fn create_listview(
     {
         let cellrendtext = CellRendererText::new();
         let col = TreeViewColumn::new();
-
-        //         col.pack_start(&cellrendtext, true);
-        gtk::prelude::CellLayoutExt::pack_start(&col, &cellrendtext, true);
-
-        // col.add_attribute(&cellrendtext, TYPESTRING_TEXT, 1);
-        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendtext, TYPESTRING_TEXT, 1);
-
+        CellLayoutExt::pack_start(&col, &cellrendtext, true);
+        CellLayoutExt::add_attribute(&col, &cellrendtext, TYPESTRING_TEXT, 1);
         col.set_visible(true);
         col.set_title(&t!("MSGLIST_TOP_TITLE"));
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
@@ -123,17 +119,12 @@ pub fn create_listview(
     {
         let col = TreeViewColumn::new(); // is-read
         let cellrendpixbuf = CellRendererPixbuf::new();
-
-        // col.pack_end(&cellrendpixbuf, false);
-        gtk::prelude::CellLayoutExt::pack_end(&col, &cellrendpixbuf, false);
-
-        //        col.add_attribute(&cellrendpixbuf, "gicon", 3_i32);
-        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "gicon", 3_i32);
-
+        use gtk::prelude::CellLayoutExt;
+        CellLayoutExt::pack_end(&col, &cellrendpixbuf, false);
+        CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "gicon", 3_i32);
         col.set_title("R");
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
         col.set_expand(false);
-        // col.set_min_width(10);        col.set_max_width(20);
         col.set_fixed_width(WIDTH_ISREAD_FAV);
         col.set_sort_column_id(LIST0_COL_ISREAD);
         col.set_resizable(false);
@@ -142,15 +133,9 @@ pub fn create_listview(
     {
         let cellrendtext = CellRendererText::new();
         let col = TreeViewColumn::new();
-
-        // col.pack_end(&cellrendtext, false);
-        gtk::prelude::CellLayoutExt::pack_end(&col, &cellrendtext, false);
-
-        // col.add_attribute(&cellrendtext, TYPESTRING_TEXT, 2);
-        gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendtext, TYPESTRING_TEXT, 2);
-
+        CellLayoutExt::pack_end(&col, &cellrendtext, false);
+        CellLayoutExt::add_attribute(&col, &cellrendtext, TYPESTRING_TEXT, 2);
         col.set_visible(true);
-
         col.set_title(&t!("MSGLIST_TOP_DATE"));
         col.set_sizing(gtk::TreeViewColumnSizing::GrowOnly);
         col.set_min_width(10);
@@ -444,7 +429,6 @@ fn set_sort_indicator(tvc: &TreeViewColumn, _sort_column: i32, sort_ascending: b
 fn set_column_notifier(col: &TreeViewColumn, g_ev_se: Sender<GuiEvents>) {
     let esw = EvSenderWrapper(g_ev_se.clone());
     col.connect_sort_order_notify(move |col| {
-        //  trace!(            "sort_order_notify:  sort_order_notify col={} {:?}",            col.sort_column_id(),            col.sort_order()        );
         esw.sendw(GuiEvents::ListSortOrderChanged(
             0,
             col.sort_column_id() as u8,
@@ -453,7 +437,6 @@ fn set_column_notifier(col: &TreeViewColumn, g_ev_se: Sender<GuiEvents>) {
     });
     let esw = EvSenderWrapper(g_ev_se);
     col.connect_sort_column_id_notify(move |col| {
-        // trace!(            "sort_column_id_notify:  column_id_notify {} : {} ",            col.sort_column_id(),            col.is_sort_indicator()        );
         esw.sendw(GuiEvents::ListSortOrderChanged(
             0,
             col.sort_column_id() as u8,

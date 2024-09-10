@@ -19,10 +19,12 @@ fn feed_text_to_entries_xkcd() {
     assert_eq!(new_list.len(), 4);
 }
 
-//RUST_BACKTRACE=1 cargo watch -s "cargo test   downloader::messages::t_::feed_text_to_entries_naturalnews  --lib -- --exact --nocapture   "
+// cargo watch -s "cargo test   downloader::messages::t_::feed_text_to_entries_naturalnews_2023  --lib -- --exact --nocapture   "
+// cargo watch -s "cargo test  feed_text_to_entries_naturalnews_2023 -- --exact  "
 #[test]
-fn feed_text_to_entries_naturalnews() {
+fn feed_text_to_entries_naturalnews_2023() {
     setup();
+
     let filename = format!("{}feeds/naturalnews_rss.xml", TD_BASE);
     let contents = std::fs::read_to_string(filename).unwrap();
     let (new_list, _ts_created, _err): (Vec<MessageRow>, i64, String) =
@@ -33,6 +35,9 @@ fn feed_text_to_entries_naturalnews() {
     assert_eq!( decompress (&new_list.get(10).unwrap().title),
 	   "White House press secretary ripped for claiming it'll take days to count ballots so many winners won't be immediately known".to_string()   );
 }
+
+
+
 
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::t_strange_datetime_recover    --lib -- --exact --nocapture "
 #[test]
