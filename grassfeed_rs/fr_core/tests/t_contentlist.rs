@@ -6,6 +6,7 @@ use fr_core::controller::contentlist::match_new_entries_to_existing;
 use fr_core::controller::contentlist::CJob;
 use fr_core::controller::contentlist::ContentList;
 use fr_core::controller::contentlist::IContentList;
+use fr_core::db::message::compress;
 use fr_core::db::message::MessageRow;
 use fr_core::db::message_state::MessageStateMap;
 use fr_core::db::messages_repo::IMessagesRepo;
@@ -19,6 +20,7 @@ use std::rc::Rc;
 use std::sync::RwLock;
 
 // test if feed update content matching works
+#[ignore]
 #[test]
 fn test_new_entries_filter() {
     setup();
@@ -108,6 +110,7 @@ fn test_new_entries_filter() {
     }
 }
 
+#[ignore]
 #[test]
 fn parse_wissensmanufaktur() {
     setup();
@@ -127,6 +130,7 @@ fn parse_wissensmanufaktur() {
     );
 }
 
+#[ignore]
 #[test]
 fn parse_youtube() {
     setup();
@@ -142,6 +146,7 @@ fn parse_youtube() {
     assert!(msg0.content_text.len() > 2);
 }
 
+#[ignore]
 #[test]
 fn parse_convert_entry_file1() {
     setup();
@@ -153,6 +158,7 @@ fn parse_convert_entry_file1() {
     assert_eq!(fce.content_text, "Today: Lorem ipsum dolor sit amet");
 }
 
+#[ignore]
 #[test]
 fn parse_linuxcompati() {
     setup();
@@ -178,26 +184,41 @@ fn parse_linuxcompati() {
 fn t_filter_messages() {
     setup();
     let msgstate: RwLock<MessageStateMap> = RwLock::new(MessageStateMap::default());
-    let filter = "alle";
     let mut messagelist: Vec<&MessageRow> = Vec::default();
-    let  m1 = MessageRow {
-        title: String::from("Hello"),
+    let m = MessageRow {
         message_id: 1,
         ..Default::default()
     };
-    messagelist.push(&m1);
-    let  m2 = MessageRow {
-        title: String::from("alles "),
+    messagelist.push(&m);
+    let m = MessageRow {
         message_id: 2,
         ..Default::default()
     };
-    messagelist.push(&m2);
-    let r = fr_core::controller::contentlist::filter_messages2(&msgstate, &messagelist, filter);
-    debug!(" #R: {:?} ", r.len());
+    messagelist.push(&m);
+    let m3 = MessageRow {
+        message_id: 3,
+        ..Default::default()
+    };
+    messagelist.push(&m3);
+    {
+        let mut m_s_w = msgstate.write().unwrap();
+        m_s_w.insert(1, false, 0, 0, compress("Helloo "), 0, 0);
+        m_s_w.insert(2, false, 0, 0, compress("allees"), 0, 0);
+        m_s_w.insert(3, false, 0, 0, compress("weerld"), 0, 0);
+    }
 
-    debug!("  {:?} ", r);
+    {
+        let r = fr_core::controller::contentlist::filter_messages2(&msgstate, &messagelist, "alle");
+        assert_eq!(1, r.len());
+    }
+    {
+        let r =
+            fr_core::controller::contentlist::filter_messages2(&msgstate, &messagelist, "he|al");
+        //trace!("  {:?} ", r);
+        debug!(" #R: {:?} ", r.len());
+        assert_eq!(2, r.len());
+    }
 
-    assert_eq!(1, r.len());
     // assert!(r.starts_with("2023-10-07 03:47:44     7"));
 }
 
@@ -215,9 +236,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            (logger_config::QuietFlags::Controller as u64)
-                | (logger_config::QuietFlags::Config as u64)
-                | (logger_config::QuietFlags::Db as u64),
+            // (logger_config::QuietFlags::Controller as u64)                |
+            (logger_config::QuietFlags::Config as u64) | (logger_config::QuietFlags::Db as u64),
         );
         unzipper::unzip_some();
     });

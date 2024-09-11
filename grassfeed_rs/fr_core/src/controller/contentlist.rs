@@ -30,7 +30,7 @@ use gui_layer::abstract_ui::UIAdapterValueStoreType;
 use gui_layer::abstract_ui::UIUpdaterAdapter;
 use gui_layer::gui_values::FontAttributes;
 use gui_layer::gui_values::PropDef;
-use regex::RegexBuilder;
+use regex::RegexSet;
 use resources::gen_icons;
 use resources::gen_icons::IDX_34_DATA_XP2;
 use resources::id::LIST0_COL_MSG_ID;
@@ -342,34 +342,36 @@ impl ContentList {
         );
     }
 
-    fn filter_messages1<'a>(&'a self, list_in: &'a [&MessageRow]) -> Vec<&MessageRow> {
-        let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
+    /*
+       fn filter_messages1<'a>(&'a self, list_in: &'a [&MessageRow]) -> Vec<&MessageRow> {
+           let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
 
-        let reg = RegexBuilder::new(&regex::escape(matchtext))
-            .case_insensitive(true)
-            .build()
-            .unwrap();
+           let reg = RegexBuilder::new(&regex::escape(matchtext))
+               .case_insensitive(true)
+               .build()
+               .unwrap();
 
-        trace!("filter_messages:  matchtext {}", matchtext);
+           trace!("filter_messages:  matchtext {}", matchtext);
 
-        let out_list: Vec<&MessageRow> = list_in
-            .iter()
-            .filter(|m| {
-                let o_title = self.msg_state.read().unwrap().get_title(m.message_id);
-                if o_title.is_none() {
-                    return true;
-                }
-                let title = o_title.unwrap();
+           let out_list: Vec<&MessageRow> = list_in
+               .iter()
+               .filter(|m| {
+                   let o_title = self.msg_state.read().unwrap().get_title(m.message_id);
+                   if o_title.is_none() {
+                       return true;
+                   }
+                   let title = o_title.unwrap();
 
-                if reg.is_match(&title) {
-                    return true;
-                }
-                false
-            })
-            .cloned()
-            .collect();
-        out_list
-    }
+                   if reg.is_match(&title) {
+                       return true;
+                   }
+                   false
+               })
+               .cloned()
+               .collect();
+           out_list
+       }
+    */
 
     /// Read from db and put into the list view,
     /// State Map shall contain only the current subscription's messages, for finding the cursor position for the focus policy
@@ -1137,7 +1139,7 @@ enum ContentMatchMask {
 ///     1: entry_src_date
 ///     2: post_id
 ///     4: title
-pub fn match_fce(existing: &MessageRow, new_fce: &MessageRow) -> u8 {
+pub fn match_messagerow(existing: &MessageRow, new_fce: &MessageRow) -> u8 {
     let mut match_bits: u8 = 0;
     if existing.entry_src_date == new_fce.entry_src_date {
         match_bits |= ContentMatchMask::EntrySrcDate as u8;
@@ -1157,14 +1159,13 @@ pub fn match_new_entries_to_existing(
     job_sender: Sender<CJob>,
 ) -> Vec<MessageRow> {
     let mut new_list_delete_indices: Vec<usize> = Vec::default();
-
     for idx_new in 0..new_list.len() {
         let n_fce: &MessageRow = new_list.get(idx_new).unwrap();
         let mut exi_pos_match: HashMap<usize, u8> = HashMap::new();
         let mut max_ones_count: u8 = 0;
         let e_m_i = existing_msg_iter.clone();
         e_m_i.enumerate().for_each(|(n, ee)| {
-            let matchfield: u8 = match_fce(ee, n_fce);
+            let matchfield: u8 = match_messagerow(ee, n_fce);
             let ones_count: u8 = matchfield.count_ones() as u8;
             if ones_count > 1 {
                 exi_pos_match.insert(n, ones_count);
@@ -1179,7 +1180,7 @@ pub fn match_new_entries_to_existing(
             .map(|(pos, _ones_count_)| pos);
         if let Some(pos) = pos_with_max_ones {
             let exi_fce = existing_msg_iter.get_row(*pos).unwrap();
-            let matchfield: u8 = match_fce(exi_fce, n_fce);
+            let matchfield: u8 = match_messagerow(exi_fce, n_fce);
             if matchfield.count_ones() >= 3 {
                 new_list_delete_indices.push(idx_new); // full match
             }
@@ -1266,15 +1267,8 @@ pub fn filter_messages2<'a>(
     list_in: &'a [&MessageRow],
     matchtext: &str,
 ) -> Vec<&'a MessageRow> {
-    // let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
-
-    let reg = RegexBuilder::new(&regex::escape(matchtext))
-        .case_insensitive(true)
-        .build()
-        .unwrap();
-
-    trace!("filter_messages:  matchtext {}", matchtext);
-
+    let rset = create_regex_set(matchtext);
+    // trace!("filter_messages:   {}   {:?} ", matchtext, rset);
     let out_list: Vec<&MessageRow> = list_in
         .iter()
         .filter(|m| {
@@ -1282,14 +1276,52 @@ pub fn filter_messages2<'a>(
             if o_title.is_none() {
                 return true;
             }
-            let title = o_title.unwrap();
+            let title_lower = o_title.unwrap().to_lowercase();
 
-            if reg.is_match(&title) {
-                return true;
-            }
-            false
+            rset.matches(&title_lower).matched_any()
         })
         .cloned()
         .collect();
     out_list
+}
+
+// case insensitive, pattern will be all lower case
+pub fn create_regex_set(pattern: &str) -> RegexSet {
+    let pattern_tolower = pattern.to_lowercase();
+    let o_set: Result<RegexSet, _>;
+    if pattern_tolower.contains('|') {
+        let patterns: Vec<&str> = pattern_tolower.split('|').collect::<Vec<&str>>();
+        o_set = RegexSet::new(&*patterns.as_slice());
+    } else {
+        o_set = RegexSet::new(&[pattern_tolower]);
+    }
+    if o_set.is_err() {
+        debug!("create_regex_set:  {:?} ", o_set.err());
+        return RegexSet::empty();
+    }
+    o_set.unwrap()
+}
+
+#[cfg(test)]
+pub mod t {
+    use super::*;
+
+    // cargo watch -s "RUST_BACKTRACE=1 cargo test controller::contentlist::t::try_regex_only  --lib -- --exact --nocapture"
+    #[test]
+    fn try_regex_only() {
+        let hay = "Hello World";
+        assert!(ismatch(hay, "he"));
+        assert!(ismatch(hay, "He"));
+        assert!(!ismatch(hay, "yy|xx"));
+        assert!(ismatch(hay, "he|xx"));
+        assert!(ismatch(hay, "yy|xx|ll"));
+    }
+
+    fn ismatch(haystack: &str, pattern: &str) -> bool {
+        let rset = create_regex_set(pattern);
+        let hay_tolower = haystack.to_lowercase();
+        let matched = rset.matches(&hay_tolower).matched_any();
+        println!("{} \t{} \t{:?} ", haystack, pattern, matched);
+        matched
+    }
 }
