@@ -260,7 +260,7 @@ impl GuiProcessor {
                     (*self.feedsources_r).borrow_mut().notify_config_update();
                 }
                 Job::DownloaderJobStarted(threadnr, kind) => {
-                    self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = kind;
+                    self.statusbar.borrow_mut().cache.downloader_kind_new[threadnr as usize] = kind;
                 }
                 Job::DownloaderJobFinished(
                     subs_id,
@@ -287,7 +287,7 @@ impl GuiProcessor {
                             }
                         }
                         4 => {
-                            self.statusbar.borrow_mut().db_check_running = false;
+                            self.statusbar.borrow_mut().cache.db_check_running = false;
                         }
                         _ => {
                             if elapsed_ms > 1000 {
@@ -298,7 +298,7 @@ impl GuiProcessor {
                             }
                         }
                     }
-                    self.statusbar.borrow_mut().downloader_kind_new[threadnr as usize] = 0;
+                    self.statusbar.borrow_mut().cache.downloader_kind_new[threadnr as usize] = 0;
                 }
                 Job::CheckFocusMarker(num) => {
                     if num > 0 {
@@ -308,14 +308,14 @@ impl GuiProcessor {
                     }
                 }
                 Job::AddBottomDisplayErrorMessage(msg) => {
-                    self.statusbar.borrow_mut().bottom_notices.push_back(msg);
+                    self.statusbar.borrow_mut().cache.bottom_notices.push_back(msg);
                 }
                 Job::NotifyDbClean(c_step, duration_ms, ref c_msg) => {
                     // debug!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
                     let av2nd = if let Some(msg) = c_msg {
                         let newmsg = format!(
                             "{}{}\t{}\n",
-                            self.statusbar.borrow().db_check_display_message,
+                            self.statusbar.borrow().cache.db_check_display_message,
                             duration_ms,
                             msg
                         );
@@ -333,7 +333,7 @@ impl GuiProcessor {
                         .borrow()
                         .update_dialog(DIALOG_SETTINGS_CHECK);
                     if c_step >= CLEAN_STEPS_MAX {
-                        self.statusbar.borrow_mut().db_check_running = false;
+                        self.statusbar.borrow_mut().cache.db_check_running = false;
                         (*self.gui_updater)
                             .borrow()
                             .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, true);
@@ -644,7 +644,7 @@ impl Buildable for GuiProcessor {
     type Output = GuiProcessor;
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         let gp = GuiProcessor::new(_appcontext);
-        gp.statusbar.borrow_mut().mem_usage_vmrss_bytes = -1;
+        gp.statusbar.borrow_mut().cache.mem_usage_vmrss_bytes = -1;
         gp
     }
 }
@@ -697,7 +697,7 @@ impl StartupWithAppContext for GuiProcessor {
         self.addjob(Job::StartApplication);
         self.addjob(Job::StoreDefaultIcons);
         self.addjob(Job::NotifyConfigChanged);
-        self.statusbar.borrow_mut().num_downloader_threads = (*self.downloader_r)
+        self.statusbar.borrow_mut().cache.num_downloader_threads = (*self.downloader_r)
             .borrow()
             .get_config()
             .num_downloader_threads;
@@ -706,7 +706,7 @@ impl StartupWithAppContext for GuiProcessor {
             .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
         {
             if let Ok(b) = s.parse::<bool>() {
-                self.statusbar.borrow_mut().mode_debug = b;
+                self.statusbar.borrow_mut().cache.mode_debug = b;
             }
         }
         self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2 {});
@@ -1414,7 +1414,7 @@ impl HandleSingleEvent for HandleBrowserEvent {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::BrowserEvent(ref ev_type, value) = ev {
             if ev_type == &BrowserEventType::LoadingProgress {
-                gp.statusbar.borrow_mut().browser_loading_progress = value as u8;
+                gp.statusbar.borrow_mut().cache.browser_loading_progress = value as u8;
             }
         }
     }
@@ -1425,13 +1425,13 @@ impl HandleSingleEvent for HandleButtonActivated {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::ButtonClicked(msg) = ev {
             if msg == "D_SETTINGS_CHECKNOW" {
-                let isrunning = gp.statusbar.borrow().db_check_running;
+                let isrunning = gp.statusbar.borrow().cache.db_check_running;
                 if !isrunning {
                     (*gp.gui_updater)
                         .borrow()
                         .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, false);
                     let mut sb = gp.statusbar.borrow_mut();
-                    sb.db_check_running = true;
+                    sb.cache.db_check_running = true;
                     gp.downloader_r.borrow().cleanup_db();
                     gp.addjob(Job::NotifyDbClean(
                         0,

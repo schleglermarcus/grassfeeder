@@ -34,45 +34,37 @@ pub struct StatusBar {
     r_browserpane: Rc<RefCell<dyn IBrowserPane>>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
     gui_val_store: UIAdapterValueStoreType,
-    downloader_kind: [u8; DOWNLOADER_MAX_NUM_THREADS],
+
+    pub cache: CachedData,
+}
+
+pub struct CachedData {
+    pub downloader_kind: [u8; DOWNLOADER_MAX_NUM_THREADS],
     pub downloader_kind_new: [u8; DOWNLOADER_MAX_NUM_THREADS],
-    num_msg_all: isize,
-    num_msg_unread: isize,
-    last_fetch_time: i64,
-    selected_repo_id: isize,
+    pub num_msg_all: isize,
+    pub num_msg_unread: isize,
+    pub last_fetch_time: i64,
+    pub selected_repo_id: isize,
     pub num_downloader_threads: u8,
-    num_dl_queue_length: u16,
-    selected_msg_id: i32,
-    selected_msg_url: String,
+    pub num_dl_queue_length: u16,
+    pub selected_msg_id: i32,
+    pub selected_msg_url: String,
     /// proc//status/VmRSS  Resident set size, estimation of the current physical memory used by the application
     pub mem_usage_vmrss_bytes: isize,
     pub mode_debug: bool,
     pub bottom_notices: VecDeque<String>,
     //  start-of-display  time,  current message
-    bottom_notice_current: Option<(i64, String)>,
+    pub bottom_notice_current: Option<(i64, String)>,
     pub browser_loading_progress: u8,
-    browser_loading_progress_int: u8,
-    downloader_stats: [u32; DLKIND_MAX],
+    pub browser_loading_progress_int: u8,
+    pub downloader_stats: [u32; DLKIND_MAX],
     pub db_check_running: bool,
     pub db_check_display_message: String,
 }
 
-impl StatusBar {
-    pub fn new(
-        r_c_subs: Rc<RefCell<dyn ISourceTreeController>>,
-        r_downloadr: Rc<RefCell<dyn IDownloader>>,
-        gui_updatr: Rc<RefCell<dyn UIUpdaterAdapter>>,
-        r_msg_c: Rc<RefCell<dyn IContentList>>,
-        browser_pane: Rc<RefCell<dyn IBrowserPane>>,
-        val_store: UIAdapterValueStoreType,
-    ) -> Self {
-        StatusBar {
-            r_subscriptions_controller: r_c_subs,
-            r_downloader: r_downloadr,
-            gui_updater: gui_updatr,
-            r_messages: r_msg_c,
-            r_browserpane: browser_pane,
-            gui_val_store: val_store,
+impl CachedData {
+    fn new() -> Self {
+        CachedData {
             downloader_kind: Default::default(),
             downloader_kind_new: Default::default(),
             num_msg_all: Default::default(),
@@ -94,62 +86,191 @@ impl StatusBar {
             db_check_display_message: Default::default(),
         }
     }
+}
+
+impl StatusBar {
+    pub fn new(
+        r_c_subs: Rc<RefCell<dyn ISourceTreeController>>,
+        r_downloadr: Rc<RefCell<dyn IDownloader>>,
+        gui_updatr: Rc<RefCell<dyn UIUpdaterAdapter>>,
+        r_msg_c: Rc<RefCell<dyn IContentList>>,
+        browser_pane: Rc<RefCell<dyn IBrowserPane>>,
+        val_store: UIAdapterValueStoreType,
+    ) -> Self {
+        StatusBar {
+            r_subscriptions_controller: r_c_subs,
+            r_downloader: r_downloadr,
+            gui_updater: gui_updatr,
+            r_messages: r_msg_c,
+            r_browserpane: browser_pane,
+            gui_val_store: val_store,
+            cache: CachedData::new(),
+        }
+    }
 
     pub fn update(&mut self) {
-        let mut need_update1: bool = false;
-        let mut need_update2: bool = false;
-        let mut need_update3: bool = false;
         let repo_id_new: isize;
         let mut last_fetch_time: i64 = 0;
         let mut feed_src_link = String::default();
         let mut is_folder: bool = false;
-        let o_fse = (*self.r_subscriptions_controller)
+        let timestamp_now: i64 = timestamp_now();
+
+        let o_subscription = (*self.r_subscriptions_controller)
             .borrow()
             .get_current_selected_subscription();
-        if let Some((fse, _)) = o_fse {
+        if let Some((fse, _)) = o_subscription {
             repo_id_new = fse.subs_id;
             last_fetch_time = fse.updated_int;
             feed_src_link.clone_from(&fse.url);
             is_folder = fse.is_folder;
             let dl_r_b = (*self.r_downloader).borrow();
-            self.num_downloader_threads = dl_r_b.get_config().num_downloader_threads;
-            self.downloader_stats = dl_r_b.get_statistics();
+            self.cache.num_downloader_threads = dl_r_b.get_config().num_downloader_threads;
+            self.cache.downloader_stats = dl_r_b.get_statistics();
         } else {
             repo_id_new = -1;
         }
+
+        {
+            let mut need_update_1: bool = false;
+            let mut num_msg_all = self.cache.num_msg_all;
+            let mut num_msg_unread = self.cache.num_msg_unread;
+
+            //            let repo_id_new: isize;
+            let subs_state: SubsMapEntry = (*self.r_subscriptions_controller)
+                .borrow()
+                .get_state(repo_id_new)
+                .unwrap_or_default();
+
+            if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
+                num_msg_all = n_a;
+                num_msg_unread = n_u;
+            }
+
+            if repo_id_new > 0 {
+                if num_msg_all != self.cache.num_msg_all {
+                    self.cache.num_msg_all = num_msg_all;
+                    need_update_1 = true;
+                }
+                if num_msg_unread != self.cache.num_msg_unread {
+                    self.cache.num_msg_unread = num_msg_unread;
+                    need_update_1 = true;
+                }
+            }
+            let mut block_vertical: char = ' ';
+
+            if !is_folder && repo_id_new != self.cache.selected_repo_id {
+                self.cache.selected_repo_id = repo_id_new;
+                let fs_conf = self.r_subscriptions_controller.borrow().get_config();
+                let interval_s = (*fs_conf).borrow().get_interval_seconds();
+                let elapsed: i64 = std::cmp::min(timestamp_now - (last_fetch_time), interval_s);
+                block_vertical =
+                    self.get_vertical_block_char(elapsed as usize, interval_s as usize);
+                need_update_1 = true;
+            }
+
+            let downloader_busy = (self.r_downloader).borrow().get_kind_list();
+            for (a, busy) in downloader_busy
+                .iter()
+                .enumerate()
+                .take(DOWNLOADER_MAX_NUM_THREADS)
+            {
+                if self.cache.downloader_kind[a] > 0 && *busy == 0 {
+                    self.cache.downloader_kind_new[a] = 0;
+                    need_update_1 = true;
+                }
+                if self.cache.downloader_kind[a] != self.cache.downloader_kind_new[a] {
+                    self.cache.downloader_kind[a] = self.cache.downloader_kind_new[a];
+                    need_update_1 = true;
+                }
+            }
+            let new_qsize = (*self.r_downloader).borrow().get_queue_size();
+            let new_qsize = new_qsize.0 + new_qsize.1; // queue + threads
+            if new_qsize != self.cache.num_dl_queue_length {
+                self.cache.num_dl_queue_length = new_qsize;
+                need_update_1 = true;
+            }
+
+            if need_update_1 {
+                let mut downloader_display: String = String::default();
+                for a in 0..(self.cache.num_downloader_threads as usize) {
+                    let nc = dl_char_for_kind(self.cache.downloader_kind[a]);
+                    downloader_display.push(nc);
+                }
+                let unread_all = format!(
+                    "{:5} / {:5}",
+                    self.cache.num_msg_unread, self.cache.num_msg_all
+                );
+                let mut dl_line = String::default();
+                self.cache
+                    .downloader_stats
+                    .iter()
+                    .enumerate()
+                    .filter(|(_n, s)| **s > 0)
+                    .map(|(n, s)| format!("{}{} ", dl_char_for_kind(n as u8), s))
+                    .for_each(|s| dl_line.push_str(&s));
+                let memdisplay = format!(
+                    "  {}MB  {}  ",
+                    self.cache.mem_usage_vmrss_bytes / 1048576,
+                    dl_line
+                );
+                let dl_queue_txt = if self.cache.num_dl_queue_length > 0 {
+                    format!("{:2}", self.cache.num_dl_queue_length)
+                } else {
+                    "  ".to_string()
+                };
+                let msg1 = format!(   "<tt>{dl_queue_txt} {downloader_display}  {unread_all}    \u{2595}{block_vertical}\u{258F}</tt>"   );
+                (*self.gui_val_store) // \u{25df} \u{25de}
+                    .write()
+                    .unwrap()
+                    .set_label_text(LABEL_STATUS_1, msg1);
+                let msg1tooltip = memdisplay;
+                (*self.gui_val_store)
+                    .write()
+                    .unwrap()
+                    .set_label_tooltip(LABEL_STATUS_1, msg1tooltip);
+
+                (*self.gui_updater)
+                    .borrow()
+                    .update_label_markup(LABEL_STATUS_1);
+            }
+        }
+
+        let mut need_update2: bool = false;
+        let mut need_update3: bool = false;
+
         let content_ids = (*self.r_messages).borrow().get_selected_content_ids();
         let mut selected_msg_id = -1;
         if !content_ids.is_empty() {
             selected_msg_id = *content_ids.first().unwrap();
         }
-        let mut num_msg_all = self.num_msg_all;
-        let mut num_msg_unread = self.num_msg_unread;
         let subs_state: SubsMapEntry = (*self.r_subscriptions_controller)
             .borrow()
             .get_state(repo_id_new)
             .unwrap_or_default();
-        if selected_msg_id != self.selected_msg_id || repo_id_new != self.selected_repo_id {
-            self.selected_msg_id = selected_msg_id;
+        if selected_msg_id != self.cache.selected_msg_id
+            || repo_id_new != self.cache.selected_repo_id
+        {
+            self.cache.selected_msg_id = selected_msg_id;
         }
         if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
-            num_msg_all = n_a;
-            num_msg_unread = n_u;
-            if n_a != self.num_msg_all || n_u != self.num_msg_unread {
+            // num_msg_all = n_a;
+            // num_msg_unread = n_u;
+            if n_a != self.cache.num_msg_all || n_u != self.cache.num_msg_unread {
                 need_update2 = true;
             }
         }
         if repo_id_new > 0 {
-            if num_msg_all != self.num_msg_all {
-                self.num_msg_all = num_msg_all;
-                need_update1 = true;
-            }
-            if num_msg_unread != self.num_msg_unread {
-                self.num_msg_unread = num_msg_unread;
-                need_update1 = true;
-            }
+            // if num_msg_all != self.num_msg_all {
+            //     self.num_msg_all = num_msg_all;
+            //     need_update1 = true;
+            // }
+            // if num_msg_unread != self.num_msg_unread {
+            //     self.num_msg_unread = num_msg_unread;
+            //     need_update1 = true;
+            // }
 
-            if self.last_fetch_time != last_fetch_time {
-                self.last_fetch_time = last_fetch_time;
+            if self.cache.last_fetch_time != last_fetch_time {
+                self.cache.last_fetch_time = last_fetch_time;
                 need_update2 = true;
             }
         }
@@ -158,101 +279,43 @@ impl StatusBar {
         } else {
             (self.r_browserpane).borrow().get_last_selected_link()
         };
-        if self.selected_msg_url != last_msg_url {
-            self.selected_msg_url = last_msg_url;
+        if self.cache.selected_msg_url != last_msg_url {
+            self.cache.selected_msg_url = last_msg_url;
             need_update2 = true;
         }
-        let timestamp_now: i64 = timestamp_now();
-        let mut longtext = if self.selected_msg_url.is_empty() {
+        //        let timestamp_now: i64 = timestamp_now();
+        let mut longtext = if self.cache.selected_msg_url.is_empty() {
             string_escape_url(feed_src_link)
         } else {
-            string_escape_url(self.selected_msg_url.clone())
+            string_escape_url(self.cache.selected_msg_url.clone())
         };
-        if let Some((ts, msg)) = &self.bottom_notice_current {
+        if let Some((ts, msg)) = &self.cache.bottom_notice_current {
             if timestamp_now > ts + BOTTOM_MSG_SHOW_TIME_S as i64 {
-                self.bottom_notice_current = None;
+                self.cache.bottom_notice_current = None;
             } else {
                 longtext = StatusBar::error_formatter(msg.to_string());
             }
             need_update2 = true;
-        } else if let Some(n_msg) = self.bottom_notices.pop_front() {
-            self.bottom_notice_current = Some((timestamp_now, n_msg));
+        } else if let Some(n_msg) = self.cache.bottom_notices.pop_front() {
+            self.cache.bottom_notice_current = Some((timestamp_now, n_msg));
             need_update2 = true;
         }
-        let mut block_vertical: char = ' ';
-        if !is_folder && repo_id_new != self.selected_repo_id {
-            self.selected_repo_id = repo_id_new;
-            // time-to next feed update
-            let fs_conf = self.r_subscriptions_controller.borrow().get_config();
-            let interval_s = (*fs_conf).borrow().get_interval_seconds();
-            let elapsed: i64 = std::cmp::min(timestamp_now - (last_fetch_time), interval_s);
-            block_vertical = self.get_vertical_block_char(elapsed as usize, interval_s as usize);
-            need_update2 = true;
-            need_update1 = true;
-        }
-        let downloader_busy = (self.r_downloader).borrow().get_kind_list();
-        for (a, busy) in downloader_busy
-            .iter()
-            .enumerate()
-            .take(DOWNLOADER_MAX_NUM_THREADS)
-        {
-            if self.downloader_kind[a] > 0 && *busy == 0 {
-                self.downloader_kind_new[a] = 0;
-                need_update1 = true;
-            }
-            if self.downloader_kind[a] != self.downloader_kind_new[a] {
-                self.downloader_kind[a] = self.downloader_kind_new[a];
-                need_update1 = true;
-            }
-        }
-        let new_qsize = (*self.r_downloader).borrow().get_queue_size();
-        let new_qsize = new_qsize.0 + new_qsize.1; // queue + threads
-        if new_qsize != self.num_dl_queue_length {
-            self.num_dl_queue_length = new_qsize;
-            need_update1 = true;
-        }
-        if self.browser_loading_progress != self.browser_loading_progress_int {
-            self.browser_loading_progress_int = self.browser_loading_progress;
-            need_update3 = true;
-        }
-        if need_update1 {
-            let mut downloader_display: String = String::default();
-            for a in 0..(self.num_downloader_threads as usize) {
-                let nc = dl_char_for_kind(self.downloader_kind[a]);
-                downloader_display.push(nc);
-            }
-            let unread_all = format!("{:5} / {:5}", self.num_msg_unread, self.num_msg_all);
-            let mut dl_line = String::default();
-            self.downloader_stats
-                .iter()
-                .enumerate()
-                .filter(|(_n, s)| **s > 0)
-                .map(|(n, s)| format!("{}{} ", dl_char_for_kind(n as u8), s))
-                .for_each(|s| dl_line.push_str(&s));
-            let memdisplay = format!(
-                "  {}MB  {}  ",
-                self.mem_usage_vmrss_bytes / 1048576,
-                dl_line
-            );
-            let dl_queue_txt = if self.num_dl_queue_length > 0 {
-                format!("{:2}", self.num_dl_queue_length)
-            } else {
-                "  ".to_string()
-            };
-            let msg1 = format!(   "<tt>{dl_queue_txt} {downloader_display}  {unread_all}    \u{2595}{block_vertical}\u{258F}</tt>"   );
-            (*self.gui_val_store) // \u{25df} \u{25de}
-                .write()
-                .unwrap()
-                .set_label_text(LABEL_STATUS_1, msg1);
-            let msg1tooltip = memdisplay;
-            (*self.gui_val_store)
-                .write()
-                .unwrap()
-                .set_label_tooltip(LABEL_STATUS_1, msg1tooltip);
+        // let mut block_vertical: char = ' ';
+        if !is_folder && repo_id_new != self.cache.selected_repo_id {
+            self.cache.selected_repo_id = repo_id_new;
+            // // time-to next feed update
+            // let fs_conf = self.r_subscriptions_controller.borrow().get_config();
+            // let interval_s = (*fs_conf).borrow().get_interval_seconds();
+            // let elapsed: i64 = std::cmp::min(timestamp_now - (last_fetch_time), interval_s);
+            // block_vertical = self.get_vertical_block_char(elapsed as usize, interval_s as usize);
 
-            (*self.gui_updater)
-                .borrow()
-                .update_label_markup(LABEL_STATUS_1);
+            need_update2 = true;
+            // need_update1 = true;
+        }
+
+        if self.cache.browser_loading_progress != self.cache.browser_loading_progress_int {
+            self.cache.browser_loading_progress_int = self.cache.browser_loading_progress;
+            need_update3 = true;
         }
         if need_update2 {
             (*self.gui_val_store)
@@ -265,7 +328,7 @@ impl StatusBar {
         }
         if need_update3 {
             let b_loading =
-                self.get_vertical_block_char(self.browser_loading_progress as usize, 256);
+                self.get_vertical_block_char(self.cache.browser_loading_progress as usize, 256);
             (*self.gui_val_store)
                 .write()
                 .unwrap()
@@ -284,7 +347,8 @@ impl StatusBar {
     pub fn update_memory_stats(&mut self) {
         if let Ok(mem) = proc_status::mem_usage() {
             // trace!(                "PS:  MEM:  {} {}",                mem.current / DIVISOR_MB,                mem.peak / DIVISOR_MB            );
-            self.mem_usage_vmrss_bytes = (self.mem_usage_vmrss_bytes + mem.current as isize) / 2;
+            self.cache.mem_usage_vmrss_bytes =
+                (self.cache.mem_usage_vmrss_bytes + mem.current as isize) / 2;
         }
     }
 
@@ -306,7 +370,18 @@ impl StatusBar {
 
     /// Text field inside the Settings Dialog, DB-Cleanup Tab
     pub fn set_db_check_msg(&mut self, m: &str) {
-        // self.db_check_display_message = m.to_owned();
-        m.clone_into(&mut self.db_check_display_message);
+        m.clone_into(&mut self.cache.db_check_display_message);
+    }
+}
+
+trait OnePanel {
+    /// returns: regular text, tooltip-text
+    fn calculateUpdateString(statusbar: &StatusBar) -> (Option<String>, Option<String>);
+}
+
+struct Panel1 {}
+impl OnePanel for Panel1 {
+    fn calculateUpdateString(statusbar: &StatusBar) -> (Option<String>, Option<String>) {
+        (None, None)
     }
 }

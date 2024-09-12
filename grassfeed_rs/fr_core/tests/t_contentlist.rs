@@ -20,7 +20,6 @@ use std::rc::Rc;
 use std::sync::RwLock;
 
 // test if feed update content matching works
-#[ignore]
 #[test]
 fn test_new_entries_filter() {
     setup();
@@ -110,7 +109,6 @@ fn test_new_entries_filter() {
     }
 }
 
-#[ignore]
 #[test]
 fn parse_wissensmanufaktur() {
     setup();
@@ -130,7 +128,6 @@ fn parse_wissensmanufaktur() {
     );
 }
 
-#[ignore]
 #[test]
 fn parse_youtube() {
     setup();
@@ -146,7 +143,6 @@ fn parse_youtube() {
     assert!(msg0.content_text.len() > 2);
 }
 
-#[ignore]
 #[test]
 fn parse_convert_entry_file1() {
     setup();
@@ -158,7 +154,6 @@ fn parse_convert_entry_file1() {
     assert_eq!(fce.content_text, "Today: Lorem ipsum dolor sit amet");
 }
 
-#[ignore]
 #[test]
 fn parse_linuxcompati() {
     setup();
@@ -181,7 +176,7 @@ fn parse_linuxcompati() {
 
 //  cargo watch -s "(cd fr_core ; cargo test --test t_contentlist)  "
 #[test]
-fn t_filter_messages() {
+fn t_messages_filter_multiple() {
     setup();
     let msgstate: RwLock<MessageStateMap> = RwLock::new(MessageStateMap::default());
     let mut messagelist: Vec<&MessageRow> = Vec::default();
@@ -206,7 +201,6 @@ fn t_filter_messages() {
         m_s_w.insert(2, false, 0, 0, compress("allees"), 0, 0);
         m_s_w.insert(3, false, 0, 0, compress("weerld"), 0, 0);
     }
-
     {
         let r = fr_core::controller::contentlist::filter_messages2(&msgstate, &messagelist, "alle");
         assert_eq!(1, r.len());
@@ -214,12 +208,9 @@ fn t_filter_messages() {
     {
         let r =
             fr_core::controller::contentlist::filter_messages2(&msgstate, &messagelist, "he|al");
-        //trace!("  {:?} ", r);
         debug!(" #R: {:?} ", r.len());
         assert_eq!(2, r.len());
     }
-
-    // assert!(r.starts_with("2023-10-07 03:47:44     7"));
 }
 
 // ------------------------------------

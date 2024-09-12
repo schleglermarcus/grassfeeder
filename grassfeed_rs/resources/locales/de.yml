@@ -16,7 +16,7 @@ M_SHORT_HELP: Kurzhilfe
 TB_ADD_FOLDER: Ordner hinzufügen
 TB_ADD_FEED: Quelle hinzufügen
 TB_REFRESH_ALL: Alle Quellen aktualisieren
-TB_FILTER_1: Nachrichten filtern
+TB_FILTER_1: "Nachrichten filtern:  mehrere Ausdrücke mit | angeben"
 TB_BROWSER_ZOOM_IN: Ansicht größer
 TB_BROWSER_ZOOM_OUT: Ansicht kleiner
 TB_BROWSER_ZOOM_DEFAULT: Ansicht Normalgröße

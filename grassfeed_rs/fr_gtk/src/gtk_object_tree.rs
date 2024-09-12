@@ -719,14 +719,23 @@ pub fn create_toolbar(
     let searchentry: SearchEntry = SearchEntry::new();
     containing_box.add(&searchentry);
     searchentry.set_tooltip_text(Some(&t!("TB_FILTER_1")));
-    searchentry.set_height_request(12);
+    searchentry.set_height_request(10);
     searchentry.set_vexpand(false);
     let esw = EvSenderWrapper(g_ev_se);
-    searchentry.connect_changed(move |se: &SearchEntry| {
+    searchentry.connect_search_changed(move |se: &SearchEntry| {
         esw.sendw(GuiEvents::SearchEntryTextChanged(
             SEARCH_ENTRY_0,
             se.buffer().text(),
         ));
+    });
+    searchentry.connect_next_match(move |_se: &SearchEntry| {
+        debug!("connect_next_match !");
+    });
+    searchentry.connect_previous_match(move |_se: &SearchEntry| {
+        debug!("connect_previous_match !");
+    });
+    searchentry.connect_stop_search(move |_se: &SearchEntry| {
+        debug!("connect_stop_search !");
     });
     {
         let mut ret = (*gtk_obj_a).write().unwrap();

@@ -16,7 +16,7 @@ M_SHORT_HELP: Short help text
 TB_ADD_FOLDER: Add Folder
 TB_ADD_FEED: Add Subscription
 TB_REFRESH_ALL: Refresh all Feeds
-TB_FILTER_1: Filter messages
+TB_FILTER_1: "Filter messages:  separate multiple expressions with |"
 TB_BROWSER_ZOOM_IN: View larger
 TB_BROWSER_ZOOM_OUT: View smaller
 TB_BROWSER_ZOOM_DEFAULT: View default size

@@ -1,8 +1,9 @@
-grassfeeder-gtk3 (0.0.3109) buster; urgency=low
+grassfeeder-gtk3 (0.0.3111) buster; urgency=low
 
   - Library update: gtkwebkit to 0.19, gtk to 0.16
-  - Bugfix db cleanup locking issue
   - Bigger Font for browser title
+  - Search field allows multipile entries via separator
+  - Bugfix db cleanup locking issue
   
   - remove queue display left
 
