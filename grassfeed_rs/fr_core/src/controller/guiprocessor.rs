@@ -106,7 +106,7 @@ pub struct GuiProcessor {
     subscriptionmove_r: Rc<RefCell<dyn ISubscriptionMove>>,
     subscriptionrepo_r: Rc<RefCell<dyn ISubscriptionRepo>>,
     iconrepo_r: Rc<RefCell<dyn IIconRepo>>,
-    statusbar: RefCell<StatusBar>,
+    statusbar: StatusBar,
     focus_by_tab: RefCell<FocusByTab>,
     currently_minimized: RefCell<bool>,
     event_handler_map: HashMap<Discriminant<GuiEvents>, Box<dyn HandleSingleEvent>>,
@@ -125,14 +125,14 @@ impl GuiProcessor {
         let guirunner = (*guicontex_r).borrow().get_gui_runner();
         let dl_r = (*ac).get_rc::<contentdownloader::Downloader>().unwrap();
         let err_rep = (*ac).get_rc::<ErrorRepo>().unwrap();
-        let status_bar = RefCell::new(StatusBar::new(
+        let status_bar = StatusBar::new(
             (*ac).get_rc::<SourceTreeController>().unwrap(),
             dl_r.clone(),
             gui_u_a.clone(),
             (*ac).get_rc::<ContentList>().unwrap(),
             (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
             gui_v_a.clone(),
-        ));
+        );
 
         GuiProcessor {
             subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
@@ -260,7 +260,8 @@ impl GuiProcessor {
                     (*self.feedsources_r).borrow_mut().notify_config_update();
                 }
                 Job::DownloaderJobStarted(threadnr, kind) => {
-                    self.statusbar.borrow_mut().cache.downloader_kind_new[threadnr as usize] = kind;
+                    // self.statusbar.borrow_mut().cache.downloader_kind_new[threadnr as usize] = kind;
+                    self.statusbar.set_downloader_kind(threadnr, kind);
                 }
                 Job::DownloaderJobFinished(
                     subs_id,
@@ -287,7 +288,7 @@ impl GuiProcessor {
                             }
                         }
                         4 => {
-                            self.statusbar.borrow_mut().cache.db_check_running = false;
+                            self.statusbar.set_db_check_running(false);
                         }
                         _ => {
                             if elapsed_ms > 1000 {
@@ -298,7 +299,8 @@ impl GuiProcessor {
                             }
                         }
                     }
-                    self.statusbar.borrow_mut().cache.downloader_kind_new[threadnr as usize] = 0;
+                    // self.statusbar.borrow_mut().cache.downloader_kind_new[threadnr as usize] = 0;
+                    self.statusbar.set_downloader_kind(threadnr, 0);
                 }
                 Job::CheckFocusMarker(num) => {
                     if num > 0 {
@@ -308,18 +310,20 @@ impl GuiProcessor {
                     }
                 }
                 Job::AddBottomDisplayErrorMessage(msg) => {
-                    self.statusbar.borrow_mut().cache.bottom_notices.push_back(msg);
+                    // self.statusbar                        .borrow_mut()                        .cache                        .bottom_notices                        .push_back(msg);
+                    self.statusbar.push_bottom_notice(msg);
                 }
                 Job::NotifyDbClean(c_step, duration_ms, ref c_msg) => {
                     // debug!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
                     let av2nd = if let Some(msg) = c_msg {
                         let newmsg = format!(
                             "{}{}\t{}\n",
-                            self.statusbar.borrow().cache.db_check_display_message,
+                            self.statusbar.get_db_check_message(), // borrow().cache.db_check_display_message,
                             duration_ms,
                             msg
                         );
-                        self.statusbar.borrow_mut().set_db_check_msg(&newmsg);
+                        // self.statusbar.borrow_mut().set_db_check_msg(&newmsg);
+                        self.statusbar.set_db_check_message(newmsg.clone());
                         AValue::ASTR(newmsg)
                     } else {
                         AValue::None
@@ -333,7 +337,7 @@ impl GuiProcessor {
                         .borrow()
                         .update_dialog(DIALOG_SETTINGS_CHECK);
                     if c_step >= CLEAN_STEPS_MAX {
-                        self.statusbar.borrow_mut().cache.db_check_running = false;
+                        self.statusbar.set_db_check_running(false);
                         (*self.gui_updater)
                             .borrow()
                             .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, true);
@@ -644,7 +648,7 @@ impl Buildable for GuiProcessor {
     type Output = GuiProcessor;
     fn build(_conf: Box<dyn BuildConfig>, _appcontext: &AppContext) -> Self::Output {
         let gp = GuiProcessor::new(_appcontext);
-        gp.statusbar.borrow_mut().cache.mem_usage_vmrss_bytes = -1;
+        gp.statusbar.set_mem_vrmss_bytes(-1);
         gp
     }
 }
@@ -658,7 +662,7 @@ impl TimerReceiver for GuiProcessor {
                     self.process_jobs();
                 }
                 TimerEvent::Timer10s => {
-                    self.statusbar.borrow_mut().update();
+                    self.statusbar.update();
                 }
                 _ => (),
             }
@@ -667,10 +671,10 @@ impl TimerReceiver for GuiProcessor {
                 TimerEvent::Timer100ms => {
                     self.process_event();
                     self.process_jobs();
-                    self.statusbar.borrow_mut().update();
+                    self.statusbar.update();
                 }
                 TimerEvent::Timer1s => {
-                    self.statusbar.borrow_mut().update_memory_stats();
+                    self.statusbar.update_memory_stats();
                 }
                 TimerEvent::Timer10s => {}
                 TimerEvent::Startup => {
@@ -697,16 +701,18 @@ impl StartupWithAppContext for GuiProcessor {
         self.addjob(Job::StartApplication);
         self.addjob(Job::StoreDefaultIcons);
         self.addjob(Job::NotifyConfigChanged);
-        self.statusbar.borrow_mut().cache.num_downloader_threads = (*self.downloader_r)
-            .borrow()
-            .get_config()
-            .num_downloader_threads;
+        self.statusbar.set_num_downloader_threads(
+            (*self.downloader_r)
+                .borrow()
+                .get_config()
+                .num_downloader_threads,
+        );
         if let Some(s) = (*self.configmanager_r)
             .borrow()
             .get_sys_val(ConfigManager::CONF_MODE_DEBUG)
         {
             if let Ok(b) = s.parse::<bool>() {
-                self.statusbar.borrow_mut().cache.mode_debug = b;
+                self.statusbar.set_mode_debug(b);
             }
         }
         self.add_handler(&GuiEvents::WinDelete, HandleWinDelete2 {});
@@ -1414,7 +1420,8 @@ impl HandleSingleEvent for HandleBrowserEvent {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::BrowserEvent(ref ev_type, value) = ev {
             if ev_type == &BrowserEventType::LoadingProgress {
-                gp.statusbar.borrow_mut().cache.browser_loading_progress = value as u8;
+                //    gp.statusbar.borrow_mut().cache.browser_loading_progress = value as u8;
+                gp.statusbar.set_browser_loading_progress(value as u8);
             }
         }
     }
@@ -1425,13 +1432,15 @@ impl HandleSingleEvent for HandleButtonActivated {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::ButtonClicked(msg) = ev {
             if msg == "D_SETTINGS_CHECKNOW" {
-                let isrunning = gp.statusbar.borrow().cache.db_check_running;
+                let isrunning = gp.statusbar.is_db_check_running();
                 if !isrunning {
                     (*gp.gui_updater)
                         .borrow()
                         .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, false);
-                    let mut sb = gp.statusbar.borrow_mut();
-                    sb.cache.db_check_running = true;
+
+                    gp.statusbar.set_db_check_running(true);
+                    // let mut sb = gp.statusbar.borrow_mut();                    sb.cache.db_check_running = true;
+
                     gp.downloader_r.borrow().cleanup_db();
                     gp.addjob(Job::NotifyDbClean(
                         0,

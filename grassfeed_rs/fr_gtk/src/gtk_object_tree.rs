@@ -1,5 +1,3 @@
-use gdk::pango::AttrFontFeatures;
-use gdk::pango::Attribute;
 #[cfg(feature = "legacy3gtk14")]
 use gtk::ToggleToolButtonBuilder;
 #[cfg(feature = "legacy3gtk14")]
@@ -18,8 +16,11 @@ use crate::util::DragState;
 use crate::util::EvSenderWrapper;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
+use gdk::pango::AttrColor;
+use gdk::pango::AttrFontFeatures;
 use gdk::pango::AttrList;
 use gdk::pango::AttrSize;
+use gdk::pango::Attribute;
 use gdk::EventButton;
 use gtk::pango::WrapMode;
 use gtk::prelude::GtkMenuItemExt;
@@ -226,38 +227,9 @@ impl GtkGuiBuilder for GtkObjectTree {
         paned_1.pack2(&scrolledwindow_1, FRAME_RESIZE, FRAME_SHRINK);
         let content_tab_widget = self.create_content_tabs_2(gtk_obj_a.clone());
         paned_top.pack2(&content_tab_widget, true, true); // resize  , shrink: yes
-
-        // box_1_v
-        let box3_status = gtk::Box::new(Orientation::Horizontal, 0);
-        box3_status.set_widget_name("box3_status");
-        // box_1_v
-        box_top.add(&box3_status);
-        let label_st1 = Label::new(Some("|____|"));
-        label_st1.set_width_request(20);
-        box3_status.add(&label_st1);
-        let label_st2 = Label::new(Some(">some_url<"));
-        label_st2.set_width_request(100);
-        label_st2.set_selectable(true);
-        label_st2.connect_button_press_event(|label2: &Label, evb: &EventButton| {
-            if evb.button() == MOUSE_BUTTON_RIGHT {
-                label2.select_region(0, -1); // select all
-            }
-            gtk::Inhibit(false)
-        });
-        let layout_st = gtk::Layout::new(NONE_ADJ, NONE_ADJ);
-        layout_st.add(&label_st2);
-        layout_st.set_width(100);
-        layout_st.set_vexpand(false);
-        layout_st.set_hexpand(true);
-        box3_status.add(&layout_st);
-        let label_st3 = Label::new(Some("___"));
-        label_st3.set_width_request(10);
-        box3_status.add(&label_st3);
+        box_top.add(&create_statusbar(gtk_obj_a.clone(), mode_debug));
         {
             let mut ret = (*gtk_obj_a).write().unwrap();
-            ret.set_label(LABEL_STATUS_1, &label_st1);
-            ret.set_label(LABEL_STATUS_2, &label_st2);
-            ret.set_label(LABEL_STATUS_3, &label_st3);
             ret.set_paned(PANED_1_LEFT, &paned_1);
             ret.set_scrolledwindow(SCROLLEDWINDOW_0, &scrolledwindow_0);
             ret.set_scrolledwindow(SCROLLEDWINDOW_1, &scrolledwindow_1);
@@ -811,6 +783,53 @@ pub fn create_buttonbox(_g_ev_se: Sender<GuiEvents>) -> ButtonBox {
     let button1: Button = Button::with_label("button1");
     buttonbox.add(&button1);
     buttonbox
+}
+
+fn create_statusbar(gtk_obj_a: GtkObjectsType, mode_debug: bool) -> gtk::Box {
+    // box_1_v
+    let box3_status = gtk::Box::new(Orientation::Horizontal, 0);
+    box3_status.set_widget_name("box3_status");
+    // box_1_v
+    let label_st1 = Label::new(Some("^_^"));
+    label_st1.set_width_request(20);
+    box3_status.add(&label_st1);
+
+    let label_st2 = Label::new(Some("^_^"));
+    label_st2.set_width_request(100);
+    label_st2.set_selectable(true);
+
+    if mode_debug {
+        let attr_list = AttrList::new();
+        attr_list.insert(Attribute::from(AttrColor::new_background(
+            0xf000, 0xf000, 0x8000,
+        )));
+        label_st2.set_attributes(Some(&attr_list));
+    }
+
+    label_st2.connect_button_press_event(|label2: &Label, evb: &EventButton| {
+        if evb.button() == MOUSE_BUTTON_RIGHT {
+            label2.select_region(0, -1); // select all
+        }
+        gtk::Inhibit(false)
+    });
+    const NONE_ADJ: Option<&Adjustment> = None;
+    let layout_st = gtk::Layout::new(NONE_ADJ, NONE_ADJ);
+    layout_st.add(&label_st2);
+    layout_st.set_width(100);
+    layout_st.set_vexpand(false);
+    layout_st.set_hexpand(true);
+    box3_status.add(&layout_st);
+    let label_st3 = Label::new(Some("^_^"));
+    label_st3.set_width_request(10);
+    box3_status.add(&label_st3);
+
+    {
+        let mut ret = (*gtk_obj_a).write().unwrap();
+        ret.set_label(LABEL_STATUS_1, &label_st1);
+        ret.set_label(LABEL_STATUS_2, &label_st2);
+        ret.set_label(LABEL_STATUS_3, &label_st3);
+    }
+    box3_status
 }
 
 #[cfg(not(feature = "legacy3gtk14"))]

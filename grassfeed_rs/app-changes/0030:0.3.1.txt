@@ -1,7 +1,7 @@
 Thu, 11 Sep 2024 12:00:00 +0000
 * Library update: gtkwebkit to 0.19, gtk to 0.16
-* Bigger Font for browser title
 * Search field allows multipile entries via separator
+* Bigger Font for browser title
 * Bugfix db cleanup locking issue
 
 - remove queue display left
