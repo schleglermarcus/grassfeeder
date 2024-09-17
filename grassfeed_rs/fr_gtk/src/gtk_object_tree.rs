@@ -793,19 +793,16 @@ fn create_statusbar(gtk_obj_a: GtkObjectsType, mode_debug: bool) -> gtk::Box {
     let label_st1 = Label::new(Some("^_^"));
     label_st1.set_width_request(20);
     box3_status.add(&label_st1);
-
     let label_st2 = Label::new(Some("^_^"));
     label_st2.set_width_request(100);
     label_st2.set_selectable(true);
-
     if mode_debug {
         let attr_list = AttrList::new();
         attr_list.insert(Attribute::from(AttrColor::new_background(
-            0xf000, 0xf000, 0x8000,
+            0xa000, 0xa000, 0x4000,
         )));
         label_st2.set_attributes(Some(&attr_list));
     }
-
     label_st2.connect_button_press_event(|label2: &Label, evb: &EventButton| {
         if evb.button() == MOUSE_BUTTON_RIGHT {
             label2.select_region(0, -1); // select all
