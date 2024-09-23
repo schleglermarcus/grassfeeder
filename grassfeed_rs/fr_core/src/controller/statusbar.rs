@@ -56,6 +56,7 @@ impl StatusBar {
         let mut panels_: Vec<Box<dyn OnePanel>> = Vec::new();
         panels_.push(Box::new(PanelLeft {}));
         panels_.push(Box::new(PanelMiddle {}));
+        panels_.push(Box::new(PanelRight {}));
 
         StatusBar {
             r_subscriptions_controller: r_c_subs,
@@ -135,9 +136,7 @@ impl StatusBar {
                     .set_label_tooltip(label_id, tt);
             }
             if do_update {
-                (*self.gui_updater)
-                    .borrow()
-                    .update_label_markup(label_id);
+                (*self.gui_updater).borrow().update_label_markup(label_id);
             }
         }
 
@@ -148,7 +147,7 @@ impl StatusBar {
         // let mut last_fetch_time: i64 = 0;
         let mut feed_src_link = String::default();
         //      let mut is_folder: bool = false;
-        let timestamp_now: i64 = timestamp_now();
+        // let timestamp_now: i64 = timestamp_now();
 
         let mut subscription_id_new: isize = -1;
         let o_subscription = (*self.r_subscriptions_controller)
@@ -190,96 +189,27 @@ impl StatusBar {
         }
 
         /*
-                // label-2
-                {
-                    let mut need_update_2: bool = false;
+               // label-3
+               {
+                   let mut need_update3: bool = false;
 
-                    if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
-                        if n_a != self.cache.borrow().num_msg_all
-                            || n_u != self.cache.borrow().num_msg_unread
-                        {
-                            need_update_2 = true;
-                        }
-                    }
-
-                    // if subscription_id_new > 0 {
-                    //     if self.cache.borrow().last_fetch_time != last_fetch_time {
-                    //         self.cache.borrow_mut().last_fetch_time = last_fetch_time;
-                    //         need_update_2 = true;
-                    //     }
-                    // }
-
-                    let last_msg_url = if selected_msg_id < 0 {
-                        String::default()
-                    } else {
-                        (self.r_browserpane).borrow().get_last_selected_link()
-                    };
-                    if self.cache.borrow().selected_msg_url != last_msg_url {
-                        self.cache.borrow_mut().selected_msg_url = last_msg_url;
-                        need_update_2 = true;
-                    }
-
-                    //        let timestamp_now: i64 = timestamp_now();
-                    let mut longtext = if self.cache.borrow().selected_msg_url.is_empty() {
-                        string_escape_url(feed_src_link)
-                    } else {
-                        string_escape_url(self.cache.borrow().selected_msg_url.clone())
-                    };
-
-                    let o_current = &self.get_bottom_notice_current();
-                    if let Some((ts, msg)) = o_current {
-                        if timestamp_now > ts + BOTTOM_MSG_SHOW_TIME_S as i64 {
-                            self.cache.borrow_mut().bottom_notice_current = None;
-                        } else {
-                            longtext = StatusBar::error_formatter(msg.to_string());
-                        }
-                        need_update_2 = true;
-                    }
-                    //  TODO    bottom notice  needs rework
-                    if o_current.is_none() {
-                        if let Some(_n_msg) = self.pop_bottom_message() {
-                            need_update_2 = true;
-                        }
-                    }
-
-                    if !self.cache.borrow().subscription_is_folder
-                        && subscription_id_new != self.cache.borrow().selected_repo_id
-                    {
-                        self.cache.borrow_mut().selected_repo_id = subscription_id_new;
-                        need_update_2 = true;
-                    }
-
-                    if need_update_2 {
-                        (*self.gui_val_store)
-                            .write()
-                            .unwrap()
-                            .set_label_text(LABEL_STATUS_2, longtext);
-                        (*self.gui_updater)
-                            .borrow()
-                            .update_label_markup(LABEL_STATUS_2);
-                    }
-                }
+                   let p_int = self.cache.borrow().browser_loading_progress_int;
+                   if self.cache.borrow().browser_loading_progress != p_int {
+                       self.cache.borrow_mut().browser_loading_progress_int = p_int;
+                       need_update3 = true;
+                   }
+                   if need_update3 {
+                       let b_loading = get_vertical_block_char(p_int as usize, 256);
+                       (*self.gui_val_store)
+                           .write()
+                           .unwrap()
+                           .set_label_text(LABEL_STATUS_3, format!("<tt>\u{2595}{b_loading}</tt>"));
+                       (*self.gui_updater)
+                           .borrow()
+                           .update_label_markup(LABEL_STATUS_3);
+                   }
+               }
         */
-        // label-3
-        {
-            let mut need_update3: bool = false;
-
-            let p_int = self.cache.borrow().browser_loading_progress_int;
-            if self.cache.borrow().browser_loading_progress != p_int {
-                self.cache.borrow_mut().browser_loading_progress_int = p_int;
-                need_update3 = true;
-            }
-            if need_update3 {
-                let b_loading = get_vertical_block_char(p_int as usize, 256);
-                (*self.gui_val_store)
-                    .write()
-                    .unwrap()
-                    .set_label_text(LABEL_STATUS_3, format!("<tt>\u{2595}{b_loading}</tt>"));
-                (*self.gui_updater)
-                    .borrow()
-                    .update_label_markup(LABEL_STATUS_3);
-            }
-        }
     }
 
     // Mem usage in kb: current=105983, peak=118747411
@@ -579,5 +509,29 @@ impl OnePanel for PanelMiddle {
 
     fn get_label_id(&self) -> u8 {
         LABEL_STATUS_2
+    }
+}
+
+struct PanelRight {}
+impl OnePanel for PanelRight {
+    fn calculate_update(&self, statusbar: &StatusBar) -> (Option<String>, Option<String>) {
+        let progr = statusbar.cache.borrow().browser_loading_progress;
+        let p_int = statusbar.cache.borrow().browser_loading_progress_int;
+        if p_int > 0 || progr > 0 {
+            debug!("right:  p: {}   <== {}   ", p_int, progr);
+        }
+
+        if progr != p_int {
+            statusbar.cache.borrow_mut().browser_loading_progress_int = progr;
+
+            let b_loading = get_vertical_block_char(p_int as usize, 256);
+            let text = format!("<tt>\u{2595}{b_loading}</tt>");
+
+            return (Some(text), None);
+        }
+        (None, None)
+    }
+    fn get_label_id(&self) -> u8 {
+        LABEL_STATUS_3
     }
 }
