@@ -144,20 +144,15 @@ impl StatusBar {
     }
 
     pub fn update_old(&self) {
-        // let mut last_fetch_time: i64 = 0;
         let mut feed_src_link = String::default();
-        //      let mut is_folder: bool = false;
-        // let timestamp_now: i64 = timestamp_now();
 
-        let mut subscription_id_new: isize = -1;
+ //       let mut subscription_id_new: isize = -1;
         let o_subscription = (*self.r_subscriptions_controller)
             .borrow()
             .get_current_selected_subscription();
         if let Some((fse, _)) = o_subscription {
             subscription_id_new = fse.subs_id;
-            //             last_fetch_time = fse.updated_int;
             feed_src_link.clone_from(&fse.url);
-            //            is_folder = fse.is_folder;
             let dl_r_b = (*self.r_downloader).borrow();
             let mut c = self.cache.borrow_mut();
             c.num_downloader_threads = dl_r_b.get_config().num_downloader_threads;
@@ -187,29 +182,6 @@ impl StatusBar {
         {
             self.cache.borrow_mut().selected_msg_id = selected_msg_id;
         }
-
-        /*
-               // label-3
-               {
-                   let mut need_update3: bool = false;
-
-                   let p_int = self.cache.borrow().browser_loading_progress_int;
-                   if self.cache.borrow().browser_loading_progress != p_int {
-                       self.cache.borrow_mut().browser_loading_progress_int = p_int;
-                       need_update3 = true;
-                   }
-                   if need_update3 {
-                       let b_loading = get_vertical_block_char(p_int as usize, 256);
-                       (*self.gui_val_store)
-                           .write()
-                           .unwrap()
-                           .set_label_text(LABEL_STATUS_3, format!("<tt>\u{2595}{b_loading}</tt>"));
-                       (*self.gui_updater)
-                           .borrow()
-                           .update_label_markup(LABEL_STATUS_3);
-                   }
-               }
-        */
     }
 
     // Mem usage in kb: current=105983, peak=118747411
