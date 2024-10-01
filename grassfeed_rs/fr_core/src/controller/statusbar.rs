@@ -142,7 +142,7 @@ impl StatusBar {
                 (*self.gui_updater).borrow().update_label_markup(label_id);
             }
         }
-          // self.update_old();
+            // self.update_old();
     }
 
     // returns subscription_id
