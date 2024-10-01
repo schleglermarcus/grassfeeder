@@ -119,6 +119,9 @@ impl StatusBar {
     }
 
     pub fn update(&self) {
+        let subs_id = self.get_subscription_info();
+        self.get_contents_info(subs_id);
+
         for p in &self.panels {
             let label_id = p.get_label_id();
             let (o_labeltext, o_tooltip) = p.calculate_update(&self);
@@ -139,50 +142,95 @@ impl StatusBar {
                 (*self.gui_updater).borrow().update_label_markup(label_id);
             }
         }
-
-        self.update_old();
+        // self.update_old();
     }
 
-    pub fn update_old(&self) {
-        let mut feed_src_link = String::default();
+    // returns subscription_id
+    fn get_subscription_info(&self) -> isize {
+        let subs_id_old = self.cache.borrow().selected_repo_id;
 
- //       let mut subscription_id_new: isize = -1;
+        let mut subscription_id_new: isize = -1;
         let o_subscription = (*self.r_subscriptions_controller)
             .borrow()
             .get_current_selected_subscription();
+        let mut subs_is_folder: bool = false;
+        let mut subs_updated_int: i64 = 0;
         if let Some((fse, _)) = o_subscription {
             subscription_id_new = fse.subs_id;
-            feed_src_link.clone_from(&fse.url);
-            let dl_r_b = (*self.r_downloader).borrow();
-            let mut c = self.cache.borrow_mut();
-            c.num_downloader_threads = dl_r_b.get_config().num_downloader_threads;
-            c.downloader_stats = dl_r_b.get_statistics();
-            c.subscription_is_folder = fse.is_folder;
-            c.subscription_last_download_time = fse.updated_int;
+            subs_is_folder = subs_is_folder;
+            subs_updated_int = fse.updated_int;
         } else {
             subscription_id_new = -1;
         }
-
-        let subscription_id_old = self.cache.borrow().selected_repo_id;
-        if subscription_id_new != subscription_id_old {
+        if subscription_id_new != subs_id_old {
+            let dl_r_b = self.r_downloader.borrow();
             let mut c = self.cache.borrow_mut();
-            c.selected_repo_id = subscription_id_new;
+            c.num_downloader_threads = dl_r_b.get_config().num_downloader_threads;
+            c.downloader_stats = dl_r_b.get_statistics();
+            c.subscription_is_folder = subs_is_folder;
+            c.subscription_last_download_time = subs_updated_int;
             c.subscription_id_changed = true;
         } else {
-            self.cache.borrow_mut().subscription_id_changed = false;
+            let is_changed = self.cache.borrow().subscription_id_changed;
+            if is_changed {
+                self.cache.borrow_mut().subscription_id_changed = false;
+            }
         }
+        subscription_id_new
+    }
 
+    fn get_contents_info(&self, subscription_id: isize) {
         let content_ids = (*self.r_messages).borrow().get_selected_content_ids();
         let mut selected_msg_id = -1;
         if !content_ids.is_empty() {
             selected_msg_id = *content_ids.first().unwrap();
         }
-        if selected_msg_id != self.cache.borrow().selected_msg_id
-            || subscription_id_new != self.cache.borrow().selected_repo_id
-        {
+        //   || subscription_id_new != self.cache.borrow().selected_repo_id
+        if selected_msg_id != self.cache.borrow().selected_msg_id {
             self.cache.borrow_mut().selected_msg_id = selected_msg_id;
         }
+
+        let subs_state: SubsMapEntry = (*self.r_subscriptions_controller)
+            .borrow()
+            .get_state(subscription_id)
+            .unwrap_or_default();
+
+        if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
+            let old_n_all: isize;
+            let old_n_unread: isize;
+            let old_is_changed: bool;
+            {
+                let c = self.cache.borrow();
+                old_n_all = c.num_msg_all;
+                old_n_unread = c.num_msg_unread;
+                old_is_changed = c.num_msg_changed;
+            }
+
+            if n_a != old_n_all || n_u != old_n_unread {
+                let mut c = self.cache.borrow_mut();
+                c.num_msg_all = n_a;
+                c.num_msg_unread = n_u;
+                c.num_msg_changed = true;
+            } else if old_is_changed {
+                self.cache.borrow_mut().num_msg_changed = false;
+            }
+        }
     }
+
+    /*
+       pub fn update_old(&self) {
+           let mut feed_src_link = String::default();
+           let mut subscription_id_new: isize = -1;
+           let subscription_id_old = self.cache.borrow().selected_repo_id;
+           if subscription_id_new != subscription_id_old {
+               let mut c = self.cache.borrow_mut();
+               c.selected_repo_id = subscription_id_new;
+               c.subscription_id_changed = true;
+           } else {
+               self.cache.borrow_mut().subscription_id_changed = false;
+           }
+       }
+    */
 
     // Mem usage in kb: current=105983, peak=118747411
     // Htop:  103M    SHR: 73580m   0,7% mem
@@ -224,8 +272,6 @@ fn get_vertical_block_char(dividend: usize, divisor: usize) -> char {
 pub struct CachedData {
     pub downloader_kind: [u8; DOWNLOADER_MAX_NUM_THREADS],
     pub downloader_kind_new: [u8; DOWNLOADER_MAX_NUM_THREADS],
-    pub num_msg_all: isize,
-    pub num_msg_unread: isize,
     pub last_fetch_time: i64,
     pub num_downloader_threads: u8,
     pub num_dl_queue_length: u16,
@@ -249,6 +295,10 @@ pub struct CachedData {
 
     pub subscription_is_folder: bool,
     pub subscription_last_download_time: i64,
+
+    pub num_msg_all: isize,
+    pub num_msg_unread: isize,
+    pub num_msg_changed: bool,
 }
 
 impl CachedData {
@@ -385,49 +435,36 @@ impl OnePanel for PanelMiddle {
     fn calculate_update(&self, statusbar: &StatusBar) -> (Option<String>, Option<String>) {
         let mut need_update_2: bool = false;
 
-        let mut subscription_id_new: isize = statusbar.cache.borrow().selected_repo_id;
+        //        let mut subscription_id_new: isize = statusbar.cache.borrow().selected_repo_id;
 
         let mut feed_src_link = String::default();
         let o_subscription = (*statusbar.r_subscriptions_controller)
             .borrow()
             .get_current_selected_subscription();
         if let Some((fse, _)) = o_subscription {
-            subscription_id_new = fse.subs_id;
+            //   subscription_id_new = fse.subs_id;
             feed_src_link.clone_from(&fse.url);
-        } else {
-            subscription_id_new = -1;
-        }
-
-        let subs_state: SubsMapEntry = (*statusbar.r_subscriptions_controller)
-            .borrow()
-            .get_state(subscription_id_new)
-            .unwrap_or_default();
-
-        if let Some((n_a, n_u)) = subs_state.num_msg_all_unread {
-            if n_a != statusbar.cache.borrow().num_msg_all
-                || n_u != statusbar.cache.borrow().num_msg_unread
-            {
-                need_update_2 = true;
-            }
-        }
+        } //else {            subscription_id_new = -1;        }
 
         let content_ids = (*statusbar.r_messages).borrow().get_selected_content_ids();
         let mut selected_msg_id = -1;
         if !content_ids.is_empty() {
             selected_msg_id = *content_ids.first().unwrap();
         }
-        if selected_msg_id != statusbar.cache.borrow().selected_msg_id
-            || subscription_id_new != statusbar.cache.borrow().selected_repo_id
-        {
-            statusbar.cache.borrow_mut().selected_msg_id = selected_msg_id;
-        }
 
-        // if subscription_id_new > 0 {
-        //     if self.cache.borrow().last_fetch_time != last_fetch_time {
-        //         self.cache.borrow_mut().last_fetch_time = last_fetch_time;
-        //         need_update_2 = true;
-        //     }
-        // }
+        /*
+               if selected_msg_id != statusbar.cache.borrow().selected_msg_id
+                   || subscription_id_new != statusbar.cache.borrow().selected_repo_id
+               {
+                   statusbar.cache.borrow_mut().selected_msg_id = selected_msg_id;
+               }
+               if subscription_id_new > 0 {
+                   if self.cache.borrow().last_fetch_time != last_fetch_time {
+                       self.cache.borrow_mut().last_fetch_time = last_fetch_time;
+                       need_update_2 = true;
+                   }
+               }
+        */
 
         let last_msg_url = if selected_msg_id < 0 {
             String::default()
@@ -463,15 +500,15 @@ impl OnePanel for PanelMiddle {
                 need_update_2 = true;
             }
         }
-
-        // debug!("Middle: {}  {} ", need_update_2, longtext);
-        if !statusbar.cache.borrow().subscription_is_folder
-            && subscription_id_new != statusbar.cache.borrow().selected_repo_id
-        {
-            statusbar.cache.borrow_mut().selected_repo_id = subscription_id_new;
-            need_update_2 = true;
-        }
-
+        /*
+               // debug!("Middle: {}  {} ", need_update_2, longtext);
+               if !statusbar.cache.borrow().subscription_is_folder
+                   && subscription_id_new != statusbar.cache.borrow().selected_repo_id
+               {
+                   statusbar.cache.borrow_mut().selected_repo_id = subscription_id_new;
+                   need_update_2 = true;
+               }
+        */
         if need_update_2 {
             return (Some(longtext), None);
         }
@@ -489,11 +526,8 @@ impl OnePanel for PanelRight {
     fn calculate_update(&self, statusbar: &StatusBar) -> (Option<String>, Option<String>) {
         let progr = statusbar.cache.borrow().browser_loading_progress;
         let p_int = statusbar.cache.borrow().browser_loading_progress_int;
-        if p_int > 0 || progr > 0 {
-            debug!("right:  p: {}   <== {}   ", p_int, progr);
-        }
-
         if progr != p_int {
+            debug!("right:  p: {}   <== {}   ", p_int, progr);
             statusbar.cache.borrow_mut().browser_loading_progress_int = progr;
 
             let b_loading = get_vertical_block_char(p_int as usize, 256);
