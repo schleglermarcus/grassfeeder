@@ -260,7 +260,6 @@ impl GuiProcessor {
                     (*self.feedsources_r).borrow_mut().notify_config_update();
                 }
                 Job::DownloaderJobStarted(threadnr, kind) => {
-                    // self.statusbar.borrow_mut().cache.downloader_kind_new[threadnr as usize] = kind;
                     self.statusbar.set_downloader_kind(threadnr, kind);
                 }
                 Job::DownloaderJobFinished(
