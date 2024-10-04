@@ -71,6 +71,7 @@ impl GtkRunnerInternal {
     /// Creates the window, connects the   activate signal with the build command
     /// https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/gio/struct.ApplicationFlags.html#associatedconstant.HANDLES_COMMAND_LINE
     /// return  true on success.  False on   App-Was-Running
+    ///   app.release();   this was in 0.18  , but no more in  0.19
     pub fn init(
         &mut self,
         builder: &GtkBuilderType,
@@ -82,11 +83,10 @@ impl GtkRunnerInternal {
         let ev_se = self.gui_event_sender.clone();
         let obj_c = self.gtk_objects.clone();
         let obj_c2 = self.gtk_objects.clone();
-
         let builder_c = builder.clone();
         let mut appflags: ApplicationFlags = ApplicationFlags::default();
         appflags.set(ApplicationFlags::HANDLES_COMMAND_LINE, false);
-        let app = gtk::Application::new(Some(&app_url), appflags);
+        let app: gtk::Application = gtk::Application::new(Some(&app_url), appflags);
         dbus_register(&app);
         if app.is_remote() {
             warn!(
@@ -94,10 +94,6 @@ impl GtkRunnerInternal {
                 &app_url
             );
             let _r = ev_se.send(GuiEvents::AppWasAlreadyRunning);
-
-            // TODO check:  this was in 0.18  , but no more in  0.19
-            // app.release();
-
             dbus_close(&app);
             return false;
         }
@@ -300,9 +296,6 @@ fn build_window(
     window.set_title(&title);
     window.set_default_size(width, height);
     window.show_all();
-
-    // if let Some(screen) = window.screen() {
-    //      if let Some(screen) = gtk::prelude::WidgetExt::screen(&window) {
     if let Some(screen) = gtk::prelude::GtkWindowExt::screen(&window) {
         if let Some(settings) = Settings::for_screen(&screen) {
             settings.set_gtk_enable_animations(true);

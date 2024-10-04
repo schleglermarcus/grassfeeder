@@ -282,6 +282,8 @@ fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> Cleaner
 }
 
 /*
+
+// Later: find   better solution for dummy data
 fn copy_icon_json(icn_path: &str) {
     let _r = std::fs::create_dir(icn_path);
     let r = std::fs::copy(
@@ -289,10 +291,11 @@ fn copy_icon_json(icn_path: &str) {
         format!("{}/icons_list.json", icn_path),
     );
     assert!(r.is_ok());
-    let mut iconrepo = IconRepo::new_(icn_path); // TODO  better solution for dummy data
+    let mut iconrepo = IconRepo::new_(icn_path);
     iconrepo.startup_();
 }
  */
+
 // ------------------------------------
 
 mod logger_config;

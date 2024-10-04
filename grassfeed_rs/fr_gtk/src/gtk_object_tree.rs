@@ -265,10 +265,11 @@ impl GtkObjectTree {
             return false;
         }
         match self.initvalues.get(&name) {
-            Some(b) => match b.parse::<bool>() {
-                Ok(i) => i,
-                Err(_e) => false,
-            },
+            Some(b) => b.parse::<bool>().unwrap_or_default(),
+            //  match b.parse::<bool>() {
+            //     Ok(i) => i,
+            //     Err(_e) => false,
+            // }
             None => false,
         }
     }
@@ -783,7 +784,6 @@ pub fn create_buttonbox(_g_ev_se: Sender<GuiEvents>) -> ButtonBox {
     buttonbox.add(&button1);
     buttonbox
 }
-
 
 fn create_statusbar(gtk_obj_a: GtkObjectsType, _mode_debug: bool) -> gtk::Box {
     // box_1_v

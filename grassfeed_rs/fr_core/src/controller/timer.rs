@@ -133,8 +133,7 @@ impl TimerRegistry for Timer {
         self.schedules.borrow()[index]
             .receivers
             .iter()
-            .enumerate()
-            .for_each(|(_n, (rec, call_mut))| {
+            .for_each(|(rec, call_mut)| {
                 if let Some(rc) = rec.upgrade() {
                     if *call_mut {
                         (*rc).borrow_mut().trigger_mut(te);

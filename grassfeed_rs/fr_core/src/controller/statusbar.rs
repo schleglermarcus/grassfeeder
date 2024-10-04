@@ -4,6 +4,7 @@ use crate::controller::contentdownloader::DLKIND_MAX;
 use crate::controller::contentlist::IContentList;
 use crate::controller::guiprocessor::dl_char_for_kind;
 use crate::controller::isourcetree::ISourceTreeController;
+use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_state::SubsMapEntry;
 use crate::util::string_escape_url;
 use crate::util::timestamp_now;
@@ -53,11 +54,15 @@ impl StatusBar {
         browser_pane: Rc<RefCell<dyn IBrowserPane>>,
         val_store: UIAdapterValueStoreType,
     ) -> Self {
-        let mut panels_: Vec<Box<dyn OnePanel>> = Vec::new();
-        panels_.push(Box::new(PanelLeft {}));
-        panels_.push(Box::new(PanelMiddle {}));
-        panels_.push(Box::new(PanelRight {}));
-
+        // let mut panels_: Vec<Box<dyn OnePanel>> = Vec::new();
+        // panels_.push(Box::new(PanelLeft {}));
+        // panels_.push(Box::new(PanelMiddle {}));
+        // panels_.push(Box::new(PanelRight {}));
+        let panels_: Vec<Box<dyn OnePanel>> = vec![
+            Box::new(PanelLeft {}),
+            Box::new(PanelMiddle {}),
+            Box::new(PanelRight {}),
+        ];
         StatusBar {
             r_subscriptions_controller: r_c_subs,
             r_downloader: r_downloadr,
@@ -131,7 +136,7 @@ impl StatusBar {
 
         for p in &self.panels {
             let label_id = p.get_label_id();
-            let (o_labeltext, o_tooltip) = p.calculate_update(&self);
+            let (o_labeltext, o_tooltip) = p.calculate_update(self);
             let with_tooltip = o_tooltip.is_some();
             let with_label = o_labeltext.is_some();
             if let Some(labeltext) = o_labeltext {
@@ -159,15 +164,16 @@ impl StatusBar {
     fn get_subscription_info(&self) -> isize {
         let subs_id_old = self.cache.borrow().subscription_id;
         let subscription_id_new: isize;
-        let o_subscription = (*self.r_subscriptions_controller)
+        let o_subscription: Option<(SubscriptionEntry, Vec<i32>)> = (*self
+            .r_subscriptions_controller)
             .borrow()
             .get_current_selected_subscription();
         let mut subs_is_folder: bool = false;
         let mut subs_updated_int: i64 = 0;
-        if let Some((fse, _)) = o_subscription {
-            subscription_id_new = fse.subs_id;
-            subs_is_folder = subs_is_folder;
-            subs_updated_int = fse.updated_int;
+        if let Some((subscr, _)) = o_subscription {
+            subscription_id_new = subscr.subs_id;
+            subs_is_folder = subscr.is_folder;
+            subs_updated_int = subscr.updated_int;
         } else {
             subscription_id_new = -1;
         }
@@ -387,10 +393,14 @@ impl OnePanel for PanelLeft {
             return (None, None);
         }
         let mut downloader_display: String = String::default();
-        for a in 0..n_threads {
-            let nc = dl_char_for_kind(downloader_kind[a]);
-            downloader_display.push(nc);
+        // for a in 0..n_threads {
+        //     let nc = dl_char_for_kind(downloader_kind[a]);
+        //     downloader_display.push(nc);
+        // }
+        for k in downloader_kind.iter().take(n_threads) {
+            downloader_display.push(dl_char_for_kind(*k));
         }
+
         let unread_all = format!("{:5} / {:5}", num_msg_unread, num_msg_all);
         statusbar.cache.borrow_mut().reset_downloader_kind_updated();
         let t_popup = format!(
@@ -432,34 +442,28 @@ impl OnePanel for PanelMiddle {
         if let Some((fse, _)) = o_subscription {
             feed_src_link.clone_from(&fse.url);
         }
-        let mut need_update_2: bool = false;
+        let mut need_update_2: bool = selected_msg_changed;
 
-        if selected_msg_changed {
-            need_update_2 = true;
-        }
         let mut longtext = if selected_msg_url.is_empty() {
             string_escape_url(feed_src_link)
         } else {
             string_escape_url(selected_msg_url.clone())
         };
-
         if let Some((ts, msg)) = bottom_notice_current {
             let timestamp_now: i64 = timestamp_now();
             if timestamp_now > ts + BOTTOM_MSG_SHOW_TIME_S as i64 {
                 statusbar.cache.borrow_mut().bottom_notice_current = None;
             } else {
                 longtext = StatusBar::error_formatter(msg.to_string());
-            }
-            need_update_2 = true;
-        } else {
-            if let Some(_n_msg) = statusbar.pop_bottom_message() {
                 need_update_2 = true;
             }
+        } else if let Some(_n_msg) = statusbar.pop_bottom_message() {
+            need_update_2 = true;
         }
-        if !need_update_2 {
-            return (None, None);
+        if need_update_2 {
+            return (Some(longtext), Some(String::from("Toooltip !!")));
         }
-        return (Some(longtext), Some(String::from("Toooltip !!")));
+        (None, None)
     }
 
     fn get_label_id(&self) -> u8 {

@@ -1,3 +1,6 @@
+
+
+- IconStore: utilize    http_date, http_length
 - check if icon cleanup works with database
 - remove or re-load icons that are too old
 - remove unused icons

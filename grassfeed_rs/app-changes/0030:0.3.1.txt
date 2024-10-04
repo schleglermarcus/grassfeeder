@@ -6,7 +6,4 @@ Fri, 04 Oct 2024 12:00:00 +0000
 * Queue length to block char display
 
 
-- clippy
--->  treeview2.rs
---> runner_internal
 - create source zip

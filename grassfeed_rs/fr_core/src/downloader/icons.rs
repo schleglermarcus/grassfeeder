@@ -407,13 +407,15 @@ impl Step<IconInner> for IconCheckPresent {
     }
 }
 
+
+// Later:   utilize    http_date, http_length
 struct IconStore(IconInner);
 impl Step<IconInner> for IconStore {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let inner: IconInner = self.0;
         assert!(!inner.compressed_icon.is_empty());
-        let http_date: i64 = 0; // TODO
-        let http_length: isize = 0; // TODO
+        let http_date: i64 = 0;
+        let http_length: isize = 0;
         match inner.iconrepo.add_icon(
             inner.compressed_icon.clone(),
             http_date,

@@ -114,22 +114,10 @@ pub fn create_treeview(
         let cellrendpixbuf = CellRendererPixbuf::new();
         CellLayoutExt::pack_end(&col, &cellrendpixbuf, false);
         CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "gicon", 3_i32);
-
-
-
-// TODO
-        //         col.add_attribute(&cellrendpixbuf, "visible", 10_i32);
         gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "visible", 10_i32);
-
-        //         col.pack_end(&cellrenderer_spinner, false);
         gtk::prelude::CellLayoutExt::pack_end(&col, &cellrenderer_spinner, false);
-
-        //        col.add_attribute(&cellrenderer_spinner, "active", 9_i32);
         gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrenderer_spinner, "active", 9_i32);
-
-        // col.add_attribute(&cellrenderer_spinner, "visible", 9_i32);
         gtk::prelude::CellLayoutExt::add_attribute(&col, &cellrenderer_spinner, "visible", 9_i32);
-
         col.set_fixed_width(9); // If we don't fix the width, the gtk system crashes on moving the pane-1
         treeview1.append_column(&col);
     }

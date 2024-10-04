@@ -506,19 +506,19 @@ impl SourceTreeController {
             .subscriptionrepo_r
             .borrow()
             .get_children(parent_subscr_id);
-        entries.iter().enumerate().for_each(|(_n, fse)| {
-            let o_subs_map = self.statemap.borrow().get_state(fse.subs_id);
+        entries.iter().for_each(|subscr| {
+            let o_subs_map = self.statemap.borrow().get_state(subscr.subs_id);
             if o_subs_map.is_none() {
-                warn!("insert_single : no state map entry for {}", fse.subs_id);
+                warn!("insert_single : no state map entry for {}", subscr.subs_id);
                 return;
             }
             let subs_map = o_subs_map.unwrap();
             if subs_map.tree_path.is_none() {
-                warn!("insert_single : path for {}", fse.subs_id);
+                warn!("insert_single : path for {}", subscr.subs_id);
                 return;
             }
             let path = subs_map.tree_path.as_ref().unwrap();
-            let treevalues = self.tree_row_to_values(fse, &subs_map);
+            let treevalues = self.tree_row_to_values(subscr, &subs_map);
             (*self.gui_val_store)
                 .write()
                 .unwrap()

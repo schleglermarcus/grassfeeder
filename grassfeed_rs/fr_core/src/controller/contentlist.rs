@@ -1242,7 +1242,6 @@ pub fn filter_messages2<'a>(
                 return true;
             }
             let title_lower = o_title.unwrap().to_lowercase();
-
             rset.matches(&title_lower).matched_any()
         })
         .cloned()
@@ -1253,13 +1252,12 @@ pub fn filter_messages2<'a>(
 // case insensitive, pattern will be all lower case
 pub fn create_regex_set(pattern: &str) -> RegexSet {
     let pattern_tolower = pattern.to_lowercase();
-    let o_set: Result<RegexSet, _>;
-    if pattern_tolower.contains('|') {
+    let o_set: Result<RegexSet, _> = if pattern_tolower.contains('|') {
         let patterns: Vec<&str> = pattern_tolower.split('|').collect::<Vec<&str>>();
-        o_set = RegexSet::new(&*patterns.as_slice());
+        RegexSet::new(patterns.as_slice())
     } else {
-        o_set = RegexSet::new(&[pattern_tolower]);
-    }
+        RegexSet::new(&[pattern_tolower])
+    };
     if o_set.is_err() {
         debug!("create_regex_set:  {:?} ", o_set.err());
         return RegexSet::empty();
