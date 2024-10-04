@@ -16,7 +16,6 @@ use crate::util::DragState;
 use crate::util::EvSenderWrapper;
 use crate::util::MOUSE_BUTTON_RIGHT;
 use flume::Sender;
-use gdk::pango::AttrColor;
 use gdk::pango::AttrFontFeatures;
 use gdk::pango::AttrList;
 use gdk::pango::AttrSize;
@@ -785,7 +784,7 @@ pub fn create_buttonbox(_g_ev_se: Sender<GuiEvents>) -> ButtonBox {
     buttonbox
 }
 
-fn create_statusbar(gtk_obj_a: GtkObjectsType, mode_debug: bool) -> gtk::Box {
+fn create_statusbar(gtk_obj_a: GtkObjectsType, _mode_debug: bool) -> gtk::Box {
     // box_1_v
     let box3_status = gtk::Box::new(Orientation::Horizontal, 0);
     box3_status.set_widget_name("box3_status");
@@ -796,13 +795,15 @@ fn create_statusbar(gtk_obj_a: GtkObjectsType, mode_debug: bool) -> gtk::Box {
     let label_st2 = Label::new(Some("^_^"));
     label_st2.set_width_request(100);
     label_st2.set_selectable(true);
-    if mode_debug {
-        let attr_list = AttrList::new();
-        attr_list.insert(Attribute::from(AttrColor::new_background(
-            0xa000, 0xa000, 0x4000,
-        )));
-        label_st2.set_attributes(Some(&attr_list));
-    }
+    /*
+       if mode_debug {
+           let attr_list = AttrList::new();
+           attr_list.insert(Attribute::from(AttrColor::new_background(
+               0x4000, 0x8000, 0x4000,
+           )));
+           label_st2.set_attributes(Some(&attr_list));
+       }
+    */
     label_st2.connect_button_press_event(|label2: &Label, evb: &EventButton| {
         if evb.button() == MOUSE_BUTTON_RIGHT {
             label2.select_region(0, -1); // select all

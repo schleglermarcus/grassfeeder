@@ -1,8 +1,6 @@
-- remove queue display left
 
 - remove or re-load icons that are too old
 - remove unused icons
-- put errors in a database
 - put errors in a database
 
 

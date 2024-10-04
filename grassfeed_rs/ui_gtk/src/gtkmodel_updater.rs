@@ -325,7 +325,7 @@ impl GtkModelUpdaterInt {
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
     ///  Needs the same index for   ListStore  as for TreeView
     pub fn update_list_model_full(&self, list_index: u8) {
-        let now = std::time::Instant::now();
+        // let now = std::time::Instant::now();
         let g_o = (*self.g_o_a).read().unwrap();
         let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
         if let Some(row0) = (self.m_v_store)
@@ -361,12 +361,12 @@ impl GtkModelUpdaterInt {
         if o_last_sort_column_id.is_some() {
             list_store.set_unsorted();
         }
-        let mut num_lines = 0;
+        // let mut num_lines = 0;
         list_store.clear();
         for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
             let append_iter = list_store.insert(-1);
             Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbuf_cache);
-            num_lines += 1;
+            // num_lines += 1;
         }
         if let Some((sort_col, sort_type)) = o_last_sort_column_id {
             list_store.set_sort_column_id(sort_col, sort_type);
