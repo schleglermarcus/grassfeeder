@@ -1,7 +1,12 @@
-Thu, 11 Sep 2024 12:00:00 +0000
+Fri, 04 Oct 2024 12:00:00 +0000
 * Library update: gtkwebkit to 0.19, gtk to 0.16
 * Search field allows multipile entries via separator
 * Bigger Font for browser title
 * Bugfix db cleanup locking issue
+* Queue length to block char display
 
-- remove queue display left
+
+- clippy
+-->  treeview2.rs
+--> runner_internal
+- create source zip

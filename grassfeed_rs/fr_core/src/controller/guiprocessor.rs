@@ -298,7 +298,6 @@ impl GuiProcessor {
                             }
                         }
                     }
-                    // self.statusbar.borrow_mut().cache.downloader_kind_new[threadnr as usize] = 0;
                     self.statusbar.set_downloader_kind(threadnr, 0);
                 }
                 Job::CheckFocusMarker(num) => {
@@ -309,7 +308,6 @@ impl GuiProcessor {
                     }
                 }
                 Job::AddBottomDisplayErrorMessage(msg) => {
-                    // self.statusbar                        .borrow_mut()                        .cache                        .bottom_notices                        .push_back(msg);
                     self.statusbar.push_bottom_notice(msg);
                 }
                 Job::NotifyDbClean(c_step, duration_ms, ref c_msg) => {
@@ -321,7 +319,6 @@ impl GuiProcessor {
                             duration_ms,
                             msg
                         );
-                        // self.statusbar.borrow_mut().set_db_check_msg(&newmsg);
                         self.statusbar.set_db_check_message(newmsg.clone());
                         AValue::ASTR(newmsg)
                     } else {

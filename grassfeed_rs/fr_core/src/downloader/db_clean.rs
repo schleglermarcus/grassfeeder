@@ -323,17 +323,16 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
     }
 }
 
+
+
+/// Later:  check if icon cleanup works with database
 pub struct CorrectIconsDoublettes(pub CleanerInner);
 impl Step<CleanerInner> for CorrectIconsDoublettes {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
         inner.send_gp(None);
-
         let all_icons: Vec<IconRow> = inner.iconrepo.get_all_entries();
-
-        // TODO
-
         let mut ic_first: HashMap<String, isize> = HashMap::new();
         let mut replace_ids: HashMap<isize, isize> = HashMap::new(); // subsequent-icon-id =>  previous icon-id
         all_icons
@@ -453,7 +452,7 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(None); // Some("MarkUnconnectedMessages-0".to_string())
+        inner.send_gp(None);
         let parent_ids_active: Vec<i32> = inner
             .subscriptionrepo
             .get_all_nonfolder()

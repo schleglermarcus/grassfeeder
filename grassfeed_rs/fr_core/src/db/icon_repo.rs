@@ -189,11 +189,7 @@ impl IIconRepo for IconRepo {
             compression_type: comp_type,
             req_date: 0,
         };
-        trace!(
-            "icon_repo::store_icon: {} C{:?}",
-            entry.icon_id,
-            entry.compression_type
-        );
+        //  trace!(            "icon_repo::store_icon: {} C{:?}",            entry.icon_id,            entry.compression_type        );
         match self.ctx.insert(&entry, true) {
             Ok(r) => Result::Ok(r as usize),
             Err(e) => Result::Err(Box::new(e)),

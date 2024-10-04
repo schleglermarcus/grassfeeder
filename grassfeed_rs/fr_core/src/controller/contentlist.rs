@@ -342,37 +342,6 @@ impl ContentList {
         );
     }
 
-    /*
-       fn filter_messages1<'a>(&'a self, list_in: &'a [&MessageRow]) -> Vec<&MessageRow> {
-           let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
-
-           let reg = RegexBuilder::new(&regex::escape(matchtext))
-               .case_insensitive(true)
-               .build()
-               .unwrap();
-
-           trace!("filter_messages:  matchtext {}", matchtext);
-
-           let out_list: Vec<&MessageRow> = list_in
-               .iter()
-               .filter(|m| {
-                   let o_title = self.msg_state.read().unwrap().get_title(m.message_id);
-                   if o_title.is_none() {
-                       return true;
-                   }
-                   let title = o_title.unwrap();
-
-                   if reg.is_match(&title) {
-                       return true;
-                   }
-                   false
-               })
-               .cloned()
-               .collect();
-           out_list
-       }
-    */
-
     /// Read from db and put into the list view,
     /// State Map shall contain only the current subscription's messages, for finding the cursor position for the focus policy
     fn update_messagelist_int(&self) {
@@ -381,7 +350,6 @@ impl ContentList {
         let mut child_ids: Vec<isize> = Vec::default();
         let mut mr_r = self.messagesrepo_r.borrow_mut();
         let mr_i: MessageIterator;
-
         if isfolder {
             if let Some(feedsources) = self.feedsources_w.upgrade() {
                 if let Some((_subs_e, child_subs)) =
@@ -398,14 +366,12 @@ impl ContentList {
             mr_i = (*mr_r).get_by_subscription(subs_id);
         }
         mr_i.clone().for_each(|m| {
-            // trace!(                "update_messagelist_int {}  ISREAD:{}   ",                m.message_id,                m.is_read            );
             messagelist.push(m);
         });
         if num_msg != messagelist.len() as isize {
             self.fill_state_map(mr_i.clone());
         }
         let filtered_msglist: Vec<&MessageRow> = if self.msg_filter.is_some() {
-            // self.filter_messages1(&messagelist)
             let matchtext: &str = self.msg_filter.as_ref().unwrap().as_str();
             filter_messages2(&self.msg_state, &messagelist, matchtext)
         } else {
@@ -432,7 +398,6 @@ impl ContentList {
                 ),
             );
         });
-        // debug!(            "update_messagelist_int {}     #filtered={}  ",            subs_id,            filtered_msglist.len()        );
         (*self.gui_updater).borrow().update_list(TREEVIEW1);
         self.list_selected_ids.write().unwrap().clear();
     }

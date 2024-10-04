@@ -538,29 +538,6 @@ impl TimerReceiver for SubscriptionRepo {
     }
 }
 
-/*
-fn subscription_entry_to_json(input: &SubscriptionEntry) -> Option<String> {
-    match serde_json::to_string(input) {
-        Ok(encoded) => Some(encoded),
-        Err(er) => {
-            error!("serde_json {:?} \n {:?}", er, &input.subs_id);
-            None
-        }
-    }
-}
-
-fn json_to_subscription_entry(line: String) -> Option<SubscriptionEntry> {
-    let dec_r: serde_json::Result<SubscriptionEntry> = serde_json::from_str(&line);
-    match dec_r {
-        Ok(dec_se) => Some(dec_se),
-        Err(e) => {
-            error!("serde_json:from_str {:?}   {:?} ", e, &line);
-            None
-        }
-    }
-}
- */
-
 #[cfg(test)]
 mod ut {
     use super::*;

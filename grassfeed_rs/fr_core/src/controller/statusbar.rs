@@ -113,7 +113,12 @@ impl StatusBar {
     }
 
     pub fn set_browser_loading_progress(&self, p: u8) {
-        self.cache.borrow_mut().browser_loading_progress = p;
+        let old_prog = self.cache.borrow().browser_loading_progress;
+        if p != old_prog {
+            let mut c = self.cache.borrow_mut();
+            c.browser_loading_progress = p;
+            c.browser_loading_progress_changed = true;
+        }
     }
 
     pub fn pop_bottom_message(&self) -> Option<String> {
@@ -127,7 +132,8 @@ impl StatusBar {
         for p in &self.panels {
             let label_id = p.get_label_id();
             let (o_labeltext, o_tooltip) = p.calculate_update(&self);
-            let do_update = o_tooltip.is_some() || o_labeltext.is_some();
+            let with_tooltip = o_tooltip.is_some();
+            let with_label = o_labeltext.is_some();
             if let Some(labeltext) = o_labeltext {
                 (*self.gui_val_store)
                     .write()
@@ -140,11 +146,13 @@ impl StatusBar {
                     .unwrap()
                     .set_label_tooltip(label_id, tt);
             }
-            if do_update {
+
+            if with_tooltip {
                 (*self.gui_updater).borrow().update_label_markup(label_id);
+            } else if with_label {
+                (*self.gui_updater).borrow().update_label(label_id);
             }
         }
-        // self.update_old();
     }
 
     // returns subscription_id
@@ -166,6 +174,7 @@ impl StatusBar {
         if subscription_id_new != subs_id_old {
             let dl_r_b = self.r_downloader.borrow();
             let mut c = self.cache.borrow_mut();
+            c.subscription_id = subscription_id_new;
             c.num_downloader_threads = dl_r_b.get_config().num_downloader_threads;
             c.downloader_stats = dl_r_b.get_statistics();
             c.subscription_is_folder = subs_is_folder;
@@ -180,7 +189,6 @@ impl StatusBar {
         subscription_id_new
     }
 
-    // todo: move update mechanism to cache
     fn get_contents_info(&self, subscription_id: isize) {
         let content_ids = (*self.r_messages).borrow().get_selected_content_ids();
         let mut new_selected_msg_id = -1;
@@ -195,7 +203,6 @@ impl StatusBar {
         } else if self.cache.borrow().selected_msg_changed {
             self.cache.borrow_mut().selected_msg_changed = false;
         }
-
         let subs_state: SubsMapEntry = (*self.r_subscriptions_controller)
             .borrow()
             .get_state(subscription_id)
@@ -211,7 +218,6 @@ impl StatusBar {
                 old_n_unread = c.num_msg_unread;
                 old_is_changed = c.num_msg_changed;
             }
-
             if n_a != old_n_all || n_u != old_n_unread {
                 let mut c = self.cache.borrow_mut();
                 c.num_msg_all = n_a;
@@ -221,34 +227,15 @@ impl StatusBar {
                 self.cache.borrow_mut().num_msg_changed = false;
             }
         }
-
         let new_qsize = (*self.r_downloader).borrow().get_queue_size();
         let new_qsize = new_qsize.0 + new_qsize.1; // queue + threads
         if new_qsize != self.cache.borrow().num_dl_queue_length {
             let mut c = self.cache.borrow_mut();
             c.num_dl_queue_length = new_qsize;
             c.num_dl_queue_length_changed = true;
+        } else if self.cache.borrow().num_dl_queue_length_changed {
+            self.cache.borrow_mut().num_dl_queue_length_changed = false;
         }
-
-        /*
-        let downloader_kind: [u8; DOWNLOADER_MAX_NUM_THREADS];
-               for (a, busy) in downloader_busy
-                   .iter()
-                   .enumerate()
-                   .take(DOWNLOADER_MAX_NUM_THREADS)
-               {
-                   if statusbar.cache.borrow().downloader_kind[a] > 0 && *busy == 0 {
-                       statusbar.cache.borrow_mut().downloader_kind_new[a] = 0;
-                       need_update_1 = true;
-                   }
-
-                   let k_new = statusbar.cache.borrow().downloader_kind_new[a];
-                   if statusbar.cache.borrow().downloader_kind[a] != k_new {
-                       statusbar.cache.borrow_mut().downloader_kind[a] = k_new;
-                       need_update_1 = true;
-                   }
-               }
-        */
     }
 
     // Mem usage in kb: current=105983, peak=118747411
@@ -298,8 +285,6 @@ pub struct CachedData {
     pub bottom_notices: VecDeque<String>,
     //  start-of-display  time,  current message
     pub bottom_notice_current: Option<(i64, String)>,
-    pub browser_loading_progress: u8,
-    pub browser_loading_progress_int: u8,
     pub downloader_stats: [u32; DLKIND_MAX],
     pub db_check_running: bool,
     pub db_check_display_message: String,
@@ -325,6 +310,9 @@ pub struct CachedData {
     pub selected_msg_id: i32,
     pub selected_msg_url: String,
     pub selected_msg_changed: bool,
+
+    pub browser_loading_progress: u8,
+    pub browser_loading_progress_changed: bool,
 }
 
 impl CachedData {
@@ -363,20 +351,17 @@ impl OnePanel for PanelLeft {
         let num_msg_changed: bool;
         let is_folder: bool;
         let subs_id_changed: bool;
-        // let subscription_id: isize;
         let downloader_kind: [u8; DOWNLOADER_MAX_NUM_THREADS];
         let n_threads: usize;
         let downloader_kind_changed: bool;
         let downloader_queue_length: u16;
         let downloader_queue_changed: bool;
-
         {
             let c = statusbar.cache.borrow();
             is_folder = c.subscription_is_folder;
             subs_id_changed = c.subscription_id_changed;
             num_msg_all = c.num_msg_all;
             num_msg_unread = c.num_msg_unread;
-            // subscription_id = c.subscription_id;
             num_msg_changed = c.num_msg_changed;
             downloader_kind = c.downloader_kind;
             n_threads = c.num_downloader_threads as usize;
@@ -384,10 +369,10 @@ impl OnePanel for PanelLeft {
             downloader_queue_length = c.num_dl_queue_length;
             downloader_queue_changed = c.num_dl_queue_length_changed;
         }
-
         if num_msg_changed || downloader_kind_changed || downloader_queue_changed {
             need_update_1 = true;
         }
+        //  debug!("PanelLeft:1   {num_msg_changed}  {downloader_kind_changed}     {downloader_queue_changed}   vert {} " ,  !is_folder && subs_id_changed );
         let mut block_vertical: char = ' ';
         if !is_folder && subs_id_changed {
             let fs_conf = statusbar.r_subscriptions_controller.borrow().get_config();
@@ -401,41 +386,27 @@ impl OnePanel for PanelLeft {
         if !need_update_1 {
             return (None, None);
         }
-
         let mut downloader_display: String = String::default();
         for a in 0..n_threads {
             let nc = dl_char_for_kind(downloader_kind[a]);
             downloader_display.push(nc);
         }
         let unread_all = format!("{:5} / {:5}", num_msg_unread, num_msg_all);
-        let mut dl_line = String::default();
-        statusbar
-            .cache
-            .borrow()
-            .downloader_stats
-            .iter()
-            .enumerate()
-            .filter(|(_n, s)| **s > 0)
-            .map(|(n, s)| format!("{}{} ", dl_char_for_kind(n as u8), s))
-            .for_each(|s| dl_line.push_str(&s));
         statusbar.cache.borrow_mut().reset_downloader_kind_updated();
-
-        let memdisplay = format!(
-            "  {}MB  {}  ",
-            statusbar.cache.borrow().mem_usage_vmrss_bytes / 1048576,
-            dl_line
+        let t_popup = format!(
+            "q{}  {}MB",
+            downloader_queue_length,
+            statusbar.cache.borrow().mem_usage_vmrss_bytes / 1048576
         );
 
-        /// TODO
-        let dl_queue_txt = if downloader_queue_length > 0 {
-            format!("{:2}", downloader_queue_length)
-        } else {
-            "  ".to_string()
-        };
-
-        let msg1 = format!(   "<tt>{dl_queue_txt} {downloader_display}  {unread_all}    \u{2595}{block_vertical}\u{258F}</tt>"   );
-        // trace!("PanelLeft:3    {msg1}  {memdisplay}  ");
-        (Some(msg1), Some(memdisplay))
+        let queue_display_max = DOWNLOADER_MAX_NUM_THREADS << 1; // double amount of threads shall display full char
+        let dl_queue_char = get_vertical_block_char(
+            usize::min(downloader_queue_length as usize, queue_display_max),
+            queue_display_max,
+        );
+        let msg1 = format!(   "<tt>{dl_queue_char} {downloader_display}  {unread_all}    \u{2595}{block_vertical}\u{258F}</tt>"   );
+        // debug!("PanelLeft:3    {msg1}  {t_popup}  ");
+        (Some(msg1), Some(t_popup))
     }
     fn get_label_id(&self) -> u8 {
         LABEL_STATUS_1
@@ -447,16 +418,13 @@ impl OnePanel for PanelMiddle {
     fn calculate_update(&self, statusbar: &StatusBar) -> (Option<String>, Option<String>) {
         let selected_msg_url: String;
         let selected_msg_changed: bool;
-        let selected_msg_id: i32;
         let bottom_notice_current: Option<(i64, String)>;
         {
             let c = statusbar.cache.borrow();
             selected_msg_url = c.selected_msg_url.clone();
             selected_msg_changed = c.selected_msg_changed;
-            selected_msg_id = c.selected_msg_id;
             bottom_notice_current = c.bottom_notice_current.clone();
         }
-
         let mut feed_src_link = String::default();
         let o_subscription = (*statusbar.r_subscriptions_controller)
             .borrow()
@@ -464,33 +432,17 @@ impl OnePanel for PanelMiddle {
         if let Some((fse, _)) = o_subscription {
             feed_src_link.clone_from(&fse.url);
         }
-        /*
-               let content_ids = (*statusbar.r_messages).borrow().get_selected_content_ids();
-               let mut selected_msg_id = -1;
-               if !content_ids.is_empty() {
-                   selected_msg_id = *content_ids.first().unwrap();
-               }
-        let last_msg_url = if selected_msg_id < 0 {
-            String::default()
-        } else {
-            (statusbar.r_browserpane).borrow().get_last_selected_link()
-        };
-
-        */
         let mut need_update_2: bool = false;
 
         if selected_msg_changed {
             need_update_2 = true;
         }
-
-        // let selected_msg_url: String = statusbar.cache.borrow().selected_msg_url.clone();
         let mut longtext = if selected_msg_url.is_empty() {
             string_escape_url(feed_src_link)
         } else {
             string_escape_url(selected_msg_url.clone())
         };
 
-        // let o_current = &statusbar.get_bottom_notice_current();
         if let Some((ts, msg)) = bottom_notice_current {
             let timestamp_now: i64 = timestamp_now();
             if timestamp_now > ts + BOTTOM_MSG_SHOW_TIME_S as i64 {
@@ -504,14 +456,10 @@ impl OnePanel for PanelMiddle {
                 need_update_2 = true;
             }
         }
-
         if !need_update_2 {
             return (None, None);
         }
-
-        trace!("Middle:   URL:{selected_msg_url}   {longtext} ",);
-
-        return (Some(longtext), None);
+        return (Some(longtext), Some(String::from("Toooltip !!")));
     }
 
     fn get_label_id(&self) -> u8 {
@@ -522,15 +470,20 @@ impl OnePanel for PanelMiddle {
 struct PanelRight {}
 impl OnePanel for PanelRight {
     fn calculate_update(&self, statusbar: &StatusBar) -> (Option<String>, Option<String>) {
-        let progr = statusbar.cache.borrow().browser_loading_progress;
-        let p_int = statusbar.cache.borrow().browser_loading_progress_int;
-        if progr != p_int {
-            //  debug!("right:  p: {}   <== {}   ", p_int, progr);
-            statusbar.cache.borrow_mut().browser_loading_progress_int = progr;
-
-            let b_loading = get_vertical_block_char(p_int as usize, 256);
+        let progr: u8;
+        let progr_changed: bool;
+        {
+            let c = statusbar.cache.borrow();
+            progr = c.browser_loading_progress;
+            progr_changed = c.browser_loading_progress_changed;
+        }
+        if progr_changed {
+            statusbar
+                .cache
+                .borrow_mut()
+                .browser_loading_progress_changed = false;
+            let b_loading = get_vertical_block_char(progr as usize, 256);
             let text = format!("<tt>\u{2595}{b_loading}</tt>");
-
             return (Some(text), None);
         }
         (None, None)

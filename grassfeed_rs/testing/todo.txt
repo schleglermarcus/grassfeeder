@@ -1,10 +1,12 @@
-
+- check if icon cleanup works with database
 - remove or re-load icons that are too old
 - remove unused icons
 - put errors in a database
 
+- look at db cleanup dialog, watch update bar
 
 - package bas64  to newer version
+- Filling content list with partitioned gtk-String lists.
 
 - https://www.inka-magazin.de/stadtmagazin-karlsruhe-baden-pfalz.html
   Multiple Feeds On one Page, Create a Selector
@@ -12,7 +14,6 @@
 
 
 Later:
-- 02 Apr 2023 :  update GTK  to  features, new Version compatible to ubuntu20
 - GTK4: block multiple instances
 - GTK4: process both sets of cmd parameters:   application   AND gtk, see runner_internal
 	https://docs.gtk.org/gio/method.Application.run.html
@@ -95,27 +96,6 @@ Linux Iso download:
 
 
 
------- Gnome Desktop:
-appimage /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_ABI_DT_RELR' not found (required by /tmp/.mount /lib64/libm.so.6)
-
-Samba mount:
-#  apt-get install cifs-utils
-
-# /etc/fstab:
-//kav/workspacer	/mnt/kav 		cifs 	noauto,rw,user,exec,vers=2.1		0 0
-
-# sudo chmod u+s   /bin/mount /bin/umount   /usr/sbin/mount.cifs 	/sbin/mount.cifs
-
-# nano ~/.bashrc
-gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
-test -s ~/.alias && . ~/.alias || true
-alias l="ls -l --color"
-findmnt /mnt/kav || mount /mnt/kav
-rsync -av  --delete /mnt/kav/gfdist ~/
-
-
-crates.io download:                   https://crates.io/api/v1/crates/webpki/0.22.0/download
-
 
 
 ------ AppImage
@@ -162,14 +142,8 @@ GTK_DEBUG=interactive
 
 
 -------------------
-
-
-
-
 cat /proc/1/smaps |grep -i pagesize  |sort -u
 KernelPageSize:        4 kB
-
-
 /proc/self/statm
 
 

@@ -784,6 +784,7 @@ pub fn create_buttonbox(_g_ev_se: Sender<GuiEvents>) -> ButtonBox {
     buttonbox
 }
 
+
 fn create_statusbar(gtk_obj_a: GtkObjectsType, _mode_debug: bool) -> gtk::Box {
     // box_1_v
     let box3_status = gtk::Box::new(Orientation::Horizontal, 0);
@@ -791,6 +792,7 @@ fn create_statusbar(gtk_obj_a: GtkObjectsType, _mode_debug: bool) -> gtk::Box {
     // box_1_v
     let label_st1 = Label::new(Some("^_^"));
     label_st1.set_width_request(20);
+
     box3_status.add(&label_st1);
     let label_st2 = Label::new(Some("^_^"));
     label_st2.set_width_request(100);
