@@ -1,0 +1,5 @@
+Sun, 06 Oct 2024 01:00:00 +0000
+* Using updated base versions:  Debian bookworm (previous bullseye)
+* Using updated base versions:  Ubuntu noble  (previous jammy) 
+* Updated dependencies for docker: libwebkit2gtk-4.1-dev  libjavascriptcoregtk-4.1-dev
+* Re-added creating changelog.gz
