@@ -3,6 +3,13 @@
 
 * Check version number in   app-gtk3-linux/Cargo.toml
 
+* Launchpad uses an old rust version 1.75.0, see https://launchpad.net/ubuntu/+source/rustc
+  Downgrade the rust version, then build it locally
+  #  rustup default 1.75.0
+  Later upgrade back with #  rustup default stable
+
+
+
 * Merge Branch and build release
   git checkout main
   git merge origin/v0_2_2

@@ -13,7 +13,10 @@ RUN pwd
 
 # RUN (test -f Cargo.lock && rm Cargo.lock)        # The command '/bin/sh -c (test -f Cargo.lock && rm Cargo.lock)' returned a non-zero code: 1
 # RUN if test -f  Cargo.lock  ; then rm Cargo.lock ; fi
- 
+
+# This creates a situation like on launchpad, see versions here https://launchpad.net/ubuntu/+source/rustc
+RUN rustup default 1.75
+
 RUN cargo clean
 RUN cargo test --release
 RUN cargo deb

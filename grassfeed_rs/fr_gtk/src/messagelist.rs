@@ -119,7 +119,6 @@ pub fn create_listview(
     {
         let col = TreeViewColumn::new(); // is-read
         let cellrendpixbuf = CellRendererPixbuf::new();
-        use gtk::prelude::CellLayoutExt;
         CellLayoutExt::pack_end(&col, &cellrendpixbuf, false);
         CellLayoutExt::add_attribute(&col, &cellrendpixbuf, "gicon", 3_i32);
         col.set_title("R");
