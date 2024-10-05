@@ -1,6 +1,6 @@
 [package]
 name = "app-gtk3-linux"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 description = "Feed Reader Linux-Gtk3 Application"
 license = "LGPL-3"
@@ -54,7 +54,7 @@ assets = [
 	],
 	[
 		"assets/changelog.gz",
-		"/usr/share/doc/grassfeeder/",
+		"/usr/share/doc/grassfeeder/changelog.Debian.gz",
 		"0644",
 	],
 	[

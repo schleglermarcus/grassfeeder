@@ -8,9 +8,10 @@
   git merge origin/v0_2_2
   git commit
   git push origin main
-  cd grassfeed_rs   ; cargo test
+  cd grassfeed_rs   ;  (find . -name Cargo.lock  |xargs rm -v)
+  cargo test 
   (cd app-gtk3-linux ; ./debian-stage2.sh )
-  (cd app-gtk3-ubuntu/ ; ./deb-sign.sh )
+  cd app-gtk3-ubuntu/ ; ./deb-sign.sh 
 
 
 * Put the work folder back to main
@@ -18,7 +19,7 @@ git checkout main ;    git pull ;  git status
 
 
 * Create new Branch
-(B=v0_2_3 ;	git branch $B ;	git checkout $B ; git push -u origin $B ;   git branch --set-upstream-to=origin/$B $B )
+(B=v0_2_3 ; git branch $B ; git checkout $B ; git push -u origin $B ;   git branch --set-upstream-to=origin/$B $B )
 
 
 
@@ -33,6 +34,8 @@ git checkout main ;    git pull ;  git status
     # ./deb-create.sh
     
 
-
+* Check dates of release info files:
+# cd app-changes
+# for F in `ls -1d *.txt` ; do (  A=`cat $F |head -n1` ; N=`date -R -ud "$A"` ; if test "$A" != "$N" ; then echo "$F $A $N" ; fi    )   ; done 
 
 

@@ -1,5 +1,8 @@
 FROM grassfeeder:debian-stage1
 
+RUN apt install -y libwebkit2gtk-4.1-dev        libjavascriptcoregtk-4.1-dev librust-glib-dev  librust-glib-sys-dev  
+RUN dpkg -l |grep glib-sys
+
 
 WORKDIR /usr/src/
 COPY target/gf.tar.gz /usr/src/
@@ -9,7 +12,8 @@ WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
 RUN pwd
 
 # RUN (test -f Cargo.lock && rm Cargo.lock)        # The command '/bin/sh -c (test -f Cargo.lock && rm Cargo.lock)' returned a non-zero code: 1
-
+# RUN if test -f  Cargo.lock  ; then rm Cargo.lock ; fi
+ 
 RUN cargo clean
 RUN cargo test --release
 RUN cargo deb

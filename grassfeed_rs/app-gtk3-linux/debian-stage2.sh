@@ -12,9 +12,6 @@ test -f Cargo.lock && rm Cargo.lock
 docker build -t grassfeeder:debian-stage2 -f  debian-stage2.docker .
 
 
-#docker cp $(docker create --name tc grassfeeder:debian-stage2):/usr/src/grassfeed_rs/app-gtk3-linux/gf.AppImage target/ ; docker rm tc
-#mv target/gf.AppImage  target/grassfeeder-${VERSION}-debian11.AppImage
-
 docker cp $(docker create --name tc grassfeeder:debian-stage2):/usr/src/grassfeed_rs/target/gf.deb target/ ; docker rm tc
 mv target/gf.deb  target/grassfeeder-${VERSION}-debian11.deb
 
