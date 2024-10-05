@@ -21,16 +21,17 @@ find vendor/winapi* -name lib -type d |xargs rm -rf
 
 DEST="sources-vendored"
 test -d target || mkdir target
-
+find target/sources_* |xargs rm -rf
 test -d $DEST || rm -rf $DEST
 mkdir $DEST
 
 mv -v vendor/soup3 $DEST/
 mv -v vendor/libsqlite3* $DEST/
 mv -v vendor/web-sys $DEST/
-mv -v vendor/image-* $DEST/
+mv -v vendor/image* $DEST/
 mv -v vendor/ring  $DEST/
-mv -v vendor/rav1e  $DEST/
+mv -v vendor/libwebp-sys2  $DEST/
+
 tar c $DEST |gzip >src_vendored_1.tar.gz
 
 test -d target/sources_vendored_1 || rm -rf target/sources_vendored_1
