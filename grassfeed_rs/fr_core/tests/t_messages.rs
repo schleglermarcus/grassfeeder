@@ -36,9 +36,6 @@ fn feed_text_to_entries_naturalnews_2023() {
 	   "White House press secretary ripped for claiming it'll take days to count ballots so many winners won't be immediately known".to_string()   );
 }
 
-
-
-
 //RUST_BACKTRACE=1 cargo watch -s "cargo test  downloader::messages::t_::t_strange_datetime_recover    --lib -- --exact --nocapture "
 #[test]
 fn t_strange_datetime_recover() {

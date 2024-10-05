@@ -3,7 +3,7 @@ use resources::application_id::*;
 
 const CARGO_PKG_DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 
-const LOCALES_LIST: [&str; 2] = ["en", "de"]; // later into environment variable ?
+const LOCALES_LIST: [&str; 2] = ["en", "de"];
 
 #[derive(Debug, Options)]
 pub struct MyOptions {

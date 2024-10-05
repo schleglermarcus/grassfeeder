@@ -407,7 +407,6 @@ impl Step<IconInner> for IconCheckPresent {
     }
 }
 
-
 // Later:   utilize    http_date, http_length
 struct IconStore(IconInner);
 impl Step<IconInner> for IconStore {

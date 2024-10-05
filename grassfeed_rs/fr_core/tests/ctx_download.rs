@@ -32,7 +32,7 @@ fn comprehensive_feed_download() {
     let fetcher: WebFetcherType = Arc::new(Box::new(FileFetcher::new(base_path)));
     let comp_inner = ComprehensiveInner {
         feed_url_edit: "gui_proc_rss2_v1.rss".to_string(),
-        iconrepo: IconRepo::new_in_mem(), 
+        iconrepo: IconRepo::new_in_mem(),
         web_fetcher: fetcher,
         download_error_happened: false,
         icon_url: String::default(),
@@ -63,7 +63,7 @@ fn downloader_load_message_into_db() {
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
     let (gp_s, _gp_r) = flume::bounded::<Job>(9);
     let r_configmanager = Rc::new(RefCell::new(ConfigManager::default()));
-    let f_src_repo = SubscriptionRepo::new_inmem(); 
+    let f_src_repo = SubscriptionRepo::new_inmem();
     f_src_repo.scrub_all_subscriptions();
     let mut fse = SubscriptionEntry::from_new_url(
         "feed1-display".to_string(),

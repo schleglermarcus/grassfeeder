@@ -445,6 +445,8 @@ impl ISubscriptionMove for SubscriptionMove {
     }
 
     ///  returns  the suscription id
+    ///
+    /// Later: investigate how to filter  https://www.ksta.de/feed/index.rss
     fn add_new_subscription_at_parent(
         &self,
         newsource: String,
@@ -460,7 +462,7 @@ impl ISubscriptionMove for SubscriptionMove {
             .to_string();
         let (filtered, was_truncated) = filter_by_iso8859_1(&san_display);
         if !was_truncated {
-            san_display = filtered; // later see how to filter  https://www.ksta.de/feed/index.rss
+            san_display = filtered;
         }
         let mut fse = SubscriptionEntry::from_new_url(san_display, san_source.clone());
         fse.subs_id = self.get_next_available_subscription_id();

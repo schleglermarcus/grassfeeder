@@ -323,8 +323,6 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
     }
 }
 
-
-
 /// Later:  check if icon cleanup works with database
 pub struct CorrectIconsDoublettes(pub CleanerInner);
 impl Step<CleanerInner> for CorrectIconsDoublettes {

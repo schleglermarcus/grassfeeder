@@ -1,4 +1,4 @@
-grassfeeder-gtk3 (0.0.3130) jammy; urgency=low
+grassfeeder-gtk3 (0.3.1) jammy; urgency=low
 
   * Search field allows multipile entries via separator
   * Bigger Font for browser title

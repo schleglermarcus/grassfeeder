@@ -791,7 +791,7 @@ fn create_settings_dialog(
     let sw_display_feedcount = Switch::new();
     let spinb_msg_keep_count = SpinButton::with_range(
         20.0,
-        STORE_MESSAGES_PER_SUBSCRIPTION as f64 , /*  10000.0 */
+        STORE_MESSAGES_PER_SUBSCRIPTION as f64, /*  10000.0 */
         20.0,
     );
     let sw_fontsize_manual_enable = Switch::new();

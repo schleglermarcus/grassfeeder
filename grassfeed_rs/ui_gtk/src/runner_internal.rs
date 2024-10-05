@@ -116,7 +116,7 @@ impl GtkRunnerInternal {
 
     /// this  blocks the caller completely, while running the app
     /// https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/gio/prelude/trait.ApplicationExtManual.html#tymethod.run
-    ///  LATER: find a way how to process both sets of parameters:   application   AND gtk
+    ///  LATER,  gkt4:  find a way how to process both sets of parameters:   application   AND gtk
     pub fn run(&self) {
         let app_o = (*self.gtk_objects).read().unwrap().get_application();
         match app_o {
