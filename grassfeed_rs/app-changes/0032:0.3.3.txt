@@ -1,0 +1,2 @@
+Sun, 06 Oct 2024 02:00:00 +0000
+* downgraded package "image"  for pleasing the launchpad rustc version 1.75
