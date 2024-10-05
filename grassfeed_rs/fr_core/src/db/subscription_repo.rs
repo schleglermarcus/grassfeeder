@@ -21,8 +21,6 @@ use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
 
-// pub const CONV_TO: &dyn Fn(String) -> Option<SubscriptionEntry> = &json_to_subscription_entry;
-// pub const CONV_FROM: &dyn Fn(&SubscriptionEntry) -> Option<String> = &subscription_entry_to_json;
 
 pub trait ISubscriptionRepo {
     /// sorts by folder_position

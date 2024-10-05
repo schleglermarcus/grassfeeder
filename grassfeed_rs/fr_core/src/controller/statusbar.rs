@@ -54,10 +54,6 @@ impl StatusBar {
         browser_pane: Rc<RefCell<dyn IBrowserPane>>,
         val_store: UIAdapterValueStoreType,
     ) -> Self {
-        // let mut panels_: Vec<Box<dyn OnePanel>> = Vec::new();
-        // panels_.push(Box::new(PanelLeft {}));
-        // panels_.push(Box::new(PanelMiddle {}));
-        // panels_.push(Box::new(PanelRight {}));
         let panels_: Vec<Box<dyn OnePanel>> = vec![
             Box::new(PanelLeft {}),
             Box::new(PanelMiddle {}),
@@ -295,7 +291,6 @@ pub struct CachedData {
     pub db_check_running: bool,
     pub db_check_display_message: String,
 
-    ///  change name
     pub subscription_id: isize,
     pub subscription_id_changed: bool,
 
@@ -306,7 +301,6 @@ pub struct CachedData {
     pub num_msg_unread: isize,
     pub num_msg_changed: bool,
 
-    //    pub downloader_kind_new: [u8; DOWNLOADER_MAX_NUM_THREADS],
     pub downloader_kind: [u8; DOWNLOADER_MAX_NUM_THREADS],
     pub downloader_kind_changed: bool,
 
@@ -378,7 +372,6 @@ impl OnePanel for PanelLeft {
         if num_msg_changed || downloader_kind_changed || downloader_queue_changed {
             need_update_1 = true;
         }
-        //  debug!("PanelLeft:1   {num_msg_changed}  {downloader_kind_changed}     {downloader_queue_changed}   vert {} " ,  !is_folder && subs_id_changed );
         let mut block_vertical: char = ' ';
         if !is_folder && subs_id_changed {
             let fs_conf = statusbar.r_subscriptions_controller.borrow().get_config();
@@ -393,10 +386,6 @@ impl OnePanel for PanelLeft {
             return (None, None);
         }
         let mut downloader_display: String = String::default();
-        // for a in 0..n_threads {
-        //     let nc = dl_char_for_kind(downloader_kind[a]);
-        //     downloader_display.push(nc);
-        // }
         for k in downloader_kind.iter().take(n_threads) {
             downloader_display.push(dl_char_for_kind(*k));
         }

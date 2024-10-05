@@ -7,7 +7,7 @@ grassfeeder-gtk3 (0.3.1) jammy; urgency=low
   * Vendored source packages divided into two tar.gz files
   * Bugfix db cleanup locking issue
 
- -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sat, 05 Oct 2024 12:00:00 +0000
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sat, 05 Oct 2024 13:00:00 +0000
 
 grassfeeder-gtk3 (0.3.0) jammy; urgency=low
 

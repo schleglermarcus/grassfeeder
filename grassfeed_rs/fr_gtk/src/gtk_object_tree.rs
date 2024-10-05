@@ -266,10 +266,6 @@ impl GtkObjectTree {
         }
         match self.initvalues.get(&name) {
             Some(b) => b.parse::<bool>().unwrap_or_default(),
-            //  match b.parse::<bool>() {
-            //     Ok(i) => i,
-            //     Err(_e) => false,
-            // }
             None => false,
         }
     }
