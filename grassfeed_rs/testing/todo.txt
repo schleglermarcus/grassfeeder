@@ -1,10 +1,13 @@
 
 
+
 - IconStore: utilize    http_date, http_length
 - check if icon cleanup works with database
 - remove or re-load icons that are too old
 - remove unused icons
 - put errors in a database
+
+- check for alternative for libwebp-image, due to conflict in package "image"
 
 - look at db cleanup dialog, watch update bar
 

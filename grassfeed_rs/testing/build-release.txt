@@ -19,3 +19,20 @@ git checkout main ;    git pull ;  git status
 
 * Create new Branch
 (B=v0_2_3 ;	git branch $B ;	git checkout $B ; git push -u origin $B ;   git branch --set-upstream-to=origin/$B $B )
+
+
+
+--
+* New Vendored-Sources
+    - Folder app-gtk3-ubuntu 
+    # ./create-vendored.sh
+    - edit .cargo/config, deactivate  the local cache  (!)
+    #  ./extract-dependencies.sh
+    # ./deb-sign.sh
+    # ./unpack-vendored.sh                             (!)
+    # ./deb-create.sh
+    
+
+
+
+

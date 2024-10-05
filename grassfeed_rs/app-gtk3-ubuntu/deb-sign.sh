@@ -10,7 +10,7 @@
 #
 PKGNAME="grassfeeder-gtk3"
 T_MAINT="Marcus der Schlegler <schlegler_marcus@posteo.de>"
-BUILD_DEPENDS="rustc, cargo, devscripts, pkg-config, librust-glib-dev, librust-glib-sys-dev, librust-gobject-sys-dev, libatk1.0-dev, libwebkit2gtk-4.0-dev, libsoup2.4-dev "
+BUILD_DEPENDS="rustc, cargo, devscripts, pkg-config, librust-glib-dev, librust-glib-sys-dev, librust-gobject-sys-dev, libatk1.0-dev, libwebkit2gtk-4.1-dev, libsoup2.4-dev "
 
 DIR=`pwd`
 VERSION=`cat ../resources/version.txt`

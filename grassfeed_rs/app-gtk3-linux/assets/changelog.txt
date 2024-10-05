@@ -1,18 +1,13 @@
-grassfeeder-gtk3 (0.0.3128) buster; urgency=low
+grassfeeder-gtk3 (0.0.3130) buster; urgency=low
 
-  * Library update: gtkwebkit to 0.19, gtk to 0.16
   * Search field allows multipile entries via separator
   * Bigger Font for browser title
+  * Work queue size to block char height
+  * Library update: gtkwebkit to 0.19, gtk to 0.16
+  * Vendored source packages divided into two tar.gz files
   * Bugfix db cleanup locking issue
-  * Queue length to block char display
-  
-  
-  - clippy
-  -->  treeview2.rs
-  --> runner_internal
-  - create source zip
 
- -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Fri, 04 Oct 2024 12:00:00 +0000
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sat, 05 Oct 2024 12:00:00 +0000
 
 grassfeeder-gtk3 (0.3.0) buster; urgency=low
 
