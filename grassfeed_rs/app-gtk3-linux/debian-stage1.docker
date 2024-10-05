@@ -1,8 +1,9 @@
 # NEW but  the package won't work in Mint20
 # 2023-05 : cargo-deb needs rust-1.64 
 # 2023-10 : regex-automata needs rust-1.65
+# see  https://hub.docker.com/_/rust/ 
 
-FROM rust:1.73-slim-bullseye
+FROM rust:1.81-slim-bullseye
 run echo "deb     http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free"  >/etc/apt/sources.list
 run echo "deb-src http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free" >>/etc/apt/sources.list
 

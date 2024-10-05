@@ -7,16 +7,13 @@ RUN cat gf.tar.gz |gzip -d |tar x
 
 WORKDIR /usr/src/grassfeed_rs/app-gtk3-linux
 RUN pwd
-RUN test -f Cargo.lock && rm Cargo.lock
+
+# RUN (test -f Cargo.lock && rm Cargo.lock)        # The command '/bin/sh -c (test -f Cargo.lock && rm Cargo.lock)' returned a non-zero code: 1
+
 RUN cargo clean
 RUN cargo test --release
 RUN cargo deb
 RUN cargo generate-rpm
-
-#RUN APPIMAGE_EXTRACT_AND_RUN=1 cargo appimage
-#RUN mv grassfeeder*.AppImage  gf.AppImage
-#RUN pwd
-#RUN ls -l
 
 RUN ls -l  target/generate-rpm/*
 RUN cp target/generate-rpm/gr*.rpm  ../target/gf.rpm
