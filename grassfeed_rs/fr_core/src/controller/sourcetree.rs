@@ -389,7 +389,7 @@ impl SourceTreeController {
             if (*self.config).borrow().mode_debug {
                 let elapsed_m = now.elapsed().as_millis();
                 if elapsed_m > 100 {
-                    debug!("   SJOB: {:?} took {:?}", &job, elapsed_m);
+                    trace!("   SJOB: {:?} took {:?}", &job, elapsed_m);
                 }
             }
         }

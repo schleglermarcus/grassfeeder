@@ -132,20 +132,6 @@ fn clean_too_many_messages() {
     }
 }
 
-// Later: create new test data
-#[ignore]
-#[test]
-fn clean_icon_doublettes() {
-    setup();
-    let cleaner_i = prepare_cleaner_inner(Some("../target/iconc"), -1);
-    let sut = CorrectIconsDoublettes(cleaner_i);
-    if let StepResult::Continue(s) = Box::new(sut).step() {
-        let inner: CleanerInner = s.take();
-        let all = inner.iconrepo.get_all_entries();
-        assert_eq!(all.len(), 3);
-    }
-}
-
 // #[ignore]
 #[test]
 fn clean_errorlist_too_old() {
@@ -171,6 +157,30 @@ fn clean_errorlist_too_old() {
     }
 }
 
+
+//  cargo watch -s "(cd fr_core; cargo test --test db_remove_deleted   )  "
+#[test]
+fn clean_too_many_icons() {
+    let cleaner_i = prepare_cleaner_inner(None, -1);
+    // TODO
+    assert!(false);
+}
+
+// Later: create new test data
+#[ignore]
+#[test]
+fn clean_icon_doublettes() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(Some("../target/iconc"), -1);
+    let sut = CorrectIconsDoublettes(cleaner_i);
+    if let StepResult::Continue(s) = Box::new(sut).step() {
+        let inner: CleanerInner = s.take();
+        let all = inner.iconrepo.get_all_entries();
+        assert_eq!(all.len(), 3);
+    }
+}
+
+// TODO
 #[ignore]
 #[test]
 fn clean_errorlist_too_many() {
@@ -280,21 +290,6 @@ fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> Cleaner
     );
     cleaner_i
 }
-
-/*
-
-// Later: find   better solution for dummy data
-fn copy_icon_json(icn_path: &str) {
-    let _r = std::fs::create_dir(icn_path);
-    let r = std::fs::copy(
-        "tests/data/icons_list.json",
-        format!("{}/icons_list.json", icn_path),
-    );
-    assert!(r.is_ok());
-    let mut iconrepo = IconRepo::new_(icn_path);
-    iconrepo.startup_();
-}
- */
 
 // ------------------------------------
 

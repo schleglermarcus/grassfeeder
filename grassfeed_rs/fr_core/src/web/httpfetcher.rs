@@ -1,5 +1,7 @@
 use crate::web::HttpGetResult;
 use crate::web::IHttpRequester;
+use chrono::DateTime;
+use chrono::Local;
 use std::io::Read;
 use ureq::ErrorKind;
 
@@ -17,14 +19,29 @@ impl HttpFetcher {
         let mut r_errorkind: u8 = 0;
         let mut r_ed = String::default();
         let mut r_bytes: Vec<u8> = Vec::default();
+        let mut web_content_length: i64 = -1;
+        let mut web_last_modified: i64 = -1;
+
         let agent = ureq::builder().user_agent("ferris/1.0").build();
         match agent.get(url).call() {
             Ok(response) => {
                 r_status = response.status();
+                if let Some(l_mod_str) = response.header("Last-Modified") {
+                    match DateTime::parse_from_rfc2822(&l_mod_str) {
+                        Ok(parse_dt) => {
+                            web_last_modified = DateTime::<Local>::from(parse_dt).timestamp();
+                        }
+                        Err(e) => {
+                            r_ed = format!("Error parse_from_rfc2822(`{}`) {:?} ", l_mod_str, &e);
+                        }
+                    };
+                }
+
                 if is_binary {
                     let mut length: u64 = 0;
                     if let Some(h_cole) = response.header("Content-Length") {
                         length = h_cole.parse().unwrap();
+                        web_content_length = length as i64;
                     }
                     if length > 0 {
                         length = std::cmp::min(length, MAX_BUFFER_LENGTH);
@@ -71,6 +88,8 @@ impl HttpFetcher {
             content_bin: r_bytes,
             status: HttpGetResult::combine_status(r_status, r_errorkind),
             error_description: r_ed,
+            content_length: web_content_length,
+            timestamp: web_last_modified,
         }
     }
 }

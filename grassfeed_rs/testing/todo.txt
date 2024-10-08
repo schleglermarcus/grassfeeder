@@ -1,18 +1,15 @@
 
-
-
 - IconStore: utilize    http_date, http_length
 - check if icon cleanup works with database
 - remove or re-load icons that are too old
 - remove unused icons
 - put errors in a database
-
-- check for alternative for libwebp-image, due to conflict in package "image"
-
 - look at db cleanup dialog, watch update bar
 
-- package bas64  to newer version
+
 - Filling content list with partitioned gtk-String lists.
+
+- package bas64  to newer version
 
 - https://www.inka-magazin.de/stadtmagazin-karlsruhe-baden-pfalz.html
   Multiple Feeds On one Page, Create a Selector

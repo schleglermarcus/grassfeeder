@@ -445,6 +445,10 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
     }
 }
 
+
+//  TODO new Step  Remove Unused Icons
+
+
 pub struct MarkUnconnectedMessages(pub CleanerInner);
 impl Step<CleanerInner> for MarkUnconnectedMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {

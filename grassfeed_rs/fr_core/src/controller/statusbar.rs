@@ -22,8 +22,9 @@ const BOTTOM_MSG_SHOW_TIME_S: u8 = 10;
 const ERROR_TEXT_COLOR: &str = "#CC6666";
 
 // https://www.w3schools.com/charsets/ref_utf_block.asp
+// https://jkorpela.fi/chars/spaces.html
 const VERTICAL_RISING_BAR: [u32; 9] = [
-    ' ' as u32, 0x2581, 0x2582, 0x2583, 0x2584, 0x2585, 0x2586, 0x2587, 0x2588,
+    0x2001, 0x2581, 0x2582, 0x2583, 0x2584, 0x2585, 0x2586, 0x2587, 0x2588,
 ];
 
 const VERTICAL_RISING_BAR_LEN: usize = VERTICAL_RISING_BAR.len() - 1;
@@ -147,11 +148,15 @@ impl StatusBar {
                     .unwrap()
                     .set_label_tooltip(label_id, tt);
             }
-
-            if with_tooltip {
+            /*
+                       if with_tooltip {
+                           (*self.gui_updater).borrow().update_label_markup(label_id);
+                       } else if with_label {
+                           (*self.gui_updater).borrow().update_label(label_id);
+                       }
+            */
+            if with_tooltip || with_label {
                 (*self.gui_updater).borrow().update_label_markup(label_id);
-            } else if with_label {
-                (*self.gui_updater).borrow().update_label(label_id);
             }
         }
     }
@@ -476,6 +481,7 @@ impl OnePanel for PanelRight {
                 .borrow_mut()
                 .browser_loading_progress_changed = false;
             let b_loading = get_vertical_block_char(progr as usize, 256);
+            // let text = format!("\u{2595}{b_loading}\u{258F}");
             let text = format!("<tt>\u{2595}{b_loading}</tt>");
             return (Some(text), None);
         }

@@ -28,11 +28,10 @@ pub const FILENAME: &str = "icons_list.json";
 
 pub trait IIconRepo {
     fn get_ctx(&self) -> &SqliteContext<IconRow>;
-
-    fn get_by_icon(&self, icon_s: String) -> Vec<IconRow>;
-
-    fn get_by_index(&self, icon_id: isize) -> Option<IconRow>;
     fn get_all_entries(&self) -> Vec<IconRow>;
+    fn get_by_icon(&self, icon_s: String) -> Vec<IconRow>;
+    fn get_by_index(&self, icon_id: isize) -> Option<IconRow>;
+    fn get_by_web_url(&self, url: String) -> Vec<IconRow>;
 
     fn add_icon(
         &self,
@@ -59,14 +58,12 @@ pub trait IIconRepo {
     fn create_table(&self) -> usize;
 
     /// returns number of changed rows
-    fn update_icon(
+    fn update_icon_content(
         &self,
         icon_id: isize,
         new_icon: Option<String>,
         comp_type: CompressionType,
     ) -> Result<usize, Box<dyn std::error::Error>>;
-
-    // fn insert_tx(&self, e_list: &[IconRow]) -> Result<i64, Box<dyn std::error::Error>>;
 
     fn store_icons_tx(
         &self,
@@ -156,6 +153,15 @@ impl IIconRepo for IconRepo {
         self.ctx.get_list(sql)
     }
 
+    fn get_by_web_url(&self, url: String) -> Vec<IconRow> {
+        let sql = format!(
+            "SELECT * FROM {} where web_url=\"{}\" ",
+            IconRow::table_name(),
+            url
+        );
+        self.ctx.get_list(sql)
+    }
+
     fn get_by_index(&self, icon_id: isize) -> Option<IconRow> {
         self.ctx.get_by_index(icon_id)
     }
@@ -200,7 +206,7 @@ impl IIconRepo for IconRepo {
         self.ctx.create_table()
     }
 
-    fn update_icon(
+    fn update_icon_content(
         &self,
         icon_id: isize,
         new_icon: Option<String>,

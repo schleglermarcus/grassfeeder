@@ -112,7 +112,6 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconRow>,
         web_fetcher: Arc::new(Box::new(HttpFetcher {})),
         download_error_happened: false,
         icon_url: String::default(),
-        icon_bytes: Vec::default(),
         fs_icon_id_old: 0,
         sourcetree_job_sender: stc_job_s,
         feed_homepage: String::default(),
@@ -121,6 +120,9 @@ fn download_icon_one_url(feed_url: &String, homepage: &String) -> (Vec<IconRow>,
         erro_repo: erro_rep,
         icon_kind: Default::default(),
         compressed_icon: Default::default(),
+        dl_icon_bytes: Vec::default(),
+        dl_datetime_stamp: 0,
+        dl_icon_size: 0,
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     if let Ok(ev) = stc_job_r.recv_timeout(std::time::Duration::from_millis(1)) {
@@ -146,7 +148,6 @@ fn icon_too_big() {
         web_fetcher: Arc::new(Box::new(HttpFetcher {})),
         download_error_happened: false,
         icon_url: String::default(),
-        icon_bytes: Vec::default(),
         fs_icon_id_old: 0,
         sourcetree_job_sender: stc_job_s,
         feed_homepage: String::default(),
@@ -155,6 +156,9 @@ fn icon_too_big() {
         erro_repo: erro_rep,
         icon_kind: Default::default(),
         compressed_icon: Default::default(),
+        dl_icon_bytes: Vec::default(),
+        dl_datetime_stamp: 0,
+        dl_icon_size: 0,
     };
     let last = StepResult::start(Box::new(IconLoadStart::new(icon_inner)));
     assert!(!last.download_error_happened);
@@ -178,7 +182,7 @@ fn stop_on_nonexistent() {
         iconrepo: IconRepo::new_in_mem(),
         web_fetcher: get_file_fetcher(),
         download_error_happened: false,
-        icon_bytes: Vec::default(),
+        // icon_bytes: Vec::default(),
         fs_icon_id_old: -1,
         sourcetree_job_sender: stc_job_s,
         feed_homepage: String::default(),
@@ -187,6 +191,9 @@ fn stop_on_nonexistent() {
         erro_repo: erro_rep,
         icon_kind: Default::default(),
         compressed_icon: Default::default(),
+        dl_icon_bytes: Vec::default(),
+        dl_datetime_stamp: 0,
+        dl_icon_size: 0,
     };
     let ic = IconCheckIsImage(dl_inner);
     let r: StepResult<IconInner> = Box::new(ic).step();

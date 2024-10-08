@@ -378,7 +378,7 @@ impl IDownloader for Downloader {
             icon_kind: IconKind::HttpRawData,
             web_fetcher: self.web_fetcher.clone(),
             download_error_happened: false,
-            icon_bytes: Vec::default(),
+            dl_icon_bytes: Vec::default(),
             fs_icon_id_old: old_icon_id as isize,
             sourcetree_job_sender: self.source_c_sender.as_ref().unwrap().clone(),
             feed_homepage: String::default(),
@@ -386,6 +386,8 @@ impl IDownloader for Downloader {
             subscriptionrepo: subscription_repo,
             erro_repo: errors_rep,
             compressed_icon: Default::default(),
+            dl_datetime_stamp: 0,
+            dl_icon_size: -1,
         };
         self.add_to_queue(DLJob::Icon(dl_inner));
     }

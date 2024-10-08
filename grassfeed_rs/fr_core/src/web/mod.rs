@@ -16,6 +16,8 @@ pub struct HttpGetResult {
     pub content_bin: Vec<u8>,
     pub status: usize,
     pub error_description: String,
+    pub timestamp : i64,
+    pub content_length: i64,
 }
 
 impl HttpGetResult {

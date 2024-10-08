@@ -815,10 +815,9 @@ fn create_statusbar(gtk_obj_a: GtkObjectsType, _mode_debug: bool) -> gtk::Box {
     layout_st.set_vexpand(false);
     layout_st.set_hexpand(true);
     box3_status.add(&layout_st);
-    let label_st3 = Label::new(Some("^_^"));
-    label_st3.set_width_request(10);
+    let label_st3 = Label::new(Some("_"));
+    label_st3.set_width_request(4);
     box3_status.add(&label_st3);
-
     {
         let mut ret = (*gtk_obj_a).write().unwrap();
         ret.set_label(LABEL_STATUS_1, &label_st1);

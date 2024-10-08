@@ -8,13 +8,15 @@ use crate::db::icon_row::IconRow;
 use crate::db::subscription_repo::ISubscriptionRepo;
 use crate::db::subscription_repo::SubscriptionRepo;
 use crate::downloader::util;
-use crate::downloader::util::workaround_https_declaration;
+use crate::util::db_time_to_display;
 use crate::util::downscale_image;
 use crate::util::png_from_svg;
 use crate::util::IconKind;
 use crate::util::Step;
 use crate::util::StepResult;
+use crate::web::HttpGetResult;
 use crate::web::WebFetcherType;
+
 use flume::Sender;
 use ico::ResourceType;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
@@ -27,7 +29,6 @@ pub struct IconInner {
     pub fs_icon_id_old: isize,
     pub feed_url: String,
     pub icon_url: String,
-    pub icon_bytes: Vec<u8>,
     pub iconrepo: IconRepo,
     pub icon_kind: IconKind,
     pub web_fetcher: WebFetcherType,
@@ -38,6 +39,11 @@ pub struct IconInner {
     pub subscriptionrepo: SubscriptionRepo,
     pub erro_repo: ErrorRepo,
     pub compressed_icon: String,
+
+    pub dl_icon_bytes: Vec<u8>,
+    pub dl_datetime_stamp: i64,
+    /// Server sided size
+    pub dl_icon_size: i64,
 }
 
 impl std::fmt::Debug for IconInner {
@@ -120,7 +126,7 @@ struct HomepageDownload(IconInner);
 impl Step<IconInner> for HomepageDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        let dl_text = workaround_https_declaration(&inner.feed_download_text);
+        let dl_text = util::workaround_https_declaration(&inner.feed_download_text);
         let (homepage, _feed_title, errtext) =
             util::retrieve_homepage_from_feed_text(dl_text.as_bytes(), &inner.feed_url);
         // trace!( "HomepageDownload({})  i_hp:{}  retr_hp:{}  title:{}  err:{}    feed_url:{} ",            inner.subs_id,            inner.feed_homepage,            homepage,            _feed_title,            errtext,            inner.feed_url        );
@@ -228,11 +234,17 @@ impl Step<IconInner> for IconDownload {
         let mut inner: IconInner = self.0;
         // trace!("IconDownload({}) {} ", inner.subs_id, &inner.icon_url);
         let now = Instant::now();
-        let r = (*inner.web_fetcher).request_url_bin(&inner.icon_url);
+        let r: HttpGetResult = (*inner.web_fetcher).request_url_bin(&inner.icon_url);
         let elapsedms = now.elapsed().as_millis();
         match r.status {
             200 => {
-                inner.icon_bytes = r.content_bin;
+                inner.dl_icon_bytes = r.content_bin;
+                inner.dl_icon_size = r.content_length;
+                inner.dl_datetime_stamp = r.timestamp;
+                if r.content_length <= 1 {
+                    // info!(                        "IconDownload({}) {} content-length:{} num-bytes:{} ",                        inner.subs_id,                        &inner.icon_url,                        r.content_length,                        inner.dl_icon_bytes.len()                    );
+                    inner.dl_icon_size = inner.dl_icon_bytes.len() as i64;
+                }
                 if elapsedms > 100 {
                     inner.erro_repo.add_error(
                         inner.subs_id,
@@ -272,13 +284,13 @@ pub struct IconCheckIsImage(pub IconInner);
 impl Step<IconInner> for IconCheckIsImage {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        let an_res: IconAnalyseResult = icon_analyser(&inner.icon_bytes);
+        let an_res: IconAnalyseResult = icon_analyser(&inner.dl_icon_bytes);
         inner.icon_kind = an_res.kind.clone();
         // trace!(            "IconCheckIsImage:  Kind {:?}  {}  {} disguised_as_png={} ",            an_res.kind,            inner.feed_homepage,            inner.icon_url,            an_res.icon_disguised_as_png        );
         if an_res.kind == IconKind::Svg {
             return StepResult::Continue(Box::new(IconSvgToPng(inner)));
         }
-        if decide_downscale(inner.icon_bytes.len(), &an_res) {
+        if decide_downscale(inner.dl_icon_bytes.len(), &an_res) {
             // trace!(                "IconCheckIsImage:  go to downscale  Url:{} ",               inner.icon_url            );
             return StepResult::Continue(Box::new(IconDownscale(inner)));
         }
@@ -286,7 +298,7 @@ impl Step<IconInner> for IconCheckIsImage {
             inner.erro_repo.add_error(
                 inner.subs_id,
                 ESRC::IconsCheckimg,
-                inner.icon_bytes.len() as isize,
+                inner.dl_icon_bytes.len() as isize,
                 inner.icon_url.clone(),
                 an_res.message,
             );
@@ -310,7 +322,7 @@ pub struct IconSvgToPng(pub IconInner);
 impl Step<IconInner> for IconSvgToPng {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        let r = png_from_svg(&inner.icon_bytes);
+        let r = png_from_svg(&inner.dl_icon_bytes);
         if r.is_err() {
             let msg = format!(
                 "SvgToPng:{:?} {} {} {:?}",
@@ -329,7 +341,7 @@ impl Step<IconInner> for IconSvgToPng {
             );
             return StepResult::Stop(inner);
         }
-        inner.icon_bytes = r.unwrap();
+        inner.dl_icon_bytes = r.unwrap();
         inner.icon_kind = IconKind::Png;
         StepResult::Continue(Box::new(IconDownscale(inner)))
     }
@@ -340,7 +352,11 @@ impl Step<IconInner> for IconDownscale {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         // trace!("IconDownscale: ... {:?} ", inner.icon_kind);
-        let r = downscale_image(&inner.icon_bytes, &inner.icon_kind, ICON_CONVERT_TO_WIDTH);
+        let r = downscale_image(
+            &inner.dl_icon_bytes,
+            &inner.icon_kind,
+            ICON_CONVERT_TO_WIDTH,
+        );
         if r.is_err() {
             let msg = format!(
                 "downscale:{:?} {} {} {:?}",
@@ -359,31 +375,32 @@ impl Step<IconInner> for IconDownscale {
             );
             return StepResult::Stop(inner);
         }
-        inner.icon_bytes = r.unwrap();
+        inner.dl_icon_bytes = r.unwrap();
         StepResult::Continue(Box::new(IconCheckPresent(inner)))
     }
 }
 
-struct IconCheckPresent(IconInner);
+pub struct IconCheckPresent(pub IconInner);
 impl Step<IconInner> for IconCheckPresent {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        if inner.icon_bytes.len() < 10 {
-            error!(
+        if inner.dl_icon_bytes.len() < 10 {
+            debug!(
                 "downloaded icon_too_small! {:?} {:?}",
-                inner.icon_bytes, inner.icon_url
+                inner.dl_icon_bytes, inner.icon_url
             );
             return StepResult::Stop(inner);
         }
-        if inner.icon_bytes.len() > 5000 {
+        if inner.dl_icon_bytes.len() > 5000 {
             debug!(
                 "IconCheckPresent: {} {} \t big size: {} kB",
                 inner.icon_url,
                 inner.feed_url,
-                inner.icon_bytes.len() / 1024
+                inner.dl_icon_bytes.len() / 1024
             );
         }
-        inner.compressed_icon = util::compress_vec_to_string(&inner.icon_bytes);
+
+        inner.compressed_icon = util::compress_vec_to_string(&inner.dl_icon_bytes);
         let existing_icons: Vec<IconRow> =
             inner.iconrepo.get_by_icon(inner.compressed_icon.clone());
 
@@ -413,23 +430,16 @@ impl Step<IconInner> for IconStore {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let inner: IconInner = self.0;
         assert!(!inner.compressed_icon.is_empty());
-        let http_date: i64 = 0;
-        let http_length: isize = 0;
         match inner.iconrepo.add_icon(
             inner.compressed_icon.clone(),
-            http_date,
-            http_length,
+            inner.dl_datetime_stamp,
+            inner.dl_icon_size as isize,
             inner.icon_url.clone(),
             CompressionType::ImageRs,
         ) {
             Ok(icon_id) => {
-                trace!(
-                    "IconStore:  len:{:?}  => ID {}  F:{}  HP:{}  --> SetIconId",
-                    inner.compressed_icon.len(),
-                    icon_id,
-                    inner.feed_url,
-                    inner.feed_homepage
-                );
+                debug!( "IconStore:  Web-len:{}  compr-len:{:?}  => ID {}  F:{}  HP:{}  Web-Last-Mod:{} --> SetIconId" ,
+                        inner.dl_icon_size, inner.compressed_icon.len(),  icon_id, inner.feed_url,  inner.feed_homepage,  db_time_to_display (inner.dl_datetime_stamp)   );
                 let _r = inner
                     .sourcetree_job_sender
                     .send(SJob::SetIconId(inner.subs_id, icon_id as isize));
