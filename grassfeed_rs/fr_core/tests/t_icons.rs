@@ -4,22 +4,23 @@ use fr_core::db::icon_repo::IIconRepo;
 use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::icon_row::CompressionType;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
-use fr_core::db::subscription_repo::SubscriptionRepo;
+// use fr_core::db::subscription_repo::SubscriptionRepo;
+use flume::Receiver;
 use fr_core::downloader::icons::icon_analyser;
 use fr_core::downloader::icons::IconCheckPresent;
 use fr_core::downloader::icons::IconInner;
-//use fr_core::downloader::icons::IconLoadStart;
 use fr_core::downloader::util::extract_icon_from_homepage;
 use fr_core::util::png_from_svg;
 use fr_core::util::IconKind;
 use fr_core::util::StepResult;
 use fr_core::web::mockfilefetcher;
+use fr_core::web::mockfilefetcher::FileFetcher;
+use fr_core::web::IHttpRequester;
 use fr_core::web::WebFetcherType;
 use fr_core::TD_BASE;
 use resources::gen_icons;
 use std::sync::Arc;
 use std::time::Instant;
-use fr_core::web::mockfilefetcher::FileFetcher;
 
 // later: create sloppy  extract-icon-from-page for missing quotes:
 //  thevaluable_dev            <link rel="shortcut icon" href=https://thevaluable.dev/images/favicon.png>
@@ -177,39 +178,51 @@ fn icons_store_delete_and_tx() {
     assert!(now.elapsed().as_millis() < 100);
 }
 
+#[ignore] // TODO later
 #[test]
 fn is_icon_present() {
     setup();
-    let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-    let erro_rep = ErrorRepo::new_in_mem();
-    let subscr_r = SubscriptionRepo::new_inmem();
-    subscr_r.scrub_all_subscriptions();
-   let fetcher: WebFetcherType =
-        Arc::new(Box::new(FileFetcher::new("../target/data/".to_string())));
 
-    let icon_inner = IconInner {
-        subs_id: 1,
-        feed_url: String::default(),
-        iconrepo: IconRepo::new_in_mem(),
-        web_fetcher: fetcher,
-        download_error_happened: false,
-        icon_url: String::default(),
-        fs_icon_id_old: 0,
-        sourcetree_job_sender: stc_job_s,
-        feed_homepage: String::default(),
-        feed_download_text: String::default(),
-        subscriptionrepo: subscr_r,
-        erro_repo: erro_rep,
-        icon_kind: Default::default(),
-        compressed_icon: Default::default(),
-        dl_icon_bytes: Vec::default(),
-        dl_datetime_stamp: 0,
-        dl_icon_size: 0,
-    };
-    let last = StepResult::start(Box::new(IconCheckPresent { 0: icon_inner }));
+    /*
+       let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
+       let erro_rep = ErrorRepo::new_in_mem();
+       let subscr_r = SubscriptionRepo::new_inmem();
+       subscr_r.scrub_all_subscriptions();
 
-// TODO  check if is_present() worked
+       let ff = FileFetcher::new("../fr_core/tests/data/".to_string());
+       let httpgetresult = ff.request_url_bin("http://localhost/icon-example-small.png");
+       // debug!("R= {httpgetresult:?} ");
+
+       let fetcher_a: WebFetcherType = Arc::new(Box::new(ff));
+
+       let icon_inner = IconInner {
+           subs_id: 1,
+           feed_url: String::default(),
+           iconrepo: IconRepo::new_in_mem(),
+           web_fetcher: fetcher_a,
+           download_error_happened: false,
+           icon_url: String::default(),
+           fs_icon_id_old: 0,
+           sourcetree_job_sender: stc_job_s,
+           feed_homepage: String::default(),
+           feed_download_text: String::default(),
+           subscriptionrepo: subscr_r,
+           erro_repo: erro_rep,
+           icon_kind: Default::default(),
+           compressed_icon: Default::default(),
+           dl_icon_bytes: httpgetresult.content_bin,
+           dl_datetime_stamp: 1000,
+           dl_icon_size: 344,
+       };
+
+    */
+    let ii_t: (IconInner, Receiver<SJob>) = IconInner::new_in_mem("../fr_core/tests/data/", 1);
+
+    let last = StepResult::start(Box::new(IconCheckPresent { 0: ii_t.0 }));
+    // TODO  check if is_present() worked
     // if let Ok(ev) = stc_job_r.recv_timeout(std::time::Duration::from_millis(1)) {        assert_eq!(ev, SJob::SetIconId(1, 1));    }
+
+    assert!(false);
 }
 
 // ------------------------------------

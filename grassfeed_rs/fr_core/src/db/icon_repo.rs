@@ -31,7 +31,7 @@ pub trait IIconRepo {
     fn get_all_entries(&self) -> Vec<IconRow>;
     fn get_by_icon(&self, icon_s: String) -> Vec<IconRow>;
     fn get_by_index(&self, icon_id: isize) -> Option<IconRow>;
-    fn get_by_web_url(&self, url: String) -> Vec<IconRow>;
+    fn get_by_web_url(&self, url: &str) -> Vec<IconRow>;
 
     fn add_icon(
         &self,
@@ -153,7 +153,7 @@ impl IIconRepo for IconRepo {
         self.ctx.get_list(sql)
     }
 
-    fn get_by_web_url(&self, url: String) -> Vec<IconRow> {
+    fn get_by_web_url(&self, url: &str ) -> Vec<IconRow> {
         let sql = format!(
             "SELECT * FROM {} where web_url=\"{}\" ",
             IconRow::table_name(),

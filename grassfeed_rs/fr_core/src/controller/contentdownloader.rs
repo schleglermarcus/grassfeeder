@@ -26,7 +26,6 @@ use crate::downloader::launch_web::LaunchInner;
 use crate::downloader::launch_web::LaunchWebBrowserStart;
 use crate::downloader::messages::FetchInner;
 use crate::downloader::messages::FetchStart;
-use crate::util::IconKind;
 use crate::util::StepResult;
 use crate::web::httpfetcher::HttpFetcher;
 use crate::web::WebFetcherType;
@@ -369,7 +368,25 @@ impl IDownloader for Downloader {
             (*self.subscriptionrepo_r).borrow().get_connection(),
         );
         let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
-        //  trace!("Q-Add: {subsid} {}  old:{old_icon_id} ", &feedurl);
+
+        debug!(
+            "contentdownloader:   load_icon({subsid})   {}  old:{old_icon_id}  TODO ",
+            &feedurl
+        );
+
+        let mut dl_inner = IconInner::new(
+            self.source_c_sender.as_ref().unwrap().clone(),
+            self.web_fetcher.clone(),
+            icon_repo,
+            subscription_repo,
+            errors_rep,
+        );
+        dl_inner.feed_url = feedurl;
+        dl_inner.fs_icon_id_old = old_icon_id as isize; // TODO check if needed!
+        dl_inner.subs_id = subsid;
+        // dl_inner.icon_kind = IconKind::HttpRawData;
+
+        /*
         let dl_inner = IconInner {
             subs_id: subsid,
             feed_url: feedurl,
@@ -389,6 +406,7 @@ impl IDownloader for Downloader {
             dl_datetime_stamp: 0,
             dl_icon_size: -1,
         };
+         */
         self.add_to_queue(DLJob::Icon(dl_inner));
     }
 

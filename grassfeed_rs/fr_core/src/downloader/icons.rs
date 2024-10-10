@@ -14,19 +14,27 @@ use crate::util::png_from_svg;
 use crate::util::IconKind;
 use crate::util::Step;
 use crate::util::StepResult;
+use crate::web::mockfilefetcher::FileFetcher;
 use crate::web::HttpGetResult;
 use crate::web::WebFetcherType;
-
+use flume::Receiver;
 use flume::Sender;
 use ico::ResourceType;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
+use std::sync::Arc;
 use std::time::Instant;
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;
 
+pub const ICON_WARNING_SIZE_BYTES: usize = 20000;
+
 pub struct IconInner {
     pub subs_id: isize,
+
+    /// TODO : check if needed!
+    // #[deprecated]
     pub fs_icon_id_old: isize,
+
     pub feed_url: String,
     pub icon_url: String,
     pub iconrepo: IconRepo,
@@ -44,6 +52,83 @@ pub struct IconInner {
     pub dl_datetime_stamp: i64,
     /// Server sided size
     pub dl_icon_size: i64,
+    // icon-id  retrieved from database
+    pub db_icon_id: isize,
+}
+
+impl IconInner {
+    pub fn new_in_mem(
+        filefetcher_base: &str,
+        subscription_id: isize,
+    ) -> (IconInner, Receiver<SJob>) {
+        let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(1);
+        let ff = FileFetcher::new(filefetcher_base.to_string());
+        let fetcher_a: WebFetcherType = Arc::new(Box::new(ff));
+        let mut icon_inner = IconInner::new(
+            stc_job_s,
+            fetcher_a,
+            IconRepo::new_in_mem(),
+            SubscriptionRepo::new_inmem(),
+            ErrorRepo::new_in_mem(),
+        );
+        /*
+         {
+            subs_id: 1,
+            feed_url: String::default(),
+            iconrepo: IconRepo::new_in_mem(),
+            web_fetcher: fetcher_a,
+            download_error_happened: false,F
+            icon_url: String::default(),
+            fs_icon_id_old: 0,
+            sourcetree_job_sender: stc_job_s,
+            feed_homepage: String::default(),
+            feed_download_text: String::default(),
+            subscriptionrepo: SubscriptionRepo::new_inmem(),
+            erro_repo: ErrorRepo::new_in_mem(),
+            icon_kind: Default::default(),
+            compressed_icon: Default::default(),
+            dl_icon_bytes: Default::default(),
+            dl_datetime_stamp: 0,
+            dl_icon_size: 0,
+            db_icon_id: -1,
+        };
+         */
+        icon_inner.subs_id = subscription_id;
+        icon_inner.subscriptionrepo.scrub_all_subscriptions();
+        (icon_inner, _stc_job_r)
+    }
+
+    pub fn new(
+        sourcetree_job_sender: Sender<SJob>,
+        web_fetche: WebFetcherType,
+        iconrep: IconRepo,
+        subscriptionrepo: SubscriptionRepo,
+        errorrepo: ErrorRepo,
+    ) -> IconInner {
+        // let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(1);
+
+        let icon_inner = IconInner {
+            sourcetree_job_sender: sourcetree_job_sender, // stc_job_s,
+            subscriptionrepo: subscriptionrepo,
+            erro_repo: errorrepo,
+            web_fetcher: web_fetche,
+            subs_id: -1,
+            feed_url: String::default(),
+            iconrepo: iconrep,
+            download_error_happened: false,
+            icon_url: String::default(),
+            fs_icon_id_old: -1,
+            feed_homepage: String::default(),
+            feed_download_text: String::default(),
+            icon_kind: Default::default(),
+            compressed_icon: Default::default(),
+            dl_icon_bytes: Default::default(),
+            dl_datetime_stamp: 0,
+            dl_icon_size: -1,
+            db_icon_id: -1,
+        };
+        icon_inner
+    }
 }
 
 impl std::fmt::Debug for IconInner {
@@ -71,10 +156,15 @@ impl IconLoadStart {
 impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
+        if inner.subs_id < 0 {
+            error!("IconLoadStart:  subs_id:{}  but must be >0!", inner.subs_id);
+            return StepResult::Stop(inner);
+        }
+
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
             if !inner.icon_url.is_empty() {
                 trace!("IconLoadStart:  ID:{}  db-HP:{} prev-icon-url:{}  HP:{} icon_id:{}  {}  feed-url:{} ",
-                  inner.subs_id,subs_e.website_url, inner.icon_url, inner.feed_homepage,
+                  inner.subs_id,  subs_e.website_url, inner.icon_url, inner.feed_homepage,
                   subs_e.icon_id,subs_e.display_name, subs_e.url );
             }
             if !subs_e.website_url.is_empty() {
@@ -254,7 +344,7 @@ impl Step<IconInner> for IconDownload {
                         String::default(),
                     );
                 }
-                StepResult::Continue(Box::new(IconCheckIsImage(inner)))
+                StepResult::Continue(Box::new(IconIsInDatabase(inner)))
             }
             _ => {
                 inner.download_error_happened = true;
@@ -280,13 +370,74 @@ impl Step<IconInner> for IconDownload {
     }
 }
 
+pub struct IconIsInDatabase(pub IconInner);
+impl Step<IconInner> for IconIsInDatabase {
+    fn step(self: Box<Self>) -> StepResult<IconInner> {
+        let mut inner: IconInner = self.0;
+        if inner.dl_icon_bytes.len() < 10 {
+            trace!(
+                "downloaded icon_too_small! {:?} {:?}",
+                inner.dl_icon_bytes,
+                inner.icon_url
+            );
+            return StepResult::Stop(inner);
+        }
+        if inner.dl_icon_bytes.len() > ICON_WARNING_SIZE_BYTES {
+            trace!(
+                "IconIsInDatabase: {} big size: {} kB",
+                inner.icon_url,
+                inner.dl_icon_bytes.len() / 1024
+            );
+        }
+
+        let icons_in_db: Vec<IconRow> = inner.iconrepo.get_by_web_url(&inner.icon_url);
+        if icons_in_db.len() > 1 {
+            debug!(
+                "IconIsInDatabase({}) {}   multiple icons for that url:{} ",
+                inner.subs_id,
+                &inner.icon_url,
+                icons_in_db.len()
+            );
+        }
+        if icons_in_db.len() == 0 {
+            return StepResult::Continue(Box::new(IconCheckIsImage(inner)));
+        }
+        let icon_per_url: &IconRow = icons_in_db.get(0).unwrap();
+        if icon_per_url.web_date == inner.dl_datetime_stamp {
+            // trace!("IconPerUrl {} same timestamp, good", &inner.icon_url);
+
+            inner.db_icon_id = icon_per_url.icon_id;
+            return StepResult::Continue(Box::new(UseIconForDisplay(inner)));
+        }
+
+        trace!(
+            "IconPerUrl {} different timestamp,  db:{} {}bytes    web:{} {}bytes  processing... ",
+            &inner.icon_url,
+            db_time_to_display(icon_per_url.web_date),
+            icon_per_url.web_size,
+            db_time_to_display(inner.dl_datetime_stamp),
+            inner.dl_icon_size
+        );
+
+        //         info!(            "IconPerUrl  db_date:{}  !=  web_date:{}  TODO",            icon_per_url.web_date, inner.dl_datetime_stamp        );
+
+        StepResult::Continue(Box::new(IconCheckIsImage(inner)))
+    }
+}
+
 pub struct IconCheckIsImage(pub IconInner);
 impl Step<IconInner> for IconCheckIsImage {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let an_res: IconAnalyseResult = icon_analyser(&inner.dl_icon_bytes);
         inner.icon_kind = an_res.kind.clone();
-        // trace!(            "IconCheckIsImage:  Kind {:?}  {}  {} disguised_as_png={} ",            an_res.kind,            inner.feed_homepage,            inner.icon_url,            an_res.icon_disguised_as_png        );
+        trace!(
+            "IconCheckIsImage:  Kind {:?}  {}  {} disguised_as_png={} ",
+            an_res.kind,
+            inner.feed_homepage,
+            inner.icon_url,
+            an_res.icon_disguised_as_png
+        );
         if an_res.kind == IconKind::Svg {
             return StepResult::Continue(Box::new(IconSvgToPng(inner)));
         }
@@ -384,21 +535,8 @@ pub struct IconCheckPresent(pub IconInner);
 impl Step<IconInner> for IconCheckPresent {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        if inner.dl_icon_bytes.len() < 10 {
-            debug!(
-                "downloaded icon_too_small! {:?} {:?}",
-                inner.dl_icon_bytes, inner.icon_url
-            );
-            return StepResult::Stop(inner);
-        }
-        if inner.dl_icon_bytes.len() > 5000 {
-            debug!(
-                "IconCheckPresent: {} {} \t big size: {} kB",
-                inner.icon_url,
-                inner.feed_url,
-                inner.dl_icon_bytes.len() / 1024
-            );
-        }
+
+        // TODO  ....  is it in DB ??  necessary??
 
         inner.compressed_icon = util::compress_vec_to_string(&inner.dl_icon_bytes);
         let existing_icons: Vec<IconRow> =
@@ -414,10 +552,8 @@ impl Step<IconInner> for IconCheckPresent {
                 inner.icon_url
             );
             if existing_id != inner.fs_icon_id_old {
-                let _r = inner
-                    .sourcetree_job_sender
-                    .send(SJob::SetIconId(inner.subs_id, existing_icons[0].icon_id));
-                return StepResult::Stop(inner);
+                // TODO  ....  is it in DB ??  necessary??
+                return StepResult::Continue(Box::new(UseIconForDisplay(inner)));
             }
         }
         StepResult::Continue(Box::new(IconStore(inner)))
@@ -428,7 +564,7 @@ impl Step<IconInner> for IconCheckPresent {
 struct IconStore(IconInner);
 impl Step<IconInner> for IconStore {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
-        let inner: IconInner = self.0;
+        let mut inner: IconInner = self.0;
         assert!(!inner.compressed_icon.is_empty());
         match inner.iconrepo.add_icon(
             inner.compressed_icon.clone(),
@@ -440,15 +576,25 @@ impl Step<IconInner> for IconStore {
             Ok(icon_id) => {
                 debug!( "IconStore:  Web-len:{}  compr-len:{:?}  => ID {}  F:{}  HP:{}  Web-Last-Mod:{} --> SetIconId" ,
                         inner.dl_icon_size, inner.compressed_icon.len(),  icon_id, inner.feed_url,  inner.feed_homepage,  db_time_to_display (inner.dl_datetime_stamp)   );
-                let _r = inner
-                    .sourcetree_job_sender
-                    .send(SJob::SetIconId(inner.subs_id, icon_id as isize));
+                inner.db_icon_id = icon_id as isize;
+                return StepResult::Continue(Box::new(UseIconForDisplay(inner)));
             }
             Err(e) => {
                 error!("Storing Icon from {}  failed {:?}", inner.icon_url, e);
             }
         }
         StepResult::Stop(inner)
+    }
+}
+
+struct UseIconForDisplay(IconInner);
+impl Step<IconInner> for UseIconForDisplay {
+    fn step(self: Box<Self>) -> StepResult<IconInner> {
+        let _r = self
+            .0
+            .sourcetree_job_sender
+            .send(SJob::SetIconId(self.0.subs_id, self.0.db_icon_id as isize));
+        StepResult::Stop(self.0)
     }
 }
 

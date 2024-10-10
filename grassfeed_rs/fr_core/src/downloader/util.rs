@@ -163,7 +163,7 @@ pub fn feed_url_to_main_url(f_u: String) -> String {
             );
             return icon_url;
         }
-        Err(e) => warn!("invalid url: {}  {:?}", &f_u, e),
+        Err(e) => warn!("feed_url_to_main_url invalid: {}  {:?}", &f_u, e),
     }
     String::default()
 }
@@ -183,7 +183,7 @@ pub fn feed_url_to_icon_url(f_u: String) -> String {
             );
             return icon_url;
         }
-        Err(e) => warn!("invalid url: {}  {:?}", &f_u, e),
+        Err(e) => warn!("feed_url_to_icon_url:invalid  {}  {:?}", &f_u, e),
     }
     String::default()
 }
