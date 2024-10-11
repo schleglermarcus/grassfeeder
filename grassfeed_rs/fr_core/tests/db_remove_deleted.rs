@@ -133,7 +133,7 @@ fn clean_too_many_messages() {
 }
 
 // TODO: investigate errors list
-#[ignore]
+// #[ignore]
 #[test]
 fn clean_errorlist_too_old() {
     setup();
@@ -159,14 +159,18 @@ fn clean_errorlist_too_old() {
     }
 }
 
+/*  TODO
+
 //  cargo watch -s "(cd fr_core; cargo test --test db_remove_deleted   )  "
-#[ignore] // TODO
+#[ignore]
 #[test]
 fn clean_too_many_icons() {
     let _cleaner_i = prepare_cleaner_inner(None, -1);
 
     assert!(false);
 }
+ */
+
 
 // Later: create new test data
 #[ignore]
@@ -183,7 +187,7 @@ fn clean_icon_doublettes() {
 }
 
 // TODO
-#[ignore]
+// #[ignore]
 #[test]
 fn clean_errorlist_too_many() {
     setup();

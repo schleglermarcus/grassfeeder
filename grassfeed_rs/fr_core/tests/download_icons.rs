@@ -100,35 +100,7 @@ fn download_icon_one_url(feed_url_: &String, homepage: &String) -> (Vec<IconRow>
         website_url: homepage.clone(),
         ..Default::default()
     };
-    /*
-        let (stc_job_s, stc_job_r) = flume::bounded::<SJob>(9);
-        let subscr_r = SubscriptionRepo::new_inmem();
-        subscr_r.scrub_all_subscriptions();
-        let _r = subscr_r.store_entry(&se);
-        let erro_rep = ErrorRepo::new_in_mem();
-    */
     let (mut icon_inner, stc_job_r) = IconInner::new_in_mem("", 1);
-    /*
-       let icon_inner = IconInner {
-           subs_id: 1,
-           feed_url: feed_url.clone(),
-           iconrepo: IconRepo::new_in_mem(),
-           web_fetcher: Arc::new(Box::new(HttpFetcher {})),
-           download_error_happened: false,
-           icon_url: String::default(),
-           fs_icon_id_old: 0,
-           sourcetree_job_sender: stc_job_s,
-           feed_homepage: String::default(),
-           feed_download_text: String::default(),
-           subscriptionrepo: subscr_r,
-           erro_repo: erro_rep,
-           icon_kind: Default::default(),
-           compressed_icon: Default::default(),
-           dl_icon_bytes: Vec::default(),
-           dl_datetime_stamp: 0,
-           dl_icon_size: 0,
-       };
-    */
     let _r = icon_inner.subscriptionrepo.store_entry(&se);
     icon_inner.web_fetcher = Arc::new(Box::new(HttpFetcher {}));
     icon_inner.feed_url = feed_url_.clone();
@@ -147,32 +119,6 @@ fn download_icon_one_url(feed_url_: &String, homepage: &String) -> (Vec<IconRow>
 #[test]
 fn icon_too_big() {
     setup();
-    /*
-       let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-       let subscr_r = SubscriptionRepo::new_inmem();
-       let erro_rep = ErrorRepo::new_in_mem();
-       let icon_inner = IconInner {
-           // TODO
-           subs_id: 1,
-           feed_url: "http://lisahaven.news/feed/".to_string(),
-           iconrepo: IconRepo::new_in_mem(),
-           web_fetcher: Arc::new(Box::new(HttpFetcher {})),
-           download_error_happened: false,
-           icon_url: String::default(),
-           fs_icon_id_old: 0,
-           sourcetree_job_sender: stc_job_s,
-           feed_homepage: String::default(),
-           feed_download_text: String::default(),
-           subscriptionrepo: subscr_r,
-           erro_repo: erro_rep,
-           icon_kind: Default::default(),
-           compressed_icon: Default::default(),
-           dl_icon_bytes: Vec::default(),
-           dl_datetime_stamp: 0,
-           dl_icon_size: 0,
-       };
-    */
-
     let (mut icon_inner, stc_job_r) = IconInner::new_in_mem("", 1);
     icon_inner.feed_url = "http://lisahaven.news/feed/".to_string();
     icon_inner.web_fetcher = Arc::new(Box::new(HttpFetcher {}));
@@ -190,35 +136,8 @@ fn icon_too_big() {
 #[test]
 fn stop_on_nonexistent() {
     setup(); // This test issues a stop signal upon a nonexistent icon
-             /*
-                 let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(9);
-                 let subscr_r = SubscriptionRepo::new_inmem();
-                 let erro_rep = ErrorRepo::new_in_mem();
-                 let dl_inner = IconInner {
-                     // TODO
-                     subs_id: 5,
-                     feed_url: "http://localhorst/none.xml".to_string(),
-                     icon_url: String::default(),
-                     iconrepo: IconRepo::new_in_mem(),
-                     web_fetcher: get_file_fetcher(),
-                     download_error_happened: false,
-                     // icon_bytes: Vec::default(),
-                     fs_icon_id_old: -1,
-                     sourcetree_job_sender: stc_job_s,
-                     feed_homepage: String::default(),
-                     feed_download_text: String::default(),
-                     subscriptionrepo: subscr_r,
-                     erro_repo: erro_rep,
-                     icon_kind: Default::default(),
-                     compressed_icon: Default::default(),
-                     dl_icon_bytes: Vec::default(),
-                     dl_datetime_stamp: 0,
-                     dl_icon_size: 0,
-                 };
-             */
-    let (mut icon_inner, stc_job_r) = IconInner::new_in_mem("", 1);
-    icon_inner.subs_id = 5; // TODO: necessary?
-
+    let (mut icon_inner, stc_job_r) = IconInner::new_in_mem("", 5);
+    icon_inner.subs_id = 5;
     let ic = IconCheckIsImage(icon_inner);
     let r: StepResult<IconInner> = Box::new(ic).step();
     assert!(matches!(r, StepResult::Stop(..)));
