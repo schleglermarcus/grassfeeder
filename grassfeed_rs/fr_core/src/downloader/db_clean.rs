@@ -437,7 +437,7 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
                 .update_icon_id_many(reset_icon_subs_ids, gen_icons::IDX_05_RSS_FEEDS_GREY_64_D);
             inner.need_update_subscriptions = true;
         }
-        StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)))
+        StepResult::Continue(Box::new(DeleteUnusedIcons(inner)))
     }
 
     fn take(self: Box<Self>) -> CleanerInner {
@@ -445,9 +445,23 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
     }
 }
 
-
 //  TODO new Step  Remove Unused Icons
+pub struct DeleteUnusedIcons(pub CleanerInner);
+impl Step<CleanerInner> for DeleteUnusedIcons {
+    fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        let inner = self.0;
+        let all_icon_ids: Vec<isize> = inner
+            .iconrepo
+            .get_all_entries()
+            .iter()
+            .map(|ie| ie.icon_id)
+            .collect::<Vec<isize>>();
 
+        debug!("DeleteUnusedIcons:  all icons: {:?} ", all_icon_ids);
+
+        StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)))
+    }
+}
 
 pub struct MarkUnconnectedMessages(pub CleanerInner);
 impl Step<CleanerInner> for MarkUnconnectedMessages {
@@ -488,6 +502,10 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
             inner.messagesrepo.update_is_deleted_many(&noncon_ids, true); // needs long time
         }
         StepResult::Continue(Box::new(ReduceTooManyMessages(inner)))
+    }
+
+    fn take(self: Box<Self>) -> CleanerInner {
+        self.0
     }
 }
 

@@ -70,6 +70,12 @@ pub trait IIconRepo {
         list: Vec<(isize, String)>,
         comp_type: CompressionType,
     ) -> Result<usize, Box<dyn std::error::Error>>;
+
+    fn update_icon_webdate(
+        &self,
+        icon_id: isize,
+        web_date: i64,
+    ) -> Result<usize, Box<dyn std::error::Error>>;
 }
 
 pub struct IconRepo {
@@ -153,7 +159,7 @@ impl IIconRepo for IconRepo {
         self.ctx.get_list(sql)
     }
 
-    fn get_by_web_url(&self, url: &str ) -> Vec<IconRow> {
+    fn get_by_web_url(&self, url: &str) -> Vec<IconRow> {
         let sql = format!(
             "SELECT * FROM {} where web_url=\"{}\" ",
             IconRow::table_name(),
@@ -221,6 +227,20 @@ impl IIconRepo for IconRepo {
             IconRow::table_name(),
             comp_type as u8,
             up_icon,
+            icon_id,
+        );
+        Ok(self.ctx.execute(sql))
+    }
+
+    fn update_icon_webdate(
+        &self,
+        icon_id: isize,
+        web_date: i64,
+    ) -> Result<usize, Box<dyn std::error::Error>> {
+        let sql = format!(
+            "UPDATE {}  SET  web_date = {} WHERE icon_id = {}",
+            IconRow::table_name(),
+            web_date,
             icon_id,
         );
         Ok(self.ctx.execute(sql))

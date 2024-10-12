@@ -360,11 +360,10 @@ impl Step<IconInner> for IconIsInDatabase {
                 inner.dl_icon_bytes.len() / 1024
             );
         }
-
         let icons_in_db: Vec<IconRow> = inner.iconrepo.get_by_web_url(&inner.icon_url);
         if icons_in_db.len() > 1 {
             debug!(
-                "IconIsInDatabase({}) {}   multiple icons for that url:{} ",
+                "({}) {}   multiple icons in DB for that url:{} ",
                 inner.subs_id,
                 &inner.icon_url,
                 icons_in_db.len()
@@ -374,8 +373,8 @@ impl Step<IconInner> for IconIsInDatabase {
             return StepResult::Continue(Box::new(IconCheckIsImage(inner)));
         }
         let icon_per_url: &IconRow = icons_in_db.get(0).unwrap();
+        inner.db_icon_id = icon_per_url.icon_id;
         if icon_per_url.web_date == inner.dl_datetime_stamp {
-            inner.db_icon_id = icon_per_url.icon_id;
             if inner.db_icon_id > 0 {
                 return StepResult::Continue(Box::new(UseIconForDisplay(inner)));
             } else {
@@ -385,6 +384,7 @@ impl Step<IconInner> for IconIsInDatabase {
                     icon_per_url.icon_id
                 );
             }
+            return StepResult::Continue(Box::new(IconCheckIsImage(inner)));
         }
         trace!(
             "IconPerUrl {} different timestamp,  db:{} {}bytes    web:{} {}bytes  processing... ",
@@ -394,7 +394,25 @@ impl Step<IconInner> for IconIsInDatabase {
             db_time_to_display(inner.dl_datetime_stamp),
             inner.dl_icon_size
         );
-        StepResult::Continue(Box::new(IconCheckIsImage(inner)))
+        inner.dl_datetime_stamp = icon_per_url.web_date;
+        StepResult::Continue(Box::new(UpdateWebDate(inner)))
+    }
+}
+
+pub struct UpdateWebDate(pub IconInner);
+impl Step<IconInner> for UpdateWebDate {
+    fn step(self: Box<Self>) -> StepResult<IconInner> {
+        let r = self
+            .0
+            .iconrepo
+            .update_icon_webdate(self.0.db_icon_id, self.0.dl_datetime_stamp);
+        if let Err(e) = r {
+            warn!(
+                "UpdateWebDate {} {} {} ",
+                self.0.db_icon_id, self.0.dl_datetime_stamp, e
+            );
+        }
+        StepResult::Continue(Box::new(IconCheckIsImage(self.0)))
     }
 }
 

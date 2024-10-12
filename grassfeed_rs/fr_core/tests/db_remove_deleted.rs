@@ -17,6 +17,7 @@ use fr_core::downloader::db_clean::CleanerInner;
 use fr_core::downloader::db_clean::CleanerStart;
 use fr_core::downloader::db_clean::CorrectIconsDoublettes;
 use fr_core::downloader::db_clean::DeleteDoubleSameMessages;
+use fr_core::downloader::db_clean::DeleteUnusedIcons;
 use fr_core::downloader::db_clean::ReduceTooManyMessages;
 use fr_core::downloader::db_clean::MAX_ERROR_LINES_PER_SUBSCRIPTION;
 use fr_core::downloader::db_clean::MAX_ERROR_LINE_AGE_S;
@@ -24,11 +25,12 @@ use fr_core::util::timestamp_now;
 use fr_core::util::Step;
 use fr_core::util::StepResult;
 
+#[ignore]
 #[test]
 fn clean_errorlist_no_subscription() {
     setup();
     let date_now = timestamp_now();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
+    let cleaner_i = prepare_cleaner_inner(-1);
     for i in 1..9 {
         let _r = cleaner_i.error_repo.add_error_ts(
             (1 + i) as isize,
@@ -49,11 +51,11 @@ fn clean_errorlist_no_subscription() {
     }
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn clean_subscriptions_names_expanded() {
     setup();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
+    let cleaner_i = prepare_cleaner_inner(-1);
     prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
     let sut = AnalyzeFolderPositions(cleaner_i);
     if let StepResult::Continue(s) = Box::new(sut).step() {
@@ -69,11 +71,11 @@ fn clean_subscriptions_names_expanded() {
     }
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn t_db_cleanup_1() {
     setup();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
+    let cleaner_i = prepare_cleaner_inner(-1);
     let inner = StepResult::start(Box::new(CleanerStart::new(cleaner_i)));
     let parent_ids_to_correct = inner.fp_correct_subs_parent.lock().unwrap().clone();
     assert_eq!(parent_ids_to_correct.len(), 1);
@@ -87,11 +89,11 @@ fn t_db_cleanup_1() {
     assert_eq!(msg2.is_deleted, false); // belongs to subscription, keep it
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn t_subscr_parent_ids_correction() {
     setup();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
+    let cleaner_i = prepare_cleaner_inner(-1);
     prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
     let sut = AnalyzeFolderPositions(cleaner_i);
     if let StepResult::Continue(s) = Box::new(sut).step() {
@@ -103,11 +105,11 @@ fn t_subscr_parent_ids_correction() {
     }
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn clean_message_doublettes() {
     setup();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
+    let cleaner_i = prepare_cleaner_inner(-1);
     prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
     let sut = DeleteDoubleSameMessages(cleaner_i);
     if let StepResult::Continue(s) = Box::new(sut).step() {
@@ -117,12 +119,12 @@ fn clean_message_doublettes() {
     }
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn clean_too_many_messages() {
     setup();
     let c_max_messages: i32 = 5;
-    let cleaner_i = prepare_cleaner_inner(None, c_max_messages);
+    let cleaner_i = prepare_cleaner_inner(c_max_messages);
     prepare_db_with_errors_1(&cleaner_i.messagesrepo, &cleaner_i.subscriptionrepo);
     let sut = ReduceTooManyMessages(cleaner_i);
     if let StepResult::Continue(s) = Box::new(sut).step() {
@@ -133,11 +135,11 @@ fn clean_too_many_messages() {
 }
 
 // TODO: investigate errors list
-// #[ignore]
+#[ignore]
 #[test]
 fn clean_errorlist_too_old() {
     setup();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
+    let cleaner_i = prepare_cleaner_inner(-1);
     let date_now = timestamp_now();
     let timediff: usize = MAX_ERROR_LINE_AGE_S / 5;
     for i in 0..11 {
@@ -159,25 +161,12 @@ fn clean_errorlist_too_old() {
     }
 }
 
-/*  TODO
-
-//  cargo watch -s "(cd fr_core; cargo test --test db_remove_deleted   )  "
-#[ignore]
-#[test]
-fn clean_too_many_icons() {
-    let _cleaner_i = prepare_cleaner_inner(None, -1);
-
-    assert!(false);
-}
- */
-
-
 // Later: create new test data
 #[ignore]
 #[test]
 fn clean_icon_doublettes() {
     setup();
-    let cleaner_i = prepare_cleaner_inner(Some("../target/iconc"), -1);
+    let cleaner_i = prepare_cleaner_inner(/* Some("../target/iconc"), */ -1);
     let sut = CorrectIconsDoublettes(cleaner_i);
     if let StepResult::Continue(s) = Box::new(sut).step() {
         let inner: CleanerInner = s.take();
@@ -187,11 +176,11 @@ fn clean_icon_doublettes() {
 }
 
 // TODO
-// #[ignore]
+#[ignore]
 #[test]
 fn clean_errorlist_too_many() {
     setup();
-    let cleaner_i = prepare_cleaner_inner(None, -1);
+    let cleaner_i = prepare_cleaner_inner(-1);
     let date_now = timestamp_now();
     for i in 0..(MAX_ERROR_LINES_PER_SUBSCRIPTION * 2) {
         let _r = cleaner_i.error_repo.add_error_ts(
@@ -209,7 +198,58 @@ fn clean_errorlist_too_many() {
         let list = inner.error_repo.get_by_subscription(2);
         assert_eq!(list.len(), MAX_ERROR_LINES_PER_SUBSCRIPTION); // retain the upper half
         assert!(list[0].date > (date_now + MAX_ERROR_LINES_PER_SUBSCRIPTION as i64));
+    } else {
+        assert!(false);
     }
+}
+
+const SRC_ICONSDB: &str = "tests/data/icons_too_many.db";
+const TARGET_ICONSDB: &str = "../target/icons_too_many.db";
+
+//  cargo watch -s "(cd fr_core; cargo test --test db_remove_deleted   )  "
+// #[ignore]
+#[test]
+fn t_delete_unused_icons() {
+    setup();
+    let cleaner_i = prepare_cleaner_inner(-1);
+    // let r = std::fs::copy("tests/data/icons_too_many.db", TARGET_ICONSDB);
+    // if let Err(e) = r {
+    //     error!(
+    //         "copying from {} -> {} => {:?} ",
+    //         SRC_ICONSDB, TARGET_ICONSDB, e
+    //     );
+    // }
+    let iconrepo = IconRepo::new_by_filename(SRC_ICONSDB);
+    iconrepo.get_all_entries().into_iter().for_each(|ic| {
+        let i_msg = format!(" {:?} ", ic);
+        let r = cleaner_i
+            .iconrepo
+            .store_icon(ic.icon_id, ic.icon, ic.compression_type);
+        //trace!("copy {:?}  ", i_msg);
+        assert!(r.is_ok());
+    });
+
+    let sut = DeleteUnusedIcons(cleaner_i);
+    let r = Box::new(sut).step();
+    if let StepResult::Stop(ref _s) = r {
+        assert!(false);
+    }
+    if let StepResult::Continue(s) = r {
+        let inner: CleanerInner = s.take();
+
+        let icon_ids: Vec<isize> = inner
+            .iconrepo
+            .get_all_entries()
+            .iter()
+            .map(|ie| ie.icon_id)
+            .collect::<Vec<isize>>();
+        // debug!("R:  icons:   {:?} ", icon_ids);
+
+        // debug!("  t_delete_unused_icons done1  ");
+    }
+    // debug!("  t_delete_unused_icons done2  ");
+
+    assert!(false); // TODO
 }
 
 fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo) {
@@ -259,13 +299,10 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
         m1.entry_src_date = 1000000000_i64 + 100000 * i;
         let _r = msgrepo.insert(&m1);
     }
-
-    // Later: more icons test for removing
-    // let r = std::fs::copy("tests/data/icons_sane.json", "../target/icons_list.json");
-    // assert!(r.is_ok());
 }
 
-fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> CleanerInner {
+// TODO
+fn prepare_cleaner_inner(max_messages: i32) -> CleanerInner {
     let (stc_job_s, _stc_job_r) = flume::bounded::<SJob>(99);
     let (gpj_s, _gpj_r) = flume::bounded::<Job>(99);
     let subsrepo = SubscriptionRepo::new_inmem();
@@ -275,16 +312,7 @@ fn prepare_cleaner_inner(copy_icons: Option<&str>, max_messages: i32) -> Cleaner
     msgrepo1.get_ctx().create_table();
     prepare_db_with_errors_1(&msgrepo1, &subsrepo);
     let iconrepo = IconRepo::new_in_mem();
-    if let Some(_i_p) = copy_icons {
-        /*  Later: create test data for removal testing
-               copy_icon_json(i_p);
-               iconrepo = IconRepo::new_(i_p);
-               iconrepo.startup_();
-        */
-    } else {
-        // debug!("dummy_icon_list: ....  ");        let dummy_icon_list: Arc<RwLock<HashMap<isize, IconEntry>>> =            Arc::new(RwLock::new(HashMap::default()));
-        // iconrepo = IconRepo::by_existing_list(dummy_icon_list);
-    }
+
     let cleaner_i = CleanerInner::new(
         gpj_s,
         stc_job_s,
@@ -311,7 +339,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            logger_config::QuietFlags::Downloader as u64, // 0,
+            // logger_config::QuietFlags::Downloader as u64,
+             0,
         );
         unzipper::unzip_some();
     });
