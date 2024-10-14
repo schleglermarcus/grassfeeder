@@ -1,3 +1,18 @@
+grassfeeder-gtk3 (0.0.3515) bookworm; urgency=low
+
+  
+  - IconStore: utilize    http_date, http_length
+  
+  - check if icon cleanup works with database
+  - remove or re-load icons that are too old
+  - remove unused icons
+  
+  - look at db cleanup dialog, watch update bar
+  
+  - put errors in a database
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Sun, 06 Oct 2024 03:00:00 +0000
+
 grassfeeder-gtk3 (0.3.4) bookworm; urgency=low
 
   * re-built the vendored dependencies with downgraded packages

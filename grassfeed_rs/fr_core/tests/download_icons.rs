@@ -1,12 +1,9 @@
 use fr_core::controller::contentdownloader::Downloader;
 use fr_core::controller::sourcetree::SJob;
-//use fr_core::db::errors_repo::ErrorRepo;
 use fr_core::db::icon_repo::IIconRepo;
-use fr_core::db::icon_repo::IconRepo;
 use fr_core::db::icon_row::IconRow;
 use fr_core::db::subscription_entry::SubscriptionEntry;
 use fr_core::db::subscription_repo::ISubscriptionRepo;
-use fr_core::db::subscription_repo::SubscriptionRepo;
 use fr_core::downloader::icons::IconCheckIsImage;
 use fr_core::downloader::icons::IconInner;
 use fr_core::downloader::icons::IconLoadStart;
@@ -16,8 +13,8 @@ use fr_core::util::Step;
 use fr_core::util::StepResult;
 use fr_core::web::httpfetcher::HttpFetcher;
 use fr_core::web::mockfilefetcher::file_to_bin;
-use fr_core::web::mockfilefetcher::FileFetcher;
-use fr_core::web::WebFetcherType;
+// use fr_core::web::mockfilefetcher::FileFetcher;
+// use fr_core::web::WebFetcherType;
 use fr_core::TD_BASE;
 use std::io::Write;
 use std::sync::Arc;
@@ -101,6 +98,7 @@ fn download_icon_one_url(feed_url_: &String, homepage: &String) -> (Vec<IconRow>
         ..Default::default()
     };
     let (mut icon_inner, stc_job_r) = IconInner::new_in_mem("", 1);
+    icon_inner.subscriptionrepo.scrub_all_subscriptions();
     let _r = icon_inner.subscriptionrepo.store_entry(&se);
     icon_inner.web_fetcher = Arc::new(Box::new(HttpFetcher {}));
     icon_inner.feed_url = feed_url_.clone();
@@ -119,7 +117,7 @@ fn download_icon_one_url(feed_url_: &String, homepage: &String) -> (Vec<IconRow>
 #[test]
 fn icon_too_big() {
     setup();
-    let (mut icon_inner, stc_job_r) = IconInner::new_in_mem("", 1);
+    let (mut icon_inner, _stc_job_r) = IconInner::new_in_mem("", 1);
     icon_inner.feed_url = "http://lisahaven.news/feed/".to_string();
     icon_inner.web_fetcher = Arc::new(Box::new(HttpFetcher {}));
 
@@ -136,7 +134,7 @@ fn icon_too_big() {
 #[test]
 fn stop_on_nonexistent() {
     setup(); // This test issues a stop signal upon a nonexistent icon
-    let (mut icon_inner, stc_job_r) = IconInner::new_in_mem("", 5);
+    let (mut icon_inner, _stc_job_r) = IconInner::new_in_mem("", 5);
     icon_inner.subs_id = 5;
     let ic = IconCheckIsImage(icon_inner);
     let r: StepResult<IconInner> = Box::new(ic).step();
@@ -192,11 +190,13 @@ fn t_host_for_url() {
     assert_eq!(hostname.unwrap(), "www.youtube.com".to_string());
 }
 
+/*
 fn get_file_fetcher() -> WebFetcherType {
     Arc::new(Box::new(FileFetcher::new(
         "../fr_core/tests/data/".to_string(),
     )))
 }
+*/
 
 // ------------------------------------
 

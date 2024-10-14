@@ -25,7 +25,7 @@ use fr_core::util::timestamp_now;
 use fr_core::util::Step;
 use fr_core::util::StepResult;
 
-#[ignore]
+// #[ignore]
 #[test]
 fn clean_errorlist_no_subscription() {
     setup();
@@ -51,7 +51,7 @@ fn clean_errorlist_no_subscription() {
     }
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn clean_subscriptions_names_expanded() {
     setup();
@@ -71,7 +71,7 @@ fn clean_subscriptions_names_expanded() {
     }
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn t_db_cleanup_1() {
     setup();
@@ -89,7 +89,7 @@ fn t_db_cleanup_1() {
     assert_eq!(msg2.is_deleted, false); // belongs to subscription, keep it
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn t_subscr_parent_ids_correction() {
     setup();
@@ -105,7 +105,7 @@ fn t_subscr_parent_ids_correction() {
     }
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn clean_message_doublettes() {
     setup();
@@ -119,7 +119,7 @@ fn clean_message_doublettes() {
     }
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 fn clean_too_many_messages() {
     setup();
@@ -162,6 +162,7 @@ fn clean_errorlist_too_old() {
 }
 
 // Later: create new test data
+// TODO: currently fails, check test data
 #[ignore]
 #[test]
 fn clean_icon_doublettes() {
@@ -176,7 +177,7 @@ fn clean_icon_doublettes() {
 }
 
 // TODO
-#[ignore]
+// #[ignore]
 #[test]
 fn clean_errorlist_too_many() {
     setup();
@@ -203,8 +204,8 @@ fn clean_errorlist_too_many() {
     }
 }
 
-const SRC_ICONSDB: &str = "tests/data/icons_too_many.db";
-const TARGET_ICONSDB: &str = "../target/icons_too_many.db";
+const SRC_ICONSDB: &str = "tests/data/icons_testing.db";
+
 
 //  cargo watch -s "(cd fr_core; cargo test --test db_remove_deleted   )  "
 // #[ignore]
@@ -212,16 +213,9 @@ const TARGET_ICONSDB: &str = "../target/icons_too_many.db";
 fn t_delete_unused_icons() {
     setup();
     let cleaner_i = prepare_cleaner_inner(-1);
-    // let r = std::fs::copy("tests/data/icons_too_many.db", TARGET_ICONSDB);
-    // if let Err(e) = r {
-    //     error!(
-    //         "copying from {} -> {} => {:?} ",
-    //         SRC_ICONSDB, TARGET_ICONSDB, e
-    //     );
-    // }
     let iconrepo = IconRepo::new_by_filename(SRC_ICONSDB);
     iconrepo.get_all_entries().into_iter().for_each(|ic| {
-        let i_msg = format!(" {:?} ", ic);
+        // let i_msg = format!(" {:?} ", ic);
         let r = cleaner_i
             .iconrepo
             .store_icon(ic.icon_id, ic.icon, ic.compression_type);
@@ -236,20 +230,18 @@ fn t_delete_unused_icons() {
     }
     if let StepResult::Continue(s) = r {
         let inner: CleanerInner = s.take();
-
         let icon_ids: Vec<isize> = inner
             .iconrepo
             .get_all_entries()
             .iter()
             .map(|ie| ie.icon_id)
             .collect::<Vec<isize>>();
-        // debug!("R:  icons:   {:?} ", icon_ids);
-
-        // debug!("  t_delete_unused_icons done1  ");
+        // debug!("R:  {}  icons:   {:?} ", icon_ids.len(), icon_ids);
+        assert_eq!(icon_ids.len(), 24);
+    } else {
+        assert!(false);
     }
     // debug!("  t_delete_unused_icons done2  ");
-
-    assert!(false); // TODO
 }
 
 fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo) {
@@ -270,10 +262,12 @@ fn prepare_db_with_errors_1(msgrepo: &MessagesRepo, subsrepo: &SubscriptionRepo)
     se.display_name = "fourth".to_string();
     se.expanded = false;
     se.folder_position = 3;
+    se.icon_id = 33;
     assert!(subsrepo.store_entry(&se).is_ok()); // id 4
     se.display_name = "fifth".to_string();
     se.expanded = false;
     se.folder_position = 4;
+    se.icon_id = 34;
     assert!(subsrepo.store_entry(&se).is_ok()); // id 5
 
     let mut m1 = MessageRow::default();
@@ -339,8 +333,8 @@ static TEST_SETUP: Once = Once::new();
 fn setup() {
     TEST_SETUP.call_once(|| {
         let _r = logger_config::setup_fern_logger(
-            // logger_config::QuietFlags::Downloader as u64,
-             0,
+            logger_config::QuietFlags::Downloader as u64,
+           // 0,
         );
         unzipper::unzip_some();
     });

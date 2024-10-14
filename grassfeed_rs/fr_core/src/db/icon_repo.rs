@@ -97,7 +97,7 @@ impl IconRepo {
     }
 
     pub fn new_by_filename(filename: &str) -> Self {
-        trace!("icon_repo::NEW  filename={} ", filename);
+        // trace!("icon_repo::NEW  filename={} ", filename);
         let dbctx = SqliteContext::new(filename);
         IconRepo { ctx: dbctx }
     }

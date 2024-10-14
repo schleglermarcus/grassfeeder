@@ -71,7 +71,6 @@ impl IconInner {
             ErrorRepo::new_in_mem(),
         );
         icon_inner.subs_id = subscription_id;
-        icon_inner.subscriptionrepo.scrub_all_subscriptions();
         (icon_inner, _stc_job_r)
     }
 
@@ -297,7 +296,6 @@ struct IconDownload(IconInner);
 impl Step<IconInner> for IconDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
-        // trace!("IconDownload({}) {} ", inner.subs_id, &inner.icon_url);
         let now = Instant::now();
         let r: HttpGetResult = (*inner.web_fetcher).request_url_bin(&inner.icon_url);
         let elapsedms = now.elapsed().as_millis();
@@ -387,7 +385,7 @@ impl Step<IconInner> for IconIsInDatabase {
             return StepResult::Continue(Box::new(IconCheckIsImage(inner)));
         }
         trace!(
-            "IconPerUrl {} different timestamp,  db:{} {}bytes    web:{} {}bytes  processing... ",
+            "IconPerUrl {} different timestamp,  db:{} {}bytes    web:{} {}bytes, storing into db ... ",
             &inner.icon_url,
             db_time_to_display(icon_per_url.web_date),
             icon_per_url.web_size,

@@ -383,7 +383,7 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
         let mut inner = self.0;
         inner.advance_step();
         inner.send_gp(None);
-        let all_folders: Vec<SubscriptionEntry> = inner
+        let all_subscriptions: Vec<SubscriptionEntry> = inner
             .subscriptionrepo
             .get_all_entries()
             .into_iter()
@@ -403,7 +403,7 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
             )));
             return StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)));
         }
-        for se in all_folders {
+        for se in all_subscriptions {
             if se.icon_id < ICON_LIST.len() && se.icon_id != gen_icons::IDX_05_RSS_FEEDS_GREY_64_D {
                 reset_icon_subs_ids.push(se.subs_id as i32);
                 continue;
@@ -445,20 +445,41 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
     }
 }
 
-//  TODO new Step  Remove Unused Icons
 pub struct DeleteUnusedIcons(pub CleanerInner);
 impl Step<CleanerInner> for DeleteUnusedIcons {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let inner = self.0;
-        let all_icon_ids: Vec<isize> = inner
+        let mut used_icon_ids: Vec<usize> = inner
+            .subscriptionrepo
+            .get_all_entries()
+            .into_iter()
+            .filter_map(|subscr| match subscr.is_folder {
+                true => None,
+                false => Some(subscr.icon_id),
+            })
+            .filter(|id| *id > gen_icons::IDX_44_ICON_GREEN_D)
+            .collect();
+        used_icon_ids.sort();
+        used_icon_ids.dedup();
+        trace!("DeleteUnusedIcons:  used_icon_ids: {:?} ", used_icon_ids);
+        let all_icon_ids: Vec<usize> = inner
             .iconrepo
             .get_all_entries()
             .iter()
-            .map(|ie| ie.icon_id)
-            .collect::<Vec<isize>>();
-
-        debug!("DeleteUnusedIcons:  all icons: {:?} ", all_icon_ids);
-
+            .map(|ie| ie.icon_id as usize)
+            .collect();
+        let icon_ids_to_delete: Vec<usize> = all_icon_ids
+            .into_iter()
+            .filter(|id| id > &gen_icons::IDX_44_ICON_GREEN_D && !used_icon_ids.contains(id))
+            .collect();
+        if icon_ids_to_delete.len() > 0 {
+            let msg = format!("DeleteUnusedIcons:  {:?} ", icon_ids_to_delete);
+            // debug!(" {} ", msg);
+            inner.send_gp(Some(msg));
+            for icon_id in icon_ids_to_delete {
+                inner.iconrepo.delete_icon(icon_id as isize);
+            }
+        }
         StepResult::Continue(Box::new(MarkUnconnectedMessages(inner)))
     }
 }
