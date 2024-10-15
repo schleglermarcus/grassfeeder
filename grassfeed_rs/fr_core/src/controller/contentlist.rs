@@ -1256,7 +1256,7 @@ pub fn create_regex_set(pattern: &str) -> RegexSet {
         let patterns: Vec<&str> = pattern_tolower.split('|').collect::<Vec<&str>>();
         RegexSet::new(patterns.as_slice())
     } else {
-        RegexSet::new(&[pattern_tolower])
+        RegexSet::new( [pattern_tolower])
     };
     if o_set.is_err() {
         debug!("create_regex_set:  {:?} ", o_set.err());

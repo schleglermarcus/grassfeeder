@@ -358,6 +358,8 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
                 });
         });
         inner.advance_step();
+        changes.sort();
+        changes.dedup();
         if !changes.is_empty() {
             inner.send_gp(Some(format!(
                 "CorrectIconsDoublettes changes: {:?} ",
@@ -472,7 +474,7 @@ impl Step<CleanerInner> for DeleteUnusedIcons {
             .into_iter()
             .filter(|id| id > &gen_icons::IDX_44_ICON_GREEN_D && !used_icon_ids.contains(id))
             .collect();
-        if icon_ids_to_delete.len() > 0 {
+        if !icon_ids_to_delete.is_empty() {
             let msg = format!("DeleteUnusedIcons:  {:?} ", icon_ids_to_delete);
             // debug!(" {} ", msg);
             inner.send_gp(Some(msg));

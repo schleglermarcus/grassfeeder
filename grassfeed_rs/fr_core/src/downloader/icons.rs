@@ -81,7 +81,7 @@ impl IconInner {
         subscriptionrep: SubscriptionRepo,
         errorrepo: ErrorRepo,
     ) -> IconInner {
-        let icon_inner = IconInner {
+        IconInner {
             sourcetree_job_sender: sourcetree_job_sende, // stc_job_s,
             subscriptionrepo: subscriptionrep,
             erro_repo: errorrepo,
@@ -100,8 +100,7 @@ impl IconInner {
             dl_datetime_stamp: 0,
             dl_icon_size: -1,
             db_icon_id: -1,
-        };
-        icon_inner
+        }
     }
 }
 
@@ -367,10 +366,10 @@ impl Step<IconInner> for IconIsInDatabase {
                 icons_in_db.len()
             );
         }
-        if icons_in_db.len() == 0 {
+        if icons_in_db.is_empty() {
             return StepResult::Continue(Box::new(IconCheckIsImage(inner)));
         }
-        let icon_per_url: &IconRow = icons_in_db.get(0).unwrap();
+        let icon_per_url: &IconRow = icons_in_db.first().unwrap();
         inner.db_icon_id = icon_per_url.icon_id;
         if icon_per_url.web_date == inner.dl_datetime_stamp {
             if inner.db_icon_id > 0 {
@@ -574,12 +573,12 @@ impl Step<IconInner> for UseIconForDisplay {
         if self.0.db_icon_id <= 0 {
             let msg: String = if self.0.db_icon_id <= (ICON_LIST.len() as isize) {
                 format!(
-                    "UseIconForDisplay: db_icon_id too small! {} <{} ! Stopping ",
+                    "UseIconForDisplay: db_icon_id too small! {} < {} ! Stopping ",
                     self.0.db_icon_id,
                     ICON_LIST.len()
                 )
             } else {
-                format!("UseIconForDisplay: db_icon_id<0 ! Stopping ")
+                "UseIconForDisplay: db_icon_id<0 ! Stopping ".to_string()
             };
             error!("{}", msg);
             return StepResult::Stop(self.0);
@@ -588,7 +587,7 @@ impl Step<IconInner> for UseIconForDisplay {
         let _r = self
             .0
             .sourcetree_job_sender
-            .send(SJob::SetIconId(self.0.subs_id, self.0.db_icon_id as isize));
+            .send(SJob::SetIconId(self.0.subs_id, self.0.db_icon_id));
         StepResult::Stop(self.0)
     }
 }

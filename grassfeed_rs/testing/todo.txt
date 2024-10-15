@@ -1,12 +1,9 @@
 
-- IconStore: utilize    http_date, http_length
-- check if icon cleanup works with database
-- remove or re-load icons that are too old
-- remove unused icons
 - put errors in a database
 - look at db cleanup dialog, watch update bar
 
 
+- remove or re-load icons that are too old
 - Filling content list with partitioned gtk-String lists.
 
 - package bas64  to newer version

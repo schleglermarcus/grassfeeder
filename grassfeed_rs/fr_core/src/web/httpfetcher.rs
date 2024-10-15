@@ -27,7 +27,7 @@ impl HttpFetcher {
             Ok(response) => {
                 r_status = response.status();
                 if let Some(l_mod_str) = response.header("Last-Modified") {
-                    match DateTime::parse_from_rfc2822(&l_mod_str) {
+                    match DateTime::parse_from_rfc2822(l_mod_str) {
                         Ok(parse_dt) => {
                             web_last_modified = DateTime::<Local>::from(parse_dt).timestamp();
                         }

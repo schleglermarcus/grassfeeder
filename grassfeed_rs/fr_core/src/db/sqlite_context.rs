@@ -168,7 +168,7 @@ impl<T: TableInfo> SqliteContext<T> {
         }
     }
 
-    #[allow(clippy::blocks_in_conditions)]
+    // #[allow(clippy::blocks_in_if_conditions)]
     pub fn get_one(&self, sql: String) -> Option<T> {
         let mut ret: Option<T> = None;
         if let Ok(mut stmt) = (*self.connection).lock().unwrap().prepare(&sql) {
@@ -200,7 +200,7 @@ impl<T: TableInfo> SqliteContext<T> {
         self.get_list(prepared)
     }
 
-    #[allow(clippy::blocks_in_conditions)]
+    // #[allow(clippy::blocks_in_if_conditions)]
     pub fn get_list(&self, sql: String) -> Vec<T> {
         let mut list: Vec<T> = Vec::default();
         if let Ok(mut stmt) = (*self.connection).lock().unwrap().prepare(&sql) {

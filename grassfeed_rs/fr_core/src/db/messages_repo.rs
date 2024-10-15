@@ -147,7 +147,7 @@ impl MessagesRepo {
         }
     }
 
-    #[allow(clippy::blocks_in_conditions)]
+    // #[allow(clippy::blocks_in_if_conditions)]
     fn request_messages_reduced(&mut self, sql: &str) {
         self.cached_rows.clear();
         if let Ok(mut stmt) = (*self.get_connection()).lock().unwrap().prepare(sql) {

@@ -190,14 +190,6 @@ fn t_host_for_url() {
     assert_eq!(hostname.unwrap(), "www.youtube.com".to_string());
 }
 
-/*
-fn get_file_fetcher() -> WebFetcherType {
-    Arc::new(Box::new(FileFetcher::new(
-        "../fr_core/tests/data/".to_string(),
-    )))
-}
-*/
-
 // ------------------------------------
 
 mod logger_config;
