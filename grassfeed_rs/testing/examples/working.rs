@@ -123,13 +123,13 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
         for esrc in ESRC::VALUES {
             let dummy_val = subs_id_dyn * (esrc.clone() as isize);
-            (*error_repo.borrow()).add_error(
+            let _r = (*error_repo.borrow()).add_error(
                 subs_id_dyn,
                 esrc,
                 dummy_val,
                 url_dynamic.clone(),
                 "some-message".to_string(),
-            )
+            );
         }
 
         //  subs_move.add_new_subscription_at_parent(            format!("{}/naturalnews_aug.xml", addr),            "NN-aug".to_string(),            folder1,            false,        );

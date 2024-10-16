@@ -1,12 +1,10 @@
-use gtk::LevelBar;
 #[cfg(feature = "legacy3gtk14")]
 use gtk::NotebookBuilder;
 
 #[cfg(not(feature = "legacy3gtk14"))]
 use gtk::builders::NotebookBuilder;
-use gtk::TextBuffer;
-use gtk::TextTagTable;
 
+use crate::statistics_list::create_statistic_listview;
 use crate::util::*;
 use flume::Sender;
 use gtk::gdk_pixbuf::InterpType;
@@ -25,6 +23,7 @@ use gtk::FileChooserDialog;
 use gtk::Grid;
 use gtk::Image;
 use gtk::Label;
+use gtk::LevelBar;
 use gtk::LevelBarMode;
 use gtk::Notebook;
 use gtk::Orientation;
@@ -36,6 +35,8 @@ use gtk::ShadowType;
 use gtk::SpinButton;
 use gtk::Spinner;
 use gtk::Switch;
+use gtk::TextBuffer;
+use gtk::TextTagTable;
 use gtk::TextView;
 use gtk::Window;
 use gui_layer::abstract_ui::AValue;
@@ -61,7 +62,6 @@ const GRID_SPACING: u32 = 5;
 const DB_CLEAN_STEPS_MAX: f64 = 10.0;
 const ICON_RESCALE_SIZE: i32 = 24;
 const ICON_DIALOG_COLUMNS: i32 = 40;
-// const ICON_DIALOG_INCLUDE_INTERNAL: bool = false;
 
 const NONE_ADJ: Option<&Adjustment> = None;
 const NONE_TEXT: Option<&TextTagTable> = None;
@@ -79,8 +79,9 @@ pub fn create_dialogs(
     create_folder_edit_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_settings_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
     create_opml_import_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
-    create_opml_export_dialog(gui_event_sender, gtk_obj_a.clone());
+    create_opml_export_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
     create_about_dialog(gtk_obj_a.clone(), ddd);
+    create_subscription_statistic_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
 }
 
 fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributor) {
@@ -1132,6 +1133,127 @@ fn create_about_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
 
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_ABOUT, &dialog.upcast());
+}
+
+fn create_subscription_statistic_dialog(
+    _g_ev_se: Sender<GuiEvents>, // TODO
+    gtk_obj_a: GtkObjectsType,
+    ddd: &mut DialogDataDistributor,
+) {
+    let width = 800;
+    let dialog = Dialog::with_buttons::<Window>(
+        Some(&t!("D_SUBSCRIPTION_STATISTIC_TITLE")),
+        (*gtk_obj_a).read().unwrap().get_window().as_ref(),
+        gtk::DialogFlags::MODAL,
+        &[(&t!("D_BUTTON_OK"), ResponseType::Ok)],
+    );
+    dialog.set_width_request(width);
+    dialog.set_default_response(ResponseType::Ok);
+
+    let grid2 = Grid::new();
+    dialog.content_area().add(&grid2);
+    //  notebook.append_page(&grid2, Some(&label_nb2));
+    grid2.set_vexpand(true);
+    grid2.set_hexpand(true);
+
+    let mut line = 0;
+    let label1a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_MAIN_WEBSITE")));
+    grid2.attach(&label1a, 0, line, 1, 1);
+    let label1b = Label::new(Some("_"));
+    grid2.attach(&label1b, 1, line, 1, 1);
+    line += 1;
+    let label2a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_NUM_MESSAGES")));
+    grid2.attach(&label2a, 0, line, 1, 1);
+    let label2b = Label::new(Some("_"));
+    grid2.attach(&label2b, 1, line, 1, 1);
+    line += 1;
+    let label3a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_NUM_UNREAD")));
+    grid2.attach(&label3a, 0, line, 1, 1);
+    let label3b = Label::new(Some("_"));
+    grid2.attach(&label3b, 1, line, 1, 1);
+    line += 1;
+    let label4a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_LAST_DOWNLOAD")));
+    grid2.attach(&label4a, 0, line, 1, 1);
+    let label4b = Label::new(Some("_"));
+    grid2.attach(&label4b, 1, line, 1, 1);
+    line += 1;
+    let label5a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_LAST_CREATION")));
+    grid2.attach(&label5a, 0, line, 1, 1);
+    let label5b = Label::new(Some("_"));
+    grid2.attach(&label5b, 1, line, 1, 1);
+    // line += 1;
+    // let label6a = Label::new(None);
+    // grid2.attach(&label6a, 0, line, 1, 1);
+    // let label6b = Label::new(None);
+    // grid2.attach(&label6b, 1, line, 1, 1);
+
+    line += 1;
+    //    let label7a = Label::new(Some(&t!("D_SUBSCRIPTION_STATISTIC_ERRORLIST")));
+    let scrolledwindow1 = ScrolledWindow::new(NONE_ADJ, NONE_ADJ);
+    grid2.attach(&scrolledwindow1, 0, line, 2, 1);
+
+    scrolledwindow1.set_widget_name("scrolledwindow_0");
+    scrolledwindow1.set_policy(gtk::PolicyType::Automatic, gtk::PolicyType::Automatic); // scrollbar-h, scrollbar-v
+    scrolledwindow1.set_vexpand(true);
+    scrolledwindow1.set_hexpand(true);
+    scrolledwindow1.set_shadow_type(ShadowType::EtchedIn);
+
+    /*
+       let textview = TextView::new();
+       textview.set_vexpand(true);
+       textview.set_hexpand(true);
+       textview.set_monospace(true);
+       scrolledwindow1.add(&textview);
+    */
+
+    let err_list = create_statistic_listview(gtk_obj_a.clone());
+    scrolledwindow1.add(&err_list);
+
+    dialog.connect_response(move |dialog, rt| {
+        match rt {
+            ResponseType::Ok => {
+                debug!("statistics: OK! ");
+            }
+            _ => {
+                warn!("statistics:response unexpected {}", rt);
+            }
+        }
+        dialog.hide();
+    });
+    dialog.connect_delete_event(|dia, _| {
+        dia.hide();
+        gtk::Inhibit(true)
+    });
+    //    let textview_c = textview.clone();
+    ddd.set_dialog_distribute(DIALOG_SUBSCRIPTION_STATISTIC, move |dialogdata| {
+        // let mut url = String::default();
+        if let Some(s) = dialogdata.get(3).unwrap().str() {
+            label2b.set_text(&s); // 3: num-all
+        }
+        if let Some(s) = dialogdata.get(4).unwrap().str() {
+            label3b.set_text(&s); // 4: num-unread
+        }
+        if let Some(s) = dialogdata.get(5).unwrap().str() {
+            label1b.set_text(&s); // 5: main website
+        }
+        if let Some(s) = dialogdata.get(6).unwrap().str() {
+            label4b.set_text(&s); // update-int
+        }
+        if let Some(s) = dialogdata.get(7).unwrap().str() {
+            label5b.set_text(&s); // update-ext
+        }
+        /*
+               if let Some(s) = dialogdata.get(8).unwrap().str() {
+                   debug!("TODO fill list instead of text lines! {} ", s);
+                   // let buffer = textview_c.buffer().unwrap();
+                   // buffer.set_text(&s);
+
+               }
+        */
+    });
+    let mut ret = (*gtk_obj_a).write().unwrap();
+    ret.set_dialog(DIALOG_SUBSCRIPTION_STATISTIC, &dialog);
+    // ret.set_text_view(DIALOG_TEXTVIEW_ERR, &textview);
 }
 
 //

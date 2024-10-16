@@ -2,7 +2,6 @@ Sun, 06 Oct 2024 03:00:00 +0000
 * Use http date to check fav-icon presence
 * Cleanup: remove unused icons
 
-
-- put errors in a database
+- Subscriptions Errors Display
 
 - look at db cleanup dialog, watch update bar

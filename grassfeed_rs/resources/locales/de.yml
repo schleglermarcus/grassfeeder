@@ -38,6 +38,7 @@ CM_MSG_COPY_LINK_CLIPBOARD: Verweis in Zwischenablage kopieren
 CM_MSG_MARK_FAVORITE: Als Favorit markieren
 CM_MSG_UNMARK_FAVORITE: Favorit aufheben
 
+
 D_BUTTON_YES: Ja
 D_BUTTON_NO: Nein
 D_BUTTON_OK: Ok
@@ -57,6 +58,7 @@ CM_SUB_UPDATE: Aktualisieren
 CM_SUB_MARK_AS_READ: Als gelesen markieren
 CM_SUB_EDIT: Editieren
 CM_SUB_DELETE: Löschen
+CM_SUBS_STATISTICS: Statistik und Fehler
 
 D_NEW_SUBSCRIPTION_TITLE: Neues Abonnement
 D_NEW_SUBSCRIPTION_URL: Adresse der Quelle
@@ -102,6 +104,13 @@ D_SETTINGS_DB_CLEAN_B1: "Start"
 D_IMPORT_OPML_SELECT_FILE: Opml Datei auswählen
 D_STORE_OPML_SELECT_FILE: Opml Datei bestimmen
 
+D_SUBSCRIPTION_STATISTIC_TITLE: "Statistik und Fehler"
+
+ERRORSLIST_TITLE0: "Zeit"
+ERRORSLIST_TITLE1: "Ursache"
+ERRORSLIST_TITLE2: "Wert"
+ERRORSLIST_TITLE3: "Server-Adresse"
+ERRORSLIST_TITLE4: "Details"
 
 
 EM_DL_0: "-"
@@ -123,6 +132,10 @@ EM_DL_16: "Feed-Text Download für Symbol"
 EM_DL_17: "Feed-Download"
 EM_DL_18: "Symbol Download"
 EM_DL_19: "Keine Homepage aus Feed-Inhalt"
+EM_DL_20: "Wandeln von SVG zu PNG"
+EM_DL_21: "Herunterladen des Icon"
+
+
 
 
 M_SHORTHELP_TEXT: "Grassfeeder RSS Anzeiger Tastenbelegung\n

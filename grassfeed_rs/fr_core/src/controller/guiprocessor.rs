@@ -60,6 +60,13 @@ use std::mem::Discriminant;
 use std::rc::Rc;
 use std::time::Instant;
 
+/// "Download took longer than 2 seconds.";
+const DOWNLOAD_TOO_LONG_MSG: &str = "dl>3s";
+const DOWNLOAD_TOO_LONG_MS: u32 = 3000;
+
+const JOBQUEUE_SIZE: usize = 100;
+const TREE_PANE1_MIN_WIDTH: i32 = 100;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Job {
     StartApplication,
@@ -83,9 +90,6 @@ pub enum Job {
     NotifyDbClean(u8, u32, Option<String>),
     StoreDefaultIcons,
 }
-
-const JOBQUEUE_SIZE: usize = 100;
-const TREE_PANE1_MIN_WIDTH: i32 = 100;
 
 #[allow(dead_code)]
 pub struct GuiProcessor {
@@ -272,17 +276,17 @@ impl GuiProcessor {
                 ) => {
                     match kind {
                         1 | 2 => {
-                            if elapsed_ms > 2000 && subs_id > 0 {
+                            if elapsed_ms > DOWNLOAD_TOO_LONG_MS && subs_id > 0 {
                                 (*self.erro_repo_r).borrow().add_error(
                                     subs_id,
                                     if kind == 1 {
-                                        ESRC::HttpFeedDownload
+                                        ESRC::GPFeedDownloadDuration
                                     } else {
-                                        ESRC::HttpIconDownload
+                                        ESRC::GPIconDownloadDuration
                                     },
                                     elapsed_ms as isize,
                                     remote_addr,
-                                    description,
+                                    DOWNLOAD_TOO_LONG_MSG.to_string(),
                                 );
                             }
                         }
@@ -1136,35 +1140,43 @@ impl HandleSingleEvent for HandleDialogEditData {
 struct HandleTreeEvent(Rc<RefCell<dyn ISourceTreeController>>);
 impl HandleSingleEvent for HandleTreeEvent {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
-        if let GuiEvents::TreeEvent(_tree_nr, src_repo_id, ref command) = ev {
+        if let GuiEvents::TreeEvent(_tree_nr, subscription_id, ref command) = ev {
             match command.as_str() {
                 "feedsource-delete-dialog" => {
                     (*self.0)
                         .borrow_mut()
-                        .start_delete_dialog(src_repo_id as isize);
+                        .start_delete_dialog(subscription_id as isize);
                 }
                 "feedsource-update" => {
                     self.0
                         .borrow_mut()
-                        .mark_schedule_fetch(src_repo_id as isize);
+                        .mark_schedule_fetch(subscription_id as isize);
                 }
                 "feedsource-edit-dialog" => {
                     (*self.0)
                         .borrow_mut()
-                        .start_feedsource_edit_dialog(src_repo_id as isize);
+                        .start_subscription_edit_dialog(subscription_id as isize);
                 }
                 "feedsource-mark-as-read" => {
-                    (*self.0).borrow_mut().mark_as_read(src_repo_id as isize);
+                    (*self.0)
+                        .borrow_mut()
+                        .mark_as_read(subscription_id as isize);
                 }
                 "new-folder-dialog" => {
                     (*self.0)
                         .borrow_mut()
-                        .start_new_fol_sub_dialog(src_repo_id as isize, DIALOG_NEW_FOLDER);
+                        .start_new_fol_sub_dialog(subscription_id as isize, DIALOG_NEW_FOLDER);
                 }
                 "new-subscription-dialog" => {
+                    (*self.0).borrow_mut().start_new_fol_sub_dialog(
+                        subscription_id as isize,
+                        DIALOG_NEW_SUBSCRIPTION,
+                    );
+                }
+                "subscription-statistics-dialog" => {
                     (*self.0)
                         .borrow_mut()
-                        .start_new_fol_sub_dialog(src_repo_id as isize, DIALOG_NEW_SUBSCRIPTION);
+                        .start_statistic_dialog(subscription_id as isize);
                 }
                 _ => {
                     warn!("unknown command for TreeEvent   {}", command);

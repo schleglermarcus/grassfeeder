@@ -4,10 +4,18 @@ pub const LIST0_COL_ISREAD: i32 = 4;
 pub const LIST0_COL_FAVICON: i32 = 7;
 pub const LIST0_COL_MSG_ID: u8 = 5;
 
+pub const LIST1_COL_TIMESTAMP: i32 = 0;
+pub const LIST1_COL_SRC: i32 = 1;
+pub const LIST1_COL_VALUE: i32 = 2;
+pub const LIST1_COL_REMOTEADDR: i32 = 3;
+pub const LIST1_COL_DETAIL: i32 = 3;
+
 /// Subscription List
 pub const TREEVIEW0: u8 = 0;
 /// Messages List
-pub const TREEVIEW1: u8 = 1; //
+pub const TREEVIEW1: u8 = 1;
+/// Stats-Errors List
+pub const TREEVIEW2: u8 = 2;
 
 pub const TREE0_COL_REPO_ID: i32 = 5;
 pub const TREE0_COL_STATUS: i32 = 7;
@@ -26,6 +34,7 @@ pub const DIALOG_SETTINGS: u8 = 8;
 pub const DIALOG_ABOUT: u8 = 9;
 pub const DIALOG_TREE0COL1: u8 = 10;
 pub const DIALOG_SETTINGS_CHECK: u8 = 11;
+pub const DIALOG_SUBSCRIPTION_STATISTIC: u8 = 12;
 
 pub const DIALOG_TEXTVIEW_ERR: u8 = 0;
 pub const DIALOG_TEXTVIEW_CLEAN: u8 = 1;

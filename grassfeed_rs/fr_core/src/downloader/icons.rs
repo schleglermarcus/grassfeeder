@@ -26,8 +26,8 @@ use std::sync::Arc;
 use std::time::Instant;
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;
-
 pub const ICON_WARNING_SIZE_BYTES: usize = 20000;
+pub const ICON_DOWNLOAD_TOO_SLOW: &str = "icon download too slow";
 
 pub struct IconInner {
     pub subs_id: isize,
@@ -162,10 +162,10 @@ impl Step<IconInner> for FeedTextDownload {
                 if elapsedms > 100 {
                     inner.erro_repo.add_error(
                         inner.subs_id,
-                        ESRC::IconFeedTextDur,
+                        ESRC::IconDownloadTimeDuration,
                         elapsedms as isize,
                         inner.feed_url.to_string(),
-                        String::default(),
+                        ICON_DOWNLOAD_TOO_SLOW.to_string(),
                     );
                 }
                 inner.feed_download_text = result.content;
@@ -173,7 +173,7 @@ impl Step<IconInner> for FeedTextDownload {
             _ => {
                 inner.erro_repo.add_error(
                     inner.subs_id,
-                    ESRC::IconsFeedtext,
+                    ESRC::IconDownloadOther,
                     result.status as isize,
                     inner.feed_url.clone(),
                     result.error_description,
@@ -253,7 +253,7 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                     // trace!(                        "IconAnalyzeHomepage({}) E: {}  {} ",                        inner.subs_id,                        e_descr,                        homepage                    );
                     inner.erro_repo.add_error(
                         inner.subs_id,
-                        ESRC::IconsAHEx,
+                        ESRC::IconsAnalyzeHomepageExtract,
                         r.status as isize,
                         homepage,
                         e_descr,
@@ -265,7 +265,7 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                 // trace!(                    "IconAnalyzeHomepage({})   STATUS:{}  alt_hp:{} ",                    inner.subs_id,                    r.status,                    alt_hp                );
                 inner.erro_repo.add_error(
                     inner.subs_id,
-                    ESRC::IconsAHMain,
+                    ESRC::IconsAnalyzeHomepageDownloadOther,
                     r.status as isize,
                     homepage,
                     r.error_description,
@@ -310,7 +310,7 @@ impl Step<IconInner> for IconDownload {
                 if elapsedms > 100 {
                     inner.erro_repo.add_error(
                         inner.subs_id,
-                        ESRC::IconDLDuration,
+                        ESRC::IconDownloadTimeDuration,
                         elapsedms as isize,
                         inner.icon_url.to_string(),
                         String::default(),

@@ -18,11 +18,11 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "cache_folder";
-pub const FILENAME: &str = "errors.json.txt";
+// pub const FILENAME: &str = "errors.json.txt";
 
 pub struct ErrorRepo {
     ctx: SqliteContext<ErrorEntry>,
-    errorlines_cache: Mutex<Vec<ErrorEntry>>,
+    //    errorlines_cache: Mutex<Vec<ErrorEntry>>,
 }
 
 impl ErrorRepo {
@@ -38,7 +38,7 @@ impl ErrorRepo {
         let dbctx = SqliteContext::new(&filename);
         ErrorRepo {
             ctx: dbctx,
-            errorlines_cache: Default::default(),
+            //            errorlines_cache: Default::default(),
         }
     }
 
@@ -47,7 +47,7 @@ impl ErrorRepo {
         cx.create_table();
         ErrorRepo {
             ctx: cx,
-            errorlines_cache: Default::default(),
+            //            errorlines_cache: Default::default(),
         }
     }
 
@@ -58,7 +58,7 @@ impl ErrorRepo {
     pub fn by_connection(ex_con: Arc<Mutex<Connection>>) -> Self {
         ErrorRepo {
             ctx: SqliteContext::new_by_connection(ex_con),
-            errorlines_cache: Default::default(),
+            // errorlines_cache: Default::default(),
         }
     }
 
@@ -83,10 +83,14 @@ impl ErrorRepo {
             date: crate::util::timestamp_now(),
             ..Default::default()
         };
-        if let Ok(mut list_g) = self.errorlines_cache.lock() {
-            (*list_g).push(en);
-        } else {
-            error!("Cannot lock Error cache! {:?} ", en);
+
+        let r = self.add_error_entry(&en);
+        if r.is_err() {
+            error!(
+                "adding error to db failed: {:?} {:?}  ",
+                &en,
+                r.unwrap_err()
+            )
         }
     }
 
@@ -115,7 +119,7 @@ impl ErrorRepo {
         self.ctx.insert(en, false).map_err(rusqlite_error_to_boxed)
     }
 
-//    #[allow(clippy::blocks_in_if_conditions)]
+    /// ordered by date, newest on top
     pub fn get_by_subscription(&self, subs_id: isize) -> Vec<ErrorEntry> {
         let prepared = format!(
             "SELECT * FROM {} WHERE subs_id={}  ORDER BY date DESC ",
@@ -166,16 +170,19 @@ impl ErrorRepo {
     }
 
     pub fn flush_dirty(&self) {
-        if let Ok(mut lg) = self.errorlines_cache.lock() {
-            if lg.len() > 0 {
-                while let Some(entry) = lg.pop() {
-                    let r = self.add_error_entry(&entry);
-                    if r.is_err() {
-                        error!("while storing error lines : {:?} {:?}", r.err(), &entry);
-                    }
-                }
-            }
-        }
+        /*
+               if let Ok(mut lg) = self.errorlines_cache.lock() {
+                   if lg.len() > 0 {
+                       while let Some(entry) = lg.pop() {
+                           let r = self.add_error_entry(&entry);
+                           if r.is_err() {
+                               error!("while storing error lines : {:?} {:?}", r.err(), &entry);
+                           }
+                       }
+                   }
+               }
+        */
+        self.ctx.cache_flush();
     }
 
     pub fn db_vacuum(&self) -> usize {

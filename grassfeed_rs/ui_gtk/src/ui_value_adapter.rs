@@ -194,7 +194,7 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
     }
 
     ///   insert a new   GuiListEntry  does not handle multiple lists yet.
-    //  Later:  use list index
+    //  TODO:  use list index
     fn insert_list_item(&mut self, _list_index: u8, list_position: i32, values: &[AValue]) {
         while self.gui_list.len() <= list_position as usize {
             self.gui_list.push(Vec::default());
@@ -202,12 +202,13 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
         values.clone_into(&mut self.gui_list[list_position as usize]);
     }
 
-    //  Later: use list index
+    //  TODO:  use list index
     fn clear_list(&mut self, _list_index: u8) {
         self.gui_list.clear();
     }
 
     ///   GuiListEntry  does not handle multiple lists yet
+    //  TODO:  use list index
     fn get_list_item(&self, _list_index: u8, list_position: i32) -> Option<Vec<AValue>> {
         if self.gui_list.len() <= list_position as usize {
             error!(
@@ -224,9 +225,11 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
         None
     }
 
+    //  TODO:  use list index
     fn get_list_iter(&self, _list_index: u8) -> Iter<Vec<AValue>> {
         self.gui_list.iter()
     }
+
 
     fn set_text_view(&mut self, text_view_index: u8, newtext: String) {
         if (self.gui_text_views.len() as u8) <= text_view_index {

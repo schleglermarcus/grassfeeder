@@ -12,8 +12,8 @@ pub enum ESRC {
     SubsmoveTruncated = 2,
     DragEvalstart = 3,
     IconsFeedtext = 4,
-    IconsAHEx = 5,
-    IconsAHMain = 6,
+    IconsAnalyzeHomepageExtract = 5,
+    IconsAnalyzeHomepageDownloadOther = 6,
     IconsDownload = 7,
     IconsCheckimg = 8,
     IconsDownscale = 9,
@@ -21,23 +21,24 @@ pub enum ESRC {
     MsgEvalFltStrange = 12,
     MsgDownloadTooLong = 13,
     MsgDlStartErr = 14,
-    IconDLDuration = 15,
+    IconDownloadTimeDuration = 15,
     IconFeedTextDur = 16,
-    HttpFeedDownload = 17,
-    HttpIconDownload = 18,
+    GPFeedDownloadDuration = 17,
+    GPIconDownloadDuration = 18,
     IconNoHomepageFromFeedtext = 19,
     IconsSvgToPng = 20,
+    IconDownloadOther = 21,
 }
 
 impl ESRC {
-    pub const VALUES: [Self; 19] = [
+    pub const VALUES: [Self; 21] = [
         Self::None,
         Self::GpDlFinished,
         Self::SubsmoveTruncated,
         Self::DragEvalstart,
         Self::IconsFeedtext,
-        Self::IconsAHEx,
-        Self::IconsAHMain,
+        Self::IconsAnalyzeHomepageExtract,
+        Self::IconsAnalyzeHomepageDownloadOther,
         Self::IconsDownload,
         Self::IconsCheckimg,
         Self::IconsDownscale,
@@ -45,11 +46,13 @@ impl ESRC {
         Self::MsgEvalFltStrange,
         Self::MsgDownloadTooLong,
         Self::MsgDlStartErr,
-        Self::IconDLDuration,
+        Self::IconDownloadTimeDuration,
         Self::IconFeedTextDur,
-        Self::HttpFeedDownload,
-        Self::HttpIconDownload,
+        Self::GPFeedDownloadDuration,
+        Self::GPIconDownloadDuration,
         Self::IconNoHomepageFromFeedtext,
+        Self::IconsSvgToPng,
+        Self::IconDownloadOther,
     ];
 }
 

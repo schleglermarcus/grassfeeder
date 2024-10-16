@@ -276,14 +276,14 @@ pub fn create_treeview(
     treeview1
 }
 
-fn show_context_menu_source(ev_button: u32, source_repo_id: i32, g_ev_se: Sender<GuiEvents>) {
+fn show_context_menu_source(ev_button: u32, subscription_id: i32, g_ev_se: Sender<GuiEvents>) {
     let menu: gtk::Menu = Menu::new();
     let mi_addfeed = MenuItem::with_label(&t!("CM_SUB_ADD_FEED"));
     let esw = EvSenderWrapper(g_ev_se.clone());
     mi_addfeed.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
             0,
-            source_repo_id,
+            subscription_id,
             "new-subscription-dialog".to_string(),
         ));
     });
@@ -293,7 +293,7 @@ fn show_context_menu_source(ev_button: u32, source_repo_id: i32, g_ev_se: Sender
     mi_afo.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
             0,
-            source_repo_id,
+            subscription_id,
             "new-folder-dialog".to_string(),
         ));
     });
@@ -302,7 +302,7 @@ fn show_context_menu_source(ev_button: u32, source_repo_id: i32, g_ev_se: Sender
     mi_update.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
             0,
-            source_repo_id,
+            subscription_id,
             "feedsource-update".to_string(),
         ));
     });
@@ -312,7 +312,7 @@ fn show_context_menu_source(ev_button: u32, source_repo_id: i32, g_ev_se: Sender
     mi_mark_all.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
             0,
-            source_repo_id,
+            subscription_id,
             "feedsource-mark-as-read".to_string(),
         ));
     });
@@ -321,23 +321,34 @@ fn show_context_menu_source(ev_button: u32, source_repo_id: i32, g_ev_se: Sender
     mi_edit.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
             0,
-            source_repo_id,
+            subscription_id,
             "feedsource-edit-dialog".to_string(),
         ));
     });
-    let esw = EvSenderWrapper(g_ev_se);
+    let esw = EvSenderWrapper(g_ev_se.clone());
     let mi_del = MenuItem::with_label(&t!("CM_SUB_DELETE"));
     mi_del.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
             0,
-            source_repo_id,
+            subscription_id,
             "feedsource-delete-dialog".to_string(),
         ));
     });
-    if source_repo_id >= 0 {
+
+    let esw = EvSenderWrapper(g_ev_se);
+    let mi_stats = MenuItem::with_label(&t!("CM_SUBS_STATISTICS"));
+    mi_stats.connect_activate(move |_menuiten| {
+        esw.sendw(GuiEvents::TreeEvent(
+            0,
+            subscription_id,
+            "subscription-statistics-dialog".to_string(),
+        ));
+    });
+    if subscription_id >= 0 {
         menu.append(&mi_mark_all);
         menu.append(&mi_update);
         menu.append(&mi_edit);
+        menu.append(&mi_stats);
         menu.append(&mi_del);
     }
     menu.append(&mi_addfeed);

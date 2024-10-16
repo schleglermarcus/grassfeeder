@@ -45,6 +45,8 @@ use std::sync::RwLock;
 const JOBQUEUE_SIZE: usize = 1000; // at least as many jobs as there might be subscriptions
 const LIST_SCROLL_POS: i8 = 80; // to 70% of the upper list is visible, the cursor shall go to the lower 30%
 
+const STORE_LIST_INDEX: u8 = 0;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CJob {
     /// content_id, newtitle
@@ -378,7 +380,7 @@ impl ContentList {
             messagelist
         };
         let mut valstore = (*self.gui_val_store).write().unwrap();
-        valstore.clear_list(0);
+        valstore.clear_list(STORE_LIST_INDEX);
         filtered_msglist.iter().enumerate().for_each(|(i, fc)| {
             let st = self.msg_state.read().unwrap();
             let title_string = st.get_title(fc.message_id).unwrap_or_default();
@@ -387,7 +389,7 @@ impl ContentList {
                 false => None,
             };
             valstore.insert_list_item(
-                0,
+                STORE_LIST_INDEX,
                 i as i32,
                 &Self::message_to_row(
                     fc,
@@ -1256,7 +1258,7 @@ pub fn create_regex_set(pattern: &str) -> RegexSet {
         let patterns: Vec<&str> = pattern_tolower.split('|').collect::<Vec<&str>>();
         RegexSet::new(patterns.as_slice())
     } else {
-        RegexSet::new( [pattern_tolower])
+        RegexSet::new([pattern_tolower])
     };
     if o_set.is_err() {
         debug!("create_regex_set:  {:?} ", o_set.err());

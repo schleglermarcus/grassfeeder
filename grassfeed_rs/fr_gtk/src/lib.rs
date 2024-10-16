@@ -9,6 +9,7 @@ extern crate rust_i18n;
 
 pub mod cell_data_func;
 pub mod dialogs;
+pub mod statistics_list;
 pub mod gtk_object_tree;
 pub mod load_css;
 pub mod messagelist;

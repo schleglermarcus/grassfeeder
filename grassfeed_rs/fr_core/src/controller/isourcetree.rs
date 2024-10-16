@@ -13,17 +13,22 @@ use crate::db::subscription_state::FeedSourceState;
 use crate::db::subscription_state::ISubscriptionState;
 use crate::db::subscription_state::StatusMask;
 use crate::db::subscription_state::SubsMapEntry;
+use crate::util::db_time_to_display;
 use crate::util::db_time_to_display_nonnull;
 use crate::util::string_is_http_url;
 use flume::Sender;
 use gui_layer::abstract_ui::AValue;
 use resources::id::DIALOG_FOLDER_EDIT;
 use resources::id::DIALOG_FS_DELETE;
+use resources::id::DIALOG_SUBSCRIPTION_STATISTIC;
 use resources::id::DIALOG_SUBS_EDIT;
 use resources::id::TOOLBUTTON_RELOAD_ALL;
 use resources::id::TREEVIEW0;
+use resources::id::TREEVIEW2;
 use std::cell::RefCell;
 use std::rc::Rc;
+
+const STORE_LIST_INDEX: u8 = 1;
 
 pub trait ISourceTreeController {
     fn mark_schedule_fetch(&self, subscription_id: isize);
@@ -45,12 +50,13 @@ pub trait ISourceTreeController {
     fn set_conf_display_feedcount_all(&mut self, a: bool);
     fn notify_config_update(&mut self);
 
-    fn start_feedsource_edit_dialog(&mut self, source_repo_id: isize);
+    fn start_subscription_edit_dialog(&mut self, source_repo_id: isize);
     fn end_subscr_edit_dialog(&mut self, values: &[AValue]);
     fn start_new_fol_sub_dialog(&mut self, src_repo_id: isize, dialog_id: u8);
     fn start_delete_dialog(&mut self, src_repo_id: isize);
     fn newsource_dialog_edit(&mut self, edit_feed_url: String);
     fn set_ctx_subscription(&self, src_repo_id: isize);
+    fn start_statistic_dialog(&mut self, subscription_id: isize);
 
     /// returns  Subscription,  Non-Folder-Child-IDs
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
@@ -204,7 +210,7 @@ impl ISourceTreeController for SourceTreeController {
         self.job_queue_sender.clone()
     }
 
-    fn start_feedsource_edit_dialog(&mut self, subs_id: isize) {
+    fn start_subscription_edit_dialog(&mut self, subs_id: isize) {
         let mut dialog_id = DIALOG_SUBS_EDIT;
         let o_fse = (*self.subscriptionrepo_r).borrow().get_by_index(subs_id);
         if o_fse.is_none() {
@@ -251,6 +257,86 @@ impl ISourceTreeController for SourceTreeController {
             .set_dialog_data(dialog_id, &dd);
         (*self.gui_updater).borrow().update_dialog(dialog_id);
         (*self.gui_updater).borrow().show_dialog(dialog_id);
+    }
+
+    fn start_statistic_dialog(&mut self, subscription_id: isize) {
+        info!("TODO start_statistic_dialog {}", subscription_id);
+
+        let o_fse = (*self.subscriptionrepo_r)
+            .borrow()
+            .get_by_index(subscription_id);
+        if o_fse.is_none() {
+            return;
+        }
+        let subscription = o_fse.unwrap();
+
+        let mut num_all: i32 = -1;
+        let mut num_unread: i32 = -1;
+        if let Some(feedcontents) = self.feedcontents_w.upgrade() {
+            (num_all, num_unread) = (*feedcontents)
+                .borrow()
+                .get_counts(subscription_id)
+                .unwrap();
+        }
+        let mut dd: Vec<AValue> = Vec::default();
+        dd.push(AValue::None); // 0
+        dd.push(AValue::ASTR(subscription.url.clone())); // 1
+        dd.push(AValue::None); // 2
+        dd.push(AValue::AI32(num_all)); // 3
+        dd.push(AValue::AI32(num_unread)); // 4
+        dd.push(AValue::ASTR(subscription.website_url)); // 5 main website
+        dd.push(AValue::ASTR(db_time_to_display_nonnull(
+            subscription.updated_int,
+        ))); // 6
+        dd.push(AValue::ASTR(db_time_to_display_nonnull(
+            subscription.updated_ext,
+        ))); // 7
+
+        if true {
+            debug!("TODO   error messages into list !!");
+
+            let mut valstore = (*self.gui_val_store).write().unwrap();
+            valstore.clear_list(STORE_LIST_INDEX);
+
+            (*self.erro_repo_r)
+                .borrow()
+                .get_by_subscription(subscription_id)
+                .iter()
+                .enumerate()
+                .for_each(|(i, ee)| {
+                    let mut vrow: Vec<AValue> = Vec::default();
+
+                    vrow.push(AValue::ASTR(db_time_to_display(ee.date))); // DateTime
+                    let mut esrc_txt = t!(&format!("EM_DL_{}", ee.e_src));
+                    esrc_txt.truncate(40);
+                    vrow.push(AValue::ASTR(esrc_txt)); // 1 src - message
+
+                    valstore.insert_list_item(STORE_LIST_INDEX, i as i32, &vrow);
+                });
+        } else {
+            let lines: Vec<String> = (*self.erro_repo_r)
+                .borrow()
+                .get_by_subscription(subscription_id)
+                .iter()
+                .map(errorentry_to_line)
+                .collect();
+            let joined = lines.join("\n");
+            dd.push(AValue::ASTR(joined)); // 8 error lines
+        }
+
+        (*self.gui_updater).borrow().update_list(TREEVIEW2);
+
+        (*self.gui_val_store)
+            .write()
+            .unwrap()
+            .set_dialog_data(DIALOG_SUBSCRIPTION_STATISTIC, &dd);
+
+        (*self.gui_updater)
+            .borrow()
+            .update_dialog(DIALOG_SUBSCRIPTION_STATISTIC);
+        (*self.gui_updater)
+            .borrow()
+            .show_dialog(DIALOG_SUBSCRIPTION_STATISTIC);
     }
 
     fn end_subscr_edit_dialog(&mut self, values: &[AValue]) {
