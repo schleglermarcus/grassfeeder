@@ -28,6 +28,7 @@ use std::time::Instant;
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;
 pub const ICON_WARNING_SIZE_BYTES: usize = 20000;
 pub const ICON_DOWNLOAD_TOO_SLOW: &str = "icon download too slow";
+pub const ICON_DOWNLOAD_TIMEOUT: u8 = 200;
 
 pub struct IconInner {
     pub subs_id: isize,
@@ -159,13 +160,13 @@ impl Step<IconInner> for FeedTextDownload {
         let elapsedms = now.elapsed().as_millis();
         match result.status {
             200 => {
-                if elapsedms > 100 {
+                if (elapsedms as u8) > ICON_DOWNLOAD_TIMEOUT {
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconDownloadTimeDuration,
                         elapsedms as isize,
                         inner.feed_url.to_string(),
-                        ICON_DOWNLOAD_TOO_SLOW.to_string(),
+                        format!("timeout {ICON_DOWNLOAD_TIMEOUT} ms"),
                     );
                 }
                 inner.feed_download_text = result.content;
@@ -251,10 +252,15 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                 }
                 Err(e_descr) => {
                     // trace!(                        "IconAnalyzeHomepage({}) E: {}  {} ",                        inner.subs_id,                        e_descr,                        homepage                    );
+                    let st: isize = if r.status == 200 {
+                        0
+                    } else {
+                        r.status as isize
+                    };
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconsAnalyzeHomepageExtract,
-                        r.status as isize,
+                        st,
                         homepage,
                         e_descr,
                     );
@@ -307,13 +313,13 @@ impl Step<IconInner> for IconDownload {
                     // info!(                        "IconDownload({}) {} content-length:{} num-bytes:{} ",                        inner.subs_id,                        &inner.icon_url,                        r.content_length,                        inner.dl_icon_bytes.len()                    );
                     inner.dl_icon_size = inner.dl_icon_bytes.len() as i64;
                 }
-                if elapsedms > 100 {
+                if (elapsedms as u8) > ICON_DOWNLOAD_TIMEOUT {
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconDownloadTimeDuration,
                         elapsedms as isize,
                         inner.icon_url.to_string(),
-                        String::default(),
+                        format!("timeout {ICON_DOWNLOAD_TIMEOUT} ms"),
                     );
                 }
                 StepResult::Continue(Box::new(IconIsInDatabase(inner)))

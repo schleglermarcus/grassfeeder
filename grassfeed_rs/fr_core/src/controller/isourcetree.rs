@@ -22,13 +22,11 @@ use resources::id::DIALOG_FOLDER_EDIT;
 use resources::id::DIALOG_FS_DELETE;
 use resources::id::DIALOG_SUBSCRIPTION_STATISTIC;
 use resources::id::DIALOG_SUBS_EDIT;
+use resources::id::LISTVIEW1;
 use resources::id::TOOLBUTTON_RELOAD_ALL;
 use resources::id::TREEVIEW0;
-use resources::id::TREEVIEW2;
 use std::cell::RefCell;
 use std::rc::Rc;
-
-const STORE_LIST_INDEX: u8 = 1;
 
 pub trait ISourceTreeController {
     fn mark_schedule_fetch(&self, subscription_id: isize);
@@ -260,8 +258,6 @@ impl ISourceTreeController for SourceTreeController {
     }
 
     fn start_statistic_dialog(&mut self, subscription_id: isize) {
-        info!("TODO start_statistic_dialog {}", subscription_id);
-
         let o_fse = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_index(subscription_id);
@@ -269,7 +265,6 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let subscription = o_fse.unwrap();
-
         let mut num_all: i32 = -1;
         let mut num_unread: i32 = -1;
         if let Some(feedcontents) = self.feedcontents_w.upgrade() {
@@ -293,26 +288,25 @@ impl ISourceTreeController for SourceTreeController {
         ))); // 7
 
         if true {
-            debug!("TODO   error messages into list !!");
-
-            let mut valstore = (*self.gui_val_store).write().unwrap();
-            valstore.clear_list(STORE_LIST_INDEX);
-
-            (*self.erro_repo_r)
+            let err_list = (*self.erro_repo_r)
                 .borrow()
-                .get_by_subscription(subscription_id)
-                .iter()
-                .enumerate()
-                .for_each(|(i, ee)| {
-                    let mut vrow: Vec<AValue> = Vec::default();
-
-                    vrow.push(AValue::ASTR(db_time_to_display(ee.date))); // DateTime
-                    let mut esrc_txt = t!(&format!("EM_DL_{}", ee.e_src));
-                    esrc_txt.truncate(40);
-                    vrow.push(AValue::ASTR(esrc_txt)); // 1 src - message
-
-                    valstore.insert_list_item(STORE_LIST_INDEX, i as i32, &vrow);
-                });
+                .get_by_subscription(subscription_id);
+            // debug!(                "start_statistic_dialog   error messages into list !!   len:{} ",                err_list.len()            );
+            let mut valstore = (*self.gui_val_store).write().unwrap();
+            valstore.clear_list(LISTVIEW1);
+            err_list.iter().enumerate().for_each(|(i, ee)| {
+                let mut vrow: Vec<AValue> = Vec::default();
+                vrow.push(AValue::ASTR(db_time_to_display(ee.date))); // DateTime
+                let mut esrc_txt = t!(&format!("EM_DL_{}", ee.e_src));
+                esrc_txt.truncate(40);
+                vrow.push(AValue::ASTR(esrc_txt)); // 1 src - message
+                vrow.push(AValue::AI32(ee.e_val as i32)); // 2 value
+                vrow.push(AValue::ASTR(ee.remote_address.clone())); // 3 remote addr
+                vrow.push(AValue::ASTR(ee.text.clone())); // 4 detail
+                vrow.push(AValue::None); // 5 not yet
+                vrow.push(AValue::ASTR(format!("TT ESRC {}", ee.e_src))); //6
+                valstore.insert_list_item(LISTVIEW1, i as i32, &vrow);
+            });
         } else {
             let lines: Vec<String> = (*self.erro_repo_r)
                 .borrow()
@@ -323,14 +317,12 @@ impl ISourceTreeController for SourceTreeController {
             let joined = lines.join("\n");
             dd.push(AValue::ASTR(joined)); // 8 error lines
         }
-
-        (*self.gui_updater).borrow().update_list(TREEVIEW2);
-
+        (*self.gui_updater).borrow().update_list(LISTVIEW1);
+        // debug!("start_statistic_dialog  update_list  idx:{} ", LISTVIEW1);
         (*self.gui_val_store)
             .write()
             .unwrap()
             .set_dialog_data(DIALOG_SUBSCRIPTION_STATISTIC, &dd);
-
         (*self.gui_updater)
             .borrow()
             .update_dialog(DIALOG_SUBSCRIPTION_STATISTIC);

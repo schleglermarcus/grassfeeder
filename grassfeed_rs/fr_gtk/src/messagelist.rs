@@ -319,9 +319,9 @@ pub fn create_listview(
     set_column_notifier(&title_column, g_ev_se.clone());
     set_column_notifier(&date_column, g_ev_se);
     let mut ret = (*gtk_obj_a).write().unwrap();
-    ret.set_tree_view(TREEVIEW1, &content_tree_view);
-    ret.set_list_store(TREEVIEW1, &list_store);
-    ret.set_list_store_max_columns(TREEVIEW1 as usize, liststoretypes.len() as u8);
+    ret.set_tree_view(LISTVIEW0, &content_tree_view);
+    ret.set_list_store(LISTVIEW0, &list_store);
+    ret.set_list_store_max_columns(LISTVIEW0 as usize, liststoretypes.len() as u8);
     content_tree_view
 }
 

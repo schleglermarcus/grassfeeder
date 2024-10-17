@@ -81,7 +81,7 @@ pub fn create_dialogs(
     create_opml_import_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
     create_opml_export_dialog(gui_event_sender.clone(), gtk_obj_a.clone());
     create_about_dialog(gtk_obj_a.clone(), ddd);
-    create_subscription_statistic_dialog(gui_event_sender.clone(), gtk_obj_a.clone(), ddd);
+    create_subscription_statistic_dialog(gtk_obj_a.clone(), ddd);
 }
 
 fn create_icons_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributor) {
@@ -1136,7 +1136,6 @@ fn create_about_dialog(gtk_obj_a: GtkObjectsType, ddd: &mut DialogDataDistributo
 }
 
 fn create_subscription_statistic_dialog(
-    _g_ev_se: Sender<GuiEvents>, // TODO
     gtk_obj_a: GtkObjectsType,
     ddd: &mut DialogDataDistributor,
 ) {
@@ -1197,27 +1196,15 @@ fn create_subscription_statistic_dialog(
     scrolledwindow1.set_vexpand(true);
     scrolledwindow1.set_hexpand(true);
     scrolledwindow1.set_shadow_type(ShadowType::EtchedIn);
-
-    /*
-       let textview = TextView::new();
-       textview.set_vexpand(true);
-       textview.set_hexpand(true);
-       textview.set_monospace(true);
-       scrolledwindow1.add(&textview);
-    */
-
     let err_list = create_statistic_listview(gtk_obj_a.clone());
     scrolledwindow1.add(&err_list);
-
-    dialog.connect_response(move |dialog, rt| {
-        match rt {
-            ResponseType::Ok => {
-                debug!("statistics: OK! ");
-            }
-            _ => {
-                warn!("statistics:response unexpected {}", rt);
-            }
-        }
+    dialog.connect_response(move |dialog, _rt| {
+        // match rt {
+        //     ResponseType::Ok => {}
+        //     _ => {
+        //         warn!("statistics:response unexpected {}", rt);
+        //     }
+        // }
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
@@ -1242,18 +1229,9 @@ fn create_subscription_statistic_dialog(
         if let Some(s) = dialogdata.get(7).unwrap().str() {
             label5b.set_text(&s); // update-ext
         }
-        /*
-               if let Some(s) = dialogdata.get(8).unwrap().str() {
-                   debug!("TODO fill list instead of text lines! {} ", s);
-                   // let buffer = textview_c.buffer().unwrap();
-                   // buffer.set_text(&s);
-
-               }
-        */
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_SUBSCRIPTION_STATISTIC, &dialog);
-    // ret.set_text_view(DIALOG_TEXTVIEW_ERR, &textview);
 }
 
 //

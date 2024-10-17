@@ -325,7 +325,6 @@ impl GtkModelUpdaterInt {
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
     ///  Needs the same index for   ListStore  as for TreeView
     pub fn update_list_model_full(&self, list_index: u8) {
-        // let now = std::time::Instant::now();
         let g_o = (*self.g_o_a).read().unwrap();
         let maxcols: u32 = g_o.get_list_store_max_columns(list_index as usize) as u32;
         if let Some(row0) = (self.m_v_store)
@@ -345,7 +344,7 @@ impl GtkModelUpdaterInt {
         }
         let o_list_store = g_o.get_list_store(list_index as usize);
         if o_list_store.is_none() {
-            error!("update_list_model: liststore {} not found", list_index);
+            error!("update_list_model: list {} not found", list_index);
             return;
         }
         let list_store: &ListStore = o_list_store.unwrap();
@@ -361,30 +360,15 @@ impl GtkModelUpdaterInt {
         if o_last_sort_column_id.is_some() {
             list_store.set_unsorted();
         }
-        // let mut num_lines = 0;
         list_store.clear();
         for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
             let append_iter = list_store.insert(-1);
             Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbuf_cache);
-            // num_lines += 1;
         }
         if let Some((sort_col, sort_type)) = o_last_sort_column_id {
             list_store.set_sort_column_id(sort_col, sort_type);
         }
         list_view.set_model(Some(list_store));
-        /*
-               let is_minimized = (self.m_v_store).read().unwrap().get_window_minimized();
-               if !is_minimized {
-                   let elapsed = now.elapsed().as_millis();
-                   if elapsed > 400 {
-                       trace!(
-                           "update_list_model took {:?}ms #lines:{} ",
-                           elapsed,
-                           num_lines
-                       );
-                   }
-               }
-        */
     }
 
     /// deconnects the list store,  refills it, reconnects it,   puts cursor back
@@ -414,21 +398,17 @@ impl GtkModelUpdaterInt {
             }
             list_store.clear();
         }
-        // let mut num_lines = 0;
         let listpos_end = listpos_start + list_length;
-
         for (num_lines, row) in (self.m_v_store)
             .read()
             .unwrap()
             .get_list_iter(list_index)
             .enumerate()
         {
-            // for row in (self.m_v_store).read().unwrap().get_list_iter(list_index) {
             if num_lines >= listpos_start && num_lines < listpos_end {
                 let append_iter = list_store.insert(-1);
                 Self::put_into_store(list_store, &append_iter, maxcols, row, &self.pixbuf_cache);
             }
-            // num_lines += 1;
         }
         if updatemode == UpdateListMode::LastPart {
             if let Some((sort_col, sort_type)) = o_last_sort_column_id {
@@ -822,7 +802,6 @@ impl GtkModelUpdaterInt {
 
     pub fn store_image(&self, idx: i32, img: String) {
         if self.pixbuf_cache.borrow().contains_key(&idx) {
-            // trace!("  store_image: {} already contained, skipping ", idx);
             return;
         }
         let pb: Pixbuf = Self::icon_for_string(&img, &format!("store_image {} ", idx));

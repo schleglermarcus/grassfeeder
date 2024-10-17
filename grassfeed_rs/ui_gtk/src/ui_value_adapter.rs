@@ -9,7 +9,7 @@ use std::collections::HashMap;
 #[derive(Default)]
 pub struct ModelValueStoreImpl {
     pub gui_tree_root: GuiTreeItem,
-    pub gui_list: Vec<Vec<AValue>>, //  rows of  items
+    pub gui_lists: Vec<Vec<Vec<AValue>>>, //  list of  rows of  items
     pub gui_text_views: Vec<String>,
     pub gui_web_view_texts: Vec<String>,
     pub gui_text_entry_content: Vec<String>,
@@ -27,8 +27,10 @@ pub struct ModelValueStoreImpl {
 
 impl ModelValueStoreImpl {
     pub fn new() -> Self {
+        let first_list: Vec<Vec<AValue>> = vec![Vec::default()];
         ModelValueStoreImpl {
             gui_tree_root: GuiTreeItem::new_named_("+"),
+            gui_lists: vec![first_list],
             ..Default::default()
         }
     }
@@ -98,12 +100,10 @@ impl ModelValueStoreImpl {
     }
 }
 
+// later check if clearing the lists  reduces memory usage
 impl UIAdapterValueStore for ModelValueStoreImpl {
     fn set_window_minimized(&mut self, active: bool) {
         self.window_minimized = active;
-        if active {
-            self.gui_list.clear();
-        }
     }
 
     fn get_window_minimized(&self) -> bool {
@@ -193,43 +193,71 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
         self.gui_tree_root.children.clear();
     }
 
-    ///   insert a new   GuiListEntry  does not handle multiple lists yet.
-    //  TODO:  use list index
-    fn insert_list_item(&mut self, _list_index: u8, list_position: i32, values: &[AValue]) {
-        while self.gui_list.len() <= list_position as usize {
-            self.gui_list.push(Vec::default());
+    fn insert_list_item(&mut self, list_index: u8, list_position: i32, values: &[AValue]) {
+        while self.gui_lists.len() <= list_index as usize {
+            self.gui_lists.push(Vec::default());
         }
-        values.clone_into(&mut self.gui_list[list_position as usize]);
+        while self.gui_lists[list_index as usize].len() <= list_position as usize {
+            self.gui_lists[list_index as usize].push(Vec::default());
+        }
+        //        trace!("insert_list_item {:?} {:?} {:?} ", list_index, list_position, &values);
+        values.clone_into(&mut self.gui_lists[list_index as usize][list_position as usize]);
     }
 
-    //  TODO:  use list index
-    fn clear_list(&mut self, _list_index: u8) {
-        self.gui_list.clear();
+    fn clear_list(&mut self, list_index: u8) {
+        while self.gui_lists.len() <= list_index as usize {
+            trace!(
+                "clear_list: {list_index} <= {}  creating new one ",
+                self.gui_lists.len()
+            );
+            self.gui_lists.push(Vec::default());
+        }
+        self.gui_lists[list_index as usize].clear();
     }
 
-    ///   GuiListEntry  does not handle multiple lists yet
-    //  TODO:  use list index
-    fn get_list_item(&self, _list_index: u8, list_position: i32) -> Option<Vec<AValue>> {
-        if self.gui_list.len() <= list_position as usize {
+    fn get_list_item(&self, list_index: u8, list_position: i32) -> Option<Vec<AValue>> {
+        if self.gui_lists.len() <= list_index as usize {
             error!(
-                "get_list_item:  requested index {} , list has only  {} ",
+                "get_list_item:  list-index {} , but we have   {} lists ",
                 list_position,
-                self.gui_list.len()
+                self.gui_lists.len()
             );
             return None;
         }
-        let o_val = self.gui_list.get(list_position as usize);
+        if self.gui_lists[list_index as usize].len() <= list_position as usize {
+            error!(
+                "get_list_item:  requested index {} , list has only  {} ",
+                list_position,
+                self.gui_lists[list_index as usize].len()
+            );
+            return None;
+        }
+        let o_val = self.gui_lists[list_index as usize].get(list_position as usize);
         if let Some(gle) = o_val {
             return Some(gle.clone());
         }
         None
     }
 
-    //  TODO:  use list index
-    fn get_list_iter(&self, _list_index: u8) -> Iter<Vec<AValue>> {
-        self.gui_list.iter()
+    fn get_list_iter(&self, list_index: u8) -> Iter<Vec<AValue>> {
+        while self.gui_lists.len() <= list_index as usize {
+            warn!(
+                "get_list_iter({})  len:{} ",
+                list_index,
+                self.gui_lists.len()
+            );
+            return self.gui_lists[0].iter();
+        }
+        self.gui_lists[list_index as usize].iter()
     }
 
+    fn get_list_length(&self, list_index: u8) -> usize {
+        if (list_index as usize) < self.gui_lists.len() {
+            self.gui_lists[list_index as usize].len()
+        } else {
+            0
+        }
+    }
 
     fn set_text_view(&mut self, text_view_index: u8, newtext: String) {
         if (self.gui_text_views.len() as u8) <= text_view_index {
@@ -372,9 +400,5 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
     }
     fn get_label_tooltip(&self, index: u8) -> Option<&String> {
         self.gui_label_tooltips.get(index as usize)
-    }
-
-    fn get_list_length(&self, _list_index: u8) -> usize {
-        self.gui_list.len()
     }
 }

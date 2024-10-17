@@ -245,7 +245,7 @@ impl GuiProcessor {
                     (*self.contentlist_r)
                         .borrow()
                         .update_message_list(feed_source_id);
-                    (*self.gui_updater).borrow().update_list(0);
+                    (*self.gui_updater).borrow().update_list(  LISTVIEW0  );
                 }
                 Job::UpdateTextView(t_v_id) => {
                     (*self.gui_updater).borrow().update_text_view(t_v_id);
@@ -548,12 +548,12 @@ impl GuiProcessor {
                 FocusByTab::FocusSubscriptions => {
                     (*self.gui_updater)
                         .borrow()
-                        .grab_focus(UIUpdaterMarkWidgetType::TreeView, TREEVIEW0);
+                        .grab_focus(UIUpdaterMarkWidgetType::TreeView, LISTVIEW0);
                 }
                 FocusByTab::FocusMessages => {
                     (*self.gui_updater)
                         .borrow()
-                        .grab_focus(UIUpdaterMarkWidgetType::TreeView, TREEVIEW1);
+                        .grab_focus(UIUpdaterMarkWidgetType::TreeView, LISTVIEW0);
                 }
                 FocusByTab::FocusBrowser => {
                     (*self.gui_updater)

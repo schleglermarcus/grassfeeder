@@ -15,7 +15,6 @@ use ui_gtk::GtkObjectsType;
 
 const TYPESTRING_TEXT: &str = "text";
 
-//    _g_ev_se: Sender<GuiEvents>,
 pub fn create_statistic_listview(gtk_obj_a: GtkObjectsType) -> TreeView {
     let err_view = TreeView::new();
     err_view.set_headers_visible(true);
@@ -34,8 +33,6 @@ pub fn create_statistic_listview(gtk_obj_a: GtkObjectsType) -> TreeView {
         bool::static_type(),     // 5 not yet used
         gtk::glib::Type::STRING, // 6 Toolip
     ];
-    // let title_column: TreeViewColumn;
-    // let date_column: TreeViewColumn;
     {
         let cellrendtext = CellRendererText::new();
         let col = TreeViewColumn::new();
@@ -44,7 +41,6 @@ pub fn create_statistic_listview(gtk_obj_a: GtkObjectsType) -> TreeView {
         col.set_visible(true);
         col.set_title(&t!("ERRORSLIST_TITLE0"));
         col.set_sizing(gtk::TreeViewColumnSizing::Fixed);
-        // col.set_min_width(10);        col.set_max_width(1000);
         col.set_sort_column_id(LIST1_COL_TIMESTAMP);
         col.set_sort_indicator(true);
         err_view.append_column(&col);
@@ -126,8 +122,8 @@ pub fn create_statistic_listview(gtk_obj_a: GtkObjectsType) -> TreeView {
     */
 
     let mut ret = (*gtk_obj_a).write().unwrap();
-    ret.set_tree_view(TREEVIEW2, &err_view);
-    ret.set_list_store(TREEVIEW2, &list_store);
-    ret.set_list_store_max_columns(TREEVIEW2 as usize, liststoretypes.len() as u8);
+    ret.set_tree_view(LISTVIEW1, &err_view);
+    ret.set_list_store(LISTVIEW1, &list_store);
+    ret.set_list_store_max_columns(LISTVIEW1 as usize, liststoretypes.len() as u8);
     err_view
 }

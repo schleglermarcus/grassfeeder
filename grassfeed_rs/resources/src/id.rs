@@ -10,12 +10,12 @@ pub const LIST1_COL_VALUE: i32 = 2;
 pub const LIST1_COL_REMOTEADDR: i32 = 3;
 pub const LIST1_COL_DETAIL: i32 = 3;
 
-/// Subscription List
+/// Subscriptions List/Tree
 pub const TREEVIEW0: u8 = 0;
 /// Messages List
-pub const TREEVIEW1: u8 = 1;
+pub const LISTVIEW0: u8 = 1;
 /// Stats-Errors List
-pub const TREEVIEW2: u8 = 2;
+pub const LISTVIEW1: u8 = 2;
 
 pub const TREE0_COL_REPO_ID: i32 = 5;
 pub const TREE0_COL_STATUS: i32 = 7;

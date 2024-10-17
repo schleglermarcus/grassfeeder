@@ -34,7 +34,7 @@ use regex::RegexSet;
 use resources::gen_icons;
 use resources::gen_icons::IDX_34_DATA_XP2;
 use resources::id::LIST0_COL_MSG_ID;
-use resources::id::TREEVIEW1;
+use resources::id::LISTVIEW0;
 use resources::names::FOCUS_POLICY_NAMES;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -45,7 +45,6 @@ use std::sync::RwLock;
 const JOBQUEUE_SIZE: usize = 1000; // at least as many jobs as there might be subscriptions
 const LIST_SCROLL_POS: i8 = 80; // to 70% of the upper list is visible, the cursor shall go to the lower 30%
 
-const STORE_LIST_INDEX: u8 = 0;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CJob {
@@ -320,7 +319,7 @@ impl ContentList {
 
     fn set_cursor_to_message(&self, msg_id: isize) {
         (*self.gui_updater).borrow().list_set_cursor(
-            TREEVIEW1,
+            LISTVIEW0,
             msg_id,
             LIST0_COL_MSG_ID,
             LIST_SCROLL_POS,
@@ -380,7 +379,7 @@ impl ContentList {
             messagelist
         };
         let mut valstore = (*self.gui_val_store).write().unwrap();
-        valstore.clear_list(STORE_LIST_INDEX);
+        valstore.clear_list(LISTVIEW0); // , STORE_LIST_INDEX
         filtered_msglist.iter().enumerate().for_each(|(i, fc)| {
             let st = self.msg_state.read().unwrap();
             let title_string = st.get_title(fc.message_id).unwrap_or_default();
@@ -389,7 +388,7 @@ impl ContentList {
                 false => None,
             };
             valstore.insert_list_item(
-                STORE_LIST_INDEX,
+                LISTVIEW0,
                 i as i32,
                 &Self::message_to_row(
                     fc,
@@ -400,7 +399,7 @@ impl ContentList {
                 ),
             );
         });
-        (*self.gui_updater).borrow().update_list(TREEVIEW1);
+        (*self.gui_updater).borrow().update_list(LISTVIEW0);
         self.list_selected_ids.write().unwrap().clear();
     }
 
@@ -472,7 +471,7 @@ impl ContentList {
             .collect::<Vec<u32>>();
         (*self.gui_updater)
             .borrow()
-            .update_list_some(TREEVIEW1, &vec_listpos);
+            .update_list_some(LISTVIEW0, &vec_listpos);
     }
 
     fn check_message_counts(&self, subs_id: isize) {
@@ -541,7 +540,7 @@ impl IContentList for ContentList {
                         vec_pos_db.iter().map(|(lp, _db)| *lp).collect::<Vec<u32>>();
                     (*self.gui_updater)
                         .borrow()
-                        .update_list_some(TREEVIEW1, &list_pos);
+                        .update_list_some(LISTVIEW0, &list_pos);
                 }
                 CJob::SwitchBrowserTabContent(msg_id) => {
                     if self
@@ -677,7 +676,7 @@ impl IContentList for ContentList {
         if current_subs_id == subs_id {
             self.update_message_list(subs_id);
             self.addjob(CJob::RequestUnreadAllCount(subs_id));
-            (*self.gui_updater).borrow().update_list(TREEVIEW1);
+            (*self.gui_updater).borrow().update_list(LISTVIEW0);
         } else {
             warn!(
                 "set_read_complete_subscription: {} != {}",
@@ -736,7 +735,7 @@ impl IContentList for ContentList {
             );
             // trace!(                " update_content_list_some   {} {:?}  {:?} ",                isfolder,                o_icon,                av_list            );
             (*self.gui_val_store).write().unwrap().insert_list_item(
-                0,
+                LISTVIEW0,
                 *list_position as i32,
                 &av_list,
             );
@@ -756,7 +755,7 @@ impl IContentList for ContentList {
         self.update_content_list_some(&vec_pos_db);
         (*self.gui_updater)
             .borrow()
-            .update_list_some(TREEVIEW1, &[list_position as u32]);
+            .update_list_some(LISTVIEW0, &[list_position as u32]);
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
         self.addjob(CJob::RequestUnreadAllCount(subs_id));
     }
@@ -783,7 +782,7 @@ impl IContentList for ContentList {
         self.update_content_list_some(&vec_pos_db);
         (*self.gui_updater)
             .borrow()
-            .update_list_some(TREEVIEW1, &[list_position as u32]);
+            .update_list_some(LISTVIEW0, &[list_position as u32]);
     }
 
     /// [  ( msg-id , list-pos ) ]
@@ -1004,7 +1003,7 @@ impl IContentList for ContentList {
             .find_unread_message(first_selected_msg, select_later);
         if let Some((dest_id, next_dest_id)) = o_dest_subs_id {
             (*self.gui_updater).borrow().list_set_cursor(
-                TREEVIEW1,
+                LISTVIEW0,
                 dest_id,
                 LIST0_COL_MSG_ID,
                 LIST_SCROLL_POS,
