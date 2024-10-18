@@ -57,7 +57,7 @@ impl Step<ComprehensiveInner> for ComprStart {
         let mut inner: ComprehensiveInner = self.0;
         let url = inner.feed_url_edit.clone();
         let result = (*inner.web_fetcher).request_url(&url);
-        match result.status {
+        match result.http_status {
             200 => {
                 inner.url_download_text = result.content;
                 StepResult::Continue(Box::new(ParseFeedString(inner)))
@@ -65,10 +65,10 @@ impl Step<ComprehensiveInner> for ComprStart {
             _ => {
                 inner.download_error_happened = true;
                 trace!(
-                    "Feed download:  '{}' => {} {} {:?}",
+                    "Feed download:  '{}' => {}:{} {:?}",
                     &url,
-                    result.get_status(),
-                    result.get_kind(),
+                    result.http_status,
+                    result.http_err_val,
                     result.error_description
                 );
                 StepResult::Continue(Box::new(ComprFinal(inner)))
@@ -106,7 +106,7 @@ impl Step<ComprehensiveInner> for ComprAnalyzeHomepage {
         let mut inner: ComprehensiveInner = self.0;
         // debug!(            "ComprAnalyzeHomepage: {}   icon_url={}",            &inner.feed_homepage, inner.icon_url        );
         let r = (*inner.web_fetcher).request_url(&inner.feed_homepage);
-        match r.status {
+        match r.http_status {
             200 => match util::extract_icon_from_homepage(r.content, &inner.feed_homepage) {
                 Ok(icon_url) => {
                     inner.icon_url = icon_url;
@@ -117,8 +117,8 @@ impl Step<ComprehensiveInner> for ComprAnalyzeHomepage {
             },
             _ => {
                 debug!(
-                    "ComprAnalyzeHomepage: {:?} {}",
-                    r.status, r.error_description
+                    "ComprAnalyzeHomepage: {:?} {} {}",
+                    r.http_status, r.http_err_val, r.error_description
                 );
             }
         }
@@ -141,7 +141,7 @@ impl Step<ComprehensiveInner> for ComprLoadIcon {
             return StepResult::Continue(Box::new(ComprFinal(inner)));
         }
         let r = (*inner.web_fetcher).request_url_bin(&inner.icon_url);
-        match r.status {
+        match r.http_status {
             200 => {
                 // trace!(                    "icon-download: {} '{}'  =>  {} {} {} ",                    inner.feed_url_edit,                    inner.icon_url,                    &r.get_status(),                    r.get_kind(),                    r.error_description                );
                 inner.icon_bytes = r.content_bin;

@@ -1,6 +1,7 @@
 use crate::controller::guiprocessor::Job;
 use crate::controller::sourcetree::SJob;
 use crate::db::errorentry::ErrorEntry;
+use crate::db::errorentry::ESRC;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IIconRepo;
 use crate::db::icon_repo::IconRepo;
@@ -19,6 +20,7 @@ use crate::util::StepResult;
 use flume::Sender;
 use resources::gen_icons;
 use resources::gen_icons::ICON_LIST;
+use resources::parameter::DOWNLOAD_TOO_LONG_MS;
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -726,6 +728,7 @@ impl Step<CleanerInner> for CheckErrorLog {
             .filter(|e| !subs_ids.contains(&e.subs_id))
             .for_each(|e| delete_list.push(e.err_id));
         let timestamp_earliest = timestamp_now() - (MAX_ERROR_LINE_AGE_S as i64);
+        let timestamp_earliest_half = timestamp_now() - ((MAX_ERROR_LINE_AGE_S >> 1) as i64);
         for subs_id in subs_ids {
             let mut all_per_subs_id: Vec<&ErrorEntry> = list
                 .iter()
@@ -739,9 +742,21 @@ impl Step<CleanerInner> for CheckErrorLog {
                 });
                 all_per_subs_id = right.to_vec();
             }
-            all_per_subs_id
+            all_per_subs_id // delete those too old
                 .iter()
                 .filter(|el| el.date < timestamp_earliest)
+                .for_each(|el| {
+                    delete_list.push(el.err_id);
+                });
+
+            all_per_subs_id // if it was the download duration, delete those shorter than the timeout
+                .iter()
+                .filter(|el| {
+                    ((el.e_src == ESRC::GPFeedDownloadDuration as isize)
+                        || (el.e_src == ESRC::GPIconDownloadDuration as isize))
+                        && ((el.date < timestamp_earliest_half)
+                            || (el.e_val as u32) < DOWNLOAD_TOO_LONG_MS)
+                })
                 .for_each(|el| {
                     delete_list.push(el.err_id);
                 });

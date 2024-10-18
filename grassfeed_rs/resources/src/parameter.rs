@@ -12,3 +12,5 @@ pub const FETCH_PROCESS_ONETIME_LIMIT: usize = 2;
 pub const CHECK_MESSAGE_COUNTS_SET_SIZE: usize = 5;
 
 pub const STORE_MESSAGES_PER_SUBSCRIPTION: usize = 20000;
+
+pub const DOWNLOAD_TOO_LONG_MS: u32 = 5000;

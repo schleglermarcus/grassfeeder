@@ -21,7 +21,6 @@ impl HttpFetcher {
         let mut r_bytes: Vec<u8> = Vec::default();
         let mut web_content_length: i64 = -1;
         let mut web_last_modified: i64 = -1;
-
         let agent = ureq::builder().user_agent("ferris/1.0").build();
         match agent.get(url).call() {
             Ok(response) => {
@@ -80,13 +79,21 @@ impl HttpFetcher {
             }
             Err(ureq::Error::Transport(transp)) => {
                 r_errorkind = ureq_error_kind_to_u8(transp.kind());
-                r_ed = format!("{:?} {}", transp.kind(), transp.message().unwrap_or(""));
+                r_ed = format!(
+                    "transport:{:?}  message:{}",
+                    transp.kind(),
+                    transp.message().unwrap_or("")
+                );
             }
         }
         HttpGetResult {
             content: r_text,
             content_bin: r_bytes,
-            status: HttpGetResult::combine_status(r_status, r_errorkind),
+
+            //             status: HttpGetResult::combine_status(r_status, r_errorkind),
+            //
+            http_status: r_status as i16,
+            http_err_val: r_errorkind as i16,
             error_description: r_ed,
             content_length: web_content_length,
             timestamp: web_last_modified,
@@ -108,12 +115,12 @@ pub fn ureq_error_kind_to_u8(e: ErrorKind) -> u8 {
 }
 
 const UREQ_ERRORKIND_LIST: [ErrorKind; 12] = [
-    ErrorKind::HTTP,
+    ErrorKind::HTTP, // 0
     ErrorKind::InvalidUrl,
     ErrorKind::UnknownScheme,
     ErrorKind::Dns,
-    ErrorKind::ConnectionFailed,
-    ErrorKind::TooManyRedirects,
+    ErrorKind::ConnectionFailed, // 4
+    ErrorKind::TooManyRedirects, // 5
     ErrorKind::BadStatus,
     ErrorKind::BadHeader,
     ErrorKind::Io,
@@ -134,27 +141,27 @@ mod httpfetcher_t {
     #[test]
     fn test_local404() {
         let r = prep_fetcher().request_url("http://localhost::8123/nothing");
-        assert_eq!(r.get_kind(), 1);
+        assert_eq!(r.http_err_val, 1);
         assert!(r.error_description.contains("InvalidUrl"));
     }
 
     #[test]
     fn test_remote_200() {
         let r = prep_fetcher().request_url("https://www.heise.de/icons/ho/topnavi/nopur.gif");
-        assert_eq!(r.get_status(), 200);
+        assert_eq!(r.http_status, 200);
     }
 
     #[test]
     //     #[allow(dead_code)]
     fn test_remote_403() {
         let r = prep_fetcher().request_url("https://static.foxnews.com/unknown.png");
-        assert_eq!(r.get_status(), 403);
+        assert_eq!(r.http_status, 403);
     }
 
     #[test]
     fn test_remote_connect() {
         let r = prep_fetcher().request_url("https://www.hyundai-kefico.com/en/main/index.do");
-        assert_eq!(r.get_kind(), 4);
+        assert_eq!(r.http_err_val, 4);
         assert!(r.error_description.contains("ConnectionFailed"));
     }
 
@@ -162,13 +169,13 @@ mod httpfetcher_t {
     fn test_remote_404() {
         let r =
             prep_fetcher().request_url_bin("https://www.heise.de/icons/ho/touch-icons/none.png");
-        assert_eq!(r.get_status(), 404);
+        assert_eq!(r.http_status, 404);
     }
 
     //  cargo test  web::httpfetcher::httpfetcher_t::test_remote_kodansha --lib -- --exact --nocapture
     #[test]
     fn test_remote_kodansha() {
         let r = prep_fetcher().request_url_bin("https://kodansha.us/favicon.ico");
-        assert_eq!(r.get_status(), 200);
+        assert_eq!(r.http_status, 200);
     }
 }

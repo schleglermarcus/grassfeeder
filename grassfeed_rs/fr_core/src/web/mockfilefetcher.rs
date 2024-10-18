@@ -28,10 +28,10 @@ impl IHttpRequester for FileFetcher {
         match std::fs::read_to_string(fs_file.clone()) {
             Ok(s) => {
                 r.content = s;
-                r.status = 200;
+                r.http_status = 200;
             }
             Err(e) => {
-                r.status = 404;
+                r.http_status= 404;
                 r.error_description = format!("{e} {fs_file}");
             }
         }
@@ -48,10 +48,10 @@ impl IHttpRequester for FileFetcher {
         match file_to_bin(&fs_file) {
             Ok(bytes_vec) => {
                 r.content_bin = bytes_vec;
-                r.status = 200;
+                r.http_status = 200;
             }
             Err(e) => {
-                r.status = 404;
+                r.http_status = 404;
                 r.error_description = format!("{e} {fs_file}");
             }
         }

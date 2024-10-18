@@ -100,27 +100,6 @@ pub fn create_statistic_listview(gtk_obj_a: GtkObjectsType) -> TreeView {
 
     let list_store = ListStore::new(liststoretypes);
     err_view.set_model(Some(&list_store));
-
-    /*
-       err_view.connect_selection_notify_event(|_tv, ev_sel| {
-           debug!("LIST  _selection_notify_event  {:?}", ev_sel);
-           Inhibit(false)
-       });
-
-       let esw = EvSenderWrapper(g_ev_se.clone());
-       err_view.connect_row_activated(move |t_view, t_path, _tv_column| {
-           let t_model = t_view.model().unwrap();
-           let t_iter = t_model.iter(t_path).unwrap();
-           let repo_id = t_model
-               .value(&t_iter, LIST0_COL_MSG_ID as i32)
-               .get::<u32>()
-               .unwrap() as i32;
-           let list_pos = t_path.indices()[0];
-           trace!(            "row_activated, double click repoid: {} {}",            repo_id,            list_pos        );
-           // esw.sendw(GuiEvents::ListRowDoubleClicked(0, list_pos, repo_id));
-       });
-    */
-
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_tree_view(LISTVIEW1, &err_view);
     ret.set_list_store(LISTVIEW1, &list_store);

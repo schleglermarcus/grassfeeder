@@ -53,6 +53,7 @@ use resources::gen_icons;
 use resources::gen_icons::ICON_LIST;
 use resources::id::DIALOG_ABOUT;
 use resources::id::*;
+use resources::parameter::DOWNLOAD_TOO_LONG_MS;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -60,10 +61,7 @@ use std::mem::Discriminant;
 use std::rc::Rc;
 use std::time::Instant;
 
-/// "Download took longer than 2 seconds.";
-const DOWNLOAD_TOO_LONG_MSG: &str = "dl>3s";
-const DOWNLOAD_TOO_LONG_MS: u32 = 3000;
-
+// const DOWNLOAD_TOO_LONG_MS: u32 = 5000;
 const JOBQUEUE_SIZE: usize = 100;
 const TREE_PANE1_MIN_WIDTH: i32 = 100;
 
@@ -245,7 +243,7 @@ impl GuiProcessor {
                     (*self.contentlist_r)
                         .borrow()
                         .update_message_list(feed_source_id);
-                    (*self.gui_updater).borrow().update_list(  LISTVIEW0  );
+                    (*self.gui_updater).borrow().update_list(LISTVIEW0);
                 }
                 Job::UpdateTextView(t_v_id) => {
                     (*self.gui_updater).borrow().update_text_view(t_v_id);
@@ -275,21 +273,29 @@ impl GuiProcessor {
                     remote_addr,
                 ) => {
                     match kind {
-                        1 | 2 => {
+                        1 => {
                             if elapsed_ms > DOWNLOAD_TOO_LONG_MS && subs_id > 0 {
                                 (*self.erro_repo_r).borrow().add_error(
                                     subs_id,
-                                    if kind == 1 {
-                                        ESRC::GPFeedDownloadDuration
-                                    } else {
-                                        ESRC::GPIconDownloadDuration
-                                    },
+                                    ESRC::GPFeedDownloadDuration,
                                     elapsed_ms as isize,
                                     remote_addr,
-                                    DOWNLOAD_TOO_LONG_MSG.to_string(),
+                                    String::default(), // DOWNLOAD_TOO_LONG_MSG.to_string(),
                                 );
                             }
                         }
+                        2 => {
+                            if elapsed_ms > DOWNLOAD_TOO_LONG_MS && subs_id > 0 {
+                                (*self.erro_repo_r).borrow().add_error(
+                                    subs_id,
+                                    ESRC::GPIconDownloadDuration,
+                                    elapsed_ms as isize,
+                                    remote_addr,
+                                    String::default(),
+                                );
+                            }
+                        }
+
                         4 => {
                             self.statusbar.set_db_check_running(false);
                         }

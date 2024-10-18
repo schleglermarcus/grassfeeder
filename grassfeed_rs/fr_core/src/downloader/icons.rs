@@ -158,7 +158,7 @@ impl Step<IconInner> for FeedTextDownload {
         // trace!("FeedTextDownload:   feed-url:{} ", inner.feed_url);
         let result = (*inner.web_fetcher).request_url(&inner.feed_url);
         let elapsedms = now.elapsed().as_millis();
-        match result.status {
+        match result.http_status {
             200 => {
                 if (elapsedms as u8) > ICON_DOWNLOAD_TIMEOUT {
                     inner.erro_repo.add_error(
@@ -175,9 +175,9 @@ impl Step<IconInner> for FeedTextDownload {
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconDownloadOther,
-                    result.status as isize,
+                    result.http_status as isize,
                     inner.feed_url.clone(),
-                    result.error_description,
+                    format!("{} {}", result.http_err_val, result.error_description),
                 );
                 return StepResult::Continue(Box::new(IconFallbackSimple(inner)));
             }
@@ -244,7 +244,7 @@ impl Step<IconInner> for IconAnalyzeHomepage {
         let homepage: String = inner.feed_homepage.clone();
         // trace!(            "IconAnalyzeHomepage({})   feed_hp:{} ",            inner.subs_id,            homepage        );
         let r = (*inner.web_fetcher).request_url(&homepage);
-        match r.status {
+        match r.http_status {
             200 | 202 => match util::extract_icon_from_homepage(r.content, &homepage) {
                 Ok(icon_url) => {
                     inner.icon_url = icon_url;
@@ -252,17 +252,17 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                 }
                 Err(e_descr) => {
                     // trace!(                        "IconAnalyzeHomepage({}) E: {}  {} ",                        inner.subs_id,                        e_descr,                        homepage                    );
-                    let st: isize = if r.status == 200 {
+                    let st: isize = if r.http_status == 200 {
                         0
                     } else {
-                        r.status as isize
+                        r.http_status as isize
                     };
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconsAnalyzeHomepageExtract,
                         st,
                         homepage,
-                        e_descr,
+                        format!("{}:{}", r.http_err_val, e_descr),
                     );
                 }
             },
@@ -272,9 +272,9 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconsAnalyzeHomepageDownloadOther,
-                    r.status as isize,
+                    r.http_status as isize,
                     homepage,
-                    r.error_description,
+                    format!("{}:{}", r.http_err_val, r.error_description),
                 );
                 if inner.feed_homepage != alt_hp {
                     inner.feed_homepage = alt_hp;
@@ -304,7 +304,7 @@ impl Step<IconInner> for IconDownload {
         let now = Instant::now();
         let r: HttpGetResult = (*inner.web_fetcher).request_url_bin(&inner.icon_url);
         let elapsedms = now.elapsed().as_millis();
-        match r.status {
+        match r.http_status {
             200 => {
                 inner.dl_icon_bytes = r.content_bin;
                 inner.dl_icon_size = r.content_length;
@@ -326,21 +326,21 @@ impl Step<IconInner> for IconDownload {
             }
             _ => {
                 inner.download_error_happened = true;
-                if r.get_status() != 404 {
+                if r.http_status != 404 {
                     trace!(
-                        "IconDownload ERR {} {}  {}   {}   ",
-                        r.get_status(),
+                        "IconDownload ERR {}:{}  {}   {}   ",
+                        r.http_status,
+                        r.http_err_val,
                         r.error_description,
-                        r.get_kind(),
                         inner.icon_url
                     );
                 }
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconsDownload,
-                    r.get_status() as isize,
+                    r.http_status as isize,
                     inner.icon_url.clone(),
-                    format!("IconDownload K:{}  {}", r.get_kind(), r.error_description),
+                    format!("IconDownload K:{}  {}", r.http_err_val, r.error_description),
                 );
                 StepResult::Stop(inner)
             }

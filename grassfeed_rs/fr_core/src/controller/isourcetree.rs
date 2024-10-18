@@ -273,10 +273,18 @@ impl ISourceTreeController for SourceTreeController {
                 .get_counts(subscription_id)
                 .unwrap();
         }
+        let mut iconval = AValue::None;
+        if let Some(ie) = (*self.iconrepo_r)
+            .borrow()
+            .get_by_index(subscription.icon_id as isize)
+        {
+            iconval = AValue::AIMG(ie.icon);
+        }
+
         let mut dd: Vec<AValue> = Vec::default();
         dd.push(AValue::None); // 0
         dd.push(AValue::ASTR(subscription.url.clone())); // 1
-        dd.push(AValue::None); // 2
+        dd.push(iconval); // 2  : icon
         dd.push(AValue::AI32(num_all)); // 3
         dd.push(AValue::AI32(num_unread)); // 4
         dd.push(AValue::ASTR(subscription.website_url)); // 5 main website
@@ -296,7 +304,7 @@ impl ISourceTreeController for SourceTreeController {
             valstore.clear_list(LISTVIEW1);
             err_list.iter().enumerate().for_each(|(i, ee)| {
                 let mut vrow: Vec<AValue> = Vec::default();
-                vrow.push(AValue::ASTR(db_time_to_display(ee.date))); // DateTime
+                vrow.push(AValue::ASTR(db_time_to_display(ee.date))); //0: DateTime
                 let mut esrc_txt = t!(&format!("EM_DL_{}", ee.e_src));
                 esrc_txt.truncate(40);
                 vrow.push(AValue::ASTR(esrc_txt)); // 1 src - message

@@ -206,10 +206,7 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
 
     fn clear_list(&mut self, list_index: u8) {
         while self.gui_lists.len() <= list_index as usize {
-            trace!(
-                "clear_list: {list_index} <= {}  creating new one ",
-                self.gui_lists.len()
-            );
+            // trace!(                "clear_list: {list_index} <= {}  creating new one ",                self.gui_lists.len()            );
             self.gui_lists.push(Vec::default());
         }
         self.gui_lists[list_index as usize].clear();

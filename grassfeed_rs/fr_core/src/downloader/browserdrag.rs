@@ -71,15 +71,15 @@ impl Step<DragInner> for BrowserEvalStart {
     fn step(self: Box<Self>) -> StepResult<DragInner> {
         let mut inner: DragInner = self.0;
         let result = (*inner.web_fetcher).request_url(&inner.dragged_url);
-        if result.status == 200 {
+        if result.http_status== 200 {
             inner.dragged_url_content = result.content;
             return StepResult::Continue(Box::new(ParseWebpage(inner)));
         }
-        inner.error_message = format!("{} {}", result.status, &result.error_description);
+        inner.error_message = format!("{} {}", result.http_status, &result.error_description);
         inner.erro_repo.add_error(
             -1,
             ESRC::DragEvalstart,
-            result.status as isize,
+            result.http_status as isize,
             inner.dragged_url.clone(),
             result.error_description,
         );

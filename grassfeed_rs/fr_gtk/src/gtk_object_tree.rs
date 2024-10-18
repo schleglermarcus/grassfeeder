@@ -585,8 +585,8 @@ pub fn create_toolbar(
         process_string_to_image(
             gen_icons::ICON_20_FOLDER_NEW_48,
             &image,
-            &String::default(),
             TOOLBAR_ICON_SIZE,
+            "",
         );
         let button1: ToolButton = ToolButtonBuilder::new()
             .icon_widget(&image)
@@ -605,12 +605,7 @@ pub fn create_toolbar(
     }
     {
         let image = Image::new();
-        process_string_to_image(
-            gen_icons::ICON_10_RSS_ADD_32,
-            &image,
-            &String::default(),
-            TOOLBAR_ICON_SIZE,
-        );
+        process_string_to_image(gen_icons::ICON_10_RSS_ADD_32, &image, TOOLBAR_ICON_SIZE, "");
         let but: ToolButton = ToolButtonBuilder::new()
             .icon_widget(&image)
             .tooltip_text(&t!("TB_ADD_FEED"))
@@ -628,12 +623,7 @@ pub fn create_toolbar(
     }
     {
         let image = Image::new();
-        process_string_to_image(
-            gen_icons::ICON_18_RELOAD_32,
-            &image,
-            &String::default(),
-            TOOLBAR_ICON_SIZE,
-        );
+        process_string_to_image(gen_icons::ICON_18_RELOAD_32, &image, TOOLBAR_ICON_SIZE, "");
         let but: ToolButton = ToolButtonBuilder::new()
             .icon_widget(&image)
             .tooltip_text(&t!("TB_REFRESH_ALL"))
@@ -653,12 +643,7 @@ pub fn create_toolbar(
     }
     if false {
         let image = Image::new();
-        process_string_to_image(
-            gen_icons::ICON_34_DATA_XP2,
-            &image,
-            &String::default(),
-            TOOLBAR_ICON_SIZE,
-        );
+        process_string_to_image(gen_icons::ICON_34_DATA_XP2, &image, TOOLBAR_ICON_SIZE, "");
         let but: ToolButton = ToolButtonBuilder::new()
             .icon_widget(&image)
             .tooltip_text("troubleshooting pane move")
@@ -719,12 +704,7 @@ pub fn create_browser_toolbar(g_ev_se: Sender<GuiEvents>, containing_box: &gtk::
     toolbar.set_border_width(TOOLBAR_BORDER_WIDTH);
     {
         let image = Image::new();
-        process_string_to_image(
-            gen_icons::ICON_36_ZOOM_IN,
-            &image,
-            &String::default(),
-            TOOLBAR_ICON_SIZE,
-        );
+        process_string_to_image(gen_icons::ICON_36_ZOOM_IN, &image, TOOLBAR_ICON_SIZE, "");
         let but: ToolButton = ToolButtonBuilder::new()
             .icon_widget(&image)
             .tooltip_text(&t!("TB_BROWSER_ZOOM_IN"))
@@ -740,8 +720,8 @@ pub fn create_browser_toolbar(g_ev_se: Sender<GuiEvents>, containing_box: &gtk::
         process_string_to_image(
             gen_icons::ICON_40_ZOOM_FIT_BEST,
             &image,
-            &String::default(),
             TOOLBAR_ICON_SIZE,
+            "",
         );
         let but: ToolButton = ToolButtonBuilder::new()
             .icon_widget(&image)
@@ -755,12 +735,7 @@ pub fn create_browser_toolbar(g_ev_se: Sender<GuiEvents>, containing_box: &gtk::
     }
     {
         let image = Image::new();
-        process_string_to_image(
-            gen_icons::ICON_38_ZOOM_OUT,
-            &image,
-            &String::default(),
-            TOOLBAR_ICON_SIZE,
-        );
+        process_string_to_image(gen_icons::ICON_38_ZOOM_OUT, &image, TOOLBAR_ICON_SIZE, "");
         let but: ToolButton = ToolButtonBuilder::new()
             .icon_widget(&image)
             .tooltip_text(&t!("TB_BROWSER_ZOOM_OUT"))
