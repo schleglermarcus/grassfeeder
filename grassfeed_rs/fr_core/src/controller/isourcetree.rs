@@ -54,7 +54,7 @@ pub trait ISourceTreeController {
     fn start_delete_dialog(&mut self, src_repo_id: isize);
     fn newsource_dialog_edit(&mut self, edit_feed_url: String);
     fn set_ctx_subscription(&self, src_repo_id: isize);
-    fn start_statistic_dialog(&mut self, subscription_id: isize);
+    fn start_statistic_dialog(&self, subscription_id: isize);
 
     /// returns  Subscription,  Non-Folder-Child-IDs
     fn get_current_selected_subscription(&self) -> Option<(SubscriptionEntry, Vec<i32>)>;
@@ -257,7 +257,7 @@ impl ISourceTreeController for SourceTreeController {
         (*self.gui_updater).borrow().show_dialog(dialog_id);
     }
 
-    fn start_statistic_dialog(&mut self, subscription_id: isize) {
+    fn start_statistic_dialog(&self, subscription_id: isize) {
         let o_fse = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_index(subscription_id);
@@ -265,6 +265,10 @@ impl ISourceTreeController for SourceTreeController {
             return;
         }
         let subscription = o_fse.unwrap();
+        if subscription.is_folder || subscription.deleted {
+            trace!("no info dialog on folder or deleted subscription");
+            return;
+        }
         let mut num_all: i32 = -1;
         let mut num_unread: i32 = -1;
         if let Some(feedcontents) = self.feedcontents_w.upgrade() {
@@ -280,21 +284,31 @@ impl ISourceTreeController for SourceTreeController {
         {
             iconval = AValue::AIMG(ie.icon);
         }
-
-        let mut dd: Vec<AValue> = Vec::default();
-        dd.push(AValue::None); // 0
-        dd.push(AValue::ASTR(subscription.url.clone())); // 1
-        dd.push(iconval); // 2  : icon
-        dd.push(AValue::AI32(num_all)); // 3
-        dd.push(AValue::AI32(num_unread)); // 4
-        dd.push(AValue::ASTR(subscription.website_url)); // 5 main website
-        dd.push(AValue::ASTR(db_time_to_display_nonnull(
-            subscription.updated_int,
-        ))); // 6
-        dd.push(AValue::ASTR(db_time_to_display_nonnull(
-            subscription.updated_ext,
-        ))); // 7
-
+        let mut dd: Vec<AValue> = vec![
+            AValue::None,                                                       // 0
+            AValue::ASTR(subscription.url.clone()),                             // 1
+            iconval,                                                            // 2
+            AValue::AI32(num_all),                                              // 3
+            AValue::AI32(num_unread),                                           // 4
+            AValue::ASTR(subscription.website_url),                             // 5 main website
+            AValue::ASTR(db_time_to_display_nonnull(subscription.updated_int)), // 6
+            AValue::ASTR(db_time_to_display_nonnull(subscription.updated_ext)), // 7
+        ];
+        /*
+                Vec::default();
+               dd.push(AValue::None); // 0
+               dd.push(AValue::ASTR(subscription.url.clone())); // 1
+               dd.push(iconval); // 2  : icon
+               dd.push(AValue::AI32(num_all)); // 3
+               dd.push(AValue::AI32(num_unread)); // 4
+               dd.push(AValue::ASTR(subscription.website_url)); // 5 main website
+               dd.push(AValue::ASTR(db_time_to_display_nonnull(
+                   subscription.updated_int,
+               ))); // 6
+               dd.push(AValue::ASTR(db_time_to_display_nonnull(
+                   subscription.updated_ext,
+               ))); // 7
+        */
         if true {
             let err_list = (*self.erro_repo_r)
                 .borrow()

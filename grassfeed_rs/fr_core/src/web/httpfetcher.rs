@@ -89,9 +89,6 @@ impl HttpFetcher {
         HttpGetResult {
             content: r_text,
             content_bin: r_bytes,
-
-            //             status: HttpGetResult::combine_status(r_status, r_errorkind),
-            //
             http_status: r_status as i16,
             http_err_val: r_errorkind as i16,
             error_description: r_ed,
@@ -152,7 +149,6 @@ mod httpfetcher_t {
     }
 
     #[test]
-    //     #[allow(dead_code)]
     fn test_remote_403() {
         let r = prep_fetcher().request_url("https://static.foxnews.com/unknown.png");
         assert_eq!(r.http_status, 403);

@@ -529,13 +529,7 @@ impl Step<IconInner> for SearchIconByContent {
             return StepResult::Continue(Box::new(IconStore(inner)));
         }
         let existing_id = existing_icons[0].icon_id;
-        trace!(
-            "SearchIconByContent:  subs:{} URL:{} already in DB: {}=>{}    ",
-            inner.subs_id,
-            inner.icon_url,
-            existing_id,
-            inner.db_icon_id,
-        );
+        // trace!(            "SearchIconByContent:  subs:{} URL:{} already in DB: {}=>{}    ",            inner.subs_id,            inner.icon_url,            existing_id,            inner.db_icon_id,        );
         if existing_id != inner.db_icon_id {
             inner.db_icon_id = existing_id;
         }

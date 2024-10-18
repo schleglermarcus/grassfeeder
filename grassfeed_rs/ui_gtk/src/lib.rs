@@ -125,8 +125,8 @@ pub trait GtkObjects {
     fn get_tree_view(&self, tree_index: usize) -> Option<&gtk::TreeView>;
     fn set_tree_view(&mut self, idx: u8, tv: &gtk::TreeView);
 
-    fn get_tree_store_max_columns(&self, tree_index: usize) -> u8;
-    fn set_tree_store_max_columns(&mut self, tree_index: usize, max_col: u8);
+    fn get_tree_store_max_columns(&self, tree_index: u8) -> u8;
+    fn set_tree_store_max_columns(&mut self, tree_index: u8, max_col: u8);
 
     fn get_list_store(&self, list_index: usize) -> Option<&gtk::ListStore>;
     fn set_list_store(&mut self, idx: u8, store: &gtk::ListStore);

@@ -1,4 +1,4 @@
-grassfeeder-gtk3 (0.0.3521) noble; urgency=low
+grassfeeder-gtk3 (0.0.3522) noble; urgency=low
 
   * Use http date to check fav-icon presence
   * Cleanup: remove unused icons

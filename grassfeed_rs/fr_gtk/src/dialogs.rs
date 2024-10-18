@@ -458,15 +458,6 @@ fn create_subscription_edit_dialog(
     );
     dialog.set_width_request(width);
     dialog.set_default_response(ResponseType::Ok);
-    /*
-       let notebook: Notebook = NotebookBuilder::new()
-           .scrollable(true)
-           .show_border(true)
-           .show_tabs(true)
-           .width_request(50)
-           .build();
-       dialog.content_area().add(&notebook);
-    */
     let grid1 = Grid::new();
     dialog.content_area().add(&grid1);
     grid1.set_widget_name("subs_edit_grid1");
@@ -474,8 +465,6 @@ fn create_subscription_edit_dialog(
     grid1.set_hexpand(true);
     grid1.set_column_spacing(3);
     grid1.set_row_spacing(3);
-    //    let label_nb1 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB1")));
-    //    notebook.append_page(&grid1, Some(&label_nb1));
 
     let mut line = 0;
     let label1 = Label::new(Some(&t!("D_NEW_SUBSCRIPTION_NAME")));
@@ -497,66 +486,8 @@ fn create_subscription_edit_dialog(
     entry2.set_activates_default(true);
     entry2.set_max_length(MAX_LENGTH_NEW_SOURCE_URL);
     grid1.attach(&entry2, 1, line, 1, 1);
-    line += 1;
+    //    line += 1;
 
-    let label0 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_ICON")));
-    grid1.attach(&label0, 0, line, 1, 1);
-    let empty_image = Image::new();
-    process_string_to_image(
-        gen_icons::ICON_06_CENTER_POINT_GREEN,
-        &empty_image,
-        DIALOG_ICON_SIZE,
-        "",
-    );
-    grid1.attach(&empty_image, 1, line, 1, 1);
-    // line += 1;
-    /*
-       let label_nb2 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB2")));
-       let grid2 = Grid::new();
-       notebook.append_page(&grid2, Some(&label_nb2));
-       grid2.set_vexpand(false);
-       grid2.set_hexpand(true);
-
-       let mut line = 0;
-       let label1a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_MAIN_WEBSITE")));
-       grid2.attach(&label1a, 0, line, 1, 1);
-       let label1b = Label::new(Some("_"));
-       grid2.attach(&label1b, 1, line, 1, 1);
-       line += 1;
-       let label2a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_NUM_MESSAGES")));
-       grid2.attach(&label2a, 0, line, 1, 1);
-       let label2b = Label::new(Some("_"));
-       grid2.attach(&label2b, 1, line, 1, 1);
-       line += 1;
-       let label3a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_NUM_UNREAD")));
-       grid2.attach(&label3a, 0, line, 1, 1);
-       let label3b = Label::new(Some("_"));
-       grid2.attach(&label3b, 1, line, 1, 1);
-       line += 1;
-       let label4a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_LAST_DOWNLOAD")));
-       grid2.attach(&label4a, 0, line, 1, 1);
-       let label4b = Label::new(Some("_"));
-       grid2.attach(&label4b, 1, line, 1, 1);
-       line += 1;
-       let label5a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_LAST_CREATION")));
-       grid2.attach(&label5a, 0, line, 1, 1);
-       let label5b = Label::new(Some("_"));
-       grid2.attach(&label5b, 1, line, 1, 1);
-       // line += 1;
-
-       let label_nb3 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB3")));
-       let scrolledwindow1 = ScrolledWindow::new(NONE_ADJ, NONE_ADJ);
-       scrolledwindow1.set_widget_name("scrolledwindow_0");
-       scrolledwindow1.set_policy(gtk::PolicyType::Automatic, gtk::PolicyType::Automatic); // scrollbar-h, scrollbar-v
-       scrolledwindow1.set_vexpand(true);
-       scrolledwindow1.set_shadow_type(ShadowType::EtchedIn);
-
-       let textview = TextView::new();
-       textview.set_vexpand(true);
-       textview.set_monospace(true);
-       notebook.append_page(&scrolledwindow1, Some(&label_nb3));
-       scrolledwindow1.add(&textview);
-    */
     let ev_se = g_ev_se;
     let entry1c = entry1.clone();
     let entry2c = entry2.clone();
@@ -587,57 +518,18 @@ fn create_subscription_edit_dialog(
     });
     let entry1c = entry1;
     let entry2c = entry2;
-    let image_c = empty_image;
-    /*
-       let label1b_c = label1b;
-       let label2b_c = label2b;
-       let label3b_c = label3b;
-       let label4b_c = label4b;
-       let label5b_c = label5b;
-       let textview_c = textview.clone();
-    */
     ddd.set_dialog_distribute(DIALOG_SUBS_EDIT, move |dialogdata| {
-        let mut url = String::default();
+        //        let mut url = String::default();
         if let Some(s) = dialogdata.first().unwrap().str() {
             entry1c.set_text(&s); //   0: displayname
         }
         if let Some(s) = dialogdata.get(1).unwrap().str() {
             entry2c.set_text(&s); //   1: url
-            url = s;
+                                  //          url = s;
         }
-        if !process_icon_to_image(dialogdata.get(2), &image_c, &url) {
-            process_string_to_image(
-                gen_icons::ICON_05_RSS_FEEDS_GREY_64_D,
-                &image_c,
-                DIALOG_ICON_SIZE,
-                url.as_str(),
-            ); //  2: icon
-        }
-        /*
-               if let Some(s) = dialogdata.get(3).unwrap().str() {
-                   label2b_c.set_text(&s); // 3: num-all
-               }
-               if let Some(s) = dialogdata.get(4).unwrap().str() {
-                   label3b_c.set_text(&s); // 4: num-unread
-               }
-               if let Some(s) = dialogdata.get(5).unwrap().str() {
-                   label1b_c.set_text(&s); // 5: main website
-               }
-               if let Some(s) = dialogdata.get(6).unwrap().str() {
-                   label4b_c.set_text(&s); // update-int
-               }
-               if let Some(s) = dialogdata.get(7).unwrap().str() {
-                   label5b_c.set_text(&s); // update-ext
-               }
-               if let Some(s) = dialogdata.get(8).unwrap().str() {
-                   let buffer = textview_c.buffer().unwrap(); // error lines
-                   buffer.set_text(&s);
-               }
-        */
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_SUBS_EDIT, &dialog);
-    //     ret.set_text_view(DIALOG_TEXTVIEW_ERR, &textview);
 }
 
 fn create_folder_edit_dialog(
@@ -657,28 +549,37 @@ fn create_folder_edit_dialog(
     );
     dialog.set_width_request(width);
     dialog.set_default_response(ResponseType::Ok);
-    let notebook: Notebook = NotebookBuilder::new()
-        .scrollable(true)
-        .show_border(true)
-        .show_tabs(true)
-        .width_request(50)
-        .build();
-    dialog.content_area().add(&notebook);
+    /*
+       let notebook: Notebook = NotebookBuilder::new()
+           .scrollable(true)
+           .show_border(true)
+           .show_tabs(true)
+           .width_request(50)
+           .build();
+       dialog.content_area().add(&notebook);
+    */
     let grid1 = Grid::new();
+    dialog.content_area().add(&grid1);
     grid1.set_vexpand(false);
     grid1.set_hexpand(true);
     grid1.set_column_spacing(2);
-    let label_nb1 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB1")));
-    notebook.append_page(&grid1, Some(&label_nb1));
+    /*
+       let label_nb1 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB1")));
+       notebook.append_page(&grid1, Some(&label_nb1));
+    */
     let label1 = Label::new(Some(&t!("D_NEW_SUBSCRIPTION_NAME")));
     grid1.attach(&label1, 0, 0, 1, 1);
     let entry1 = Entry::new();
     entry1.set_expand(true);
     entry1.set_activates_default(true);
     grid1.attach(&entry1, 1, 0, 1, 1);
-    let box2v = gtk::Box::new(Orientation::Vertical, 0);
-    let label_nb2 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB2")));
-    notebook.append_page(&box2v, Some(&label_nb2));
+
+    /*
+       let box2v = gtk::Box::new(Orientation::Vertical, 0);
+       let label_nb2 = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_TAB2")));
+       notebook.append_page(&box2v, Some(&label_nb2));
+    */
+
     let ev_se = g_ev_se;
     let entry1c = entry1.clone();
     dialog.connect_response(move |dialog, rt| {
@@ -1154,15 +1055,11 @@ fn create_subscription_statistic_dialog(
     );
     dialog.set_width_request(width);
     dialog.set_default_response(ResponseType::Ok);
-
     let gri = Grid::new();
     dialog.content_area().add(&gri);
-    //  notebook.append_page(&grid2, Some(&label_nb2));
     gri.set_vexpand(true);
     gri.set_hexpand(true);
-
     gri.set_column_spacing(5);
-
 
     let mut line = 0;
     let label1a = Label::new(Some(&t!("D_EDIT_SUBSCRIPTION_MAIN_WEBSITE")));
@@ -1217,9 +1114,8 @@ fn create_subscription_statistic_dialog(
     }
 
     line += 1;
-    //    let label7a = Label::new(Some(&t!("D_SUBSCRIPTION_STATISTIC_ERRORLIST")));
     let scrolledwindow1 = ScrolledWindow::new(NONE_ADJ, NONE_ADJ);
-    gri.attach(&scrolledwindow1, 0, line, 2, 1);
+    gri.attach(&scrolledwindow1, 0, line, 3, 1);
 
     scrolledwindow1.set_widget_name("scrolledwindow_0");
     scrolledwindow1.set_policy(gtk::PolicyType::Automatic, gtk::PolicyType::Automatic); // scrollbar-h, scrollbar-v
@@ -1229,19 +1125,12 @@ fn create_subscription_statistic_dialog(
     let err_list = create_statistic_listview(gtk_obj_a.clone());
     scrolledwindow1.add(&err_list);
     dialog.connect_response(move |dialog, _rt| {
-        // match rt {
-        //     ResponseType::Ok => {}
-        //     _ => {
-        //         warn!("statistics:response unexpected {}", rt);
-        //     }
-        // }
         dialog.hide();
     });
     dialog.connect_delete_event(|dia, _| {
         dia.hide();
         gtk::Inhibit(true)
     });
-    //    let textview_c = textview.clone();
     ddd.set_dialog_distribute(DIALOG_SUBSCRIPTION_STATISTIC, move |dialogdata| {
         let r1 = process_icon_to_image(
             dialogdata.get(2),

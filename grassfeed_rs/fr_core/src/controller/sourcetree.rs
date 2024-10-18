@@ -825,7 +825,11 @@ impl SourceTreeController {
     }
 
     /// We overlap the  in-mem Folder-expanded with DB-Folder-Expanded
-    pub fn tree_row_to_values(&self, fse: &SubscriptionEntry, su_st: &SubsMapEntry) -> Vec<AValue> {
+    pub fn tree_row_to_values(
+        &self,
+        subscr: &SubscriptionEntry,
+        su_st: &SubsMapEntry,
+    ) -> Vec<AValue> {
         let mut tv: Vec<AValue> = Vec::new(); // linked to ObjectTree
         let mut rightcol_text = String::default(); // later:  folder sum stats
         let mut num_msg_unread = 0;
@@ -855,18 +859,18 @@ impl SourceTreeController {
             None => "".to_string(),
         };
         let mut m_status = su_st.status as u32;
-        if fse.expanded {
+        if subscr.expanded {
             m_status |= TREE0_COL_STATUS_EXPANDED;
         }
 
-        let displayname = if fse.display_name.is_empty() {
+        let displayname = if subscr.display_name.is_empty() {
             String::from("--")
         } else {
-            fse.display_name.clone()
+            subscr.display_name.clone()
         };
         let mut tooltip_a = AValue::None;
         if su_st.is_err_on_fetch() {
-            if let Some(last_e) = (*self.erro_repo_r).borrow().get_last_entry(fse.subs_id) {
+            if let Some(last_e) = (*self.erro_repo_r).borrow().get_last_entry(subscr.subs_id) {
                 // debug!("err-list {}  => {:?}", fse.subs_id, errorlist);
                 let mut e_part = last_e.text;
                 e_part.truncate(100);
@@ -876,15 +880,15 @@ impl SourceTreeController {
         if (*self.config).borrow().mode_debug && tooltip_a == AValue::None {
             tooltip_a = AValue::ASTR(format!(
                 "{} ST{} X{}  P{:?} I{} L{}",
-                fse.subs_id,
+                subscr.subs_id,
                 su_st.status,
-                match fse.expanded {
+                match subscr.expanded {
                     true => 1,
                     _ => 0,
                 },
                 tp,
-                fse.icon_id,
-                fse.last_selected_msg
+                subscr.icon_id,
+                subscr.last_selected_msg
             ));
         }
         let show_spinner = su_st.is_fetch_in_progress();
@@ -892,16 +896,16 @@ impl SourceTreeController {
         if !(*self.config).borrow().display_feedcount_all && num_msg_unread == 0 {
             rightcol_visible = false;
         }
-        tv.push(AValue::IIMG(fse.icon_id as i32)); // 0
+        tv.push(AValue::IIMG(subscr.icon_id as i32)); // 0
         tv.push(AValue::ASTR(displayname)); // 1:
         tv.push(AValue::ASTR(rightcol_text));
         tv.push(AValue::IIMG(n_status_icon as i32));
-        tv.push(AValue::AU32(0)); // 4: is-folder
-        tv.push(AValue::AU32(fse.subs_id as u32)); // 5: db-id
+        tv.push(AValue::ABOOL(subscr.is_folder)); // 4: is-folder
+        tv.push(AValue::AU32(subscr.subs_id as u32)); // 5: db-id
         tv.push(AValue::AU32(FontAttributes::to_activation_bits(
             (*self.config).borrow().tree_fontsize as u32,
             num_msg_unread <= 0,
-            fse.is_folder,
+            subscr.is_folder,
             false,
         ))); //  6: num_content_unread
         tv.push(AValue::AU32(m_status)); //	7 : status

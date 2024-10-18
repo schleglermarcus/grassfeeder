@@ -309,17 +309,18 @@ impl GtkObjects for GtkObjectsImpl {
         self.tree_views[idx as usize] = tv.clone();
     }
 
-    fn get_tree_store_max_columns(&self, index: usize) -> u8 {
-        match self.tree_stores_max_columns.get(index) {
+    fn get_tree_store_max_columns(&self, index: u8) -> u8 {
+        match self.tree_stores_max_columns.get(index as usize) {
             Some(mc) => *mc,
             None => 0,
         }
     }
-    fn set_tree_store_max_columns(&mut self, tree_index: usize, max_col: u8) {
-        if self.tree_stores_max_columns.len() < tree_index + 1 {
-            self.tree_stores_max_columns.resize(tree_index + 1, 0);
+    fn set_tree_store_max_columns(&mut self, tree_index: u8, max_col: u8) {
+        if self.tree_stores_max_columns.len() < (tree_index + 1) as usize {
+            self.tree_stores_max_columns
+                .resize((tree_index + 1) as usize, 0);
         }
-        self.tree_stores_max_columns[tree_index] = max_col;
+        self.tree_stores_max_columns[tree_index as usize] = max_col;
     }
 
     fn get_list_store(&self, list_index: usize) -> Option<&gtk::ListStore> {

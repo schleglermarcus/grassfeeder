@@ -29,6 +29,7 @@ use ui_gtk::dialogdatadistributor::DialogDataDistributor;
 use ui_gtk::GtkObjectsType;
 
 const TREEVIEW_NAME: &str = "TREEVIEW1";
+const TV_ID: u8 = 0;
 const COL1WIDE_WIDTH: i32 = 80;
 const COL1NARROW_WIDTH: i32 = 44;
 
@@ -40,7 +41,7 @@ pub fn create_tree_store() -> (TreeStore, usize) {
         String::static_type(),                  // 1: Feed-Source-Name
         String::static_type(),                  // 2: unread-column  text
         Pixbuf::static_type(),                  // 3: status-icon
-        u32::static_type(),                     // 4: is-Folder
+        bool::static_type(),                    // 4: is-Folder
         u32::static_type(),                     // 5: db-id
         u32::static_type(),                     // 6: num-unread
         u32::static_type(),                     // 7: status
@@ -127,7 +128,7 @@ pub fn create_treeview(
     let connect_cursor_changed_handler = move |treeview: &TreeView| {
         let (o_tp, _tree_view_column) = treeview.cursor();
         if let Some(mut treepath) = o_tp {
-            let tree_blocked = (*g_o_a_c).read().unwrap().get_block_tree_updates(0);
+            let tree_blocked = (*g_o_a_c).read().unwrap().get_block_tree_updates(TV_ID);
             let in_drag = (*drag_s7).read().unwrap().block_row_activated();
             if !in_drag {
                 if tree_blocked {
@@ -141,7 +142,7 @@ pub fn create_treeview(
                     }
                     let indices = treepath.indices_with_depth();
                     let ind_u16: Vec<u16> = indices.iter().map(|v| *v as u16).collect::<Vec<u16>>();
-                    esw.sendw(GuiEvents::TreeRowActivated(0, ind_u16, repo_id));
+                    esw.sendw(GuiEvents::TreeCursorChanged(TV_ID, ind_u16, repo_id));
                 }
             }
         }
@@ -152,6 +153,7 @@ pub fn create_treeview(
         let mut source_repo_id: i32 = -1;
         let (posx, posy) = ev_but.position();
         let treeview: gtk::TreeView = p_tv.clone().dynamic_cast::<gtk::TreeView>().unwrap();
+        let mut is_folder: bool = false;
         if let Some((Some(t_path), _o_tvc, _x, _y)) = treeview.path_at_pos(posx as i32, posy as i32)
         {
             if let Some(t_model) = treeview.model() {
@@ -160,10 +162,15 @@ pub fn create_treeview(
                     .value(&t_iter, TREE0_COL_REPO_ID)
                     .get::<u32>()
                     .unwrap() as i32;
+
+                is_folder = t_model
+                    .value(&t_iter, TREE0_COL_ISFOLDER)
+                    .get::<bool>()
+                    .unwrap();
             }
         }
         if ev_but.button() == MOUSE_BUTTON_RIGHT {
-            show_context_menu_source(ev_but.button(), source_repo_id, ev_se_3.clone());
+            show_context_menu_source(ev_but.button(), source_repo_id, ev_se_3.clone(), is_folder);
         }
         gtk::Inhibit(false)
     });
@@ -208,7 +215,7 @@ pub fn create_treeview(
             drop(w_state);
             if inserted != deleted {
                 debug!("Dragged   {:?} ==> {:?}  End  ", &deleted, &inserted);
-                esw.sendw(GuiEvents::TreeDragEvent(0, deleted, inserted));
+                esw.sendw(GuiEvents::TreeDragEvent(TV_ID, deleted, inserted));
             }
             let focus_column: Option<&TreeViewColumn> = None;
             _t_view.set_cursor(&start_path, focus_column, false);
@@ -245,22 +252,36 @@ pub fn create_treeview(
     treeview1.connect_row_expanded(move |t_view, t_iter, _t_path| {
         if let Some(model) = t_view.model() {
             let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
-            esw.sendw(GuiEvents::TreeExpanded(0, repo_id));
+            esw.sendw(GuiEvents::TreeExpanded(TV_ID, repo_id));
+        }
+    });
+
+    let esw = EvSenderWrapper(g_ev_se.clone());
+    treeview1.connect_row_collapsed(move |t_view, t_iter, _t_path| {
+        if let Some(model) = t_view.model() {
+            let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
+            esw.sendw(GuiEvents::TreeCollapsed(TV_ID, repo_id));
         }
     });
 
     let esw = EvSenderWrapper(g_ev_se);
-    treeview1.connect_row_collapsed(move |t_view, t_iter, _t_path| {
+    treeview1.connect_row_activated(move |t_view, t_path, _tv_col| {
         if let Some(model) = t_view.model() {
-            let repo_id = model.value(t_iter, TREE0_COL_REPO_ID).get::<u32>().unwrap() as i32;
-            esw.sendw(GuiEvents::TreeCollapsed(0, repo_id));
+            if let Some(t_iter) = model.iter(&t_path) {
+                let db_id = model
+                    .value(&t_iter, TREE0_COL_REPO_ID)
+                    .get::<u32>()
+                    .unwrap() as i32;
+                esw.sendw(GuiEvents::TreeDoubleClick(TV_ID, db_id));
+            }
         }
     });
+
     {
         let mut ret = (*gtk_obj_a).write().unwrap();
         ret.set_tree_store(TREEVIEW0, &tree_store);
         ret.set_tree_view(TREEVIEW0, &treeview1);
-        ret.set_tree_store_max_columns(0, num_store_types as u8);
+        ret.set_tree_store_max_columns(TV_ID, num_store_types as u8);
         if let Some(col1) = treeview1.column(1) {
             ret.set_spinner_w((cellrenderer_spinner, col1));
         }
@@ -276,13 +297,18 @@ pub fn create_treeview(
     treeview1
 }
 
-fn show_context_menu_source(ev_button: u32, subscription_id: i32, g_ev_se: Sender<GuiEvents>) {
+fn show_context_menu_source(
+    ev_button: u32,
+    subscription_id: i32,
+    g_ev_se: Sender<GuiEvents>,
+    is_folder: bool,
+) {
     let menu: gtk::Menu = Menu::new();
     let mi_addfeed = MenuItem::with_label(&t!("CM_SUB_ADD_FEED"));
     let esw = EvSenderWrapper(g_ev_se.clone());
     mi_addfeed.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
-            0,
+            TV_ID,
             subscription_id,
             "new-subscription-dialog".to_string(),
         ));
@@ -292,7 +318,7 @@ fn show_context_menu_source(ev_button: u32, subscription_id: i32, g_ev_se: Sende
     let esw = EvSenderWrapper(g_ev_se.clone());
     mi_afo.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
-            0,
+            TV_ID,
             subscription_id,
             "new-folder-dialog".to_string(),
         ));
@@ -301,7 +327,7 @@ fn show_context_menu_source(ev_button: u32, subscription_id: i32, g_ev_se: Sende
     let esw = EvSenderWrapper(g_ev_se.clone());
     mi_update.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
-            0,
+            TV_ID,
             subscription_id,
             "feedsource-update".to_string(),
         ));
@@ -311,7 +337,7 @@ fn show_context_menu_source(ev_button: u32, subscription_id: i32, g_ev_se: Sende
     let esw = EvSenderWrapper(g_ev_se.clone());
     mi_mark_all.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
-            0,
+            TV_ID,
             subscription_id,
             "feedsource-mark-as-read".to_string(),
         ));
@@ -320,7 +346,7 @@ fn show_context_menu_source(ev_button: u32, subscription_id: i32, g_ev_se: Sende
     let esw = EvSenderWrapper(g_ev_se.clone());
     mi_edit.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
-            0,
+            TV_ID,
             subscription_id,
             "feedsource-edit-dialog".to_string(),
         ));
@@ -329,7 +355,7 @@ fn show_context_menu_source(ev_button: u32, subscription_id: i32, g_ev_se: Sende
     let mi_del = MenuItem::with_label(&t!("CM_SUB_DELETE"));
     mi_del.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
-            0,
+            TV_ID,
             subscription_id,
             "feedsource-delete-dialog".to_string(),
         ));
@@ -339,16 +365,19 @@ fn show_context_menu_source(ev_button: u32, subscription_id: i32, g_ev_se: Sende
     let mi_stats = MenuItem::with_label(&t!("CM_SUBS_STATISTICS"));
     mi_stats.connect_activate(move |_menuiten| {
         esw.sendw(GuiEvents::TreeEvent(
-            0,
+            TV_ID,
             subscription_id,
             "subscription-statistics-dialog".to_string(),
         ));
     });
+    // trace!("add  RM {} {} ", subscription_id, is_folder);
     if subscription_id >= 0 {
         menu.append(&mi_mark_all);
         menu.append(&mi_update);
         menu.append(&mi_edit);
-        menu.append(&mi_stats);
+        if !is_folder {
+            menu.append(&mi_stats);
+        }
         menu.append(&mi_del);
     }
     menu.append(&mi_addfeed);

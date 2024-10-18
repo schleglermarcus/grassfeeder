@@ -237,7 +237,7 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
     }
 
     fn get_list_iter(&self, list_index: u8) -> Iter<Vec<AValue>> {
-        while self.gui_lists.len() <= list_index as usize {
+        if (list_index as usize) >= self.gui_lists.len() {
             warn!(
                 "get_list_iter({})  len:{} ",
                 list_index,

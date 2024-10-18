@@ -21,6 +21,7 @@ pub const TREE0_COL_REPO_ID: i32 = 5;
 pub const TREE0_COL_STATUS: i32 = 7;
 pub const TREE0_COL_STATUS_EXPANDED: u32 = 1;
 pub const TREE0_COL_TOOLTIP: i32 = 8;
+pub const TREE0_COL_ISFOLDER: i32 = 4;
 
 pub const DIALOG_ICONS: u8 = 0;
 pub const DIALOG_NEW_FOLDER: u8 = 1;

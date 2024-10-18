@@ -280,7 +280,7 @@ impl GuiProcessor {
                                     ESRC::GPFeedDownloadDuration,
                                     elapsed_ms as isize,
                                     remote_addr,
-                                    String::default(), // DOWNLOAD_TOO_LONG_MSG.to_string(),
+                                    String::default(),
                                 );
                             }
                         }
@@ -325,7 +325,7 @@ impl GuiProcessor {
                     let av2nd = if let Some(msg) = c_msg {
                         let newmsg = format!(
                             "{}{}\t{}\n",
-                            self.statusbar.get_db_check_message(), // borrow().cache.db_check_display_message,
+                            self.statusbar.get_db_check_message(),
                             duration_ms,
                             msg
                         );
@@ -748,8 +748,8 @@ impl StartupWithAppContext for GuiProcessor {
             HandleMenuActivate(),
         );
         self.add_handler(
-            &GuiEvents::TreeRowActivated(0, Vec::default(), 0),
-            HandleTreeRowActivated(
+            &GuiEvents::TreeCursorChanged(0, Vec::default(), 0),
+            HandleTreeCursorChanged(
                 self.contentlist_r.clone(),
                 self.feedsources_r.clone(),
                 self.subscriptionmove_r.clone(),
@@ -854,6 +854,10 @@ impl StartupWithAppContext for GuiProcessor {
             &GuiEvents::ButtonClicked(String::default()),
             HandleButtonActivated(),
         );
+        self.add_handler(
+            &GuiEvents::TreeDoubleClick(0, 0),
+            HandleTreeDoubleClick(self.feedsources_r.clone()),
+        );
     }
 }
 
@@ -927,14 +931,14 @@ impl HandleSingleEvent for HandleMenuActivate {
     }
 }
 
-struct HandleTreeRowActivated(
+struct HandleTreeCursorChanged(
     Rc<RefCell<dyn IContentList>>,
     Rc<RefCell<dyn ISourceTreeController>>,
     Rc<RefCell<dyn ISubscriptionMove>>, // 2
 );
-impl HandleSingleEvent for HandleTreeRowActivated {
+impl HandleSingleEvent for HandleTreeCursorChanged {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
-        if let GuiEvents::TreeRowActivated(_tree_idx, ref path_u16, subs_id) = ev {
+        if let GuiEvents::TreeCursorChanged(_tree_idx, ref path_u16, subs_id) = ev {
             let statemap_rc = (*self.2).borrow().get_state_map();
             // trace!(                "HandleTreeRowActivated: {:?} {:?} {:?} ",                _tree_idx,                path_u16,                subs_id            );
             if let Some(subs_map) = statemap_rc.borrow().get_state(subs_id as isize) {
@@ -1451,10 +1455,7 @@ impl HandleSingleEvent for HandleButtonActivated {
                     (*gp.gui_updater)
                         .borrow()
                         .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, false);
-
                     gp.statusbar.set_db_check_running(true);
-                    // let mut sb = gp.statusbar.borrow_mut();                    sb.cache.db_check_running = true;
-
                     gp.downloader_r.borrow().cleanup_db();
                     gp.addjob(Job::NotifyDbClean(
                         0,
@@ -1465,6 +1466,16 @@ impl HandleSingleEvent for HandleButtonActivated {
                     debug!("clicked, SKIPPING {}   isrunning={}  ", msg, isrunning);
                 }
             }
+        }
+    }
+}
+
+struct HandleTreeDoubleClick(Rc<RefCell<dyn ISourceTreeController>>);
+impl HandleSingleEvent for HandleTreeDoubleClick {
+    fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
+        if let GuiEvents::TreeDoubleClick(_tree_idx, subs_id) = ev {
+            // trace!("HandleTreeDoubleClick: {} {} ", _tree_idx, subs_id);
+            self.0.borrow().start_statistic_dialog(subs_id as isize);
         }
     }
 }

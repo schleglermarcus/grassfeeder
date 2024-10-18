@@ -60,7 +60,7 @@ pub enum GuiEvents {
     ///  paned-id,  position
     PanedMoved(i32, i32),
     ///  tree index,  tree position, db-id
-    TreeRowActivated(i32, Vec<u16>, i32),
+    TreeCursorChanged(u8, Vec<u16>, i32),
     ///  list index, list-position, db-id
     ListRowActivated(i32, i32, i32),
     ///  list index, list-position,  sort-column-nr, db-id
@@ -79,6 +79,8 @@ pub enum GuiEvents {
     TreeCollapsed(u8, i32),
     /// Tree-Nr,  db-id,
     TreeExpanded(u8, i32),
+    /// Tree-Nr,  db-id,
+    TreeDoubleClick(u8, i32),
     /// button-name
     ToolBarButton(String),
     /// button-name, is-active
