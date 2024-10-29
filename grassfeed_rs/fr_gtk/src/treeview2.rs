@@ -263,11 +263,10 @@ pub fn create_treeview(
             esw.sendw(GuiEvents::TreeCollapsed(TV_ID, repo_id));
         }
     });
-
     let esw = EvSenderWrapper(g_ev_se);
     treeview1.connect_row_activated(move |t_view, t_path, _tv_col| {
         if let Some(model) = t_view.model() {
-            if let Some(t_iter) = model.iter(&t_path) {
+            if let Some(t_iter) = model.iter(t_path) {
                 let db_id = model
                     .value(&t_iter, TREE0_COL_REPO_ID)
                     .get::<u32>()
@@ -276,7 +275,6 @@ pub fn create_treeview(
             }
         }
     });
-
     {
         let mut ret = (*gtk_obj_a).write().unwrap();
         ret.set_tree_store(TREEVIEW0, &tree_store);
@@ -286,7 +284,6 @@ pub fn create_treeview(
             ret.set_spinner_w((cellrenderer_spinner, col1));
         }
     }
-    // let t0col1 = tree0column1.clone();
     ddd.set_dialog_distribute(DIALOG_TREE0COL1, move |dialogdata| {
         let mut col0width = COL1NARROW_WIDTH;
         if dialogdata.first().unwrap().boo() {

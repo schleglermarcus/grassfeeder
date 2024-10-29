@@ -53,6 +53,7 @@ use resources::gen_icons::IDX_44_ICON_GREEN_D;
 use resources::id::*;
 use resources::parameter::CHECK_MESSAGE_COUNTS_SET_SIZE;
 use resources::parameter::FETCH_PROCESS_ONETIME_LIMIT;
+use resources::parameter::ICON_RELOAD_TIME_S;
 use rust_i18n;
 use rust_i18n::t;
 use std::cell::RefCell;
@@ -65,9 +66,6 @@ pub const TREE_STATUS_COLUMN: usize = 7;
 
 pub const DEFAULT_CONFIG_FETCH_FEED_INTERVAL: u8 = 2;
 pub const DEFAULT_CONFIG_FETCH_FEED_UNIT: u8 = 2; // hours
-
-const ICON_RELOAD_TIME_D: u8 = 2; // 2 days, later 7
-const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * (ICON_RELOAD_TIME_D as i64);
 
 // #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -594,7 +592,9 @@ impl SourceTreeController {
                 StatusMask::FetchScheduledJobCreated,
                 true,
             );
-            (*self.downloader_r).borrow().add_update_source(*subs_id);
+            (*self.downloader_r)
+                .borrow()
+                .add_update_subscription(*subs_id);
             self.set_any_spinner_visible(true);
             self.tree_store_update_one(*subs_id);
             self.check_icon_outdated(*subs_id);

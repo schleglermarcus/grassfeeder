@@ -63,7 +63,7 @@ pub trait IDownloader {
     fn get_config(&self) -> Config;
     fn set_conf_num_threads(&mut self, n: u8);
     fn get_kind_list(&self) -> Vec<u8>;
-    fn add_update_source(&self, f_source_repo_id: isize);
+    fn add_update_subscription(&self, f_source_repo_id: isize);
     fn new_feedsource_request(&self, fs_edit_url: &str);
     fn load_icon(&self, fs_id: isize, fs_url: String, old_icon_id: usize);
     fn cleanup_db(&self);
@@ -321,16 +321,16 @@ impl IDownloader for Downloader {
             .collect::<Vec<u8>>()
     }
 
-    fn add_update_source(&self, f_source_repo_id: isize) {
+    fn add_update_subscription(&self, f_source_repo_id: isize) {
         let o_fse = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_index(f_source_repo_id);
         if o_fse.is_none() {
-            warn!("cannot get FSE    {}  ", f_source_repo_id);
+            warn!("cannot get subscription    {}  ", f_source_repo_id);
             return;
         }
-        let fse = o_fse.unwrap();
-        if fse.is_folder {
+        let subs = o_fse.unwrap();
+        if subs.is_folder {
             warn!(" fetch_single    {}  but is folder ", f_source_repo_id);
             return;
         }
@@ -345,7 +345,7 @@ impl IDownloader for Downloader {
         let errors_rep = ErrorRepo::by_connection((*self.erro_repo).borrow().get_connection());
         let new_fetch_job = FetchInner {
             fs_repo_id: f_source_repo_id,
-            url: fse.url,
+            url: subs.url,
             cjob_sender: self.contentlist_job_sender.as_ref().unwrap().clone(),
             subscriptionrepo: subscription_repo,
             iconrepo: icon_repo,
@@ -361,6 +361,7 @@ impl IDownloader for Downloader {
         self.add_to_queue(DLJob::Feed(new_fetch_job));
     }
 
+    // TODO:  manual reload  shall override
     fn load_icon(&self, subsid: isize, feedurl: String, old_icon_id: usize) {
         let icon_repo =
             IconRepo::new_by_connection((*self.iconrepo_r).borrow().get_ctx().get_connection());

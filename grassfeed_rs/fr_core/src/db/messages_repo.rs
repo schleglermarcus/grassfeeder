@@ -16,6 +16,8 @@ use rusqlite::Row;
 use std::sync::Arc;
 use std::sync::Mutex;
 
+use super::message::MARKERS_FAVORITE;
+
 pub trait IMessagesRepo {
     /// returns index value
     fn insert(&self, entry: &MessageRow) -> Result<i64, Box<dyn std::error::Error>>;
@@ -84,6 +86,8 @@ pub trait IMessagesRepo {
     fn get_all_messages(&mut self) -> MessageIterator;
 
     fn get_subscription_ids(&mut self, msg_ids: &[isize]) -> Vec<isize>;
+
+    fn count_favorites(&self, subscription_id: isize) -> isize;
 }
 
 pub struct MessagesRepo {
@@ -414,7 +418,6 @@ impl IMessagesRepo for MessagesRepo {
         }
     }
 
-    /// does not include deleted ones
     fn get_by_subscriptions(
         &mut self,
         subs_ids: &[isize],
@@ -489,6 +492,18 @@ impl IMessagesRepo for MessagesRepo {
             .collect::<Vec<isize>>();
         // trace!(            "get_subscription_ids: {}  {:?}    #CACHED:{} ",            prepared,            subs_id_list,            self.cached_rows.len()        );
         subs_id_list
+    }
+
+    /// returns  the number messages marked as favorite
+    fn count_favorites(&self, subscription_id: isize) -> isize {
+        let sql = format!(
+            "SELECT COUNT({}) FROM {} WHERE feed_src_id = {}  and  is_deleted=false  and (markers & {} >0)  ",
+            MessageRow::index_column_name(),
+            MessageRow::table_name(),
+            subscription_id,
+            MARKERS_FAVORITE
+        );
+        self.ctx.one_number(sql)
     }
 
     // impl IMessagesRepo

@@ -25,6 +25,7 @@ use feed_rs::model::Entry;
 use feed_rs::parser::ParseFeedError;
 use flume::Sender;
 use regex::Regex;
+use resources::parameter::DOWNLOAD_TOO_LONG_MS;
 use std::time::Instant;
 
 pub struct FetchInner {
@@ -89,7 +90,7 @@ impl Step<FetchInner> for DownloadStart {
         match r.http_status {
             200 => {
                 inner.download_text = r.content;
-                if elapsedms > 2000 {
+                if (elapsedms as u32)  > DOWNLOAD_TOO_LONG_MS {
                     inner.erro_repo.add_error(
                         inner.fs_repo_id,
                         ESRC::MsgDownloadTooLong,

@@ -132,7 +132,7 @@ pub struct DownloaderDummy {}
 impl DownloaderDummy {}
 
 impl IDownloader for DownloaderDummy {
-    fn add_update_source(&self, _f_source_repo_id: isize) {
+    fn add_update_subscription(&self, _f_source_repo_id: isize) {
         unimplemented!()
     }
     fn load_icon(&self, _fs_id: isize, _fs_url: String, _old_icon_id: usize) {

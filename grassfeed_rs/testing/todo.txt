@@ -1,10 +1,10 @@
 
-- put errors in a database
 - look at db cleanup dialog, watch update bar
-
-
 - remove or re-load icons that are too old
+
 - Filling content list with partitioned gtk-String lists.
+
+- Drag Website not to list, but onto tree
 
 - package bas64  to newer version
 

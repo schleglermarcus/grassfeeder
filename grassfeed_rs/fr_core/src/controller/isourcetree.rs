@@ -8,6 +8,7 @@ use crate::controller::sourcetree::SJob;
 use crate::controller::sourcetree::SourceTreeController;
 use crate::controller::sourcetree::JOBQUEUE_SIZE;
 use crate::controller::subscriptionmove::ISubscriptionMove;
+use crate::db::messages_repo::IMessagesRepo;
 use crate::db::subscription_entry::SubscriptionEntry;
 use crate::db::subscription_state::FeedSourceState;
 use crate::db::subscription_state::ISubscriptionState;
@@ -284,6 +285,10 @@ impl ISourceTreeController for SourceTreeController {
         {
             iconval = AValue::AIMG(ie.icon);
         }
+        let mut num_favorites: i32 = -1;
+        if let Some(msg_r) = self.messagesrepo_w.upgrade() {
+            num_favorites = msg_r.borrow().count_favorites(subscription_id) as i32;
+        }
         let mut dd: Vec<AValue> = vec![
             AValue::None,                                                       // 0
             AValue::ASTR(subscription.url.clone()),                             // 1
@@ -293,22 +298,8 @@ impl ISourceTreeController for SourceTreeController {
             AValue::ASTR(subscription.website_url),                             // 5 main website
             AValue::ASTR(db_time_to_display_nonnull(subscription.updated_int)), // 6
             AValue::ASTR(db_time_to_display_nonnull(subscription.updated_ext)), // 7
+            AValue::AI32(num_favorites),                                        // 8
         ];
-        /*
-                Vec::default();
-               dd.push(AValue::None); // 0
-               dd.push(AValue::ASTR(subscription.url.clone())); // 1
-               dd.push(iconval); // 2  : icon
-               dd.push(AValue::AI32(num_all)); // 3
-               dd.push(AValue::AI32(num_unread)); // 4
-               dd.push(AValue::ASTR(subscription.website_url)); // 5 main website
-               dd.push(AValue::ASTR(db_time_to_display_nonnull(
-                   subscription.updated_int,
-               ))); // 6
-               dd.push(AValue::ASTR(db_time_to_display_nonnull(
-                   subscription.updated_ext,
-               ))); // 7
-        */
         if true {
             let err_list = (*self.erro_repo_r)
                 .borrow()

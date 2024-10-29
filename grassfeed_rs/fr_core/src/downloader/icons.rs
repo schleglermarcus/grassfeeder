@@ -11,6 +11,7 @@ use crate::downloader::util;
 use crate::util::db_time_to_display;
 use crate::util::downscale_image;
 use crate::util::png_from_svg;
+use crate::util::timestamp_now;
 use crate::util::IconKind;
 use crate::util::Step;
 use crate::util::StepResult;
@@ -21,39 +22,36 @@ use flume::Receiver;
 use flume::Sender;
 use ico::ResourceType;
 use resources::gen_icons::ICON_LIST;
+use resources::parameter::DOWNLOAD_TOO_LONG_MS;
+use resources::parameter::ICON_ERRORMESSAGE_SKIP_DURATION_S;
 use resources::parameter::ICON_SIZE_LIMIT_BYTES;
 use std::sync::Arc;
 use std::time::Instant;
 
 pub const ICON_CONVERT_TO_WIDTH: u32 = 48;
 pub const ICON_WARNING_SIZE_BYTES: usize = 20000;
-pub const ICON_DOWNLOAD_TOO_SLOW: &str = "icon download too slow";
-pub const ICON_DOWNLOAD_TIMEOUT: u8 = 200;
 
 pub struct IconInner {
     pub subs_id: isize,
-
-    // #[deprecated]
-    // pub fs_icon_id_old: isize,
     pub feed_url: String,
     pub icon_url: String,
-    pub iconrepo: IconRepo,
     pub icon_kind: IconKind,
-    pub web_fetcher: WebFetcherType,
     pub download_error_happened: bool,
-    pub sourcetree_job_sender: Sender<SJob>,
     pub feed_homepage: String,
     pub feed_download_text: String,
-    pub subscriptionrepo: SubscriptionRepo,
-    pub erro_repo: ErrorRepo,
     pub compressed_icon: String,
-
     pub dl_icon_bytes: Vec<u8>,
     pub dl_datetime_stamp: i64,
     /// Server sided size
     pub dl_icon_size: i64,
     // icon-id  retrieved from database
     pub db_icon_id: isize,
+
+    pub web_fetcher: WebFetcherType,
+    pub iconrepo: IconRepo,
+    pub sourcetree_job_sender: Sender<SJob>,
+    pub subscriptionrepo: SubscriptionRepo,
+    pub erro_repo: ErrorRepo,
 }
 
 impl IconInner {
@@ -121,12 +119,6 @@ impl PartialEq for IconInner {
 }
 
 pub struct IconLoadStart(IconInner);
-impl IconLoadStart {
-    pub fn new(i: IconInner) -> Self {
-        IconLoadStart(i)
-    }
-}
-
 impl Step<IconInner> for IconLoadStart {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
@@ -134,17 +126,39 @@ impl Step<IconInner> for IconLoadStart {
             error!("IconLoadStart:  subs_id:{}  but must be >0!", inner.subs_id);
             return StepResult::Stop(inner);
         }
-
         if let Some(subs_e) = inner.subscriptionrepo.get_by_index(inner.subs_id) {
-            if !inner.icon_url.is_empty() {
-                trace!("IconLoadStart:  ID:{}  db-HP:{} prev-icon-url:{}  HP:{} icon_id:{}  {}  feed-url:{} ",
-                  inner.subs_id,  subs_e.website_url, inner.icon_url, inner.feed_homepage,
-                  subs_e.icon_id,subs_e.display_name, subs_e.url );
-            }
+            // trace!(                "IconLoadStart:  ID:{}   icon_id:{}  {}  feed-url:{}  db-hp {}",                inner.subs_id,                subs_e.icon_id,                subs_e.display_name,                subs_e.url,                subs_e.website_url            );
             if !subs_e.website_url.is_empty() {
                 inner.feed_homepage = subs_e.website_url;
-                return StepResult::Continue(Box::new(IconAnalyzeHomepage(inner)));
+                return StepResult::Continue(Box::new(CheckPreviousErrors(inner)));
             }
+        }
+        StepResult::Continue(Box::new(FeedTextDownload(inner)))
+    }
+}
+
+impl IconLoadStart {
+    pub fn new(i: IconInner) -> Self {
+        IconLoadStart(i)
+    }
+}
+
+struct CheckPreviousErrors(IconInner);
+impl Step<IconInner> for CheckPreviousErrors {
+    fn step(self: Box<Self>) -> StepResult<IconInner> {
+        let inner: IconInner = self.0;
+        if let Some(err_e) = inner.erro_repo.get_last_entry(inner.subs_id) {
+            let timediff = timestamp_now() - err_e.date;
+            if timediff < ICON_ERRORMESSAGE_SKIP_DURATION_S {
+                return StepResult::Stop(inner);
+            }
+            trace!(
+                "S{}  LastErr {}  timediff {}min  skip_dur {}min  -> request again ",
+                inner.subs_id,
+                err_e,
+                timediff / 60,
+                ICON_ERRORMESSAGE_SKIP_DURATION_S / 60
+            );
         }
         StepResult::Continue(Box::new(FeedTextDownload(inner)))
     }
@@ -160,13 +174,13 @@ impl Step<IconInner> for FeedTextDownload {
         let elapsedms = now.elapsed().as_millis();
         match result.http_status {
             200 => {
-                if (elapsedms as u8) > ICON_DOWNLOAD_TIMEOUT {
+                if (elapsedms as u32) > DOWNLOAD_TOO_LONG_MS {
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconDownloadTimeDuration,
                         elapsedms as isize,
                         inner.feed_url.to_string(),
-                        format!("timeout {ICON_DOWNLOAD_TIMEOUT} ms"),
+                        format!("timeout {DOWNLOAD_TOO_LONG_MS} ms"),
                     );
                 }
                 inner.feed_download_text = result.content;
@@ -313,13 +327,13 @@ impl Step<IconInner> for IconDownload {
                     // info!(                        "IconDownload({}) {} content-length:{} num-bytes:{} ",                        inner.subs_id,                        &inner.icon_url,                        r.content_length,                        inner.dl_icon_bytes.len()                    );
                     inner.dl_icon_size = inner.dl_icon_bytes.len() as i64;
                 }
-                if (elapsedms as u8) > ICON_DOWNLOAD_TIMEOUT {
+                if (elapsedms as u32) > DOWNLOAD_TOO_LONG_MS {
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconDownloadTimeDuration,
                         elapsedms as isize,
                         inner.icon_url.to_string(),
-                        format!("timeout {ICON_DOWNLOAD_TIMEOUT} ms"),
+                        format!("timeout {DOWNLOAD_TOO_LONG_MS} ms"),
                     );
                 }
                 StepResult::Continue(Box::new(IconIsInDatabase(inner)))
@@ -389,14 +403,7 @@ impl Step<IconInner> for IconIsInDatabase {
             }
             return StepResult::Continue(Box::new(IconCheckIsImage(inner)));
         }
-        trace!(
-            "IconPerUrl {} different timestamp,  db:{} {}bytes    web:{} {}bytes, storing into db ... ",
-            &inner.icon_url,
-            db_time_to_display(icon_per_url.web_date),
-            icon_per_url.web_size,
-            db_time_to_display(inner.dl_datetime_stamp),
-            inner.dl_icon_size
-        );
+        // trace!(            "IconPerUrl {} different timestamp,  db:{} {}bytes    web:{} {}bytes, storing into db ... ",            &inner.icon_url,            db_time_to_display(icon_per_url.web_date),            icon_per_url.web_size,            db_time_to_display(inner.dl_datetime_stamp),            inner.dl_icon_size        );
         inner.dl_datetime_stamp = icon_per_url.web_date;
         StepResult::Continue(Box::new(UpdateWebDate(inner)))
     }

@@ -1100,15 +1100,15 @@ fn create_subscription_statistic_dialog(
     gri.attach(&label5a, 0, line, 1, 1);
     let label5b = Label::new(None);
     gri.attach(&label5b, 1, line, 1, 1);
-    // line += 1;
-    // let label6a = Label::new(None);
-    // grid2.attach(&label6a, 0, line, 1, 1);
-    // let label6b = Label::new(None);
-    // grid2.attach(&label6b, 1, line, 1, 1);
+    line += 1;
+    let label6a = Label::new(Some(&t!("D_SUBS_STAT_FAVORITES")));
+    gri.attach(&label6a, 0, line, 1, 1);
+    let label6b = Label::new(None);
+    gri.attach(&label6b, 1, line, 1, 1);
 
     for l in [
         &label1a, &label1b, &label2a, &label2b, &label3a, &label3b, &label4a, &label4b, &label5a,
-        &label5b,
+        &label5b, &label6a, &label6b
     ] {
         l.set_halign(Align::Start);
     }
@@ -1162,6 +1162,10 @@ fn create_subscription_statistic_dialog(
         if let Some(s) = dialogdata.get(7).unwrap().str() {
             label5b.set_text(&s); // update-ext
         }
+        if let Some(s) = dialogdata.get(8).unwrap().str() {
+            label6b.set_text(&s); // num-favorites
+        }
+
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_SUBSCRIPTION_STATISTIC, &dialog);

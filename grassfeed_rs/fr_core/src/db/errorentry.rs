@@ -84,6 +84,17 @@ impl std::fmt::Debug for ErrorEntry {
     }
 }
 
+impl std::fmt::Display for ErrorEntry {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.debug_struct("S ")
+            .field("R", &self.remote_address)
+            .field("", &ESRC::VALUES[self.e_src as usize])
+            .field("V", &self.e_val)
+            .field("", &self.text)
+            .finish()
+    }
+}
+
 impl TableInfo for ErrorEntry {
     fn table_name() -> String {
         "errors".to_string()

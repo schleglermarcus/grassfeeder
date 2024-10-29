@@ -18,11 +18,9 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "cache_folder";
-// pub const FILENAME: &str = "errors.json.txt";
 
 pub struct ErrorRepo {
     ctx: SqliteContext<ErrorEntry>,
-    //    errorlines_cache: Mutex<Vec<ErrorEntry>>,
 }
 
 impl ErrorRepo {
@@ -38,7 +36,6 @@ impl ErrorRepo {
         let dbctx = SqliteContext::new(&filename);
         ErrorRepo {
             ctx: dbctx,
-            //            errorlines_cache: Default::default(),
         }
     }
 
@@ -47,7 +44,6 @@ impl ErrorRepo {
         cx.create_table();
         ErrorRepo {
             ctx: cx,
-            //            errorlines_cache: Default::default(),
         }
     }
 
@@ -58,7 +54,6 @@ impl ErrorRepo {
     pub fn by_connection(ex_con: Arc<Mutex<Connection>>) -> Self {
         ErrorRepo {
             ctx: SqliteContext::new_by_connection(ex_con),
-            // errorlines_cache: Default::default(),
         }
     }
 
@@ -141,6 +136,7 @@ impl ErrorRepo {
         list
     }
 
+    /// retrieves the most recent one, sorted by date
     pub fn get_last_entry(&self, subs_id: isize) -> Option<ErrorEntry> {
         let prepared = format!(
             "SELECT * FROM {} WHERE subs_id={}  ORDER BY date DESC LIMIT 1 ",
@@ -170,18 +166,6 @@ impl ErrorRepo {
     }
 
     pub fn flush_dirty(&self) {
-        /*
-               if let Ok(mut lg) = self.errorlines_cache.lock() {
-                   if lg.len() > 0 {
-                       while let Some(entry) = lg.pop() {
-                           let r = self.add_error_entry(&entry);
-                           if r.is_err() {
-                               error!("while storing error lines : {:?} {:?}", r.err(), &entry);
-                           }
-                       }
-                   }
-               }
-        */
         self.ctx.cache_flush();
     }
 
@@ -257,7 +241,6 @@ mod t {
         assert!(r1.is_ok());
         e_repo.flush_dirty();
         let subs_list = e_repo.get_by_subscription(12);
-        // println!(" {:?} ", subs_list);
         assert_eq!(subs_list.len(), 2);
         assert_eq!(subs_list.get(0).unwrap().err_id, 2);
         assert_eq!(subs_list.get(1).unwrap().err_id, 1);

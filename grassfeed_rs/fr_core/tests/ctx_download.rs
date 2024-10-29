@@ -92,7 +92,7 @@ fn downloader_load_message_into_db() {
     downloader.gp_job_sender = Some(gp_s.clone());
     downloader.startup();
     let dl_r: Rc<RefCell<dyn IDownloader>> = Rc::new(RefCell::new(downloader));
-    (*dl_r).borrow().add_update_source(1);
+    (*dl_r).borrow().add_update_subscription(1);
     std::thread::sleep(std::time::Duration::from_millis(2));
     (*dl_r).borrow_mut().shutdown();
     assert!(!(*dl_r).borrow().is_running());
