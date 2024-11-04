@@ -1,4 +1,5 @@
 use crate::controller::sourcetree::SJob;
+use crate::db::errorentry::ErrorEntry;
 use crate::db::errorentry::ESRC;
 use crate::db::errors_repo::ErrorRepo;
 use crate::db::icon_repo::IIconRepo;
@@ -81,7 +82,7 @@ impl IconInner {
         errorrepo: ErrorRepo,
     ) -> IconInner {
         IconInner {
-            sourcetree_job_sender: sourcetree_job_sende, // stc_job_s,
+            sourcetree_job_sender: sourcetree_job_sende,
             subscriptionrepo: subscriptionrep,
             erro_repo: errorrepo,
             web_fetcher: web_fetche,
@@ -90,7 +91,6 @@ impl IconInner {
             iconrepo: iconrep,
             download_error_happened: false,
             icon_url: String::default(),
-            // fs_icon_id_old: -1,
             feed_homepage: String::default(),
             feed_download_text: String::default(),
             icon_kind: Default::default(),
@@ -147,21 +147,49 @@ struct CheckPreviousErrors(IconInner);
 impl Step<IconInner> for CheckPreviousErrors {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let inner: IconInner = self.0;
-        if let Some(err_e) = inner.erro_repo.get_last_entry(inner.subs_id) {
-            let timediff = timestamp_now() - err_e.date;
-            if timediff < ICON_ERRORMESSAGE_SKIP_DURATION_S {
-                return StepResult::Stop(inner);
-            }
-            trace!(
-                "S{}  LastErr {}  timediff {}min  skip_dur {}min  -> request again ",
-                inner.subs_id,
-                err_e,
-                timediff / 60,
-                ICON_ERRORMESSAGE_SKIP_DURATION_S / 60
-            );
+        let o_err = inner.erro_repo.get_last_entry(inner.subs_id);
+        if decide_icon_download(inner.subs_id, o_err) {
+            // trace!("S{}  do icon_download ", inner.subs_id);
+            StepResult::Continue(Box::new(FeedTextDownload(inner)))
+        } else {
+            // trace!("S{}  skip icon_download ", inner.subs_id);
+            StepResult::Stop(inner)
         }
-        StepResult::Continue(Box::new(FeedTextDownload(inner)))
     }
+}
+
+fn decide_icon_download(subs_id: isize, o_err: Option<ErrorEntry>) -> bool {
+    if o_err.is_none() {
+        return true;
+    }
+    let err = o_err.unwrap();
+    if err.e_src as usize >= ESRC::VALUES.len() {
+        warn!(
+            "decide_icon_download:  subs {}  cause {:?}   unknown cause id!",
+            subs_id, err.e_src
+        );
+    }
+    let timediff = timestamp_now() - err.date;
+    let e = ESRC::from(err.e_src);
+    match e {
+        ESRC::GPFeedDownloadDuration
+        | ESRC::GPIconDownloadDuration
+        | ESRC::IconDownloadTimeDuration
+        | ESRC::MsgDownloadTooLong => {
+            return true;
+        }
+        _ => (),
+    };
+    if timediff > ICON_ERRORMESSAGE_SKIP_DURATION_S {
+        trace!(
+            "S{}  LastErr {}  timediff {:.1}h  ",
+            subs_id,
+            err,
+            (timediff as f32) / 60.0 / 60.0,
+        );
+        return true;
+    }
+    false
 }
 
 struct FeedTextDownload(IconInner);
@@ -169,7 +197,6 @@ impl Step<IconInner> for FeedTextDownload {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let now = Instant::now();
-        // trace!("FeedTextDownload:   feed-url:{} ", inner.feed_url);
         let result = (*inner.web_fetcher).request_url(&inner.feed_url);
         let elapsedms = now.elapsed().as_millis();
         match result.http_status {
@@ -188,10 +215,13 @@ impl Step<IconInner> for FeedTextDownload {
             _ => {
                 inner.erro_repo.add_error(
                     inner.subs_id,
-                    ESRC::IconDownloadOther,
-                    result.http_status as isize,
+                    ESRC::FeedTextDownloadOther,
+                    result.get_combined_error(),
                     inner.feed_url.clone(),
-                    format!("{} {}", result.http_err_val, result.error_description),
+                    format!(
+                        "{}:{} {}",
+                        result.http_status, result.http_err_val, result.error_description
+                    ),
                 );
                 return StepResult::Continue(Box::new(IconFallbackSimple(inner)));
             }
@@ -256,27 +286,21 @@ impl Step<IconInner> for IconAnalyzeHomepage {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         let homepage: String = inner.feed_homepage.clone();
-        // trace!(            "IconAnalyzeHomepage({})   feed_hp:{} ",            inner.subs_id,            homepage        );
-        let r = (*inner.web_fetcher).request_url(&homepage);
-        match r.http_status {
-            200 | 202 => match util::extract_icon_from_homepage(r.content, &homepage) {
+        let f_result = (*inner.web_fetcher).request_url(&homepage);
+        let combined_err = f_result.get_combined_error();
+        match f_result.http_status {
+            200 | 202 => match util::extract_icon_from_homepage(f_result.content, &homepage) {
                 Ok(icon_url) => {
                     inner.icon_url = icon_url;
                     return StepResult::Continue(Box::new(IconDownload(inner)));
                 }
                 Err(e_descr) => {
-                    // trace!(                        "IconAnalyzeHomepage({}) E: {}  {} ",                        inner.subs_id,                        e_descr,                        homepage                    );
-                    let st: isize = if r.http_status == 200 {
-                        0
-                    } else {
-                        r.http_status as isize
-                    };
                     inner.erro_repo.add_error(
                         inner.subs_id,
                         ESRC::IconsAnalyzeHomepageExtract,
-                        st,
+                        combined_err,
                         homepage,
-                        format!("{}:{}", r.http_err_val, e_descr),
+                        format!("{}:{}", f_result.http_err_val, e_descr),
                     );
                 }
             },
@@ -286,9 +310,9 @@ impl Step<IconInner> for IconAnalyzeHomepage {
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconsAnalyzeHomepageDownloadOther,
-                    r.http_status as isize,
+                    combined_err,
                     homepage,
-                    format!("{}:{}", r.http_err_val, r.error_description),
+                    format!("{}:{}", f_result.http_err_val, f_result.error_description),
                 );
                 if inner.feed_homepage != alt_hp {
                     inner.feed_homepage = alt_hp;
@@ -342,7 +366,8 @@ impl Step<IconInner> for IconDownload {
                 inner.download_error_happened = true;
                 if r.http_status != 404 {
                     trace!(
-                        "IconDownload ERR {}:{}  {}   {}   ",
+                        "IconDownload S{} ERR {}:{}  '{}'   {}   ",
+                        inner.subs_id,
                         r.http_status,
                         r.http_err_val,
                         r.error_description,
@@ -352,7 +377,7 @@ impl Step<IconInner> for IconDownload {
                 inner.erro_repo.add_error(
                     inner.subs_id,
                     ESRC::IconsDownload,
-                    r.http_status as isize,
+                    r.get_combined_error(),
                     inner.icon_url.clone(),
                     format!("IconDownload K:{}  {}", r.http_err_val, r.error_description),
                 );
@@ -510,7 +535,6 @@ impl Step<IconInner> for IconDownscale {
                 inner.icon_url,
                 r.err()
             );
-            // trace!("{msg}");
             inner.erro_repo.add_error(
                 inner.subs_id,
                 ESRC::IconsDownscale,
@@ -624,7 +648,6 @@ impl IconAnalyseResult {
     pub fn new(k: IconKind) -> IconAnalyseResult {
         IconAnalyseResult {
             kind: k,
-
             ..Default::default()
         }
     }

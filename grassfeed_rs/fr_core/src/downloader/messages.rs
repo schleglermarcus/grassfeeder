@@ -90,7 +90,7 @@ impl Step<FetchInner> for DownloadStart {
         match r.http_status {
             200 => {
                 inner.download_text = r.content;
-                if (elapsedms as u32)  > DOWNLOAD_TOO_LONG_MS {
+                if (elapsedms as u32) > DOWNLOAD_TOO_LONG_MS {
                     inner.erro_repo.add_error(
                         inner.fs_repo_id,
                         ESRC::MsgDownloadTooLong,
@@ -106,9 +106,12 @@ impl Step<FetchInner> for DownloadStart {
                 inner.erro_repo.add_error(
                     inner.fs_repo_id,
                     ESRC::MsgDlStartErr,
-                    r.http_status as isize,
+                    r.get_combined_error(),
                     inner.url.to_string(),
-                    format!("{} {} ", r.http_err_val, r.error_description),
+                    format!(
+                        "messages.rs {}:{} {} ",
+                        r.http_status, r.http_err_val, r.error_description
+                    ),
                 );
                 StepResult::Continue(Box::new(NotifyDlStop(inner)))
             }

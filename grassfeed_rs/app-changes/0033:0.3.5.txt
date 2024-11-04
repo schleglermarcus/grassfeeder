@@ -4,4 +4,5 @@ Sun, 06 Oct 2024 03:00:00 +0000
 * Created subscription info dialog with errors list
 * Reduced Icons requests after encountering remote errors
 
+
 - look at db cleanup dialog, watch update bar

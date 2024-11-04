@@ -550,11 +550,12 @@ impl GuiProcessor {
             self.focus_by_tab.replace(new_focus_by_tab);
             self.switch_focus_marker(true);
             self.addjob(Job::CheckFocusMarker(2));
+
             match *self.focus_by_tab.borrow() {
                 FocusByTab::FocusSubscriptions => {
                     (*self.gui_updater)
                         .borrow()
-                        .grab_focus(UIUpdaterMarkWidgetType::TreeView, LISTVIEW0);
+                        .grab_focus(UIUpdaterMarkWidgetType::TreeView, TREEVIEW0);
                 }
                 FocusByTab::FocusMessages => {
                     (*self.gui_updater)

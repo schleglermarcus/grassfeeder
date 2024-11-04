@@ -20,3 +20,13 @@ pub struct HttpGetResult {
     pub timestamp: i64,
     pub content_length: i64,
 }
+
+impl HttpGetResult {
+    pub fn get_combined_error(&self) -> isize {
+        if self.http_status == 0 {
+            self.http_err_val as isize
+        } else {
+            self.http_status as isize
+        }
+    }
+}

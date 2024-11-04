@@ -80,7 +80,7 @@ impl HttpFetcher {
             Err(ureq::Error::Transport(transp)) => {
                 r_errorkind = ureq_error_kind_to_u8(transp.kind());
                 r_ed = format!(
-                    "transport:{:?}  message:{}",
+                    "transport:{:?}  {}",
                     transp.kind(),
                     transp.message().unwrap_or("")
                 );

@@ -361,7 +361,6 @@ impl IDownloader for Downloader {
         self.add_to_queue(DLJob::Feed(new_fetch_job));
     }
 
-    // TODO:  manual reload  shall override
     fn load_icon(&self, subsid: isize, feedurl: String, old_icon_id: usize) {
         let icon_repo =
             IconRepo::new_by_connection((*self.iconrepo_r).borrow().get_ctx().get_connection());
@@ -432,7 +431,10 @@ impl IDownloader for Downloader {
         self.add_to_queue(DLJob::None);
         while !self.joinhandles.is_empty() {
             let h = self.joinhandles.remove(0);
-            h.join().unwrap();
+            let name = h.thread().name().unwrap_or_default().to_string();
+            if h.join().is_err() {
+                warn!("could not join thread  {:?}", name);
+            }
         }
     }
 

@@ -317,7 +317,7 @@ impl ISourceTreeController for SourceTreeController {
                 vrow.push(AValue::ASTR(ee.remote_address.clone())); // 3 remote addr
                 vrow.push(AValue::ASTR(ee.text.clone())); // 4 detail
                 vrow.push(AValue::None); // 5 not yet
-                vrow.push(AValue::ASTR(format!("TT ESRC {}", ee.e_src))); //6
+                vrow.push(AValue::ASTR(format!("esrc {}", ee.e_src))); //6
                 valstore.insert_list_item(LISTVIEW1, i as i32, &vrow);
             });
         } else {

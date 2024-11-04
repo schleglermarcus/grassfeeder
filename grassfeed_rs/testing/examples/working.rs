@@ -104,13 +104,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
     let folder2 = subs_move.add_new_folder_at_parent("folder2".to_string(), 0);
     let folder1 = subs_move.add_new_folder_at_parent("folder1".to_string(), folder2);
 
-    subs_move.add_new_subscription_at_parent(
-        "https://www.naturalnews.com/rss.xml".to_string(),
-        "NTR-News".to_string(),
-        folder1,
-        false,
-    );
-
     if true {
         let f5 = subs_move.add_new_folder_at_parent("folder5".to_string(), 0);
 
@@ -155,10 +148,9 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         );
         subs_move.add_new_folder_at_parent("5_0".to_string(), f5);
         subs_move.add_new_folder_at_parent("5_1".to_string(), f5);
-
         subs_move.add_new_subscription_at_parent(
-            "https://thevaluable.dev/index.xml".to_string(),
-            "valdev".to_string(),
+            "https://www.avoiceformen.com/feed/".to_string(),
+            "avoiceformen".to_string(),
             folder1,
             false,
         );
@@ -178,6 +170,8 @@ fn test_setup_values(acr: &AppContext, addr: String) {
 
     if false {
         let src = [
+            ("https://www.naturalnews.com/rss.xml", "naturalnews"),
+            ("https://thevaluable.dev/index.xml", "valdev"),
             ("https://freiheitsfunken.info/feed/rss/", "Frfunken"),
             ("https://blog.linuxmint.com/?feed=rss2", "Mint"),
             ("https://www.heise.de/tp/news-atom.xml", "heise"),

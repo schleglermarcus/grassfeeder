@@ -17,6 +17,7 @@ pub enum ESRC {
     IconsDownload = 7,
     IconsCheckimg = 8,
     IconsDownscale = 9,
+    FeedTextDownloadOther = 10,
     MsgEvalFltEmpty = 11,
     MsgEvalFltStrange = 12,
     MsgDownloadTooLong = 13,
@@ -31,29 +32,41 @@ pub enum ESRC {
 }
 
 impl ESRC {
-    pub const VALUES: [Self; 21] = [
-        Self::None,
+    pub const VALUES: [Self; 22] = [
+        Self::None, // 0
         Self::GpDlFinished,
         Self::SubsmoveTruncated,
         Self::DragEvalstart,
         Self::IconsFeedtext,
-        Self::IconsAnalyzeHomepageExtract,
+        Self::IconsAnalyzeHomepageExtract, // 5
         Self::IconsAnalyzeHomepageDownloadOther,
         Self::IconsDownload,
         Self::IconsCheckimg,
         Self::IconsDownscale,
+        Self::FeedTextDownloadOther, // 10
         Self::MsgEvalFltEmpty,
         Self::MsgEvalFltStrange,
         Self::MsgDownloadTooLong,
         Self::MsgDlStartErr,
-        Self::IconDownloadTimeDuration,
+        Self::IconDownloadTimeDuration, // 15
         Self::IconFeedTextDur,
         Self::GPFeedDownloadDuration,
         Self::GPIconDownloadDuration,
         Self::IconNoHomepageFromFeedtext,
-        Self::IconsSvgToPng,
+        Self::IconsSvgToPng,        // 20
         Self::IconDownloadOther,
     ];
+}
+
+impl From<isize> for ESRC {
+    fn from(v: isize) -> Self {
+        let u = v as usize;
+        if u >= ESRC::VALUES.len() {
+            ESRC::None
+        } else {
+            ESRC::VALUES[u].clone()
+        }
+    }
 }
 
 ///
@@ -88,7 +101,7 @@ impl std::fmt::Display for ErrorEntry {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         fmt.debug_struct("S ")
             .field("R", &self.remote_address)
-            .field("", &ESRC::VALUES[self.e_src as usize])
+            .field("", &ESRC::from(self.e_src)) // &ESRC::VALUES[self.e_src as usize]
             .field("V", &self.e_val)
             .field("", &self.text)
             .finish()
@@ -113,6 +126,7 @@ impl TableInfo for ErrorEntry {
         vec![
             "CREATE INDEX IF NOT EXISTS idx_err_id  ON errors (err_id) ; ".to_string(),
             "CREATE INDEX IF NOT EXISTS idx_subs_id ON errors (subs_id) ; ".to_string(),
+            "CREATE INDEX IF NOT EXISTS idx_date ON errors (date) ; ".to_string(),
         ]
     }
 
