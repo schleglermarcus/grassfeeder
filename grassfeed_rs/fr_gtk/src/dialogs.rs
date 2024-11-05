@@ -3,6 +3,9 @@ use gtk::NotebookBuilder;
 
 #[cfg(not(feature = "legacy3gtk14"))]
 use gtk::builders::NotebookBuilder;
+use gtk::LEVEL_BAR_OFFSET_FULL;
+use gtk::LEVEL_BAR_OFFSET_HIGH;
+use gtk::LEVEL_BAR_OFFSET_LOW;
 
 use crate::statistics_list::create_statistic_listview;
 use crate::util::*;
@@ -59,12 +62,14 @@ const FONTSIZE_MAX: f64 = 18.0;
 const MAX_LENGTH_NEW_SOURCE_NAME: i32 = 50;
 const MAX_LENGTH_NEW_SOURCE_URL: i32 = 200;
 const GRID_SPACING: u32 = 5;
-const DB_CLEAN_STEPS_MAX: f64 = 10.0;
+
 const ICON_RESCALE_SIZE: i32 = 24;
 const ICON_DIALOG_COLUMNS: i32 = 40;
 
+const CLEANER_STEPS_MAX: f64 = 12.0;
+
 const NONE_ADJ: Option<&Adjustment> = None;
-const NONE_TEXT: Option<&TextTagTable> = None;
+const NONE_TEXTTAGTABLE: Option<&TextTagTable> = None;
 
 pub fn create_dialogs(
     gui_event_sender: Sender<GuiEvents>,
@@ -807,9 +812,12 @@ fn create_settings_dialog(
         }
     }
 
-    let lb_clean = LevelBar::new();
+    //    let lb_clean = LevelBar::new();
+    let lb_clean2 = LevelBar::new();
     let label_nb3 = Label::new(Some(&t!("D_SETTINGS_TAB3")));
-    let textview2 = TextView::new();
+    let textview_buffer = TextBuffer::new(NONE_TEXTTAGTABLE);
+    let textview3 = TextView::with_buffer(&textview_buffer);
+
     let b_checknow = gtk::Button::with_label(&t!("D_SETTINGS_DB_CLEAN_B1"));
     {
         let grid3 = Grid::new();
@@ -828,11 +836,43 @@ fn create_settings_dialog(
             esw.sendw(GuiEvents::ButtonClicked("D_SETTINGS_CHECKNOW".to_string()));
         });
         line += 1;
-        lb_clean.set_mode(LevelBarMode::Discrete);
-        lb_clean.set_min_value(0.0);
-        lb_clean.set_max_value(DB_CLEAN_STEPS_MAX);
-        lb_clean.set_height_request(16);
-        grid3.attach(&lb_clean, 0, line, 2, 1);
+
+        /*
+               lb_clean.set_mode(LevelBarMode::Discrete);
+               lb_clean.set_min_value(0.0);
+               lb_clean.set_max_value(DB_CLEAN_STEPS_MAX);
+               lb_clean.set_height_request(16);
+               grid3.attach(&lb_clean, 0, line, 2, 1);
+               line += 1;
+        */
+
+        lb_clean2.set_mode(LevelBarMode::Discrete);
+        lb_clean2.set_min_value(0.0);
+        lb_clean2.set_max_value(CLEANER_STEPS_MAX);
+        lb_clean2.set_height_request(16);
+        lb_clean2.set_value(0.0);
+        grid3.attach(&lb_clean2, 0, line, 2, 1);
+        lb_clean2.remove_offset_value(Some(&LEVEL_BAR_OFFSET_FULL));
+        if false {
+            lb_clean2.remove_offset_value(Some(&LEVEL_BAR_OFFSET_LOW));
+            lb_clean2.remove_offset_value(Some(&LEVEL_BAR_OFFSET_HIGH));
+            lb_clean2.remove_offset_value(Some(&LEVEL_BAR_OFFSET_FULL));
+
+            lb_clean2.add_offset_value("offset1", 3.0);
+            lb_clean2.connect_offset_changed(Some("offset1"), move |_l_b, x| {
+                info!("levelbar offset1 changed : {:?}", x);
+            });
+        }
+
+        lb_clean2.connect_offset_changed(Some(&LEVEL_BAR_OFFSET_LOW), move |_l_b, x| {
+            info!("levelbar LEVEL_BAR_OFFSET_LOW : {:?}", x);
+        });
+        lb_clean2.connect_offset_changed(Some(&LEVEL_BAR_OFFSET_HIGH), move |_l_b, x| {
+            info!("levelbar LEVEL_BAR_OFFSET_HIGH : {:?}", x);
+        });
+        lb_clean2.connect_offset_changed(Some(&LEVEL_BAR_OFFSET_FULL), move |_l_b, x| {
+            info!("levelbar LEVEL_BAR_OFFSET_FULL : {:?}", x);
+        });
 
         line += 1;
         let scrolledwindow2 = ScrolledWindow::new(NONE_ADJ, NONE_ADJ);
@@ -841,9 +881,9 @@ fn create_settings_dialog(
         scrolledwindow2.set_vexpand(true);
         scrolledwindow2.set_shadow_type(ShadowType::EtchedIn);
 
-        textview2.set_vexpand(true); //        textview2.set_monospace(true);
-        textview2.set_hexpand(true);
-        scrolledwindow2.add(&textview2);
+        textview3.set_vexpand(true); //        textview2.set_monospace(true);
+        textview3.set_hexpand(true);
+        scrolledwindow2.add(&textview3);
         grid3.attach(&scrolledwindow2, 0, line, 2, 3);
     }
 
@@ -924,25 +964,36 @@ fn create_settings_dialog(
         sw_browser_cache_clear.set_state(dialogdata.get(10).unwrap().boo()); // 10 : browser cache cleanup
                                                                              //  sw_subs_db_cleanup.set_state(dialogdata.get(11).unwrap().boo()); // 11 : DB cleanup
     });
-    let tview_clean = textview2.clone();
+    let textview_d = textview3.clone();
     ddd.set_dialog_distribute(DIALOG_SETTINGS_CHECK, move |dialogdata| {
+        /*
         if let Some(level) = dialogdata.first().unwrap().uint() {
-            if level == 0 {
-                let tbuf = TextBuffer::new(NONE_TEXT);
-                tview_clean.set_buffer(Some(&tbuf));
-            }
-            lb_clean.set_value(level as f64);
+                       if level == 0 {
+                           debug!("D_TEXT: clearing it !!! " );
+                           let tbuf = TextBuffer::new(NONE_TEXT);
+                           textview_d.set_buffer(Some(&tbuf));
+                       }
+                        lb_clean.set_value(level as f64);
+            trace!("settings dialog unused entry 0 !  >{}< ", level);
         }
+          */
+
         if let Some(s_add) = dialogdata.get(1).unwrap().str() {
-            if let Some(buf) = tview_clean.buffer() {
+            if let Some(buf) = textview_d.buffer() {
+              //  debug!("D_TEXT:  >{}< ", s_add);
                 buf.set_text(&s_add);
             }
+        }
+
+        if let Some(level) = dialogdata.get(2).unwrap().uint() {
+            // trace!("d_c_2:  level {}", level);
+            lb_clean2.set_value(level as f64);
         }
     });
 
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_SETTINGS, &dialog);
-    ret.set_text_view(DIALOG_TEXTVIEW_CLEAN, &textview2);
+    ret.set_text_view(DIALOG_TEXTVIEW_CLEAN, &textview3);
     ret.set_button(BUTTON_SETTINGS_CLEAN_START, &b_checknow);
 }
 
@@ -1108,7 +1159,7 @@ fn create_subscription_statistic_dialog(
 
     for l in [
         &label1a, &label1b, &label2a, &label2b, &label3a, &label3b, &label4a, &label4b, &label5a,
-        &label5b, &label6a, &label6b
+        &label5b, &label6a, &label6b,
     ] {
         l.set_halign(Align::Start);
     }
@@ -1165,7 +1216,6 @@ fn create_subscription_statistic_dialog(
         if let Some(s) = dialogdata.get(8).unwrap().str() {
             label6b.set_text(&s); // num-favorites
         }
-
     });
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_SUBSCRIPTION_STATISTIC, &dialog);

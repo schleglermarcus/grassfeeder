@@ -32,6 +32,7 @@ pub const MAX_PATH_DEPTH: usize = 30;
 pub const MAX_ERROR_LINES_PER_SUBSCRIPTION: usize = 100;
 pub const MAX_ERROR_LINE_AGE_S: usize = 60 * 60 * 24 * 360;
 pub const CLEAN_STEPS_MAX: u8 = 10;
+const ARTIFICIAL_STEP_DELAY: u64 = 50;
 
 pub struct CleanerInner {
     pub gp_job_sender: Sender<Job>,
@@ -84,17 +85,11 @@ impl CleanerInner {
             None => String::default(),
         };
         msg_cut.truncate(80);
-        trace!(
-            "send_gp: {}ms \tmap {}=>{} \t{} ",
-            el_ms,
-            self.stepmarker,
-            NS[self.stepmarker as usize],
-            msg_cut
-        );
+        // trace!(            "send_gp: {}ms \tmap {}=>{} \t{} ",            el_ms,            self.stepmarker,            NS[self.stepmarker as usize],            msg_cut        );
         let _r =
             self.gp_job_sender
                 .send(Job::NotifyDbClean(NS[self.stepmarker as usize], el_ms, msg));
-        std::thread::sleep(std::time::Duration::from_millis(50));
+        std::thread::sleep(std::time::Duration::from_millis(ARTIFICIAL_STEP_DELAY));
     }
 
     fn advance_step(&mut self) {
@@ -102,7 +97,6 @@ impl CleanerInner {
     }
     fn advance_to(&mut self, newvalue: u8) {
         self.stepmarker = newvalue;
-        // debug!("ADVANCE-TO {} ", newvalue);
     }
 }
 
@@ -123,12 +117,12 @@ impl std::fmt::Debug for CleanerInner {
 // Mapping DB-Check-States  to Gui-Level-Bars. This allows to shift the display levels according to time usage.
 pub const NS: [u8; 25] = [
     0, 0, 0, 0, 0, // 0-4
-    0, 0, 0, 1, 1, // 5-9
-    1, 2, 3, // 10-12 ReduceTooManyMessages
-    3, 4, 4, // 13-15: DeleteDoubleSame
-    5, 6, // 16-17 PurgeMessages
-    7, 8, // 18-19 :
-    9, 10, 10, 10, 10, // 20-25
+    1, 1, 2, 2, 2, // 5-9
+    2, 3, 4, // 10-12 ReduceTooManyMessages
+    4, 5, 6, // 13-15: DeleteDoubleSame
+    7, 8, // 16-17 PurgeMessages
+    9, 10, // 18-19 :
+    11, 12, 13, 12, 12, // 20-25
 ];
 
 impl CleanerStart {
@@ -139,6 +133,8 @@ impl CleanerStart {
 pub struct CleanerStart(pub CleanerInner);
 impl Step<CleanerInner> for CleanerStart {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
+        //        self.0.send_gp(Some(t!("D_SETTINGS_TAB1"))); // "Start".to_string()
+
         self.0.send_gp(Some("Start".to_string()));
         StepResult::Continue(Box::new(RemoveNonConnectedSubscriptions(self.0)))
     }
@@ -149,7 +145,7 @@ impl Step<CleanerInner> for RemoveNonConnectedSubscriptions {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(None);
+        inner.send_gp(Some(t!("D_SETTINGS_TAB1")));
         let all_subs = inner.subscriptionrepo.get_all_entries();
         let mut connected_child_list: HashSet<isize> = HashSet::default();
         let mut folder_work: Vec<isize> = Vec::default();
@@ -205,7 +201,7 @@ impl Step<CleanerInner> for AnalyzeFolderPositions {
         );
         let to_correct_a = &inner.fp_correct_subs_parent.lock().unwrap().clone();
         if to_correct_a.is_empty() {
-            StepResult::Continue(Box::new(CorrectNames(inner)))
+            StepResult::Continue(Box::new(CorrectEmptyFolderNames(inner)))
         } else {
             inner.need_update_subscriptions = true;
             StepResult::Continue(Box::new(ReSortParentId(inner)))
@@ -232,16 +228,15 @@ impl Step<CleanerInner> for ReSortParentId {
                 resort_parent_list(*p as isize, &inner.subscriptionrepo);
             });
         }
-        StepResult::Continue(Box::new(CorrectNames(inner)))
+        StepResult::Continue(Box::new(CorrectEmptyFolderNames(inner)))
     }
     fn take(self: Box<Self>) -> CleanerInner {
         self.0
     }
 }
 
-///  Correct all Folder names that are empty
-pub struct CorrectNames(pub CleanerInner);
-impl Step<CleanerInner> for CorrectNames {
+pub struct CorrectEmptyFolderNames(pub CleanerInner);
+impl Step<CleanerInner> for CorrectEmptyFolderNames {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
@@ -297,7 +292,8 @@ impl Step<CleanerInner> for CorrectIconsOfFolders {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(None);
+        // inner.send_gp(None);
+        inner.send_gp(Some("CorrectIconsOfFolders".to_string()));
         let all_folders: Vec<SubscriptionEntry> = inner
             .subscriptionrepo
             .get_all_entries()
@@ -331,7 +327,8 @@ impl Step<CleanerInner> for CorrectIconsDoublettes {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(None);
+        // inner.send_gp(None);
+        inner.send_gp(Some("CorrectIconsDoublettes".to_string()));
         let all_icons: Vec<IconRow> = inner.iconrepo.get_all_entries();
         let mut ic_first: HashMap<String, isize> = HashMap::new();
         let mut replace_ids: HashMap<isize, isize> = HashMap::new(); // subsequent-icon-id =>  previous icon-id
@@ -386,7 +383,9 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(None);
+        // inner.send_gp(None);
+        inner.send_gp(Some("CorrectIconsOnSubscriptions".to_string()));
+
         let all_subscriptions: Vec<SubscriptionEntry> = inner
             .subscriptionrepo
             .get_all_entries()
@@ -452,7 +451,12 @@ impl Step<CleanerInner> for CorrectIconsOnSubscriptions {
 pub struct DeleteUnusedIcons(pub CleanerInner);
 impl Step<CleanerInner> for DeleteUnusedIcons {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
-        let inner = self.0;
+        let mut inner = self.0;
+        inner.advance_step();
+
+        // inner.send_gp(None);
+        inner.send_gp(Some("DeleteUnusedIcons".to_string()));
+
         let mut used_icon_ids: Vec<usize> = inner
             .subscriptionrepo
             .get_all_entries()
@@ -493,7 +497,9 @@ impl Step<CleanerInner> for MarkUnconnectedMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(None);
+        // inner.send_gp(None);
+        inner.send_gp(Some("MarkUnconnectedMessages".to_string()));
+
         let parent_ids_active: Vec<i32> = inner
             .subscriptionrepo
             .get_all_nonfolder()
@@ -539,7 +545,8 @@ impl Step<CleanerInner> for ReduceTooManyMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(None);
+        // inner.send_gp(None);
+        inner.send_gp(Some("ReduceTooManyMessages".to_string()));
         if inner.max_messages_per_subscription > 1 {
             let subs_ids = inner
                 .subscriptionrepo
@@ -620,8 +627,10 @@ pub struct DeleteDoubleSameMessages(pub CleanerInner);
 impl Step<CleanerInner> for DeleteDoubleSameMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-        inner.advance_to(13);
-        inner.send_gp(None);
+        inner.advance_to(14);
+        // inner.send_gp(None);
+        inner.send_gp(Some("DeleteDoubleSameMessages".to_string()));
+
         let subs_ids_active: Vec<i32> = inner
             .subscriptionrepo
             .get_all_nonfolder()
@@ -676,8 +685,8 @@ pub struct PurgeMessages(pub CleanerInner);
 impl Step<CleanerInner> for PurgeMessages {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
-        inner.advance_to(16);
-        inner.send_gp(None); // Some("PurgeMessages".to_string())
+        inner.advance_to(17);
+        inner.send_gp(Some("PurgeMessages".to_string())); //
         let allmsg = inner.messagesrepo.get_all_deleted();
         let to_delete: Vec<i32> = allmsg
             .into_iter()
@@ -777,10 +786,10 @@ impl Step<CleanerInner> for ShortenDatabases {
     fn step(self: Box<Self>) -> StepResult<CleanerInner> {
         let mut inner = self.0;
         inner.advance_step();
-        inner.send_gp(None); // Some("ShortenDatabases-M".to_string())
+        inner.send_gp(Some("vacuuming messages.db".to_string())); //
         inner.messagesrepo.db_vacuum();
         inner.advance_step();
-        inner.send_gp(None); //  Some("ShortenDatabases-S".to_string())
+        inner.send_gp(Some("vacuuming subscriptions and errors".to_string())); //
         inner.subscriptionrepo.db_vacuum();
         inner.error_repo.db_vacuum();
         StepResult::Continue(Box::new(Notify(inner)))

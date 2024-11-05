@@ -3,6 +3,4 @@ Sun, 06 Oct 2024 03:00:00 +0000
 * Cleanup: remove unused icons
 * Created subscription info dialog with errors list
 * Reduced Icons requests after encountering remote errors
-
-
-- look at db cleanup dialog, watch update bar
+* Bugfix: cleanup dialog and update background

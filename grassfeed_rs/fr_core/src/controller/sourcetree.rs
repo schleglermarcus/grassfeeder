@@ -854,6 +854,7 @@ impl SourceTreeController {
             n_status_icon = IDX_32_FLAG_RED_32;
             show_status_icon = true;
         }
+        // trace!("S{}  icon{} ", subscr.subs_id, n_status_icon);
         let tp = match &su_st.tree_path {
             Some(tp) => format!("{:?}", &tp),
             None => "".to_string(),
@@ -981,7 +982,7 @@ impl SourceTreeController {
                 continue;
             }
             let subs = o_subs.unwrap();
-            if subs.icon_id <= ICON_LIST.len() {
+            if subs.icon_id < ICON_LIST.len() {
                 continue;
             }
             let o_icon = (*self.iconrepo_r)

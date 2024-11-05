@@ -321,7 +321,7 @@ impl GuiProcessor {
                     self.statusbar.push_bottom_notice(msg);
                 }
                 Job::NotifyDbClean(c_step, duration_ms, ref c_msg) => {
-                    // debug!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
+                    // trace!("NotifyDbClean:  {}  {} {:?}   ", c_step, duration_ms, c_msg);
                     let av2nd = if let Some(msg) = c_msg {
                         let newmsg = format!(
                             "{}{}\t{}\n",
@@ -334,7 +334,11 @@ impl GuiProcessor {
                     } else {
                         AValue::None
                     };
-                    let dd: Vec<AValue> = vec![AValue::AU32(c_step as u32), av2nd];
+                    let dd: Vec<AValue> = vec![
+                        AValue::None,                //   AValue::AU32(c_step as u32), // 0
+                        av2nd,                       // 1
+                        AValue::AU32(c_step as u32), // 2
+                    ];
                     (*self.gui_val_store)
                         .write()
                         .unwrap()
@@ -1456,13 +1460,10 @@ impl HandleSingleEvent for HandleButtonActivated {
                     (*gp.gui_updater)
                         .borrow()
                         .button_set_sensitive(BUTTON_SETTINGS_CLEAN_START, false);
+                    gp.statusbar.set_db_check_message(String::default());
                     gp.statusbar.set_db_check_running(true);
                     gp.downloader_r.borrow().cleanup_db();
-                    gp.addjob(Job::NotifyDbClean(
-                        0,
-                        0,
-                        Some("starting cleanup ...".to_string()),
-                    ));
+                    gp.addjob(Job::NotifyDbClean(0, 0, None)); //Some("starting cleanup ...".to_string()),
                 } else {
                     debug!("clicked, SKIPPING {}   isrunning={}  ", msg, isrunning);
                 }
