@@ -504,7 +504,7 @@ impl IContentList for ContentList {
         if self.job_queue_sender.is_full() {
             error!("ContentList CJob queue full  Skipping  {:?}", nj);
         } else {
-            self.job_queue_sender.send(nj).unwrap();
+            let _r = self.job_queue_sender.send(nj);
         }
         self.job_queue_sender.len()
     }

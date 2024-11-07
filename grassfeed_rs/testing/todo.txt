@@ -1,10 +1,8 @@
-
-- look at db cleanup dialog, watch update bar
-- remove or re-load icons that are too old
-
-- Filling content list with partitioned gtk-String lists.
+- CJob::SwitchBrowserTabContent()
 
 - Drag Website not to list, but onto tree
+- Filling content list with partitioned gtk-String lists.
+
 
 - package bas64  to newer version
 

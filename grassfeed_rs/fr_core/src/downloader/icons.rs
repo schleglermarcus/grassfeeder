@@ -149,10 +149,8 @@ impl Step<IconInner> for CheckPreviousErrors {
         let inner: IconInner = self.0;
         let o_err = inner.erro_repo.get_last_entry(inner.subs_id);
         if decide_icon_download(inner.subs_id, o_err) {
-            // trace!("S{}  do icon_download ", inner.subs_id);
             StepResult::Continue(Box::new(FeedTextDownload(inner)))
         } else {
-            // trace!("S{}  skip icon_download ", inner.subs_id);
             StepResult::Stop(inner)
         }
     }
@@ -181,12 +179,7 @@ fn decide_icon_download(subs_id: isize, o_err: Option<ErrorEntry>) -> bool {
         _ => (),
     };
     if timediff > ICON_ERRORMESSAGE_SKIP_DURATION_S {
-        trace!(
-            "S{}  LastErr {}  timediff {:.1}h  ",
-            subs_id,
-            err,
-            (timediff as f32) / 60.0 / 60.0,
-        );
+        // trace!(            "S{}  LastErr {}  timediff {:.1}h  ",            subs_id,            err,            (timediff as f32) / 60.0 / 60.0,        );
         return true;
     }
     false
@@ -710,7 +703,6 @@ impl InvestigateOne for InvIco {
                     debug!("InvIco:  not handled  {:?} ", decoder.resource_type());
                 }
                 if let Some(entry) = decoder.entries().first() {
-                    // trace!(                        "InvIco: E0:  isPng:{}  BpP:{} ",                        entry.is_png(),                        entry.bits_per_pixel()                    );
                     r.width_orig = entry.width();
                     r.height_orig = entry.height();
                     if entry.is_png() {
@@ -720,7 +712,6 @@ impl InvestigateOne for InvIco {
             }
             Err(e) => {
                 r.message = format!("not_ico: {e}");
-                // debug!("InvIco:  not_ico {} ", r.message);
             }
         }
         r

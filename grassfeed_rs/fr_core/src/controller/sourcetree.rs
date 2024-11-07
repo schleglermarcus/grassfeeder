@@ -129,7 +129,7 @@ pub struct SourceTreeController {
     pub(super) erro_repo_r: Rc<RefCell<ErrorRepo>>,
     pub(super) config: Rc<RefCell<Config>>,
     pub(super) subscriptionmove_w: Weak<RefCell<SubscriptionMove>>,
-    pub(super) current_edit_fse: Option<SubscriptionEntry>,
+    pub(super) current_edit_subscr: Option<SubscriptionEntry>,
 
     //  Subscription,  Non-Folder-Child-IDs
     pub(super) current_selected_subscription: RefCell<Option<(SubscriptionEntry, Vec<i32>)>>,
@@ -191,7 +191,7 @@ impl SourceTreeController {
             any_spinner_visible: RefCell::new(false),
             feedcontents_w: Weak::new(),
             downloader_r: downloader_,
-            current_edit_fse: None,
+            current_edit_subscr: None,
             config: confi,
             new_source: RefCell::new(NewSourceTempData::default()),
             current_selected_subscription: RefCell::new(None),
@@ -526,13 +526,13 @@ impl SourceTreeController {
 
     /// update one tree item  from db into treestore. Depends on the last tree path
     pub fn tree_store_update_one(&self, f_source_id: isize) {
-        let o_fse = (*self.subscriptionrepo_r)
+        let o_subscr = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_index(f_source_id);
-        if o_fse.is_none() {
+        if o_subscr.is_none() {
             return;
         }
-        let fse = o_fse.unwrap();
+        let fse = o_subscr.unwrap();
         if fse.isdeleted() {
             return;
         }

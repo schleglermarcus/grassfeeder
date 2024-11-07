@@ -211,12 +211,12 @@ impl ISourceTreeController for SourceTreeController {
 
     fn start_subscription_edit_dialog(&mut self, subs_id: isize) {
         let mut dialog_id = DIALOG_SUBS_EDIT;
-        let o_fse = (*self.subscriptionrepo_r).borrow().get_by_index(subs_id);
-        if o_fse.is_none() {
+        let o_subscr = (*self.subscriptionrepo_r).borrow().get_by_index(subs_id);
+        if o_subscr.is_none() {
             return;
         }
-        let fse = o_fse.unwrap();
-        self.current_edit_fse.replace(fse.clone());
+        let subscr = o_subscr.unwrap();
+        self.current_edit_subscr.replace(subscr.clone());
         let mut num_all: i32 = -1;
         let mut num_unread: i32 = -1;
         if let Some(feedcontents) = self.feedcontents_w.upgrade() {
@@ -226,21 +226,21 @@ impl ISourceTreeController for SourceTreeController {
         let mut iconval = AValue::None;
         if let Some(ie) = (*self.iconrepo_r)
             .borrow()
-            .get_by_index(fse.icon_id as isize)
+            .get_by_index(subscr.icon_id as isize)
         {
             iconval = AValue::AIMG(ie.icon);
         }
-        dd.push(AValue::ASTR(fse.display_name.clone())); // 0  url
-        if fse.is_folder {
+        dd.push(AValue::ASTR(subscr.display_name.clone())); // 0  url
+        if subscr.is_folder {
             dialog_id = DIALOG_FOLDER_EDIT;
         } else {
-            dd.push(AValue::ASTR(fse.url.clone())); // 1
+            dd.push(AValue::ASTR(subscr.url.clone())); // 1
             dd.push(iconval); // 2
             dd.push(AValue::AI32(num_all)); // 3
             dd.push(AValue::AI32(num_unread)); // 4
-            dd.push(AValue::ASTR(fse.website_url)); // 5 main website
-            dd.push(AValue::ASTR(db_time_to_display_nonnull(fse.updated_int))); // 6
-            dd.push(AValue::ASTR(db_time_to_display_nonnull(fse.updated_ext))); // 7
+            dd.push(AValue::ASTR(subscr.website_url)); // 5 main website
+            dd.push(AValue::ASTR(db_time_to_display_nonnull(subscr.updated_int))); // 6
+            dd.push(AValue::ASTR(db_time_to_display_nonnull(subscr.updated_ext))); // 7
             let lines: Vec<String> = (*self.erro_repo_r)
                 .borrow()
                 .get_by_subscription(subs_id)
@@ -343,10 +343,10 @@ impl ISourceTreeController for SourceTreeController {
     }
 
     fn end_subscr_edit_dialog(&mut self, values: &[AValue]) {
-        if self.current_edit_fse.is_none() || values.is_empty() {
+        if self.current_edit_subscr.is_none() || values.is_empty() {
             return;
         }
-        let subscr: SubscriptionEntry = self.current_edit_fse.take().unwrap();
+        let subscr: SubscriptionEntry = self.current_edit_subscr.take().unwrap();
         assert!(!values.is_empty());
         let mut newname = String::default();
         if let Some(s) = values.first() {
@@ -401,13 +401,13 @@ impl ISourceTreeController for SourceTreeController {
     }
 
     fn start_delete_dialog(&mut self, src_repo_id: isize) {
-        let o_fse = (*self.subscriptionrepo_r)
+        let o_subscr = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_index(src_repo_id);
-        if o_fse.is_none() {
+        if o_subscr.is_none() {
             return;
         }
-        let fse = o_fse.unwrap();
+        let fse = o_subscr.unwrap();
         if let Some(subs_mov) = self.subscriptionmove_w.upgrade() {
             subs_mov
                 .borrow_mut()

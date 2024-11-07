@@ -322,14 +322,14 @@ impl IDownloader for Downloader {
     }
 
     fn add_update_subscription(&self, f_source_repo_id: isize) {
-        let o_fse = (*self.subscriptionrepo_r)
+        let o_subscr = (*self.subscriptionrepo_r)
             .borrow()
             .get_by_index(f_source_repo_id);
-        if o_fse.is_none() {
+        if o_subscr.is_none() {
             warn!("cannot get subscription    {}  ", f_source_repo_id);
             return;
         }
-        let subs = o_fse.unwrap();
+        let subs = o_subscr.unwrap();
         if subs.is_folder {
             warn!(" fetch_single    {}  but is folder ", f_source_repo_id);
             return;
