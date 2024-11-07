@@ -1,4 +1,4 @@
-Thu 7 Nov 21:00:00 CET 2024  +0000
+Thu 7 Nov 2024 21:00:00 CET +0000
 * Use http date to check fav-icon presence
 * Cleanup: remove unused icons
 * Created subscription info dialog with errors list
