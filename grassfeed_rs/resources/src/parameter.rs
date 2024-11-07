@@ -15,8 +15,7 @@ pub const STORE_MESSAGES_PER_SUBSCRIPTION: usize = 20000;
 
 pub const DOWNLOAD_TOO_LONG_MS: u32 = 4000;
 
-
 pub const ICON_RELOAD_TIME_D: u8 = 2; // 2 days, later:  7
 pub const ICON_RELOAD_TIME_S: i64 = 60 * 60 * 24 * (ICON_RELOAD_TIME_D as i64);
 
-pub  const ICON_ERRORMESSAGE_SKIP_DURATION_S : i64 = 60 * 60 * 24 ; // 1 day
+pub const ICON_ERRORMESSAGE_SKIP_DURATION_S: i64 = 60 * 60 * 24; // 1 day

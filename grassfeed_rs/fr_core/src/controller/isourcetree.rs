@@ -304,7 +304,6 @@ impl ISourceTreeController for SourceTreeController {
             let err_list = (*self.erro_repo_r)
                 .borrow()
                 .get_by_subscription(subscription_id);
-            // debug!(                "start_statistic_dialog   error messages into list !!   len:{} ",                err_list.len()            );
             let mut valstore = (*self.gui_val_store).write().unwrap();
             valstore.clear_list(LISTVIEW1);
             err_list.iter().enumerate().for_each(|(i, ee)| {
@@ -331,7 +330,6 @@ impl ISourceTreeController for SourceTreeController {
             dd.push(AValue::ASTR(joined)); // 8 error lines
         }
         (*self.gui_updater).borrow().update_list(LISTVIEW1);
-        // debug!("start_statistic_dialog  update_list  idx:{} ", LISTVIEW1);
         (*self.gui_val_store)
             .write()
             .unwrap()

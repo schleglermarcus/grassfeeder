@@ -166,7 +166,6 @@ fn icons_store_delete_and_tx() {
     assert!(now.elapsed().as_millis() < 100);
 }
 
-
 // ------------------------------------
 
 mod logger_config;

@@ -75,7 +75,7 @@ impl GtkModelUpdaterInt {
             let g_o = (*self.g_o_a).read().unwrap();
             tree_store = g_o.get_tree_store(index as usize).unwrap().clone();
             tree_view = g_o.get_tree_view(index as usize).unwrap().clone();
-            max_columns = g_o.get_tree_store_max_columns(index ) as usize;
+            max_columns = g_o.get_tree_store_max_columns(index) as usize;
         }
         let view_option: Option<&ListStore> = None;
         tree_view.set_model(view_option);
@@ -203,7 +203,7 @@ impl GtkModelUpdaterInt {
         let tree_store: TreeStore;
         {
             let g_o = (*self.g_o_a).read().unwrap();
-            max_columns = g_o.get_tree_store_max_columns(index ) as usize;
+            max_columns = g_o.get_tree_store_max_columns(index) as usize;
             tree_store = g_o.get_tree_store(index as usize).unwrap().clone();
         }
         let mut gti: &GuiTreeItem = &(self.m_v_store).read().unwrap().get_tree_root();
@@ -264,7 +264,7 @@ impl GtkModelUpdaterInt {
         let tree_store: TreeStore;
         {
             let mut g_o = (*self.g_o_a).write().unwrap();
-            max_columns = g_o.get_tree_store_max_columns(tree_idx ) as usize;
+            max_columns = g_o.get_tree_store_max_columns(tree_idx) as usize;
             tree_store = g_o.get_tree_store(tree_idx as usize).unwrap().clone();
             g_o.set_block_tree_updates(tree_idx, true);
         }

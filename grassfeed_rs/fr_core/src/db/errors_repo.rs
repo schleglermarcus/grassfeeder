@@ -34,17 +34,13 @@ impl ErrorRepo {
         }
         let filename: String = ErrorRepo::filename(folder_n);
         let dbctx = SqliteContext::new(&filename);
-        ErrorRepo {
-            ctx: dbctx,
-        }
+        ErrorRepo { ctx: dbctx }
     }
 
     pub fn new_in_mem() -> Self {
         let cx = SqliteContext::new_in_memory();
         cx.create_table();
-        ErrorRepo {
-            ctx: cx,
-        }
+        ErrorRepo { ctx: cx }
     }
 
     pub fn filename(foldername: &str) -> String {

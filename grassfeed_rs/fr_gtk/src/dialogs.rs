@@ -3,9 +3,6 @@ use gtk::NotebookBuilder;
 
 #[cfg(not(feature = "legacy3gtk14"))]
 use gtk::builders::NotebookBuilder;
-use gtk::LEVEL_BAR_OFFSET_FULL;
-use gtk::LEVEL_BAR_OFFSET_HIGH;
-use gtk::LEVEL_BAR_OFFSET_LOW;
 
 use crate::statistics_list::create_statistic_listview;
 use crate::util::*;
@@ -42,6 +39,7 @@ use gtk::TextBuffer;
 use gtk::TextTagTable;
 use gtk::TextView;
 use gtk::Window;
+use gtk::LEVEL_BAR_OFFSET_FULL;
 use gui_layer::abstract_ui::AValue;
 use gui_layer::abstract_ui::GuiEvents;
 use resources::application_id::*;
@@ -811,13 +809,10 @@ fn create_settings_dialog(
             grid2.attach(&label2_5, 0, line, 1, 1);
         }
     }
-
-    //    let lb_clean = LevelBar::new();
     let lb_clean2 = LevelBar::new();
     let label_nb3 = Label::new(Some(&t!("D_SETTINGS_TAB3")));
     let textview_buffer = TextBuffer::new(NONE_TEXTTAGTABLE);
     let textview3 = TextView::with_buffer(&textview_buffer);
-
     let b_checknow = gtk::Button::with_label(&t!("D_SETTINGS_DB_CLEAN_B1"));
     {
         let grid3 = Grid::new();
@@ -836,16 +831,6 @@ fn create_settings_dialog(
             esw.sendw(GuiEvents::ButtonClicked("D_SETTINGS_CHECKNOW".to_string()));
         });
         line += 1;
-
-        /*
-               lb_clean.set_mode(LevelBarMode::Discrete);
-               lb_clean.set_min_value(0.0);
-               lb_clean.set_max_value(DB_CLEAN_STEPS_MAX);
-               lb_clean.set_height_request(16);
-               grid3.attach(&lb_clean, 0, line, 2, 1);
-               line += 1;
-        */
-
         lb_clean2.set_mode(LevelBarMode::Discrete);
         lb_clean2.set_min_value(0.0);
         lb_clean2.set_max_value(CLEANER_STEPS_MAX);
@@ -853,35 +838,13 @@ fn create_settings_dialog(
         lb_clean2.set_value(0.0);
         grid3.attach(&lb_clean2, 0, line, 2, 1);
         lb_clean2.remove_offset_value(Some(&LEVEL_BAR_OFFSET_FULL));
-        if false {
-            lb_clean2.remove_offset_value(Some(&LEVEL_BAR_OFFSET_LOW));
-            lb_clean2.remove_offset_value(Some(&LEVEL_BAR_OFFSET_HIGH));
-            lb_clean2.remove_offset_value(Some(&LEVEL_BAR_OFFSET_FULL));
-
-            lb_clean2.add_offset_value("offset1", 3.0);
-            lb_clean2.connect_offset_changed(Some("offset1"), move |_l_b, x| {
-                info!("levelbar offset1 changed : {:?}", x);
-            });
-        }
-
-        lb_clean2.connect_offset_changed(Some(&LEVEL_BAR_OFFSET_LOW), move |_l_b, x| {
-            info!("levelbar LEVEL_BAR_OFFSET_LOW : {:?}", x);
-        });
-        lb_clean2.connect_offset_changed(Some(&LEVEL_BAR_OFFSET_HIGH), move |_l_b, x| {
-            info!("levelbar LEVEL_BAR_OFFSET_HIGH : {:?}", x);
-        });
-        lb_clean2.connect_offset_changed(Some(&LEVEL_BAR_OFFSET_FULL), move |_l_b, x| {
-            info!("levelbar LEVEL_BAR_OFFSET_FULL : {:?}", x);
-        });
-
         line += 1;
         let scrolledwindow2 = ScrolledWindow::new(NONE_ADJ, NONE_ADJ);
         scrolledwindow2.set_widget_name("scrolledwindow_2");
         scrolledwindow2.set_policy(gtk::PolicyType::Automatic, gtk::PolicyType::Automatic); // scrollbar-h, scrollbar-v
         scrolledwindow2.set_vexpand(true);
         scrolledwindow2.set_shadow_type(ShadowType::EtchedIn);
-
-        textview3.set_vexpand(true); //        textview2.set_monospace(true);
+        textview3.set_vexpand(true);
         textview3.set_hexpand(true);
         scrolledwindow2.add(&textview3);
         grid3.attach(&scrolledwindow2, 0, line, 2, 3);
@@ -899,7 +862,6 @@ fn create_settings_dialog(
     let spinb_fontsize_manual_c = spinb_fontsize_manual.clone();
     let scale_bright_c = scale_bright.clone();
     let sw_browser_cache_clear_c = sw_browser_cache_clear.clone();
-
     dialog.connect_response(move |dialog, rt| {
         match rt {
             ResponseType::Ok => {
@@ -966,31 +928,15 @@ fn create_settings_dialog(
     });
     let textview_d = textview3.clone();
     ddd.set_dialog_distribute(DIALOG_SETTINGS_CHECK, move |dialogdata| {
-        /*
-        if let Some(level) = dialogdata.first().unwrap().uint() {
-                       if level == 0 {
-                           debug!("D_TEXT: clearing it !!! " );
-                           let tbuf = TextBuffer::new(NONE_TEXT);
-                           textview_d.set_buffer(Some(&tbuf));
-                       }
-                        lb_clean.set_value(level as f64);
-            trace!("settings dialog unused entry 0 !  >{}< ", level);
-        }
-          */
-
         if let Some(s_add) = dialogdata.get(1).unwrap().str() {
             if let Some(buf) = textview_d.buffer() {
-              //  debug!("D_TEXT:  >{}< ", s_add);
                 buf.set_text(&s_add);
             }
         }
-
         if let Some(level) = dialogdata.get(2).unwrap().uint() {
-            // trace!("d_c_2:  level {}", level);
             lb_clean2.set_value(level as f64);
         }
     });
-
     let mut ret = (*gtk_obj_a).write().unwrap();
     ret.set_dialog(DIALOG_SETTINGS, &dialog);
     ret.set_text_view(DIALOG_TEXTVIEW_CLEAN, &textview3);
@@ -1013,8 +959,7 @@ fn create_opml_import_dialog(g_ev_se: Sender<GuiEvents>, gtk_obj_a: GtkObjectsTy
                 let payload = vec![AValue::ASTR(
                     files[0].as_path().to_str().unwrap().to_string(),
                 )];
-                debug!("import-opml  payload={:?}", &payload);
-
+                // debug!("import-opml  payload={:?}", &payload);
                 let _r = ev_se.send(GuiEvents::DialogData("import-opml".to_string(), payload));
             }
         }

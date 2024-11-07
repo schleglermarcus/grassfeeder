@@ -148,13 +148,6 @@ impl StatusBar {
                     .unwrap()
                     .set_label_tooltip(label_id, tt);
             }
-            /*
-                       if with_tooltip {
-                           (*self.gui_updater).borrow().update_label_markup(label_id);
-                       } else if with_label {
-                           (*self.gui_updater).borrow().update_label(label_id);
-                       }
-            */
             if with_tooltip || with_label {
                 (*self.gui_updater).borrow().update_label_markup(label_id);
             }

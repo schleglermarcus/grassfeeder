@@ -200,13 +200,11 @@ impl UIAdapterValueStore for ModelValueStoreImpl {
         while self.gui_lists[list_index as usize].len() <= list_position as usize {
             self.gui_lists[list_index as usize].push(Vec::default());
         }
-        //        trace!("insert_list_item {:?} {:?} {:?} ", list_index, list_position, &values);
         values.clone_into(&mut self.gui_lists[list_index as usize][list_position as usize]);
     }
 
     fn clear_list(&mut self, list_index: u8) {
         while self.gui_lists.len() <= list_index as usize {
-            // trace!(                "clear_list: {list_index} <= {}  creating new one ",                self.gui_lists.len()            );
             self.gui_lists.push(Vec::default());
         }
         self.gui_lists[list_index as usize].clear();

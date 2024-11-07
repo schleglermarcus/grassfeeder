@@ -45,7 +45,6 @@ use std::sync::RwLock;
 const JOBQUEUE_SIZE: usize = 1000; // at least as many jobs as there might be subscriptions
 const LIST_SCROLL_POS: i8 = 80; // to 70% of the upper list is visible, the cursor shall go to the lower 30%
 
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CJob {
     /// content_id, newtitle
@@ -195,7 +194,6 @@ impl ContentList {
         aggr_icon_id: Option<usize>,
     ) -> Vec<AValue> {
         let mut newrow: Vec<AValue> = Vec::default();
-
         let mut nfav = gen_icons::IDX_03_ICON_TRANSPARENT_48;
         match aggr_icon_id {
             None => {
@@ -228,7 +226,7 @@ impl ContentList {
         ))); // 4
         newrow.push(AValue::AU32(fc.message_id as u32)); // 5
         if debug_mode {
-            let isdel = i32::from(fc.is_deleted); // if { 1 } else { 0 }
+            let isdel = i32::from(fc.is_deleted);
             newrow.push(AValue::ASTR(format!(
                 "id{} src{}  D:{} F:{}",
                 fc.message_id,

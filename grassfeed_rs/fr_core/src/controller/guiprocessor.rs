@@ -61,7 +61,6 @@ use std::mem::Discriminant;
 use std::rc::Rc;
 use std::time::Instant;
 
-// const DOWNLOAD_TOO_LONG_MS: u32 = 5000;
 const JOBQUEUE_SIZE: usize = 100;
 const TREE_PANE1_MIN_WIDTH: i32 = 100;
 
@@ -135,7 +134,6 @@ impl GuiProcessor {
             (*ac).get_rc::<browserpane::BrowserPane>().unwrap(),
             gui_v_a.clone(),
         );
-
         GuiProcessor {
             subscriptionrepo_r: (*ac).get_rc::<SubscriptionRepo>().unwrap(),
             configmanager_r: (*ac).get_rc::<ConfigManager>().unwrap(),
@@ -945,7 +943,6 @@ impl HandleSingleEvent for HandleTreeCursorChanged {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::TreeCursorChanged(_tree_idx, ref path_u16, subs_id) = ev {
             let statemap_rc = (*self.2).borrow().get_state_map();
-            // trace!(                "HandleTreeRowActivated: {:?} {:?} {:?} ",                _tree_idx,                path_u16,                subs_id            );
             if let Some(subs_map) = statemap_rc.borrow().get_state(subs_id as isize) {
                 if let Some(tp) = subs_map.tree_path {
                     if tp != *path_u16 {
@@ -1443,7 +1440,6 @@ impl HandleSingleEvent for HandleBrowserEvent {
     fn handle(&self, ev: GuiEvents, gp: &GuiProcessor) {
         if let GuiEvents::BrowserEvent(ref ev_type, value) = ev {
             if ev_type == &BrowserEventType::LoadingProgress {
-                //    gp.statusbar.borrow_mut().cache.browser_loading_progress = value as u8;
                 gp.statusbar.set_browser_loading_progress(value as u8);
             }
         }
@@ -1476,7 +1472,6 @@ struct HandleTreeDoubleClick(Rc<RefCell<dyn ISourceTreeController>>);
 impl HandleSingleEvent for HandleTreeDoubleClick {
     fn handle(&self, ev: GuiEvents, _gp: &GuiProcessor) {
         if let GuiEvents::TreeDoubleClick(_tree_idx, subs_id) = ev {
-            // trace!("HandleTreeDoubleClick: {} {} ", _tree_idx, subs_id);
             self.0.borrow().start_statistic_dialog(subs_id as isize);
         }
     }

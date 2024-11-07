@@ -31,7 +31,7 @@ impl IHttpRequester for FileFetcher {
                 r.http_status = 200;
             }
             Err(e) => {
-                r.http_status= 404;
+                r.http_status = 404;
                 r.error_description = format!("{e} {fs_file}");
             }
         }

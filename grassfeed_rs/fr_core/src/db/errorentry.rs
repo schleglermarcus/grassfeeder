@@ -53,7 +53,7 @@ impl ESRC {
         Self::GPFeedDownloadDuration,
         Self::GPIconDownloadDuration,
         Self::IconNoHomepageFromFeedtext,
-        Self::IconsSvgToPng,        // 20
+        Self::IconsSvgToPng, // 20
         Self::IconDownloadOther,
     ];
 }

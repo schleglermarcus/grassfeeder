@@ -49,11 +49,7 @@ impl DragState {
     }
 }
 
-pub fn process_icon_to_image(
-    input: Option<&AValue>,
-    dest_image: &Image,
-    err_help: &str,
-) -> bool {
+pub fn process_icon_to_image(input: Option<&AValue>, dest_image: &Image, err_help: &str) -> bool {
     if input.is_none() {
         warn!("no input value for icon: {} ", err_help);
         return false;
@@ -64,7 +60,7 @@ pub fn process_icon_to_image(
         return false;
     }
     let icon_str = o_str.unwrap();
-    process_string_to_image(&icon_str, dest_image, DIALOG_ICON_SIZE ,  err_help )
+    process_string_to_image(&icon_str, dest_image, DIALOG_ICON_SIZE, err_help)
 }
 
 pub fn process_string_to_image(

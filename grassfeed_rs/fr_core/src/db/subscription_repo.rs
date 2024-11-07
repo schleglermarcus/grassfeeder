@@ -21,7 +21,6 @@ use std::sync::Mutex;
 
 pub const KEY_FOLDERNAME: &str = "subscriptions_folder";
 
-
 pub trait ISubscriptionRepo {
     /// sorts by folder_position
     fn get_children(&self, parent_subs_id: isize) -> Vec<SubscriptionEntry>;
