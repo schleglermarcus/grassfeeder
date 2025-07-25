@@ -26,6 +26,7 @@ SUBSC_DEFAULT_FOLDER2: Technik
 
 SYSTRAY_CMD_QUIT: "Beenden"
 SYSTRAY_CMD_SHOW_WINDOW: "Fenster anzeigen / verstecken"
+STATUSBAR_MARKED: "Markiert:"
 
 MSGLIST_TOP_TITLE: "Titel"
 MSGLIST_TOP_DATE: "Datum"

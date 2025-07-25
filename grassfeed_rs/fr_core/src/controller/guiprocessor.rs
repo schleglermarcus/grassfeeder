@@ -1206,6 +1206,8 @@ impl HandleSingleEvent for HandleTreeDragEvent {
                 self.0
                     .borrow()
                     .on_subscription_drag(_tree_nr, from_path.clone(), to_path.clone());
+
+            debug!("HandleTreeDragEvent {_success} ");
         }
     }
 }

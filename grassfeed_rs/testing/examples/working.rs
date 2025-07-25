@@ -26,7 +26,8 @@ i18n!("../resources/locales");
 
 const MINIHTTPSERVER_PORT: usize = 8123;
 
-// cargo watch -s "cargo run  --example working --features ui-gtk   "
+// cargo watch -s "cargo run  --example working  "
+//                                                  --features ui-gtk
 fn main() {
     setup();
     loc::init_locales();
@@ -148,12 +149,6 @@ fn test_setup_values(acr: &AppContext, addr: String) {
         );
         subs_move.add_new_folder_at_parent("5_0".to_string(), f5);
         subs_move.add_new_folder_at_parent("5_1".to_string(), f5);
-        subs_move.add_new_subscription_at_parent(
-            "https://www.avoiceformen.com/feed/".to_string(),
-            "avoiceformen".to_string(),
-            folder1,
-            false,
-        );
         subs_move.add_new_subscription_at_parent(
             "http://staseve.eu/?feed=rss2".to_string(),
             "staseve-rss2".to_string(),

@@ -40,12 +40,23 @@ impl EvSenderCache {
 pub struct DragState {
     pub inserted: Option<Vec<u16>>, //  ID not delivered on drag
     pub deleted: Option<Vec<u16>>,
-    pub drag_start_path: Option<TreePath>,
+    drag_start_path: Option<TreePath>,
 }
 
 impl DragState {
-    pub fn block_row_activated(&self) -> bool {
+    pub fn is_block_activated(&self) -> bool {
         self.drag_start_path.is_some()
+    }
+    pub fn set_drag_start_path(&mut self, tp: TreePath) {
+        self.drag_start_path = Some(tp);
+    }
+    pub fn clear(&mut self) {
+        self.drag_start_path = None;
+        self.inserted = None;
+        self.deleted = None;
+    }
+    pub fn take_drag_start_path(&mut self) -> Option<TreePath> {
+        self.drag_start_path.take()
     }
 }
 

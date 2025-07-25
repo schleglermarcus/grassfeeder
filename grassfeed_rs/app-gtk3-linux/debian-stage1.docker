@@ -1,7 +1,7 @@
 # NEW but  the package won't work in Mint20
-# 2023-05 : cargo-deb needs rust-1.64 
+# 2023-05 : cargo-deb needs rust-1.64
 # 2023-10 : regex-automata needs rust-1.65
-# see  https://hub.docker.com/_/rust/ 
+# see  https://hub.docker.com/_/rust/
 # 2024-10 : bullseye has outdated librust-glib-sys-dev, switching to bookworm
 
 
@@ -10,16 +10,24 @@
 # run echo "deb-src http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib non-free" >>/etc/apt/sources.list
 
 FROM rust:1.81-slim-bookworm
-run echo "deb     http://ftp-stud.hs-esslingen.de/debian/ bookworm main contrib non-free"  >/etc/apt/sources.list
-run echo "deb-src http://ftp-stud.hs-esslingen.de/debian/ bookworm main contrib non-free" >>/etc/apt/sources.list
+# run echo "deb     http://ftp-stud.hs-esslingen.de/debian/ bookworm main contrib non-free"  >/etc/apt/sources.list
+# run echo "deb-src http://ftp-stud.hs-esslingen.de/debian/ bookworm main contrib non-free" >>/etc/apt/sources.list
+run echo "deb       http://ftp.gwdg.de/debian/              bookworm main contrib non-free"  >/etc/apt/sources.list
+run echo "deb-src   http://ftp.gwdg.de/debian/              bookworm main contrib non-free" >>/etc/apt/sources.list
+
 
 
 RUN apt update
-RUN apt install -y wget git pkgconf librust-glib-dev librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev libsoup2.4-dev   lintian  libwebkit2gtk-4.1-dev  libjavascriptcoregtk-4.1-dev
 
-                                    
+
+RUN apt install -y wget git pkgconf librust-glib-dev librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev libsoup2.4-dev   lintian
+RUN apt install -y libjavascriptcoregtk-4.1-dev   libwebkit2gtk-4.1-dev
+
 RUN cargo install cargo-deb
 RUN cargo install cargo-generate-rpm
+
+# This creates a situation like on launchpad, see versions here https://launchpad.net/ubuntu/+source/rustc
+RUN rustup default 1.75
 
 # for AppImage
 # RUN cargo install cargo-appimage

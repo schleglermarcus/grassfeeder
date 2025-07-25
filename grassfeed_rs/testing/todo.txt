@@ -1,7 +1,12 @@
+
+
+
 - CJob::SwitchBrowserTabContent()
+- Use test-log                https://tylerjw.dev/posts/20241012-rust-logging-in-tests/
+- Filling content list with partitioned gtk-String lists.
 
 - Drag Website not to list, but onto tree
-- Filling content list with partitioned gtk-String lists.
+
 
 
 - package bas64  to newer version

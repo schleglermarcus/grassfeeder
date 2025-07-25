@@ -206,7 +206,7 @@ pub fn create_listview(
                     None
                 })
                 .collect::<Vec<i32>>();
-            // trace!("LIST changed multiple   #rows={}  {:?}  ", n_rows, &id_list);
+            // debug!("LIST changed multiple   #rows={}  {:?}  ", n_rows, &id_list);
             esw.sendw(GuiEvents::ListSelected(0, id_list));
         });
 

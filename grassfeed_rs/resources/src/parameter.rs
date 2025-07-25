@@ -11,7 +11,7 @@ pub const FETCH_PROCESS_ONETIME_LIMIT: usize = 2;
 /// On each subsciption update time check, how many time compares we do at one time.
 pub const CHECK_MESSAGE_COUNTS_SET_SIZE: usize = 5;
 
-pub const STORE_MESSAGES_PER_SUBSCRIPTION: usize = 20000;
+pub const STORE_MESSAGES_PER_SUBSCRIPTION: usize = 30000;
 
 pub const DOWNLOAD_TOO_LONG_MS: u32 = 4000;
 

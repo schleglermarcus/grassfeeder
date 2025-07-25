@@ -195,14 +195,23 @@ impl StatusBar {
         if !content_ids.is_empty() {
             new_selected_msg_id = *content_ids.first().unwrap();
         }
-        if new_selected_msg_id != self.cache.borrow().selected_msg_id {
-            let mut c = self.cache.borrow_mut();
+
+        let mut c = self.cache.borrow_mut();
+        if new_selected_msg_id != c.selected_msg_id {
             c.selected_msg_id = new_selected_msg_id;
             c.selected_msg_changed = true;
             c.selected_msg_url = (self.r_browserpane).borrow().get_last_selected_link();
-        } else if self.cache.borrow().selected_msg_changed {
-            self.cache.borrow_mut().selected_msg_changed = false;
+        } else if c.selected_msg_changed {
+            c.selected_msg_changed = false;
         }
+        if content_ids.len() > 1 {
+            c.num_msg_marked = content_ids.len();
+            // trace!("multiple:  {:?} {}  ", c.selected_msg_url, c.num_msg_marked);
+        } else {
+            c.num_msg_marked = 0
+        }
+        drop(c);
+
         let subs_state: SubsMapEntry = (*self.r_subscriptions_controller)
             .borrow()
             .get_state(subscription_id)
@@ -298,6 +307,7 @@ pub struct CachedData {
     pub num_msg_all: isize,
     pub num_msg_unread: isize,
     pub num_msg_changed: bool,
+    pub num_msg_marked: usize,
 
     pub downloader_kind: [u8; DOWNLOADER_MAX_NUM_THREADS],
     pub downloader_kind_changed: bool,
@@ -416,11 +426,13 @@ impl OnePanel for PanelMiddle {
         let selected_msg_url: String;
         let selected_msg_changed: bool;
         let bottom_notice_current: Option<(i64, String)>;
+        let num_contents_marked: usize;
         {
             let c = statusbar.cache.borrow();
             selected_msg_url = c.selected_msg_url.clone();
             selected_msg_changed = c.selected_msg_changed;
             bottom_notice_current = c.bottom_notice_current.clone();
+            num_contents_marked = c.num_msg_marked;
         }
         let mut feed_src_link = String::default();
         let o_subscription = (*statusbar.r_subscriptions_controller)
@@ -429,13 +441,18 @@ impl OnePanel for PanelMiddle {
         if let Some((fse, _)) = o_subscription {
             feed_src_link.clone_from(&fse.url);
         }
-        let mut need_update_2: bool = selected_msg_changed;
 
+        let mut need_update_2: bool = selected_msg_changed;
         let mut longtext = if selected_msg_url.is_empty() {
             string_escape_url(feed_src_link)
         } else {
             string_escape_url(selected_msg_url.clone())
         };
+        if num_contents_marked > 1 {
+            longtext = format!("{} {} ", t!("STATUSBAR_MARKED"), num_contents_marked);
+            // debug!("middle:  marked {num_contents_marked}   {longtext}  ");
+            need_update_2 = true;
+        }
         if let Some((ts, msg)) = bottom_notice_current {
             let timestamp_now: i64 = timestamp_now();
             if timestamp_now > ts + BOTTOM_MSG_SHOW_TIME_S as i64 {

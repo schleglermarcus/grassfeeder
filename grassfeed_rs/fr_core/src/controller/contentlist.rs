@@ -135,7 +135,7 @@ pub trait IContentList {
 pub struct ContentList {
     timer_r: Rc<RefCell<Timer>>,
     messagesrepo_r: Rc<RefCell<dyn IMessagesRepo>>,
-    feedsources_w: Weak<RefCell<SourceTreeController>>,
+    subscriptions_ct_w: Weak<RefCell<SourceTreeController>>,
     configmanager_r: Rc<RefCell<ConfigManager>>,
     browserpane_r: Rc<RefCell<dyn IBrowserPane>>,
     gui_updater: Rc<RefCell<dyn UIUpdaterAdapter>>,
@@ -174,7 +174,7 @@ impl ContentList {
             browserpane_r: bp_r,
             job_queue_receiver: q_r,
             job_queue_sender: q_s,
-            feedsources_w: Weak::new(),
+            subscriptions_ct_w: Weak::new(),
             config: Config::default(),
             list_selected_ids: RwLock::new(Vec::default()),
             messagesrepo_r: msg_r,
@@ -256,7 +256,7 @@ impl ContentList {
         (*self.messagesrepo_r).borrow_mut().cache_clear();
         let (subs_id, _num_msg, isfolder) = *self.current_subscription.borrow();
         if isfolder {
-            if let Some(feedsources) = self.feedsources_w.upgrade() {
+            if let Some(feedsources) = self.subscriptions_ct_w.upgrade() {
                 if let Some((_subs_e, children)) =
                     (*feedsources).borrow().get_current_selected_subscription()
                 {
@@ -283,7 +283,7 @@ impl ContentList {
             }
             2 => {
                 let mut last_selected_msg_id: isize = -1; // Last Selected
-                if let Some(feedsources) = self.feedsources_w.upgrade() {
+                if let Some(feedsources) = self.subscriptions_ct_w.upgrade() {
                     if let Some(subs_e) =
                         (*feedsources).borrow().get_current_selected_subscription()
                     {
@@ -350,7 +350,7 @@ impl ContentList {
         let mut mr_r = self.messagesrepo_r.borrow_mut();
         let mr_i: MessageIterator;
         if isfolder {
-            if let Some(feedsources) = self.feedsources_w.upgrade() {
+            if let Some(feedsources) = self.subscriptions_ct_w.upgrade() {
                 if let Some((_subs_e, child_subs)) =
                     (*feedsources).borrow().get_current_selected_subscription()
                 {
@@ -406,7 +406,7 @@ impl ContentList {
         let msglist_len = mr_i.len();
         self.current_subscription
             .replace((subs_id, msglist_len as isize, isfolder));
-        if let Some(feedsources) = self.feedsources_w.upgrade() {
+        if let Some(feedsources) = self.subscriptions_ct_w.upgrade() {
             self.msg_state.write().unwrap().clear();
             mr_i.enumerate().for_each(|(n, msg)| {
                 let su_icon = (*feedsources)
@@ -432,7 +432,7 @@ impl ContentList {
             .unwrap()
             .find_neighbour_message(del_ids);
         let (subs_id, _num_msg, _isfolder) = *self.current_subscription.borrow();
-        if let Some(feedsources) = self.feedsources_w.upgrade() {
+        if let Some(feedsources) = self.subscriptions_ct_w.upgrade() {
             feedsources.borrow().clear_read_unread(subs_id);
         }
         self.addjob(CJob::RequestUnreadAllCount(subs_id));
@@ -482,8 +482,7 @@ impl ContentList {
         );
         let (rm_some, _n_rm, num_all, num_unread) =
             db_clean::reduce_too_many_messages(&mut msg_repo, msg_keep_count as usize, subs_id);
-        // if rm_some {            trace!(                "checkMessageCounts {} unread:{} removed:{} ",                subs_id,                num_unread,                _n_rm            );        }
-        if let Some(feedsources) = self.feedsources_w.upgrade() {
+        if let Some(feedsources) = self.subscriptions_ct_w.upgrade() {
             (*feedsources)
                 .borrow()
                 .addjob(SJob::NotifyMessagesCountsChecked(
@@ -565,6 +564,7 @@ impl IContentList for ContentList {
                         .unwrap()
                         .get_title(msg_id as isize)
                         .unwrap_or_default();
+
                     (*self.browserpane_r)
                         .borrow()
                         .switch_browsertab_content(msg_id, title, o_co_au_ca);
@@ -576,7 +576,7 @@ impl IContentList for ContentList {
                     let read_count = (*self.messagesrepo_r).borrow().get_read_sum(feed_source_id);
                     let unread_count = msg_count - read_count;
                     if msg_count >= 0 {
-                        if let Some(feedsources) = self.feedsources_w.upgrade() {
+                        if let Some(feedsources) = self.subscriptions_ct_w.upgrade() {
                             (*feedsources).borrow().addjob(SJob::NotifyTreeReadCount(
                                 feed_source_id,
                                 msg_count,
@@ -653,7 +653,7 @@ impl IContentList for ContentList {
             (*self.messagesrepo_r).borrow_mut().cache_clear();
         }
         self.addjob(CJob::UpdateMessageListSome(list_pos_dbid));
-        if let Some(feedsources) = self.feedsources_w.upgrade() {
+        if let Some(feedsources) = self.subscriptions_ct_w.upgrade() {
             (*feedsources)
                 .borrow()
                 .addjob(SJob::UpdateLastSelectedMessageId(
@@ -686,7 +686,7 @@ impl IContentList for ContentList {
     fn update_message_list(&self, subscription_id: isize) {
         let (old_subs_id, _num_msg, mut isfolder) = *self.current_subscription.borrow();
         if subscription_id != old_subs_id {
-            if let Some(feedsources) = self.feedsources_w.upgrade() {
+            if let Some(feedsources) = self.subscriptions_ct_w.upgrade() {
                 if let Some(subs_e) = (*feedsources).borrow().get_current_selected_subscription() {
                     isfolder = subs_e.0.is_folder;
                 }
@@ -857,8 +857,12 @@ impl IContentList for ContentList {
     fn set_selected_content_ids(&self, list: Vec<i32>) {
         let mut l = self.list_selected_ids.write().unwrap();
         l.clear();
-        let mut mutable = list;
-        l.append(&mut mutable);
+        // let length = list.len();
+        let mut list_mut = list;
+        l.append(&mut list_mut);
+
+        // if length > 1 {             debug!("set_selected_content_ids  #  {:?} ", length);         }
+
     }
 
     fn get_selected_content_ids(&self) -> Vec<i32> {
@@ -1062,7 +1066,7 @@ impl Buildable for ContentList {
 
 impl StartupWithAppContext for ContentList {
     fn startup(&mut self, ac: &AppContext) {
-        self.feedsources_w = Rc::downgrade(&(*ac).get_rc::<SourceTreeController>().unwrap());
+        self.subscriptions_ct_w = Rc::downgrade(&(*ac).get_rc::<SourceTreeController>().unwrap());
         let feedcontents_r = ac.get_rc::<ContentList>().unwrap();
         {
             let mut t = (*self.timer_r).borrow_mut();
