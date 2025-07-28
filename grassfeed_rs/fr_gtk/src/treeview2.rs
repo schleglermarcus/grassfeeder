@@ -148,7 +148,10 @@ pub fn create_treeview(
                     esw.sendw(GuiEvents::TreeCursorChanged(TV_ID, ind_u16, repo_id));
                 }
             } else {
-                trace!(                        " in-connect_cursor_changed_handle  IN_DRAG    tree-blocked:{tree_blocked}  P {:?} ",      t_path.indices()   );
+                trace!(
+                    "-> cursor_changed  IN_DRAG    tree-blocked:{tree_blocked}  P {:?} ",
+                    t_path.indices()
+                );
             }
         }
     };
@@ -200,45 +203,46 @@ pub fn create_treeview(
         let (o_t_path, _) = _t_view.cursor();
         if let Some(t_path) = o_t_path {
             debug!("connect_drag_begin   {:?} ", &t_path);
-            // (*drag_s2).write().unwrap().drag_start_path = Some(t_path);
             (*drag_s2).write().unwrap().set_drag_start_path(t_path);
-
             let _makeitempty = (*drag_s2).write().unwrap().inserted.take();
         }
     });
     let drag_s3 = drag_state.clone();
     let esw = EvSenderWrapper(g_ev_se.clone());
     treeview1.connect_drag_end(move |_t_view, _drag_context| {
-        let in_drag: bool;
-        let is_inserted: bool;
-        let is_deleted: bool;
         let r_state = (*drag_s3).read().unwrap();
-        in_drag = r_state.is_block_activated();
-        is_inserted = r_state.inserted.is_some();
-        is_deleted = r_state.deleted.is_some();
+        let in_drag = r_state.is_block_activated();
+        let is_inserted = r_state.inserted.is_some();
+        let is_deleted = r_state.deleted.is_some();
         drop(r_state);
+        // trace!(            "drag_end  starting   drag:{in_drag}   inserted:{is_inserted}   deleted:{is_deleted} "        );
         if in_drag {
-            let mut w_state = (*drag_s3).write().unwrap();
             if is_inserted && is_deleted {
+                let mut w_state = (*drag_s3).write().unwrap();
                 let inserted = w_state.inserted.take().unwrap();
                 let deleted = w_state.deleted.take().unwrap();
                 let start_path = w_state.take_drag_start_path().unwrap();
                 w_state.clear();
+                // trace!(                    " drag_end cleared, indrag: {} ",                    w_state.is_block_activated()                );
                 drop(w_state);
                 if inserted != deleted {
-                    // debug!("Dragged   {:?} ==> {:?}  End  ", &deleted, &inserted);
+                    trace!("Dragged   {:?} ==> {:?}  End  ", &deleted, &inserted);
                     esw.sendw(GuiEvents::TreeDragEvent(TV_ID, deleted, inserted));
-                } // else {                    debug!("connect_drag_end unequal! ");                }
-
+                }
                 let focus_column: Option<&TreeViewColumn> = None;
                 _t_view.set_cursor(&start_path, focus_column, false);
+            } else {
+                (*drag_s3).write().unwrap().clear();
+                // trace!(                    " drag_end NI/ND, clearing path {} ",                    (*drag_s3).read().unwrap().is_block_activated()                );
             }
         }
-        trace!("connect_drag_end finished ");
+        // let in_drag2 = (*drag_s3).read().unwrap().is_block_activated();
+        // trace!(" drag_end finished   indrag={in_drag2} ");
     });
     let drag_s1 = drag_state;
     treeview1.connect_drag_data_get(move |_t_view, _dragcontext, _sel_data, _i1, _i2| {
         let in_drag = (*drag_s1).read().unwrap().is_block_activated();
+        trace!(" drag_data_get {in_drag} ");
         if in_drag {
             let (o_t_path, _) = _t_view.cursor();
             if let Some(t_path) = o_t_path {

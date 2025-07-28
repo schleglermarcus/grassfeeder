@@ -112,7 +112,6 @@ pub fn downscale_image(
         IconKind::Webp => ImageFormat::WebP,
         IconKind::Ico => ImageFormat::Ico,
         IconKind::Bmp => ImageFormat::Bmp,
-
         _ => {
             warn!("downscale: unhandled format {:?} ", &img_type);
             ImageFormat::Ico
@@ -151,7 +150,7 @@ pub fn downscale_image(
 pub fn png_from_svg(img_bytes: &[u8]) -> Result<Vec<u8>, String> {
     let r = usvg::Tree::from_data(img_bytes, &usvg::Options::default());
     if let Err(e) = r {
-        return Err(format!("fromSvg:from_data {:?}", e));
+        return Err(format!("fromSvg:from_data {e:?}"));
     }
     let tree = r.unwrap();
     let width = tree.size().width() as u32;
@@ -162,7 +161,7 @@ pub fn png_from_svg(img_bytes: &[u8]) -> Result<Vec<u8>, String> {
     resvg::render(&tree, tr, &mut pmm);
     let r = pxm.encode_png();
     if let Err(e) = r {
-        return Err(format!("fromSvg:encode_png {:?}", e));
+        return Err(format!("fromSvg:encode_png {e:?}"));
     }
     Ok(r.unwrap())
 }

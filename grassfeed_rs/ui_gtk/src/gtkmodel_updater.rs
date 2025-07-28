@@ -245,7 +245,7 @@ impl GtkModelUpdaterInt {
             }
             tree_view = o_treeview.unwrap().clone();
         }
-        let path_cn = format!("{:?}", path)
+        let path_cn = format!("{path:?}",)
             .replace(['[', ']', ' '], "")
             .replace(',', ":");
         if let Some(iter) = tree_store.iter_from_string(&path_cn) {
@@ -804,7 +804,7 @@ impl GtkModelUpdaterInt {
         if self.pixbuf_cache.borrow().contains_key(&idx) {
             return;
         }
-        let pb: Pixbuf = Self::icon_for_string(&img, &format!("store_image {} ", idx));
+        let pb: Pixbuf = Self::icon_for_string(&img, &format!("store_image {idx} "));
         self.pixbuf_cache.borrow_mut().insert(idx, pb);
     }
 

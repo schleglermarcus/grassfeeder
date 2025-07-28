@@ -135,9 +135,8 @@ pub fn extract_icon_from_homepage(
                     Err(e) => debug!("XI:2:  ({})   ERR:{:?}", &homepage_url, e),
                 }
             } else if !homepage_host.ends_with('/') {
-                homepage_host = format!("{}/", homepage_host);
+                homepage_host = format!("{homepage_host}/");
             }
-            //  debug!("extract2 homepage_host: {homepage_host} ");
             icon_href = format!("{homepage_host}{icon_href}");
         }
         return Ok(icon_href);
@@ -163,7 +162,7 @@ pub fn feed_url_to_main_url(f_u: String) -> String {
             );
             return icon_url;
         }
-        Err(e) => warn!("feed_url_to_main_url invalid: {}  {:?}", &f_u, e),
+        Err(e) => warn!("feed_url_to_main_url invalid: {}  {e:?}", &f_u),
     }
     String::default()
 }

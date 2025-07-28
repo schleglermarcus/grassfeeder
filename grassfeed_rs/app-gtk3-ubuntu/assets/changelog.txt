@@ -1,3 +1,11 @@
+grassfeeder-gtk3 (0.0.3603) noble; urgency=low
+
+  * Bugfix:  Dragging of tree element on content list, gui is no more stuck
+  * Maximum feed lines to 30000
+  * Added display on count of multiple selected messages
+
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Fre, 25 Jul 2025 21:00:00 +0000
+
 grassfeeder-gtk3 (0.3.5) noble; urgency=low
 
   * Use http date to check fav-icon presence

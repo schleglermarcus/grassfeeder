@@ -794,7 +794,7 @@ impl IContentList for ContentList {
             self.addjob(CJob::SetFavoriteSome(mod_listpos_db, new_fav));
             return;
         }
-        let num_chunks = (msg_id_listpos.len() + chunk_size - 1) / chunk_size;
+        let num_chunks = msg_id_listpos.len().div_ceil(chunk_size); // (msg_id_listpos.len() + chunk_size - 1) / chunk_size;
         let num_lines = (msg_id_listpos.len() + 1) / num_chunks;
         for c in 0..num_chunks {
             let mut mod_listpos_db: Vec<(u32, u32)> = Vec::default();
@@ -857,12 +857,8 @@ impl IContentList for ContentList {
     fn set_selected_content_ids(&self, list: Vec<i32>) {
         let mut l = self.list_selected_ids.write().unwrap();
         l.clear();
-        // let length = list.len();
         let mut list_mut = list;
         l.append(&mut list_mut);
-
-        // if length > 1 {             debug!("set_selected_content_ids  #  {:?} ", length);         }
-
     }
 
     fn get_selected_content_ids(&self) -> Vec<i32> {

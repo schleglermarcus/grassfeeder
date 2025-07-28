@@ -36,17 +36,16 @@ pub fn create_debian_changelog(
     let mut file_contents: String = String::default();
     let mut outfile =
         std::fs::File::create(out_file).expect("build.rs, changelog_debian: cannot open out_file!");
-    let e_msg = format!("Error writing {} ", out_file);
+    let e_msg = format!("Error writing {out_file} ");
     file_list.iter().enumerate().for_each(|(num, name)| {
         let replaced = name.replace(".txt", "");
         let parts: Vec<&str> = replaced.split(':').collect();
         let version = if num == 0 { recent_version } else { parts[1] };
         let chfilename = format!("{in_folder}{name}");
         let contents = std::fs::read_to_string(chfilename).unwrap();
-        let line1 = format!("{} ({}) {}\n\n", package_name, version, top_line_rest);
+        let line1 = format!("{package_name} ({version}) {top_line_rest}\n\n");
         file_contents.push_str(&line1);
         outfile.write_all(line1.as_bytes()).expect(&e_msg);
-
         let date_line = contents.lines().next().unwrap();
         contents.lines().skip(1).for_each(|l| {
             let co = format!("  {l}\n");

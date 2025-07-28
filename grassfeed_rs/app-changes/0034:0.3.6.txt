@@ -1,7 +1,4 @@
-Thu, 07 Nov 2024 21:00:00 +0000
-
-- Bug:  Dragging of tree element on content list, gui is no more stuck
-- Feed entries to 30000
-
-- CJob::SwitchBrowserTabContent()
-- Filling content list with partitioned gtk-String lists.
+Fre, 25 Jul 2025 21:00:00 +0000
+* Bugfix:  Dragging of tree element on content list, gui is no more stuck
+* Maximum feed lines to 30000
+* Added display on count of multiple selected messages

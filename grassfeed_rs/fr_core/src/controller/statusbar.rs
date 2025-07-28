@@ -397,8 +397,7 @@ impl OnePanel for PanelLeft {
         for k in downloader_kind.iter().take(n_threads) {
             downloader_display.push(dl_char_for_kind(*k));
         }
-
-        let unread_all = format!("{:5} / {:5}", num_msg_unread, num_msg_all);
+        let unread_all = format!("{num_msg_unread:5} / {num_msg_all:5}");
         statusbar.cache.borrow_mut().reset_downloader_kind_updated();
         let t_popup = format!(
             "q{}  {}MB",
