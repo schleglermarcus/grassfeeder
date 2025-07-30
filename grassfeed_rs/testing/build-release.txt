@@ -3,11 +3,15 @@
 
 * Check version number in   app-gtk3-linux/Cargo.toml
 
+* Changelog with correct date format:  https://todaysdatenow.com/de/tools/rfc2822/
+
+*  Run cargo test, commit the changelog changes.
+
 * Launchpad uses an old rust version 1.75.0, see https://launchpad.net/ubuntu/+source/rustc
   Downgrade the rust version, then build it locally
   #  rustup default 1.75.0
   Later upgrade back with #  rustup default stable
-
+  
 
 
 * Merge Branch and build release
