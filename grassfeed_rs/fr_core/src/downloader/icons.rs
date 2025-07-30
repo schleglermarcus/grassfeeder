@@ -385,15 +385,10 @@ impl Step<IconInner> for IconIsInDatabase {
     fn step(self: Box<Self>) -> StepResult<IconInner> {
         let mut inner: IconInner = self.0;
         if inner.dl_icon_bytes.len() < 10 {
-            // trace!(                "downloaded icon_too_small! {:?} {:?}",                inner.dl_icon_bytes,                inner.icon_url            );
             return StepResult::Stop(inner);
         }
         if inner.dl_icon_bytes.len() > ICON_WARNING_SIZE_BYTES {
-            trace!(
-                "IconIsInDatabase: {} big size: {} kB",
-                inner.icon_url,
-                inner.dl_icon_bytes.len() / 1024
-            );
+            // trace!(                "IconIsInDatabase: {} big size: {} kB",                inner.icon_url,                inner.dl_icon_bytes.len() / 1024            );
         }
         let icons_in_db: Vec<IconRow> = inner.iconrepo.get_by_web_url(&inner.icon_url);
         if icons_in_db.len() > 1 {
@@ -421,7 +416,6 @@ impl Step<IconInner> for IconIsInDatabase {
             }
             return StepResult::Continue(Box::new(IconCheckIsImage(inner)));
         }
-        // trace!(            "IconPerUrl {} different timestamp,  db:{} {}bytes    web:{} {}bytes, storing into db ... ",            &inner.icon_url,            db_time_to_display(icon_per_url.web_date),            icon_per_url.web_size,            db_time_to_display(inner.dl_datetime_stamp),            inner.dl_icon_size        );
         inner.dl_datetime_stamp = icon_per_url.web_date;
         StepResult::Continue(Box::new(UpdateWebDate(inner)))
     }
