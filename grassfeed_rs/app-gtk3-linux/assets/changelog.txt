@@ -1,8 +1,8 @@
 grassfeeder-gtk3 (0.0.3603) bookworm; urgency=low
 
-  * Bugfix:  Dragging of tree element on content list, gui is no more stuck
   * Maximum feed lines to 30000
   * Added display on count of multiple selected messages
+  * Bugfix:  Dragging of tree element on content list, gui is no more stuck
 
  -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Fre, 25 Jul 2025 21:00:00 +0000
 
