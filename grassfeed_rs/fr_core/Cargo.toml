@@ -34,7 +34,7 @@ tl = ">=0.7.7"
 url = ">=2.3.1"
 opml = ">=1.1.5"
 textcode = ">=0.2.2"
-ureq = ">=2.6.2"                                    # uneven webpki versions. later: advance to 2.8.0
+ureq = "2"                                          # uneven webpki versions. Later: advance to 3.*
 ico = ">=0.3.0"
 png = ">=0.17.13"
 gif = ">=0.12.0"
