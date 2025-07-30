@@ -15,19 +15,25 @@ FROM rust:1.81-slim-bookworm
 run echo "deb       http://ftp.gwdg.de/debian/              bookworm main contrib non-free"  >/etc/apt/sources.list
 run echo "deb-src   http://ftp.gwdg.de/debian/              bookworm main contrib non-free" >>/etc/apt/sources.list
 
-
-
 RUN apt update
-
-
 RUN apt install -y wget git pkgconf librust-glib-dev librust-glib-sys-dev libatk1.0-dev librust-gdk-sys-dev libsoup2.4-dev   lintian
 RUN apt install -y libjavascriptcoregtk-4.1-dev   libwebkit2gtk-4.1-dev
 
-RUN cargo install cargo-deb
-RUN cargo install cargo-generate-rpm
-
-# This creates a situation like on launchpad, see versions here https://launchpad.net/ubuntu/+source/rustc
+# Downgrading rust compiler due to  launchpad, see versions here https://launchpad.net/ubuntu/+source/rustc
 RUN rustup default 1.75
+
+# error: cannot install package `cargo-deb 3.4.0`, it requires rustc 1.76 or newer, while the currently active rustc version is 1.75.0
+# `cargo-deb 3.0.0-beta.1` supports rustc 1.71
+# https://crates.io/crates/cargo-deb/versions
+#  @2.12.1    f/cargo-deb-2.12.1/src/config.rs:1007:149 error[E0277]: `toml::Value` doesn't implement `std::fmt::Display`
+RUN cargo install cargo-deb@1.44.1
+
+# v0.18.0    error: failed to parse manifest at /cargo-generate-rpm-0.18.0/Cargo.toml
+# Caused by:    feature `edition2024` is required
+# https://crates.io/crates/cargo-generate-rpm/versions
+# https://doc.rust-lang.org/cargo/commands/cargo-install.html
+RUN cargo install cargo-generate-rpm@0.16.0
+
 
 # for AppImage
 # RUN cargo install cargo-appimage

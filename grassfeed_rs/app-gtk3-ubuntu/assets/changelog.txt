@@ -4,7 +4,7 @@ grassfeeder-gtk3 (0.3.6) noble; urgency=low
   * Added display on count of multiple selected messages
   * Bugfix:  Dragging of tree element on content list, gui is no more stuck
 
- -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Wed, 30 Jul 2025 14:00:00 +0000
+ -- Marcus der Schlegler <schlegler_marcus@posteo.de>  Thu, 31 Jul 2025 02:00:00 +0000
 
 grassfeeder-gtk3 (0.3.5) noble; urgency=low
 

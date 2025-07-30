@@ -242,7 +242,6 @@ pub fn create_treeview(
     let drag_s1 = drag_state;
     treeview1.connect_drag_data_get(move |_t_view, _dragcontext, _sel_data, _i1, _i2| {
         let in_drag = (*drag_s1).read().unwrap().is_block_activated();
-        trace!(" drag_data_get {in_drag} ");
         if in_drag {
             let (o_t_path, _) = _t_view.cursor();
             if let Some(t_path) = o_t_path {

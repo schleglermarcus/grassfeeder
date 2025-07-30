@@ -3,7 +3,7 @@
 
 * Check version number in   app-gtk3-linux/Cargo.toml
 
-* Changelog with correct date format:  https://todaysdatenow.com/de/tools/rfc2822/
+* Changelog with correct date format:  https://time.lol/
 
 *  Run cargo test, commit the changelog changes.
 
